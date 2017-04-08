@@ -1,0 +1,148 @@
+--- Log opened Thu Feb 02 00:00:07 2017
+-!- suhas2go [uid201652@gateway/web/irccloud.com/x-doyicdlnyyybolgy] has quit [Quit: Connection closed for inactivity]	00:17
+@sukey	Pull Request #3608 "Move the solver related code to new file"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608	06:30
+@sukey	Pull Request #3608 "Clean up KNN" - https://github.com/shogun-toolbox/shogun/pull/3608	07:13
+-!- lisitsyn [~lisitsyn@37.139.2.75] has quit [Ping timeout: 264 seconds]	07:14
+-!- lisitsyn [~lisitsyn@37.139.2.75] has joined #shogun	07:14
+-!- shogitter [~nodebot@ks312251.kimsufi.com] has quit [Ping timeout: 264 seconds]	07:15
+-!- ShellcatZero [~ShellcatZ@cpe-76-93-136-67.san.res.rr.com] has quit [Ping timeout: 264 seconds]	07:15
+-!- shogitter [~nodebot@ks312251.kimsufi.com] has joined #shogun	07:15
+-!- nagdev [dce39546@gateway/web/freenode/ip.220.227.149.70] has quit [Ping timeout: 260 seconds]	07:18
+-!- ShellcatZero [~ShellcatZ@cpe-76-93-136-67.san.res.rr.com] has joined #shogun	07:29
+-!- abhinav_ [~abhinav@14.139.62.117] has joined #shogun	07:43
+-!- abhinav_ [~abhinav@14.139.62.117] has quit [Ping timeout: 240 seconds]	07:53
+-!- praisethemoon [~praisethe@197.3.11.178] has joined #shogun	09:03
+-!- suhas2go [uid201652@gateway/web/irccloud.com/x-pkiyeenpxlfrgdyu] has joined #shogun	10:16
+@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608	10:18
+@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608	11:52
+-!- mikeling [uid89706@gateway/web/irccloud.com/x-ogxsdnvqovhlqchx] has joined #shogun	11:53
+mikeling	hey, why "./tests/unit/shogun-unit-test --gtest_filter=GaussianProcessRegression.apply_*" doesn't work for me even after I run make shogun-unit-test	12:41
+mikeling	ok the unit-test works, but I have no idea what't the meaning of the error my got	13:11
+mikeling	hi lisitsyn, could you give me some help on https://travis-ci.org/shogun-toolbox/shogun/jobs/197601158#L4013? I have no idea about this error	13:11
+mikeling	and how could I debug my code when the ctest told me unit-KNN has SegFault? I use lldb on OS X	13:13
+-!- nagdev [dce39546@gateway/web/freenode/ip.220.227.149.70] has joined #shogun	14:08
+@wiking	mikeling, still around?	14:34
+mikeling	wiking: yep	14:34
+@wiking	ok so	14:34
+@wiking	how do you run your cmake on your machine?	14:34
+mikeling	wiking: it's **cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTING=ON -DBUILD_DASHBOARD_REPORTS=ON -DDEBUG=ON ../**	14:35
+@wiking	ok	14:35
+@wiking	you dont need DBUILD_DASHBOARD_REPORTS	14:35
+@wiking	nor DDEBUG=ON	14:35
+@wiking	but	14:35
+@wiking	you should have	14:35
+@wiking	-DBUILD_META_EXAMPLES=ON	14:35
+@wiking	imo it's on by default by just in case	14:35
+mikeling	wiking: ok, I will try it right now. Thank you for your help!:)	14:37
+@wiking	and note that some some part of knn	14:37
+mikeling	do you mean the error I got about knn unittest? could you tell me more specifically about that?	14:40
+@wiking	ok so i was wondering if the falconn part might be using openmp	14:41
+@wiking	that's why	14:41
+@wiking	you might not be able to reproduce it on osx with clang compiler by defalt	14:41
+@wiking	but i dont see any #pragma in the falconn code	14:41
+@wiking	so that's not it	14:41
+@wiking	so you should be able to reproduce	14:41
+@wiking	locally	14:42
+@wiking	btw if you run	14:42
+@wiking	ctest	14:42
+@wiking	everything is passing you?	14:42
+@wiking	because for me it seems there are some serious errors in everyjob	14:42
+@wiking	on travis	14:42
+mikeling	wiking: yeah, if I just use ctest and everything works for me	14:44
+@wiking	mmm	14:44
+@wiking	you might be missing some libraries?	14:44
+@wiking	hence some code is just not being compiled?	14:45
+@wiking	i'm not so sure	14:45
+@wiking	but in worst case	14:45
+@wiking	you could fire up a docker image :)	14:45
+@wiking	and check it yourself	14:45
+@wiking	imo there's a quite good docker implementation on osx already	14:45
+mikeling	wiking: oh, so let me use docker image and see what i can got. I'm not familiar with docker so it may every consuming before I got things right ;)	14:49
+@wiking	well	14:51
+@wiking	if you follow .travis.yml	14:51
+@wiking	then you'll actually get what travis does	14:51
+@wiking	locally	14:51
+@wiking	actually	15:01
+@wiking	if you figure that out	15:01
+@wiking	could you write a couple of lines of markdown document	15:01
+@wiking	how to do it	15:01
+@wiking	i mean it's there	15:01
+@wiking	just it'd be a good doc for everybody to share	15:02
+@wiking	how to reproduce travis errors locally on your machine ;)	15:02
+* wiking is being super lazy :P	15:02
+nagdev	wiking: I read up on all the work that has been done on the usual suspects project previously and I was thinking about working with KNN or neural nets. Do you know if anyone is already working on it?	15:05
+@wiking	nagdev, mikeling is working on KNN atm	15:12
+@wiking	i dont recall anybody working on nns	15:12
+mikeling	wiking: nagdev I'm working on this issue actually :) https://github.com/shogun-toolbox/shogun/issues/3507	15:15
+mikeling	wiking: sure, I will write all the things down if I figure out all the things. :)	15:15
+mikeling	sorry for the late reply, I just miss the message somehow	15:15
+nagdev	mikeling: so can I just start working on it with you or will I need some background?	15:16
+nagdev	I know KNNs in general	15:16
+-!- abhinav [~abhinav@103.211.53.99] has joined #shogun	15:21
+-!- abhinav [~abhinav@103.211.53.99] has quit [Client Quit]	15:21
+mikeling	nagdev: yeah sure, actually I had commit a PR for that issue(https://github.com/shogun-toolbox/shogun/pull/3608), but the SegFault stop me verify if all my code works	15:22
+mikeling	it will be great appreciate if you can check that code and give me some feedback	15:27
+nagdev	mikeling: Cool. Give me some time to read all the existing work and catch up. I'll start giving my inputs as soon as I'm done with that	15:27
+nagdev	wiking: couple more things. Firstly, the PCA implementation is already significantly faster than other toolboxes. Why is PCA still in the list of algorithms to be improved? Are there any further changes that need to be made in it?	15:30
+nagdev	Second, some of the algorithms listed in project list were already taken up in prev year's GSoC. Are they still not complete?	15:31
+mikeling	nagdev: oh great! Thank you :)	15:34
+mikeling	nagdev: BTW, are you going to apply GSoC this year? Which project you are interested in? if I may ask :)	15:35
+@wiking	nagdev, mmm there's alway room for improvement :)	15:38
+@wiking	i do not know actually in case of each and every model what needs to be improved	15:38
+@wiking	but rest assured none of them is prefect :)	15:38
+@wiking	just pick anything that is to your liking and nobody else if working on (you can figure this out from the open prs)	15:39
+@wiking	or just do something that you find interesting	15:39
+@wiking	and you reckon it would be a good feature to add	15:39
+@wiking	and it's easy to add to shogun	15:39
+@wiking	you do not need to necessarily stick to that list	15:39
+@wiking	it's just giving u some ideas	15:39
+@wiking	like for example we do not have a preprocessor	15:39
+@wiking	that does one-hot encoding for a categorical variable	15:40
+nagdev	wiking: Sure. I think I'll start working on KNN only and figure out if there is something else that I can work on as well	15:48
+@wiking	mmm	15:48
+@wiking	since mikeling is alrready working on knn	15:48
+@wiking	i would really suggest you to pick something else	15:48
+@wiking	otherwise it's inevitable that you'll end up doing double work	15:49
+@wiking	and as we would like you to take something on your own to see how you handle things ..... dont get me wrong collaboration is very good but as well getting deep into some parts of the code alone is important	15:50
+nagdev	yeah i understand	15:50
+nagdev	is it ok if I just lurk around to see how he's working because I'm fairly new to open source and don't know much about how to go around doing things. That's why I wanted to work with someone to start off	15:51
+@wiking	nagdev, mmm the point of entrance tasks are actually this	15:52
+@wiking	they are small	15:52
+nagdev	I'll just see how he's working (general direction and coding style)	15:52
+nagdev	ok	15:52
+@wiking	fairly easy to get you started	15:52
+@wiking	and it's quite autonomous	15:52
+@wiking	anyhow	15:52
+@wiking	just pick anything from the entrance tasks	15:53
+@wiking	try to fix it	15:53
+@wiking	and send in a pr	15:53
+@wiking	as soon as you send in a pr we can give you a hand	15:53
+@wiking	tell you what is ok and what is wrong	15:53
+@wiking	usually the first pr takes about 3-4-6 iterations	15:53
+@wiking	till it gets actually merged	15:53
+@wiking	there's really no better way to get started with this is to try and fail	15:54
+@wiking	:)	15:54
+nagdev	ok sure. I'll try out some tasks.	15:54
+nagdev	mikeling: I'll only apply if shogun gets selected because afaik it is the only ML related project in the organization list. I'm mostly interested in projects which involve core ML implementation and improvement.	15:57
+nagdev	So from the available list, usual suspects, real life problem solving and shogun extension are my preferred options	15:58
+nagdev	Usual suspects seems to be the most likely in that.	15:58
+nagdev	In that too, I would prefer to work on PCA, KNN or neural nets as I'm working on some papers to improve the algorithms and it'd be great to translate that into actual, functioning code	16:01
+nagdev	wiking: the entrance task doesn't mean that I have to commit to the project right?	16:06
+@wiking	what do you mean?	16:07
+nagdev	If i try to work on a bug on a particular algo (say GP), I can still switch to some other project (like NN) later right?	16:09
+@wiking	sure	16:10
+@wiking	then entrance is just about	16:10
+@wiking	seeing how can you contribute/code/interract etc	16:10
+nagdev	so I was looking at https://github.com/shogun-toolbox/shogun/issues/3054 and https://github.com/shogun-toolbox/shogun/issues/3513 to start with. There has been some work in these already. Is it still fine if I start with one of these?	16:14
+-!- abhinav_ [~abhinav@103.211.53.99] has joined #shogun	16:44
+-!- abhinav_ [~abhinav@103.211.53.99] has quit [Remote host closed the connection]	17:24
+-!- Jyo__ [0e8b9b18@gateway/web/freenode/ip.14.139.155.24] has joined #shogun	18:03
+-!- Jyo__ [0e8b9b18@gateway/web/freenode/ip.14.139.155.24] has quit [Client Quit]	18:03
+-!- praisethemoon_ [~praisethe@197.3.11.178] has joined #shogun	18:16
+-!- praisethemoon [~praisethe@197.3.11.178] has quit [Ping timeout: 255 seconds]	18:17
+-!- mikeling [uid89706@gateway/web/irccloud.com/x-ogxsdnvqovhlqchx] has quit [Quit: Connection closed for inactivity]	18:49
+-!- nagdev [dce39546@gateway/web/freenode/ip.220.227.149.70] has quit [Quit: Page closed]	19:35
+shogitter	(etotientz) are there no newcomer issues to solve at https://github.com/shogun-toolbox/shogun/issues?utf8=%E2%9C%93&q=	21:21
+shogitter	(etotientz) I m interested in contributing here	21:21
+shogitter	(etotientz) maybe relevant to gsoc this year	21:21
+--- Log closed Fri Feb 03 00:00:09 2017

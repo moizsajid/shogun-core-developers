@@ -1,0 +1,125 @@
+--- Log opened Thu Dec 08 00:00:48 2016
+-!- zero1hac [~zerooneha@139.59.16.180] has quit [Ping timeout: 268 seconds]	05:02
+-!- zero1hac [~zerooneha@139.59.16.180] has joined #shogun	05:03
+@sukey	Pull Request #3575 "LinalgRefacotr - Fix GPU Vector/Matrix deep cloning"  opened by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3575	06:15
+-!- CaBa [~Diu7saig@unaffiliated/caba] has quit [Ping timeout: 268 seconds]	06:32
+-!- CaBa [~Diu7saig@unaffiliated/caba] has joined #shogun	06:33
+@sukey	Pull Request #3534 "LinalgRefactor - Cholesky - CPU only"  synchronized by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3534	08:16
+-!- praisethemoon [~praisethe@41.226.248.123] has joined #shogun	08:41
+CaBa	wiking: ping	11:24
+@wiking	pong	11:25
+CaBa	wiking: good evening! :)	11:25
+CaBa	wiking: do you have any info on my 22:35:03 question for me? :)	11:25
+@wiking	lemme se	11:26
+@wiking	e	11:26
+@wiking	[05:35]  <CaBa> wiking: is there any harm in calling init(l,r) multiple times, i.e. with different features?	11:26
+@wiking	no	11:26
+@wiking	it should be fine	11:26
+@wiking	unless there's a bug	11:27
+CaBa	wiking: hm, ok	11:37
+CaBa	wiking: i'm trying to write kind of a wrapper class around a kernel, derived from the latter. it is meant to accept a different feature type and convert it whenever needed to the type accepted by the upstream kernel... which is the case (1) if the features change and (2) if an extra parameter changed	11:38
+CaBa	wiking: does that seem realizable to you?	11:39
+@wiking	ah yeah	11:45
+@wiking	sure	11:45
+@wiking	although	11:45
+@wiking	why not a preprocessor/	11:45
+@wiking	?	11:45
+CaBa	wiking: can that be hooked in in a way such that it is re-run if a parameter of the kernel was changed through model selection?	11:49
+@wiking	could you rephrase this question?	11:50
+@wiking	https://github.com/shogun-toolbox/shogun/blob/develop/examples/undocumented/python_modular/preprocessor_normone_modular.py	11:51
+CaBa	wiking: i don't know what the design goal of the preprocessors in sg is. i was wondering if they are automatically called in certain situations	11:51
+@wiking	http://beta.shogun.ml/api/latest/classshogun_1_1CFeatures.html#a53d5b6b17d8e4b44117d404b119faca6	11:52
+CaBa	wiking: when are those called?	11:53
+@wiking	when you call force_preprocessing	11:53
+@wiking	i meant apply_preprocessor	11:54
+@wiking	on the features	11:54
+CaBa	wiking: i see. i don't think that interface is helping much here. i need something that is automatically rerun (or checks if it has to rerun) upon ::compute calls	11:56
+@wiking	kernel normalizer? :D	11:56
+@wiking	they are actually rerun	11:56
+CaBa	prior to the actual compute() logic ;)	11:57
+CaBa	wiking: oh, things like get_kernel_matrix() are parallelized...	12:18
+@wiking	yes	12:18
+CaBa	wiking: my new compute() function isn't thread safe anymore	12:18
+@wiking	:)	12:18
+@wiking	then just set	12:19
+@wiking	the num of threads	12:19
+@wiking	to 1	12:19
+CaBa	CRITICAL should work, too, right?	12:20
+@wiking	?	12:50
+@wiking	critical?	12:50
+@wiking	in what sense?	12:50
+CaBa	    #pragma omp critical	12:56
+CaBa	worked :)	12:56
+CaBa	wrapper seems to work fine now, at least so far...	12:56
+@wiking	:)	13:01
+@wiking	mmm	13:02
+CaBa	mmm?	13:02
+@wiking	nevermind	13:02
+CaBa	critical about the critical? :D	13:02
+@wiking	i mean i was about to say that we'll change	13:02
+CaBa	to c++11 threads?	13:02
+CaBa	:D	13:02
+@wiking	the backend for kernel.cpp (get_kernel_matrix etc)	13:02
+@wiking	nono	13:02
+@wiking	omp	13:02
+@wiking	so it's all good	13:02
+@wiking	the commit is there	13:02
+@wiking	feature/KernelOMP	13:02
+@wiking	it's just that it introduces some fixes that reveals some bugs	13:02
+@wiking	in the parallel random forest etc	13:02
+@wiking	hence it hasn't got merged into develop yet	13:03
+@wiking	but yeah because now	13:04
+@wiking	the #pragma omp critical	13:04
+@wiking	is only working by chance :P	13:04
+CaBa	why?	13:04
+@wiking	because what if you compile the thing with clang	13:04
+@wiking	:P	13:04
+@wiking	then the #pragma omp critical	13:04
+@wiking	will be ignored	13:04
+CaBa	yes, but it'll also be single-threaded then	13:05
+@wiking	but the Kernel.cpp parallel things are implemented with posix threads	13:05
+@wiking	no	13:05
+@wiking	as you can see currently parallel stuff in kernel.cc	13:05
+@wiking	*cpp	13:05
+@wiking	are implemented using native posix threads	13:05
+CaBa	well then the lock is also ignore in gcc	13:06
+@wiking	?	13:06
+@wiking	lock	13:06
+@wiking	?	13:06
+@wiking	what lock?	13:06
+CaBa	my omp critical	13:06
+@wiking	mmm gcc is for along time openmp ready	13:06
+@wiking	:)	13:07
+@wiking	so it wont be ignored	13:07
+CaBa	oh so the pthread code is only compiled when openmp is unavailable?	13:07
+CaBa	i thought there is pthread code	13:07
+@wiking	no	13:07
+@wiking	one has nothing to do with other	13:07
+@wiking	but anyyyyyyyyyhow	13:07
+@wiking	it's ok	13:07
+@wiking	soon it'll be omp only	13:07
+CaBa	exactly.. so the pthread code will not care about openmp critical statemehts	13:07
+@wiking	yes	13:07
+CaBa	even if theres openmp support	13:07
+CaBa	bbl, lunch	13:07
+@wiking	if you only have PTHREAD	13:07
+@wiking	but not openmp	13:08
+@wiking	no	13:08
+@wiking	if you have openmp support	13:08
+@wiking	then it's find	13:08
+@wiking	*fine	13:08
+@wiking	as the pragma is not ignored	13:08
+@wiking	but ok	13:08
+@wiking	think about it	13:08
+@wiking	and you'll see what i mean	13:08
+@wiking	:)	13:08
+-!- fhal3 [~fhal@my83-216-94-208.cust.relish.net] has quit [Read error: Connection reset by peer]	13:46
+CaBa	wiking: the pragma works even if the underlying code uses pthreads?	14:05
+@sukey	Issue #3576 "Unable to install package on Ubuntu 16.04" opened by hrushikesht - https://github.com/shogun-toolbox/shogun/issues/3576	14:14
+@sukey	Issue #3576 "Unable to install package on Ubuntu 16.04"- https://github.com/shogun-toolbox/shogun/issues/3576	14:15
+-!- praisethemoon [~praisethe@41.226.248.123] has quit [Changing host]	14:23
+-!- praisethemoon [~praisethe@unaffiliated/praisethemoon] has joined #shogun	14:23
+CaBa	wiking: switched to an std::mutex, that should cover either cases...	15:42
+@sukey	Pull Request #3534 "LinalgRefactor - Cholesky - CPU only"  synchronized by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3534	16:04
+-!- praisethemoon [~praisethe@unaffiliated/praisethemoon] has quit [Ping timeout: 250 seconds]	18:08
+--- Log closed Fri Dec 09 00:00:50 2016
