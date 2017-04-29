@@ -1,0 +1,287 @@
+--- Log opened Sun Jan 12 00:00:48 2014
+@sonney2k	pickle27, ok easily fixed. just add    s/\\r//g; to the last perl thing
+@sonney2k	just next to the \\n/\n line
+* sonney2k off
+ pickle27	sonney2k: I was just fighting with perl to do the same thing!
+@sonney2k	pickle27, try to be there on monday for the stammtisch :)
+* sonney2k Zzzzz...
+ pickle27	will do!
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- pickle27 [~kevin@192-0-136-118.cpe.teksavvy.com] has quit [Quit: Leaving]
+-!- tricksy__ [uid12458@gateway/web/irccloud.com/x-tqegrjmczmcaudeo] has quit [Ping timeout: 272 seconds]
+-!- tricksy__ [uid12458@gateway/web/irccloud.com/x-jlahkdclumkmltig] has joined #shogun
+-!- sonne|osx [~sonne@e179136104.adsl.alicedsl.de] has quit [Ping timeout: 246 seconds]
+-!- sonne|osx_ [~sonne@e178247164.adsl.alicedsl.de] has joined #shogun
+ shogun-buildbot	build #678 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/678
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has joined #shogun
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+ besser82	sonney2k:  ping?
+ besser82	wiking:  could you solve bb's segfault-probs yesterday?
+ besser82	wiking:  or do we need to get that OSX-buildslave up && running again?
+ besser82	wiking, sonney2k: btw. Why is it down?
+-!- Netsplit *.net <-> *.split quits: sonne|osx_, dsockwell
+@wiking	besser82: broken
+ besser82	wiking:  b0rken? The buildbot?
+ besser82	wiking:  any chance to get that fixed?
+@wiking	besser82: no not the buildbot
+@wiking	somebody broke python modular
+ besser82	wiking:  mhhh...  but how?
+@wiking	but it's obvious
+@wiking	it's currenlty broken on non osx system as well
+@wiking	so there's not so much to it
+ besser82	wiking:  afaik noone touched that recently
+ besser82	wiking:  I didn't try from recent checkout...
+@wiking	http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2130/steps/test%20python%20modular/logs/stdio
+@wiking	that's why the last commit broke it i suppose
+@wiking	...
+@wiking	besser82: it was your commit that broke modular_interface bot: https://github.com/shogun-toolbox/shogun/commit/9eff7f380bc7c54f21a90c9318fc0d954ad35278
+@wiking	so i suppose that actually it has been changed recently
+@wiking	which actually broke the tests
+ besser82	wiking:  so my commit didn't break it, but revealed the truth  :-P
+@wiking	so i cannot really comprehend with the sentence: "besser82> wiking:  afaik noone touched that recently"
+@wiking	of course of course
+@wiking	how the fuck can i be soooo fucking stupid
+@wiking	not to understand this
+@wiking	</sarcasm>
+ besser82	wiking:  :-P
+@wiking	besser82: let me get this straight
+@wiking	this was working in release 3.0
+@wiking	all of it
+@wiking	it compiled both on modular_interface
+ besser82	wiking: yes
+-!- Netsplit over, joins: sonne|osx_
+@wiking	and on osx
+@wiking	so when u say
+@wiking	12:46 < besser82> wiking:  so my commit didn't break it, but revealed the truth  :-P
+@wiking	it's far from any kind of reality
+@wiking	it got broken
+@wiking	and your commit broke it on the buildbot
+@wiking	i.e. you broke it
+ besser82	wiking: my commit just added the fact, that cmake should exit(1) if one of the intergration tests fail...
+@wiking	so there's noooo fucking way around this but to see that it got broken recently with the .... *recent* changes.
+@wiking	besser82: yeah i see you totally get my point
+@wiking	"12:47 <@wiking> this was working in release 3.0"
+@wiking	w/o segfaulting on osx
+@wiking	and i cannot really see it happening
+@wiking	that when u exit(1) a python script would segfault
+@wiking	it's just really far stretch
+-!- dsockwell [~twgs@199.167.199.97] has joined #shogun
+@wiking	where one would need to spend hours to arrive to that point
+@wiking	where you get a segfault from exit(1)
+@wiking	ok?
+ besser82	wiking: kk
+ besser82	wiking: all I said was the interface itself wasn't touched for ~2 months
+ besser82	wiking: last commit was from sonney2k
+ besser82	wiking: and for me && sonney2k those python_modular isn't segfaulting on linux...
+ besser82	wiking: there must be another reason than just my commit to checkgdb....
+@wiking	besser82: ok do you want me to prove you wrong or can we just give me the benefit of the doubt (after like 5 times we've been over very similar things) and say that yes it got broken in recent commints
+@wiking	*commits
+@wiking	dude if it was working in release 3.0
+@wiking	then if it's now broken
+@wiking	then i think it's ... quite possible that commits between now and 3.0 release broke it
+@sonney2k	wiking, what is the issue?
+@wiking	sonney2k: readlogs
+ besser82	wiking:  I don't say it isn't broken; but what about the 3.1.0 / 3.1.1 releases for OSX?  do they work?
+@wiking	besser82: obviously nobody knows this as it wasn't tested
+@sonney2k	wiking, looks like the old stuff was broken before
+@wiking	sonney2k: what old stuff?
+@sonney2k	wiking, in 3.0 I mean but the tests just pretended to work
+@wiking	sonney2k: no it was working
+@wiking	sonney2k: i tested myself
+@wiking	on my own machine
+@wiking	i did not ever got segfaults
+@sonney2k	wiking, for some reason the deb3 modular buildbot did not get triggered
+@wiking	so plz can we get over this and arrive to the point where where we accept the facts?
+@wiking	sonney2k: well it does not segfault
+@wiking	so obviously it's a different problem
+@sonney2k	wiking, well all that besser82 changed (before stuff broke) was to parse the output of the tests correctly so they fail when they did indeed. there is no segfault IIRC
+@wiking	sonney2k: implication?
+@wiking	it is a different bug
+@wiking	but again... it was working with 3.0
+@sonney2k	wiking, with osx I had that too - it is just due to using the wrong python version
+@wiking	sonney2k: noup it's not
+@wiking	sonney2k: but yeah i really like to waste both our times and make such a rookie error
+@sonney2k	wiking, how do you know?
+@wiking	sonney2k: because i fucking tested it
+@wiking	come on man
+ besser82	wiking:  How about testing 3.1.0 / 3.1.1 on OSX?
+ besser82	wiking:  if one of these segfault we can detect which commit possibly is the root cause...
+@wiking	besser82: you mean bisecting?
+@sonney2k	wiking, well just building 3.1.1 shougl be enough
+@wiking	sonney2k: glhf
+@wiking	sonney2k: since obviously i have no clue at all how to do any of these things...
+@sonney2k	wiking, btw could you easily add python_modualr tests on the osx buildbot?
+ besser82	wiking:  like that
+ besser82	wiking:  yes
+@wiking	sonney2k: addig python_modular to osx buildbot will not solve anything python modular integration tests always failed on osx
+@wiking	*adding
+ shogun-buildbot	build #341 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/341  blamelist: Bj?rn Esser <bjoern.esser@gmail.com>, Soeren Sonnenburg <sonne@debian.org>, Thoralf Klein <thoralf.klein@zib.de>, Viktor Gal <vigsterkr@gmail.com>, hushell <dom343@gmail.com>, Koen van de Sande
+ shogun-buildbot	<koen@tibed.net>, parijat <mazumdarparijat@gmail.com>, Viktor Gal <viktor.gal@maeth.com>, Heiko Strathmann <heiko.strathmann@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>, Roman Votyakov <votjakovr@gmail.com>
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	shogun-buildbot_, force build --branch=develop 'osx2 - python'
+ shogun-buildbot_	build #0 forced
+ shogun-buildbot_	I'll give a shout when the build finishes
+@sonney2k	wiking, time to fix things then!
+@wiking	sonney2k: well we've tried this like... soooo many times
+@wiking	and we've figured that it's going to be very hard
+@wiking	(check logs for details)
+@sonney2k	wiking, yeah I know but we now use our own equals to compare things so we don't have the epsilon diff issues any longer
+ shogun-buildbot_	build #0 of osx2 - python is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20python/builds/0
+@wiking	besser82: ping?
+ besser82	wiking:  pong!
+ besser82	wiking:  wassup?!?
+@wiking	besser82: any experience with openstack?
+@wiking	besser82: i'm having trouble attaching a volume to an instance
+@wiking	and i have no clue where to start debugging
+ besser82	wiking:  what type of volume?  persistent one?
+ besser82	wiking:  or transient one?
+@wiking	besser82: yeah it's a persistent volume
+@wiking	besser82: so i have an istance
+@wiking	and then i've created a volume
+@wiking	the volume creation went successfully
+@wiking	but then when i try to attach that volume to a running instance
+@wiking	it just gets stuck
+ besser82	wiking:  lemme ask nirik;  he was fighting with that problem, too, when creating our c-a in fedora-cloud  ;)
+@wiking	and after a while it sends an error that it couldn't attach the volume
+@wiking	the admin of the system copy-pasted me an error but i can't even find the logfile for that error :)
+@wiking	i have root acccess to the system and want to fix it asap
+ besser82	wiking:  exactly the same problem nirik had with fedora-cloud  ;)
+@wiking	but dunno where to start the debugging
+ besser82	wiking:  I'll start asking nirik, he knows / if he isn't araound i can ask mrunge tomorrow: he is one of the openStack developers...
+@wiking	ok i'll google then
+@wiking	as i really need the solution yesterday :)
+-!- new_lido [~walid@41.218.178.11] has joined #shogun
+ besser82	wiking:  I just pinged nirik, asking for the solution....
+@wiking	thnx if u have something let me know
+ besser82	wiking:  you may wish to have a look into #fedora-admin too see whether he responded...
+@wiking	i'm trying to find the logs :)
+-!- new_lido [~walid@41.218.178.11] has quit [Ping timeout: 248 seconds]
+@wiking	fuck for sure it's apparmor
+-!- new_lido [~walid@41.218.177.73] has joined #shogun
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+@sonney2k	lisitsyn, vojtech is in for gsoc too :)
+ lisitsyn	sonney2k: cool
+@sonney2k	wiking, might be of interest to you: vojtech did extend libqp quite a bit (more general more solvers...)
+ lisitsyn	sonney2k: some qp I guess?
+ lisitsyn	:)
+@wiking	sonney2k: where's da code?
+@wiking	sonney2k: yeah but my idea is really a more modular/general interface for the whole optimization
+@wiking	sonney2k: but would be great to include libqp in that as well
+@wiking	anybody knows a little bit about virsh?
+@wiking	last release of libqp is 18-Jul-2012 11:16
+@wiking	or at least on the website
+ besser82	wiking:  <nirik> besser82: in our case it was deleting a very large persistent volume... and the OS version we are running does a dd over it to wipe it and sucked up all i/o. Some instances needed to be restarted to see the net/storage after that finally finished. ;(
+@wiking	besser82: hehehe same in my case
+ besser82	wiking:  :D
+@wiking	besser82: but now the problem is that i suspsect that a kvm instance has been stuck in
+@wiking	i see the kvm process but not on the openstack ui
+@wiking	but before killing the instance
+@wiking	i would really like to see what's that instance
+@wiking	virtsh sees it
+@wiking	but dunno how i can use virtsh to echo the /etc/hostname
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ besser82	iglesiasg:  sup, man?
+@iglesiasg	besser82, hey there
+ besser82	iglesiasg:  :D
+@wiking	ppppp wtf is the ssh tunneling command? -L
+@wiking	besser82: there's a port bind to localhost only... but i want to access it remotely?
+@wiking	besser82: ssh -RlocalhostPort:myport?
+ besser82	wiking:  ssh -Lremoteport:localhost:myport  ;)
+@wiking	besser82: noup
+ besser82	wiking:  sry, my bad
+@wiking	i mean on the remote's localhost there's a port
+@wiking	that i want to have it on my own localhost
+@wiking	ok it's the other way around i think
+@wiking	huuu fuck i was right :)
+ besser82	wiking:  so how did you do it?
+@wiking	nah i was right about being the other way around aht that a kvm instance got stuck
+@wiking	:)
+@wiking	it's
+@wiking	-LportUmap:localhost:desiredPort
+@wiking	doh i cannot send a ctrl+alt del
+@wiking	to that vnc session
+ besser82	wiking:  why don't you use virtsh to trigger a reboot on that machine?
+@wiking	yeah actually i just needed this to assure myself that it's an instance i was thinking about
+ besser82	wiking:  I see  ;)
+@wiking	mmmm
+@wiking	besser82: what happens when virsh shutdown domainid does not stup the instance? :)
+ besser82	wiking:  basically nuthing
+ besser82	wiking:  virsh tries to shutdown sending an acpi event
+@wiking	besser82: ok reset works
+@wiking	but still i just want to destroy this domain
+ besser82	wiking:  reset is the "brutal" way
+@wiking	besser82: but it's really in a weird place this whole libvirt
+@wiking	anyhow as i can see virsh destroy will be the one
+ besser82	wiking:  ??
+@wiking	           Immediately terminate the domain domain-id.  This doesn't give the domain OS any chance to react, and it's the equivalent of ripping the power cord out on a
+ besser82	wiking:  that is the way you need to go, if guest doesn't act on acpi-events...  :(
+@wiking	besser82: well on reset it does but nothing else
+ besser82	wiking:  reset is like pushing the hw-button  ;)
+@wiking	great
+@wiking	 -     instance-0000122b              shut off
+@wiking	:>
+ besser82	wiking:  :D
+@wiking	but is this really deleted/destroyed?
+ besser82	wiking:  no, just shutdown, like pulling the cord
+ besser82	wiking:  undefine would delete it "physically"
+ besser82	wiking:  like throwing the device into waste-bin
+@wiking	besser82: other thing: when u try to do screen -r with another use (i.e. not the user who owns the pts) how do u resolve it? (Cannot open your terminal '/dev/pts/30' - please check.)
+ besser82	wiking:  try using sudo?
+@wiking	besser82: yep that's the error
+@wiking	both for sudo su -
+@wiking	and sudo -u user -i
+ besser82	did you try su -c 'sudo -u user -i'  ?
+@wiking	same
+@wiking	just an extra error:
+@wiking	-bash: no job control in this shell
+ besser82	wiking:  sh*T
+@wiking	nevermind solved it by adding my public key to that user
+@wiking	:P
+ besser82	wiking:  did you try to chmod the perms to 660  ?
+ besser82	wiking:  or that solution  ;)
+@wiking	ok finally an error log
+@wiking	http://pastebin.com/rnQ8M1jJ
+@wiking	besser82: can u ask about this niri?
+ besser82	wiking:  done ;) w8ing 4 reply
+ besser82	wiking:  if he doesn't know, I will ask mrunge tomorrow. An openStack-dev should know about && why...
+ besser82	<nirik> besser82: hum... is tgtd running ok on all the compute nodes? firewall allowing it? Otherwise not sure, haven't seen that before...  <--- wiking
+ besser82	wiking:  Sry, I couldn't help instantly with that...
+@wiking	kkk
+@wiking	tgtd is running apparently
+@wiking	i though that apparmor is fucking up things
+@wiking	but i totally disabled it
+ besser82	wiking:  firewall? what about that?
+@wiking	besser82: which ? :)
+@wiking	i mean the whole thing is running on one machine :)
+ besser82	wiking:  hehe, so no fw, right?
+ besser82	wiking:  I'll ask mrunge tommorow, he should know what's going b0rken there
+ besser82	wiking:  btw. pastebin-ad tells me I urgently need to fix my "WindowsErrors" on Linux  :-P
+* besser82 off [Zzzzz]
+@wiking	besser82: thnx i think i've encountered this bug: https://bugzilla.redhat.com/show_bug.cgi?id=1009299
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	shogun-buildbot_, force build --branch=develop 'osx2 - python'
+@sonney2k	shogun-buildbot, force build --branch=develop 'osx2 - python'
+ shogun-buildbot	build #1 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	wiking, any idea why no tests for python static are found http://buildbot.shogun-toolbox.org/builders/osx2%20-%20python/builds/0/steps/test%20python%20static/logs/stdio
+-!- pickle27 [~kevin@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- zxtx_ [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Ping timeout: 272 seconds]
+@wiking	sonney2k: so where's the src for the libqp enhancements? :)
+@wiking	because they are not created imho
+@wiking	-rw-r--r-- 1 wiking staff 0 Oct 25 16:53 examples/undocumented/python_static/CMakeLists.txt
+ shogun-buildbot	build #1 of osx2 - python is complete: Failure [failed test libshogun test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20python/builds/1
+@iglesiasg	good night guys
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- pickle27 [~kevin@192-0-136-118.cpe.teksavvy.com] has quit [Quit: Leaving]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	shogun-buildbot, force build --branch=develop 'osx2 - python'
+ shogun-buildbot	build #2 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #2 of osx2 - python is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20python/builds/2
+--- Log closed Mon Jan 13 00:00:50 2014

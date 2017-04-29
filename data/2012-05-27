@@ -1,0 +1,143 @@
+--- Log opened Sun May 27 00:00:41 2012
+@sonney2k	blackburn, I added some stuff and at least now kernel.kernel() works
+ blackburn	kernel.kernel()?
+ blackburn	what's that?
+@sonney2k	kernel.kernel(i,j)
+@sonney2k	gives you k[i,j] :D
+ blackburn	ah
+ blackburn	kernel(i,j)
+@sonney2k	I don't udnerstand the error though
+ blackburn	init one?
+@sonney2k	init?
+@sonney2k	there is no init
+@sonney2k	the error is in get_kernel_matrix()
+@sonney2k	and that is just calling kernel(i,j)
+ blackburn	ah so what is the error?
+@sonney2k	RuntimeError: maximum recursion depth exceeded while calling a Python object
+ blackburn	argh
+@sonney2k	but at least it still says returning kernel matrix of size 5x5
+@sonney2k	so it enters get_kernel_matrix
+ blackburn	sonney2k: looks like known bug of swig?
+@sonney2k	wait not true
+@sonney2k	that was for the get-kernel_matroix of the linear kernel
+@sonney2k	blackburn, ?
+ blackburn	I googled - some issues
+@sonney2k	sure but why does kernel(i,j) work?
+ blackburn	different way of call I'd say
+ blackburn	ah
+ blackburn	no
+@sonney2k	hmmhh, one is using typemaps...
+@sonney2k	it returns SGMatrix
+@sonney2k	kernel(i,j) just double
+@sonney2k	let me try sth
+@sonney2k	blackburn, I now created a simple get_km()
+@sonney2k	returning some sgmatrix
+@sonney2k	directly from directorkernel
+ blackburn	works?
+@sonney2k	if that fails we will see
+@sonney2k	compile time is much higher with directors...
+@sonney2k	wrapper is much bigger
+ blackburn	hmm
+@sonney2k	blackburn, yes that works
+ blackburn	so what is the reason?
+@sonney2k	blackburn, no idea
+@sonney2k	timings:
+@sonney2k	0.7 sec for a 1000x1000 matrix w/ shogun
+@sonney2k	15 sec with directors from python
+ blackburn	heh
+ blackburn	sonney2k: what is the reason between get_km and get_kernel_matrix?
+ blackburn	errr
+ blackburn	difference
+@sonney2k	blackburn, again no idea
+ blackburn	pthreads?
+@sonney2k	btw the example crashes at the end
+ blackburn	heh
+@sonney2k	blackburn, well I set threads=1
+@sonney2k	(of course)
+@sonney2k	it doesn't crash with gdb
+@sonney2k	hah
+@sonney2k	blackburn, also doesn't crash with valgrind
+ blackburn	yes that happens sometimes
+@sonney2k	blackburn, do you think gsomix can find out what is wrong?
+ blackburn	give a chance :)
+@sonney2k	ok
+@sonney2k	I will mail him the example then
+ CIA-113	shogun: Soeren Sonnenburg master * rd8a7270 / (2 files): add some helper functions for director kernel - http://git.io/nlEDig
+@sonney2k	uhh ohh
+@sonney2k	I have to sleep
+-!- blackburn [~blackburn@31.28.59.65] has quit [Ping timeout: 240 seconds]
+-!- gsomix [~gsomix@109.169.151.2] has joined #shogun
+ gsomix	sonney2k, I got mail. I got mail. I can try to solve issue in evening
+ gsomix	sorry, need to go
+-!- ZiYuan [~ZiYuan@14.151.191.134] has joined #shogun
+-!- ZiYuan [~ZiYuan@14.151.191.134] has quit [Client Quit]
+-!- ZiYuan [~ZiYuan@14.151.191.134] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- ZiYuan [~ZiYuan@14.151.191.134] has quit []
+-!- ZiYuan [~ZiYuan@14.151.191.134] has joined #shogun
+-!- ZiYuan [~ZiYuan@14.151.191.134] has quit [Client Quit]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: Lost terminal]
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- blackburn [~blackburn@31.28.59.65] has quit [Ping timeout: 260 seconds]
+-!- gsomix [~gsomix@109.169.151.2] has quit [Quit: Ex-Chat]
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@31.28.59.65] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- gsomix [~gsomix@188.168.5.87] has joined #shogun
+ gsomix	fuf, I have returned to dorm.
+ gsomix	time to work
+ gsomix	sonney2k, blackburn,  hi
+ blackburn	hey
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	n4nd0: hey
+ blackburn	I tweaked it up to 97.82 :D
+ n4nd0	blackburn: hey man, how is it going?
+ n4nd0	blackburn: wow nice tweak then :)
+ n4nd0	blackburn: what value were you aiming at?
+ blackburn	no idea I just needed to overwhelm 97.00%
+ n4nd0	objective achieved then
+ blackburn	well.. before (in paper for that russian journal) I stated I 'can' recognize with 97.43 accuracy
+ blackburn	so objective is rather 97.43
+ blackburn	but achieved yeah
+ n4nd0	congrats ;)
+ blackburn	however I have not too much time now to get thesis itself done
+ n4nd0	blackburn: do you have to write it completely?
+ blackburn	yes needs to be 100% done before 7th June
+ n4nd0	blackburn: you write it in Russian, right?
+ blackburn	yes
+ n4nd0	:( it would be cool to read it otherwise
+ blackburn	hah nothing special
+ blackburn	I have nothing but HOG and SVM here
+ blackburn	Crammer-Singer SVM + Homogeneous Kernel Map + HOG
+ n4nd0	blackburn: I insist, probably interesting to read ;)
+ blackburn	good thing being russian is direct access to vapnik's stuff
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ gsomix	sonney2k, around
+ gsomix	*?
+ gsomix	hmm, nevermind :)
+@sonney2k	gsomix, any news?
+ gsomix	sonney2k, yep.
+ gsomix	get_kernel_matrix works.
+ blackburn	sonney2k: to redeclare virtuals is the key :D
+ gsomix	blackburn, tnx for fast description. :)
+@sonney2k	k
+@sonney2k	no more crashes?
+ gsomix	sonney2k, hmm, I have not noticed more. but work in progress, need 15mins.
+ blackburn	sonney2k: what do you think about BSVM?
+@sonney2k	blackburn, don't think it is worth it
+ blackburn	why?
+@sonney2k	but I haven't read the paper/mail :)
+@sonney2k	gmnpsvm should be doing better
+@sonney2k	we need something massively multiclass
+ blackburn	MDM is cool yes but I do not think BSVM is slower
+ blackburn	sonney2k: ok then another thing - strprtool has 5 solver for gmnp
+ blackburn	solvers*
+ blackburn	why do we have only mdm?
+ blackburn	do not say ask vojtech :D
+ gsomix	sonney2k, ok, works. but this requires cleaning up
+ gsomix	btw, feats_train.parallel.set_num_threads(2) -> segfault
+ gsomix	sonney2k, can I commit/push it tomorrow?
+ gsomix	tired, time to sleep =__=
+--- Log closed Mon May 28 00:00:41 2012

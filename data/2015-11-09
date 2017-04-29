@@ -1,0 +1,185 @@
+--- Log opened Mon Nov 09 00:00:39 2015
+-!- shaochuan [~shaochuan@2601:647:4603:2a70:a984:53d5:434f:406] has joined #shogun
+-!- shaochuan [~shaochuan@2601:647:4603:2a70:a984:53d5:434f:406] has quit [Remote host closed the connection]
+-!- shaochuan [~shaochuan@2601:647:4603:2a70:a984:53d5:434f:406] has joined #shogun
+-!- shaochuan [~shaochuan@2601:647:4603:2a70:a984:53d5:434f:406] has quit [Ping timeout: 246 seconds]
+@wiking	besser82: morning? :)
+-!- HeikoS [~heiko@05453a05.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@05453a05.skybroadband.com] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@untrusted.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ lisitsyn	HeikoS: hey
+@HeikoS	lisitsyn:  jojo
+@HeikoS	lisitsyn: how are things?
+ lisitsyn	HeikoS: mehh I want to find some will/time to move shogun
+@HeikoS	lisitsyn: how can I help?
+@HeikoS	what about something concrete?
+@HeikoS	I.e. links in the shogun manual? class links I mean
+ lisitsyn	HeikoS: we need to fully integrate it first maybe..
+@HeikoS	lisitsyn: that too
+@HeikoS	lisitsyn: but need links also, and thats easy to do
+@HeikoS	I want to work on integration soon
+ lisitsyn	I think that is the thing that blocks me
+ lisitsyn	I don't have proper environment
+ lisitsyn	:)
+ lisitsyn	so how do we do it
+ lisitsyn	with cmake?
+@HeikoS	yes
+@HeikoS	lisitsyn: should be part of the build
+@HeikoS	generate the meta examples
+ lisitsyn	ok let me see
+@HeikoS	build doc
+@HeikoS	feel free to edit this stuff
+ lisitsyn	yeap
+ lisitsyn	HeikoS: once done I'd move to plugins
+ lisitsyn	probably I just need to start
+ lisitsyn	then we will see the best way to do plugins
+@HeikoS	lisitsyn: sure
+@HeikoS	exactly
+ lisitsyn	HeikoS: I also want to integrate property-based testing
+@HeikoS	but the manual should be flexible enough to tolerate all those changes under the hood
+@HeikoS	its just about modular bindings anyways
+ lisitsyn	HeikoS: yeah true
+ lisitsyn	HeikoS: what do you think about idea that we should work transparently on common data frames
+ lisitsyn	like pandas dataframe, numpy array, spark rdd
+@HeikoS	lisitsyn: very good
+@HeikoS	dataframe is a good structure
+@HeikoS	lisitsyn: but matrices are also fine for now I guess
+-!- HeikoS [~heiko@untrusted.swc.ucl.ac.uk] has quit [Ping timeout: 272 seconds]
+-!- HeikoS [~heiko@nat-244-183.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-244-183.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 244 seconds]
+-!- HeikoS [~heiko@nat-244-183.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-244-183.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@nat-244-183.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- smallgraph [~textual@MRitter04.wv.cc.cmu.edu] has joined #shogun
+-!- smallgraph [~textual@MRitter04.wv.cc.cmu.edu] has left #shogun ["Textual IRC Client: www.textualapp.com"]
+@wiking	btw
+@wiking	http://tensorflow.org/
+ lisitsyn	yeah
+@wiking	have any of u seen this?
+@wiking	lisitsyn: u tried it?
+ lisitsyn	no
+ lisitsyn	I am pessimistic actually
+@wiking	hehe i'm just checking th code
+@wiking	https://github.com/tensorflow/tensorflow
+@wiking	btw anybody seen besser82 around? :D
+ lisitsyn	oh its in python
+@besser82	wiking, yes :P
+ lisitsyn	wiking: I think magic platforms suck
+@besser82	I'm still in the US...  ;)
+@wiking	btw: $ sudo apt-get install python-numpy swig python-dev
+@wiking	lisitsyn: so they use swig :>
+@wiking	besser82: aaah i see :)))0
+@wiking	then it's going to be hard to collaborate
+@besser82	a little, yes
+@besser82	will be back on Dec 1st
+ lisitsyn	wiking: nips?
+ lisitsyn	no?
+@wiking	lisitsyn: no(
+ lisitsyn	meh
+@wiking	i'm going to try to defend my thesis that time
+@wiking	besser82: so yeah i guess you know what i'm after :P
+ lisitsyn	oh really?
+ lisitsyn	cool
+@besser82	wiking, the PRs, rye?
+@wiking	yes
+@wiking	besser82: so i was thinking maybe i should move every little thing to be it's own project?
+@wiking	like say libshogun is one project
+@wiking	python modular is another project
+@wiking	etc.
+@wiking	and then you either can have a monolithic build
+@wiking	or you can build them separately
+@besser82	wiking, actually two projects are enough
+@besser82	libsg
+@besser82	and sg-interfaces
+@wiking	mmm
+@wiking	and sg-interfaces would depend on libshogun yeah
+@wiking	ok
+-!- HeikoS [~heiko@nat-244-183.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+@wiking	question about the compiler flags
+@wiking	how to pass them?
+@wiking	or even better
+@wiking	how to share the detection of various features?
+ lisitsyn	share cmake?
+@wiking	say c++11 suport
+ lisitsyn	like sgcmake
+ lisitsyn	:)
+@wiking	because how i imagine it that say you cd shogun/sg-interfaces && mkdir build && cd build && cmake ..
+@wiking	that would do a FIND_PACKAGE for libshogun
+@wiking	and in the meanwhile check whether swig is available etc
+ lisitsyn	wiking: why not include sg-cmake-commons-whatever?
+@wiking	but almost the same functionality is required in libshogun cmake (at least on the compiler support))
+@wiking	would we just use the same cmake folder that we use now?
+@wiking	but push down the find_package + compiler flags detection into both project?s
+ lisitsyn	you want separate git projects?
+@wiking	no
+@wiking	this should be ok with the current setup
+ lisitsyn	project like directory?
+@wiking	only thing is that the CMakeLists.txt files should be refactored
+@wiking	i've started a bit
+@wiking	see config branch
+@wiking	but that needs more work to be able to have a full separation
+@wiking	so that we can actually build a modular interface without actually building libshogun
+ lisitsyn	its pretty complicated now
+@wiking	what? :)
+@wiking	no
+@wiking	:D
+@wiking	not at allll!
+@wiking	:D
+ lisitsyn	I have no idea what you changed :)
+@wiking	but yeah this i just want to have that we can finally fucking have a debian package target
+@wiking	for each interface
+@wiking	yeah that's normal
+@wiking	but that hasn't changed since 2011
+@wiking	:D
+@wiking	you had no idea wha ti changed in ./configure either
+@wiking	that shit was not understood by anybody except sonney2k_
+@wiking	no offence to anybody
+ lisitsyn	actually it was easier
+ lisitsyn	because it was flat
+ lisitsyn	now it is a cmess
+ lisitsyn	:)
+ lisitsyn	cmakess
+ lisitsyn	https://github.com/shogun-toolbox/shogun/blob/develop/CMakeLists.txt this one is easy
+@wiking	ok then write it in whatever
+@wiking	but who is going to fix it?
+@wiking	and most importantly when?
+ lisitsyn	nah cmake is good
+@wiking	yeah 1152 lines
+@wiking	it's a fucking mess
+@wiking	that i agree
+@wiking	i'm trying to unfuck it
+@wiking	no fucking src file should ever be more than 500 lines
+@wiking	at any fucking circumstances
+ lisitsyn	wiking: ok https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/CMakeLists.txt this one is not that hard
+@wiking	i would actually love to see a github analysis
+@wiking	LoC/file vs Programming language
+ lisitsyn	wiking: should it mess with protobuf?
+@wiking	yes it should since we want protobuf :>
+@wiking	so what't the guess
+@wiking	which language would be on top of that list?
+ lisitsyn	C
+ lisitsyn	make
+ lisitsyn	:D
+ lisitsyn	and cmake
+@wiking	mmm i think python would be on top
+ lisitsyn	depends
+ lisitsyn	but iyeah it is easy to write 1k of loc
+ lisitsyn	wiking: ok so can I help you somehow?
+ lisitsyn	wiking: when I am looking at the cmake stuff I want to write some functions to make it more comprehensible
+ lisitsyn	does it make sense to you to function-alize it a bit
+@wiking	yes of course
+ lisitsyn	wiking: will it help if I shrink these find_package if endif to some functions?
+ lisitsyn	it is dumb work I can do at some point when I am bored
+@wiking	cool
+@wiking	yeah sure
+@wiking	add it to the config branch
+ lisitsyn	ok
+-!- HeikoS [~heiko@05453a05.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@05453a05.skybroadband.com] has quit [Quit: Leaving.]
+--- Log closed Tue Nov 10 00:00:40 2015

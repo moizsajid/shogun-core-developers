@@ -1,0 +1,940 @@
+--- Log opened Tue May 31 00:00:19 2016
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+ shogun-buildbot	build #2889 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2889  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, OXPHOS <engelzora@gmail.com>
+ shogun-buildbot	build #27 of xenial - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/xenial%20-%20libshogun/builds/27  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, OXPHOS <engelzora@gmail.com>
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+ shogun-buildbot	build #18 of FC23 - libshogun - aarch64 is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC23%20-%20libshogun%20-%20aarch64/builds/18  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, OXPHOS <engelzora@gmail.com>
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 244 seconds]
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+ shogun-buildbot	build #10 of clang - thread analysis is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang%20-%20thread%20analysis/builds/10  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>, OXPHOS <engelzora@gmail.com>
+ shogun-buildbot	build #9 of clang - undefined behaviour analysis is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang%20-%20undefined%20behaviour%20analysis/builds/9  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>, OXPHOS <engelzora@gmail.com>
+ shogun-buildbot	build #10 of memleak - valgrind is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/memleak%20-%20valgrind/builds/10  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>, OXPHOS <engelzora@gmail.com>
+-!- mizari [~mizari@95-174-213-100.nts.su] has quit [Ping timeout: 244 seconds]
+ shogun-buildbot	build #1012 of nightly_none is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_none/builds/1012  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>, OXPHOS <engelzora@gmail.com>
+ shogun-buildbot	build #1141 of nightly_default is complete: Failure [failed test notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1141  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>, OXPHOS <engelzora@gmail.com>
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Client Quit]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+-!- sanuj [~sanuj@117.204.240.143] has joined #shogun
+-!- sanuj [~sanuj@117.204.240.143] has quit [Ping timeout: 272 seconds]
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	wiking: jo
+@HeikoS	lisitsyn: jo
+ lisitsyn	HeikoS: h
+@HeikoS	lisitsyn: you think its a good idea to fix seeds in the integraiton tests with random output?
+@HeikoS	or just not test in that case (and rely on unit tests)
+@HeikoS	lisitsyn: such a test is a bit of a nop
+@HeikoS	but not sure
+@HeikoS	what do you think?
+ lisitsyn	not sure I get it
+@HeikoS	lisitsyn: imagine I have class X
+ lisitsyn	ah
+@HeikoS	X.classify() is random
+ lisitsyn	yeah ok so you fix a seed when something is random
+@HeikoS	yeah
+@HeikoS	but is that a meaningful test?
+ lisitsyn	apart from being possibly not cross-platfom
+ lisitsyn	it should be ok
+@HeikoS	lisitsyn: no it is
+@HeikoS	we have our own random generator
+ lisitsyn	okie
+@HeikoS	wiking: wrote it
+ lisitsyn	then it depends what you check
+ lisitsyn	I am not sure it is a good idea to check exact values
+ lisitsyn	but whether it worked - why not
+@HeikoS	lisitsyn: so say kmeans centers
+@HeikoS	yeah thats the thing, is it really a good idea to check exact values in that case?
+@HeikoS	or just no integration test but rather a unit test that somehow deals with this differently
+ lisitsyn	well I see no danger yet
+ lisitsyn	but for some reason not a fan
+@HeikoS	lisitsyn: the decision is now
+@HeikoS	did not do that yet
+@HeikoS	have to decide
+ lisitsyn	HeikoS: well good test should probably check more reasonable things
+ lisitsyn	like objective of k-means
+ shogun-buildbot	build #2890 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2890  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, OXPHOS <engelzora@gmail.com>
+@HeikoS	lisitsyn: but that is unit
+@HeikoS	lisitsyn: not integration
+@HeikoS	right?
+@HeikoS	lisitsyn: ok then
+ lisitsyn	HeikoS: yeah
+@HeikoS	lisitsyn: on the other hand
+ shogun-buildbot	build #28 of xenial - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/xenial%20-%20libshogun/builds/28  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, OXPHOS <engelzora@gmail.com>
+@HeikoS	purpose of integration in some way is "did things change"
+@HeikoS	lisitsyn: then, lets only store deterministic stuff
+@HeikoS	thanks
+ lisitsyn	HeikoS: I see value in integration tests
+@HeikoS	lisitsyn: mmh
+@HeikoS	lisitsyn: so what would you do?
+@HeikoS	store or not store?
+@HeikoS	lisitsyn: its much better now
+ lisitsyn	well probably
+ lisitsyn	we could store
+@HeikoS	we had the seeds fixed before
+ lisitsyn	but automatically
+@HeikoS	but also stored things like class instances
+ lisitsyn	like in generated tests
+@HeikoS	lisitsyn: yeah that is what I talk about
+ lisitsyn	but not manually using 3.142342
+@HeikoS	oh yeah sure
+@HeikoS	it is just that
+@HeikoS	I am talking about
+@HeikoS	meta example output
+ lisitsyn	ok then lets keep it
+ lisitsyn	it is cheap
+@HeikoS	kk
+-!- sanuj [~sanuj@117.204.240.143] has joined #shogun
+ sanuj	HeikoS, hi!
+@HeikoS	sanuj:  hi
+@HeikoS	your did the gmm cookbook right?
+@HeikoS	you
+ sanuj	yes
+ sanuj	what happened
+@HeikoS	sanuj: nothing :)
+@HeikoS	I just want to ask you to do something
+@HeikoS	that is, put a Math.init_random(0) in the front of it
+@HeikoS	and then put the generated output as integration test
+@HeikoS	Saurabh7: hi
+ sanuj	HeikoS, yes, i'll do that
+ Saurabh7	HeikoS: hi!
+@HeikoS	Saurabh7: about the x-validation, I would really like to get this out of the way quikly. SO nevermind the locked case for now
+ Saurabh7	HeikoS: its working
+@HeikoS	Saurabh7: just the unlocked case, simplest possible
+@HeikoS	Saurabh7: locked as well?=
+ Saurabh7	ok i will remove then
+@HeikoS	Saurabh7: for the PR, remove for now
+ Saurabh7	HeikoS: yes
+@HeikoS	want to merge
+@HeikoS	and then we can incrementally increase complexity
+ Saurabh7	HeikoS: ok
+@HeikoS	but I want to keep the patch simple and also merge this very soon
+ Saurabh7	HeikoS: ok then i remvoe
+@HeikoS	Saurabh7: great
+ Saurabh7	unlcoked is working for everything runs folds no leaks
+ Saurabh7	after teh changes
+@HeikoS	Saurabh7: great
+ sanuj	HeikoS, for the svr cookbook
+@HeikoS	Saurabh7: also remove the parallel runs for now, only folds
+ sanuj	you want me to add the objective function
+@HeikoS	and what we need is a unit test
+@HeikoS	that compares output of both
+ sanuj	HeikoS, shall i add the one from here http://www.shogun-toolbox.org/doc/en/latest/classshogun_1_1CLibSVR.html#details
+@HeikoS	Saurabh7: for a single machine, can you add that to the PR and then polish?
+ sanuj	but it's lot of math for a cookbook page i think
+ Saurabh7	HeikoS: yep
+@HeikoS	sanuj: yeah thats too much
+@HeikoS	sanuj: then just leave it as it was, i.e. only write how the final function looks like
+@HeikoS	There is a link to that doc anyways
+ sanuj	alright
+ sanuj	lisitsyn, hello!
+ lisitsyn	sanuj: hey
+ sanuj	got time?
+ sanuj	wanted to discuss about the hash function
+ lisitsyn	a little bit
+ lisitsyn	yes ok
+ sanuj	lisitsyn, BaseTag has only one member
+ sanuj	i.e. name
+ lisitsyn	yeah probably
+ sanuj	so i use the name to generate the hash
+ sanuj	i read this http://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
+ lisitsyn	yes
+ sanuj	then there will be collision because of same names
+ lisitsyn	yeah I think it makes sense to make them collide
+ lisitsyn	implement *both* operator== and hash
+ lisitsyn	then hash collisions won't cause trouble
+ lisitsyn	but the same name = the same parameter
+ lisitsyn	this sounds reasonable
+ sanuj	lisitsyn, but in whole shogun there can be multiple parameters with the same name
+ sanuj	because the map will be stored in SGObject
+ sanuj	but there are many classes derived from SGObject
+ lisitsyn	?? :)
+ sanuj	and each class shall have different parameters with the same name
+ lisitsyn	object
+ lisitsyn	not class
+ sanuj	yeah
+ sanuj	object
+ sanuj	sorry
+ lisitsyn	so no problem
+ sanuj	so suppose object A and B
+ lisitsyn	different objects would have the same parameter name
+ sanuj	but the same name parameters will collide
+ lisitsyn	how?
+ sanuj	because same name will generate same hash
+ lisitsyn	yes but how's that bad if you have different objects
+ sanuj	lisitsyn, A("width") B("width")
+ sanuj	can have diff values
+ lisitsyn	yes exactly, what is wrong with that
+ sanuj	lisitsyn, oh i thought that if they have same key(name) then one will overwrite the other
+ lisitsyn	how? :)
+ lisitsyn	different objects
+ sanuj	oh
+ sanuj	now i get it
+ sanuj	:D
+ sanuj	haha
+ lisitsyn	sanuj: as basetag is immutable (you can't change name)
+ sanuj	lisitsyn, then why do we need BaseTag
+ sanuj	lisitsyn, can't we use just name as hash
+ sanuj	as key i mean
+ lisitsyn	sanuj: nah that could be better
+ lisitsyn	essentially the same
+ lisitsyn	but
+ lisitsyn	sanuj: BaseTag is immutable
+ lisitsyn	you can't change its name
+ lisitsyn	just precompute hash in its ctor
+ lisitsyn	compute and store it once
+ lisitsyn	then in hash function just access it
+ sanuj	lisitsyn, i see
+ sanuj	lisitsyn, to compute hash from it's name
+ sanuj	shall i use std::hash?
+ lisitsyn	yes sure
+ lisitsyn	we can change that later if needed
+ lisitsyn	just std hash would suffice
+ sanuj	lisitsyn, okay, so this should happen in BaseTag constructor
+ lisitsyn	yes
+ sanuj	lisitsyn, and one more thing
+ sanuj	lisitsyn, we are making BaseTag immutable by adding const
+ lisitsyn	yes
+ lisitsyn	const everything up there
+ sanuj	can't we do that for string also?
+ lisitsyn	const std::string?
+ sanuj	yeah
+ lisitsyn	yeah why not
+ sanuj	lisitsyn, then why do we need BaseTag
+ sanuj	we could have used name in Tag itself
+ sanuj	just make it const if we want to make it immutable
+ lisitsyn	map<Tag<T>, Any>
+ lisitsyn	which T?
+ lisitsyn	:)
+ sanuj	lisitsyn, map<std::string, Any>
+ lisitsyn	no precomputed hash then
+ lisitsyn	multiple access would lead to recomputing hashes
+ sanuj	lisitsyn, compute hash for tag._name in constructor
+ sanuj	okay
+ sanuj	lisitsyn, i see
+ sanuj	what you mean
+ sanuj	:)
+ sanuj	lisitsyn, by using BaseTag as key, we are storing the hash in BaseTag as a member so it's only computed once (in the constructor)?
+ lisitsyn	yes
+ sanuj	oh, i finally got it right :)
+ lisitsyn	yeah its getting a bit complex
+ lisitsyn	once we get it to work should look easy
+ sanuj	lisitsyn, yes
+ sanuj	lisitsyn, so just to confirm
+ sanuj	there are 2 members in BaseTag
+ sanuj	_hash
+ sanuj	and _name
+ lisitsyn	sanuj: yeah fair enough
+ sanuj	cool
+ shogun-buildbot	build #19 of FC23 - libshogun - aarch64 is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC23%20-%20libshogun%20-%20aarch64/builds/19  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, OXPHOS <engelzora@gmail.com>
+@HeikoS	Saurabh7: and?
+ Saurabh7	hey
+ Saurabh7	HeikoS: removed everything
+@HeikoS	Saurabh7: hi
+ Saurabh7	still cant see how we can unit test before and after
+@HeikoS	Saurabh7: you need to distinguish the case in the code
+@HeikoS	that is
+@HeikoS	if (get_global_parallel()->get_num_threads()) == 1) { initialise machine and features in old way } else {the new way}
+@HeikoS	but that is super simple as all you need to do is to remember whether you have to clone or not
+@HeikoS	and then change all machine assignments
+@HeikoS	so if no threads are available, the code does *exactly* the same as before you started editing it
+ Saurabh7	yes i understand it, didnt knwo about we had get_global_parallel tho
+ Saurabh7	let me ad quickly
+@HeikoS	Saurabh7: should be easy
+ Saurabh7	yes only if else
+@HeikoS	yep
+@HeikoS	and then you can set the number of threads to 1 in the unit test
+@HeikoS	and then back to num_cpus
+ c4goldsw	What time does OXPHOS usually come on?
+ c4goldsw	HeikoS ^
+ Saurabh7	c4goldsw: i think shes arnd utc-8
+-!- sanuj [~sanuj@117.204.240.143] has quit [Ping timeout: 276 seconds]
+ c4goldsw	Saurabh7 Thanks
+-!- sanuj [~sanuj@117.204.240.143] has joined #shogun
+@HeikoS	c4goldsw: she is NY time
+ c4goldsw	HeikoS Ah, good to know.  I won't have to stay up late then.
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+@HeikoS	lambday: hi! could you send a PR for the omp parallel thread setter?
+@HeikoS	Saurabh7: needs to use it
+@lambday	HeikoS: yeah let me add that..
+@lambday	HeikoS: too much rain :(
+@HeikoS	lambday: ha! indeed
+@HeikoS	thats why I am currently working from here
+-!- travis-ci [~travis-ci@ec2-54-224-204-201.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/134105657
+-!- travis-ci [~travis-ci@ec2-54-224-204-201.compute-1.amazonaws.com] has left #shogun []
+ sanuj	HeikoS, regarding Gaussian Kernel cache size
+ sanuj	shall i use the default cache size
+ sanuj	which is 10
+@HeikoS	sanuj: yes
+@HeikoS	thats good
+ sanuj	HeikoS, what is cache size
+ sanuj	is it in bytes?
+@HeikoS	no I think mbytes
+@HeikoS	check the code
+@HeikoS	sanuj: if a kernel cache is used (say kernel computation is very expensive)
+@HeikoS	and the kernel matrix is huge
+@HeikoS	i.e. cannnot be stored
+@HeikoS	the kernel cache is something for in between
+@HeikoS	not storing the full matrix
+@HeikoS	but not re-computing everything
+@HeikoS	only makes sense for very expensiv ekernel functions
+ sanuj	i see
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+@HeikoS	Saurabh7: jo
+@HeikoS	how is it going?
+@HeikoS	lets get this thing out of the way soon, it shouldnt take that long to write  simple test
+@HeikoS	matter of minutes
+ Saurabh7	HeikoS: done sending
+@HeikoS	Saurabh7: ah cool :)
+ Saurabh7	it was segfaulting for some reason when i assign directly
+@HeikoS	Saurabh7: did you valgrind it?
+@HeikoS	null pointer?
+ Saurabh7	got it i had to disable parallel and ref only when num_thread==1
+@HeikoS	not sure I get that, but Ill see in the pr
+@HeikoS	Saurabh7: I see no
+@HeikoS	w
+@HeikoS	I would do the other way around
+@HeikoS	not put extra REF/UNREF for m_machine
+@HeikoS	but DO put REF and UNREF for the cloned ones (in case num_threads>1=)
+ Saurabh7	HeikoS: ah yes you are right
+@HeikoS	Saurabh7: did you valgrind the unit test?
+ Saurabh7	HeikoS: not the unit test but similar example
+@HeikoS	valgrind ./shogun-unit-test --gtest_filter=CrossValidation_multithread.LibSVM_unlocked
+ Saurabh7	how to ge
+ Saurabh7	HeikoS:  ok :)
+@HeikoS	Saurabh7: please always do that for such critial use cases :)
+@HeikoS	run that in the build/tests/unit dir
+@HeikoS	you can run a make before
+@HeikoS	(will only compile things needed for the unit tests)
+@HeikoS	Saurabh7: how many cpu do you have?
+ Saurabh7	HeikoS: 4
+ Saurabh7	but for some reason when i was debugging i see 3 threads with omp
+@HeikoS	yeah there are some problems with omp setup
+@HeikoS	https://github.com/shogun-toolbox/shogun/pull/3236/files
+@HeikoS	this fixes it
+@HeikoS	we have to wait for that to be merged, otherwise the set_num_threads doesnt affect omp
+@HeikoS	Saurabh7: ok, there are some minor clean ups
+@HeikoS	Saurabh7: then rebase against 3236, and then we are done first first step
+ Saurabh7	HeikoS: ok
+@HeikoS	Saurabh7: so that is good
+@HeikoS	Saurabh7: with this stuff in place
+@HeikoS	can you do a benchmark
+@HeikoS	for say liblinear?
+ Saurabh7	HeikoS: yes
+@HeikoS	Saurabh7: any algorithm that doesnt run multicore on its own
+@HeikoS	Saurabh7: let me know how it compares
+@HeikoS	curios
+@HeikoS	also memory usage is interesting as we clone the features
+ Saurabh7	clone has overhead with runtime tooo i think
+ Saurabh7	i profiled this libsvm
+ Saurabh7	HeikoS: https://gist.github.com/Saurabh7/19637ab52d0d595016ac2820a9e87d4b
+ Saurabh7	but i will compare lets see
+@HeikoS	need debug symbols
+ sanuj	lisitsyn, hey
+@HeikoS	Saurabh7: ok cool. So we need to wait for the other patch to be merged before you can tell openml to only use 1 thread from shogun
+@HeikoS	Saurabh7: lets benchmark (and test again) once it is merged
+@HeikoS	Saurabh7: I suggest you start with the LARS in the mean time?
+ Saurabh7	HeikoS: ok will start with profiling that too
+ Saurabh7	have a benchmark for taht i think already
+@HeikoS	Saurabh7: to get familiar with the code, it might be good to write a few unit tests (or extend existing ones) and then eigen3-ize the code
+@HeikoS	Saurabh7: they key routines are the low rank updates of cholesky factors or matrix inverses
+@HeikoS	arianepaola: hi
+@HeikoS	arianepaola: what are you up to ?
+ Saurabh7	HeikoS: i see thanks keeping in mind
+@HeikoS	Saurabh7: again, share things early, this allows us to proceed much faster :)
+@HeikoS	Saurabh7: we can continue to incrementaly improve the x-validation over the next days
+@HeikoS	Saurabh7: would like to add: parallel locked training (not sure how yet)
+@HeikoS	then parallel runs
+@HeikoS	and sharing the feature matrix
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ sanuj	lisitsyn, there?
+ Saurabh7	HeikoS: yes i will
+ Saurabh7	HeikoS: parallel locked works with clone but i think it will be slower
+@HeikoS	Saurabh7: actually
+@HeikoS	thining about it
+@HeikoS	if we clone everything after the locking
+@HeikoS	then that would easily work in parallel
+@HeikoS	without being slower in fact
+ Saurabh7	HeikoS:  thats what i did
+@HeikoS	Saurabh7: locking simply precoimputes the kernel matrix
+@HeikoS	I see
+@HeikoS	mmh
+ Saurabh7	but there we assert CustomKernel == kernel
+@HeikoS	so then sharing the kernel matrix
+@HeikoS	is exactly the same as sharing features
+ Saurabh7	so i made that change
+@HeikoS	if things are cloned
+@HeikoS	Saurabh7: assert as in the same pointer?
+ Saurabh7	HeikoS: yes
+@HeikoS	Saurabh7: I see
+ Saurabh7	but clone makes different ones
+@HeikoS	I see
+ Saurabh7	for both m_custom_kernel and kernel
+@HeikoS	ok then
+ Saurabh7	after lock
+@HeikoS	maybe re-add it after all
+ Saurabh7	HeikoS: but i checked the speed too
+@HeikoS	and?
+ Saurabh7	parallel was slower this way for some reason
+@HeikoS	mmh
+@HeikoS	slower as in?
+ Saurabh7	parallel locked + clone  vs seq locked
+@HeikoS	Saurabh7:  it depends where the kernel matrix is precomputed
+@HeikoS	well lets do things incremental anyways, let's stay with the simple case for now
+@HeikoS	it needs benchmarking and testing
+@HeikoS	and then data sharing
+@HeikoS	THEN we can do locked case
+ Saurabh7	precompute happens in CCustomkernel init
+ Saurabh7	ok
+@HeikoS	interesting that is is slower
+ Saurabh7	yup I will make a reproduceable example later
+ Saurabh7	let u know
+ arianepaola	Hello everyone :-)
+ sanuj	arianepaola, Hi!
+ arianepaola	hi sanuj
+ sanuj	lambday, there?
+ sanuj	HeikoS, there?
+@lambday	sanuj: yo
+ sanuj	lambday, whatsup :)
+ sanuj	did the rain end? ;)
+@lambday	sanuj: not really :|
+ sanuj	oh sad
+@lambday	this whole week it's gonna be rainy
+@lambday	:'(
+ sanuj	haha
+ sanuj	it's sunny here
+ sanuj	40 degrees
+@lambday	haha
+ sanuj	lambday, i wanted to to know how to print private variables in shogun
+ sanuj	for debugging
+@lambday	sanuj: you want to just test it for your local use or commit it?
+ sanuj	lambday, just want to test it for local use
+@lambday	sanuj: just use SG_PRINT/SPRINT/cout/printf whatever then :D
+ sanuj	lambday, will that print while i build it or from the unit test?
+ sanuj	oh it will print while i run the unit test
+ sanuj	got it
+@lambday	yes
+@HeikoS	sanuj: hi
+@HeikoS	arianepaola: hi
+ arianepaola	hi HeikoS
+@HeikoS	arianepaola: how are things going?
+ arianepaola	good
+@HeikoS	arianepaola: wanted to hear what things you are currently doing and planning to do for the wekk
+@HeikoS	week
+ arianepaola	I will be looking into the rest of the unit tests required to pass for the debian package
+ arianepaola	I have some linking errors with lapack
+-!- travis-ci [~travis-ci@ec2-54-146-36-34.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/134117813
+-!- travis-ci [~travis-ci@ec2-54-146-36-34.compute-1.amazonaws.com] has left #shogun []
+ arianepaola	do you have an idea on #3213?
+ arianepaola	this is related to the lapack part in the cmake files
+@HeikoS	arianepaola: not really, sorry
+@HeikoS	weird error
+@HeikoS	btw in terms of building the package
+@HeikoS	I guess there is quite a few things that can be done even if the tests dont pass yet?
+@HeikoS	arianepaola: so if you say you are looking into the unit tests, what exactly does that mean? Any particular problems?
+ arianepaola	what wiking suggested in approach of the debian package was to make things more modular by separating libshogun and the modular interfaces
+-!- sanuj [~sanuj@117.204.240.143] has quit [Ping timeout: 276 seconds]
+@HeikoS	arianepaola: yeah thats a god idea, we had that in the past in fact
+@HeikoS	and does that work easily?
+ arianepaola	and improve the parts that he did on the cmake config branch
+ arianepaola	the lapack error hinders to build the interfaces
+@HeikoS	arianepaola: on your ubuntu?
+@HeikoS	arianepaola: well if it blocks, why not continue somewhere else until it is figured out?
+-!- sanuj [~sanuj@117.204.240.143] has joined #shogun
+ arianepaola	it is in a vm
+ arianepaola	have tried both 14.04 and 16.04, get the same
+@HeikoS	wiking is probably on holiday for this long weekend and he will be able to help sorting that out later I guess
+@HeikoS	e.g. the cookbook you sent is still incomplete
+-!- OXPHOS [9d8b131c@gateway/web/freenode/ip.157.139.19.28] has joined #shogun
+@HeikoS	it would be good to get a few more
+@HeikoS	python install
+ arianepaola	yes, I was going to work on it today
+@HeikoS	tons of stuff
+@HeikoS	no need to get blocked by one thing :)
+@HeikoS	OXPHOS: good orning :)
+ arianepaola	sure HeikoS :-)
+ OXPHOS	HeikoS: hello :)
+@HeikoS	OXPHOS: all good?
+ OXPHOS	HeikoS: yes. reading logs - so try to fix seeds for integration tests
+@HeikoS	OXPHOS: yeah
+@HeikoS	just adding a single call
+@HeikoS	in the .sg listing
+@HeikoS	no need to mention it in the cookbook rst
+ OXPHOS	HeikoS Lemme try
+ OXPHOS	Also here's a gist for opaque pointer of Vector wrapper class, I can open a separate PR for now but it'll be overlapped with the currently one finally.
+ OXPHOS	https://gist.github.com/OXPHOS/42f06dfc38325399982faf2f9468b7fa
+ OXPHOS	Do u want to have a look now? HeikoS, lambday, wiking
+ OXPHOS	^
+@HeikoS	OXPHOS: lambday should check
+ OXPHOS	kk
+-!- travis-ci [~travis-ci@ec2-54-224-204-201.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/134139132
+-!- travis-ci [~travis-ci@ec2-54-224-204-201.compute-1.amazonaws.com] has left #shogun []
+@lambday	OXPHOS: hey
+@lambday	checking
+ OXPHOS	lambday: thx!
+@lambday	OXPHOS: can you please add this in the PR? we can't really comment inline in gist
+ OXPHOS	lambday: sure. So I'll push from the same branch? Or should I open a new PR? it'll be quite different from yesterday's
+@lambday	OXPHOS: actually, don't bother.. let me have a look and let's discuss here a bit first
+ OXPHOS	lambday: thx. and for the name, I prefer to do BaseDataPtr/CPUDataPtr/GPUDataPtr, instead of BaseVector/CPUVector. Since Matrix will be in
+@lambday	OXPHOS: CPUVector shouldn't have a ptr to SGVector, maybe just the underlying T* and len?
+@lambday	or just a reference
+ OXPHOS	lambday: good point
+@lambday	OXPHOS: how do you plan to put the matrix classes in this?
+@lambday	OXPHOS: using the same class for both?
+@lambday	or create a subclass of this C(G)PUDataPtr
+ OXPHOS	lambday: use the same class, and overload constructor
+@lambday	OXPHOS: maybe using the same class is not the best idea.. one can then pass a matrix to a method that is supposed to work only with vectors
+@lambday	see the issue?
+@lambday	if you want to use the similar underlying array structure,
+@lambday	then maybe we have something like BaseDataPtr (maybe call it BaseMemArray) <-- CPUMemArray <-- CPUVector | CPUMatrix
+@lambday	CPUMemArray has the underlying array
+ OXPHOS	lambday: I see.
+@lambday	then CPUVector has an extra field "len", and then CPUMatrix has "num_rows" and "num_cols"
+@lambday	but doesn't matter.. I'd rather just keep two different ptrs for the data for vectors and matrices and remove the CPUMemArray class in between..
+@lambday	and make CPUvec CPUmat directly inherit from basememarrya
+ OXPHOS	So the user just send whatever to factory and get a basearray back
+@lambday	OXPHOS: yes.. factory creates the appropriate instance and returns that instance, casting to base type
+@lambday	and, basememarray shouldn't be the base class for both matrices and vectors
+@lambday	then we face the same problem..
+@lambday	imagine this
+@lambday	auto vec = factory(a) // a --> SGVector<T> type
+@lambday	vec is of BaseVector<T>* type
+@lambday	if a was SGMatrix<T>, the factory should return BaseMatrix<T>* type or something
+ OXPHOS	lambday: I think I got you - but we can throw error if let's say dot(matrix a, b)? This might be too expensive
+@lambday	if we get the same base ptr in both the cases, there is no way we can differentiate whether we have a vector or matrix
+@lambday	OXPHOS: no.. if someone tries to do dot(matrix a, b), this should not even compile :)
+ OXPHOS	lambday: haha okay
+ OXPHOS	so completely separate
+@lambday	catching these things at compile time is better :) specially the "illegal operations" cases like this
+@lambday	OXPHOS: yeah.. check SGVector and SGMatrix.. they are totally independent ..
+@lambday	yes they both depend on SGReferenceData but that is only for the ref-counting
+ OXPHOS	lambday: sure! also, I saw people use unique_ptr for opaque pointer. But it failed for me. We're suppose to switch to smart pointer for this right?
+@lambday	OXPHOS: it is a good idea to use unique_ptr for the opaque ptr..
+@lambday	OXPHOS: what errors did you get?
+ OXPHOS	kind of, not known how much space to allocate for the pointer as the struct is incomplete
+@lambday	OXPHOS: shouldn't be a problem if you allocate in the cpp..
+@lambday	there the compiler knows what exactly the struct is..
+@lambday	OXPHOS: let me show you something
+@lambday	OXPHOS: https://github.com/shogun-toolbox/shogun/blob/feature/bigtest/src/shogun/statistical_testing/HypothesisTest.h
+@lambday	https://github.com/shogun-toolbox/shogun/blob/feature/bigtest/src/shogun/statistical_testing/HypothesisTest.cpp
+@lambday	OXPHOS: another comment - we probably won't need this thing : https://gist.github.com/OXPHOS/42f06dfc38325399982faf2f9468b7fa#file-linalg-cpp-L21
+@lambday	OXPHOS: okay let's try one thing.. the PR you sent, it works, right?
+@lambday	as in, it does compile and we can run it
+ OXPHOS	lambday: thx! I did similar thing..but now I think I might have screwed up some details, like namespace..
+ OXPHOS	lambday: yes
+@lambday	OXPHOS: okay.. next step: make the PR work with the d-ptr.. that compiles and works..
+@lambday	baby steps
+@lambday	first, split the basevector into header and cpp
+@lambday	(you don't need to add all the template instantiations.. just add float64_t for now.. if it works with that, all other primitive types would work)
+@lambday	when that works, split the CPUvector into header and cpp
+@lambday	then cpu
+@lambday	gpu*
+@lambday	iteratively
+ OXPHOS	lambday: there's nothing to split for base vector?
+@lambday	if you update the PR itself, it would be easier to see what works and what doesn't
+@lambday	OXPHOS: well, you can add the instantiations in the cpp :)
+@lambday	OXPHOS: anyway, not too imp now.. maybe keep the basevector in the header for now
+@lambday	but split the children
+ OXPHOS	lambday: sure
+@lambday	OXPHOS: let me know when you update the PR :)
+@HeikoS	Saurabh7: the parallel thing is merged
+ OXPHOS	lambday: np. thx!
+@HeikoS	OXPHOS: hey
+@HeikoS	just looking at the cereal thing you sent
+ OXPHOS	HeikoS: yep
+@HeikoS	OXPHOS: so that save and load pair seems to work fine
+@HeikoS	OXPHOS: is the design you have in mind based on having such save/load pairs for all SG* types?
+@HeikoS	OXPHOS: because currently, all this is done in TParameter.h
+@HeikoS	OXPHOS: can you maybe clean up this PR?
+@HeikoS	OXPHOS: so that only the necessary bits of SGVector are there
+ OXPHOS	HeikoS: yes. if I understood correctly, save method in TParameter.h will fall back to the original type. So If SG*type works, all other class should
+ OXPHOS	HeikoS: sure
+@HeikoS	OXPHOS: yeah this is a good idea
+@HeikoS	OXPHOS: *though*
+@HeikoS	there is one thing
+ shogun-buildbot	build #2891 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2891  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+@HeikoS	this will only work for SG* that have basic types in them
+ OXPHOS	lambday: ((I'm wating for the making
+@HeikoS	OXPHOS: like int, float etc
+@HeikoS	there are two more cases
+@HeikoS	1.) CSGOBject
+@HeikoS	that should be easy as we just call CSGOBject::save there
+@HeikoS	2.) SG*
+@HeikoS	an example would be a SGMatrix<SGMatrix>
+@HeikoS	Shogun can currently serialize this
+@HeikoS	but I suggest we drop that
+@HeikoS	and only allow for basic and CSGOBject
+@HeikoS	then your approach would work
+ OXPHOS	for SGObject, I had kmeans (SGObject?) implemented, which saves a SGVector<> and an int. It worked.
+ OXPHOS	HeikoS: I saw only these two params are serialized (Added to param list) now
+@HeikoS	yeah sure, that falls under the first cases
+@HeikoS	OXPHOS: wait
+@HeikoS	how did you implement that for kmeans?
+@HeikoS	have a gist?
+ OXPHOS	digging
+-!- sanuj [~sanuj@117.204.240.143] has quit [Ping timeout: 276 seconds]
+ OXPHOS	HeikoS: in this ugly PR: https://github.com/shogun-toolbox/shogun/pull/3199/files#diff-40b41b5eecabf9f724506e7e80fe5419
+ OXPHOS	if you jump to kmeans.h, it's there.
+@HeikoS	ok
+@HeikoS	OXPHOS: can you send another PR with just the kmeans thing? and mention that its just to show?
+@HeikoS	OXPHOS: but ok
+@HeikoS	reading it
+@HeikoS	OXPHOS: so the thing here is
+@HeikoS	OXPHOS: you are implementing the save method explicitly
+@HeikoS	OXPHOS: so far so good
+@HeikoS	BUT, the save method is implemented in the base class CSGObject
+@HeikoS	which means in that code, you dont have access to members directly
+ OXPHOS	HeikoS: Sure. they're all public?
+@HeikoS	OXPHOS: how would you access them?
+@HeikoS	the method is in CSGObject.cpp itself
+@HeikoS	OXPHOS: the only way to access things is through m_parameters
+ OXPHOS	HeikoS: ahh I got it
+@HeikoS	OXPHOS: so you need to iterate through m_parameters
+@HeikoS	and the distinguish all the cases
+@HeikoS	1.) single (basic & CSGObject=)
+@HeikoS	2.) SG* (T=basic or CSGOBject)
+@HeikoS	OXPHOS: have a look at CSGObject::save_serializable
+@HeikoS	which calls
+@HeikoS	TParameter::save
+@HeikoS	and TParameter::save is the juicy one, where all the cases are at
+@HeikoS	you need to do something similar to this
+@HeikoS	and we should simplify on the fly
+@HeikoS	you will see that this method is pretty much doing the same as you kmeans version, but in the general case
+ OXPHOS	HeikoS: sure. so I shall 1). clean up SGVectorCerealTest and 2). jump to SGObject/parameter? Or try kmeans first?
+@HeikoS	OXPHOS:  not really a point in doing things explicit
+@HeikoS	as you see, if you can serialize kmean
+@HeikoS	thats it, you can only serialize that class
+@HeikoS	but we dont want to do this by hand for all the classes
+@HeikoS	Also check TSGDataType in DataType.h
+@HeikoS	there you have these 3 things
+@HeikoS	primitive type
+@HeikoS	structure type
+@HeikoS	container type
+@HeikoS	so I think the first step is to implement the save method for SGVector using cereal (you got that more or less already)
+@HeikoS	the next step is to read and understand the existing code a bit
+@HeikoS	and ask many questions :)
+@HeikoS	we should also talk to wiking soon on this
+@HeikoS	I gotta leave now, see you later
+ OXPHOS	HeikoS: right..thx! I'll check closer
+ OXPHOS	HeikoS: too sophisticated. But I guess I have to read through
+@HeikoS	OXPHOS: dont spend too much time in details
+@HeikoS	try to understand the TSGDataType thing
+ OXPHOS	kk
+@HeikoS	its essentially just goes through all the cases
+@HeikoS	no container, no structure, only primitive
+@HeikoS	vector/matrix container, no structure, all primitives
+@HeikoS	and then sparse etc
+@HeikoS	so check the function calls
+ OXPHOS	okay thx!
+@wiking	HeikoS: yo
+@HeikoS	wiking: ah jojo welcome back
+@HeikoS	wiking: was about to leave, but maybe we should discuss a few things
+@HeikoS	wiking: how are things?
+@HeikoS	look what I just found, hahaha http://www.demiurge.technology/
+@HeikoS	wiking: lets talk later
+@HeikoS	really gotta go
+@HeikoS	ill be back in 2 hrs or so
+@wiking	ok
+@wiking	HeikoS: i'm UTC+8
+@wiking	so i probably wont be online anyore :(
+@wiking	so from now on i'm again singapore timezone
+@wiking	OXPHOS: since i've got a lot of unread emails (as well from you) do you have a preference of list of pr/issues you want me to check on?
+@HeikoS	wiking: can talk tomorrow then
+@wiking	kk
+@wiking	sent you an email
+@wiking	plz answer that asap
+ shogun-buildbot	build #29 of xenial - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/xenial%20-%20libshogun/builds/29  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+ OXPHOS	wiking: I'm good for now. I'll work sth out today and ping you again. :)
+@wiking	btw
+@wiking	have we merged the cmake detection to the branch?
+ OXPHOS	wiking: yes
+@wiking	ah yeah we did cool!
+@wiking	thnx for doing the squashing
+-!- sanuj [~sanuj@117.204.240.143] has joined #shogun
+ OXPHOS	wiking: np. I have an open pr but I'll clean it up first and show you.
+ OXPHOS	lambday: there? unique_ptr still fails.
+@wiking	 src/shogun/lib/CerealTest.h
+ OXPHOS	https://gist.github.com/OXPHOS/89ad25db040852b5ea1add46d122a795
+@wiking	thi sis still a test?
+@wiking	i mean i suppose you are moving this .h somewhere later?
+@lambday	OXPHOS: let me check
+ OXPHOS	wiking: It's supposed to be in SGVector later.
+ OXPHOS	lambday: thx
+@wiking	kk
+ OXPHOS	wiking: somehow Math.h or whatever confused current load and this one
+ OXPHOS	during compiling
+ sanuj	lisitsyn, there?
+ lisitsyn	yes
+@lambday	OXPHOS: try adding the instantiation for int in base?
+@lambday	as well as for gpuvector?
+ sanuj	lisitsyn, i got the hashing work exactly the way we want in a dummy
+ sanuj	was trying to do it in shogun
+ sanuj	getting an error
+ lisitsyn	what error?
+ OXPHOS	lambday: just to be sure - you mean the template struct GPU_Vector<int32_t> right?
+@HeikoS	wiking: replied
+@lambday	OXPHOS: yeah
+ sanuj	lisitsyn, http://pastebin.com/D6di2Ka1
+ OXPHOS	lambday: it is there..so lemme move base to cpp too
+@lambday	OXPHOS: let me try this in my machine
+ lisitsyn	sanuj: C++ exception with description "Bad cast toint but the type is shogun::Any::Empty" thrown in the test body.
+ sanuj	lisitsyn, yes
+ sanuj	lisitsyn, happened while doing EXPECT_EQ(gauss_kernel->get(distance), 10);
+ lisitsyn	sanuj: well need to check your code
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+ sanuj	lisitsyn, i'll push it on the pr
+ arianepaola	hi wiking
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Client Quit]
+ OXPHOS	lambday: I got the same error even if I had template struct BaseVector<int32_t> and BaseVector in .cpp
+-!- leagoetz [~leagoetz@nat-221-122.internal.eduroam.ucl.ac.uk] has joined #shogun
+@lambday	OXPHOS: works fine here - https://gist.github.com/lambday/123b97bfe6f15f98d0f7d24ce8dd35b5
+@lambday	OXPHOS: please paste working code in gist
+ sanuj	lisitsyn, https://github.com/shogun-toolbox/shogun/pull/3221
+@lambday	OXPHOS: did it work?
+ lisitsyn	sanuj: you didn't copy the hash
+ lisitsyn	neither in copy ctor, nor in assignment
+ sanuj	lisitsyn, oh, i'll fix it
+ sanuj	missed them by mistake
+ OXPHOS	lambday: on it
+ sanuj	didn't have a copy and assignment constructor in my dummy
+ OXPHOS	lambday: yes..
+@lambday	OXPHOS: what was the issue :)
+ OXPHOS	OXPHOS: how..Is there a difference between clang and g++?
+ OXPHOS	lambday:^
+@lambday	OXPHOS: I just checked with clang++ and even then it worked!
+ OXPHOS	lambday: Yeah me too..so I'll remove all other stuff and put them back in bit by bit
+@lambday	OXPHOS: yeah that sounds good
+-!- travis-ci [~travis-ci@ec2-54-163-137-83.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/134158086
+-!- travis-ci [~travis-ci@ec2-54-163-137-83.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #20 of FC23 - libshogun - aarch64 is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC23%20-%20libshogun%20-%20aarch64/builds/20  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- leagoetz [~leagoetz@nat-221-122.internal.eduroam.ucl.ac.uk] has quit []
+-!- OXPHOS [9d8b131c@gateway/web/freenode/ip.157.139.19.28] has quit [Ping timeout: 250 seconds]
+-!- mizari [~mizari@95-174-213-100.nts.su] has quit [Quit: Leaving]
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	HeikoS: so how's ccache?
+@HeikoS	wiking: jo
+@HeikoS	it is better
+@HeikoS	BUT still annoys me
+@HeikoS	that I cannot isolate my unit tests
+@wiking	what's the output of ccache -s ?
+@HeikoS	eats like 10s time everytime I check something
+@HeikoS	1. relinking of shogun 2. re-linking of unit tests
+ lisitsyn	HeikoS: is it about runtime
+ lisitsyn	or compile time
+@HeikoS	compiling is fine now due to ccache
+@HeikoS	even if I switch Debug/Release
+@HeikoS	cache size                           4.0 Gbytes
+@HeikoS	max cache size                      10.0 Gbytes
+@HeikoS	wiking: so all good with that
+ lisitsyn	is it about running just a few tests?
+@HeikoS	lisitsyn: no I do that
+ lisitsyn	is it about linking all tests?
+@HeikoS	it is about the fact that I cannot isolate my stuff: my classes and my tests
+ lisitsyn	plugins
+ lisitsyn	:D
+@HeikoS	but I think classes will be resoilved with plugiuns
+@HeikoS	yeah
+@HeikoS	and unit tests hopefully once the serialization is out
+@HeikoS	though I dont see that yet tbh
+@HeikoS	wiking: as we still need to test serialization right?
+@HeikoS	wiking: another thought I had about this was if we had two unit test binaries: one with automatically generated tests for all shogun classes (serialization, clone, etc) and one for the manually written ones
+@HeikoS	that would help
+@HeikoS	lol my shogun code is 1000x faster than my "clever" python code
+@HeikoS	lisitsyn: how are the plugins going?
+ lisitsyn	HeikoS: well it is about parameters yet
+@HeikoS	parameters as in?
+@HeikoS	btw you should also tell OXPHOS how the serialization will be done once the parameter maps are ready
+ lisitsyn	sure
+ lisitsyn	HeikoS: well sanuj on his way to integrate generic parameters into sgobject
+ lisitsyn	via map
+ lisitsyn	and tags
+ sanuj	lisitsyn, it's working now
+ sanuj	:)
+ lisitsyn	cool
+ sanuj	i'm testing them with T = SGVector
+@HeikoS	lisitsyn: ah sooo good :)
+@HeikoS	sanuj: lisitsyn please tell OXPHOS that
+@HeikoS	because I told her to check Parameter.h
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has quit [Quit: Page closed]
+ sanuj	HeikoS, yes i'll
+@HeikoS	sanuj: and you have a prototype right?
+@HeikoS	share it
+@HeikoS	and tell her that she can already think about cereal on this
+ sanuj	HeikoS, yes but i used aer
+@HeikoS	thats fine
+ sanuj	The PR is enough for the prototype now
+@HeikoS	just how the interface is
+ sanuj	I need to add swig interface
+ sanuj	which i will do tomorrow
+ sanuj	which i will do tomorrow
+ sanuj	oh sorry
+ sanuj	lisitsyn, i think sgvector is causing some trouble
+ sanuj	i'll look into this tomorrow
+ lisitsyn	ok
+ sanuj	gotta sleep
+ sanuj	lisitsyn, what time will you be here tomorrow
+ lisitsyn	probably starting from 8-9 UTC
+ sanuj	okay
+ sanuj	goodnight :)
+-!- sanuj [~sanuj@117.204.240.143] has quit [Remote host closed the connection]
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+-!- travis-ci [~travis-ci@ec2-54-224-204-201.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/134191379
+-!- travis-ci [~travis-ci@ec2-54-224-204-201.compute-1.amazonaws.com] has left #shogun []
+-!- OXPHOS [9d8b1501@gateway/web/freenode/ip.157.139.21.1] has joined #shogun
+-!- lambday [56a397da@gateway/web/freenode/ip.86.163.151.218] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+ OXPHOS	lambday: hey
+@lambday	OXPHOS: yo
+ OXPHOS	lambday: aha you're still here!
+ OXPHOS	lambday: so I changed the constructor you wrote to GPUVector(int a);
+ OXPHOS	and did int main() {     GPUVector<int> vec(5);     return 0; }
+ OXPHOS	got error:  error: no matching function for call to 'std::unique_ptr<shogun::GPUVector<int>, std::default_delete<shogun::GPUVector<int> > >::unique_ptr(std::unique_ptr<shogun::GPUVector<int>::GPUArray, std::default_delete<shogun::GPUVector<int>::GPUArray> >)'
+@lambday	OXPHOS: as in, vector length 5
+@lambday	?
+-!- OXPHOS_ [9d8b1501@gateway/web/freenode/ip.157.139.21.1] has joined #shogun
+-!- lambday [56a397da@gateway/web/freenode/ip.86.163.151.218] has quit [Ping timeout: 250 seconds]
+-!- OXPHOS [9d8b1501@gateway/web/freenode/ip.157.139.21.1] has quit [Ping timeout: 250 seconds]
+ OXPHOS_	test
+-!- lambday [56a397da@gateway/web/freenode/ip.86.163.151.218] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+@lambday	OXPHOS_: works fine here
+ OXPHOS_	lambday: can I send you the exact scripts I'm trying to run and you try again?
+@lambday	OXPHOS_: yes..
+@lambday	that's what I have been saying :D
+@lambday	upload/send exact thing :D
+ OXPHOS_	lambday: my bad .. https://gist.github.com/a70af5c8945befc8915d143e5c5d4b8e.git
+@lambday	OXPHOS_: you haven't instantiated GPUVector<int> yet
+@lambday	OXPHOS_: try this: put the main function in a separate file
+@lambday	instantiate the templates (maybe just for int/double) - put those within shogun namespace
+@lambday	instantiate the templates (maybe just for int/double) - put those within shogun namespace
+-!- lambday_ [56a397da@gateway/web/freenode/ip.86.163.151.218] has joined #shogun
+-!- mode/#shogun [+o lambday_] by ChanServ
+ OXPHOS_	lambday: done.
+@lambday_	OXPHOS_: and?
+ OXPHOS_	lambday: sry 1sec
+-!- lambday [56a397da@gateway/web/freenode/ip.86.163.151.218] has quit [Ping timeout: 250 seconds]
+ OXPHOS_	lambday_: okay I updated the gist. Now I have the same error I had for the dot linalg
+@lambday_	OXPHOS_: the instantiations have to be within the namespace :)
+@lambday_	i.e., inside namespace shogun { .... }
+ OXPHOS_	I just threw the .cpp in namespace shogun{...} and updated the gist
+@lambday_	OXPHOS_: works?
+ OXPHOS_	doesn't seem to help
+ OXPHOS_	the same error
+@lambday_	strange!
+@lambday_	let me download your code
+ OXPHOS_	thx
+@lambday_	okay your version has an error.. my version didn't have..
+@lambday_	checking
+@lambday_	OXPHOS_: https://gist.github.com/OXPHOS/a70af5c8945befc8915d143e5c5d4b8e#file-linalg-h-L22
+@lambday_	this should be std::unique_ptr<GPUArray> :P
+ OXPHOS_	...
+ OXPHOS_	so sorry about this
+@lambday_	OXPHOS_: don't worry
+@lambday_	OXPHOS_: make sure it works
+ OXPHOS_	But in the "real" linalg code the unique_ptr was correct, and it still gave error.. lemme check again
+@lambday_	OXPHOS_: yeah...
+@lambday_	refactor one class (split into header+cpp), update the PR, repeat
+@lambday_	make one changes at a time..
+@lambday_	should work
+ OXPHOS_	lambday_: do you want me to pull a new PR even if it doesn't work for me now?
+ OXPHOS_	lambday_: sorry a huge mistake. I didn't run main.cpp for the test case.
+ OXPHOS_	lambday_: https://gist.github.com/a70af5c8945befc8915d143e5c5d4b8e.git
+ OXPHOS_	 error: invalid application of 'sizeof' to incomplete type 'shogun::GPUVector<int>::GPUArray'   static_assert(sizeof(_Tp)>0,
+-!- travis-ci [~travis-ci@ec2-54-224-204-201.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/134233169
+-!- travis-ci [~travis-ci@ec2-54-224-204-201.compute-1.amazonaws.com] has left #shogun []
+@lambday_	OXPHOS_: no it's better to update the existing PR for this one
+@lambday_	OXPHOS_: why does the main function has to be within shogun namespace?
+ OXPHOS_	lambday_: it doesn't
+@lambday_	OXPHOS_: https://gist.github.com/OXPHOS/a70af5c8945befc8915d143e5c5d4b8e#file-main-cpp-L2
+ OXPHOS_	lambday_: yeah I know.. I just did copy-paste. will this harm anything? I'll change it now.
+@lambday_	OXPHOS_: I don't think it will compile :/
+ OXPHOS_	done. still the same error
+@lambday_	OXPHOS_: anyway.. what do you mean by opening a new PR?
+@lambday_	OXPHOS_: the current PR works, no?
+@lambday_	whatever stuff that is there
+@lambday_	so make a small change, compile and make sure it still works, commit, repeat
+ OXPHOS_	I just feel the current working PR and the opaque pointer I'm writing now is too different
+ OXPHOS_	i mean, if it works, there's no diff
+ OXPHOS_	but now for some reason it doesn't. so I have only the 'opaque pointer' part
+@lambday_	OXPHOS_: the opaque ptr gists that we have been discussing is more or less a proof of concept thing.. the actual stuff has to go inside the PR :)
+ OXPHOS_	yes..but it still doesn't work..
+@lambday_	OXPHOS_: before making the opaque ptr change in the original PR you had, split the files first
+@lambday_	make sure at least that works
+@lambday_	because the original PR works, right?
+ OXPHOS_	right
+@lambday_	so, split the file...
+@lambday_	works? good.. no? check what went wrong..
+ OXPHOS_	okay I didn't take that as a step. will do.
+@lambday_	then make use of the dptr in the gpuptr
+@lambday_	hehe don't worry the about the steps.. since you said it doesn't work.. I am just saying that doing things in small steps help us find out what is actually going wrong..
+@lambday_	and how to pinpoint the source of it
+@lambday_	:)
+ OXPHOS_	sure. the raw pointer worked for me and I'll put it back for now. can you try the updated gist if you have time?
+ lisitsyn	I heard raw pointer!
+@lambday_	lisitsyn: sleep :P
+ lisitsyn	sorry
+@lambday_	lisitsyn: hehehe
+ OXPHOS_	bugged
+ lisitsyn	raw pointer police
+ OXPHOS_	lisitsyn: they won't be merged
+@lambday_	lisitsyn: don't hate 'em so much.. herb said they are perfectly good :D
+@lambday_	OXPHOS_: which one you want me to try?
+ lisitsyn	yes inside some functions
+@lambday_	lisitsyn: yes
+@lambday_	don't worry she's gonna use unique_ptr :)
+ OXPHOS_	lambday_: https://gist.github.com/a70af5c8945befc8915d143e5c5d4b8e.git
+ OXPHOS_	thx
+ OXPHOS_	now I kinda hate unique_ptr
+@lambday_	OXPHOS_: noooooooo :'(
+ lisitsyn	why so
+@lambday_	don't hate
+ lisitsyn	you gonna hate everything debugging your pointers :D
+@lambday_	OXPHOS_: well, this is the previous code, with just main function, right?
+@lambday_	or did you change anything else?
+ OXPHOS_	they're too "smart"
+ OXPHOS_	lambday_: I changed g++. nothing else
+@lambday_	OXPHOS_: so this doesn't work with g++ ?
+ OXPHOS_	lambyday_: no I mean last time though I had main.cpp I was still running linalg.cpp... that's why there's no error
+ OXPHOS_	for the moment
+ OXPHOS_	I didn't change linalg.h / linalg.cpp. Just add a main function.
+@lambday_	so why doesn't it work? you compile linalg.cpp, you compile main.cpp, you link both objects, voila
+ OXPHOS_	I did g++ -c -std=c++11 -I. main.cpp -lshogun
+@lambday_	it didn't work?
+@lambday_	interesting
+ OXPHOS_	got the error: invalid application of 'sizeof' to incomplete type 'shogun::GPUVector<int>::GPUArray'   static_assert(sizeof(_Tp)>0,
+@lambday_	okay let me check
+-!- travis-ci [~travis-ci@ec2-54-224-204-201.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/134236526
+-!- travis-ci [~travis-ci@ec2-54-224-204-201.compute-1.amazonaws.com] has left #shogun []
+@lambday_	OXPHOS_: yeah there is an error.. let me check why..
+-!- sonne|osx [~sonne@x5ce5a1c4.dyn.telefonica.de] has joined #shogun
+ OXPHOS_	lambday_: is it the same one? I shouldn't be glad about this, but kinda..relieved..
+@lambday_	OXPHOS_: yeah same error (downloaded your gist) :)
+ OXPHOS_	lambday_: Hope it's not caused by a stupid typo again..I did see that error from 15h ago
+ OXPHOS_	17h
+@lambday_	OXPHOS_: usually it is something stupid like that
+ OXPHOS_	:(
+@lambday_	OXPHOS_: don't worry.. check a bit
+ OXPHOS_	thx
+--- Log closed Wed Jun 01 00:00:20 2016

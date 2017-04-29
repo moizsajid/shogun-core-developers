@@ -1,0 +1,406 @@
+--- Log opened Sun Dec 01 00:00:47 2013
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- zxtx [~zv@ool-2f110054.dyn.optonline.net] has quit [Ping timeout: 260 seconds]
+ shogun-buildbot_	build #634 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/634
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 9a6ce87 / src/interfaces/modular/SGBase.i: https://github.com/shogun-toolbox/shogun/commit/9a6ce877edacdf9a29d683f3011914e62508b93c
+ shogun-notifier-	shogun: include SGRefObject before SGObject for swig
+-!- travis-ci [~travis-ci@ec2-54-237-116-165.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14756218
+-!- travis-ci [~travis-ci@ec2-54-237-116-165.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot_	build #2063 of deb3 - modular_interfaces is complete: Failure [failed examples and unit tests]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2063  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- iglesiasg [~iglesiasg@206.Red-83-61-168.dynamicIP.rima-tde.net] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	good morning guys
+-!- iglesiasg [~iglesiasg@206.Red-83-61-168.dynamicIP.rima-tde.net] has quit [Read error: Connection reset by peer]
+-!- iglesiasg [~iglesiasg@206.Red-83-61-168.dynamicIP.rima-tde.net] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * a93cb3b / src/ (5 files): https://github.com/shogun-toolbox/shogun/commit/a93cb3b9136f8072472067ac57828992bf6d8d77
+ shogun-notifier-	shogun: drop SERIALIZABLE_DUMMY
+@sonney2k	iglesiasg, moin!
+@iglesiasg	sonney2k, you were right with your first comment here https://github.com/shogun-toolbox/shogun-web/pull/39
+@iglesiasg	sonney2k, it seems that the html files have to be inside the templates directory
+@sonney2k	iglesiasg, could be worse .. so maybe you just create some extra dir inside the template dir?
+@iglesiasg	sonney2k, yep
+@iglesiasg	sonney2k, instead of static/md2html, we use templates/md2html and done
+@sonney2k	ok
+@sonney2k	lisitsyn, F%$*$Y%(*!
+@sonney2k	lisitsyn, how did you ever get the %typemap(javainterfaces) to do *anything*
+ lisitsyn	sonney2k: why?
+@sonney2k	I dont' see in any class any java.io.Externalizable
+ lisitsyn	sonney2k: what do you mean?
+ lisitsyn	#ifdef SWIGJAVA%typemap(javainterfaces) SGObject "java.io.Externalizable"
+@sonney2k	lisitsyn, yes I am not seeing any implements Externalizable or so
+ lisitsyn	sonney2k: public void writeExternal(java.io.ObjectOutput out) throws java.io.IOException {
+ lisitsyn	?? :)
+@sonney2k	lisitsyn, there also is no writeExternal or anything
+@sonney2k	I guess I killed it all now
+@sonney2k	lisitsyn, you wrote that stuff so help me!
+@sonney2k	http://stackoverflow.com/questions/5477747/cant-figure-out-how-to-make-swig-java-force-a-proxy-class-to-implement-an-inter
+ lisitsyn	sonney2k: what's going on? :D
+@sonney2k	and here the guy does just
+@sonney2k	%typemap(javainterfaces) Foo "SomeInterface"
+@sonney2k	struct Foo {
+@sonney2k	};
+@sonney2k	and it is then adding a public class Foo extends SomeBase implements SomeInterface {
+ lisitsyn	yeah
+ lisitsyn	and what?
+@sonney2k	so why in 3$#$ hell does it now work with CSGObject now
+ lisitsyn	*not* work?
+@sonney2k	%typemap(javaimports) CSGObject
+@sonney2k	%{
+@sonney2k	import org.shogun.SerializableFile;
+@sonney2k	import org.shogun.SerializableAsciiFile;
+@sonney2k	%}
+@sonney2k	I don't see in any .java file these imports
+@sonney2k	lisitsyn, *not* == no implements!
+ lisitsyn	uhm
+-!- travis-ci [~travis-ci@ec2-54-226-95-169.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14758523
+-!- travis-ci [~travis-ci@ec2-54-226-95-169.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	ahh
+@sonney2k	lisitsyn, namespaces!
+ lisitsyn	hahaha
+@sonney2k	maybe shogun::CSGObject
+* sonney2k tries
+ lisitsyn	ah so now I get it
+ lisitsyn	it was SWIGCLASS
+ lisitsyn	yeah it must be namespace
+ lisitsyn	we have stupid java externalization btw without buffering and file based
+@sonney2k	lisitsyn, better stupid than none
+@sonney2k	I hope besser82 finishes his cmake stuff
+@sonney2k	I would want to give the swig stuff an overhaul
+@iglesiasg	sonney2k, django template question
+@sonney2k	so that we have java stuff only in certain files
+@sonney2k	and not the mess we have now in SGBase / modshogun.i
+@sonney2k	lisitsyn, yes works :D
+@sonney2k	public class SGObject extends SGRefObject implements java.io.Externalizable {
+@sonney2k	lisitsyn, I think I fixed things now for real
+@iglesiasg	sonney2k, I have in a variable called fname the name of an html file, I can see that doing {{ fname }}. But when I want to include the html doing something like {% include {{fname}} %} it breaks
+@sonney2k	lisitsyn, do you know why we always have a import java.io.Serializable; in there?
+@sonney2k	iglesiasg, I guess that won't work - maybe you better just generate the templates like {% include real_filename %}
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * ed592ee / src/interfaces/modular/SGBase.i: https://github.com/shogun-toolbox/shogun/commit/ed592ee8942ecaf9e5bb9e8844a3953924ca8af7
+ shogun-notifier-	shogun: add namespace to get Externalizable to work for real
+@iglesiasg	sonney2k, ahhh I am such an idiot
+ lisitsyn	sonney2k: where do we have it?
+@iglesiasg	I just needed to remove the {{ }} and it works
+@sonney2k	iglesiasg, :)
+@sonney2k	lisitsyn, what?
+@sonney2k	lisitsyn, for each object we want this serialization right
+@sonney2k	lisitsyn, any idea why you did it for *any* type before not just SGObject?
+ shogun-buildbot_	build #2064 of deb3 - modular_interfaces is complete: Failure [failed test python modular test ruby modular test java modular test csharp modular test lua modular test octave modular test r modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2064  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- travis-ci [~travis-ci@ec2-54-242-242-147.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14759141
+-!- travis-ci [~travis-ci@ec2-54-242-242-147.compute-1.amazonaws.com] has left #shogun []
+ lisitsyn	sonney2k: hmm no
+ lisitsyn	I don't remember that
+@iglesiasg	sonney2k, when is the shogun repo updated in the machine that contains shogun-web?
+-!- zxtx [~zv@ool-2f110054.dyn.optonline.net] has joined #shogun
+ shogun-buildbot_	build #2065 of deb3 - modular_interfaces is complete: Failure [failed test python modular test ruby modular test java modular test csharp modular test lua modular test octave modular test r modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2065  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	iglesiasg, when wiking or me do make release
+@iglesiasg	sonney2k, I see
+@iglesiasg	sonney2k, maybe it is better to get the md files from the urls as I did then?
+@iglesiasg	sonney2k, this is regaring the second comment in https://github.com/shogun-toolbox/shogun-web/pull/39
+@sonney2k	iglesiasg, I think it is better to assume a shogun install somewhere
+@iglesiasg	sonney2k, but then the md files in the website won't be the same ones as in the repo, right?
+@iglesiasg	they won't be synced until the make release is done again
+@iglesiasg	I understand that make release is done once in a blue moon or so
+@sonney2k	iglesiasg, ahh indeed
+@sonney2k	so we should point it to the buildbot's shogun checkout then and run it at nightly_default
+@iglesiasg	I am not sure
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * ba0a597 / src/interfaces/modular/SGBase.i: https://github.com/shogun-toolbox/shogun/commit/ba0a597a2b32dd3456403bc8c705aa83e47f2dae
+ shogun-notifier-	shogun: make ref/unref known *before* including the class
+@sonney2k	iglesiasg, how would you determine which *.md files exist?
+@sonney2k	if you have the source code dir I could e.g. call your update function with all the .md file names
+@iglesiasg	sonney2k, can we do a sort of os.walk in github.com/shogun-toolbox/shogun/develop/?
+@iglesiasg	does that even make sense? :D
+@sonney2k	iglesiasg, heh hardly - lets better do that on the local buildbot :D
+@iglesiasg	aham! maybe GitHub API has some method to do that
+@iglesiasg	I think that is very likely
+@iglesiasg	something to get all the files in the repo with some extension
+@iglesiasg	let me check that
+@sonney2k	iglesiasg, I mean we coudl do update_md.py `find /path/to/shogun -name '*.md'`
+@sonney2k	and done
+@sonney2k	no need for magic
+@sonney2k	shogun-buildbot_, force build --branch=develop 'deb3 - modular_interfaces'
+ shogun-buildbot_	build forced [ETA 47m10s]
+ shogun-buildbot_	I'll give a shout when the build finishes
+@sonney2k	man please don't fail me
+@iglesiasg	sonney2k, mm I don't follow the update_md.py `find /path/to/shogun -name '*.md'` idea
+-!- zxtx [~zv@ool-2f110054.dyn.optonline.net] has quit [Ping timeout: 252 seconds]
+-!- travis-ci [~travis-ci@ec2-54-242-242-147.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14761264
+-!- travis-ci [~travis-ci@ec2-54-242-242-147.compute-1.amazonaws.com] has left #shogun []
+-!- zxtx [~zv@ool-2f110054.dyn.optonline.net] has joined #shogun
+ shogun-buildbot_	build #2066 of deb3 - modular_interfaces is complete: Failure [failed test csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2066
+-!- besser82 [~besser82@2a02:8108:8840:1800:e8b:fdff:fe16:bb33] has joined #shogun
+-!- besser82 [~besser82@2a02:8108:8840:1800:e8b:fdff:fe16:bb33] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: Hey Folks!!!
+@iglesiasg	Hi besser82 !
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: During refactoring that cmake-stuff and doing some basic sanity-checks i found some _really_ problematic issue:  When we bundle stuff like Eigen3, ColPack, ARPREC,...  there's problems when building some cxx-code interfacing libshogun  :(
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: like missing headers for that bundled stuff....
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: how do we want to solve that?
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: two proposals from me:
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: a) installing the headers from `bundled stuff` inside some private location, like %{_includedir}/shogun/...
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: b) remove that bundling crap and requires these stuff to be present when building libshogun
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: Other thoughts / ideas / proposals ??? Or shall we vote amoung these two possibilities?
+ lisitsyn	I admit I don't really understand the issue
+ besser82	lisitsyn: What is unclear to you?  Please be more verbose and I'll try to explain...
+ lisitsyn	besser82: why these headers are missing?
+ besser82	lisitsyn: because from the bundled stuff there is static-libs build and linked into libshogun...
+ besser82	lisitsyn: there are headers which get referenced by shogun's headers, but actually are not installed and are only present somewhere in build-tree underneath `third_party/...`
+ lisitsyn	besser82: ah get it
+ lisitsyn	besser82: so the reason is that we have some 3rd party headers used in our headers right?
+ besser82	lisitsyn: right, and those 3rd-party headers are not present, when libshogun is build with bundling...
+ besser82	lisitsyn: if i build with linking against system's stuff this ain't an issue
+ besser82	lisitsyn: by not present i refer to not present for system outside shogun's build-tree....
+ shogun-buildbot_	build #2067 of deb3 - modular_interfaces is complete: Failure [failed test csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2067  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot_	build #328 of precise - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/328  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ besser82	lisitsyn: shogun itself will build without problems, but when it comes to interfacing shogun-with-bundled-libs from own C++-code there are situations when `pop goes the weasel`  :(
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: ^^^  a good example to reproduce is interfacing shogun's eigen-based stuff from C++
+@iglesiasg	besser82, uhm I see, I don't understand though why it happens
+@iglesiasg	I understand that it won't  be possible to use Eigen stuff directly, but why not Shogun stuff that employs Eigen?
+@iglesiasg	besser82, we are talking about compile-time errors btw, right?
+ besser82	iglesiasg: yes compile-time errors, when interfacing libshogun from c++
+ besser82	iglesiasg: as i said this doesn't happen always and in every header, but in some there is....
+@iglesiasg	besser82, can it be due to something done wrong bundling?
+ besser82	iglesiasg: actually, no...
+ besser82	iglesiasg: it happenes with current develop/HEAD as well...
+ besser82	iglesiasg: and all my tracing leads to the problem of missing headers from bundled 3rd party-stuff...
+@iglesiasg	besser82, I meant in bundling Eigen
+ besser82	iglesiasg: How do you mean that in detail?
+ besser82	iglesiasg: try sth like creating an instance of `IterativeSolverIterator` inside some external code...
+@iglesiasg	besser82, when bundle_eigen is ON
+@iglesiasg	something must be done in the cmake
+@iglesiasg	I am wondering whether there could be something wrong done there causing the error you have found
+ besser82	iglesiasg: the error is either caused by bundling eigen3 or by not installing eigen3-headers when it get's bundled....
+ besser82	iglesiasg: that is just _ONE_ example of problems
+ besser82	iglesiasg: there are acutally more, but those I'm currently tracing down and will report on them later...
+ besser82	iglesiasg: I actually expect a whole lot more...
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: ^^^ /  Another solution would be to split up shogun's headers like public-interface  /  internal(build-time)-interface...
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: if that applies somehow...
+@wiking	besser82: bundling stays
+@wiking	besser82: and no install within shogun
+ besser82	wiking: ?!?
+@wiking	besser82: well then we need to start with the d-ptrs
+ lisitsyn	besser82: I see one problem with that 2) thing
+ lisitsyn	if we make assumption headers are in system
+ lisitsyn	we may find a lot of troubles this way
+ lisitsyn	e.g. shogun compiled with eigen 3.1.2
+ lisitsyn	and used with eigen 3.1.5
+ lisitsyn	or whatever
+ besser82	lisitsyn: that stuff to resolve with cmake's configure-stage....
+ besser82	lisitsyn: like `FindPackage(eigen3 3.2 REQUIRED)
+@wiking	besser82: but what if u r in the meanwhile (after installing shogun) intall eigen 3.2
+@wiking	so you have on your system eigen 3.2
+@wiking	but you've installed shogun with a bundled eigen
+ besser82	wiking: then code interfacing libshogun would build fine, but binary is broken  :(
+ besser82	wiking: if the system-ver && shogun-bundled-eigen-ver don't match...
+@wiking	yep
+@wiking	besser82: hence we could go with d-ptrs where this can be hidden
+ besser82	wiking: but d-ptr doesn't cure everything i assume...
+ besser82	... brb ...  ---> lunch  ;)
+@wiking	well all these dependency problems can be cured
+@wiking	as then we would not ever include stuff in our public headers
+@wiking	that is not directly part of shogun
+@wiking	this way even if we include eigen
+@wiking	that would be in some private class
+-!- iglesiasg [~iglesiasg@206.Red-83-61-168.dynamicIP.rima-tde.net] has quit [Ping timeout: 246 seconds]
+@wiking	which never would be exposed to the public header
+@wiking	so all those ifdef HAVE would be within the private classes
+-!- iglesiasg [~iglesiasg@206.Red-83-61-168.dynamicIP.rima-tde.net] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ besser82	wiking: sounds good  ;)
+ besser82	wiking: but what to do until?!?
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: I'd propose to install all needed, bundled headers into  `%{_includedir}/shogun/third_party`, then.  That's an easy job with cmake and all needed include-dirs can be populated by shogun.pc / ShogunConfig.cmake, when interfacing libshogun from other C++.
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: That would make building the lang-interfaces from existing libshogun even quicker && easier
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: Any objections?
+ besser82	sonney2k, sonne|work, iglesiasg, lisitsyn, wiking: That stuff can be easily removed / disabled when having those d-ptr-stuff implemented...
+@wiking	besser82: nothing...
+ besser82	wiking: nothing, what???? *puzzled*  No objections?
+@wiking	third_party and then we'll see if we ever get to the point of having dptrs
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 252 seconds]
+-!- besser82 [~besser82@77-20-95-52-dynip.superkabel.de] has joined #shogun
+-!- besser82 [~besser82@77-20-95-52-dynip.superkabel.de] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+ besser82	wiking: Allrighty, then  ;)  I can dooooooooooooo it  :D
+ besser82	wiking: that d-ptr stuff...  If I'm done witth this cmake && SVM^bright, I can start implementing d-ptr to shogun  ;)
+@wiking	besser82: well that's going to be a common effort
+@wiking	i.e. feature branch
+@wiking	with a lot of discussion in the meanwhile
+@wiking	that cannot be done by 1 person
+@wiking	not because of some resource limitation
+@wiking	more because it has to be agreed by everybody
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ besser82	wiking: allrighty  ;)  It was just an offer  ;)
+-!- iglesiasg [~iglesiasg@206.Red-83-61-168.dynamicIP.rima-tde.net] has quit [Quit: Leaving]
+-!- new_lido [~walid@105.200.193.157] has joined #shogun
+-!- new_lido [~walid@105.200.193.157] has quit [Ping timeout: 245 seconds]
+-!- lisitsyn [~lisitsyn@188-122-234-71.clients.tlt.100megabit.ru] has quit [Quit: Leaving.]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMakeImproved * e47602f / src/interfaces/modular/SGBase.i: https://github.com/shogun-toolbox/shogun/commit/e47602f2e9ac3e65f7c5797cf9efe8977e1354e2
+ shogun-notifier-	shogun: change order of includes to fix compile error
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMakeImproved * 5844f48 / / (14 files): https://github.com/shogun-toolbox/shogun/commit/5844f480a1b588e5fccfef90d1df096579467d19
+ shogun-notifier-	shogun: don't include SGStringList in SGObject.h
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMakeImproved * 9a6ce87 / src/interfaces/modular/SGBase.i: https://github.com/shogun-toolbox/shogun/commit/9a6ce877edacdf9a29d683f3011914e62508b93c
+ shogun-notifier-	shogun: include SGRefObject before SGObject for swig
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMakeImproved * a93cb3b / src/ (5 files): https://github.com/shogun-toolbox/shogun/commit/a93cb3b9136f8072472067ac57828992bf6d8d77
+ shogun-notifier-	shogun: drop SERIALIZABLE_DUMMY
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMakeImproved * ed592ee / src/interfaces/modular/SGBase.i: https://github.com/shogun-toolbox/shogun/commit/ed592ee8942ecaf9e5bb9e8844a3953924ca8af7
+ shogun-notifier-	shogun: add namespace to get Externalizable to work for real
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMakeImproved * ba0a597 / src/interfaces/modular/SGBase.i: https://github.com/shogun-toolbox/shogun/commit/ba0a597a2b32dd3456403bc8c705aa83e47f2dae
+ shogun-notifier-	shogun: make ref/unref known *before* including the class
+-!- travis-ci [~travis-ci@ec2-54-226-95-169.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14768179
+-!- travis-ci [~travis-ci@ec2-54-226-95-169.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	besser82, I will be around later in the evening...
+@sonney2k	why oh why is csharp failing now
+@sonney2k	besser82, I actually don't see the issue you see - shogun doesn't include any external libs from its headers
+ besser82	sonney2k: actually it does ---> shogun/mathematics/linalg/linsolver/IterativeSolverIterator.h
+ besser82	sonney2k: one example
+@sonney2k	besser82, then this needs to be fixed in this example
+ besser82	sonney2k: then you will need to do some predeclaration for eigen3  :(
+ besser82	sonney2k: there actually a lot more stuff like this for ColPack, ARPREC, etc...
+@sonney2k	besser82, where?
+@sonney2k	all bugs
+@sonney2k	I am pretty sure we don't need lapack / atlas pthreads etc
+ besser82	sonney2k: are you sure those are bugs???
+@sonney2k	yes
+ besser82	e.g. in that named header there is stuff used being declared in eigen3-headers
+@sonney2k	besser82, you cannot require people to having installed all the deps developer files shogun has as build deps
+ besser82	i don't
+@sonney2k	besser82, so yes all bugs
+ besser82	sonney2k: but how should we solve?
+@sonney2k	besser82, where do we have to solve it
+@sonney2k	we just don't use external libs in .h's
+ besser82	sonney2k: lemme probe all headers for stuff like that
+ besser82	sonney2k: me and wiking agree to have those headers installed along shogun in a %{includedir}/shogun/third_party/
+@sonney2k	and of course d-ptr's solve it for all cases and we want to do them anyway
+@sonney2k	besser82, not needed
+ besser82	sonney2k: as a quick thing until we have d-ptr implemented?!?
+ besser82	sonney2k: since we are going to have them, we can solve this temporary like that
+@sonney2k	besser82, well no it works except for one example right?
+ besser82	sonney2k: include/shogun/mathematics/linalg/ratapprox/tracesampler/ProbingSampler.h
+ besser82	include/shogun/mathematics/JacobiEllipticFunctions.h
+ besser82	sonney2k: are the next ones
+ besser82	sonney2k: include/shogun/mathematics/lapack.h
+ besser82	sonney2k: more to come....
+ besser82	sonney2k: that's not just fixing up 1 or 2 headers....  :(
+ besser82	sonney2k: btw. we have another issue, but that's another case....
+ besser82	sonney2k: multi-lib incompatibility with shogun/lib/config.h and others
+ besser82	sonney2k: like one cannot install iX86 and amd64 within the same OS
+ besser82	sonney2k: and other arches, too, i suppose
+ besser82	sonney2k: but that's only stuff we have to deal with as pkg-maintainers in debian / FC / RHEL
+ besser82	sonney2k: but we would need to get that multilib stuff addressed, too...
+ besser82	sonney2k:????
+ besser82	sonney2k: I so far found ~150 headers including stuff which is _not_ stdlib nor common build-essential...
+ besser82	sonney2k: depending on shogun's build-config that would be: hdf5, eigen3, libxml, json, atlas / clapack / lapack, arprec, locales, colpack
+ besser82	sonney2k: and possibly some more requirements
+-!- some_student [~some_stud@pool-72-70-88-143.nycmny.east.verizon.net] has joined #shogun
+ some_student	Hey everybody, I'm having trouble compiling shogun 3.0.0 on Max OS X 10.9, when running 'make' I get an 'expression not assignable error' for the file shogun/io/SerializableAsciiReader00.cpp:95-96:34. Any thoughts?
+ some_student	Only installing the python modular package as well
+-!- iglesiasg [~iglesiasg@206.Red-83-61-168.dynamicIP.rima-tde.net] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ besser82	some_student: Hi!  Unfortunately I cannot help with that, because I don't own a mac.  But sonney2k has one i think...
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ some_student	Appreciate the timely response! Thanks for the tip
+@iglesiasg	wiking may be able to help as well
+@wiking	some_student: yeah that has been fixed in the develop branch of shogun
+@wiking	some_student: basically clang 3.3 has some funky things going on because of switching to libc++ from libstdc++
+ some_student	oo okay, so if I just grab the dev branch and build it should be good?
+@wiking	indeed
+@wiking	that person that uses maven to build an ant project should be hanged
+ some_student	Awesome! Thanks so much for the quick respsonse! Where is your dev branch located by the way?
+@wiking	some_student: git clone https://github.com/shogun-toolbox/shogun.git
+@wiking	some_student: should work as 10.9 has by default git installed :P
+ some_student	haha 10.9 is a godsend with default installations this time around. Thanks for the link
+@wiking	nw
+@sonney2k	besser82, sorry had to sing like 100 x-mas carols until the kids were ok with me leaving
+@sonney2k	besser82, with the external stuff I would rather want to do the d-ptr business (or you start doing some first iteration - it is a loong process anyway)
+-!- some_student [~some_stud@pool-72-70-88-143.nycmny.east.verizon.net] has quit [Quit: irc2go]
+@sonney2k	besser82, what I meant was that you don't need third party libs installed but only headers - quite the opposite of what I said above
+@sonney2k	but still we should really get rid of all third party deps when you link against libshogun / compile w/ shogun headers
+@sonney2k	besser82, anyways it would be nice if we could get your cmake stuff merged rather soonish
+@sonney2k	I would want to do some more cleanups in the modular/*.i dir
+@sonney2k	and yay all the c# examples work on my machine
+@sonney2k	wiking, any clues how to run the csharp examples on fatbot?
+@sonney2k	wiking, if I just do ctest --output-on-failure -j2 -R csharp
+@sonney2k	wiking, it says No tests were found!!!
+@sonney2k	ahh wrong dir
+@sonney2k	build/buil
+-!- some_student [~some_stud@pool-72-70-88-143.nycmny.east.verizon.net] has joined #shogun
+ some_student	Hey everybody, I just download your developer branch on github trying to install 3.0.0 for Mac OS X 10.9, python modular interface. When I "import modshogun", I get a segfault. I think its because during compilation ranlib sent me the error: 'file: libshogun.a(SomeShogunFileName.cpp.o) has no symbols' for a bunch of files.. Any thoughts?
+ besser82	sonney2k: :D  Christmas with them kids  ;)
+ besser82	sonney2k: `Advent` actually  ;)
+ besser82	sonney2k: CMake stuff is nearly finished, first PR to come during tomorrow  ;)
+ besser82	sonney2k: btw. you aren't blocked cleaning that modular*/*.i  stuff  ;)
+@wiking	some_student: no it's not because of that... make sure that u r compiling the python modular iface with the right python lib/headers. this happened to me when i had system's python 2.7 but i was trying to use the generated modshogun from macport's python
+ besser82	sonney2k: I know how to rebase my branch upon develop  ;)
+@sonney2k	some_student, wiking I had that very same issue too - be extra cautious which python version is used and adjust PYTHON_PATH accordingly
+@sonney2k	some_student, pretty annoying ....
+@sonney2k	besser82, well did you do any cleanups in the .i files?
+@sonney2k	besser82, I mean I don't know exactly how ccache for swig works
+@sonney2k	besser82, but maybe it is possible to speed things up a bit
+@sonney2k	shogun-buildbot_, force build --branch=develop 'deb3 - modular_interfaces'
+ shogun-buildbot_	build forced [ETA 47m10s]
+ shogun-buildbot_	I'll give a shout when the build finishes
+ besser82	sonney2k: actually if ccache is properly configure it will be used by swig as well
+ besser82	sonney2k: yes, i did some mods to those *.i, but nothing really large
+ besser82	sonney2k: actually moving defines to SHOGUN_-scope, e.g. USE_FEATURE ---> SHOGUN_USE_FEATURE
+ besser82	sonney2k: and making sure config.h is picked up properly
+@sonney2k	besser82, we have a couple of defines in there that are JAVA/ etc specific
+ besser82	sonney2k: i know, seen them
+@sonney2k	besser82, so some objects get functions attached
+@sonney2k	for python / java etc
+ besser82	sonney2k: right
+ besser82	sonney2k: afaik there is some ifdef / ifndef around inlined code and such
+ besser82	sonney2k: so what's the punch-line?
+@sonney2k	besser82, I think ccache won't work due to these lang specific defines at all
+ besser82	sonney2k: it does  ;)
+@sonney2k	maybe we should have one different modshogun.i or / SGBase.i per language
+ besser82	sonney2k: not really
+@sonney2k	besser82, then caching would work - I mean if we change one .i file
+ besser82	sonney2k: tht's correct, but i already took care of that ;)
+@sonney2k	besser82, lets get your thing merged first and then discuss again after I did some experiments with it :)
+ besser82	sonney2k: actually some of those .i-files are autogenerated by cmake now
+ besser82	sonney2k: and testsuite passes so far
+ besser82	sonney2k: by the .i-files are not that much relevant, the way the modules are build actually
+ besser82	sonney2k: there could be much more speed gain when we would SWIG && CC every .i-file seperately, and get the object linked together...
+ besser82	sonney2k: but so far, like wiking said, modules are just crashing with such a setup
+ besser82	sonney2k: that would be subject to more and deeper investigation....
+ besser82	sonney2k: but I can dooooooooo it  ;)  after merge
+ besser82	sonney2k: recently there is a _real_ speedup when re-compiling from ccaches even for the modules  ;)
+ besser82	sonney2k: the whole stack now rebuilds within a minute, if there were no changes....
+ besser82	sonney2k: changes actually slow down the rebuild a bit, but not as far as build time are now
+ besser82	sonney2k: depending on the impact of the actual change there is rebuild-times of ~3 - 5 minutes when ccaches are present
+ some_student	wiking, sonney2k: By PYTHON_PATH, im assuming you guys mean a bash variable.. I pointed it to correct python installation, to no avail.. cmake is telling me it found SWIG, pythonLibs, pythonInterp, and NumPy. How can I see where shogun is looking for python? or am I just doing it wrong?
+@sonney2k	besser82, ok so lets see then :)
+ shogun-buildbot_	build #2068 of deb3 - modular_interfaces is complete: Failure [failed test csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2068
+ besser82	sonney2k: allrighty  ;)
+ besser82	some_student: try -DPYTHON_INCLUDE_PATH=%{path to your python headers} on the cmake commandline
+ besser82	some_student: %{path to your python headers} should point to the include-dir of the python-install you want to use python-shogun with
+ besser82	some_student: I hope that will help you  ;)
+ some_student	besser82: Looks promising, trying now! Figured I was missing something! thank you all :)
+ besser82	some_student: you're welcome  :D  If it won't work, check back to see if we can resolve that issue  ;)
+-!- sonne|osx [~sonne@f053038072.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f053038072.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+ some_student	besser82: So I followed your advice, and pointed it to my local python install, header directory.. but then when compiling it couldnt find Python.h, even though Python.h is definitely in the directory I pointed it in.. any thoughts?
+ besser82	some_student: mhhhh.... sounds odd...
+ some_student	I know.. I keep ls'ing the directory as a sanity check and its definitely there
+ besser82	some_student: are both python version the same or different?
+ some_student	both are the same to my knowledge
+ besser82	some_student: try`-DPYTHON_LIBRARY=%{path to libpython.so}` and `-DPYTHON_INCLUDE_DIR=%{path to dir having the Python.h belonging to that lib}`, perhaps that might help...
+ besser82	some_student:  if pathes do have whitespaces try to wrap them into ""
+ some_student	no whitespaces, and I'm running everything from the top, and I just realized that some relevant packages are outdated so I'm updating those. Will try the python lib as well tho!
+ besser82	Good n8, folks!  :D
+-!- besser82 [~besser82@fedora/besser82] has quit [Quit: freedom, friends, features, first ---> fedoraproject.org]
+ some_student	besser82: you are my hero. It was the python_library arguement that needed to be tweaked. I wish you didn't just leave so I could let you know how awesome you are! Seriously. thank you so much
+-!- some_student [~some_stud@pool-72-70-88-143.nycmny.east.verizon.net] has quit [Quit: irc2go]
+@iglesiasg	time to bed, good night people
+-!- iglesiasg [~iglesiasg@206.Red-83-61-168.dynamicIP.rima-tde.net] has quit [Quit: Leaving]
+-!- Boeke [~alex@24-179-114-25.dhcp.oxfr.ma.charter.com] has joined #shogun
+ Boeke	Hi does anyone have an idea why HDF5File fails to open a hdf5 file that h5py can open
+ Boeke	Specifically it gives the error "SystemError: [ERROR] In file /home/alex/shogun-3.0.0/src/shogun/io/HDF5File.cpp line 61: Could not open file '/home/alex/features1.h5'"
+ Boeke	never mind sorry
+--- Log closed Mon Dec 02 00:00:49 2013

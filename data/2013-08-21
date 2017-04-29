@@ -1,0 +1,515 @@
+--- Log opened Wed Aug 21 00:00:24 2013
+ shogun-buildbot	build #954 of rpm1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/954
+-!- foulwall [~user@2001:da8:215:c252:7846:786c:36da:abfc] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot	build #1278 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1278  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1572 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1572  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 260 seconds]
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has joined #shogun
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 276 seconds]
+-!- travis-ci [~travis-ci@ec2-54-227-44-173.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/10424566
+-!- travis-ci [~travis-ci@ec2-54-227-44-173.compute-1.amazonaws.com] has left #shogun []
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- travis-ci [~travis-ci@ec2-184-73-69-105.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/10424611
+-!- travis-ci [~travis-ci@ec2-184-73-69-105.compute-1.amazonaws.com] has left #shogun []
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 248 seconds]
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- zxtx [~zv@rrcs-74-62-200-195.west.biz.rr.com] has quit [Ping timeout: 264 seconds]
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has left #shogun []
+-!- hushell [~hushell@c-98-232-178-161.hsd1.or.comcast.net] has joined #shogun
+-!- gsomix [~gsomix@95.67.149.216] has quit [Ping timeout: 264 seconds]
+-!- gsomix [~gsomix@80.234.99.172] has joined #shogun
+-!- lisitsyn1 [~lisitsyn@fb2-lo1.global63.net] has left #shogun []
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+@wiking	sonney2k: ping
+-!- gsomix [~gsomix@80.234.99.172] has quit [Ping timeout: 264 seconds]
+-!- gsomix [~gsomix@80.234.99.172] has joined #shogun
+-!- gsomix_ [~gsomix@109.169.154.231] has joined #shogun
+-!- gsomix [~gsomix@80.234.99.172] has quit [Ping timeout: 260 seconds]
+-!- gsomix_ is now known as gsomix
+-!- yo [4e352d55@gateway/web/freenode/ip.78.53.45.85] has joined #shogun
+-!- yo is now known as Guest60747
+ gsomix	good morning?
+-!- Guest60747 [4e352d55@gateway/web/freenode/ip.78.53.45.85] has quit [Ping timeout: 250 seconds]
+-!- van51 [~van51@ppp-94-66-22-124.home.otenet.gr] has joined #shogun
+@wiking	hey
+ gsomix	wiking, hey ho
+ gsomix	sonney2k, around?
+ gsomix	wiking, are there nice and safe methods for use SGVector with offset? I want use it for Parsing.
+@wiking	gsomix: whatyaneed exactly
+@wiking	i mean SGVector.vector is just a simple T* array where T is a builtin type... so u can offset that for sure quite easily the only thing you'll always have to check yourself is that you are not trying to offset more than the length of the vector...
+ gsomix	something like SGVector<char> substring=string.get_vector_with_offset(start); where string is SGVector.
+ gsomix	wiking, yeah, but I want refcount for this.
+@wiking	gsomix: aaaaah lool
+@wiking	you want to raise the refcount of the sgvector if you get a subset of it
+@wiking	mmm
+ gsomix	yep, of course I can to make unsafe offset with pointers...
+@wiking	mmm
+@wiking	there's this command
+@wiking	SGVector<T> get()
+@wiking	{
+@wiking	return *this;
+@wiking	}
+@wiking	and according to the doxygen:  * @return the refcount increased vector
+@wiking	which i dont see yet how it is done if you just return *this :P
+@wiking	but then again you should check it with .ref_count()
+@wiking	but if that works
+@wiking	then basically you can write the same type of function
+@wiking	SGVector<T> get_vector_with_offset(start) {  return  }
+@wiking	just do the offsetting yourself
+@wiking	awith the pointer of *this
+@wiking	*with
+@wiking	gsomix: but then again this is really just an assumption... you should check it simply with the ref_count() :P
+ gsomix	wiking, hm, ok. but there is needed to store offset in SGVector. additional data... I need think about it.
+-!- van51 [~van51@ppp-94-66-22-124.home.otenet.gr] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@nat-187-82.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	HeikoS: sorry man but that's not shogun's fault
+ lisitsyn	wiking: yes it raises the RC
+ lisitsyn	wiking: it *has* to call the constructor
+ lisitsyn	RVO whatever but you need to create a copy
+@wiking	ah ok so it's calling the copy ctr
+@wiking	lisitsyn: still here?
+-!- xBeast [~xBeast@den-69-171-160-70.evdo.leapwireless.net] has joined #shogun
+-!- gsomix [~gsomix@109.169.154.231] has quit [Ping timeout: 256 seconds]
+-!- xBeast [~xBeast@den-69-171-160-70.evdo.leapwireless.net] has left #shogun ["Leaving"]
+ lisitsyn	wiking: yes
+@wiking	lisitsyn: so i was thinking about adding a new serilization support, but then i realised that actually what would b good to have is to be able to (de)serialize not only to hdfs but as well deserialize a mahout Dense/SparseVector into SGVector/sparseVector
+@wiking	the first part is quite easy... i mean we just have to add like a SerializeAvroFile/Reader.h with the right implementation
+@wiking	insights?
+-!- van51 [~van51@ppp-94-66-22-124.home.otenet.gr] has joined #shogun
+ lisitsyn	wiking: sorry don't get: what is the first part and the second part?
+-!- gsomix [~gsomix@109.169.154.231] has joined #shogun
+@wiking	1) support serialization to hdfs
+@wiking	2) support serialization of mahout's vector into shogun's vector
+@HeikoS	wiking: well, I still cannot compile it, mpi *is* installed
+ lisitsyn	wiking: I am not sure I have any insight on that actually
+ lisitsyn	is there any specific problem?
+-!- van51 [~van51@ppp-94-66-22-124.home.otenet.gr] has quit [Quit: Leaving.]
+ lisitsyn	HeikoS: are you going to nips this year?
+@HeikoS	lisitsyn: hi! not clear yet, waiting for rewie answers
+ lisitsyn	HeikoS: http://mloss.org/workshop/nips13/
+@HeikoS	but optimistic
+ lisitsyn	I think it is for you then :)
+@HeikoS	ah cool! :)
+@HeikoS	thanks for the info
+ lisitsyn	HeikoS: lets prepare something
+@HeikoS	lisitsyn: yeah why not :)
+@HeikoS	shogun parallel stuff :D
+ lisitsyn	I would like to go as well but that's too much travelling already :D
+@HeikoS	why?
+@HeikoS	travelling is nice :)
+ lisitsyn	HeikoS: $$ :)
+@HeikoS	hehe
+-!- foulwall [~user@2001:da8:215:c252:893c:1950:94a2:dc48] has joined #shogun
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Thoralf Klein :develop * d0bbb8f / src/shogun/features/streaming/ (2 files): https://github.com/shogun-toolbox/shogun/commit/d0bbb8ff4f40c453e79f6a8f71b2a32de608bf91
+ shogun-notifier-	shogun: Refactoring of StreamingSparseFeatures: Removed current_vector and current_length
+ shogun-notifier-	shogun: * Removed code duplication; simpler initialization.
+ shogun-notifier-	shogun: * Using non-refcounted sparse vector to avoid double-frees when using get_vector().
+ shogun-notifier-	shogun: Heiko Strathmann :develop * eb72b69 / src/shogun/features/streaming/ (2 files): https://github.com/shogun-toolbox/shogun/commit/eb72b6932aec410817eb76af44b781a9fc67de7e
+ shogun-notifier-	shogun: Merge pull request #1449 from tklein23/refactoring_streaming_sparse_features
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Refactoring of StreamingSparseFeatures: Removed members current_vector/_length
+ shogun-buildbot	build #1457 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1457  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ shogun-buildbot	build #1488 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1488  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+-!- van51 [~van51@ppp-94-66-22-124.home.otenet.gr] has joined #shogun
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has left #shogun []
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+@wiking	re
+-!- HeikoS [~heiko@nat-187-82.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 246 seconds]
+ shogun-buildbot	build #1279 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1279  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+-!- HeikoS [~heiko@nat-187-82.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ shogun-buildbot	build #1458 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1458  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1489 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1489  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@wiking	gsomix: here?
+ gsomix	wiking, yep
+@wiking	gsomix: so just a quick question as you are really into this
+@wiking	say i want a new class that can generate SGVectors or SGMatrixes from files
+@wiking	currently this is implemented with classes that are subclasses of File.h
+@wiking	right?
+ gsomix	hm, yep. but it works with plain arrays, not SGVector's or SGMatrices.
+@wiking	yeah i saw that
+@wiking	but then how one would get like a CFeatures* from a CSVFile at the moment?
+ gsomix	wiking, CFeatures' object should have method load(CFile*)
+@wiking	and it does \o/
+@wiking	ok so basically what i would need then is open the file with CSVFile and then create a CFeatures object and call .load(CSVFile) on it
+@wiking	and that'll basically load the csvfile content into a CFeatures.
+@wiking	ok and that is the same for SGMatrix
+@wiking	i can see
+ gsomix	wiking, yeo
+ gsomix	https://github.com/shogun-toolbox/shogun/blob/develop/examples/undocumented/python_modular/kernel_anova_modular.py
+ gsomix	for example
+@wiking	ok this is great
+@wiking	thnx
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- van511 [~van51@ppp-94-66-88-196.home.otenet.gr] has joined #shogun
+-!- van51 [~van51@ppp-94-66-22-124.home.otenet.gr] has quit [Ping timeout: 248 seconds]
+-!- travis-ci [~travis-ci@ec2-184-73-69-105.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/10455297
+-!- travis-ci [~travis-ci@ec2-184-73-69-105.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #1280 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1280  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ gsomix	ok, all another works are done today.
+ gsomix	time for shogun
+-!- lambday [67157c37@gateway/web/freenode/ip.103.21.124.55] has joined #shogun
+ lambday	HeikoS: hi
+ lambday	wiking: thanks man! :)
+-!- travis-ci [~travis-ci@ec2-184-73-69-105.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/10455297
+-!- travis-ci [~travis-ci@ec2-184-73-69-105.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	lambday: hi!
+@HeikoS	lambday: I have been starting to prototype the independent computation stuff for PBS in python, might be useful for us later
+ lambday	HeikoS: PBS?
+@HeikoS	thats a batch based cluster
+@HeikoS	where one can submit independent jobs that are queued etc
+ lambday	:D
+ lambday	wow!
+@HeikoS	seems to work nice with our ideas
+@HeikoS	but still building things
+@HeikoS	lambday: anyway, how are things?
+ lambday	HeikoS: I was checking out ColPack
+@HeikoS	lambday: ah cool, what do you think about it?
+ lambday	HeikoS: and to use it, we need CRS format
+ lambday	which eigen3 provides
+ lambday	and we already have a method which convers SGSparseMatrix to eigen3 one
+@HeikoS	lambday: nice!
+ lambday	but extra memory usage is a drawback
+ lambday	anyway
+@HeikoS	well
+ lambday	but computing matrix power
+@HeikoS	thats life
+ lambday	is a bad thing :(
+@HeikoS	I know
+@HeikoS	krylstat do it by hand?
+-!- van511 [~van51@ppp-94-66-88-196.home.otenet.gr] has quit [Quit: Leaving.]
+ lambday	HeikoS: yeah they simply multiply matrices
+ lambday	HeikoS: I wanted to test something
+@HeikoS	lambday: what better ideas are there?
+ lambday	since its psd, we can use eigenvalues and eigenvectors
+@HeikoS	for matrix powers?
+ lambday	and we already have Lanczos for that
+ lambday	yes
+@HeikoS	ah
+@HeikoS	that would be sweet
+@HeikoS	would be good to compare the speed
+ lambday	HeikoS: yes... otherwise I can add matrix-matrix product for SGSparseMatrix...
+ lambday	using mat-vec product that I already added
+@HeikoS	lambday: yep
+ lambday	so, I am thinking of adding just the coloring first
+@HeikoS	lambday: ok
+ lambday	and then the matrix power - straight forward
+@HeikoS	the only thing open is then what is fastest
+ lambday	then will add the eigenvalue/eigenvectors thing
+@HeikoS	lambday: ok this sounds all very promising
+ lambday	HeikoS: yes
+@HeikoS	has colpack many dependencies?
+ lambday	HeikoS: oh one thing... while passing SGVector as a param, is all the data copied or just the refcount increases?
+@HeikoS	can we cmake it into shogun?, wiking?
+ lambday	HeikoS: that's already done.... :D I talked to wiking yesterday and asked him to add it
+ lambday	and he did :D
+@HeikoS	lambday: SGVector copy by value creates another SGVector instance with the pointer pointing to the same memory
+@HeikoS	and yes recount is increased
+@HeikoS	lambday: whoooo
+@HeikoS	wiking rocks doesnt he? :)
+ lambday	no I can run ColPack without any dependency
+ lambday	HeikoS: you bet :D
+ lambday	the cmake thing is frickin
+ lambday	awesome!
+ lambday	HeikoS: I just checked that wiking added ColPack check... now gotta do some test..
+@HeikoS	lambday: indeed!
+@HeikoS	lambday: ok then
+ lambday	HeikoS: once I add this.. I'll be relieved! :D theoretically all modules will be implemented
+@HeikoS	I am really curious how long this takes with colpack and your lancos idea
+ lambday	rest, test and more tests
+@HeikoS	since with matlab it took ages
+ lambday	HeikoS: yeah! but the power is small, then Lanczos can be a overkill
+@HeikoS	so that I just dumped a fixed matrix colouring to disc and loaded it all over again
+@HeikoS	lambday: lets see
+@HeikoS	lambday: the ozone matrix is a good benchmark, use it
+ lambday	alright.. yes
+ lambday	HeikoS: can I add to shogun??
+@HeikoS	its quite sparse so the conversion also should not be a problem
+ lambday	add the ozone matrix as data?
+@HeikoS	lambday: good question
+@HeikoS	would be good let me check
+ lambday	its 80 MB almost
+@HeikoS	sonney2k, ^ too much?
+@HeikoS	lambday: I just asked daniel lets see whether its even allowed
+@HeikoS	I mean the matrix at least is ok
+ lambday	HeikoS: what is?
+@HeikoS	but we rather want the dataset to generate the matrix from for different parameters
+@HeikoS	the matrix itself is not protected o whatever
+@HeikoS	allowed to publish the data
+ lambday	okay...hmm
+@HeikoS	I will also ask Daniel to for advice on hard synthetic datasets
+@HeikoS	lambday: btw the notebooks should also illustrate how to use all the solvers you wrote, people might be interested in that as a seperate module in shogun
+@HeikoS	lambday: but that later, first lets make things work :)
+ lambday	currently for log-det, we can only use 3 solvers...
+ lambday	direct one, cocg, and cg-m
+@HeikoS	ah yes not the individual one
+ lambday	I am still confused about why the paper calls it cocg-m... :-/ if the data is real, then vec1.transpose()*vec2 is same as vec1.dot(vec2) :(
+@HeikoS	lambday: dont know, dont worry about this
+ lambday	the only thing that changes from cocg and cg is this step!
+@HeikoS	lambday: the individual with preconditioning should be optional, once all the rest works
+@HeikoS	since time is getting more tight these days
+ lambday	yeah! :(
+ lambday	and things are getting tougher and tougher on my side :(
+@HeikoS	lambday: indeed, so lets focus on getting the core to work
+@HeikoS	then we can extend
+@HeikoS	oh and documentation is also very important
+@HeikoS	we should go over all class docs etc to make things very clear
+@HeikoS	so
+ lambday	alright
+ lambday	okay... how long would it take for me to add swig interfaces? (stupid question but I have no idea about this)
+@HeikoS	1.) some tests on solvers
+@HeikoS	2.) matrix product
+@HeikoS	3.) colpack
+@HeikoS	4.) implement probing
+@HeikoS	5.) final example
+@HeikoS	6.) tests
+@HeikoS	7.) docs
+@HeikoS	lambday: they are done extremley fast
+@HeikoS	just a few lines to add
+@HeikoS	all built automagically
+ lambday	classic!
+@HeikoS	static interfaces are more work though
+@HeikoS	and I would like to have at least some basic ones
+@HeikoS	for matlab and R people
+ lambday	wow this list seems great!... I am copying it to my mail :D
+ lambday	err..
+ lambday	for the ipython demo, we need python modular interface to work, right?
+@HeikoS	lambday: yes
+@HeikoS	lambday: but as said, modular interfaces are only 1h work
+ lambday	HeikoS: phew! :D
+@HeikoS	if you want, have  a look into src/interfaces/modular
+@HeikoS	there are .i files
+@HeikoS	GaussianProcess.i GaussianProcess_includes.i
+@HeikoS	you have to create similar ones
+@HeikoS	or even put it into math
+@HeikoS	for static ones, no idea, I have in fact never created some, but ask pickle27 I think he created some static ones
+ lambday	wah
+ lambday	alright... so, in the final example, would we just compute log-det or run the whole thing?
+@HeikoS	lambday: but thats also not top priority
+@HeikoS	lambday: yes
+ lambday	and plot that graph that I saw in the ozone examplepage?
+@HeikoS	lambday: so I would like a few things in fact
+@HeikoS	lambday: first some basic examples how the log-det framework is used in c++ and in python modular
+@HeikoS	with a few cases covered ( no plots though, just basic usage)
+ lambday	alright
+@HeikoS	and then, have one big ipython notebook where you introduce your whole project, illustrate many of the methods, how they work, how they behave, have some examples, convergence plots, maybe the ozone data
+@HeikoS	maybe even a little MCMC on a GMRF
+@HeikoS	even the ozone maybe
+@HeikoS	depending on how much time we have
+@HeikoS	should leave 1-2 weeks at the end just for the notebook and examples
+ lambday	HeikoS: alright...
+@HeikoS	lambday: will be very cool! :)
+ lambday	yeah! :)
+ lambday	feels bad that I could have done much more if I could give all my time but these f**king people! :'(
+ lambday	anyway I will try to finish coloring by this week only
+ lambday	last night I checked what I had to do, now just gotta implement
+@HeikoS	lambday: dont spend too much energy being angry, not worth it. You will finish the project anyhow and did a great job already, so dont feel bad
+@HeikoS	lambday: cool, sounds good!
+ lambday	:(
+@HeikoS	lambday: I hope to finish the cluster stuff this week so then next week I will test your stuff :D
+ lambday	yeah you're right... better use my energy in something constructive
+ lambday	hehe.... that's superb!
+ lambday	alright..
+@HeikoS	cool man, keep me update how it is going
+ lambday	HeikoS: are we gonna have another meeting before endsem?
+@HeikoS	really excited about the graph colouring stuff :)
+@HeikoS	lambday: yes I will organize one soon
+ lambday	HeikoS: official meeting
+ lambday	alright :)
+ lambday	me too
+ lambday	lol@endsem,  I meant endterm :D
+@HeikoS	hehe :)
+@HeikoS	students ;)
+@wiking	 HeikoS ok so i was digging
+@wiking	HeikoS: got some time now?
+@HeikoS	wiking: sorry just about to leave home
+@HeikoS	wiking: what did you dig out?
+@wiking	okok
+@wiking	no worries we talk another time
+@HeikoS	wiking: ok then, see you tomorrow!
+@HeikoS	wiking: btw we could have another dev meeting some time soon! :)
+-!- HeikoS [~heiko@nat-187-82.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- hushell [~hushell@c-98-232-178-161.hsd1.or.comcast.net] has quit [Ping timeout: 245 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot	build #1575 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1575  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@wiking	lambday: ping
+ lambday	wiking: pong
+@wiking	lambday: does the color graph library detection work for u?
+ lambday	wiking: checking... :)
+ lambday	wiking: it did detect
+@wiking	cool
+-!- foulwall [~user@2001:da8:215:c252:893c:1950:94a2:dc48] has quit [Ping timeout: 245 seconds]
+ lambday	you rock!
+@wiking	lambday: do u have time a bit now to talk about the computation engine you've developed?
+ lambday	wiking: sure
+ lambday	its still its infancy :(
+@wiking	lambday: yeah but still cool
+@wiking	i just want to talk about the backend
+ lambday	but this can be extended...
+@wiking	what u had in mind for the real distributed engine
+ lambday	wiking: please ask/suggest
+@wiking	so let's say we have now the serialize engine for all the objects
+@wiking	that currently only supports serialization via file but that can be extended
+@wiking	my only question here is what should we implement as a parallel engine
+@wiking	i.e. the new subclass of IndependentComputationEngine
+ lambday	wiking: so far me and Heiko had discussed, it uses a job queue... and dispatches the jobs to different nodes... all these jobs has a compute method and they all know how to compute the individual results...
+ lambday	and all these jobs submits their results to the job aggregator.. the computation engine waits until all the jobs are computed
+@wiking	yep true
+@wiking	but what's the job engine
+@wiking	?
+@wiking	because so far it's abstract
+@wiking	we need a library or something that does all the underlying job
+@wiking	like finding a free node and sending the job there
+ lambday	wiking: yeah and I guess these all will be within the parallel implementation of the job engine.. yes as of now its abstract only, the serial computation engine which is currently there just computes these jobs sequentially
+@wiking	lambday: yeah i wouldn't recommend implementing the scheduling and all the networking stuff ourselves
+ lambday	so, we need implementation of the submit_job method and wait_for_all...
+@wiking	i was wondering whether you've been talking about what libraries to interface with
+ lambday	wiking: we planned using mpi for that
+@wiking	because for sure there are like millions of engines like this out there
+@wiking	lambday: ookey that's an option
+ lambday	wiking: Heiko is currently working on that for a project that needs log-det computation on cluster..
+@wiking	yeah i got that T:)
+ lambday	wiking: if you have any other suggestion please let us know... we've kept this outside the scope of gsoc, so not much we discussed about the future of it
+@wiking	lambday: yeah that's totally out of scope of it
+@wiking	i'm just thinking what we should support/implement in the future
+ lambday	but the job/engine design is flexible enough as per we think
+ lambday	what idea do you have in mind for dispatching jobs other that mpi (I don't have experience in this yet)
+@wiking	lambday: well that's the thing
+@wiking	i'm looking into other cluster infrastructure implementations
+@wiking	what we could use/support
+ lambday	that's super cool!
+@wiking	i'm wondering now about hadoop
+ lambday	ah I was just about to say this
+@wiking	because it's quite hot nowadays
+@wiking	for big data computation
+ lambday	yeah it is...
+@wiking	but in the past when i was doing hadoop pipes
+@wiking	(the c++ interface of hadoop) i had quite some troubles
+@wiking	but now i'm checking into it
+ lambday	what's the main difference in openmpi and hadoop anyway?
+@wiking	anyhow i'd like to support to read/write mahout vector,matrix so we'll have hdfs support in shogun for sure
+@wiking	lambday: well there's a lot :)
+@wiking	for one hadoop is java native :P
+ lambday	yeah that but functionally?
+@wiking	lambday: and hadoop is bascially giving you a filessystem
+@wiking	a distributed fs
+@wiking	while openmpi is really just purely doing the communication among the nodes
+ lambday	wiking: but when we have independent computation jobs (like the ones I created for log-det) we don't need to have any msg massing at all... do you think openmpi won't be a bottleneck for this case?
+@wiking	lambday: what do you mean you dont need msg massing?
+ lambday	err
+ lambday	passing
+@wiking	lambday: who's gonna take care of communicating amongst the nodes?
+@wiking	and who's gonna know at all about the nodes
+ lambday	ya but these nodes can compute each of the tasks independently, so in that sense..
+ lambday	I mean, in this scenario, what advantages does hadoop have over mpi
+@wiking	yeah but then after the computation is finished
+@wiking	somehow it has to be signaled and sent back the result
+ lambday	yeah that's true
+@wiking	well hadoop takes care of lot of things
+@wiking	like having a fault tolerant computation engine (i.e. when a node dies while doing a job)
+@wiking	and then having the hdfs which all the nodes share
+@wiking	and some funky optimization
+@wiking	like the scheduler of the job will assign the node to do the computation
+@wiking	that has the fastest way of accessing the data in the hdfs
+ lambday	okay... that sounds great
+ lambday	but you had some troubles with the c++ interface... so would it fit in?
+@wiking	lambday: i'm just cehcking the latest stable
+@wiking	the last time i've used this was like 1.5 years ago
+ lambday	if it works - awesome.. I am sure Heiko can give some inputs... I will be really happy if I can be of any help in implementing any of these stuffs
+@wiking	yeah i'll do today a test with this
+@wiking	see if i can get something out of the new version of hadoop and it's c++ api
+@wiking	seems to be much more mature now
+ lambday	that's great
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has joined #shogun
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 276 seconds]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 256 seconds]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+ shogun-buildbot	build #23 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/23  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Thoralf Klein <thoralf.klein@zib.de>
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has joined #shogun
+-!- zxtx [~zv@rrcs-76-79-81-162.west.biz.rr.com] has joined #shogun
+-!- lambday [67157c37@gateway/web/freenode/ip.103.21.124.55] has quit [Ping timeout: 250 seconds]
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has left #shogun []
+-!- iglesiasg [~iglesias@89-77-4-38.dynamic.chello.pl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	good evening people
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Kevin :develop * 53014e3 / / (10 files): https://github.com/shogun-toolbox/shogun/commit/53014e3b94e82d366c5a9cdb730ec628eb813f3d
+ shogun-notifier-	shogun: added UWedgeSep and python modular examples for all current ICA methods
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 7d6ee1d / / (10 files): https://github.com/shogun-toolbox/shogun/commit/7d6ee1dc3ce1d9cd1905c6b71e2dd81a314a20c5
+ shogun-notifier-	shogun: Merge pull request #1447 from pickle27/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: added UWedgeSep Alg and python modular examples for all current ICA methods
+ lisitsyn	hey iglesiasg
+@iglesiasg	lisitsyn, how is it going?
+ shogun-notifier-	shogun: hushell :develop * 6badc95 / / (5 files): https://github.com/shogun-toolbox/shogun/commit/6badc95efdf9816841dd1cc82e8e04cbde7e49d3
+ shogun-notifier-	shogun: max product inference for factor graph model
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 636a71b / / (5 files): https://github.com/shogun-toolbox/shogun/commit/636a71bb190549cdb43ec28f263cc5811a6bd7b0
+ shogun-notifier-	shogun: Merge pull request #1379 from hushell/fg_dev
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: max product inference for factor graph model
+ lisitsyn	ha
+ lisitsyn	iglesiasg: ok, what about you?
+@iglesiasg	lisitsyn, I am good. This is my last night of holidays :(
+ lisitsyn	iglesiasg: I am really curious why you have chose poland ;)
+@iglesiasg	lisitsyn, well it is cheap, close to home and with beach holidays ;)
+ lisitsyn	iglesiasg: c'mon you are from spain, it is common destination for 99% of mid class russians ;)
+@iglesiasg	lisitsyn, Spain or Poland?
+ lisitsyn	spain
+@iglesiasg	as you may understand I have been in Spain quite a bit already hehe
+@iglesiasg	I like to visit new places
+ lisitsyn	haha
+ lisitsyn	yeah but beaches are better in spain right?
+@iglesiasg	but yeah, there are places left to visit in Spain for me
+ gsomix	iglesiasg, >> I like to visit new places | how about Russia next year? >:3
+@iglesiasg	lisitsyn, there are better beaches in Spain than the one I am here
+@iglesiasg	gsomix, hehe why not!
+ lisitsyn	yeah we discussed st. petersburg once :D
+@iglesiasg	gsomix, St. Petersburgh looks awesome
+ lisitsyn	it is pretty swedish though
+@iglesiasg	it will take me years before I get right the spelling hehe
+ lisitsyn	iglesiasg: you should get to gsomix's origin place
+@iglesiasg	where is it?
+ gsomix	huh!
+@iglesiasg	Kamchatka is also impressive!
+ lisitsyn	well all around here
+ lisitsyn	but it is pure russia
+ lisitsyn	not the city so more pure for sure
+@iglesiasg	I checked a bit more about both St. Petersburg and Kamchatka
+ lisitsyn	kamchatka should be quite expensive
+ gsomix	iglesiasg, lisitsyn pure russia... no, no cities! I'm here now: 52.337542,49.923922
+ lisitsyn	iglesiasg: yo yo saint P should be not that expensive comparing to kamchatka
+@iglesiasg	gsomix, google maps doesn't show me much about that location hehe
+ lisitsyn	iglesiasg: there is freaking nothing :D
+@iglesiasg	lisitsyn, saint P is da city
+ gsomix	iglesiasg, indeed.
+@iglesiasg	haha
+ lisitsyn	it is like 50 kms and you are in kazakhstan
+@iglesiasg	Borat?!
+ lisitsyn	the borat yes
+ lisitsyn	hmm I think more
+@iglesiasg	I have to start saving money, I want to go up to Kilimanjaro
+ shogun-buildbot	build #1490 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1490  blamelist: hushell <hushell@hushell-U510.(none)>
+ lisitsyn	maybe ~100 or whatever
+ shogun-buildbot	build #1459 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1459  blamelist: hushell <hushell@hushell-U510.(none)>
+@iglesiasg	crazy expensive
+ shogun-buildbot	build #24 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/24  blamelist: hushell <hushell@hushell-U510.(none)>
+ lisitsyn	iglesiasg: like gsoc I guess :D
+@iglesiasg	lisitsyn, so so
+ shogun-buildbot	build #1491 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1491  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #25 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/25  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ hushell	iglesiasg: Thanks! :)
+@iglesiasg	hushell, thanks to you ;)
+ hushell	iglesiasg: Next PR coming soon, I see how hard your job is, haha
+@iglesiasg	hehe
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has quit [Quit: Leaving.]
+ shogun-buildbot	build #1281 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1281  blamelist: hushell <hushell@hushell-U510.(none)>
+@iglesiasg	all right guys, going to bed now. See you tomorrow afternoon!
+--- Log closed Thu Aug 22 00:00:25 2013

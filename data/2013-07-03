@@ -1,0 +1,671 @@
+--- Log opened Wed Jul 03 00:00:15 2013
+@iglesiasg	hey hushell, how is it going?
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 256 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection reset by peer]
+-!- wiking [~wiking@info2k1.hu] has joined #shogun
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+ shogun-buildbot	build #446 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/446
+-!- zxtx [~zv@rrcs-74-62-200-195.west.biz.rr.com] has quit [Read error: Operation timed out]
+-!- nube [~rho@49.244.47.218] has quit [Ping timeout: 252 seconds]
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- nube [~rho@116.90.239.3] has quit [Client Quit]
+-!- nube1 [~rho@116.90.239.3] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- gsomix [~gsomix@109.188.126.139] has joined #shogun
+ gsomix	good morning
+@iglesiasg	good morning
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- zxtx [~zv@cpe-76-166-29-100.socal.res.rr.com] has joined #shogun
+@sonney2k	gsomix, awake?
+@sonney2k	gsomix, we were desperately looking for you yesterday
+@sonney2k	gsomix, would be nice if you could make use of the delimitertokenizer such that we can finally merge your patch
+ gsomix	sonney2k, doing this thing now.
+-!- zxtx [~zv@cpe-76-166-29-100.socal.res.rr.com] has quit [Read error: Operation timed out]
+ gsomix	sonney2k, btw, should CircularBuffer be inheritor of the Tokenizer?
+ gsomix	it seems my buffer and tokenizer are doing the same thing, but buffer have additional functionality like data storage.
+ gsomix	hm, it's good idea, I think. doing that.
+ sonne|work	gsomix: hmmhh maybe not inherit but just get the tokenizer as argument
+ sonne|work	gsomix: go go :)
+ gsomix	sonne|work, I really like the Tokenizer interface, I want the same in my class :)
+ sonne|work	gsomix: yeah van51 write nicely readable code :)
+-!- nube1 [~rho@116.90.239.3] has quit [Ping timeout: 256 seconds]
+-!- gsomix [~gsomix@109.188.126.139] has quit [Ping timeout: 256 seconds]
+-!- gsomix [~gsomix@109.188.126.139] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- gsomix [~gsomix@109.188.126.139] has quit [Ping timeout: 246 seconds]
+-!- gsomix [~gsomix@109.188.127.26] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+ gsomix	sonney2k, sonne|work almost things are done, but now I need go to zoo with gf :)
+ gsomix	interface of CircularBuffer looks very fine
+ gsomix	Tokenizer interface + push/pop (now with SGVectors - very fine and laconically) + decorates DelimiterTokenizer + set_tokenizer
+ sonne|work	gsomix: so now what?
+ gsomix	sonne|work, I need little modify my tokenize methods for finding N-char tokens in CircularBuffer. and then PR at evening.
+ sonne|work	n-char tokens?
+ gsomix	err, just tokens. :) CircularBuffer works fine for single delimiters now. DelimiterTokenizer allows to search tokens, but in CircularBuffer tokens can be situated from end of physical memory to begin.
+ gsomix	because of buffer is circular, hm
+ sonne|work	gsomix: it is sufficient that it works with delimitertokenizer
+ lisitsyn	sonne|work: is our MKL using ||w||=1 constraint?
+ sonne|work	lisitsyn: we can do any p-norm >=1
+ lisitsyn	sonne|work: last mail in the mailing list
+ lisitsyn	he asked about norm regularizer
+ lisitsyn	instead of norm constraint
+ lisitsyn	or ivanov vs tikhonov as he said
+ gsomix	sonne|work, hm, I don't think so. look, buffer [' ','a','b',' ',' '], delimiter is ' ' (space)
+ sonne|work	lisitsyn: IIRC these formulations are equivalent
+ lisitsyn	sonne|work: in terms of math yes but numerically not I guess?
+ sonne|work	lisitsyn: I don't see why not optimum IIRC is always at the ||w||_p = 1
+ sonne|work	gsomix: I dont' get what you mean
+ gsomix	sonne|work, for example buffer being is 'a' (buffer[1])
+ gsomix	now I use DelimiterTokenizer for find tokens in parts buffer[1:5] and buffer[0:1]
+ gsomix	but token is continuous
+ gsomix	token is buffer[3:5]+buffer[0]
+ gsomix	I must take this into account.
+ sonne|work	gsomix: but why do you want to support more than a single char as delimiter?
+ gsomix	sonne|work, hm, interesting question. :) because of DelimiterTokenizer potential, I think.
+ gsomix	sonne|work, but I can support single delimiters, yep.
+ sonne|work	IMHO not essential
+ gsomix	then I need clean up code and send PR
+ sonne|work	we should rather speed up and support some file format
+ sonne|work	s
+ gsomix	sonne|work, ok, sorry. :(
+ gsomix	so, need to go, sorry twice
+ gsomix	cu at evening
+-!- gsomix [~gsomix@109.188.127.26] has quit [Quit: Leaving]
+-!- nube [~rho@116.90.239.3] has quit [Quit: Leaving.]
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- HeikoS [~heiko@nat-189-68.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ votjakovr	HeikoS: hi! now i'm working again on refactoring: i think that it's better to create a methods like: get_posterior_means(features) and get_posterior_variances(features) in CGaussianProcessMachine class. These two methods will return mu and s2 from N(mu, s2), where N(mu, s2) approximates posterior p(f*|x*,x,y)
+@HeikoS	votjakovr: hi!
+@HeikoS	any problems with the old scheme?
+@HeikoS	votjakovr: wait
+@HeikoS	is this the conditioned GP
+ votjakovr	HeikoS: we will use these methods in classification and regression parts
+@HeikoS	or the posterior (which is not always Gaussian)
+-!- foulwall [~user@2001:da8:215:6100:1cf2:7cef:b86d:5a1b] has joined #shogun
+@HeikoS	votjakovr: p(f|y) not not always Gaussian
+@HeikoS	for regression, it is
+@HeikoS	for laplace approximation, it is
+@HeikoS	but not otherwise
+@HeikoS	not even for sparse regression with student -t likelihood
+@HeikoS	votjakovr:  on the other hand, gpml also does this
+@HeikoS	votjakovr: maybe give it a try, we can change it later, it should not be too much work right?
+-!- nube [~rho@116.90.239.3] has quit [Ping timeout: 246 seconds]
+@HeikoS	for EP, it will also work
+@HeikoS	votjakovr: the only thing I am concerned about is then the posterior is actually not Gaussian. Then integrating over it for predictions will use different methods (for example sampling) and things wont be nicely unified anymore
+@HeikoS	for std cases it should be fine and as said we can change it later
+ votjakovr	HeikoS: i mean mu from the 4th line, s2 from the 6th line of the algorithm 3.2, p. 44
+@HeikoS	i got a differen edition
+@HeikoS	is this the prediction algorithm, votjakovr?
+ votjakovr	HeikoS: ohh, i'm sorry, not mu and s2, but f*- and V[f*]
+ votjakovr	HeikoS: yep
+ votjakovr	HeikoS: these two things i'd like to to have in GaussianMachine class
+@HeikoS	votjakovr: as I said, this is fine, but only can be used if the posterior is Gaussian
+@HeikoS	if we try to do exact inference, we cannot call these methods
+@HeikoS	so it kind of depends on the inference method used, you see what I mean?
+ votjakovr	HeikoS: yep, totally
+@HeikoS	line 7 of the algorithm, this Gaussian is not always a Gaussian
+@HeikoS	so if the methods are in the GPmachine
+@HeikoS	votjakovr: how do they compute the posterior?
+@HeikoS	over which interfaces?
+@HeikoS	votjakovr: I mean the way to solve this integral is inference method dependent
+@HeikoS	votjakovr: however, please go ahead and do your changes, as for this project, all posterior GPs will be approximated by Gaussians :)
+@HeikoS	we can do changes later
+@HeikoS	this makes things easier
+ votjakovr	HeikoS: sure, it depends on inference method, but we can get cholesky, alpha and sqrt(W) from each inference method class and compute posterior
+@HeikoS	votjakovr: again, that is only possible if the posterior is Gaussian, doesnt work for other forms
+@HeikoS	we can only handle different Gaussians this way (i.e. Laplace, EP, and exact regression)
+@HeikoS	but not posterior distributions which dont have a closed form expression
+ votjakovr	HeikoS: i agree
+@HeikoS	votjakovr: but since the current framework is kind of based on only gaussians, lets stick with it for now
+@HeikoS	votjakovr: we can later on think about more things, but first we need baseline methods, so do what you suggested :)
+ votjakovr	HeikoS: ok:) honestly, i didn't even think about non Gaussian posteriors
+@HeikoS	votjakovr: keep in mind that it is *never* Gaussian if the likelihood is not ;) we are doing approximate inference here
+@HeikoS	votjakovr: but one can also do exact things (which are slow usually)
+ votjakovr	HeikoS: yep, i knew that posterior is non Gaussian, when likelihood is not. But i didn't think about posterior distributions which dont have a closed form
+ votjakovr	 expression
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+@HeikoS	votjakovr: this will be an issue after multiclass is finished, so a long way, how long do you think it will take for the logit one to be working?
+ votjakovr	HeikoS: i think, that i'll finish it today
+@HeikoS	votjakovr: nice!
+-!- nube [~rho@49.244.96.166] has joined #shogun
+-!- nube [~rho@49.244.96.166] has quit [Ping timeout: 276 seconds]
+-!- foulwall [~user@2001:da8:215:6100:1cf2:7cef:b86d:5a1b] has quit [Remote host closed the connection]
+-!- nube [~rho@49.244.104.21] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- benibadman [~benibadma@62.217.45.102] has joined #shogun
+-!- nube [~rho@49.244.104.21] has quit [Ping timeout: 260 seconds]
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+ van51	hello
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has quit [Read error: Connection reset by peer]
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+@iglesiasg	lisitsyn, more people register to the workshop, right?
+ lisitsyn	iglesiasg: yes two more
+@iglesiasg	lisitsyn, cool
+@sonney2k	wiking, could you please tell me the URL under which we will have the workshop live stream?
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- benibadman [~benibadma@62.217.45.102] has quit [Remote host closed the connection]
+ van51	sonney2k: if I run liblinear
+ van51	sonney2k: without specifying num_of_threads =1 , I'm getting segfaults sometimes
+ van51	sonney2k: and almost always if the number of examples >= 100
+ van51	sonney2k: should that worry me a little or a lot ? :)
+-!- nube [~rho@49.244.83.95] has joined #shogun
+-!- lambday [67157f4c@gateway/web/freenode/ip.103.21.127.76] has joined #shogun
+ lisitsyn	van51: yes that should worry us
+ lisitsyn	van51: please try to reproduce it under valgrind
+ van51	lisitsyn: okie
+ van51	lisitsyn: I am not sure atm but I think it was in a unref method of sgreferenceddata or something
+ van51	lisitsyn: I will try to reproduce it ofc
+ van51	lisitsyn: but could it be bc of the way I initialize my data?
+ lisitsyn	van51: I don't know everything is possible :)
+-!- pickle27 [~Kevin@130.15.32.52] has joined #shogun
+ votjakovr	HeikoS: i've just sent a PR (with refactoring parts). Please, have a look at it.
+@HeikoS	votjakovr: just did, looks fine
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Roman Votyakov :develop * 971d4fb / src/shogun/ (8 files): https://github.com/shogun-toolbox/shogun/commit/971d4fbb6186ca10b168f76f999e474e31918a50
+ shogun-notifier-	shogun: refactor evaluation of posterior and predictive distributions
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 2c0f087 / src/shogun/ (8 files): https://github.com/shogun-toolbox/shogun/commit/2c0f08749fb47800f8a5ef038b0ada76e585b13c
+ shogun-notifier-	shogun: Merge pull request #1206 from votjakovr/feature/gp_refactoring
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: refactor evaluation of posterior and predictive distributions
+ van51	lisitsyn: here is a valgrind output http://pastebin.com/47j8QRB8
+ votjakovr	HeikoS: ok, then, i'll send next one (with logit) tonight
+@HeikoS	votjakovr: cool! this will be the first major step taken :)
+ lisitsyn	van51: hashed doc dot features is something you work on, right?
+ van51	lisitsyn: yeah
+ lisitsyn	van51: looks like you are working on a vector that was free'd
+ pickle27	lisitsyn, saw your comment
+ pickle27	will be updating the PR shortly
+ lisitsyn	votjakovr: would you go for implementing the same thing you posted at g+? ;)
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ shogun-buildbot	build #1181 of bsd1 - libshogun is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1181  blamelist: Roman Votyakov <votjakovr@gmail.com>
+ lambday	HeikoS: hi
+ lambday	HeikoS: do you think I should rather override the clone method of SGObject for DenseMatrixOperators instead of doing it in the copy constructor
+@HeikoS	lambday: hi
+@HeikoS	lambday: nono
+@HeikoS	clone implements a deep copy for all SGObject subclasses already
+@HeikoS	so you can use that
+ lambday	HeikoS: I tried, but gives segfaults :(
+@HeikoS	lambday: aha!
+@HeikoS	wiking: where are my unit tests!!!
+@HeikoS	lambday: I added that recently, its experimental
+@HeikoS	lambday: can you reproduce and isolate the segfault and send me the program?
+ lambday	HeikoS: I was testing with logdet itself, I'll create a small one and sending you then
+@HeikoS	ok thanks!
+@HeikoS	turn on debug then you see where the problem happens
+ lambday	HeikoS: it prints clone successful...
+ lambday	yes
+ lambday	it comes back
+@HeikoS	and then?
+ lambday	I put a print in the caller, that too prints.. so shouldn
+ lambday	t' be any problem with that
+ lambday	BUT
+ lambday	then I get the diagonal and it doesn't move any further
+ lambday	wait I will send you
+ lambday	I do have a REQUIRE statement that ensures that the matrix isn't NULL
+@HeikoS	ok
+@HeikoS	I dont get it, waiting for the code ;)
+ lambday	yes I understand.. sounds way too messy :D
+ lambday	wait.. sending
+ shogun-buildbot	build #1182 of bsd1 - libshogun is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1182  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1305 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1305  blamelist: Roman Votyakov <votjakovr@gmail.com>
+ lambday	HeikoS: https://gist.github.com/lambday/5920296
+ lambday	HeikoS: I have some bug in my program as well.. I should check
+ lambday	in the code I mistakenly used the pointer!
+ lambday	Argh! explains the deviation! I'll fix it soon!
+-!- gsomix [~gsomix@109.188.124.200] has joined #shogun
+ lambday	HeikoS: oh! It gives segfaults cause I tried to delete it!
+ gsomix	good evening
+@HeikoS	lambday: that means?
+ lambday	HeikoS: no, ummm.. that's not it :-
+ lambday	HeikoS: sorry I am really confused :(
+@HeikoS	lambday: dont worry, so whats the current problem then?
+ lambday	but I found a bug in my program!
+@HeikoS	lambday: so clone works?
+ lambday	HeikoS: nope! because using copy constructor that I used fails on REQUIRE of the get_diagonal, but when I used clone, it gives segfaults, doesn't fail on REQUIRE
+ lambday	my program is buggy as well
+ lambday	:(
+ lambday	please uncomment that and run...
+ lambday	(I wrote in comments)
+@HeikoS	could we have a program without the copy constructor business?
+@HeikoS	that confuses me a bi
+@HeikoS	t
+-!- pickle27 [~Kevin@130.15.32.52] has quit [Quit: Leaving]
+ lambday	yes! deep copy of the operator we need.. I could have used same op and set the diagonal different for each jobs but that would only work for sequential computation and not the parallel
+-!- travis-ci [~travis-ci@ec2-54-235-27-215.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/8701802
+-!- travis-ci [~travis-ci@ec2-54-235-27-215.compute-1.amazonaws.com] has left #shogun []
+ lambday	so, once clone works, we'll have a deep copy of the operators with each of the jobs
+ lambday	that's exactly what we need
+@HeikoS	yep deep copy is what we want
+ lambday	yep
+@HeikoS	and what is broken in there?
+ lambday	1. my copy constructor is buggy! 2. clone gives segfaults
+@HeikoS	ok the the clone call fails in the example?
+ lambday	yes, please try to run it once... uncommenting the get_diagonal() for the cloned one
+@HeikoS	lets see
+ shogun-buildbot	build #1306 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1306  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	lambday: example fails to compile here, SGMatrix not found, annoying ....
+ lambday	errr! :-/
+@HeikoS	../shogun-test.cpp:19:2: error: 'SGMatrix' was not declared in this scope
+@HeikoS	dont know why this is happening
+ lambday	oh shit!
+ lambday	using namespace shogun;
+ lambday	:D
+@HeikoS	ah namespace
+ lambday	I copied and pasted a part of my code, missed that :(
+@HeikoS	lambday: now I get linker errors *sigh*
+@HeikoS	thats something else
+@HeikoS	let me find out ...
+ lambday	linking errors :'(
+@HeikoS	gotta recompile shogun,
+ lambday	oh.. yes!
+@HeikoS	messed up source tree here
+ lambday	its newly added stuff
+@HeikoS	just pulled
+ lambday	okay
+ lambday	(good that I kept this week for bugfixing! this explains all the deviations! things should work properly once I do the clone properly)
+@HeikoS	lambday: yeah, always important to look at the valgrind output :)
+@HeikoS	clone is also not stable yet
+@HeikoS	but just 95%
+ lambday	should work, right?
+@HeikoS	I am still waiting for wiking to write some automated unit test magic :)
+@HeikoS	still compiling
+ lambday	yes I always use valgrind.. I test the class separately, write tests separately, debug, and then add to shogun :D
+ lambday	but this is a stupid error.. I set the same pointer instead of calling copy constructor... so it keeps on adding shifts in each iterations.. explains why we got so large deviations for higher number of shifts
+ lambday	aah!
+ lambday	HeikoS: automated unit-test?
+@HeikoS	lambday: yeah for clone its quite easy
+@HeikoS	assert(a->equals(a->clone()))
+@HeikoS	for all SGObhjects
+@HeikoS	makes sure that both equals and clone works
+ lambday	ahan!
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has joined #shogun
+ lambday	feels so relaxing to work on this again after 6 hours of brainstorming at that Intel project I was talking about :D
+@HeikoS	lambday: haha :)
+@HeikoS	man :D
+ lambday	HeikoS: you won't believe I'll be working 12-14 hours a day :D
+ lambday	lol
+@HeikoS	lambday: I *do* believe you, all this stuff has to be written at some point right? :D
+@HeikoS	so I got it running now
+@HeikoS	there is something wrong with clone I think
+ lambday	reproduces
+@HeikoS	doesnt copy the complex value
+ lambday	you implemented that before I added complex I guess
+ lambday	:-/
+@HeikoS	lambday: no afterwards
+@HeikoS	lambday: the m_operator is not registered
+@HeikoS	that definitely causes a problem
+ lambday	where?
+@HeikoS	of DenseMatrix
+ lambday	oh!
+@HeikoS	so clone does not handle it
+@HeikoS	wiking: exactly this is why we need the unit tests asap! ^
+@HeikoS	since when one forgets to register parameters, the unit test will fail
+ lambday	HeikoS: I faced a problem when I was registering it
+@HeikoS	lambday: which is?
+ lambday	wait.. let me check
+@HeikoS	only registered parameters are handled by clone
+ lambday	yes... so once I solve that, it solves it all...
+@HeikoS	hopefully :)
+ lambday	I remember I kept it like that for some reason... for all other classes I registered params..
+@HeikoS	what happens if you register it?
+ lambday	HeikoS: wait I'm testing again... I also can't use SG_GCDEBUG but rather I had to use SG_SGCDEBUG for this
+ lambday	says "io" not defined
+@HeikoS	thats no problem
+@HeikoS	you can only use the non-static one when you have SGobjects
+@HeikoS	not from static context
+ lambday	https://gist.github.com/lambday/5920710
+ lambday	umm but its a subclass of SGObject and the methods I used are not static
+ lambday	I did include shogun/base/Parameter.h
+@HeikoS	maybe you forgot to include SGIO?
+@HeikoS	lambday: so, does registering it work?
+ lambday	HeikoS: that shouldn't be the case, SGObject.h includes SGIO.h itself
+ lambday	HeikoS: no :(
+@HeikoS	whats the problem?
+ lambday	check the gist I pasted.. this is the error msg I get when I add init and use SG_ADD
+@HeikoS	ah so same problem
+@HeikoS	so base class seems like
+@HeikoS	thats so weird
+ lambday	yes :( :(
+ lambday	its not getting anything from its base
+ lambday	some mistake is there!
+-!- gsomix [~gsomix@109.188.124.200] has quit [Remote host closed the connection]
+@HeikoS	lambday: yeah must be some subtle thing
+ lambday	I checked it twice today.. must be missing something... I'll check it again
+@sonney2k	van51, that segfault is probably due to some bug in your dotfeatures /converter then
+ van51	sonney2k: yea probably, I'm trying to locate it
+@sonney2k	van51, but post your example / code
+@sonney2k	on some gist.github.com
+ van51	sonney2k: https://gist.github.com/van51/5920880
+@sonney2k	van51, btw one test would be to run your converter / dotfeatures under valgrind (e.g. just the test)
+ van51	sonney2k: I have ran the unit tests in valgrind and they were ok
+@sonney2k	van51, you can use init_shogun_with_defaults() btw
+@HeikoS	lambday: its weird, base constructor is called
+@HeikoS	so the things *are* there
+@HeikoS	but I am already tired, probably will find it with fresh eyes ;)
+@sonney2k	van51, and yes you only need to unref lib_linear
+ van51	sonney2k: hehe ok
+ van51	sonney2k: I will find it or I won't sleep -.-
+ van51	sonney2k: is the plain dot function called at all from liblinear?
+@sonney2k	van51, btw you can load the label vector much more easy - just use a SGVector and then do load with CAsciiFile
+@sonney2k	van51, not sure - I *think* not
+@sonney2k	van51, but it depends on the liblinear solver that is used
+ van51	sonney2k: yea I saw that in an example, but I wanted to only load the first K labels
+@sonney2k	van51, well you can just head -n K file or shrink the vector (resize...)
+-!- lisitsyn [~lisitsyn@83.234.169.218] has joined #shogun
+@HeikoS	lambday: I gotta go now, see you tomorrow! dont forget to sleep ;)
+@HeikoS	votjakovr: going gome, see you tomorrow!
+-!- HeikoS [~heiko@nat-189-68.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+@sonney2k	lisitsyn, wiking @c-base now
+ lisitsyn	sonney2k: nice
+ lisitsyn	sonney2k: equipment?
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Read error: Operation timed out]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ naywhayare	hello there, I think I've found a problem with the ./configure script
+ naywhayare	I haven't looked into it too deeply but I think the problem is still present in trunk
+ naywhayare	if I have lua5.2 installed, ./configure will detect that and try to build the lua interface; however, (I did not check with trunk, but I did with 2.1.0) shogun does not compile with lua5.2
+@sonney2k	lisitsyn, yes we can use the c-base cam \o/
+ lisitsyn	sonney2k: heh nice finally
+ lisitsyn	naywhayare: hey
+ naywhayare	lisitsyn: it should be an easy fix around line 1008 or 1010 of the configure script (somewhere in there)
+ lisitsyn	naywhayare: thanks
+@sonney2k	naywhayare, shogun develop should do lua5.2
+ naywhayare	I should also note -- I know nothing about lua and have no use for it.  but I wanted to compile shogun with all features available :)
+ naywhayare	sonney2k: okay, then nevermind :)
+@sonney2k	lisitsyn, any idea where gsomix is?
+@sonney2k	wiking, awake?
+ lisitsyn	sonney2k: no
+@sonney2k	lambday, hmmhh :/
+ lisitsyn	naywhayare: okay let me try to compile it here with lua
+@sonney2k	van51, any insights from valgrind?
+ van51	sonney2k: I have some fixes to send
+ van51	sonney2k: but nothing final yet
+@sonney2k	van51, fixes for what?
+ van51	sonney2k: some simple stuff, like a SG_REF in the converter
+ van51	sonney2k: and a minor change in the copy constructos of the tokenizers
+@sonney2k	van51, found by valgrind?
+ van51	sonney2k: no :P
+ van51	sonney2k: the SG_REF I had it in my mind from when you told me that it's a "rule" to sg-ref objects you save for later
+ van51	sonney2k: the others I found an abnormality in some debugging messages and thought that maybe it was that the cause
+ van51	sonney2k: when a copy constructor was called on a Tokenizer it didn't also copy the position of the last_idx
+ van51	sonney2k: actually I think it wasn't even setting it to 0
+ van51	it could be trash
+ van51	sonney2k: anyway, I was planning to make a PR now about those, you can see the changes there
+@sonney2k	van51, well the copy constructor is not really used
+ van51	sonney2k: yea it didn't fix the issue, but since it's something that I noticed, I guess it can be changed
+-!- gsomix [~gsomix@109.188.124.219] has joined #shogun
+ gsomix	good evening again
+@sonney2k	hey gsomix!
+@sonney2k	gsomix, all happy animals?
+ gsomix	sonney2k, yep. and Moscow's zoo is free for students.
+ lambday	sonney2k: hi.. sorry I was away
+ lisitsyn	sonney2k: btw is it worth to visit berlin one?
+ gsomix	sonney2k, preparing PR.
+@sonney2k	lambday, whats up?
+@sonney2k	lisitsyn, berline one?
+ lisitsyn	sonney2k: yes zoo
+ lambday	sonney2k: going good so far.. been assigned with a lot of stuff at the insti.. gotta manage time :(
+ lisitsyn	you were talking about zoo
+ lisitsyn	:0
+ lisitsyn	:)
+@sonney2k	lisitsyn, well animals are animals :)
+ lisitsyn	sonney2k: that's true and people are animals too but still may be it is not cool
+ lisitsyn	sonney2k: so what made c-base guys get convinced?
+@sonney2k	lisitsyn, from when is the viola jones paper?
+ lisitsyn	sonney2k: year?
+@sonney2k	yes
+ lisitsyn	2001 or so
+@sonney2k	wow old
+@sonney2k	lisitsyn, and local binary patterns
+ lisitsyn	yes 2001
+ lisitsyn	lbp is around 2004 I guess
+ lisitsyn	oops
+ lisitsyn	:D
+ lisitsyn	sonney2k: LBP is 1994
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@sonney2k	lisitsyn, you are around on thursday too right?
+ lisitsyn	sonney2k: yes
+@sonney2k	lisitsyn, I will be in c-base in the evening for cam setup stuff so we might meet aswell
+ lisitsyn	sonney2k: oh why not!
+@sonney2k	I will likely not have my talk ready though and be dead but hey why not :D
+ lisitsyn	sonney2k: btw how do we present things? with own notebooks?
+ lambday	sonney2k: lisitsyn CGSObject::clone won't work if the params registered are not CGSObject type as of now, right?
+ lambday	oops
+ lambday	SG*
+ lisitsyn	lambday: that's what heiko knows but I don't think it skips matrices and such stuff
+ lisitsyn	I see it clones all parameters
+ lisitsyn	lambday: why?
+@sonney2k	lambday, no it should work for all registered params
+@sonney2k	lisitsyn, own notebook yeah
+ lambday	sonney2k: lisitsyn its giving segfault at the line base/SGObject.cpp:1341
+ lambday	which is
+@sonney2k	lisitsyn, in worst case my notebook with .pdf or so
+ lambday	if (!m_parameters->get_parameter(i)->copy(copy->m_parameters->get_parameter(i)))
+@sonney2k	lambday, cloning what?
+ lambday	SGReferencedData has copy?
+ lisitsyn	sonney2k: I have bad battery hope to have AC available directly from the place
+@sonney2k	lisitsyn, sure
+ lambday	cloning a CSGObject type obj which has a SGMatrix param
+ lisitsyn	lambday: lets see valgrind!
+ lambday	wait I'm pasting you the debug msgs (gdb)
+@sonney2k	lambday, no it doesn't need to - it gets the values of the matrix and then sets it again
+ lambday	I'm checking.. but it does give segfault for this line
+ lisitsyn	lambday: can you check what is uninitialized?
+@sonney2k	lambday, then we still have a bug there
+@sonney2k	lambday, it would help a lot to produce a minimal test case then HeikoS can easily fix this
+ lambday	sonney2k: lisitsyn please have a look at this - https://gist.github.com/lambday/5922327
+ lambday	sonney2k: yes I was thinking the same
+ lisitsyn	lambday: we need to know what is NULL/uninitialized
+ lambday	lisitsyn: checking..
+ lisitsyn	lambday: I guess it is either copy
+ lisitsyn	or copy->m_parameters
+ lambday	lisitsyn: how do I test that with gdb? :(
+ lisitsyn	lambday: I'd suggest to put some prints
+ lisitsyn	of copy and copy->m_parameters
+ lisitsyn	and copy->m_parameters->get_parameter(i)
+ lisitsyn	you will see what failed
+ lisitsyn	otherwise put a breakpoint
+ lisitsyn	and use 'print copy'
+ lisitsyn	and so on
+ lambday	okay
+ lisitsyn	lambday: cgdb can appear quite useful to manipulate breakpoints
+ lambday	lisitsyn: alright... checking
+ lambday	lisitsyn: seems like it doesn't entered TParameter::copy at all... otherwise that would have been printed
+ lisitsyn	lambday: yes
+ lisitsyn	that's why I think that's something with the expression inside ()
+ lisitsyn	hmm something is wrong with lua indeed
+ lambday	lisitsyn: aha!
+ lambday	copy is nil
+ lisitsyn	lambday: put an assert here please
+ lambday	lisitsyn: okay
+ lisitsyn	but anyway we've got to do something with it :)
+ lambday	why would new_sgserializable(get_name(), this->m_generic) return nil
+ lambday	:-
+ lambday	:-/
+ lisitsyn	lambday: what is name?
+ lambday	lisitsyn: CDenseMatrixOperator (its a bit modified than what I've pushed, I hadn't added the register_params stuff for that due to c++ template issues, now I did, and testing)
+ lisitsyn	lambday: is it template class?
+ lambday	yes
+ lambday	its like CSGObject <-- CLinearOperator<T> <---- CMatrixOperator<T> <---- CDenseMatrixOperator<T>
+ lambday	SG_ADD didn't work (said m_parameters and m_model_selection_parameters not declared), so used CSGObject::m_pamareters->add() directly
+-!- zxtx [~zv@rrcs-74-62-200-195.west.biz.rr.com] has joined #shogun
+ lambday	params are registered (clone shows the index and all)
+ lisitsyn	lambday: what is template type you use?
+ lambday	complex
+ lisitsyn	haha
+ lisitsyn	okay
+ lisitsyn	lambday: shogun/base/class_list.cpp.py:116
+ lambday	lisitsyn: that's for the make, right?
+ lambday	lisitsyn: I tested with float64_t also and it fails there too
+ lisitsyn	lambday: no that's why it does return null
+ lisitsyn	hmm no idea but it is wrong
+ lambday	lisitsyn: okay.. trying removing that..
+ lisitsyn	lambday: just check generated class_list.cpp
+ lisitsyn	and find CDenseMatrixOperator
+ lisitsyn	you will see it won't be created for complex
+ lisitsyn	just NULL
+ lambday	lisitsyn: yes.. but clone depends on that?
+ lisitsyn	lambday: yes that's what new_sgserializable does
+ lambday	lisitsyn: okayss
+ lambday	lisitsyn: but then why it fails for float64_t
+ lambday	:-/
+ lisitsyn	lambday: I don't know but I am absolutely sure it should not return null
+ lisitsyn	so lets solve one problem :)
+ lambday	same for intxx_t
+ lambday	hmm... okay
+ lambday	lisitsyn: now I remember why I put it there..
+ lisitsyn	lambday: why?
+ lambday	lisitsyn: commented that line and it fails at many places (complex doesn't overload +=, -= etc I guess)
+ lambday	like other ptypes
+ lisitsyn	oh
+ lisitsyn	lambday: then you've got to put some magic here
+ lambday	lisitsyn: I don't think I can use clone for complex at all then!! :(
+ lambday	lisitsyn: there is other way
+ lisitsyn	lambday: you can add it by your selection
+ lisitsyn	just need some code in class_list.cpp.py
+ lisitsyn	which excludes complex for anything but your classes
+ lambday	lisitsyn: for a selected few classes you mean
+ lambday	that we'll actually be using complex with??
+ lisitsyn	yes
+ lisitsyn	yes
+ lambday	lisitsyn: that's an awesome idea!!
+ lambday	classic!!
+ lambday	alright... trying!
+ lambday	:D
+ lisitsyn	lambday: just add a list and some thing that handles it
+ lambday	yup
+-!- kevin_ [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- kevin_ [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Client Quit]
+-!- kevin_ [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- kevin_ [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Client Quit]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has left #shogun ["Fallen asleep!"]
+ van51	so I have a suspicion it happens when apply() is called on liblinear and num_threads > 1
+ lisitsyn	van51: then we have a race condition ;)
+ lisitsyn	van51: helgrind may be?
+ van51	lisitsyn: I can try it
+ van51	lisitsyn: I'm guessing it's similar to valgrind
+ van51	:p
+ van51	lisitsyn: very imaginative names btw
+ lisitsyn	van51: it is a module of valgrind
+ lisitsyn	van51: yes very nordic and GRIND
+ van51	lisitsyn: baah can't believe it's taking this long
+ lisitsyn	van51: it is run in a kind of sandbox where everything is counted and checked so no surprise
+ van51	hopefully next time I'll narrow it down sooner
+ van51	or more hopefully there won't be a similar next time :)
+ van51	lisitsyn: ok sounds nice
+ lisitsyn	van51: does it happen with other type of features?
+ van51	lisitsyn: I'll try it soon
+ van51	lisitsyn: didn't check
+ van51	lisitsyn: I'll see that first once valgrind finishes its run
+ lisitsyn	that may help to get suspect in custody
+ van51	lisitsyn: I can't seem to reproduce it with DenseFeatures
+ lisitsyn	good
+ lisitsyn	then it is more likely that we have bug somewhere else ;)
+ van51	lisitsyn: but it's leaking memory when apply() is called
+ van51	no it's not :p
+ van51	anyway, it's time for helgrind
+@sonney2k	van51, ohh makes sense
+@sonney2k	van51, I think your code is not thread safe
+@sonney2k	van51, but it needs to be
+@sonney2k	van51, liblinear trains on a single cpu
+ lambday	lisitsyn: okay that got solved
+ lambday	lisitsyn:  but it still fails assert
+@sonney2k	van51, however when calling apply() we will use all available cpu's
+ lisitsyn	lambday: the class_list thing/
+ lisitsyn	?
+ lambday	lisitsyn: yep
+ van51	sonney2k: I see
+@sonney2k	van51, so the dotfeatures you wrote need to be reentrant
+ lisitsyn	lambday: alright
+ van51	sonney2k: so how do I start to make it thread-safe?
+ lisitsyn	lambday: copy is still null right?
+ van51	sonney2k: is there a similar situation-class I can have a look at?
+@sonney2k	van51, no member variables for status
+@sonney2k	van51, let me check
+ lambday	manually added a separate list of classes for which we need complex to work and added a condition
+ lambday	lisitsyn: yep
+ lisitsyn	lambday: and they are in class_list.cpp?
+ lambday	lisitsyn: yep
+@sonney2k	lambday, it is the tokenizer
+@sonney2k	lambday, sry
+@sonney2k	van51, it is the tokenizer
+ lambday	:D
+ lisitsyn	lambday: is m_generic set correclty?
+ lambday	sonney2k: no problem
+@sonney2k	van51, you need a separate one in dense_dot etc
+ van51	sonney2k: it's shared through the threads?
+ lambday	lisitsyn: checking
+ van51	sonney2k: bc it's a pointer?
+@sonney2k	van51, or the tokenizer is not allowed to keep local variables / or you need to pass it some status variable
+@sonney2k	van51, just think of you call next() from several threads
+ lisitsyn	lambday: just check if it is PT_COMPLEX64 as required
+ van51	sonney2k: I mean all the threads use the same object,right?
+ van51	sonney2k: atm
+@sonney2k	van51, yes
+ lambday	lisitsyn: alright
+ van51	sonney2k: ok
+@sonney2k	van51, and when they all call next() you have a race condition
+ van51	sonney2k: that's why I was noticing a weird output
+@sonney2k	van51, yes
+@sonney2k	van51, copy constructor with shallow copies might help already
+@sonney2k	van51, so you only have different next pointers etc
+@sonney2k	van51, but share all the delimiter array etc
+ van51	sonney2k: ok! I'll take a look :)
+@sonney2k	van51, or the other solution would be to do tokenizer->has_next(last_end_index)
+@sonney2k	van51, to keep it status free
+@sonney2k	van51, that is probable even easier/better
+@sonney2k	y
+ van51	sonney2k: btw plain dot() is called
+@sonney2k	van51, for what?
+ van51	sonney2k: in the beggining it's called for every single example
+ van51	to compute a dot with the same example
+@sonney2k	van51, ahh ok diagonal of kernel matrix or sth
+@sonney2k	van51, anyway my favourite solution is the has_next(last_index) one
+ lambday	lisitsyn: its coming out to be PT_SGOBJECT every time
+ van51	sonney2k: the thing is that the tokenizer also has the text as a status
+ lambday	so, its not set!
+ van51	sonney2k: so each call to dense_dot also changes the text
+ lisitsyn	lambday: you should call set_generic<T>();
+ lisitsyn	somewhere
+ lisitsyn	in init may be
+ lambday	lisitsyn: okay.. I should do it for all template classes then
+ lisitsyn	lambday: exactly
+@sonney2k	van51, yeah you have to return it in some function, e.g. you do t->has_next(last_index) and SGVector<char> next = t->next(last_index) will return it
+ lisitsyn	sleep time see you
+ lambday	lisitsyn: okies... good night :)
+-!- lisitsyn [~lisitsyn@83.234.169.218] has quit [Quit: Leaving.]
+ van51	sonney2k: that would return a token?
+ van51	sonney2k: but the text to be tokenized is stored inside the tokenizer object
+ van51	sonney2k: and it's replaced on each call to dense_dot
+@sonney2k	van51, anyway either copy constructor or some way of returning the status will work
+@sonney2k	van51, jsut do whatever you find easier.
+ van51	sonney2k: I think copy constructor would be better
+ van51	sonney2k: I have one question though
+ van51	sonney2k: do I have to find the class first to call the appropriate constructor?
+@sonney2k	van51, btw if you do copy constructor please change the bool[256] array to SGVector<byte> so you can get refcounts for the array
+ van51	constructors are not virtual, right?
+@sonney2k	van51, just don't store an array
+@sonney2k	van51, true they are not
+ van51	sonney2k: clone() could work here, though
+ van51	if I register the delimiters
+ van51	now that it will be a sgvector
+@sonney2k	van51, no don't do clone
+@sonney2k	van51, you will need a copy constructor for each tokenizer
+@sonney2k	then all good
+ van51	sonney2k: won't that need multiple cases for the tokenizers, to call the appropriate one?
+@sonney2k	van51, I don't understand the question
+@sonney2k	IMHO you should just use CTokenizer tokenizer as member
+@sonney2k	and then do a CTokenizer thread_local_tokenizer = tokenizer; in the dense_dot etc
+ van51	sonney2k: ok, that's what I had in my mind as an idea
+ van51	it seems easier to do this way
+--- Log closed Thu Jul 04 00:00:16 2013

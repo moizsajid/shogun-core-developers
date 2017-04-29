@@ -1,0 +1,113 @@
+--- Log opened Mon Sep 26 00:00:29 2011
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 248 seconds]
+-!- serialhex_ [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Ping timeout: 260 seconds]
+ CIA-3	shogun: Soeren Sonnenburg master * rb1043b0 / src/configure : disable compiler optimizations for swig interface - http://git.io/uPm3eA
+ CIA-3	shogun: Soeren Sonnenburg master * r13468eb / (2 files): remove std::vector usage and replace it with SGVector - http://git.io/pjgiHw
+ CIA-3	shogun: Soeren Sonnenburg master * r7a631af / src/shogun/classifier/svm/SVM_libsvm.cpp : enable threaded parallelization for libsvm - http://git.io/EqBWVA
+ shogun-buildbot	build #279 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/279  blamelist: sonne@debian.org
+ CIA-3	shogun: Soeren Sonnenburg master * r138b2e1 / src/shogun/kernel/MultitaskKernelMaskNormalizer.h : include <string> to fix compile error - http://git.io/juQgIw
+ CIA-3	shogun: Soeren Sonnenburg master * rdce18b6 / src/shogun/classifier/KNN.cpp :
+ CIA-3	shogun: fix compiler warning about downcast to int32_t
+ CIA-3	shogun: in the end we just change the variable type to float64_t - http://git.io/dZ5DrQ
+ CIA-3	shogun: Soeren Sonnenburg master * rdf28c58 / src/shogun/lib/DataType.h : add virtual destructors to fix compiler warning - http://git.io/Smx8yQ
+ shogun-buildbot	build #281 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/281
+ CIA-3	shogun: Soeren Sonnenburg master * r0c743b2 / src/shogun/classifier/svm/SVM_libsvm.cpp :
+ CIA-3	shogun: parallelize all libsvm learners
+ CIA-3	shogun: however, speedup is really only marginal. - http://git.io/NuwY1A
+ CIA-3	shogun: Soeren Sonnenburg master * r70eff01 / examples/undocumented/python_modular/library_time.py : add toy example to illustrate how to use CTime - http://git.io/6-oWvA
+-!- blackburn [~blackburn@188.168.4.59] has joined #shogun
+ blackburn	sonne|work: have too much spare time on job? :)
+ sonne|work	I needed these things...
+ sonne|work	and I always forget how to use CTime
+ sonne|work	blackburn: ^
+ blackburn	I see :)
+-!- BrianC_ [43dc92a2@gateway/web/freenode/ip.67.220.146.162] has joined #shogun
+ BrianC_	Hi
+ sonne|work	hi
+ BrianC_	Thanks for the fix on set_w
+ sonne|work	BrianC_: that was blackburn
+ BrianC_	Ah
+ BrianC_	I ran into another issue when I compiled that update
+ BrianC_	ImportError: /home/mike/brian/lib/python2.7/dist-packages/_modshogun.so: undefined symbol: _ZN6shogun24CStreamingSparseFeaturesIiE11get_featureEi
+ sonne|work	how can one reproduce this?
+ blackburn	BrianC_: you could try make clean first
+ blackburn	or git clean -dfx
+ BrianC_	Compile build 9780d20 without xml or hdf5
+ blackburn	and reconfigure
+ sonne|work	BrianC_: I think blackburn is right
+ BrianC_	ah ill give make clean a shot
+ BrianC_	I ran into a similar import error related to hdf5 and xml which is why I disabled them in ./configure
+ BrianC_	hdf5 and xml import issues were seperate
+ sonne|work	BrianC_: please report on the mailinglist (or here)
+ BrianC_	same import issue after 'make clean'
+ BrianC_	more specifically happens in:
+ BrianC_	  File "/home/mike/brian/lib/python2.7/dist-packages/modshogun.py", line 26, in swig_import_helper     _mod = imp.load_module('_modshogun', fp, pathname, description)
+ blackburn	ehh
+ blackburn	sonne|work: any idea?
+ blackburn	BrianC_: did you run configure once more?
+ BrianC_	yes
+ blackburn	what is the options you gave to configure?
+ blackburn	./configure --interfaces=python_modular?
+ BrianC_	 --interfaces=python_modular --python=/frodo/shared/epd/bin/python --libs=/frodo/shared/epd/lib/ --includes=/frodo/shared/epd/include/ --disable-xml --disable-hdf5 --prefix=home/mike/brian/
+ blackburn	hmm I see
+ blackburn	pretty strange..
+@sonney2k	BrianC_, I would recommend to really erase the shogun install
+@sonney2k	that is any libshogun*.so*
+@sonney2k	incl. headers
+@sonney2k	and then git clean -dfx and rebuild again
+ BrianC_	yeah, i rm -rf lib and include in the prefix directory
+@sonney2k	BrianC_, sure that you don't have any libshogun.so lying around in LD_LIBRARY_PATH / usr/lib / usr/local/lib or so?
+@sonney2k	blackburn, btw I sped up compilation now for modular interfaces - we use -O0 for modshogun.so now
+ blackburn	sonney2k: I've seen, yeah
+ BrianC_	sonney2k, I think so.  When I try the same thing with original shogun-1.0.0 it doesnt have import issues (just stops at the set_w)
+@sonney2k	BrianC_, hmmhh I am currently running up-to-date git
+ BrianC_	oh i didnt install git,i just downloaded the commit from github.com
+ CIA-3	shogun: Soeren Sonnenburg master * r0cadbbd / (7 files in 6 dirs): Merge branch 'master' of github.com:shogun-toolbox/shogun - http://git.io/hCGicw
+@sonney2k	BrianC_, maybe just try again with latest snapshot
+@sonney2k	however I would say it should work...
+ CIA-3	shogun: Soeren Sonnenburg master * r32b654e / (2 files): add two more c# examples translated by daniel - http://git.io/VEGezw
+ BrianC_	hmm
+ BrianC_	i do notice that ldconfig make[1]: ldconfig: Command not found make[1]: [install-libshogun] Error 127 (ignored)
+ BrianC_	is happening in my make install
+-!- serialhex_ [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Ping timeout: 245 seconds]
+-!- BrianC_ [43dc92a2@gateway/web/freenode/ip.67.220.146.162] has quit [Ping timeout: 252 seconds]
+ CIA-3	shogun: Sergey Lisitsyn master * raf3211a / src/shogun/lib/FibonacciHeap.cpp : Removed memory leak @ FibonacciHeap - http://git.io/v-CA4A
+ CIA-3	shogun: Sergey Lisitsyn master * r140237b / (2 files): Added getters for distance and kernel at DR preprocessor - http://git.io/wewRvg
+ CIA-3	shogun: Sergey Lisitsyn master * r0f76c54 / (6 files): Refactored LLE algorithms for code reuse - http://git.io/jkDP3Q
+ CIA-3	shogun: Sergey Lisitsyn master * rcf86e1b / src/shogun/preprocessor/DiffusionMaps.cpp : Removed junk ctime usage from Diffusion Maps preprocessor - http://git.io/fWwufw
+ CIA-3	shogun: Sergey Lisitsyn master * r2a16c52 / (2 files): Updated swissroll and hemisphere graphical NLDR examples - http://git.io/SnHNPA
+-!- BrianC_ [43dc92a2@gateway/web/freenode/ip.67.220.146.162] has joined #shogun
+ CIA-3	shogun: Sergey Lisitsyn master * rfda999c / src/shogun/preprocessor/LocalTangentSpaceAlignment.cpp : BLASed LTSA - http://git.io/8L4XQw
+-!- BrianC_ [43dc92a2@gateway/web/freenode/ip.67.220.146.162] has quit [Ping timeout: 252 seconds]
+ blackburn	sonney2k: hey we got posted on google opensource
+@sonney2k	blackburn, great :)
+ blackburn	sonney2k: fame :D
+@sonney2k	blackburn, put this in your CV :)
+ blackburn	sure
+ blackburn	sonney2k: it raises our chances to get into next gsoc
+ blackburn	I think :)
+@sonney2k	I hope that we can do several nice things even w/o btw :)
+@sonney2k	but yes another gsoc infusion would be great!
+ blackburn	sonney2k: the most significant part of my project is done in september haha
+ blackburn	was done
+@sonney2k	at least you did it :)
+ blackburn	sonney2k: how are buffer protocol things?
+ blackburn	sonney2k: what do you think about adding benchmarks to shogun?
+@sonney2k	benchmarks are good
+@sonney2k	didn't work on the array interface
+ blackburn	sonney2k: I just noticed parallel LTSA doesn't take advantage of multiple threads :(
+ blackburn	I was pretty sure it does
+@sonney2k	blackburn, yeah libsvm didn't gain much either
+@sonney2k	at some point everything is in kernel cache
+@sonney2k	and then it doesn't help
+ blackburn	sonney2k: do you think mfpmath=sse can affect on parallel things?
+@sonney2k	I dont' think so
+ blackburn	bad bad :(
+ CIA-3	shogun: Sergey Lisitsyn master * r95c854a / src/shogun/preprocessor/HessianLocallyLinearEmbedding.cpp : BLASed HLLE - http://git.io/YmMa8w
+ blackburn	see you
+ blackburn	daily plan works
+ blackburn	:D
+-!- blackburn [~blackburn@188.168.4.59] has quit [Quit: Leaving.]
+--- Log closed Tue Sep 27 00:00:33 2011

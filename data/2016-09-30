@@ -1,0 +1,341 @@
+--- Log opened Fri Sep 30 00:00:12 2016
+-!- GandalfTheWizard [~Emma@112.10.170.120] has joined #shogun
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- travis-ci [~travis-ci@ec2-54-196-200-41.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/163990114
+-!- travis-ci [~travis-ci@ec2-54-196-200-41.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	wiking: jo
+@HeikoS	random c
+@HeikoS	c++ question
+@HeikoS	lisitsyn: around?
+ lisitsyn	yeap
+ lisitsyn	HeikoS: hey
+@HeikoS	lisitsyn: cool so I want this:
+@HeikoS	member of a class that I never want to  modify, i.e. only call const methods
+@HeikoS	but I might want to change that member itself
+@HeikoS	i.e. I want a setter for it
+@HeikoS	so I cannot make it const
+@HeikoS	lisitsyn: is that possible?
+ lisitsyn	const_cast
+@HeikoS	Ill google it thanks! :)
+@HeikoS	lisitsyn: any caveats?
+@wiking	lisitsyn: a
+@wiking	lisitsyn: aaa
+@wiking	HeikoS: or mutable
+@HeikoS	wiking: mutable , what do I google for?
+@HeikoS	dont like const_cast
+@wiking	HeikoS: http://en.cppreference.com/w/cpp/keyword/mutable
+@wiking	http://en.cppreference.com/w/cpp/language/cv
+@HeikoS	wiking: cool thanks!
+@HeikoS	I am doing this in some of my research code, but I think Shogun should also receive some const love
+@HeikoS	wiking:, so as I understand this, I can make the thing const volatile, and then use const_cast to change its value?
+@wiking	no
+@wiking	so
+@wiking	say you have
+@wiking	class A {
+@wiking	int x;
+@wiking	};
+@wiking	then if you define
+@HeikoS	Let me give an example of what I want
+@wiking	int lala(int z) const { x = z*2; }
+@wiking	then you'll get a compile error right?
+@wiking	but
+@HeikoS	yeah sure
+@wiking	if you define
+@wiking	class A {
+@HeikoS	but its a bit different to what I want
+@wiking	mutable int x;
+@wiking	}
+@wiking	then you will not have a problem
+@wiking	with that const method
+@HeikoS	kk I get that
+@wiking	ok so what is the problemo?
+@HeikoS	so what I want
+@HeikoS	I have a class that has a member, say a matrix
+@HeikoS	and I want to guarantee that I never change the contents of that
+@HeikoS	but I want to maybe put another matrix after I instantiated the class
+@HeikoS	say a setter for the matrix
+@wiking	mm i guess you feel the contradiction
+@wiking	right? :)
+@HeikoS	no wait
+@wiking	you dont want it to change
+@HeikoS	so I want a member
+@wiking	but then want it to change
+@HeikoS	where I am only allowed to call const methods on
+@HeikoS	but I might want to change that member
+@HeikoS	the member itself can change
+@wiking	i see
+@HeikoS	but I want to guarantee that I only ever call const methods on there since I want to guarantee that I dont modify the state of the member object
+@HeikoS	i.e. readonly access
+@wiking	yep i understand
+@HeikoS	like any shogun algo should guarantee :)
+@HeikoS	to the features one passes
+@wiking	fucking immutable objects
+@wiking	they are the worst :)
+@wiking	everybody is wanking on this nowadays
+@HeikoS	hehe
+@HeikoS	I dont even know how I do that
+@HeikoS	I mean cast_const would work I guess, but thats ugly
+@HeikoS	I can "unconst" the member, assign
+@HeikoS	and somehow make the compiler not optimize it
+@HeikoS	but thats not nice
+@HeikoS	I want something nice :)
+@wiking	but i dont eundstand
+@HeikoS	so immutable but assignable member
+@wiking	i mean it's easy
+@wiking	you have a private property
+@wiking	and then all operations on it are
+@wiking	llla const
+@wiking	and you have only one fuction
+@wiking	that is a setter of that private property
+@wiking	that is none-const
+@wiking	what's the problem with that?
+@HeikoS	sure from outside I can protect
+@HeikoS	but what about subclass
+@wiking	private
+@HeikoS	ah yes
+@wiking	it doesn't inherit
+@HeikoS	mmh
+@HeikoS	the thing is I wanted to get a compile error if I call non-const method on the member
+@HeikoS	but yeah it could work via a return
+@HeikoS	and a private member
+@HeikoS	a bit weird in my eyes
+@HeikoS	would rather have an immutable keyword or so
+@wiking	const
+@wiking	and then you const_cast it
+@wiking	i mean you only do that const_Cast once
+@wiking	when you do the setting of that pointer
+@wiking	right?
+@HeikoS	in the setter, yes
+@wiking	so?
+@HeikoS	is that defined?
+@wiking	that should be goodenough
+@wiking	:)
+@HeikoS	or do I need to be careful with optimizer=?
+@wiking	mmm no
+@wiking	ok i'm baking my bread now :)
+@HeikoS	ok let me try
+@HeikoS	wiking: really? :D :D
+@HeikoS	let me send you something
+@wiking	yeah
+@wiking	i'm baking bread for 3 months now
+@wiking	sourdough home made bread
+@wiking	but the problem is that i dont know yet how to do high hydratation bread
+@wiking	:S
+@HeikoS	haha
+@HeikoS	man
+@HeikoS	I am SO into this
+@HeikoS	which recipe are you using?
+@HeikoS	tartine style?
+@HeikoS	wiking: ^
+@HeikoS	I do 400g of water for 500g of whole wheat flour
+@HeikoS	pretty wet ;)
+@wiking	how do fuck
+@wiking	do you dong get it to stick to everything?!
+@wiking	the dough is so fucked up
+@wiking	i see everybody has a super high tension dough
+@wiking	mine is fucking sticking to EVERYTHING
+@wiking	even to the silicon matt
+@wiking	i've tried now for the second time
+@wiking	a 75% dough
+@wiking	and it's fucking sticking TO EERYTING
+@wiking	i cannot handle it
+@wiking	and now it's already so fucking degassed
+@wiking	i wanna through it out :D
+@wiking	for the 2nd time
+@wiking	woah those look great
+@wiking	i cannot make that high hydra dough
+@wiking	btw i've using 40% whole wheat flour
+@wiking	60% white
+@wiking	lemme know if you know a good way
+@wiking	as i'm about to give up
+@wiking	and go back to my shitty none high hydra bread :)
+@HeikoS	hahaha
+@HeikoS	I had this when I started
+@wiking	those are good as well
+@HeikoS	took me a while
+@HeikoS	we should make some in SF
+@HeikoS	apparently the climate is really well
+@wiking	but yeah would like to learn how to make the real one :)
+@wiking	heheh here everything grows like hell
+@wiking	the sourdough i can get started
+@HeikoS	use a bit less water to start with
+@wiking	in 4 hours
+@wiking	:P
+@HeikoS	it is all in the shaping
+@HeikoS	I can bring some of my starter
+@HeikoS	its 3 years old :)
+@wiking	hehe dont take it
+@wiking	they'll just cause trouble for you'
+@wiking	usa food importation
+@wiking	is really shitty
+@HeikoS	really?
+@HeikoS	ah
+@HeikoS	ok
+@HeikoS	we can get some locally
+@wiking	yeap
+@HeikoS	the tartine approach works really well for me
+@wiking	but yeah the starter is not a problem for me
+@HeikoS	in their first book
+@wiking	it looks really good
+@HeikoS	the numbers are good
+@HeikoS	and it *is* sticky
+@wiking	and it really grows the dough as well
+@HeikoS	it requires careful handling
+@HeikoS	need to watch a video on the stretching and shaping
+@wiking	but i dont know how the fuck one can make that surface tension
+@HeikoS	that helped me
+@wiking	that i see in the videos
+@HeikoS	yeah
+@HeikoS	it is the handling
+@HeikoS	kind of minimal yet dynamic
+@wiking	i see :)
+@HeikoS	few movements but with lots of intention
+@HeikoS	and I often use the spatula
+@wiking	btw do you put it in the fridge
+@HeikoS	makes it easier
+@HeikoS	yeah
+@HeikoS	8 hrs
+@wiking	hahah ok
+@wiking	:)
+@wiking	next time
+@HeikoS	so much better with that
+@HeikoS	I do
+@wiking	i need breat NOW
+@HeikoS	30m or longer autolyse (sometimes overnight but then without the leaven added yet)
+@HeikoS	2 hrs with stretching every 30 mins
+@HeikoS	2 hrs without touching
+@HeikoS	(some of it in some controlled temperature environment like my oven with light on)
+@HeikoS	then shape, 20 min bench reset, then fridge over night
+@HeikoS	ok gotta go to talk now
+@HeikoS	see you later
+@HeikoS	btw
+@HeikoS	there is a guy reccomending for immutable members
+@HeikoS	the setter returns a new instance of the object
+@HeikoS	not so sure about that
+@HeikoS	like the private one more
+@HeikoS	https://en.wikipedia.org/wiki/Immutable_object#C.2B.2B
+@HeikoS	wiking: lets definitely bake in SF :)
+@HeikoS	also : lets book flat soon!
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Remote host closed the connection]
+-!- HeikoS_mobile [~Mutter@nat-8-27.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- HeikoS_mobile [~Mutter@nat-8-27.internal.eduroam.ucl.ac.uk] has quit [Remote host closed the connection]
+-!- HeikoS_mobile [~Mutter@nat-8-27.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- HeikoS_mobile [~Mutter@nat-8-27.internal.eduroam.ucl.ac.uk] has quit [Remote host closed the connection]
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- OXPHOS [92bd305b@gateway/web/freenode/ip.146.189.48.91] has joined #shogun
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Client Quit]
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	wiking: back
+@HeikoS	lisitsyn:  you still there?
+ lisitsyn	HeikoS: yeah sort of
+@HeikoS	lisitsyn:  so about this immutable member thing
+ lisitsyn	okay what's with that
+@HeikoS	make it private and provide a public getter that returns const version?
+@HeikoS	or is there a cleaner way?
+ lisitsyn	uhmm it is nice
+ lisitsyn	I don't think you need any other
+ lisitsyn	it depends
+@HeikoS	just a bit annoying that I have to use the method everywhere
+ lisitsyn	if you don't want to change it by chacne
+@HeikoS	the other way would be to return new instance from setter
+@HeikoS	Java like
+@HeikoS	I am also thinking what the best way to do this in shogun would be
+@HeikoS	like have read only features
+ lisitsyn	pimpl
+ lisitsyn	:D
+@HeikoS	what if you have a SGMatrix member?
+ lisitsyn	pimpl forces you to use getter
+ lisitsyn	you can't use anything but getter in pimpl
+ lisitsyn	you don't see the member anyway
+ lisitsyn	I like to name it 'self' like in python
+ lisitsyn	this way you have to use
+@HeikoS	not sure I get that
+ lisitsyn	self->blabla()
+@HeikoS	so if I have algo class
+@HeikoS	and it has a SGMatrix member
+@HeikoS	that I want to guarantee that it is not changed
+ lisitsyn	return const SGMatrix&
+ lisitsyn	and provide setter
+ lisitsyn	getter + setter
+@HeikoS	kk
+@HeikoS	so private does it then
+ lisitsyn	yeah
+@HeikoS	ok then Ill do that
+@HeikoS	thanks!
+ lisitsyn	HeikoS: if you want to defend it from being changed by chane
+ lisitsyn	by some internal code
+ lisitsyn	it is a bit more diffucult
+@HeikoS	If it is private there is some reasonable safety I guess?
+ lisitsyn	but you can decouple with interfaces
+ lisitsyn	not really
+ lisitsyn	you can change kernel width in train()
+ lisitsyn	orr
+ lisitsyn	change kernel width in compute()
+ lisitsyn	rather that
+@HeikoS	so in general, how to deal with this problem in shogun?
+ lisitsyn	I guess narrowing it to get/set
+ lisitsyn	is the way to go
+@HeikoS	and then const-ing them properly
+@HeikoS	and making all members private
+@HeikoS	?
+ lisitsyn	no only private but hidden at all
+ lisitsyn	not only*
+@HeikoS	as in using your tags?
+@HeikoS	how to hide?
+ lisitsyn	yeah
+ lisitsyn	interface
+@HeikoS	https://en.wikipedia.org/wiki/Immutable_object#C.2B.2B
+@HeikoS	lisitsyn: this is example on wiki
+@HeikoS	they provide one getter each for const and non const case
+ lisitsyn	I am not a fan of mutable
+@HeikoS	see first example
+@HeikoS	the one without mutable
+ lisitsyn	yeah it is good but you don't enforce using get/set
+@HeikoS	how to hide the members then?
+ lisitsyn	one more class
+ lisitsyn	:D
+@HeikoS	with all data?
+ lisitsyn	yeah
+@HeikoS	uh
+ lisitsyn	it is hardcore and ugly
+@HeikoS	yeah ugly
+@HeikoS	in Shogun we have the tags
+@HeikoS	I guess that does it for us?
+ lisitsyn	yes
+@HeikoS	but then the read/write access is tricky with them as well
+@HeikoS	I mean making things like: this algo guarantees not to change data matrix
+ lisitsyn	ah
+@HeikoS	contents of matrix I mean
+ lisitsyn	I see
+ lisitsyn	do you really need that?
+@HeikoS	can work on multiple matrices, but never changes the numbers
+@HeikoS	would be cool in xvalidation with mutliple threads e.g.
+@HeikoS	currently we just "trust" that nothing is changed in the data
+ lisitsyn	yeap
+@HeikoS	but if the machine has an inplace preprocessor, it just produces fuck
+ lisitsyn	ok the general principle I guess
+ lisitsyn	is to use interfaces
+ lisitsyn	it can be const then
+@HeikoS	yeah
+@HeikoS	I mean features should kind of be read-only by default
+@HeikoS	and all methods const
+-!- travis-ci [~travis-ci@ec2-54-90-84-126.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/164069068
+-!- travis-ci [~travis-ci@ec2-54-90-84-126.compute-1.amazonaws.com] has left #shogun []
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 244 seconds]
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- travis-ci [~travis-ci@ec2-54-90-84-126.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/164075785
+-!- travis-ci [~travis-ci@ec2-54-90-84-126.compute-1.amazonaws.com] has left #shogun []
+-!- OXPHOS [92bd305b@gateway/web/freenode/ip.146.189.48.91] has quit [Quit: Page closed]
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- rekado [~rekado@2a03:f80:ed15:151:236:13:15:1] has quit [Quit: ZNC - http://znc.in]
+--- Log closed Sat Oct 01 00:00:13 2016

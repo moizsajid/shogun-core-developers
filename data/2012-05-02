@@ -1,0 +1,864 @@
+--- Log opened Wed May 02 00:00:37 2012
+ CIA-64	shogun: Sergey Lisitsyn master * r2c8ae73 / (4 files in 2 dirs): Proper retraining of multiclass - http://git.io/RYQGsg
+ CIA-64	shogun: Sergey Lisitsyn master * r800be9b / (src/shogun/regression/LARS.cpp src/shogun/regression/LARS.h):
+ CIA-64	shogun: Revert "Removed unnecessary methods from LARS"
+ CIA-64	shogun: This reverts commit ca57115f7cad3b447fe4125299039ef17291ffb2. - http://git.io/ptz6yA
+-!- Netsplit *.net <-> *.split quits: @sonney2k, wiking, naywhayare
+-!- blackburn [~qdrgsm@188.168.4.67] has quit [Ping timeout: 260 seconds]
+-!- gsomix [~gsomix@188.168.13.108] has quit [Quit: Ex-Chat]
+-!- Netsplit over, joins: wiking, naywhayare
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- ServerMode/#shogun [+o sonney2k] by hitchcock.freenode.net
+-!- CIA-113 [~CIA@cia.atheme.org] has joined #shogun
+-!- CIA-64 [~CIA@cia.atheme.org] has quit [Ping timeout: 272 seconds]
+-!- av3ngr [av3ngr@nat/redhat/x-ygbjirmhcsmqgnqq] has joined #shogun
+-!- vikram360 [~vikram360@117.192.177.84] has joined #shogun
+-!- vikram360 [~vikram360@117.192.177.84] has quit [Ping timeout: 272 seconds]
+-!- vikram360 [~vikram360@117.192.176.148] has joined #shogun
+-!- vikram360 [~vikram360@117.192.176.148] has quit [Ping timeout: 246 seconds]
+-!- vikram360 [~vikram360@117.192.183.45] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-ygbjirmhcsmqgnqq] has quit [Quit: That's all folks!]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- av3ngr [~av3ngr@58.108.72.131] has joined #shogun
+-!- av3ngr [~av3ngr@58.108.72.131] has quit [Read error: Connection reset by peer]
+-!- pluskid [~pluskid@111.120.7.70] has joined #shogun
+ sonne|work	hey pluskid!
+ sonne|work	thanks for your comments about sgvector
+ pluskid	sonne|work: so is the new sgvector available now?
+ sonne|work	we will do the interface variant first and then later do the rename SGIVector / SGVector if we have some good usecases
+ pluskid	cool
+ sonne|work	pluskid: no not yet
+ sonne|work	but soon
+ pluskid	hope to see the new classes, because it is really used everywhere :D
+ sonne|work	pluskid: the other big transition I think we should do rather soon is the CLabel split up
+ sonne|work	pluskid: it will break things...
+ sonne|work	(sgvector I mean)
+ pluskid	yes, we got some discussions, but stops then
+ sonne|work	we will probably spend a week or so fixing leaks / etc
+ pluskid	sonne|work: so we hope it breaks ASAP, so we can fix those soon :)
+ sonne|work	exactly
+ sonne|work	such that when gsoc starts we are back to stable again
+ sonne|work	pluskid: so regarding labels I think an easy start is to derive multiclass and RealLabels and Binary Labels from current labels
+ pluskid	yes, the memory usage will be very difficult to track because it is rather unpredictable of where the memory is allocated/freed in the previous SGVector
+ sonne|work	yes :(
+ sonne|work	I have some ideas but sometimes it is DKJ$%H$OH%!!
+ sonne|work	pluskid: would you want to do the CLabels change?
+ sonne|work	not sure if I am asking to much here...
+ pluskid	sonne|work: sure
+ sonne|work	but all these hacks with checking if label is 2 class
+ pluskid	sonne|work: did you know the draft design we discussed about the other day?
+ sonne|work	binary or so suck
+ sonne|work	yes
+ sonne|work	hence the RealLabels name :)
+ pluskid	yes
+ sonne|work	pluskid: what I think is that the current clabels class will work as-is for binary, mc, and regression
+ pluskid	yes
+ sonne|work	so maybe all that is needed are some overloaded methods that check whether the set label vector is valid
+ pluskid	you mean something like is_valid_twoclass ?
+ sonne|work	I don't (currently) think we need some extra IntLabels - internally things could still be doubles
+ sonne|work	yeah
+ sonne|work	but using a more generic name
+ sonne|work	like is_valid()
+ sonne|work	and that check should be done when label vector is set / created
+ sonne|work	so constructor and set function only
+ pluskid	you mean, for example, in MulticlassMachine, is_valid ensures the labels are at least 3 classes?
+ sonne|work	no
+ sonne|work	multiclassmachine uses CMulticlassLabels
+ pluskid	oh, I see, you mean we still store and set/get as float
+ sonne|work	and is_valid would only check if the set labels are integers >= 0
+ pluskid	hmm
+ pluskid	I sse
+ pluskid	see
+ sonne|work	mc labels would need extra functions like get_num_classes etc
+ pluskid	but maybe someone needs to extend more, like in SO learning?
+ pluskid	then a float might not be enough?
+ sonne|work	exactly
+ sonne|work	but it is totally unclear how that would look like
+ sonne|work	i.e., which shared functions exist at all?
+ pluskid	yes
+ pluskid	actually, I'm wondering do they have to have a shared baseclass?
+ sonne|work	yeah only for the look of it I guess :)
+ sonne|work	maybe is_valid would still make sense
+ sonne|work	and maybe even some way to check if a predicted label == true label
+ sonne|work	so some way to compare a label
+ pluskid	yes
+ pluskid	that is important for SO
+ pluskid	and some way to compute distance
+ pluskid	of labels
+ sonne|work	though there are tons of ways
+ sonne|work	and they can be arbitrarily complex
+ pluskid	the problem is, if the CLabels do not have a shared base class
+ sonne|work	pluskid: I would say we start with CLabels -> MC,RealLabels,Binary
+ pluskid	we might want to move methods like apply() set_labels() in CMachine to proper subclasses like CMulticlassMachine, CSOMachine, etc.
+ sonne|work	and if we realize we can share things we could do CLabels -> SOLabels, (RealLabels -> MC, Binary)
+ pluskid	maybe have to create a CBinaryMachine and CRegressionMachine
+ sonne|work	makes sense - I am worried that this will explode our class hierachy though
+ sonne|work	it is certainly more clean...
+ pluskid	yeah, CMachine becomes more abstract
+ pluskid	in this way, we no longer have to worry about a common base class of different kind of labels
+ pluskid	CMulticlassMachine will use CMulticlassLabels
+ pluskid	CBinaryClassMachine will use CBinaryLabels
+ sonne|work	we had the same problem with CMachine (in apply) using CFeatures
+ sonne|work	but there we just just CFeatures and check at runtime that things match
+ pluskid	hmm, but Features are much more complicated than labels I think?
+ sonne|work	pluskid: what i mean is that machines usually work with one type of features
+ sonne|work	some machines (kernel machines) can work with arbitrary types
+ pluskid	sonne|work: hmm, I see
+ pluskid	sonne|work: but particular kind of machine *only* work with particular kind of labels
+ sonne|work	pluskid: anyway I think the discussion about split up of machine by label can be postponed
+ sonne|work	yeah maybe
+ pluskid	I'll write an email to the mailing list
+ sonne|work	but think of some machine
+ sonne|work	for which you can set the loss function
+ sonne|work	that one will work also for different labels
+ sonne|work	hah
+ sonne|work	actually the new liblinear would be an example
+ pluskid	hmm
+ sonne|work	one can do regression or binary or mc classification with it
+ sonne|work	of course one can split things up and make them explicit
+ sonne|work	and we did mostly so far
+ pluskid	but we have 3 wrappers for liblinear for regression, mc or binary, don't we?
+ pluskid	you mean in the future we might wrap LibLinear as a generic CMachine?
+ sonne|work	2 yes
+ sonne|work	I like the split
+ sonne|work	it makes things more explicit
+ sonne|work	but in future we might have some machine that you just give a CLoss object
+ pluskid	hmm, thanks, I'll try to summarize and write an email to the list to ask other people's opinion
+ sonne|work	and then it can do anything
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ sonne|work	so I am not in favor of splitting Machines by label
+ blackburn	oh some discussion there
+ blackburn	enlighten me ;)
+ sonne|work	but clabels only
+ pluskid	sonne|work: it's currently OK with reg, binary and mc
+ sonne|work	blackburn: I asked pluskid if he could do the other big transition (clabel splitup)
+ pluskid	but if we like to add SO
+ blackburn	sonne|work: btw we need to help n4ndo with it
+ blackburn	he is a little stucked with that design decision
+ blackburn	how can SO labels look like?
+ pluskid	currently, we have get_label(int), and get_int_label(int), if we have SO, we might need get_AAA_label(int), get_BBB_label(int) something like those in CLabels
+ sonne|work	pluskid: then we add them in there - what is the problem?
+ blackburn	I am ok to add some method there
+ sonne|work	pluskid: we have to cast labels
+ blackburn	get_structured_label
+ sonne|work	anyways
+ blackburn	yeah no way w/o casting probably
+ pluskid	blackburn: what it return? a CSGObject ?
+ blackburn	pluskid: yes, or some StructuredOutput base class
+ sonne|work	can be anything
+ sonne|work	graph
+ pluskid	sonne|work: ok, I see
+ sonne|work	segmentation
+ pluskid	so dynamic_cast again
+ pluskid	like with features
+ sonne|work	(so vector/matrix could suffice ...)
+ sonne|work	pluskid: well with CFeatures we explicitly check for type
+ pluskid	then why would we bother splitting?
+ sonne|work	and then cast
+ blackburn	pluskid: I had one concern about lars
+ sonne|work	pluskid: well there might be some shared functions still
+ pluskid	sonne|work: dynamic_cast will return NULL if it is not the subclass type you want
+ blackburn	let us discuss it after that issue
+ sonne|work	like is_valid
+ blackburn	get_number of labels is shared at leasy
+ blackburn	least*
+ pluskid	hmm
+ pluskid	becomes more clear now
+ sonne|work	pluskid: I know but one cannot check which type an object has in C++ in a compiler independent way
+ pluskid	sonne|work: hmm, that's true
+ sonne|work	so it is better to put an enum in there
+ pluskid	leave for supper
+ sonne|work	enjoy!
+ pluskid	be back in a while
+ blackburn	sonne|work: I have one idea about backcompatibility
+ blackburn	Labels should be a factory
+ blackburn	Labels([1,2,3]) => MulticlassLabels
+ sonne|work	uii
+ blackburn	Labels([graph1,graph2]) => SO labels
+ sonne|work	intelligence in labels :D
+ blackburn	no, hardcode rather
+ blackburn	but compatibility would be here
+ blackburn	code compatibility
+ blackburn	as for serialization..
+ blackburn	I'd rather let users convert their object by theyselves..
+ blackburn	objects*
+ blackburn	it becomes too difficult to handle
+ sonne|work	yeah true serialization will be b0rked
+ pluskid	but we cannot produce object of another class from a constructor
+ pluskid	btw, in the data/toy directory
+ pluskid	fm_train_real.dat label_train_multiclass.dat are data and label for training
+ pluskid	fm_test_real.dat is data for testing
+ pluskid	but do we have labels for testing?
+-!- karlnapf [~heiko@host86-179-192-128.range86-179.btcentralplus.com] has joined #shogun
+ blackburn	pluskid: no, I don't mean C++ class for that
+ blackburn	probably python function Labels() would work too
+ blackburn	I know how to do that at least in java and python
+ pluskid	in Java you can new CLabel() and get a CMulticlassLabel ?
+ blackburn	pluskid: about LARS - don't you think it should be LeastAnglesRegression?
+ pluskid	blackburn: you mean the name?
+ pluskid	I'm OK with both
+ blackburn	pluskid: yeah
+ blackburn	I think we should prefer *Regression naming
+ blackburn	I do work on some regression right now
+ blackburn	FeatureTreeLeastSquaresRegression namely
+ pluskid	haha, our class names are becoming longer :)
+ blackburn	pluskid: I have spent a lot of time but no idea how to do that shorter..
+ blackburn	however in my multitask part this naming could be convenient
+ blackburn	next class to implement is TaskTreeLeastSquaresRegression
+ blackburn	pluskid: so I have one ask - could you please rename it and provide constructor taking (CFeatures*,CLabels*)
+ blackburn	?
+-!- wiking [~wiking@we02c096.ugent.be] has joined #shogun
+-!- wiking [~wiking@we02c096.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ pluskid	blackburn: don't worry, at least our names are shorter than org.aspectj.weaver.patterns.HasThisTypePatternTriedToSneakInSomeGenericOrParameterizedTypePatternMatchingStuffAnywhereVisitor
+ blackburn	pluskid: lol
+ pluskid	blackburn: LARS?
+ blackburn	pluskid: yeap
+ pluskid	OK
+ blackburn	pluskid: and also please remove save/load
+ pluskid	that's cool
+ pluskid	I hate them :D
+ blackburn	and get_w that does store to given pointer
+ blackburn	only SGVector should stay
+ blackburn	oh I hate shindows :E
+ blackburn	2 minutes to force reboot
+ pluskid	blackburn: wait a minute, I forgot about the code
+ blackburn	it says it will reboot automatically in 1.23
+ blackburn	:D
+ blackburn	and restart later is inactive
+ pluskid	...
+ pluskid	you mean what get_w?
+ blackburn	pluskid: float64_t*&
+ blackburn	0:05
+ blackburn	haha
+ pluskid	ok, see you later
+ blackburn	nooooo
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Ping timeout: 245 seconds]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackburn	pluskid: re
+ pluskid	blackburn: where's regression_lars.py in examples?
+ pluskid	is it removed?
+ blackburn	hmm I didn't move or remove it
+ pluskid	Oh, I found it
+ pluskid	it is moved to graphical folder
+ pluskid	btw: what do you mean by get_w?
+ pluskid	I wrote that in the way CLinearMachine implemented
+ blackburn	pluskid: why?
+ blackburn	because of nz parameter?
+ blackburn	pluskid: https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/regression/LARS.h
+ blackburn	line 157
+ blackburn	this method is not needed (I know it is in linearmachine but should be removed as well)
+ pluskid	so you want to copy into the pointer, instead of simply assigning?
+ pluskid	OK
+ pluskid	you mean remove it?
+ pluskid	I see
+ blackburn	pluskid: yes no need to have it because it won't work in modular
+ pluskid	<pluskid> btw, in the data/toy directory
+ pluskid	<pluskid> fm_train_real.dat label_train_multiclass.dat are data and label for training
+ pluskid	<pluskid> fm_test_real.dat is data for testing
+ pluskid	<pluskid> but do we have labels for testing?
+ pluskid	blackburn: do you know this? ^^
+ blackburn	pluskid: yes, no testing labels
+ pluskid	hmm, strange...
+ pluskid	then no way to compute the prediction error
+ blackburn	pluskid: we rather compare results are the same
+ pluskid	blackburn: I just want to get a sense of how various ECOC scheme performs :)
+ blackburn	hmm I can give you some data if you want
+ pluskid	blackburn: is there any pre-existing in the data directory?
+ pluskid	that submodule is quite large
+ blackburn	no, our data is rather toy
+ blackburn	there are some applications data and testing data
+ blackburn	but I do not give a f how to operate on genome data
+ pluskid	give me some link to mldata or UCI is also OK
+ pluskid	I don't want big data
+ blackburn	why?
+ pluskid	just some local play
+ pluskid	on my laptop
+ pluskid	to get some basic sense
+ pluskid	instead of to publish a paper :p
+ pluskid	I wish I can run the experiment within several seconds
+ blackburn	heh you can't really compare accuracy on small dataset I think
+ pluskid	hmm
+ pluskid	then large data is also OK
+ pluskid	as long as my laptop can run it :)
+ sonne|work	blackburn: sure you can :)
+ blackburn	sonne|work: ECOC vs OvR? lets see..
+ blackburn	pluskid: I will compare your ecoc on my data soon
+ blackburn	would be clear if it works correct and even if it gives any extra performance
+ sonne|work	why not use mnist data?
+ sonne|work	(some subset is totally enough)
+ sonne|work	pluskid: looks like we are too late for winning http://lshtc.iit.demokritos.gr/
+ sonne|work	but it also has some nice mc data with *lots* of classes
+ pluskid	:D
+ blackburn	pluskid: that mnist suggestion of sonne|work is pretty good, it is more 'standard'
+ pluskid	blackburn: I see, I have that data
+ blackburn	pluskid: but I'll let you know how does it work on my HOG data
+ blackburn	sonne|work: and you ;)
+ pluskid	I usually use the raw data
+ pluskid	maybe feature extraction will produce better performance
+ blackburn	sonne|work: I still think ECOC would hardly work on small data
+ pluskid	blackburn: here comes the LARS renaming pull request
+ pluskid	sonne|work: I'll work on CLabels refactoring once I added some python_modular examples for Sparse/Dense Random ECOC
+ pluskid	work progress would be a bit slow these days because I'm with a serious cough
+ pluskid	hope to cure it soon :)
+ blackburn	pluskid: thanks
+ blackburn	pluskid: oh get well soon
+ blackburn	you already did great job on ecoc
+ pluskid	blackburn: maybe we already have something similar to that of scikit, but I haven't look at the data-dependent ECOC coding in ECOClib yet
+ pluskid	that would be a big work I guess
+ blackburn	pluskid:it looks like all you would need is to provide more distances
+ blackburn	no?
+ blackburn	and more coders sure
+ pluskid	blackburn: distances are decoders
+ pluskid	and there are some data-dependent *en*-coders
+ blackburn	pluskid: I see
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 265 seconds]
+ sonne|work	pluskid: sad to hear! get well soon
+ pluskid	sonne|work: thanks, I hope, too
+ sonne|work	blackburn: why not? if you have the right ECOC strategy or even some prior knowledge about the hierarchy things can work better with fewer data
+ blackburn	sonne|work: just some gut feeling that can be wrong for sure :)
+ blackburn	booring
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ sonne|work	the mighty wiking...!
+ wiking	yeeey
+ wiking	i've made it
+ wiking	!
+ wiking	!!
+ sonne|work	hardcore connecting yeah
+ blackburn	sonne|work: I guess he mean his paper ;)
+ sonne|work	wiking: congrats to that one too :D
+ wiking	sonne|work: hehe yeah i was rather meaning my paper for the conf :P
+ wiking	cheers
+ wiking	the only thing i have to do now is to find my supervisor so that he can sign the copyright form for the paper since his name is going to be on it, although he did not give a damn about it...
+ wiking	isn't it a bit ironic? :)
+ blackburn	lool
+ blackburn	you are kind of extreme guy
+ wiking	and that's even more funny that i cannot reach him, neither phone nor email nothing :D
+ wiking	mmm
+ wiking	n4nd0 is still in spain?
+ blackburn	wiking: yes
+ wiking	mm has he told when is he going to be around?
+-!- pluskid [~pluskid@111.120.7.70] has quit [Ping timeout: 250 seconds]
+-!- pluskid [~pluskid@111.120.7.70] has joined #shogun
+ blackburn	wiking: he is going to have exam on 7th or 8th
+ wiking	ah ok
+ wiking	so no n4nd0 till the 9th
+ wiking	roger that
+ blackburn	wiking: did you plan to work on something?
+ wiking	yep
+ wiking	need to talk with him
+ wiking	about SO framework
+ wiking	with PSI representation
+ blackburn	yeah we need to discuss design there
+ blackburn	feel free to send email to him :)
+ blackburn	you may also CC me and soeren
+ wiking	mmm
+ wiking	well i think maybe the mailing list would be the best option, or?
+ blackburn	wiking: yes sure
+-!- pluskid [~pluskid@111.120.7.70] has quit [Ping timeout: 276 seconds]
+-!- pluskid [~pluskid@li400-235.members.linode.com] has joined #shogun
+ sonne|work	wiking: still CCing the relevant people :D
+ wiking	sonne|work: ookeey
+-!- eric___ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ pluskid	aaaaaaaaaaaaah, sick... >_<~~~
+ sonne|work	pluskid: painkiller to the rescue!
+ sonne|work	..and sleep
+ eric___	hi
+ eric___	wiking: hi. comin back from holidays in the Alpes. We talked together last friday on running latent svm on action reco databases, remember ?
+ wiking	eric___: yoo yo yes
+ wiking	i hope u had fun there ;)
+ eric___	last ski weekend of the year
+ eric___	=)
+ eric___	Last friday I asked questions about my problem of releasing mem with shogun like UNREF(svm) when I initialized SimpleFeature with pointer to opencv data strucure.
+ eric___	with SG_FREE(svm) the problem doesnt occurs, what the difference btw UNREF and FREE ?
+ wiking	well unref is for the reference counter
+ wiking	free just frees the object
+ wiking	but afaik it should be essentially the same
+ wiking	as i hope free does consider the reference counter
+ wiking	and does not free the object if it's referenced
+-!- pluskid [~pluskid@li400-235.members.linode.com] has quit [Quit: Leaving]
+ sonne|work	eric___: use SG_UNREF for objects derived from SGObject
+ eric___	wiking, sonne|work: thx
+ sonne|work	np
+-!- n4nd0 [02893bbe@gateway/web/freenode/ip.2.137.59.190] has joined #shogun
+-!- gsomix [~gsomix@188.168.5.30] has joined #shogun
+-!- n4nd0 [02893bbe@gateway/web/freenode/ip.2.137.59.190] has quit [Ping timeout: 245 seconds]
+ gsomix	hi all
+ sonne|work	hi gsomix
+ sonne|work	how is your computer doing?
+ gsomix	sonne|work, fine. everything is working
+ blackburn	sonne|work: could you please your blog post too? :D
+ blackburn	fix*
+ blackburn	oh main word is missed lol
+ sonne|work	!?
+ sonne|work	ahh
+ sonne|work	name
+ sonne|work	gsomix: very good
+ blackburn	sonne|work: yeah same issue
+ blackburn	thanks
+ sonne|work	gsomix: so how about the hashset issue?
+ sonne|work	would that be a good start for today?
+-!- n4nd0 [02893bbe@gateway/web/freenode/ip.2.137.59.190] has joined #shogun
+ gsomix	sonne|work, I like it. but there is one specific detail in realization - size of table (array of lists for resolving collisions) is const.
+ sonne|work	gsomix: you could use a dynarray to grow it if that is needed...
+ gsomix	IIRC CSet is used for mallocs counting, right?
+ sonne|work	gsomix: currently yes - but when we have a faster hashset other use cases will pop up
+ blackburn	sonne|work: why not to use stl::vector?
+ blackburn	ah or set
+ gsomix	sonne|work, could use a dynarray to grow it | it's not needed (in theory), because I use lists for resolving collisions. maybe I should use another type of resolving.
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ gsomix	sonne|work, I should think about it a little. because I have written hashmap (hashset) for blackburn, not for common use.
+-!- wiking [~wiking@we02c096.ugent.be] has joined #shogun
+-!- wiking [~wiking@we02c096.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ sonne|work	gsomix: just use some fixed hash size (64k or so per default configurable in set constructor)
+ sonne|work	gsomix: that will work totally ok
+ gsomix	sonne|work, ok.
+ blackburn	sonne|work: gsomix: I can hardly remember why I needed it
+ gsomix	blackburn, lol :]
+-!- n4nd0 [02893bbe@gateway/web/freenode/ip.2.137.59.190] has quit [Ping timeout: 245 seconds]
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Quit: Leaving.]
+ gsomix	blackburn, what about titled features? Can you merge it?
+ blackburn	gsomix: yes not now
+ blackburn	shit exam tomorrow
+ blackburn	I should have prepared but I have not
+ gsomix	blackburn, which?
+ blackburn	politology
+@sonney2k	blackburn, lenin stalin and all that :)
+ blackburn	sonney2k: marx
+ CIA-113	shogun: Chiyuan Zhang master * r9935912 / (7 files in 3 dirs): Rename LARS to LeastAngleRegression - http://git.io/1MfXHQ
+ CIA-113	shogun: Soeren Sonnenburg master * rd587b61 / (7 files in 3 dirs):
+ CIA-113	shogun: Merge pull request #492 from pluskid/rename-LARS
+ CIA-113	shogun: Rename LARS to LeastAngleRegression - http://git.io/GPl_pg
+ blackburn	thanks
+ blackburn	sonney2k:khruschev destalinized it a little so no more stalin :D
+@sonney2k	gsomix, I dont' understand the feature title patch
+@sonney2k	it removes hashset?
+@sonney2k	introduces hashmap
+@sonney2k	but then uses stl::map!??!
+@sonney2k	did I miss anything?
+ blackburn	hahah
+@sonney2k	blackburn, no way
+@sonney2k	stl - why over sudden?
+ blackburn	sonney2k: I don't mind stl map there
+ blackburn	do you?
+@sonney2k	yeah - you know...
+ blackburn	sonney2k: give me a reason :)
+-!- karlnapf [~heiko@host86-179-192-128.range86-179.btcentralplus.com] has quit [Ping timeout: 276 seconds]
+@sonney2k	what? the remainders of my authority won't help!?
+ gsomix	sonney2k, ah. I prepared hashmap, but wondered about the possibility of using stl::map.
+ blackburn	sonney2k: heh your authority is there still but reason?
+@sonney2k	blackburn, how do you serialize it?
+@sonney2k	gsomix, I would prefer your hashmap :)
+ blackburn	sonney2k: how do you serialize hashmap?
+@sonney2k	if it uses standard data types like SG* stuff it will work
+ blackburn	sonney2k: I don't think it is much harder to serialize stl :)
+@sonney2k	it is
+@sonney2k	argh
+@sonney2k	have to leave train
+@sonney2k	cu
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 246 seconds]
+ gsomix	sonney2k, okay master. :)
+ gsomix	sonney2k, I need to go. Dance classes.
+ gsomix	cu evening
+-!- wiking [~wiking@we02c096.ugent.be] has joined #shogun
+-!- wiking [~wiking@we02c096.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 245 seconds]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ wiking	doh
+ wiking	wtf is with this latex template
+-!- n4nd0 [02893bbe@gateway/web/freenode/ip.2.137.59.190] has joined #shogun
+ eric___	wiking: simple advice : should I work with double or float is enough precision (for svmmulticlass ..)
+ n4nd0	eric___: hey! I don't know about your particular application but most of the things in Shogun use internally float64_t (aka double)
+ n4nd0	eric___: so if you are trying to avoid some overhead using float instead of double, take that into account
+ eric___	n4nd0: allright, because my training data comes from opencv apps, and I use float32 in it
+ eric___	n4nd0: I should then rewrite the extracting data part with double type ..
+ n4nd0	eric___: if you think that you don't need so high precision, the one offered by float64_t
+ n4nd0	I would just use it as it is
+ n4nd0	it would have a bit more of overhead since float64_t would be used internally in Shogun, but it is probably unimportant
+-!- eric___ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+-!- blackburn [~qdrgsm@188.168.4.67] has joined #shogun
+ blackburn	hey n4nd0
+ n4nd0	blackburn: hey!
+ blackburn	how are you?
+ n4nd0	I am fine
+ n4nd0	tired of wireless communications :P
+ n4nd0	what about you?
+ blackburn	n4nd0: next exam?
+ blackburn	I have one tomorrow
+ n4nd0	blackburn: yeah, next exam on that
+ n4nd0	blackburn: what is the topic?
+ blackburn	n4nd0: politology :D
+ n4nd0	wtf
+ n4nd0	what is it?
+ blackburn	kind of social science I guess
+ n4nd0	oh like politics
+ blackburn	yeap
+ blackburn	studying politics
+ n4nd0	I was thinking of something related to math
+ n4nd0	:P
+ blackburn	haha
+ blackburn	I'd rather listen to tom waits
+ blackburn	I do not want to study anything :D
+ n4nd0	yeah, I understand
+ blackburn	n4nd0: when will you get past exams results?
+ n4nd0	no idea
+ blackburn	strange
+ blackburn	we have it immediate
+ n4nd0	at most two weeks after I did them
+ n4nd0	so probably I will get to know about them by next week
+* gsomix have returned from dance floor.
+ blackburn	n4nd0: two? wow
+ n4nd0	blackburn: yeah, it is about the same in Sweden normally
+ n4nd0	I think that at the moment is superfast!
+ blackburn	n4nd0: heh students here would die of heart attack if professor said he will let they know about results in two weeks
+ n4nd0	haha
+ gsomix	blackburn, where are you?
+ blackburn	gsomix: 315, need to discuss anything? I was going to start preparing for my exam
+ gsomix	blackburn, cake. just cake. :]
+ blackburn	cake?
+ gsomix	yep
+ blackburn	heh
+ gsomix	tasty cake
+ blackburn	I am not really hungry but I'll visit you if I am ;)
+ gsomix	blackburn, ok. :]
+ n4nd0	do you like to cook cakes gsomix?
+ n4nd0	I think it is not the first time I see you guys are talking about it ;)
+ blackburn	he get one from home I guess haha
+ gsomix	n4nd0, nope. I do not know how.
+ gsomix	n4nd0, I just have one. :)
+ blackburn	he steal it from the shop
+ blackburn	:D
+ n4nd0	:)
+@sonney2k	blackburn, btw - shouldn't we get rid of the load/save functions?
+ blackburn	sonney2k: yes we should
+@sonney2k	I mean the serialization stuff should be enough
+ blackburn	sonney2k: is it used in static?
+@sonney2k	only problem is we need some replacement for it in static
+@sonney2k	hehe
+ blackburn	hmmm
+@sonney2k	there is no way to load anything from cmdline
+@sonney2k	woudln't be too much effort
+@sonney2k	just serialize the single trained model that is there
+ blackburn	sonney2k: you have slave for that :D
+@sonney2k	haha
+@sonney2k	gsomix, some easy job - just remove all the load/save functions from Machine and derived classes
+ gsomix	n4nd0, I know how to cook pelmeni. ;]
+ gsomix	sonney2k, ok.
+* sonney2k loves pelmeni
+ blackburn	sonney2k: really?
+@sonney2k	gsomix, please send some over
+ gsomix	sonney2k, huh
+ gsomix	rabotatch!
+ n4nd0	gsomix: no idea what it is, let me check
+ gsomix	n4nd0, http://en.wikipedia.org/wiki/Pelmeni
+@sonney2k	gsomix, exactly now that you are back CSet,CMap,Array/load/save etc are waiting
+* sonney2k is getting hungry
+ blackburn	sonney2k: what about borsch?
+ blackburn	you should like borsch too :D
+ gsomix	or solyanka
+@sonney2k	I love soljanka
+@sonney2k	though I don't recall the taste of borsch
+ n4nd0	blackburn: gsomix: do you know guys that this is really famous in Spain? http://en.wikipedia.org/wiki/Russian_salad
+ blackburn	n4nd0: ooh that's nice salad sure
+ n4nd0	we call it ensaladilla rusa - Russian salad
+ blackburn	n4nd0: http://en.wikipedia.org/wiki/Dressed_herring this one is very popular here too
+ gsomix	n4nd0, we cook it for the New Year. whole buckets. :)
+ blackburn	sonney2k: do you like selyodka pod shuboy?
+@sonney2k	I don't know what this is
+ blackburn	sonney2k: http://en.wikipedia.org/wiki/Dressed_herring
+ n4nd0	I like vegetables, I think I would like Russian food
+@sonney2k	blackburn, how should I mark places where SGVector no longer works as expected?
+@sonney2k	TODOVEC ?
+ blackburn	sonney2k: TODO?
+ blackburn	heh TODO SGVECTOR or so
+@sonney2k	there are tons of these
+ blackburn	oh that would be painful..
+@sonney2k	it will require internal changes to machines, features, whatnot
+@sonney2k	I can type TODOVEC faster :)
+ blackburn	hehe
+ blackburn	ok
+ blackburn	penetration is the word describing these processes
+@sonney2k	blackburn, btw I think we need some base class for GC stuff
+ blackburn	GC?
+@sonney2k	garbage collection
+ blackburn	sonney2k: yeah I understand but ?
+ blackburn	GCwhat?
+@sonney2k	because sgvector, sgmatrix, etc all have this refcounting mechanism
+@sonney2k	no idea
+ blackburn	what should it share?
+ blackburn	ah I had one idea walking from job
+@sonney2k	SGRefObject?
+ blackburn	we should implement clone() method based on parameters
+@sonney2k	ref/unref mechanism
+@sonney2k	with one virtual method to actually destroy things
+ blackburn	sonney2k: what is the difference between SGRef and SG objects?
+@sonney2k	SGObject will derive from them
+@sonney2k	SGObjects can be serialized in addition to having refcounting
+ blackburn	I lack Serialiazable interface
+@sonney2k	dump(blackburn)
+@sonney2k	not_implemented_error
+ blackburn	heh
+ blackburn	Serializable*
+@sonney2k	?
+@sonney2k	you want SGObject and derive SGSerializable from it?
+ blackburn	sonney2k: no I really like java interfaces
+@sonney2k	instead of SGRef -> SGObject , ...
+ blackburn	noonono
+@sonney2k	I have no idea why c++0x doesn't have interfaces
+@sonney2k	that really is the only cool thing about java I've learned so far
+ blackburn	sonney2k: the only??
+ blackburn	sonney2k: annotations?
+@sonney2k	blackburn, actually I like the idea of having SGObject -> SGSerializable
+ blackburn	for each
+@sonney2k	never used this no idea what this is for
+@sonney2k	lame iterators
+@sonney2k	but c++0x has them
+ blackburn	annotations?
+ blackburn	sonney2k: do you know what dependency injection is?
+@sonney2k	seems like we are trapped in some loop
+@sonney2k	no
+@sonney2k	blackburn, focus man focus
+ blackburn	haha
+ blackburn	soryy
+@sonney2k	<sonney2k> blackburn, actually I like the idea of having SGObject -> SGSerializable
+@sonney2k	^
+@sonney2k	blackburn,
+ blackburn	sonney2k: yes seems to be a good idea
+ blackburn	sonney2k: actually we can imitate interfaces..
+@sonney2k	blackburn, that will require a rename from SGObject -> SGSerializable first
+@sonney2k	blackburn, how so?
+ blackburn	multiple inheritance
+@sonney2k	MI can do much more bad stuff yes
+ blackburn	sonney2k: we won't have diamond there
+@sonney2k	but other stuff
+ blackburn	as SGSerializable should only indicate class is serializable
+@sonney2k	no MI
+ n4nd0	I read once an article about simulating interfaces in C++
+ n4nd0	I like interfaces too, maybe we could take a look to that article
+@sonney2k	as long as it doesn't involve MI - yeah
+ blackburn	btw
+ n4nd0	well it uses some macros, but it MI indeed
+ blackburn	don't you think we should have NAME("name") macros?
+ n4nd0	#define implements public
+ blackburn	for get_name method
+ n4nd0	:P
+ blackburn	hahahah
+ blackburn	#define true false
+ n4nd0	don't get me wrong guys, I was not joking
+ n4nd0	the method had some other things
+ blackburn	n4nd0: yes I understand
+ n4nd0	but at the end it relies on MI
+ n4nd0	:)
+ blackburn	I am not big fan of MI too
+ n4nd0	I realized that it was a bit as I was pulling your legs :D
+ blackburn	:D
+@sonney2k	blackburn, no idea how that can work but yes I wanted that too
+ blackburn	sonney2k: wanted what?
+@sonney2k	NAME macros for the classes
+ blackburn	should be easy?
+@sonney2k	how?
+ blackburn	#define NAME(CLASSNAME) virtual const char* get_name() const { return CLASSNAME; }
+ blackburn	won't it work?
+@sonney2k	blackburn, ahh yes
+@sonney2k	I wanted more
+ blackburn	I tried to add GETTER/SETTER but failed
+ blackburn	I guess it is not possible
+@sonney2k	that one writes this instead of class CFooBar {  char* getrname() { return "FooBar"; } };
+@sonney2k	blackburn, should sgvector.vector still be public?
+@sonney2k	and length?
+ blackburn	yes
+ blackburn	hmm
+ blackburn	no
+ blackburn	or yes
+ blackburn	:D
+@sonney2k	hahahahah
+ blackburn	sonney2k: ok I think no
+@sonney2k	yes is the easy answer so lets go for it for now
+ blackburn	but would need to do some transition
+@sonney2k	even more than we have currently
+ blackburn	I'd rather hide it
+ blackburn	in future
+ blackburn	:D
+-!- n4nd0 [02893bbe@gateway/web/freenode/ip.2.137.59.190] has quit [Ping timeout: 245 seconds]
+ blackburn	okay I have to study I think
+ blackburn	I haven't read a page yet and exam is in 11 hours :D
+ blackburn	however brb
+-!- blackburn [~qdrgsm@188.168.4.67] has quit [Quit: Leaving.]
+@sonney2k	*lol*
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+@sonney2k	blackburn, 4 minutes learning?
+ blackburn	sonney2k: hah no I'm reading that shit
+ gsomix	4 minutes learning? | I'm not surprised, blackburn studies all very fast. :)
+@sonney2k	gsomix, I am also no longer surprised
+ blackburn	yeah I just imitate I know something :D
+@sonney2k	thats how you do it!
+@sonney2k	now I finally know
+ blackburn	sonney2k: exactly
+* sonney2k dies in SGVector hell
+ blackburn	sonney2k: trying ecoc on road signs..
+ blackburn	yeah I can't focus on politics stuff
+-!- vikram360 [~vikram360@117.192.183.45] has quit [Ping timeout: 246 seconds]
+-!- vikram360 [~vikram360@117.192.166.235] has joined #shogun
+ blackburn	hmm no way - sparse one is not working yet in a proper way :(
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+* sonney2k suffer**2
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+ gsomix	sonney2k, why we need inline T get_element(int32_t index) const in CSet?
+@sonney2k	gsomix, IIRC element() is for r/w access get_element not
+@sonney2k	if it is not needed -> delete it :)
+@sonney2k	(or not used yet)
+ gsomix	sonney2k, ok, I figured out.
+* gsomix is fighting for bytes.
+@sonney2k	I have like zillions of errors left
+ blackburn	sonney2k: when I was first year undergraduate we were discussing with my friend how to compute vandermond matrix determinant and we decided to compute it step by step - and once we get N-5 x N-5 matrix we realized.. :D
+ blackburn	so it should be something like N-353 errors left :D
+@sonney2k	blackburn, what is cool about the new sgvectro stuff is that you can write SGVector a = SGVector(...)
+@sonney2k	and get automagic refcount increase of a
+@sonney2k	and when the function exits a will be destroyed
+ blackburn	sonney2k: nice, copy constructor?
+@sonney2k	so no need to manually call ref() / unref()
+@sonney2k	yes
+ blackburn	awesome
+@sonney2k	there are some rare cases where you want to immediately kill the vector (call unref)
+@sonney2k	but usually not
+@sonney2k	it compiles!
+ blackburn	yay
+@sonney2k	let me commit and break everything :(
+ blackburn	haha
+ wiking	nooooooooo
+ wiking	anybody has any idea why latex creates an a4 dvi when i have \documentclass[10pt,twocolumn,letterpaper]{article}? :)
+ blackburn	wiking: huh
+ blackburn	why do you need dvi btw?
+ CIA-113	shogun: Evgeniy Andreev master * r61b244b / src/shogun/lib/DataType.h : added reference counting for SGVector (further SGIVector) - http://git.io/CNsNfw
+ CIA-113	shogun: Evgeniy Andreev master * r3f444b9 / src/shogun/lib/DataType.h : minor fixes - http://git.io/olNAiQ
+ CIA-113	shogun: Evgeniy Andreev master * r4b3c4f6 / src/shogun/lib/DataType.h : added no_ref_count arg, temporary changes - http://git.io/9maQJQ
+ CIA-113	shogun: Evgeniy Andreev master * r4fbd7c5 / src/shogun/lib/DataType.h : minor fixes 2 - http://git.io/9N9q4g
+ wiking	well don't get me started with ieee :)
+@sonney2k	its done
+@sonney2k	the world will end
+@sonney2k	now
+@sonney2k	I better get some sleep
+ blackburn	sonney2k: why gsomix name there?
+ blackburn	:D
+@sonney2k	wiking, shouldn't it be letter?
+ wiking	sonney2k: yes it should be, but it creates a4 :)
+ wiking	and i have nooo idea why
+ blackburn	hah right letter
+@sonney2k	blackburn, hmmhh I merged his stuff but added my stuff
+@sonney2k	not letterpaper
+@sonney2k	but letter
+ wiking	and i would need letter :)
+ blackburn	wiking: [10pt,twocolumn,letter]?
+@sonney2k	noooo
+@sonney2k	fuuuuu!K!J#@(*$#Y
+@sonney2k	all changes gone?!
+ wiking	blackburn: hop does not work
+@sonney2k	blackburn, hmmhh seems like git rebase killed it all
+ blackburn	sonney2k: did you use amend?
+@sonney2k	yes
+@sonney2k	and then git pull --rebase
+@sonney2k	git commit --amend -a
+@sonney2k	followed by git pull --rebase
+@sonney2k	after that all my changes were gone
+ blackburn	huh
+@sonney2k	which is just 4 hours of work...
+ blackburn	why did you pulled?
+@sonney2k	because there was some merge inbetween
+ blackburn	is local repo broken too?
+ blackburn	rebase shouldn't do that afaik
+@sonney2k	blackburn, you think it is somewhere in git history?
+@sonney2k	maybe it is due to this merge commit?
+ blackburn	sonney2k: so is it lost in local repo too?
+@sonney2k	I don't see the commit...
+ blackburn	sonney2k: hmm so where is your amended changes?
+ blackburn	I do not believe it can disappear because of rebase
+ blackburn	wiking: any idea?
+ wiking	hehehe
+ wiking	well rebase just rebases
+ wiking	it's all gone mate
+@sonney2k	from the git faq
+@sonney2k	 So, we would normally just git pull --rebase to get ready to push, but if we do that, the merge commit gets deleted!
+ wiking	ideally
+@sonney2k	great
+ blackburn	sonney2k: damn so did you amend merge commit?
+@sonney2k	for merge commits one should do git pull --rebase -p
+@sonney2k	yes
+@sonney2k	--preserve-merges
+@sonney2k	Instead of ignoring merges, try to recreate them.
+ blackburn	one of the reasons I do not like amend
+@sonney2k	blackburn, not related to amend
+@sonney2k	related to merge commits
+@sonney2k	if you do a rebase on a merge commit your merge commit is gone
+ shogun-buildbot	build #727 of r_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/727  blamelist: gsomix@gmail.com
+ blackburn	sonney2k: but if you did basic commit it would be here still
+@sonney2k	great wasted this evening ... anyway need to sleep now
+@sonney2k	yes
+ blackburn	bad :(
+ blackburn	see you..
+@sonney2k	git reset --hard origin/master would have recovered fromt his if I didn't push before *sigh*
+@sonney2k	btw one could also say rebase is bad
+@sonney2k	a normal pull would have been no problem
+@sonney2k	ohh well we will all learn the hard way
+ blackburn	sonney2k: pull is bad
+ shogun-buildbot	build #749 of cmdline_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/749  blamelist: gsomix@gmail.com
+ blackburn	fetch/{merge,rebase} is generally better controlled
+@sonney2k	blackburn, if you don't expect a problem then that would not have helped either
+ blackburn	sure
+ blackburn	sonney2k: painful wisdom - "never amend merge and rebase"
+ shogun-buildbot	build #715 of python_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/715  blamelist: gsomix@gmail.com
+@sonney2k	yeah that is the downside of using git - you can loose everything ... with svn this is not possible
+ blackburn	sonney2k: we would break the neck doing that kind of development in svn
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+@sonney2k	gsomix, do you remember what you changed to support SGVector& ?
+@sonney2k	I would like to get rid of this & stuff again...
+ wiking	maaaan
+ wiking	it took me this much!
+ wiking	but made it
+ wiking	fuck
+ wiking	u killed it?
+ gsomix	sonney2k, only arguments of methods and typemaps (added for SGVector&).
+@sonney2k	wiking, ?!
+@sonney2k	who did you kill?
+@sonney2k	gsomix, ok
+@sonney2k	gsomix, are you making progress?
+ gsomix	sonney2k, in CSet and map to titled features?
+@sonney2k	well CSet first :)
+ gsomix	yep, of course. I figured out how to make hashset with indexes.
+ gsomix	unfortunately, it needed little more memory, than original CSet
+ gsomix	but it should works faster.
+ gsomix	*it need
+ wiking	sonney2k: have u killed the git repo :)
+@sonney2k	wiking, ?
+ wiking	sonney2k: the rebase... have u lost some commits?
+@sonney2k	all
+ wiking	all??
+ wiking	shit
+ wiking	:)
+-!- vikram360 [~vikram360@117.192.166.235] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.167.99] has joined #shogun
+ gsomix	sonney2k, btw, can you explain me later how to make templates with two args in shogun?
+ wiking	template<class this, class that>
+ wiking	?
+ gsomix	wiking, I have some problems with class_list.cpp
+ wiking	or typename instead of class... depends what u want to template
+ wiking	what the error
+ wiking	*what's
+ wiking	gsomix copy-paste me a gcc error!
+ gsomix	wiking, related to declaration templated classes with standart types. It seems, shogun thinks, that all templated classes have only one arg.
+ gsomix	wiking, later. ok?
+ wiking	hehehe ok ok
+ gsomix	templated SG classes, I mean
+ wiking	i might not be here later though
+--- Log closed Thu May 03 00:00:37 2012

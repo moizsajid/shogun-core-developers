@@ -1,0 +1,196 @@
+--- Log opened Wed Oct 10 00:00:13 2012
+--- Day changed Wed Oct 10 2012
+-!- zxtx [~zv@rrcs-24-199-47-170.west.biz.rr.com] has joined #shogun
+ blackburn	heiko: any news?
+ heiko	blackburn, I am doing some more advanced two sample tests currently
+ heiko	based on the information about the optimal kernel for that I could get 65% with a gaussian SVM :)
+ heiko	but these things will have to run over night.
+ heiko	next thing I will try is a more sophisticated kernel
+ heiko	since that also works for two sample testing
+ heiko	so I have a benchmark
+ heiko	but going to bed now
+ heiko	so see you :)
+ blackburn	I see
+ blackburn	okay I'm off too
+ blackburn	see you
+-!- blackburn [~blackburn@37.61.179.175] has quit [Quit: Leaving.]
+ shogun-buildbot	build #128 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/128
+-!- zxtx [~zv@rrcs-24-199-47-170.west.biz.rr.com] has quit [Ping timeout: 260 seconds]
+-!- zxtx [~zv@76.91.80.197] has joined #shogun
+-!- zxtx [~zv@76.91.80.197] has quit [Ping timeout: 245 seconds]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+ wiking	mmm do we have api for doing a dot product of a dense and a sparse vector?
+ sonne|work	wiking: you mean SGSparseVector * SGVector?
+ wiking	yes
+ wiking	or for that matter SGSparseVector * SGSparseVector
+ sonne|work	unfortunately not...
+ wiking	mmm
+ sonne|work	we have that code in CSparseFeatures
+ wiking	yes
+ wiking	i saw that
+ sonne|work	...it needs to be extracted to SGSparseVector
+ wiking	yeah
+ wiking	i'll do that
+ wiking	will send a PR about it
+ wiking	dense_dot will be a good name for the feature there as well... right?
+ wiking	lol
+ wiking	http://math.nist.gov/spblas/
+ sonne|work	hmmhh last update 2006??
+ wiking	i wonder if there's other lib out there for efficient sparse calculations
+ wiking	apparently
+ wiking	MTL4
+ wiking	The Matrix Template Library version 4 is a generic C++ template library providing sparse and dense BLAS functionality. MTL4 establishes an intuitive interface (similar to MATLAB) and broad applicability thanks to Generic programming.
+ wiking	eigen seems to have something for sparse matrices
+ sonne|work	then better use eigen
+ sonne|work	nothing hurts more than depending on some lib that gets no longer maintained
+ wiking	mmm
+ wiking	http://eigen.tuxfamily.org/dox/classEigen_1_1SparseMatrixBase.html#af64e012789113d938655fbb7c5f4538e
+ wiking	so it seems there is
+ wiking	the only thing is now that we store sparse matrices differently than in eigen :)
+ wiking	but yeah i dont care about this now
+ wiking	i'll optimize later
+ wiking	i just want to see results :)
+ sonne|work	wiking: however this needs to work even if eigen is not available so I guess extracting the function from sparse features is simplest
+ sonne|work	wiking: and if you look at dense_dot
+ sonne|work	the function is trivial
+ sonne|work	5 lines or so
+ wiking	yeah i've did that
+ wiking	doing tests now
+ ptizoom	hi, I had a break through, or more like a punny leap, with my perl-swig-sg activity and unslaught your git with a "pull-request", there are lots of things to tie up, help needed!
+-!- ptizoom [~ptizoom@85.210.93.120] has quit [Remote host closed the connection]
+-!- romi_ [~mizobe@187.57.2.253] has joined #shogun
+-!- romi_ [~mizobe@187.57.2.253] has quit [Remote host closed the connection]
+-!- romi_ [~mizobe@187.57.2.253] has joined #shogun
+-!- ptizoom [~christian@85.210.93.120] has joined #shogun
+-!- ptizoom [~christian@85.210.93.120] has left #shogun []
+-!- ptizoom [~christian@85.210.93.120] has joined #shogun
+ sonne|work	ptizoom: to get you right - it is OK for you if we just start cherry picking patches right?
+ sonne|work	ptizoom: you don't get credit in git logs, only some AUTHORS file later  - that is why I am asking
+ ptizoom	hi
+ ptizoom	haaa, credits!
+ ptizoom	I am not there yet.
+ ptizoom	I was saying that my pull-request is not really appropriate to a master.
+ sonne|work	ptizoom: yes I read that and it is true
+ ptizoom	but, yet I would like to be endorsed by this community!
+ sonne|work	however it does not hurt to add perl configure / make automagic and typemaps for perl
+ sonne|work	the interface will be marked pre alpha or so anyways
+ sonne|work	once some more examples work and we have no leaks we can go to beta :D
+ ptizoom	hold the horses
+ ptizoom	there is a chain of picks to climbs, and lots of crevasses on the way.
+ ptizoom	the stuff I started is very rough, and I let lots of noise in the files, but the whole structure is there , I guess.
+ ptizoom	and it needs more than one soul to complete...
+ ptizoom	hence trying to advert it on a branch of your shogun-toolbox/perl...
+ ptizoom	alternatively I made enough noise so you might direct other benevolence to the ptizoom/shogun/perl_swig_120924?
+ ptizoom	here some example of work:
+ ptizoom	make run-testsuite
+ ptizoom	make -C src run-testsuite
+ ptizoom	make[1]: Entering directory `/usr/src/shogun/src'
+ ptizoom	make -C interfaces/perldl_modular run-testsuite-perldl_modular && true
+ ptizoom	make[2]: Entering directory `/usr/src/shogun/src/interfaces/perldl_modular'
+ ptizoom	cd ../../../tests/integration/perldl_modular && (\
+ ptizoom	 LD_LIBRARY_PATH=/usr/local/lib PERLDL=pdl PERLDLPATH="/usr/local/lib/perl/5.14.2" \
+ ptizoom	 LD_LIBRARY_PATH="/usr/src/shogun/src/interfaces/perldl_modular:/usr/src/shogun/src/shogun" \
+ ptizoom	 ./test_all.sh    )
+ ptizoom	#!/bin/bash -vx
+ ptizoom	if test -z "$PERL"
+ ptizoom	then
+ ptizoom	    PERL=perl
+ ptizoom	fi
+ ptizoom	+ test -z ''
+ ptizoom	+ PERL=perl
+ ptizoom	DATAPATH='../data'
+ ptizoom	+ DATAPATH=../data
+ ptizoom	function test_all () {
+ ptizoom	    datapath="$1"
+ ptizoom	    if echo "$datapath" | grep -q '\.\./data/tests'
+ ptizoom	    then
+ ptizoom	continue
+ ptizoom	    fi
+ ptizoom	    echo "*** Testing in $datapath"
+ ptizoom	    sleep 1
+ ptizoom	    for file in $datapath; do
+ ptizoom	echo -n "$file"
+ ptizoom	echo -n -e "\t\t"
+ ptizoom	output=`./test_one.pl "$file"`
+ ptizoom	ret=$?
+ ptizoom	if [ $ret -eq 0 ] ; then
+ ptizoom	    echo 'OK'
+ ptizoom	else
+ ptizoom	    echo 'ERROR'
+ ptizoom	    echo $output
+ ptizoom	fi
+ ptizoom	    done
+ ptizoom	    sleep 1
+ ptizoom	    echo
+ ptizoom	}
+ ptizoom	if [ -n "$1" ]; then
+ ptizoom	    test_all "$DATAPATH/$1/*.m"
+ ptizoom	else
+ ptizoom	    for i in $DATAPATH/*; do
+ ptizoom	test_all "$i/*.m"
+ ptizoom	    done
+ ptizoom	fi
+ ptizoom	+ '[' -n '' ']'
+ ptizoom	+ for i in '$DATAPATH/*'
+ ptizoom	+ test_all '../data/classifier/*.m'
+ ptizoom	+ datapath='../data/classifier/*.m'
+ ptizoom	+ echo '../data/classifier/*.m'
+ ptizoom	+ grep -q '\.\./data/tests'
+ ptizoom	+ echo '*** Testing in ../data/classifier/*.m'
+ ptizoom	*** Testing in ../data/classifier/*.m
+ ptizoom	+ sleep 1
+ ptizoom	+ for file in '$datapath'
+ ptizoom	+ echo -n ../data/classifier/LibLinear_0017_1en05_1_True.m
+ ptizoom	../data/classifier/LibLinear_0017_1en05_1_True.m+ echo -n -e '\t\t'
+ ptizoom	./test_one.pl "$file"
+ ptizoom	++ ./test_one.pl ../data/classifier/LibLinear_0017_1en05_1_True.m
+ ptizoom	+ output='LibLinear - yesclassified: 5.949422e-02, bias: 1.784163e-14 <--- accuracy: 1.000000e-04'
+ ptizoom	+ ret=0
+ ptizoom	+ '[' 0 -eq 0 ']'
+ ptizoom	+ echo OK
+ ptizoom	OK
+ ptizoom	+ for file in '$datapath'
+ ptizoom	+ echo -n ../data/classifier/LibLinear_023_1en05_1_True.m
+ ptizoom	../data/classifier/LibLinear_023_1en05_1_True.m+ echo -n -e '\t\t'
+ ptizoom	./test_one.pl "$file"
+ ptizoom	++ ./test_one.pl ../data/classifier/LibLinear_023_1en05_1_True.m
+ ptizoom	+ output='LibLinear - yesclassified: 3.048510e-01, bias: 1.043610e-14 <--- accuracy: 1.000000e-04'
+ ptizoom	+ ret=0
+ ptizoom	+ '[' 0 -eq 0 ']'
+ ptizoom	+ echo OK
+ ptizoom	OK
+ ptizoom	+ for file in '$datapath'
+ ptizoom	+ echo -n ../data/classifier/LibLinear_15_1en05_1_True.m
+ ptizoom	../data/classifier/LibLinear_15_1en05_1_True.m+ echo -n -e '\t\t'
+ ptizoom	./test_one.pl "$file"
+ ptizoom	++ ./test_one.pl ../data/classifier/LibLinear_15_1en05_1_True.m
+ ptizoom	+ output='LibLinear - yesclassified: 9.949554e-01, bias: 1.378421e-05 <--- accuracy: 1.000000e-04'
+ ptizoom	+ ret=0
+ ptizoom	+ '[' 0 -eq 0 ']'
+ ptizoom	+ echo OK
+ ptizoom	OK
+ ptizoom	note:I think it is not converging because I coked up the transfer of vector into a sv_pv memory... (sigh)
+ sonne|work	ptizoom: good enough to me. I will have a look
+ ptizoom	check out swig_typemap.i, pdl.i
+ ptizoom	anyway,
+ wiking	eh this was a big spam :)
+ ptizoom	sorry
+ sonne|work	I will
+ wiking	sonne|work: SGVector<T>::add(SGSParseVector<T> v) ?
+ wiking	or at least we should have an SGVector(const SGSparseVector<T>& orig) copy constructor in SGVector
+ sonne|work	both make sense!
+ wiking	or of course SGVector<T> SGSParseVector::construct_dense_vector () const; function
+ wiking	hehe yeah
+ wiking	ok will extend them
+ sonne|work	just do it :D
+ wiking	doh
+ wiking	note: candidate function not viable: no known conversion from 'SGSparseVector<float64_t> *' to
+ wiking	      'const SGSparseVector<double>' for 1st argument; dereference the argument with *
+ wiking	                void add(const SGSparseVector<T> x);
+ wiking	ah ok my bad
+ wiking	ah ok my bad
+-!- blackburn [~blackburn@37.61.180.250] has joined #shogun
+ blackburn	ptizoom: you appear to be so poetic in your explanations :)
+-!- heiko [~heiko@host86-176-125-28.range86-176.btcentralplus.com] has left #shogun []
+ ptizoom	nothing worse than failing the turing test...
+--- Log closed Thu Oct 11 00:00:17 2012

@@ -1,0 +1,96 @@
+--- Log opened Thu Jun 16 00:00:51 2011
+-!- blackburn [~blackburn@188.168.5.186] has quit [Quit: Leaving.]
+ CIA-32	shogun: Soeren Sonnenburg master * r218bd89 / src/libshogun/features/SimpleFeatures.h : add support for SGMatrix in constructor - http://bit.ly/ilyzst
+ CIA-32	shogun: Soeren Sonnenburg master * ra6e3ec9 / examples/undocumented/java_modular/classifier_knn_modular.java : make path relative to the java_modular examples dir - http://bit.ly/montNU
+ CIA-32	shogun: Soeren Sonnenburg master * r301896d / src/modular/Regression.i : fix compilation error in python modular - http://bit.ly/m4y1d5
+-!- f-x [~user@117.192.223.246] has quit [Remote host closed the connection]
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@59.163.196.121] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ is now known as in3xes
+-!- sploving [~root@124.16.139.196] has joined #shogun
+ sploving	hello sonney2k, when i installed atlas, it said, /root/atlas/../ATLAS//CONFIG/src/backend/comptestC.c:1: not implement to support 64 bit
+-!- f-x [~user@117.192.207.37] has joined #shogun
+-!- blackburn [~blackburn@188.168.3.125] has joined #shogun
+ blackburn	got 4 :)
+ sploving	blackburn, congratuation
+ sploving	blackburn, do you know how to install atlas/
+ blackburn	sploving: thanks
+ blackburn	sorry fell asleep
+ blackburn	well I just have installed it from my ubuntu repo
+-!- f-x [~user@117.192.207.37] has quit [Remote host closed the connection]
+-!- f-x [~user@117.192.207.37] has joined #shogun
+ sploving	blackburn, use apt-get?
+ sploving	my computer is fedora, and my yum is broken. so I have to install it from source.
+ in3xes	I've never seen a working yum :P
+ sploving	which system you use? in3xes
+ in3xes	I don't work on fedora much, but when ever I used...it was broken
+ in3xes	sploving, ubuntu.
+ in3xes	The bloated one :P
+ sploving	I would not like to change my system as that might cost lot of time
+ sploving	hello blackburn, another issue, are you around?
+-!- sploving [~root@124.16.139.196] has left #shogun []
+-!- f-x [~user@117.192.207.37] has quit [Remote host closed the connection]
+-!- f-x [~user@117.192.198.36] has joined #shogun
+@sonney2k	blackburn, congrats
+ blackburn	sonney2k: thanks
+ blackburn	sonney2k: today was asked by Chris about multi-core routines for eigenproblems
+ blackburn	your opinion is use lapack by default, right?
+@sonney2k	blackburn, there is some parallel lapack
+@sonney2k	scalapack IIRC
+ blackburn	sonney2k: it is distributed-memory based lapack
+ blackburn	there is PARPACK (P stands for parallel)
+ blackburn	it is in debian repo
+ blackburn	so not 'rare' lib
+ blackburn	sonney2k: well defaults is: we use BLAS for matrix and vector operations and LAPACK for some LA routines, right?
+@sonney2k	blackburn, yes
+ blackburn	and if possible other libraries
+@sonney2k	blackburn, anything compatible to lapack / blas can be used
+@sonney2k	you actually don't even need to recompile
+ blackburn	I see
+ blackburn	unfortunately lapack doesn't provide lanczos
+ blackburn	so from mid of next week (just after my last exam) I'm going to start integrating it somehow
+ blackburn	sonney2k: I guess I will need some help from you - don't know much about how makefile provides these things
+@sonney2k	blackburn, as I said just give me a snipped with arpack
+@sonney2k	it is trivial
+ blackburn	snipped?
+@sonney2k	snippet
+ blackburn	i.e. some code using arpack, right?
+@sonney2k	yes
+ blackburn	okay
+ blackburn	parallel things is so scary forefront of development!
+ blackburn	I guess we should do heavy parallel computing before 1.0.0
+ blackburn	shouldn't*!
+@sonney2k	ack
+@sonney2k	blackburn, btw I stumbled across a problem with SGMatrix
+@sonney2k	for example the kernel has a function get_kernel_matrix()
+ blackburn	yes
+@sonney2k	which obviously should return a SGMatrix
+ blackburn	exactly
+@sonney2k	the problem is that this matrix will always be newly allocated
+@sonney2k	and has to be freed
+@sonney2k	this is in contrast to all the other get* functions we have
+@sonney2k	happens so far in get_distance_matrix / get_kernel_matrix
+ blackburn	yes I understand
+ blackburn	sonney2k: well why not put it into destructor of SGMatrix?
+@sonney2k	blackburn, but how does it know that it has to desctruct?
+ blackburn	ah yes, interesting problem
+ blackburn	sonney2k: why not store matrix in distance instance?
+@sonney2k	or return a customkernel
+@sonney2k	which has the kernel matrix inside
+ blackburn	looks ugly
+@sonney2k	but is at least consistent
+ blackburn	sonney2k: well how you will get matrix if you will just return custom kernel?
+@sonney2k	the function would have to go
+@sonney2k	and one then uses k=CustomKernel(someotherkernelobj)
+@sonney2k	k.get_kernel_matrix()
+ blackburn	we should think about it.. it works but doesn't seems very consistent to me
+@sonney2k	blackburn, this problem will re-occur whenever we have some function that returns sth that is on-the-fly computed
+ blackburn	will create a ticket :)
+ blackburn	nah later
+ blackburn	have slept less than I need :D
+ blackburn	going sleep now, see you sonney2k
+-!- blackburn [~blackburn@188.168.3.125] has quit [Quit: Leaving.]
+ CIA-32	shogun: Baozeng Ding master * r38fe3d6 / (7 files): make path relative to the java_modular examples dir and output the out_labels (+9 more commits...) - http://bit.ly/iDtjTc
+--- Log closed Fri Jun 17 00:00:53 2011

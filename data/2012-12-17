@@ -1,0 +1,119 @@
+--- Log opened Mon Dec 17 00:00:38 2012
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- zxtx [~zv@75.83.151.252] has joined #shogun
+ shogun-buildbot	build #182 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/182
+ shogun-buildbot	build #220 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/220
+-!- zxtx [~zv@75.83.151.252] has quit [Ping timeout: 272 seconds]
+-!- blackburn [~blackburn@188.168.5.28] has quit [Quit: Leaving.]
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ sonne|work	wiking: whats up with multiclass?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ wiking	sonne|work: libsvm multiclass doesn't work with 3 classes
+ sonne|work	what?
+ sonne|work	so basically all OvO MC stuff is b0rken right now?
+ sonne|work	or just libsvm?
+ wiking	libsvm
+ wiking	sonne|work: indexing problem
+ sonne|work	wiking: you have your verbose day today?
+ wiking	?
+ wiking	verbose day?:)
+ sonne|work	yeah - 3 words withing 12 minutes!
+ wiking	lol
+ wiking	yeah working in the meanwhile ;)
+ sonne|work	I almost have an idea what you are talking about
+ wiking	so yeah the problem is with multiclass libsvm, having only 3 classes
+ wiking	it complains about indexing
+ sonne|work	and w/ 4 classes or 2 it works correctly?
+ wiking	                                REQUIRE(set_svm(idx, svm),"SVM set failed");
+ wiking	this line fails
+ wiking	MulticlassLIBSVM.cpp:194
+ sonne|work	I am a bit concerned that everything is broken ...
+ wiking	it works with 4 classes, i haven't tested 2 classes
+ sonne|work	wiking: correctly even?
+ sonne|work	or just 'works' as in doesn't crash
+ wiking	basically i know that n > 3 classes works correctly
+ sonne|work	ok
+ wiking	well it gives me good result
+ wiking	but maybe it doesn't give me as good as i would like it ;)
+ wiking	haven't tested using libsvm purely if that's what you r asking
+ wiking	i don't know if there's a difference between our libsvm and the original implementation's ouptut
+ wiking	*output
+-!- ptizoom [~christian@85.210.82.84] has joined #shogun
+-!- Hausas [~admin@unaffiliated/hausas] has quit [Ping timeout: 248 seconds]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+ wiking	sonne|work: hey here ?
+ wiking	sonne|work:  i was just wondering that for how long we should archive the static analyzer output?
+ wiking	sonne|work: as it now starts to eat up significant amount of space ;)
+ sonne|work	wiking: do as you wish ... some kind of binary granularity?
+ sonne|work	like every day for 1 week
+ sonne|work	then say 8 more weeks but just weekly?
+ wiking	sonne|work: now we have december accessible right away and the rest in tar.bz2
+ wiking	yeah i'll do some kind of a weekly thing after 1 month or so
+ wiking	since keeping all that tar.bz2 is kind of waste
+ wiking	i reckon nobody will dig that out :P
+ sonne|work	wiking: just remove it then
+ sonne|work	it doesn't really help us to have a long history here
+-!- Hausas [~admin@185.6.154.4] has joined #shogun
+-!- Hausas [~admin@185.6.154.4] has quit [Changing host]
+-!- Hausas [~admin@unaffiliated/hausas] has joined #shogun
+-!- blackburn [~blackburn@83.234.54.175] has joined #shogun
+-!- hoijui [~hoijui@dslb-092-078-189-197.pools.arcor-ip.net] has joined #shogun
+-!- hoijui [~hoijui@dslb-092-078-189-197.pools.arcor-ip.net] has quit [Quit: Leaving]
+-!- FSCV [~FSCV@187.210.54.162] has joined #shogun
+-!- nona [~nona@cpc5-haye17-2-0-cust251.haye.cable.virginmedia.com] has joined #shogun
+-!- nona is now known as Guest80301
+ Guest80301	Hi
+ blackburn	hi
+ Guest80301	I would like to work with spectrum RBF kernel, anybody work with this before?
+ Guest80301	I am a bit puzzled it is not working from R and based on my information, if something implemeted in shogun it has to work from all interfaces, Am I right or not?
+ Guest80301	anybody ineterested to talk about this?
+ blackburn	Guest80301: I answered you in the mailing list
+ Guest80301	where?
+ Guest80301	ok I just go and check
+ blackburn	ah
+ blackburn	you answered already okay
+ blackburn	Guest80301: what if you try WEIGHTEDDEGREERBF?
+ blackburn	I see no reason not to work with R but I do not remember if case matters
+ Guest80301	it seems to work I don't get the same error
+ Guest80301	ump <- sg('set_kernel', 'WEIGHTEDDEGREERBF') Error in sg("set_kernel", "WEIGHTEDDEGREERBF") :    [ERROR] Usage: set_kernel  sg('set_kernel', type, size[, kernel-specific parameters])
+ blackburn	there are a few parameters here
+ Guest80301	let's see if I set up the parameters it works
+ blackburn	okay
+ blackburn	bad you can't use modular interface
+ blackburn	it is much comprehensive
+ Guest80301	I am using static interface
+ blackburn	I know
+ Guest80301	MY data set the the dna data set which is in the 'data' folder of shogun
+ Guest80301	dump <- sg('set_kernel', 'WEIGHTEDDEGREERBF', 'CHAR', size_cache, degree) > km <- sg('get_kernel_matrix', 'TRAIN') Error in sg("get_kernel_matrix", "TRAIN") :    [ERROR] Kernel can not process this train feature type: 30 10.
+ Guest80301	It is hard to figure it out without any example :(
+ blackburn	I am not sure weight degree rbf is the choice for string data
+ blackburn	I can even say it won't work with strings
+ blackburn	Guest80301: there are other string kernels so please rather try them
+ Guest80301	it seems to be a good choice for me since I don't know the structure of my string and this weighted degree kernels let me to have shifts and mis matches
+ Guest80301	I am not sure about rbf part
+ blackburn	drop rbf and it will serve you
+ Guest80301	If you have a check on the mailing list I am also trying it without rbf but still not working
+ blackburn	Guest80301: could that example help you? https://github.com/shogun-toolbox/shogun/blob/master/examples/undocumented/r_static/kernel_weighteddegreestring.R
+ Guest80301	I have been thorough this example but as you can see the only defined argument for kernel is degree
+ Guest80301	therefor there is nothing about mis-match and shifts
+ Guest80301	these axamples need some work to make them more helpful
+ blackburn	I am afraid nobody will touch that ever :)
+ Guest80301	:((
+ blackburn	we have neither power nor will to support static interfaces
+ Guest80301	what is a systematic way to find out the parameters of a kernel function written in shogun
+ blackburn	it works like a charm with modular I think ;)
+ blackburn	well
+ Guest80301	ok that means it is a self discovery
+ blackburn	probably I am not sure
+ blackburn	it is pretty clear with modular as it is just as is
+ Guest80301	I have never used modular ones
+ Guest80301	another question does shogun work with matlab under windows?
+ blackburn	https://github.com/shogun-toolbox/shogun/blob/master/examples/undocumented/python_modular/kernel_weighted_degree_string_modular.py
+ blackburn	IIRC it should but no guarantees
+ Guest80301	this is an example in python I saw similar example for matlab
+ Guest80301	thanx I am going to work on it
+ Guest80301	bye now
+-!- hoijui [~hoijui@dslb-092-078-189-197.pools.arcor-ip.net] has joined #shogun
+-!- hoijui [~hoijui@dslb-092-078-189-197.pools.arcor-ip.net] has quit [Quit: Leaving]
+--- Log closed Tue Dec 18 00:00:38 2012

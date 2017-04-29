@@ -1,0 +1,1177 @@
+--- Log opened Wed May 11 00:00:51 2016
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Ping timeout: 244 seconds]
+-!- lstsn is now known as lisitsyn
+ lisitsyn	ENOUGH
+-!- besser82_ [~besser82@fedora/besser82] has quit [Ping timeout: 244 seconds]
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+ Saurabh7	CaBa, well if the cast fails it returns a null pointer, so its a check that it is not
+ Saurabh7	and since its a SGObject pointer we know nothing about it, for other we know its Base class type so we can use the members to check
+-!- besser82_ [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82_] by ChanServ
+@wiking	CaBa: where's this?
+@wiking	Saurabh7: hey here?
+ Saurabh7	wiking, hey sry was afk
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ Saurabh7	HeikoS, hi !
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+ CaBa	wiking: in my fork
+ CaBa	Saurabh7: i see... i should probably implement it the same way then...
+@wiking	Saurabh7: how's going with your preparations?
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	HeikoS: yo
+@HeikoS	wiking: yoyo
+@HeikoS	Saurabh7: hi!
+ Saurabh7	HeikoS, yo
+ Saurabh7	wiking, I had made a list of things, mailed it to HeikoS, i will forward it to you. it covers a many things, might have to tune it a bit.
+ Saurabh7	But basicaly i found big performance difference similar to Kmeans in few say decision trees id3 etc, clustering algo etc
+ Saurabh7	others its comparable but could be parallelized and improved i think
+ Saurabh7	like this issue wu pointed out in random forests
+@HeikoS	great!
+@HeikoS	Saurabh7: I was a bit busy recently, sorry
+@HeikoS	but will read today or tomorrow and give feedback
+ Saurabh7	HeikoS, its almost same as in proposal but need to decide preferences and whats important maybe
+ Saurabh7	HeikoS, np :)
+@HeikoS	yeah definitely
+@HeikoS	Saurabh7: what you should do at this point in time is to investigate
+@HeikoS	so document and explore as good as possible:
+@HeikoS	1.) which algorithms are slow
+@HeikoS	2.) how slow
+@HeikoS	3.) in which setting they are slow
+@HeikoS	4.) what might be the reason
+@HeikoS	so this is purely exploring, but very explicitly
+@HeikoS	the other thing is: try to create a priority list
+@HeikoS	1.) algorithms which are very fundemental should have high priority
+@HeikoS	2.) algorithms which are extremely slow should have high priority
+@HeikoS	maybe you can order them according to that
+ Saurabh7	HeikoS, hm ok i will try to build up on this things already found and try to answer this points
+ Saurabh7	HeikoS, what about this feature view thing, it had been discussed long ago
+@HeikoS	Saurabh7: basically, when gsoc starts, there should be no doubts on what to do
+ Saurabh7	it might be needed to paralllieze things like random forests
+@HeikoS	so all decision making should happen now
+@HeikoS	Saurabh7: that doesnt have priority, its more linalg/internals
+@wiking	Saurabh7: okey just fwd the email plz
+@HeikoS	Saurabh7: or do you need it anywhere?
+ Saurabh7	HeikoS, ok
+ Saurabh7	HeikoS, to parallelize some algos it might be needed
+@HeikoS	Saurabh7: I recently played a bit more with cache locality, that is, read data from memory in sequential order, which can make a huge difference
+ Saurabh7	HeikoS, https://github.com/shogun-toolbox/shogun/issues/3182
+@HeikoS	Saurabh7: you could think how that can be applied to shogun algos
+@HeikoS	example for that: create a large matrix
+ Saurabh7	HeikoS, thats a new one i will look into it
+@HeikoS	and iterate through all values of it (e.g. sum them up)
+@HeikoS	then compare the performance of random order
+@HeikoS	vs sequential order
+@HeikoS	and you will find large differences
+@HeikoS	if you understand this principle, then you can often gain a factor of 2 or even more
+@HeikoS	Saurabh7: I sent an email with some pictures that illustrate it
+@HeikoS	ok gotta run now, see you later
+ Saurabh7	sounds good i will look surely
+ Saurabh7	HeikoS, ok cya
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Ping timeout: 260 seconds]
+ CaBa	I made my implementation of CParameterCombination::obtain_from_generic() to perform the same checks as CKernel::obtain_from_generic(). The casting function allows to iterate over parameter combinations from python, which currently didn't work as expected by the example in modelselection_parameter_tree_modular.py.
+ CaBa	Do you mind if I PR this?
+@wiking	no
+@wiking	go ahead!
+@wiking	Saurabh7: email
+@wiking	:)
+ Saurabh7	wiking, oops sent
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has joined #shogun
+ sanuj	why don't we have a gitter room
+ sanuj	it's better
+ sanuj	and everyone uses it
+ sanuj	torch, bvlc caffe
+ sanuj	openai gym
+ sanuj	scikit learn also
+ sanuj	i just remembered
+ sanuj	we had it
+ sanuj	https://gitter.im/shogun-toolbox/shogun
+ sanuj	besser82_: there?
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has quit [Ping timeout: 250 seconds]
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has joined #shogun
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has quit [Ping timeout: 250 seconds]
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has joined #shogun
+@wiking	sanuj: we have a gitter room
+@wiking	but dont tell me that gitte ris better than irc :)
+ sanuj	haha
+@wiking	it's like at least 25 years older and more mature/open protocol (irc)
+ sanuj	i see
+@wiking	but we do have a gitter room
+ sanuj	i could only tell from the point of view of a user using it
+ sanuj	yeh i know
+@wiking	there's less people in the gitter room :)
+@wiking	sanuj: ah you wanna bet that there are 100x more people using irc
+@wiking	than gitter ?:)
+@wiking	at least
+ sanuj	yes definitely, more people use irc
+ sanuj	:D
+@wiking	https://tools.ietf.org/html/rfc1459
+@wiking	:)
+ sanuj	the link is not opening here
+ sanuj	wiking: can you tell me how to get started with dynaplugz?
+ sanuj	we should have the plugin frame work ready and working before the coding period starts
+-!- HeikoS [~heiko@80.169.91.26] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	sanuj: ok
+@wiking	so we definitely want to have a shogun-base
+ sanuj	on github
+ sanuj	besser82_ said he will write the basic code required and then i can continue
+ sanuj	but the last commit is from march
+ Saurabh7	sanuj, ping
+ sanuj	Saurabh7: yo
+ Saurabh7	sanuj, did oyu get some call form fedex ?
+ sanuj	Saurabh7: nope
+-!- mizari [~mizari@95-174-213-100.nts.su] has quit [Read error: Connection reset by peer]
+ Saurabh7	hm
+ sanuj	what about
+ sanuj	gsoc package?
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+ Saurabh7	ye did you get yours ?
+ sanuj	no i didn't anything
+ sanuj	did you get yours?
+ Saurabh7	stuck at customs :D i dunno tf that guy wanted,some forms
+ sanuj	oh
+ lisitsyn	oh good you remind me
+ lisitsyn	I should send my tshirt to sonney2k_
+ lisitsyn	sanuj: how's it going?
+ sanuj	lisitsyn: i got some easy c++ code working with swig to produce python bindings
+ sanuj	read about templates and classes
+ sanuj	need to write the interface for the tags prototype
+ lisitsyn	cool
+ lisitsyn	let me know if you need any help
+ sanuj	i want to start contributing to dynaplugz
+ sanuj	bjorn wanted to write the base code first
+ sanuj	besser82_: ping
+ sanuj	we should have a working plugin framework before the coding period begins
+@wiking	sanuj:
+ sanuj	yes
+@wiking	there are couple of things
+ lisitsyn	yeah but that's easy
+@wiking	what we need to decide
+ lisitsyn	no need for mature library
+@wiking	do we want like a new repo
+@wiking	for all of these?
+@wiking	but the other stuff is
+@wiking	just to port in all the base classes, i.e. interfaces
+@wiking	into one module
+ lisitsyn	I vote for adding new stuff to SGObject directly
+@wiking	like/
+@wiking	?
+ lisitsyn	wiking: get/set with tags
+ lisitsyn	and string-based get/set
+@wiking	ah yeah
+ sanuj	i think we should have a separate repo where we migrate all the old shogun classes once we have the base-shogun ready
+@wiking	mmm
+@wiking	no
+ lisitsyn	that would be a mess
+@wiking	that's for sure not a good idea :)
+ sanuj	and i think base-shogun should have dynamic plugin loading and whatever lisitsyn has added
+ sanuj	okay :)
+@wiking	we should separate repos
+@wiking	into different things
+@wiking	like kernels
+@wiking	features
+@wiking	etc
+@wiking	that way things are more traceable
+@wiking	maybe
+@wiking	:)
+ lisitsyn	not sure
+@wiking	but we could do even more tricky stuff
+@wiking	:)
+ sanuj	so you mean diff repo for kernel, diff repo for features and so on?
+@wiking	either that
+@wiking	or even go with 1 repo for all
+ lisitsyn	I am not a fan of splitting repos
+ lisitsyn	(I work for big company haha)
+@wiking	and have things a bit differently partitions
+@wiking	*partitioned
+ sanuj	haha
+ sanuj	will each repo be a plugin?
+@wiking	nono
+@wiking	meaning we have 1 repos
+@wiking	*repo
+@wiking	but there you simply just have a separate folder for each 'plugin'
+ lisitsyn	versioning stuff would be tough though
+ lisitsyn	tags won't work
+ lisitsyn	branches won't work
+ lisitsyn	wiking: I think we should tell our plugins from other plugins
+ lisitsyn	I mean it could be ok if we have a set of plugins synchronized with the main repo
+@wiking	ah i see
+ lisitsyn	but not fancy impl of paper of HeikoS
+@wiking	:>
+@wiking	yeah we could do that as well
+ sanuj	haha
+ lisitsyn	then we can go with the 'plugins/' directory
+@wiking	yeah
+@wiking	but we definitely
+ sanuj	these will be the essential plugins installed with base shogun?
+@wiking	need a separate repo
+@wiking	for GPL stuff
+ lisitsyn	sanuj: yes, but not loaded by default
+@wiking	yeah by default nothing is loaded
+@wiking	but yeah we should define
+@wiking	the whole shogun-base
+ sanuj	lisitsyn: loaded when only called from python or equivalent
+@wiking	that is the base fw
+@wiking	or from c++
+ sanuj	how do i go from dynaplugz to shogun-base?
+@wiking	mmm
+@wiking	so first you have the interfaces
+@wiking	and sgobject needs to be extended
+@wiking	to support tags
+-!- HeikoS [~heiko@80.169.91.26] has quit [Ping timeout: 250 seconds]
+ sanuj	just to be clear, interfaces are swig interfaces right?
+@wiking	no
+ sanuj	oh
+@wiking	interfaces are the abstract classes in shogun codebase
+ sanuj	okay
+@wiking	interface = java semantics
+ sanuj	i see
+ sanuj	so extended sgobject and all abstract classes
+@wiking	mmm
+@wiking	have you checked shogun's code?
+@wiking	i mean like CKernel
+@wiking	and CFeatures
+ sanuj	not in detail
+@wiking	are all derived from SGObject
+ sanuj	yes
+ sanuj	i know that
+ sanuj	everything is derived from sgobject
+@wiking	not really
+@wiking	:)
+@wiking	but most of the things
+ sanuj	okay
+ sanuj	:)
+@wiking	so please
+@wiking	start looking at shogun's code in detail
+@wiking	and for example
+@wiking	let's put a list together
+ sanuj	yes sir :D
+@wiking	which classes shoudl be in that
+ lisitsyn	yeah there must be a list
+ lisitsyn	which interfaces are core
+@wiking	indeed
+@wiking	sanuj: maybe start a gdocs
+@wiking	and share it
+ sanuj	okay
+@wiking	so we can discuss this easier
+ lisitsyn	yeah whatever way
+ lisitsyn	I can deffs say
+ lisitsyn	CDotFeatures, CFeatures, CKernel, CDistance, ...
+@wiking	yep
+@wiking	CMachine
+ lisitsyn	but there are some cases
+ lisitsyn	not that easy cases ;P
+@wiking	yeh maybe some refacts will be required
+@wiking	but anyhow
+@wiking	let's have a list
+@wiking	about which we can start discussing
+ lisitsyn	wiking: sanuj: it could be a list of exports for swig
+@wiking	yep
+ lisitsyn	renames
+@wiking	sanuj: check how the renames are done
+@wiking	within current shogun
+@wiking	for swig
+ sanuj	i saw in the shogun code
+@wiking	so in that format
+@wiking	lets have a list
+@wiking	:)
+ sanuj	for templates
+@wiking	not only
+@wiking	it's for all classes
+ sanuj	yes
+@wiking	that are exposed for swig interfaces
+-!- CaBa [~Diu7saig@unaffiliated/caba] has quit [Ping timeout: 250 seconds]
+-!- CaBa [~Diu7saig@unaffiliated/caba] has joined #shogun
+ sanuj	wiking: gmail id
+@wiking	vigsterkr
+ sanuj	wiking: lisitsyn https://docs.google.com/document/d/15oCKKYJwvdHSxA8ohq6f4EOsJwfu-gxKhRLj3sj6cuM/edit?usp=sharing
+ lisitsyn	yeah let's just not lose the link :D
+@wiking	:>
+ sanuj	do we want a gist
+@wiking	if you write code
+@wiking	then yes
+ sanuj	wiking: but how will multiple people edit it?
+ sanuj	i'm talking about github gist
+@wiking	eveyr gist is a repo essentially
+ sanuj	wiking: lisitsyn https://gist.github.com/sanuj/56f03cd242473137fad851e68fa0f2c1
+@wiking	md?
+ lisitsyn	lol
+@wiking	arent' we writing a .i file? :)
+ lisitsyn	that's ok
+@wiking	anyhooooooooooooow
+@wiking	lets' just do it
+ lisitsyn	wiking: we can ``` ```
+@wiking	``````````````````````````````
+@wiking	``````````````````
+@wiking	:>
+@wiking	^ can
+ lisitsyn	```````
+ sanuj	i'll rename it
+ sanuj	:)
+ sanuj	done
+ sanuj	how does it work with gists
+ sanuj	i don't think there are PRs
+ lisitsyn	no why
+ lisitsyn	sanuj:
+ lisitsyn	you just edit it
+ lisitsyn	and we comment
+ lisitsyn	I think you can give us access if necessary
+ sanuj	no access thingy here
+ lisitsyn	nah nevermind then
+ lisitsyn	ok commented
+ Saurabh7	lord
+ CaBa	sanuj: you are from assam? :)
+ sanuj	CaBa: i study in assam :D
+ sanuj	but i'm from Jaipur
+ CaBa	sanuj: ah, i see
+ sanuj	CaBa: are you from india?
+ CaBa	sanuj: nope, i'm from germany. assam just raised my attention since i just recently became aware of the seven sister states when i travelled myanmar
+ CaBa	sanuj: kinda embarassing but that part of india wasn't in my brain world map before :)
+ sanuj	CaBa: oh i see :)
+ CaBa	sanuj: from india i've only seen the very south so far, mostly tamil nadu
+ CaBa	there might be an opportunity to see the north this year though :)
+ sanuj	great!
+ sanuj	ironically i have never been to tamil nadu
+ sanuj	have some friends there
+ sanuj	most southern part that i have visited is Mumbai
+ sanuj	CaBa: roamed around a lot in north though
+ CaBa	:D
+ CaBa	totally on the todo list
+ CaBa	i'm also somewhat curious about bhutan
+ Saurabh7	you guys should visit Goa :D
+ sanuj	haha
+-!- OXPHOS [8ca3fe9e@gateway/web/freenode/ip.140.163.254.158] has joined #shogun
+ OXPHOS	Im late for the party : (
+@wiking	:)
+@wiking	what party
+@wiking	goa party?
+ CaBa	Saurabh7: not that much into party tourism ;)
+ Saurabh7	CaBa, ah i see :)
+-!- travis-ci [~travis-ci@ec2-54-224-16-174.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's lambday's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/129440847
+-!- travis-ci [~travis-ci@ec2-54-224-16-174.compute-1.amazonaws.com] has left #shogun []
+ OXPHOS	wiking: fancier one.. saw the irc log. Lots of people around : )
+ lisitsyn	you should visit moskva!
+-!- HeikoS [~heiko@nat-240-186.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ CaBa	lisitsyn: :D
+ sanuj	lisitsyn: you got back your vowels!!!!!!!!!!!!!!!!
+ Saurabh7	davai moskva
+ sanuj	i need to train a model now which requires all of my laptop's ram
+ sanuj	so goodbye chrome :P
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has quit [Quit: Page closed]
+@wiking	sanuj: for the (irc) record: use irsii or bitchx ;)
+@wiking	lisitsyn: who's your client? :D
+ lisitsyn	wiking: irssi over znc
+@wiking	yep
+@wiking	i wanna try again bitchx :)
+@wiking	i really liked that client
+@wiking	:
+@wiking	:
+@wiking	:
+@wiking	:>
+ lisitsyn	BitchX is the most popular IRC client among Unix systems. You can also use it on Windows, but if you had a Picasso painting, would you put it in the bathroom?
+@wiking	:)
+ CaBa	wiking: did you... just recommend bitchx?!
+@wiking	best client ever
+@wiking	why
+@wiking	?
+ CaBa	interesting... where i come from it's considered worse than mIRC ^^
+@wiking	mirc fuck
+@wiking	that is a piece of fucking shit
+ CaBa	does bitchx still do this terrible bold type thing?
+ CaBa	wiking: yes. that's why i mentioned it to illustrate bitchx's reputation ^^
+@wiking	so what's a good client for you? :)
+ CaBa	irssi of course
+@wiking	:D
+ CaBa	i didn't know there was another opinion!
+ CaBa	does emacs exist? ;)
+@wiking	yeah
+ OXPHOS	I don't want to rush you guys..but it would be nice if someone can take a look at my proposal? @ wiking, HeiKoS : )
+ lisitsyn	which?
+@HeikoS	OXPHOS: hey hey :)
+@HeikoS	sorry I was so busy recently
+@wiking	oh
+@HeikoS	but its better soon
+@wiking	but wait
+@wiking	where's the proposal :D
+ OXPHOS	lisitsyn: Assuming you're talking to me..The Detox Project. I currently only shared with the assigned mentors but I'd love to have you look at it. Though I think I'll harass you with cookbook problem : )
+@wiking	:DDDDDDDDDDDDDD
+@wiking	ah
+@wiking	lemme see again
+@HeikoS	OXPHOS: looking at it now
+ OXPHOS	wiking: https://docs.google.com/document/d/1eozTFX_mgKx3eXQfQnP07Rxi8GYKfGYdu_qvGpLRnjw/edit?usp=sharing
+ lisitsyn	OXPHOS: please ping me anytime but I could be drunk and fail to respond
+ lisitsyn	OXPHOS: have you seen my 'Some' class?
+ OXPHOS	HeikoS: Thx! No rush. Just want to make sure I can get everything done on time.
+@HeikoS	OXPHOS: you are right
+@HeikoS	can you point me on something that we should start with discussing?
+@HeikoS	for linalg, lambday and wiking had a discussion
+ OXPHOS	lisitsyn: Nope sorry. where is it?
+@HeikoS	we need some decisions there
+ lisitsyn	OXPHOS: shogun/base/some.h IIRC
+@HeikoS	the design goals are: we want to be able to switch at runtime (not compile time), while we want to avoid too much overhead in the method calls
+ OXPHOS	HeikoS: Yes I guess people have different ideas
+ lisitsyn	tensorflow
+ lisitsyn	:D
+@HeikoS	lisitsyn: noooo
+ lisitsyn	YYY
+@wiking	TENSOOOOOOOOOOOOOOOORFLOOOOOOOOOOOOOOOOW
+@wiking	:D
+@wiking	floooooooooooow
+@wiking	man
+@wiking	i'm tired of deep neural nets
+@wiking	:)
+ lisitsyn	seriously why not haha
+@wiking	lets do something else
+@HeikoS	because we can't
+@HeikoS	need python to use it
+@wiking	we cant what?
+ lisitsyn	??
+@HeikoS	use tensorflow
+@wiking	they use swig
+ lisitsyn	no
+ lisitsyn	das ist not korrekt
+@wiking	its eigen + c++
+ lisitsyn	yesz
+@HeikoS	no
+@wiking	what no?
+ lisitsyn	it is
+@HeikoS	cannot build computation graphs from C++
+@HeikoS	only execute
+@HeikoS	so you have to build the graphs in python
+@HeikoS	export
+@HeikoS	then execute with c++
+@wiking	eh shitfuckers
+@wiking	:)
+ lisitsyn	https://github.com/tensorflow/tensorflow/tree/master/tensorflow/core
+ lisitsyn	really?
+@HeikoS	yes
+ lisitsyn	but we don't need graphs
+@HeikoS	otherwise I would have done a project on that ;)
+ lisitsyn	we need tensors
+@wiking	OXPHOS: so i added an idea
+@HeikoS	graphs as in computation description
+ OXPHOS	lisitsyn: Lemme check. Wondering why other people can compile successfully. Thx!
+@wiking	anyhow
+@HeikoS	wiking: you still owe us this mail about the linalg design
+@wiking	fuck deep nets
+ lisitsyn	DEEP NETS
+@wiking	HeikoS: i've replied
+@wiking	:)
+@HeikoS	ah really
+@wiking	yep
+@HeikoS	sorry didnt see yet
+@HeikoS	checking
+@wiking	but yeah i should explain that more afaik
+@wiking	*imo
+ OXPHOS	wiking: thx. sorry I forgot to mention page 3-4 are new stuff
+@HeikoS	virtual functions llama?
+@wiking	HeikoS: yeah
+@wiking	OXPHOS: ok checking bassza meg
+@wiking	:)
+@HeikoS	wiking: ok read it
+@HeikoS	what do we do with OXPHOS?
+@HeikoS	in terms of linalg
+@HeikoS	wiking: I am just discussing with rahul here
+@HeikoS	so lets say linalg is a plugin
+@HeikoS	then signature need to use SGMatrix etc
+@HeikoS	OXPHOS: you follow as well?
+@HeikoS	lisitsyn: ^
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+@lambday	wiking: lisitsyn: yo!
+@HeikoS	but if this is the case, then how to we avoid that data is transferred to GPU in every call on viennaCL things
+@wiking	lambday: hola
+@wiking	HeikoS: w8
+@HeikoS	sitting next to each other btw 8-)
+@wiking	i'm currently commending on the doc
+@wiking	*commenting
+@HeikoS	ah ok
+@wiking	gimme 5 more mins
+@HeikoS	cool sure
+@lambday	wiking: yeah me and Heiko were discussing about the interface that the linalg plugin shoudl provide!
+@HeikoS	OXPHOS: ok so linalg needs a bit discussion
+@HeikoS	OXPHOS: lets talk about serialization
+@HeikoS	while wiking comments
+ OXPHOS	HeikoS: Sure
+@HeikoS	what we need for that is a working prototype to start with
+@HeikoS	you mentioned you had 2 ideas
+ OXPHOS	HeikoS: Ah you mean the code
+@HeikoS	I mean we need something that cerealises an existing shogun class
+@HeikoS	OXPHOS: can you ellaborate a bit on your proposal?
+ OXPHOS	HeikoS: Thought I'll start that when I'm reaching that part
+ OXPHOS	So now the parameters need to be saved are added via SG_ADD
+@HeikoS	OXPHOS: I think it would be great to write a minimal example that is self contained
+@wiking	ok i think i'm done
+@wiking	OXPHOS: i second HeikoS idea
+@wiking	and the same should be done for shared_ptr
+@wiking	(see my commment in your doc)
+@HeikoS	OXPHOS: it doesnt need to be embedded into shogun fore now
+@wiking	++
+@HeikoS	but illustrate the technical problems and how then can be solved
+@HeikoS	so create a fake shogun class
+@HeikoS	and code that uses cereal
+@HeikoS	really important to do this stuff relatively early
+@wiking	arianepaola: we have a possible starter for pipy... do you want to further work on that for the time being?
+@wiking	it should be straight forward to fix and finish it
+ OXPHOS	HeikoS, wiking: so like an independent test case, but looks like a shogun one?
+@HeikoS	OXPHOS: exactly
+@wiking	yep yep
+ OXPHOS	okay got it
+@wiking	should be really striaghtforward
+ OXPHOS	yes
+@wiking	and the hdf5 thing i would really leave it
+@wiking	when you have time
+@wiking	and forget asccii output
+@wiking	so the default cereal output formats
+ OXPHOS	haha okay. This would make thins easier
+@wiking	are good... and if you have remaining time you can do those
+ OXPHOS	*things
+@wiking	yep yep
+@wiking	it's just better to have the whole serialization working
+@wiking	with cereal
+@HeikoS	wiking: so about the linalg
+ OXPHOS	sure
+@HeikoS	so lets say it is a plugin
+@HeikoS	and all the methods take SG* as input
+@HeikoS	good?
+@wiking	yep
+@HeikoS	ok then we have a few cases
+@HeikoS	1.) all is CPU, that is easy as it is as things are now
+@HeikoS	2.) I explicitly want to run a linalg operation on GPU
+@HeikoS	how would that work?
+@wiking	ok so if you want to have gpu linalg
+@HeikoS	we can create a GPUMatrix in Shogun code, and then wrap a SGMatrix around it, and pass it to linalg
+@wiking	you set your new linalg backend
+@HeikoS	or does every call to gpu linalg transfer data?
+@wiking	(a plugin)
+@HeikoS	I see
+@wiking	that'll load all the shit in
+@HeikoS	when does the data transfer happen?
+@HeikoS	in every call?
+@wiking	nono
+@wiking	you transfer it once
+@HeikoS	ok
+@wiking	why would you transfer it back an forth
+@HeikoS	so there is like a method for that?
+@HeikoS	agreed,  .... how does it look like
+@HeikoS	since the method iterface is SGMatrix
+@wiking	you can have a static code for that
+@wiking	transfer to gpu
+@wiking	transfer to cpu
+@wiking	that function returns you an object
+@wiking	that has reference on the data
+@HeikoS	say we have big matrix
+@wiking	in question
+@wiking	i mean if you know that you wanna use a gpu
+@wiking	then you would get that to gpu as soon as possible
+@wiking	(possibly when you load in the data)
+@wiking	but if that's not possible
+@wiking	you'll have to do it at some point
+@HeikoS	so what if no GPU is available
+@HeikoS	and therefore the plugin
+@HeikoS	what happens?
+@wiking	you can have the plugin
+@HeikoS	inside shogun code
+@wiking	but when you load in the plugin
+@wiking	you should have an assert/warning
+@wiking	whatever
+@HeikoS	ok so runtime error
+@wiking	that it cannot be used
+@HeikoS	no fallback
+@wiking	and then you can fallback
+@wiking	why cant you
+@HeikoS	ok if we do a fallback
+@wiking	i mean say you have a linalg interface
+@wiking	that will have a default value
+@wiking	right
+@HeikoS	then I am confused how the signatures would look like
+@wiking	so i would say that our default linalg backend is
+@wiking	eigen based
+@wiking	but that's still a plugin
+@wiking	but a plugin that is required
+@HeikoS	Isnt this very similar to the existing proposal?
+@HeikoS	just that it is a plugin
+@wiking	which proposal?
+@wiking	i mean there was a proposal
+@wiking	that a) compile 2 different shoguns
+@wiking	b) transfer data between cpu-gpu all the time
+@wiking	:)
+@HeikoS	no we dont want both of that
+@wiking	i mean i dont see any of these being what i'm talking about
+@wiking	i know
+@wiking	they are xor
+@wiking	anyhow
+@wiking	so you have a backend registered
+@HeikoS	rahul asks what the base class is for both of the matrix classes
+@HeikoS	for the runtime fallback
+@wiking	what do you mean by runtime fallback for matrix clas?
+@HeikoS	because the static methods take GPUMatrix
+@HeikoS	so if no GPU is available
+@HeikoS	you said we do fallback to the eigen3 linalg
+@wiking	you wont be able to get GPUMatrix
+@wiking	right?
+@HeikoS	exactly
+@wiking	how do you get a GPUMatrix object
+@wiking	if you dont have a GPUMatrix
+@wiking	i mean
+@HeikoS	so the code does not run then?
+@wiking	GPU matrix
+@HeikoS	that is, the GPU implementations will not work if there is not GPU?
+@HeikoS	no fallback to CPU?
+@wiking	it could
+@HeikoS	mmh
+@HeikoS	how?
+@wiking	you can still have
+@wiking	the reference to be a noop
+@wiking	right?
+@wiking	*NOP
+@HeikoS	not sure I understand
+@wiking	i mean say you have a
+@wiking	SGMatrix
+@wiking	and say you have an implementation of a special algo X
+@wiking	and that algo x is written in
+@wiking	using GPU code
+@wiking	right?
+@HeikoS	ok
+@wiking	so you'll have a transfer function
+@wiking	of the SGMatrix -> GPUMatrix
+@wiking	right?
+@HeikoS	ok
+@HeikoS	that is static
+@wiking	whatever
+@HeikoS	kk
+@wiking	somebody will do it for you
+@wiking	somehow
+@wiking	it just represents that the data is on the gpu end
+@wiking	*memory
+@wiking	if you have a GPU that will actually do the transfer
+@wiking	but if you dont why cannot that be a NOP?
+@wiking	it's a bit ugly
+@wiking	but will work
+@HeikoS	so that means: runtime error?
+@wiking	no
+@wiking	it's a no operation
+@wiking	you dont do anything with the matrix
+@wiking	no transfer
+@HeikoS	so it just ignores
+@wiking	just wrap it into GPUMatrix
+@HeikoS	the call
+@wiking	and you can continue with the whole thing
+@HeikoS	so the GPU matrix is still CPU matrix on the computer
+@wiking	gpumatrix's data will still reside on the cpu
+@HeikoS	I get it now
+@HeikoS	I see now
+@wiking	only shitty part is
+@HeikoS	so this means we have to heavily modify GPUMatrix
+@HeikoS	but ok
+@wiking	i mean
+@wiking	we could i believe
+@wiking	maaaybe
+@wiking	learn some or more
+@wiking	from magma
+@wiking	i hope they have a nicer way to do this
+@wiking	never really checked the code
+@HeikoS	wiking: I think this NOP thing is ok
+@wiking	but who knows
+@wiking	it's ugly a bit
+@HeikoS	wiking: I mean in reality
+@HeikoS	GPU algorithms will be slow as f*** on CPU
+ OXPHOS	Naive idea: cmake detects whether GPU is available/GPU is enabled and generate a FLAG?
+@HeikoS	and one needs alternative implementation if one wants to change back and forth
+@wiking	in former times opencv had the similar way
+ OXPHOS	Then do everything in GPU if FLAG=true?
+@wiking	dunno if they have now a better way to do this
+@HeikoS	OXPHOS: yes something like this
+@HeikoS	wiking, OXPHOS, lambday so let me summarise
+@HeikoS	1.) linalg will become a plugin (not part of OXPHOS work for now, but sanuj)
+@HeikoS	2.) all methods will be virtual and use SGMatrix SGVector in signatures
+@wiking	huh fuck
+@wiking	opencv's interface is really shit
+@wiking	:)
+@wiking	it got worse than it was
+@wiking	2) actually no virtual
+@wiking	:)))
+@HeikoS	3.) there will be some kind of factory which one can ask to transfer data back and forth to GPU that takes and returns GPUMAtrix type
+@wiking	you can actually avoid using virtual
+@wiking	and when you register the backend
+@wiking	you register your function pointers
+@HeikoS	3.) ok no virtual, just overloaded
+@HeikoS	ah I see
+@HeikoS	ok
+@wiking	so this way you can avoid the virtual function overhead
+@wiking	and btw
+@HeikoS	4.) transfer to GPU is an empty function in case the gpu linalg is not available
+@wiking	we should really do something about Features->dot ;)
+@HeikoS	wiking: yep :)
+@HeikoS	and we should profile cache misses in shogun
+@HeikoS	but OK
+@HeikoS	OXPHOS:
+@HeikoS	that is your summary for linalg
+@wiking	HeikoS: yeah i did some changes for false cache stuff
+@HeikoS	a prototype would be nice here as well
+@HeikoS	since it helps for facilitationg these discussions
+@HeikoS	wiking: cool
+ OXPHOS	got it.
+@HeikoS	wiking: we had some 8x factor speedups in MMD tests here via doing this properly
+@HeikoS	OXPHOS: same here, make a minimal standalone prototype
+@HeikoS	that has all important things we mentioned
+@HeikoS	and that compiles/runs
+@HeikoS	just need to put a single operation
+@wiking	HeikoS: you mean that you dont use virtual functions everywhere ;P
+@HeikoS	wiking: nono, sweeping through data sequentially
+@wiking	ah yeah
+@HeikoS	wiking: BTW, this way of linalg doesnt requires it to be a plugin
+@wiking	pipeline cache
+@HeikoS	it could be part of base
+@HeikoS	but not sure what we do there
+@wiking	you mean the interface?
+@wiking	i mean Linalg
+@wiking	should be there in base
+@wiking	but it's just the class
+@wiking	where you can register
+@wiking	the actual linalg backend
+@wiking	etc
+@HeikoS	wiking: another question
+@HeikoS	so you do the transfer call to GPU, and you get a GPUMatrix
+@HeikoS	no matter whether it happened or not, but you get the type
+@HeikoS	then you want to call linalg method
+@HeikoS	and then linalg methods are overloaded for both CPU/GPUMatrix?
+@HeikoS	so compile time determined?
+@wiking	that's why i said it's a bit ugly
+@HeikoS	but then what about this thing:
+@HeikoS	I have no GPU
+@HeikoS	I do the transfer call
+@HeikoS	I get GPUMatrix that lives in main memory
+@HeikoS	I pass it to linalg::dot( ... )
+@HeikoS	what happens inside there?
+@HeikoS	it fails?
+@wiking	nono
+@wiking	it should never fail
+@wiking	it should seemless do the operation
+@HeikoS	but if the type is static
+@wiking	:)
+@HeikoS	how would the fallback work?
+@HeikoS	since I definitely pass GPUMAtrix
+@wiking	i mena here is the shit part
+@wiking	there are couple of way around
+@HeikoS	the plugin falls back inside?
+@HeikoS	as in
+@wiking	if you know your backend doesn't support
+@wiking	GPUMatrix
+@wiking	you can do a transfer back
+@wiking	to SGMatrix
+@HeikoS	if (GPUMatrix.is_cpu) { cpu_linalg::fot( )))
+@HeikoS	inside linalg::dot() ?
+@wiking	which in case that was a GPUMatrix where data is in main memory
+@wiking	again a noop
+@wiking	*nop
+@HeikoS	where does this happen?
+@HeikoS	inside the gpu linalg method?
+@wiking	you dont have gpu or cpu linalg method
+@wiking	you just have linalg:dot
+@HeikoS	so the interface then is?
+@HeikoS	GPUMatrix m
+@wiking	and now i'm thinking
+@HeikoS	transfer_to_gpu(m)
+@wiking	do we really need
+@wiking	the distinguishing part
+@HeikoS	this is weird
+@wiking	of CPU/GPU
+@HeikoS	wait
+@HeikoS	let me first understand this
+@wiking	i mean it will work
+@wiking	but too much unnecessary wrapping
+@HeikoS	argh
+@HeikoS	firealarm
+@wiking	that's why i'm pivoting the idea
+@wiking	:)))))))))))
+@HeikoS	haha
+@wiking	exam period?
+@HeikoS	ah its turned off again
+@HeikoS	test
+@HeikoS	hahahaha
+@wiking	so the thing is that you can do these transfer back and forth
+@wiking	that is a nop
+@HeikoS	so when is the conversion of GPUMatrix->SGMatrix happening?
+@wiking	but then it's a bit of an overhead
+@HeikoS	before I call linalg::foo?
+@wiking	if the GPUMatrix was actually
+@wiking	represented in main memory?
+@wiking	it's a nop right?
+@HeikoS	yes
+@wiking	and you do that in the call
+@HeikoS	but the type I get is GPUMatrix
+@wiking	say it's a dot product
+@HeikoS	but linalg::foo needs SGMatrix
+@wiking	you are now talking about the actual implementaiton
+@wiking	not the interface you'd be calling right?
+@HeikoS	no just kind of the API
+@HeikoS	and what is happening
+@wiking	yeah but fuck
+@HeikoS	on high level
+@wiking	linalg::foo(SGMatrix)
+@wiking	linalg::foo(GPUMatrix)
+@wiking	right?
+@HeikoS	ok
+@wiking	and depending on your backend
+@wiking	one or the other is supported
+@wiking	or?
+@wiking	i mean what do you do
+@wiking	when you call
+@HeikoS	what happens in linalg::foo(GPUMatrix) if the transfer was nop?
+@wiking	linalg::foo(SGMatrix)
+@wiking	on a GPU linalg backend?
+@HeikoS	sure
+@wiking	will you do the transfer of SGMatrix -> GPUMatrix
+@wiking	do the foo(GPUMatrix)
+@wiking	then do the GPUMatrix -> SGMatrix and return?
+@wiking	from linalg::foo(GPUMatrix)
+@wiking	?
+@wiking	i mean in some way it's the same problem
+@HeikoS	nono I was just confused
+@wiking	no what i mean now
+@HeikoS	but my question still is what how the fallback works
+@wiking	what do you do in this case really?
+@wiking	yeah but fuck
+@wiking	it's the same problem
+@HeikoS	when linalg::foo(GPUMatrix) is called
+@wiking	ok so you have a linalg::foo(GPUMatrix)
+@wiking	and you backend is actually cpu
+@wiking	then you will do a NOP GPUMatrix -> SGMatrix
+@wiking	call linalg::foo(SGMatrix)
+@HeikoS	inside the foo method?
+@wiking	yes
+@wiking	as you can see this is the same problem
+@wiking	as i've mentioned about
+@wiking	GPU backend getting SGMatrix
+@wiking	and there
+@wiking	the bigger question is
+@wiking	what is your backend
+@wiking	and how do you have a reference on that?
+@HeikoS	mmh this fallback inside each method of linalg seems a bit strange to me
+@wiking	ok so lets take the other problem
+@wiking	the one above
+@wiking	GPU backend
+@wiking	and you have a GPU
+@wiking	and you regitered the linalg backend to be GPU
+@wiking	did you imagine to runtimeexception
+@wiking	when you call linalg::foo(SGMatrix)
+@wiking	?
+@HeikoS	no
+@HeikoS	that should work
+@HeikoS	as I dont want everything to be GPU
+@HeikoS	right?
+@wiking	yeah
+@HeikoS	what if the transfer_to_gpu actually returned SGMatrix if GPU was not available, and then we use auto as type as pass it to linalg::foo, which then gets linalg::foo(SGMatrix)
+@wiking	but how will it work?
+@wiking	i mean you'v just regitered your linalg backend to be GPU
+@wiking	how will then your SGMatrix linalg method still work?
+@wiking	which bakcend will you use?
+@HeikoS	I see
+@HeikoS	no only selected calls should be GPIU
+@wiking	so you say
+@wiking	linalg is ALWAYS cpu
+@wiking	and then you can choose some functions to be working
+@wiking	as gpu
+@wiking	if you register them?
+@wiking	otherwise you expect that to still work
+@HeikoS	yes I think so
+@wiking	with cpu?
+@HeikoS	yes if GPU is not available
+@wiking	ok cool
+@wiking	then i would just stop
+@wiking	having gpumatrix
+@wiking	:)
+@HeikoS	and do everything inside SGMatrix
+@wiking	yes
+@wiking	and then do the transfer
+@wiking	by hand in the algo
+@wiking	if there's gpu backend
+@HeikoS	yes
+@wiking	and then you call the fucking thind
+@HeikoS	since the transfer is expensive
+@HeikoS	we want to be explicit
+@wiking	and then it'll work either with the gpu
+@wiking	backed one
+@wiking	or just the simple one
+@HeikoS	yes
+@wiking	if no gpu
+@wiking	i think this is cleaner
+@wiking	because then you dont need
+@wiking	linalg::foo(SGMatrix)
+@wiking	linalg::foo(GPUMatrix)
+@wiking	just linalg::foo(SGMatrix)
+@wiking	and you can have like SGMatrix.onGPU()
+@wiking	and if it's on gpu then you call the gpu backend
+@wiking	otherwise fallback
+@HeikoS	yes
+@wiking	good?
+ OXPHOS	: )
+@HeikoS	so we dont have two plugins
+@HeikoS	so if I call linalg::foo(SGMatrix)
+@wiking	no you still have a plugin
+@HeikoS	inside that method, it check SGMatrix::onGPU()
+@wiking	GPU plugin
+@wiking	i mean that you register
+@HeikoS	and then calls the corresponding thing
+@wiking	i mean that's a plugin
+@wiking	you can have it available
+@HeikoS	yeah ok
+@HeikoS	so still plugins
+@wiking	yeah yeah
+@wiking	dont want to statically compile it
+@wiking	but yeah
+@wiking	you make it sure that its regitered
+@wiking	and say
+@wiking	if you have
+@wiking	linalg::foo(SGMatrix)
+@wiking	where SGMatrix::onGPU() = True
+@wiking	but you didn't register a GPU backend
+@wiking	then you throw a big motherfucking runtime exception
+@wiking	to the user
+@HeikoS	haha
+@wiking	that he is an idiot
+@wiking	:)
+@HeikoS	ok agreed :D
+@wiking	because he transferred the data to gpu
+@wiking	but not registered the gpu backend for the linalg
+@HeikoS	what exactly means registiering the gpu backend?
+@wiking	well you say to the linalg 'interface'
+@wiking	linalg::register_backend(LinalgImplementation)
+@wiking	i mean the thing is here
+@HeikoS	and this happens in the algorithms
+@wiking	or whenever
+@wiking	user can override this
+@wiking	at any point of time
+@wiking	i mean
+@wiking	the idea is here
+@wiking	that we can have
+@wiking	N different CPU linalg backends
+@wiking	and K different GPU linalg backends
+@wiking	right?
+@HeikoS	yes
+@wiking	so actually
+@wiking	i would have in linalg
+@wiking	a function
+@wiking	linalg::transfer_to_gpu(SGMatrix)
+@wiking	and then it'll use the registered GPU backend
+@wiking	and if no backend is available
+@HeikoS	ok but by "user" you mean shogun developer that writes algo?
+@wiking	i.e. not registered
+@HeikoS	or actualy user?
+@wiking	well that's the thing
+@wiking	you dont want to anchor the actual GPU backend
+@wiking	or?
+@HeikoS	no
+@HeikoS	definitely
+@wiking	i mean you just want that the algo using gpu
+@HeikoS	we want to be able to change
+@wiking	if possible
+@HeikoS	yeah
+@wiking	but you dont really care
+@wiking	if it's cuda or something else
+@wiking	or?
+@HeikoS	so inside algorithm, we just assert that fact THAT there is GPU, not WHICH backend
+@wiking	yep
+@wiking	because it should be the user's decision
+@HeikoS	about the runtime error
+@HeikoS	user doesnt register GPU backend
+@wiking	which actual implementation of linalg he wanna use
+@HeikoS	but calls algo which contains a transfer
+@HeikoS	should still work right?
+@wiking	yyeah
+@wiking	it's a NOP
+@wiking	you can warning it
+@wiking	so that the user knows
+@wiking	that it's gonna be shit
+@HeikoS	yeah
+@wiking	because he didn't register a GPU backend
+@HeikoS	yeah
+@wiking	its either intentional
+@wiking	or by mistake
+@wiking	user will decide
+@HeikoS	ok cool
+@HeikoS	I am happy with this
+@wiking	btw
+@wiking	the soon we'll have to have
+@HeikoS	OXPHOS: overwhelmed? ;)
+@wiking	shogun.config file
+@HeikoS	OXPHOS: make sure you ask questions
+@HeikoS	since you will be the person drafting this
+@HeikoS	IRC_log -> C++ prototype -> shogun code
+@wiking	sanuj ^ when you read the irc logs
+ OXPHOS	HeikoS: I'll take some time to digest :P
+@wiking	maybe with the whole plugins thing
+@wiking	we'll need to add a support for shogun config
+@wiking	because
+@HeikoS	OXPHOS: one thing is that most of the design doesnt depend on linalg being a plugin yet
+@wiking	a) where are the .so-s residing
+@HeikoS	OXPHOS: the transfer calls, the method signatures the unit tests etc etc
+@wiking	b) which linalg backend you wanna use
+@wiking	HeikoS: ^ what do you say
+@wiking	?
+@HeikoS	wiking: yeah
+@HeikoS	I think that is good
+@wiking	i think this should be config file
+@wiking	or seomthing
+@HeikoS	yeah definitely
+@HeikoS	good for experiments
+@wiking	because the parameters will grow very rapidly
+@HeikoS	we can actually use that to replace these horrible HMM_USE_SHORT_REAL
+@wiking	i mean a simple key=value file is good
+@wiking	yeah indeed
+@HeikoS	USE_BENCHMARK_KMEANS_XYZ_IMPL
+@HeikoS	yep
+@HeikoS	wiking: I know
+@HeikoS	we can use a
+@HeikoS	Python dictionary
+@HeikoS	hahah ;D
+@wiking	:DDDDDDDDDDDD
+@wiking	json? :D
+@HeikoS	yeah or just text
+@HeikoS	whatever
+@HeikoS	good idea
+@HeikoS	OXPHOS: btw as for priorities
+@HeikoS	OXPHOS: can you write this down in a summary?
+@HeikoS	in your doc
+ OXPHOS	HeikoS: doens't really know how plugin makes a difference yet :( ... will look up
+@HeikoS	design goals, API details
+ OXPHOS	HeikoS: sure
+@wiking	HeikoS: you are using her as a secretary? :)
+@HeikoS	well it is her project
+@wiking	hehehe and sanuj's
+@wiking	:>
+ OXPHOS	XD
+@HeikoS	wiking: thanks for discussion btw, super helpful
+@wiking	no worries
+@lambday	wiking: that really helped a lot
+@wiking	:)
+@HeikoS	OXPHOS: about the cereal stuff, I think we can only really discuss this once there is a prototype
+@wiking	++
+@lambday	gottta run for now.. see you!
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has quit [Quit: leaving.]
+@HeikoS	please let us know if there are any problems creating this
+@HeikoS	Saurabh7: you are still around?
+@wiking	OXPHOS: if you have a problem with cereal let me know i can help
+@wiking	and with the docs
+@wiking	just put anything into your gdocs
+@wiking	ping me
+@wiking	and then we can review
+@wiking	it really doesn't matter if it's not perfectly clear
+@wiking	jsut lets ahve something that we can later modify etc
+@HeikoS	Saurabh7: please use callgrind to profile benchmarks you write -- in particular for the cache miss
+@wiking	prof
+@wiking	:)
+@wiking	best profiler
+@wiking	:>
+@HeikoS	Saurabh7: I have this idea of systematically checking all the algorithms you touch, and producing a report for the end
+@HeikoS	or prof ^:)
+@wiking	mmm but
+@wiking	we should actually
+@wiking	buildbot this
+@HeikoS	we should really be aware
+@HeikoS	wiking: good point
+@wiking	(systematically checking algos)
+@wiking	i mean i'm now w8ing on amazon
+@HeikoS	and creating historam
+@HeikoS	haha
+@wiking	as then i'm moving all the builds
+@HeikoS	yeah
+@HeikoS	 :)
+@wiking	to aws
+@HeikoS	profiler can be on aws right?
+@wiking	and use our current machines
+@wiking	nono
+@wiking	it's not reliable
+@wiking	but we have our own machines
+@HeikoS	for like l2 cache miss?
+@wiking	we can do those there
+@wiking	nono aws is a shit
+@wiking	it's VPS
+ OXPHOS	Sure thank you guys
+@wiking	so the actual IO and CPU performance
+@wiking	pretty much depends
+ OXPHOS	So far cereal doesn't seem to be big issue
+@wiking	on the host machine's load
+@wiking	so doing benchmarks on aws is really not a good idea
+@wiking	as it's not consistent
+@wiking	rcurtin and mlpack is not using aws for the same reason for benchmarking
+@wiking	but once we have the aws credits
+@wiking	we can move every test build there
+@wiking	and use the barebone machines
+@wiking	for benhcmarking
+@HeikoS	ok
+@HeikoS	yeah I see
+@HeikoS	get it
+@HeikoS	wiking: man I am really amazed by this cache miss/git thing
+@HeikoS	such a big difference
+@HeikoS	between c++ impementations
+@HeikoS	I mean factor 8 -- come on
+@HeikoS	of my 2012 gsoc project to what we hav enow
+@HeikoS	and thats not even multicore
+@wiking	HeikoS: what actually did you there?
+@wiking	random accessed the CFeatures?
+@HeikoS	yes kernel matrix
+@HeikoS	based on block wise sums
+@HeikoS	of a big matrix
+@HeikoS	that is permuted
+@wiking	ah
+@wiking	i see
+@HeikoS	so just changing from reading sequentially over permutation vector to sequentially over data helped a lot
+@HeikoS	then some other things
+@HeikoS	that depend on algo
+@wiking	ah btw
+@wiking	WHO WILL
+@wiking	do as part of gsoc
+@wiking	the subset of CFeatures
+@wiking	:>
+@wiking	threadsafe
+@wiking	and i really want that on the end of this gsoc
+@HeikoS	haha
+@HeikoS	Saurabh7: ^
+@HeikoS	add that to your listr
+@HeikoS	for your bagging machine right?
+@wiking	anything
+@wiking	i mean it would be nice to have a thread-safe view on a cfeatures
+@wiking	:)
+@HeikoS	wiking: actually
+@HeikoS	Saurabh7: already brought that up
+@HeikoS	what would be cool
+@HeikoS	would be a general view
+@HeikoS	on matrices and vectors
+@HeikoS	not just features
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has joined #shogun
+@HeikoS	that also includes dimensions
+@HeikoS	like numpy array
+@wiking	yeah yeah
+@wiking	i mean i dont care how it is solved :)
+@wiking	and how abstract it is
+@wiking	jsut that we have this fixed
+@HeikoS	kk
+@HeikoS	also needed for parallel xvalidation
+@HeikoS	Saurabh7: that is another one for your project
+-!- besser82_ [~besser82@fedora/besser82] has quit [Remote host closed the connection]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has quit [Ping timeout: 250 seconds]
+ arianepaola	wiking: sure
+-!- HeikoS [~heiko@nat-240-186.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 252 seconds]
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 260 seconds]
+-!- ptizoom [~christian@host-92-3-89-217.as43234.net] has quit [Ping timeout: 250 seconds]
+-!- mizari [~mizari@95-174-213-100.nts.su] has quit [Ping timeout: 276 seconds]
+-!- OXPHOS [8ca3fe9e@gateway/web/freenode/ip.140.163.254.158] has quit [Quit: Page closed]
+-!- ptizoom [~christian@host-92-21-210-16.as13285.net] has joined #shogun
+-!- ptizoom [~christian@host-92-21-210-16.as13285.net] has quit [Ping timeout: 250 seconds]
+-!- ptizoom [~christian@host-92-21-199-6.as13285.net] has joined #shogun
+-!- ptizoom [~christian@host-92-21-199-6.as13285.net] has quit [Ping timeout: 244 seconds]
+-!- ptizoom [~christian@host-92-21-201-105.as13285.net] has joined #shogun
+-!- ptizoom [~christian@host-92-21-201-105.as13285.net] has quit [Ping timeout: 276 seconds]
+-!- ptizoom [~christian@host-92-21-194-73.as13285.net] has joined #shogun
+-!- ptizoom [~christian@host-92-21-194-73.as13285.net] has quit [Ping timeout: 260 seconds]
+--- Log closed Thu May 12 00:00:52 2016

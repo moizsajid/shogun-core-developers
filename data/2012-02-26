@@ -1,0 +1,247 @@
+--- Log opened Sun Feb 26 00:00:19 2012
+-!- ishaanmlhtr [~chatzilla@115.242.51.224] has quit [Ping timeout: 260 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- ishaanmlhtr [~chatzilla@115.240.99.77] has joined #shogun
+-!- ishaanmlhtr [~chatzilla@115.240.99.77] has quit [Quit: ChatZilla 0.9.88 [Firefox 9.0.1/20111220165912]]
+-!- delcoder [~ishaan@115.241.200.198] has joined #shogun
+-!- blackburn [~qdrgsm@188.122.248.245] has joined #shogun
+-!- blackburn [~qdrgsm@188.122.248.245] has quit [Quit: Leaving.]
+-!- wangyi160 [3ac2e06c@gateway/web/freenode/ip.58.194.224.108] has joined #shogun
+ wangyi160	hi,yo
+ wangyi160	anybody here
+ wangyi160	I have a question, I am using java interface, where is Load.load_numbers, it is very confusing in the example
+ wangyi160	I use DoubleMatrix.loadAsciiFile to replace that, but seems wrong
+-!- blackburn [~qdrgsm@188.122.248.245] has joined #shogun
+-!- wangyi160 [3ac2e06c@gateway/web/freenode/ip.58.194.224.108] has quit [Quit: Page closed]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	blackburn: hi!
+ blackburn	hi
+ n4nd0	blackburn: I cannot manage to fix a compile error I am getting for the example with the Mahalanobis distance
+ blackburn	heh let me try to help
+ n4nd0	blackburn: the include directive to the header file MahalanobisDistance.h is working fine
+ n4nd0	blackburn: but I still get 'CMahalanobisDistance' was not declared in this scope
+ n4nd0	blackburn: and the class is defined in that header
+ blackburn	please paste source somewhere
+ n4nd0	http://snipt.org/uVR6
+ n4nd0	and the header goes here
+ n4nd0	http://snipt.org/uVS3
+ n4nd0	I thought it might be cause by the ifdef HAVE_LAPACK directive
+ n4nd0	put the error persisted when I commented it out :S
+ n4nd0	but*
+ blackburn	ok let me think
+ blackburn	n4nd0: does your snippet work with euclidean distance?
+ n4nd0	yes
+ blackburn	hmm
+ blackburn	strange, can't see any error
+ blackburn	could you please paste the .cpp as well?
+ n4nd0	here it is http://snipt.org/uVV4
+ n4nd0	blackburn: I am doubting whether the ifdef HAVE_LAPACK in the .cpp file might be a problem
+ blackburn	n4nd0: shouldn't be if you have lapack
+ blackburn	it should be here for sure
+ n4nd0	blackburn: ok
+ blackburn	hm
+ blackburn	n4nd0: chekc interfaces/modular/Distance_includes.i
+ blackburn	and interfaces/modular/Distance.i
+ blackburn	and add your distance to make it available from modular (python,etc)
+ n4nd0	blackburn: I have done it now but the error is still there
+ n4nd0	but I guess I have to compile shogun first again
+ blackburn	no, it won't help with this error
+ n4nd0	mmm then it's bad
+ blackburn	I currently can't see any reason why it fails :(
+ n4nd0	blackburn: you were right, it didn't make the trick to compile :(
+ n4nd0	blackburn: I have no idea why can it be wrong
+ blackburn	try to use it from python
+ blackburn	when things could get clearer
+ n4nd0	ok
+ n4nd0	blackburn: you like more python definetely ;P
+ blackburn	sure, but I just want to check your distance is being included
+ blackburn	btw you will like it too if you don't
+ n4nd0	I like it but I have more experience with C++ now
+ n4nd0	but I want to improve my python skills
+ n4nd0	I'll be back later
+ blackburn	ok
+ blackburn	I'll try to find out error
+-!- wangyi160 [3ac2e06c@gateway/web/freenode/ip.58.194.224.108] has joined #shogun
+ wangyi160	hi
+ blackburn	wangyi160: hi
+ wangyi160	Oh, finally, I found it in the examples/java_modular folder... it seems I should import the whole folder into eclipse..
+ wangyi160	why no one answer me... no help, only help myself
+-!- wangyi160 [3ac2e06c@gateway/web/freenode/ip.58.194.224.108] has quit [Quit: Page closed]
+ blackburn	hah
+* blackburn is curious where is the question :D
+ n4nd0	:D
+ n4nd0	blackburn: so the instruction from shogun.Distance import MahalanobisDistance works fine from python
+ n4nd0	blackburn: that is at least a good new I guess :)
+ blackburn	yeah good news
+ n4nd0	blackburn:time to debug then! it looks like my Mahalanobis distance gives always zero as a result :S
+ blackburn	haha good distance
+ n4nd0	haha eveything is close :P
+ n4nd0	blackburn: now that I think of it, is there any way to debug the code written in C++ from a example written in python?
+ n4nd0	blackburn: I don't know if I make my point clear...
+ blackburn	well I usually do some debug print
+ blackburn	it usually helps, but sometimes C++ example is required..
+ n4nd0	blackburn: all right, so just using printf/cout in the C++ code I will get the traces when I execute the example with python?
+ blackburn	no, use SG_PRINT
+ n4nd0	SG_PRINT("Test message", stdout)?
+ blackburn	w/o stdout part
+ n4nd0	does it work with printf formatting style?
+ n4nd0	SG_PRINT("%d", 5)?
+ blackburn	yes
+ n4nd0	cool, thank you
+-!- delcoder [~ishaan@115.241.200.198] has quit [Ping timeout: 252 seconds]
+ n4nd0	blackburn: another question :P
+ blackburn	shoot
+ n4nd0	blackburn: so when one is working with just one file within the project doing some debugging, like I am doing right now with this mahalanobis distance
+ n4nd0	blackburn: is there any way to just build that part so the modifications can be tested faster?
+ blackburn	not really, when you change .h interfaces will recompile
+ blackburn	but changing .cpp's will not cause interfaces recompile - would be much faster
+ n4nd0	but it is the same process then
+ n4nd0	make, make install?
+ blackburn	yes
+ n4nd0	ok
+ blackburn	just try to change only cpp
+ blackburn	interfaces won't recompile
+ blackburn	it is the slowest step here
+ n4nd0	ok
+ n4nd0	to run configure also makes the recompilation right?
+ n4nd0	I mean that it forces it
+ blackburn	yes
+-!- delcoder [~ishaan@115.242.104.177] has joined #shogun
+ n4nd0	blackburn: man, why can I do RealFeatures(fm) if fm contains just one feature vector?
+ n4nd0	ups can't I wanted to say
+ blackburn	it should be matrix
+ blackburn	I guess numpy treated it as vector
+ n4nd0	I will try to make a cast then ... but I am actually loading it using LoadMatrix
+ blackburn	numpy tends to do this thing sometimes
+-!- blackburn [~qdrgsm@188.122.248.245] has quit [Quit: Leaving.]
+-!- blackburn [~qdrgsm@188.122.248.245] has joined #shogun
+ n4nd0	blackburn: I was checking the copy constructor of the class SGVector
+ blackburn	aha
+ blackburn	what's up with it?
+ n4nd0	blackburn: shouldn't it copy the contents to another portion of memory?
+ n4nd0	blackburn: I don't think it does that
+ blackburn	well
+ blackburn	I guess clone is supposed to do that
+ n4nd0	yeah I tried with that too
+ n4nd0	but clone is actually cloning the T*, not the SGVector structure itself
+ blackburn	what do you mean?
+ blackburn	I can see it does exactly what you want..
+ n4nd0	you mean clone_vector in SGVector?
+ n4nd0	maybe there is a method clone I didn't see
+ blackburn	yes, clone
+ blackburn	not clone_vector
+ n4nd0	aha, all right, I didn't see that one
+ n4nd0	sorry
+ blackburn	no problem :)
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Client Quit]
+-!- delcoder [~ishaan@115.242.104.177] has quit [Quit: Leaving]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	blackburn: fixed :) I am obtaining nice distance values now
+ blackburn	nice
+ n4nd0	one question about the design
+ n4nd0	this Mahalanobis distance looks to be defined both for distance from a point to a distribution and for distance between two distributions
+ n4nd0	is it interesting to have both or point to distribution is ok?
+ blackburn	I think it should be distance rhs -> lhs pointwise
+ blackburn	i.e. lhs should be considered as distribution
+ n4nd0	ok
+ n4nd0	the function compute receives two indexes as arguments because of inheritance, one of them is not used then
+ n4nd0	no problem with that right?
+ blackburn	yeah
+ blackburn	it is ok I guess
+ n4nd0	I found it weird that I can use the code with no problem from python but it was not working before in the C++ example
+ blackburn	don't worry we will find out what is wrong with it
+ n4nd0	blackburn: I will do a pull request then
+ blackburn	yeah
+ n4nd0	blackburn: by the way, should I write sth in author and copyright?
+ blackburn	yes, your name :)
+ blackburn	I hope it fits into one line ;)
+ blackburn	joke :)
+ n4nd0	haha it does ;)
+ n4nd0	a bit longer than the usual ones, but it does
+ n4nd0	:D
+ blackburn	what is J. btw?
+ blackburn	:)
+ blackburn	btw my name has patronymic, so I am Sergey Olegovitch Lisitsyn :) going long as well
+ n4nd0	Jos?
+ blackburn	I see
+ n4nd0	Fernando Jo?e Iglesias Garc?a
+ n4nd0	:P
+ blackburn	I heard brazil guys have even more names
+ blackburn	:)
+ n4nd0	yeah it might be
+ blackburn	I am curious
+ blackburn	do you understand portuguese?
+ n4nd0	I can understand quite a lot actually
+ blackburn	I see
+ n4nd0	but I used to hang out with people from Brazil when I lived in Spain
+ blackburn	I used to try to learn portuguese
+ blackburn	(failed,yeah)
+ n4nd0	oh cool
+ blackburn	and no time anymore to do such things haha
+ n4nd0	do you manage to understand then "ai se eu te pego"?
+ n4nd0	haha
+ blackburn	no, do not understand anything
+ blackburn	well soeren has been learning russian for X years
+ blackburn	and I have been learning german at school
+ n4nd0	and do you manage with German and he with Russian?
+ blackburn	and actually we both do not really understand each foreign lang :)
+ n4nd0	I think Russian must be really difficult!
+ blackburn	I'll took some spanish lessons from you ;)
+ n4nd0	cool
+ blackburn	no idea, could be :)
+ n4nd0	I am still fighting against Swedish :O
+ blackburn	how long have you been in Sweden?
+ n4nd0	this is my second year studying here
+ blackburn	I see
+ n4nd0	I have been for about 18 months now I think
+ blackburn	ah not really long
+ n4nd0	I came back to Spain during summer and so on
+ blackburn	so you are going back to spain this summer again?
+ blackburn	I wonder why you have choosed to study in sweden :)
+ n4nd0	the university is really well-known in the university I came from
+ blackburn	I see
+ n4nd0	I wanted to go to the nordic countries
+ n4nd0	but I was not very sure to which one
+ blackburn	not cold enough? :)
+ n4nd0	so this university made the final decision
+ n4nd0	haha
+ blackburn	we have some cold towns here
+ blackburn	;)
+ blackburn	I live in not-very-cold-enough one though
+ n4nd0	it is fucking cold in winter but the worst thing for me is the sun ...
+ blackburn	what's up with the sun?
+ n4nd0	one needs almost to pray to see it during winter
+ blackburn	ah
+ n4nd0	too few hours of sun for me
+ n4nd0	never thought that it would affect me but it actually does
+ blackburn	funny, never thought it can affect so hard
+ n4nd0	where do you come from in Russia? I have a couple of friends from Moscow and Volgograd living here in Stockhollm
+ n4nd0	Stockholm*
+ blackburn	I live in Togliatti
+ blackburn	and study in Samara
+ blackburn	so going back and forth
+ blackburn	it is pretty near :)
+ n4nd0	good
+ blackburn	I'm going to commit some things too soon
+ n4nd0	what have you been working on?
+ blackburn	generic multiclass things
+ n4nd0	haven't heard about them
+ n4nd0	what are they in particular?
+ blackburn	ah just some classes making possible to use binary classifiers
+ blackburn	as multiclas
+ blackburn	s
+ blackburn	OvR, OvO
+ n4nd0	ok
+ n4nd0	time to bed
+ blackburn	good night
+ n4nd0	good night
+ n4nd0	and thank you for all your help ;)
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ blackburn	you are welcome
+ CIA-64	shogun: Sergey Lisitsyn master * r1ddb633 / (10 files in 2 dirs): Introduced multiclass generics - http://git.io/afbXAg
+ shogun-buildbot	build #557 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/557  blamelist: blackburn91@gmail.com
+ CIA-64	shogun: Sergey Lisitsyn master * rdb9a699 / (2 files): Hotfix for MC machines - http://git.io/_d2Ujg
+ shogun-buildbot	build #558 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/558
+--- Log closed Mon Feb 27 00:00:19 2012

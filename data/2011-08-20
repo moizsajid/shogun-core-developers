@@ -1,0 +1,164 @@
+--- Log opened Sat Aug 20 00:00:06 2011
+ CIA-87	shogun: Soeren Sonnenburg master * r57c1c84 / examples/undocumented/java_modular/check.sh : improve java's check.sh - http://git.io/nKDWSA
+ CIA-87	shogun: Soeren Sonnenburg master * r7d3b613 / examples/undocumented/csharp_modular/check.sh : improve mono tests - http://git.io/1AVYCw
+ shogun-buildbot	build #75 of r_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/r_modular/builds/75
+-!- blackburn [~blackburn@188.122.238.50] has joined #shogun
+ CIA-87	shogun: Sergey Lisitsyn master * r2ca6531 / .gitignore : Updated gitignore - http://git.io/G53bhQ
+ CIA-87	shogun: Sergey Lisitsyn master * r569d85e / (19 files in 9 dirs): Yet another warnings removal - http://git.io/btXRNA
+-!- blackburn [~blackburn@188.122.238.50] has quit [Quit: Leaving.]
+ shogun-buildbot	build #76 of r_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org:5347/builders/r_modular/builds/76  blamelist: blackburn91@gmail.com
+ shogun-buildbot	build #75 of python_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/python_modular/builds/75
+ shogun-buildbot	build #77 of r_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/r_modular/builds/77
+-!- alesis-novik [~alesis@188.74.87.206] has joined #shogun
+ alesis-novik	Hey sonney2k , where's the warning log again (or undocumented stuff log)
+-!- blackburn [~blackburn@188.122.238.50] has joined #shogun
+@sonney2k	http://shogun-toolbox.org:5347/waterfall
+@sonney2k	alesis-novik, e.g http://shogun-toolbox.org:5347/builders/python_modular/builds/74/steps/compile/logs/warnings%20%2853%29
+-!- blackburn [~blackburn@188.122.238.50] has quit [Quit: Leaving.]
+-!- f-x [~user@117.192.222.10] has joined #shogun
+-!- alesis-novik [~alesis@188.74.87.206] has quit [Quit: Leaving]
+-!- blackburn [~blackburn@188.122.238.50] has joined #shogun
+ blackburn	sonney2k: what's up with buildbots?
+@sonney2k	blackburn, ?
+ blackburn	it seems interfaces builds are out-of-date
+ blackburn	I fixed a couple of warnings but they are still here
+ CIA-87	shogun: Soeren Sonnenburg master * r226853f / src/configure : fail when java/ruby/lua are enabled but not found - http://git.io/uoLPJw
+@sonney2k	blackburn, my computer is too unstable :(
+ blackburn	why?
+@sonney2k	I cannot figure out why
+@sonney2k	spent lots of time w/ trying
+@sonney2k	(newer linux kernel version, very conservative options, fan running full speed, unplugged usb extensions, no more pci cards, removed / added memory ...)
+@sonney2k	random reboots are the evil of it all
+@sonney2k	If I don't figure out why these happen I will have to buy a new machine
+ blackburn	sad
+@sonney2k	in this case it will certainly have enough power to be a buildbot, core i7 / 16G memory - but thats another 400 EUR and more fiddling time :/
+ blackburn	sonney2k: macos failure..
+@sonney2k	?
+ blackburn	reported on trac
+@sonney2k	blackburn, he should try git
+@sonney2k	that is for shogun 0.10
+ blackburn	ah
+ blackburn	sonney2k: should I answer?
+@sonney2k	please
+ blackburn	sonney2k: but how you know it is 0.10?
+@sonney2k	blackburn, believe me I know
+ blackburn	okay
+ CIA-87	shogun: Sergey Lisitsyn master * r37c5df6 / (4 files): Got rid of custom distance usage in Isomap and MDS - http://git.io/-Fxj6Q
+ CIA-87	shogun: Sergey Lisitsyn master * rba59f81 / (2 files): Updated dimension reduction examples - http://git.io/jH9jbA
+ blackburn	sonney2k: is there any define I could use for detecting if pthreads are here?
+@sonney2k	blackburn, I ordered a new machine now
+ blackburn	uh
+ blackburn	expensive
+@sonney2k	so somewhen next week I hope we will have some better buildbot
+@sonney2k	400 EUR
+ blackburn	I have added HAVE_PTHREAD flag
+ blackburn	will commit soon
+@sonney2k	3.4 GHz Quad-Core i7-2600K
+@sonney2k	will certainly be fater
+@sonney2k	faster
+@sonney2k	blackburn, err but osx *has* pthreads
+@sonney2k	blackburn, are you using sth non-standard?
+ blackburn	spinlock
+ blackburn	may be it is non standart
+@sonney2k	why spinlock?
+ blackburn	I don't know
+ blackburn	faster
+@sonney2k	isn't mutex sufficient?
+@sonney2k	blackburn, but they do busy loops or?
+ blackburn	I don't know really
+ blackburn	but it is faster
+@sonney2k	blackburn, how much faster?
+ blackburn	hmm I have tested on 5000 vectors
+ blackburn	it was ~4.1s for serial
+ blackburn	~4.8s for mutex
+ blackburn	and 3.8 for spinlock
+@sonney2k	so all the same
+@sonney2k	have you tested on 20k vectors or more?
+@sonney2k	I mean one second more or less doesn't matter
+ blackburn	nope
+ blackburn	do you suggest to use mutex anyway?
+@sonney2k	blackburn, just find out if spinlocks are nonstandard
+@sonney2k	if they are then better use mutexes
+@sonney2k	but you should test if it is faster then
+@sonney2k	I mean if the overhead is say 1-2 seconds for using mutexes (independent of # vectors that you use) it doesn't matter
+@sonney2k	but if this overhead is badly scaling with # vectors than it is no good
+ blackburn	sonney2k: okay but HAVE_PTHREAD is a good idea anyway, right?
+@sonney2k	blackburn, one question - couldn't you make the use of spinlocks optional?
+@sonney2k	blackburn, that yes
+ blackburn	yeah I could but really I should check
+@sonney2k	blackburn, I mean we could just have a macro - then one could define USE_MUTEX and mutexes will be used / otherwise spinlock
+ blackburn	pthread have _POSIX_SPIN_LOCKS definition
+@sonney2k	judging from http://www.alexonlinux.com/pthread-mutex-vs-pthread-spinlock  using mutexes/spinlocks is basically the same
+@sonney2k	blackburn, google says osx doesn't know spinlocks
+ blackburn	oh I see
+@sonney2k	so how about introducing the macro PTHREAD_LOCK
+@sonney2k	and PTHREAD_UNLOCK
+ blackburn	wait wait
+ blackburn	I need to test overhead
+@sonney2k	that will then be defined as either pthread_spin_lock
+@sonney2k	or pthread_mutex_lock
+@sonney2k	blackburn, what for?
+ blackburn	init too
+ blackburn	I'm not sure if I really should use spinlock here
+@sonney2k	yes PTHREAD_LOCK_T pthread_spinlock_t
+@sonney2k	blackburn, yeah but it makes sense to use mutexes per default
+@sonney2k	and then have a configure option to use spinlocks anyways
+ blackburn	where should it be defined?
+@sonney2k	blackburn, btw the good news about the new hardware is that with 16G I can actually run 4 buildbots in parallel
+ blackburn	nice
+ blackburn	sonney2k: I don't think we need to do it globally
+ blackburn	for example SGObject's mutex should stay mutex
+@sonney2k	blackburn, I think it shouldn't
+@sonney2k	I mean it is only for incrementing the reference count
+@sonney2k	very unlikely that two cpus even SG_REF at the same time
+ blackburn	The best time to use a spinlock is when the protected critical section of code is performing a simple CPU bound task that should be completed as quickly as possible. An example of a simple CPU bound task would be something like incrementing counters or perhaps reading or modifying a memory mapped IO port.A spinlock should NOT be used if the critical section has code in it that is IO bound. An example of this would be waiting for keyboard input from a u
+@sonney2k	so a spinlock would be faster
+@sonney2k	so a spinlock would make more sense
+@sonney2k	ref++
+ blackburn	hmm okay
+@sonney2k	blackburn, do we have mutexes at other places?
+ blackburn	I don't know
+ blackburn	where should it be introduced?
+@sonney2k	blackburn, how about Parallel.h ?
+ blackburn	hmm yeah seems so
+ blackburn	okay will try now
+ blackburn	sonney2k: could you remind me how to do parameter in macro?
+ blackburn	ah ()
+ blackburn	okay nevermind
+ blackburn	LOCK_PTHREAD_LOCK sounds just like die baby die :D
+ blackburn	or something crazy like that
+ blackburn	uh done
+@sonney2k	I much prefer burn motherfucker burn.
+ blackburn	boom
+ CIA-87	shogun: Sergey Lisitsyn master * ra7f397a / examples/undocumented/python_modular/graphical/swissroll.py : Fixed swissroll example (+5 more commits...) - http://git.io/WnqnXw
+* sonney2k is preparing for the night...
+* sonney2k ... by killing mosquitos
+ blackburn	no mosquitos here already
+ blackburn	too cold :)
+@sonney2k	blackburn, I currently see some major installation issues
+@sonney2k	mostly for the new interfaces but also one other issue
+@sonney2k	one should be able to run all examples once examples are installed
+@sonney2k	this means data has to be shipped somehow too (but where?)
+ blackburn	toy data could be included to shogun
+@sonney2k	and also that data has to be in some PATH maybe defined in environment variable
+ blackburn	agree
+@sonney2k	also examples should not include ../../../.../something
+@sonney2k	but expect these files under certain directories
+@sonney2k	and another problem: we have modshogun.so as the interface lib for python, java, ...
+@sonney2k	we have to see if we will run into problems because of the naming clash
+ blackburn	uh I feel upsat because of no burst with parallel algos :(
+ blackburn	is there a way to name it modshogun_java?
+ blackburn	or any other modshogun_shit
+@sonney2k	blackburn, that would mean though that one has to write import modshogun_python
+@sonney2k	or whatever
+ blackburn	oh nono
+@sonney2k	blackburn, parallel algos need lots of data usually to be really usefull
+@sonney2k	blackburn, for the algos I had parallel algos made a differnce for >1e6 examples
+@sonney2k	but before that hmmhh well not too much
+ blackburn	nor MDS, or isomap, or .. can handle 1e6 data hah
+@sonney2k	could be that you overoptimize then
+ blackburn	not really
+ blackburn	the problem is the bottleneck = eigenproblem is not parallel
+ blackburn	other steps burst from parallel a little
+ blackburn	but they are compartively fast
+--- Log closed Sun Aug 21 00:00:07 2011

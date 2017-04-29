@@ -1,0 +1,892 @@
+--- Log opened Wed Jun 05 00:00:03 2013
+--- Day changed Wed Jun 05 2013
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+-!- gsomix [~gsomix@188.168.3.7] has quit [Ping timeout: 245 seconds]
+-!- gsomix [~gsomix@188.168.3.7] has joined #shogun
+-!- lambday [67157f4e@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.78] has joined #shogun
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has left #shogun ["QUIT :Leaving."]
+-!- gsomix [~gsomix@188.168.3.7] has quit [Ping timeout: 256 seconds]
+-!- gsomix [~gsomix@188.168.3.7] has joined #shogun
+-!- zxtx [~zv@rrcs-74-62-200-195.west.biz.rr.com] has quit [Read error: No route to host]
+-!- zxtx [~zv@rrcs-74-62-200-195.west.biz.rr.com] has joined #shogun
+-!- nube [~rho@49.244.20.247] has quit [Ping timeout: 256 seconds]
+-!- hushell [~hushell@c-67-189-100-116.hsd1.or.comcast.net] has joined #shogun
+-!- gsomix [~gsomix@188.168.3.7] has quit [Ping timeout: 245 seconds]
+-!- nube [~rho@36.253.65.127] has joined #shogun
+-!- zxtx [~zv@rrcs-74-62-200-195.west.biz.rr.com] has quit [Ping timeout: 248 seconds]
+-!- lambday [67157f4e@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.78] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- nube1 [~rho@36.253.65.127] has joined #shogun
+-!- nube [~rho@36.253.65.127] has quit [Ping timeout: 248 seconds]
+-!- nube [~rho@116.90.228.137] has joined #shogun
+-!- nube1 [~rho@36.253.65.127] has quit [Ping timeout: 248 seconds]
+-!- lambday [67157f4e@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.78] has joined #shogun
+ lambday	sonney2k: good morning :)
+@sonney2k	lambday, hey!
+@sonney2k	lambday, if you have time please fix the build :) I mean the rng init might help...
+ lambday	sonney2k: there is another problem.. in the Complex unittest (which just checks for abs and do not have any permutation before that) also fails for 1e-15..
+ lambday	what could be the reason for that one? :(
+-!- gsomix [~gsomix@83.234.169.64] has joined #shogun
+@sonney2k	lambday, that should not happen
+ lambday	sonney2k: I checked buildbot logs and it shows failure for that test too :(
+-!- gsomix [~gsomix@83.234.169.64] has quit [Ping timeout: 248 seconds]
+-!- gsomix [~gsomix@83.234.169.64] has joined #shogun
+@sonney2k	lambday, who is computing abs(a)
+@sonney2k	for a being a complex type?
+ gsomix	good morning
+@sonney2k	is this in std:: ?
+ lambday	oh.. its the std::abs... I should have used CMath::abs() for complex, but that also currently calls std::abs() only
+@sonney2k	lambday, then you found in a bug in std::
+@sonney2k	the result is just wrong on bsd
+@sonney2k	lambday, using an arbitrary precision calculator the result should be
+@sonney2k	7.81024967590665439413
+@sonney2k	; (5**2+6**2)^0.5 - 7.81024967590665397665
+@sonney2k	0.00000000000000041748
+@sonney2k	; (5**2+6**2)^0.5 - 7.8102496759066558
+@sonney2k	-0.00000000000000140587
+@sonney2k	is what we see otherwise
+@sonney2k	so <1e-15 is what you have with the number you gave as reference
+@sonney2k	but the other is really off
+@sonney2k	gsomix, morning! today is test day right?
+ lambday	sonney2k: okay.. I should change the reference too then..
+ lambday	but what to do with this bsd? I am not sure :(
+@sonney2k	there is no fix
+@sonney2k	we can only go to 1e-14
+@sonney2k	precision
+ lambday	:(
+ lambday	okay
+ gsomix	sonney2k, yep.
+@sonney2k	and then ask wiking to install newer std stuff
+@sonney2k	gtg, cu
+ lambday	sonney2k: okies
+ lambday	ciao :)
+ lambday	I'll submit the PR soon
+-!- nube [~rho@116.90.228.137] has quit [Ping timeout: 248 seconds]
+-!- foulwall_ [~foulwall@2001:da8:215:503:8c13:264:5b04:37a7] has joined #shogun
+-!- nube [~rho@36.253.65.127] has joined #shogun
+-!- nube1 [~rho@116.90.228.137] has joined #shogun
+-!- nube [~rho@36.253.65.127] has quit [Ping timeout: 248 seconds]
+-!- gsomix [~gsomix@83.234.169.64] has quit [Ping timeout: 248 seconds]
+-!- lambday [67157f4e@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.78] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- lambday [67157f4c@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.76] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: van51 :develop * d4115d5 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/d4115d5512d5899abb983b3b428a4346d708785b
+ shogun-notifier-	shogun: Changed CList to CDynamicObjectArray in CCombinedDotFeatures (WIP)
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 2eb8ee7 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/2eb8ee78c046490ec87ce2b64d92c3f66743f637
+ shogun-notifier-	shogun: Merge pull request #1138 from van51/feature/dotfeats
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Changed CList to CDynamicObjectArray in CCombinedDotFeatures
+-!- lambday [67157f4c@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.76] has quit [Client Quit]
+ shogun-buildbot	build #1071 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1071  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #903 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/903  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #904 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/904  blamelist: van51 <vangelis_51@hotmail.com>
+ shogun-buildbot	build #1072 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1072
+-!- gsomix [~Miranda@r206-10.smr.ru] has joined #shogun
+-!- lisitsyn [~blackburn@37.61.181.124] has joined #shogun
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has quit [Quit: Leaving.]
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has joined #shogun
+ gsomix	lisitsyn: hey, listing. do you want me to do fourier transformation of your cat? do you have a cat?
+ lisitsyn	no I don't
+ lisitsyn	:(
+ gsomix	sonne|work: and you? have a cat?
+-!- foulwall_ [~foulwall@2001:da8:215:503:8c13:264:5b04:37a7] has quit [Remote host closed the connection]
+-!- hushell [~hushell@c-67-189-100-116.hsd1.or.comcast.net] has quit [Ping timeout: 260 seconds]
+-!- lisitsyn [~blackburn@37.61.181.124] has left #shogun []
+ sonne|work	gsomix: no but feel free to transform my fish :D
+-!- iglesiasg [~iglesiasg@193.147.77.22] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ shogun-buildbot	build #1196 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1196
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+@lisitsyn	sonne|work: I've started on model selection syntax
+ sonne|work	nice
+ gsomix	ok, signal processing...
+-!- gsomix [~Miranda@r206-10.smr.ru] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+-!- nube1 [~rho@116.90.228.137] has quit [Ping timeout: 264 seconds]
+-!- nube [~rho@116.90.228.137] has joined #shogun
+-!- nube [~rho@116.90.228.137] has quit [Ping timeout: 245 seconds]
+-!- nube [~rho@36.253.75.217] has joined #shogun
+-!- nube1 [~rho@116.90.228.137] has joined #shogun
+-!- nube [~rho@36.253.75.217] has quit [Ping timeout: 248 seconds]
+-!- lambday [67157f4e@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.78] has joined #shogun
+ lambday	sonney2k: hi.. I changed our CMath::abs(complex64_t a) to not to make use of std::abs() but rather calculate it
+ lambday	sonney2k: I think this should work in bsd..
+ lambday	the SGVector test error also arises from abs()...
+ lambday	but I can't check whether it works or not in bsd.. should I keep the tests as 1e-15 and if this time it doesn't work then make it 1e-14?
+ lambday	sonne|work:
+ sonne|work	lambday: yes makes sense
+ lambday	sonne|work: okay.. then sending a PR with just that
+@iglesiasg	lambday, I can merge that now
+@iglesiasg	why did you change the constant in the comparisons?
+ lambday	iglesiasg: okay :) thanks
+@iglesiasg	that is the new value you get when you run it with CMath::abs?
+ lambday	iglesiasg: no.. this is what I get using bc
+@iglesiasg	bc?
+ lambday	similar to what sonne|work: wrote this morning
+ lambday	arbitrary precision calculator or something
+@iglesiasg	aham ok
+@iglesiasg	lambday, so did you use another program to get that value?
+ lambday	iglesiasg: yes
+ lambday	for these two values
+@iglesiasg	lambday, ok, matlab or so?
+ lambday	no.. its called bc
+@iglesiasg	and it runs well on your machine
+@iglesiasg	aaah ok, got it now :)
+ lambday	http://www.gnu.org/software/bc/manual/html_mono/bc.html
+@iglesiasg	I thought bc was a generic name for arbitrary precision calculators
+@iglesiasg	though I didn't get where the shortform could come from
+ lambday	iglesiasg: my mistake :( I should have been more clear with it.. actually I didn't know about this until this morning
+@iglesiasg	lambday, no problem :)
+@iglesiasg	let's just check that the test is fine on travis build
+ sonne|work	iglesiasg: matlab just uses double too
+@iglesiasg	and later hope it goes well on bsd
+@iglesiasg	sonne|work, aham
+ lambday	yes.. the value that c++ program gives lie within the range 1e-15 of the value that bc gives
+ sonne|work	so it suffers the same issues
+@iglesiasg	sonne|work, this arbitrary precision calculator use a list of digits?
+@iglesiasg	or similar idea?
+ sonne|work	you tell it how many digits you want
+ shogun-notifier-	shogun: lambday :develop * c8cc427 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/c8cc427435b1ab974b66afe409b5f7d4b9803dff
+ shogun-notifier-	shogun: CMath::abs(complex64_t) changed to not to use std::abs()
+ shogun-notifier-	shogun: Fernando Iglesias :develop * a851de1 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/a851de1f6dd25e4405f34d08edd9451f1f34f9f3
+ shogun-notifier-	shogun: Merge pull request #1148 from lambday/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: CMath::abs(complex64_t) changed to not to make use of std::abs()
+ lambday	thanks iglesiasg: hope this works
+* lambday keeping his fingers crossed
+@iglesiasg	sonne|work, I actually think there is something in matlab to set more precision than double
+ sonne|work	iglesiasg: no there is not
+@iglesiasg	ok :)
+ sonne|work	iglesiasg: type 1-1.01
+ sonne|work	in matlab
+ sonne|work	and set format to the best possible
+ sonne|work	then you will see
+@iglesiasg	sonne|work, http://www.mathworks.se/help/symbolic/vpa.html
+ sonne|work	IIRC
+ sonne|work	format long
+ sonne|work	1-1.01
+@iglesiasg	I can be wrong
+ sonne|work	for some symbolic stuff yeah
+-!- naywhaya1e [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: @sonney2k, thoralf, naywhayare
+-!- Netsplit over, joins: @sonney2k, thoralf
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+@iglesiasg	lambday, it seems the test went fine on BSD
+@iglesiasg	at least this time :)
+ lambday	iglesiasg: ah, finally :D
+ lambday	yippie :D
+@iglesiasg	mmm although it is building again
+-!- nube1 [~rho@116.90.228.137] has quit [Quit: Leaving.]
+-!- nube [~rho@116.90.228.137] has joined #shogun
+ lambday	building twice? one for the commit and another for merge?
+@iglesiasg	I think so
+@iglesiasg	lambday, what I find funny is that it seems it first builds the commit with the merge
+ lambday	yes..
+ shogun-buildbot	build #905 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/905  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ lambday	cyg1 :'(
+* lambday feels like watching last extra 3 mins in a football match
+@iglesiasg	lambday, cygwin is not your fault
+@iglesiasg	it was already screwed :D
+@iglesiasg	it actually configured well this time
+ lambday	sse2 not found or something
+ lambday	not enabled
+ lambday	yay... bsd works :D
+@lisitsyn	bah
+@lisitsyn	did anyone touch libocas recently?
+@iglesiasg	no idea
+@iglesiasg	nothing that I can remember
+-!- HeikoS [~heiko@nat-173-83.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ thoralf	sonney2k: I put all local changes into a single commit, but I cannot commit them into the remote branch, since it already contains the "old" commits.
+ thoralf	sonney2k: Would push --force mess something up?
+ shogun-buildbot	build #906 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/906  blamelist: lambday <heavensdevil6909@gmail.com>
+ lambday	hi HeikoS
+@HeikoS	hi
+ lambday	checking your comments
+@HeikoS	commenting ... :)
+@HeikoS	lambday: done
+ lambday	HeikoS: okay.. I'm checking :)
+ lambday	HeikoS: alright..
+ lambday	I'm making the changes then
+@iglesiasg	lisitsyn, do you know why the buildbot builds first the merge commit and then the other?
+@iglesiasg	it looks weird to me, since the other one is done first
+ sonne|work	thoralf: well not for the PR
+ sonne|work	but for the general repository yeah kaboom time :D
+ thoralf	sonne|work: So you don't know other ways than 1. a new PR or 2. push --force?
+ thoralf	sonne|work: "but for the general repository yeah kaboom time" <-- parse error ;)
+ sonne|work	thoralf: push --force is what we usually do
+ sonne|work	(for PRs!)
+@lisitsyn	iglesiasg: no don't know why that
+ sonne|work	iglesiasg: I think it is building the master branch for some reason
+@iglesiasg	sonne|work, mmm but it seems to build the changes were are pushing these days, that go to develop branch
+ sonne|work	iglesiasg: well you can see what it built http://shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun
+@iglesiasg	sonne|work, yep, that is develop
+ sonne|work	no idea then
+ wiking	lisitsyn: not that i know of
+ wiking	(libocas)
+@iglesiasg	wiking, any idea why shogun buildbot builds the commit in that order?
+@iglesiasg	say there is a PR with a commit then someones merge it
+@iglesiasg	it builts first the merge, then the original commit
+ lambday	HeikoS: could please have a look at : https://github.com/shogun-toolbox/shogun/pull/1140/files#L19R508
+ wiking	iglesiasg: lol... sorry no idea
+@iglesiasg	then we leave it as x-file :D
+@HeikoS	lambday: good that you found that one!
+ lambday	HeikoS: more unit-tests? :(
+ lambday	okay adding
+@HeikoS	lambday: not your fault, but this nicely illustrates why one should always add at least one per method that makes sure no nonsense is produced
+@HeikoS	if you could add one for this, this would be very helpful
+ lambday	HeikoS: yes..
+ lambday	even I missed a few for complex and SGVector.. I'll make sure that each method is called at least once.. (may not need a separate test case for each method then)
+ lambday	or a separate one for each one is better?
+-!- Netsplit *.net <-> *.split quits: @sonney2k, thoralf
+@HeikoS	seperate is better
+ lambday	alright
+@HeikoS	lambday: but depends on how much work you want to invest
+@HeikoS	if its separated, its way easier to track errors
+@HeikoS	tests should be as simple as possible
+@HeikoS	have  alook at the SGObject tests I recently added
+ lambday	okay
+@HeikoS	20 of them or so, since it allows to quickly see whats wrong
+ lambday	and for the parameters, I should add test cases too in the TParameter tests, right?
+ lambday	for complex64_t I mean
+@HeikoS	lambday: question is what to test there
+@HeikoS	but actually, yes that would be helpful
+ lambday	compare_ptype
+@HeikoS	since then we have a fine grid of whats going on
+@HeikoS	rather than "serialization doesnt work"
+ lambday	okay.. I'll check it
+ lambday	will add that too in the PR then? including the edits for error msgs?
+-!- Netsplit over, joins: @sonney2k, thoralf
+@HeikoS	lambday: yes please do
+ lambday	HeikoS: alright :)
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- nube [~rho@116.90.228.137] has quit [Remote host closed the connection]
+-!- iglesiasg [~iglesiasg@193.147.77.22] has quit [Quit: Leaving]
+-!- gsomix [~Miranda@83.234.54.93] has joined #shogun
+ gsomix	passed
+@lisitsyn	away? teacher passed away? :D
+ gsomix	lisitsyn: huh, no. then I'd have failed the exam!
+ thoralf	gsomix: Dying teacher implies failed exam?
+ thoralf	gsomix: Drivers license? :)
+ gsomix	thoralf: no, just exam at university.
+ thoralf	gsomix: I wasn't serious. ;)
+ thoralf	gsomix: I was just wondering, which kind of exam fails if the teacher passes away... :)
+ gsomix	thoralf: ok. I'm a little inadequate now. >:3
+-!- iglesiasg [c1934d16@gateway/web/freenode/ip.193.147.77.22] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- gsomix [~Miranda@83.234.54.93] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+@lisitsyn	votjakovr: hey, when do you have exams?
+-!- naywhaya1e is now known as naywhayare
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ votjakovr	lisitsyn: hi, in june, but i'm already free
+@HeikoS	votjakovr: hi!
+@HeikoS	how is it going with the GPs?
+ votjakovr	HeikoS: hi, please wait a minute, i'd like to send a PR with moving of latent features to fitc
+@lisitsyn	votjakovr: no exams?
+ votjakovr	lisitsyn: almost :)
+-!- Netsplit *.net <-> *.split quits: @sonney2k, thoralf
+ votjakovr	HeikoS: mmm... sorry, integration tests are failed, i'm finding the reason
+@HeikoS	votjakovr: did you change any class members? variables? or any implementation details?
+ votjakovr	HeikoS: yep, but diff is empty
+-!- nube [~rho@116.90.228.137] has joined #shogun
+-!- Netsplit over, joins: @sonney2k, thoralf
+-!- HeikoS [~heiko@nat-173-83.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@nat-173-83.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- lisitsyn1 [~lisitsin@mxs.kg.ru] has joined #shogun
+ lambday	HeikoS: unit-test for float64_t seems okay?
+@HeikoS	lambday: traivs fails
+@HeikoS	CMath::sinh(a) evaluates to 162.07812441272409,162.07812441272406545067 evaluates to 162.07812441272407, and1E-15 evaluates to 1.0000000000000001e-15.
+ lambday	err
+ lambday	no idea why this happens!
+ lambday	it passed all the tests here :(
+@HeikoS	dont know, maybe some library issues?
+@HeikoS	I will get some lunch now, be back in an hour
+ lambday	I think so
+ lambday	HeikoS: okay, even I'm leaving.. be back in an hour too
+ lambday	will fix it then
+@HeikoS	ok, see you then!
+ lambday	see you :)
+-!- iglesiasg [c1934d16@gateway/web/freenode/ip.193.147.77.22] has quit [Quit: Page closed]
+-!- lambday [67157f4e@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.78] has quit [Quit: lambday]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Read error: Connection reset by peer]
+-!- nube [~rho@116.90.228.137] has quit [Quit: Leaving.]
+-!- vgorbati [~vgorbati@212.2.159.34] has joined #shogun
+-!- vgorbati [~vgorbati@212.2.159.34] has quit [Read error: Operation timed out]
+-!- iglesiasg [c1934d16@gateway/web/freenode/ip.193.147.77.22] has joined #shogun
+-!- vgorbati [~vgorbati@212.2.159.34] has joined #shogun
+ votjakovr	HeikoS: there is something strange: one of two python integration tests reports about an error and diff is empty, but another one is OK.
+@HeikoS	votjakovr: indeed strange
+@HeikoS	is this related to an example where you changed things?
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ votjakovr	HeikoS: yep
+@HeikoS	votjakovr: then maybe rewind your changes a bit to see which part borke it?
+@HeikoS	broke
+ votjakovr	HeikoS: huh... Ok, I'll try to do so...
+@HeikoS	votjakovr: maybe also show the full error message to me or sonney2k first
+ votjakovr	Detailled failures:
+ votjakovr	regression_gaussian_process_modular.py setting 1/2
+ votjakovr	====DIFF================
+ votjakovr	====EOT================
+ votjakovr	That's all
+@HeikoS	thats weird indeeed
+@HeikoS	no idea what can cause this
+ votjakovr	btw i when run this test manually and plot some stuff, everything is OK
+-!- lambday [67157f4e@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.78] has joined #shogun
+@HeikoS	I see
+@HeikoS	so then try to find out when this occured
+@HeikoS	this usually solves such problems
+ lambday	HeikoS: hi
+ lisitsyn1	votjakovr: HeikoS: looks like a crash for me
+ lisitsyn1	could be that I mean
+-!- Netsplit *.net <-> *.split quits: @sonney2k, thoralf
+ votjakovr	lisitsyn1: I think so, but I when run this test manually and it doesn't report anything
+ votjakovr	lisitsyn1: I mean segfaults, etc
+-!- Netsplit over, joins: @sonney2k, thoralf
+@HeikoS	lisitsyn1: do we have group lasso in shogun?
+@HeikoS	and in particular, group lasso for logistic regression (aka classification) ?
+@HeikoS	sonne|work, sonney2k ^
+ sonne|work	HeikoS: IIRC lisitsyn added that last year
+-!- sonney2k [~shogun@7nn.de] has quit [Ping timeout: 270 seconds]
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+ lisitsyn1	HeikoS: yes multiclass group lasso is here
+@HeikoS	lisitsyn1: which class?
+@HeikoS	and: does it work? :D
+ lisitsyn1	HeikoS: https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/multiclass/MulticlassTreeGuidedLogisticRegression.cpp
+ lisitsyn1	HeikoS: in general it is tree group lasso
+ lisitsyn1	HeikoS: well I hope it works
+@HeikoS	no documentation  ....
+@HeikoS	which algorithm is implemented in there?
+ lisitsyn1	HeikoS: algorithm of learning?
+@HeikoS	so is it based on the multiclass framework and does OvO ?
+ lisitsyn1	HeikoS: OvR
+@HeikoS	and how is the lasso problem solved
+@HeikoS	okay so its core is logistic regression I guess?
+ lisitsyn1	HeikoS: euclidean projection
+ lisitsyn1	IIRC it is called that
+@HeikoS	where did you take this from?
+@HeikoS	where is the algorithm described?
+ lisitsyn1	HeikoS: http://www.public.asu.edu/~jye02/Software/SLEP/
+ lisitsyn1	HeikoS: http://www.public.asu.edu/~jye02/Software/SLEP/manual.pdf
+ lisitsyn1	HeikoS: tree_mcLogisticR
+@HeikoS	cool thanks!
+@HeikoS	maybe this should be noted in the shogun documentation
+@HeikoS	otherwise no-one will ever use it
+ lisitsyn1	HeikoS: optimization wise it is some moreau-yosida proximal stuff
+@HeikoS	especially in case you suddenly die ;)
+ lisitsyn1	implemented in the 'altra' function
+ lisitsyn1	HeikoS: so basically accelerated projected gradient descend or so
+@HeikoS	lisitsyn1:  is there an example how to use it?
+ lisitsyn1	HeikoS: let me check
+ lisitsyn1	HeikoS: https://github.com/shogun-toolbox/shogun/blob/develop/examples/undocumented/python_modular/classifier_featureblock_logistic_regression.py
+ lisitsyn1	like that
+@HeikoS	cool thanks!
+ lisitsyn1	HeikoS: the group stuff is the same
+@HeikoS	so this block stuff defines the groups?
+ lisitsyn1	yes
+@HeikoS	I in fact never used such methods, so forgive me my stupid questions
+ lisitsyn1	HeikoS: haha no that's good question because API is stupid
+ lisitsyn1	HeikoS: you want to regularize groups of features right?
+@HeikoS	yes
+@HeikoS	Let me explain the problem:
+ lisitsyn1	like L1 of (L2 of (1,2,3)) + (L2 of (4,5,6))
+@HeikoS	maybe you have an idea
+@HeikoS	I have a dataset
+ lisitsyn1	HeikoS: ah wait
+@HeikoS	it consists of frequency measurements of the brain - with a few hundred sensors
+ lisitsyn1	do you need multiclass
+@HeikoS	yes
+ lisitsyn1	or binary?
+ lisitsyn1	alright
+@HeikoS	the sensors are place on the head of a guy
+ lisitsyn1	HeikoS: unfortunately I'd have to ask you to try and let me know if it produces something unreasonable
+@HeikoS	haha ok
+ lisitsyn1	ok lets continue
+ lisitsyn1	so each feature is
+-!- lisitsyn1 is now known as lisitsyn
+ lisitsyn	ampl of some frequency
+ lisitsyn	?
+@HeikoS	yes, its preprocessed I have  the FFt coefficients
+@HeikoS	I want to group sensors
+ lisitsyn	do you have groups of sensors?
+ lisitsyn	or do you want to group them?
+@HeikoS	makes sense to group them
+@HeikoS	the resulting weights are probably sparse
+@HeikoS	but the sparsity structure depends on the sensor positions
+@HeikoS	so I want to try to learn this
+ lisitsyn	hmm can you group sensors into some hierarchy?
+ lisitsyn	HeikoS: it is important to have these groups already
+ lisitsyn	it can't learn the groups itself
+@HeikoS	i know thats fine
+ lisitsyn	HeikoS: so the simplest way to go is
+ lisitsyn	let me check
+ lisitsyn	HeikoS: root is all features
+ lisitsyn	HeikoS: tree = IndexBlockTree(IndexBlock(0,n_features))
+ lisitsyn	then if you want no L2 of all features do tree.get_root_block.set_weight(0.0)
+ lisitsyn	and then
+@HeikoS	whats the difference between IndexBlockGroup and tree?
+ lisitsyn	HeikoS: just how they treat the IndexBlock
+ lisitsyn	HeikoS: I mean Tree uses subblocks as childs
+ lisitsyn	Group is just a set of blocks
+@HeikoS	so if I have indices
+@HeikoS	[0,1,2,3,4,5,6,7,8,9]
+@HeikoS	and I want groups
+@HeikoS	[0,1,2], [3,4,5], [6,7,8,9]
+ lisitsyn	the code will be
+ lisitsyn	tree = IndexBlockTree(IndexBlock(0,10))
+ lisitsyn	tree.get_root_block().add_subblock(IndexBlock(0,3))
+ lisitsyn	tree.get_root_block().add_subblock(IndexBlock(3,6))
+ lisitsyn	tree.get_root_block().add_subblock(IndexBlock(6,10))
+ lisitsyn	that's tree
+ lisitsyn	root        [0,1,2,3,4,5,6,7,8,9]
+ lisitsyn	children [0,1,2], [3,4,5], [6,7,8,9]
+@HeikoS	and I want the regulariser to be \lambda \sum ||groups||_2
+ lisitsyn	HeikoS: I didn't implement pure group lasso but tree lasso
+ lisitsyn	so you have to put weights here
+@HeikoS	ok, can I simulate this?
+@HeikoS	okay
+ lisitsyn	yes
+@HeikoS	how? :)
+ lisitsyn	just set the weight of root to 0
+-!- iglesiasg [c1934d16@gateway/web/freenode/ip.193.147.77.22] has quit [Ping timeout: 250 seconds]
+ lisitsyn	and you get L1/L2
+ lisitsyn	otherwise you get L1/L2 of groups
+ lisitsyn	plus L2 of all features
+@HeikoS	ok
+@HeikoS	tree.get_root_block.set_weight(0.0)
+@HeikoS	nice
+-!- mode/#shogun [+o sonney2k] by ChanServ
+@HeikoS	btw, this should really be documented somewhere (sorry to be annoying :)
+ lisitsyn	HeikoS: really ugly API
+@HeikoS	why?
+ lisitsyn	I want to do something with it but don't know what
+@HeikoS	its fine
+@HeikoS	just one needs to share the knowledge on how to use it
+ lisitsyn	HeikoS: about its working capabilities
+ lisitsyn	I *know* binary thing works
+ lisitsyn	can't say that about multiclass tree thing though
+ lisitsyn	but I will be able to find a bug rather quick
+@HeikoS	if binary works and it uses the multoclass framework than it should be fine right?
+@HeikoS	but there are also multinomial formulations of this
+@HeikoS	anyway
+ lisitsyn	HeikoS: no that's different solvers
+@HeikoS	I am glad there is something
+@HeikoS	really?
+@HeikoS	I see
+@HeikoS	did you ever test it?
+@HeikoS	like on a toy multiclass problem
+ lisitsyn	HeikoS: yes I tried to use it on road signs data
+@sonney2k	lisitsyn, HeikoS - that you are both here. When do we put up a workshop schedule?
+@sonney2k	I mean finalize the schedule!
+ lisitsyn	where HoG cells are groups
+@sonney2k	lisitsyn, did it improve anything?
+ lisitsyn	HeikoS: it produced reasonable results but worse than SVM
+ lisitsyn	sonney2k: no became worse
+@sonney2k	lisitsyn, yeah as expected :D
+@sonney2k	MKL is just crap
+ lisitsyn	sonney2k: too many parameters (each group has weight)
+@sonney2k	complex crap
+ lisitsyn	haha yes
+@sonney2k	HeikoS, lisitsyn workshop!
+ lisitsyn	everything complex sucks it seems
+@sonney2k	1 month
+ lisitsyn	sonney2k: yes yes
+ lisitsyn	what's about it?
+@sonney2k	we need to fix the schedule
+@HeikoS	sonney2k:  is there a list of people that applied?
+-!- iglesiasg [c1934d16@gateway/web/freenode/ip.193.147.77.22] has joined #shogun
+@sonney2k	as in when & where
+@sonney2k	HeikoS, did you apply?
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@HeikoS	sonney2k:  no why should I?
+@sonney2k	HeikoS, then do it
+-!- gsomix [~Miranda@85.26.235.51] has joined #shogun
+@sonney2k	HeikoS, how do we know who will come and what topics we want to see presented/discussed?
+@sonney2k	lisitsyn, did you?
+ lisitsyn	sonney2k: applying
+ lisitsyn	done
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+@sonney2k	anyway we need to come up with a fixed workshop program
+@HeikoS	sonney2k: is there a list?
+ lisitsyn	HeikoS: list of what?
+@sonney2k	lisitsyn, can you give HeikoS access to the list please
+@sonney2k	workshop document
+@HeikoS	found it
+@HeikoS	didnt know there was this google doc
+@HeikoS	20 people
+ lisitsyn	HeikoS: shared with you :)
+ lisitsyn	I'd say 17
+ lisitsyn	ha
+ lisitsyn	thoralf: one more :)
+ thoralf	:)
+@sonney2k	thoralf, will you come btw?
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Thoralf Klein :develop * 4146e2b / src/shogun/mathematics/Math.h,tests/unit/mathematics/Math_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/4146e2bb6159f01b743c4c6e226714fdda12331f
+ shogun-notifier-	shogun: Added test for sorting zero-sized vectors:
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: - CMath::qsort(* T, ...)
+ shogun-notifier-	shogun: - CMath::qsort(** T, ...)
+ shogun-notifier-	shogun: - CMath::qsort_index(...)
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 7e999bd / src/shogun/mathematics/Math.h,tests/unit/mathematics/Math_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/7e999bdd3d9c74866e25e3fa628f70fba8b61185
+ shogun-notifier-	shogun: Merge pull request #1145 from tklein23/develop
+ shogun-notifier-	shogun:
+@sonney2k	iglesiasg, registered and cheng will also be there
+ shogun-notifier-	shogun: Unit tests for CMath::qsort(): Trying to sort empty lists with qsort(*T) and qsort(**T)
+ lisitsyn	sonney2k: cheng is already here
+ thoralf	sonney2k: I just registered.
+@HeikoS	sonney2k: I suggest we count votes on topics and take the n most voted ideas
+@HeikoS	    tree.get_root_block().add_subblock(IndexBlock(0,3))
+@HeikoS	AttributeError: 'IndexBlock' object has no attribute 'add_subblock'
+@HeikoS	lisitsyn:  ^
+ lisitsyn	HeikoS: sub_block may be?
+@HeikoS	yep
+-!- vgorbati [~vgorbati@212.2.159.34] has quit [Quit: vgorbati]
+ lisitsyn	sonney2k: so what should we fix?
+@sonney2k	lisitsyn, the schedule!
+@HeikoS	sonney2k: have we decided on which topics we present?
+@sonney2k	as in who gives a talk about what, what discussions, hands ons thats
+@sonney2k	HeikoS, nope
+@sonney2k	we have to do that
+@HeikoS	sonney2k, lisitsyn so my suggestion on this, just count
+@HeikoS	find volunteers
+@HeikoS	and then assign them the topics
+ lisitsyn	yeah lets do that this way
+@HeikoS	I can do that
+@HeikoS	do we have a list of people that want to talk about things?
+ lisitsyn	HeikoS: do you want?
+@HeikoS	lisitsyn: maybe we could put names, emails, and topics somewhere
+@sonney2k	oh HeikoS and please don't forget the e.V. thing. the WS is just one month away
+@HeikoS	sonney2k: yes, havent forgot it
+@sonney2k	I don't really want to talk but hey I guess I have to
+@sonney2k	1 talk only though :)
+@HeikoS	I guess so :D
+ shogun-buildbot	build #907 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/907  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+@sonney2k	sry gtg, can we talk about this further in the evening?
+@sonney2k	thoralf, you are famous -
+@HeikoS	sonney2k, lisitsyn so noone has in fact submitted any abstracts
+* sonney2k argh if I only knew why cygwin has problems ...
+@HeikoS	I guess this means we only have our own talks
+@sonney2k	HeikoS, yes no researchers that need a plane / train ticket
+@sonney2k	in the evening then... cu
+@sonney2k	afk
+-!- shogun-notifier- [~irker@7nn.de] has quit [Ping timeout: 256 seconds]
+-!- gsomix [~Miranda@85.26.235.51] has quit [Ping timeout: 256 seconds]
+-!- shogun-toolbox [~shogun@7nn.de] has quit [Ping timeout: 256 seconds]
+--- Log closed Wed Jun 05 17:41:01 2013
+--- Log opened Wed Jun 05 17:41:12 2013
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 15 nicks [3 ops, 0 halfops, 0 voices, 12 normal]
+ shogun-buildbot	build #1075 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1075  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+-!- gsomix_ [~Miranda@85.26.235.51] has joined #shogun
+-!- Irssi: Join to #shogun was synced in 6 secs
+ shogun-buildbot	build #1076 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1076
+-!- gsomix_ [~Miranda@85.26.235.51] has quit [Ping timeout: 264 seconds]
+-!- sonney2k [~shogun@7nn.de] has quit [Ping timeout: 264 seconds]
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- gsomix [~Miranda@37.61.180.242] has joined #shogun
+-!- nube1 [~rho@36.253.6.136] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: lambday, nube, van51
+-!- Netsplit over, joins: van51
+-!- mode/#shogun [+o sonney2k] by ChanServ
+-!- iglesiasg [c1934d16@gateway/web/freenode/ip.193.147.77.22] has quit [Quit: Page closed]
+-!- nube1 [~rho@36.253.6.136] has quit [Ping timeout: 256 seconds]
+-!- nube [~rho@36.253.6.136] has joined #shogun
+-!- nube [~rho@36.253.6.136] has quit [Ping timeout: 256 seconds]
+-!- lambday [67157f4e@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.78] has joined #shogun
+-!- nube [~rho@49.244.97.103] has joined #shogun
+ lambday	HeikoS: please take a look at the PR when you're free.
+ lambday	I'm taking off for the day..
+ lambday	ciao
+-!- lambday [67157f4e@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.127.78] has quit [Quit: lambday]
+-!- Netsplit *.net <-> *.split quits: @sonney2k, nube, shogun-buildbot, flxb_, van51
+-!- vgorbati [~vgorbati@212.2.159.34] has joined #shogun
+-!- Netsplit over, joins: nube, van51, @sonney2k, shogun-buildbot, flxb_
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 246 seconds]
+-!- lisitsyn [~blackburn@37.61.180.242] has joined #shogun
+@sonney2k	lisitsyn, HeikoS so what should be the topics?
+@sonney2k	HeikoS, it looks like lots of people want MMD/HSIC :)
+@HeikoS	sonney2k: can do :)
+@HeikoS	I will do the vote list tomorrow
+@sonney2k	van51, around?
+ van51	sonney2k: yeap
+@sonney2k	van51, could you make sense of what I wrote yesterday about dotfeatures?
+ van51	sonney2k: yea
+ van51	sonney2k: by reading it on the logs
+@sonney2k	and how to do the CHashedDocFeatures / CHashedDocPreprocessor
+@sonney2k	(Doc is not the best word but no idea what else to use)
+@sonney2k	van51, I think this is no more than 1 day of work for you BTW
+ van51	sonney2k: question, the preprocessor can be used offline?
+@sonney2k	van51, offline as in?
+@sonney2k	not sure what you mean
+ van51	I mean use it with a file as input and a file as output
+ votjakovr	HeikoS: I've found that difference between a and b in compare function in tester.py approx. 10e-12 on test that gives empty diff
+ van51	and then read that file through a load method
+ van51	or something
+@sonney2k	van51, ohh actually preprocessor won't work - you need a converter
+@HeikoS	votjakovr: say again, I did not get that
+@sonney2k	van51, ok one step back. which interface do you intend to use?
+@sonney2k	pure C++?
+ van51	sonney2k: yea
+@sonney2k	or e.g. python_modular
+@sonney2k	van51, ok then well you can create your stringcharfeatures
+@sonney2k	load some strings from disk
+@sonney2k	and then apply a converter to convert them to DenseFeatures
+@sonney2k	since it is all about wordcounts you can use uint16_t or int32_t
+@sonney2k	for dense features
+@sonney2k	so you would convert StringFeatures<char> -> CDenseFeatures<int32_t> in your converter
+@sonney2k	and then of course you can print the whole matrix
+ van51	sonney2k: ah yea
+ votjakovr	HeikoS: I've changed implementation of exact inference method a little bit. Python integration test gives an error and empty diff. I've found that that the difference between a and b in compare function in tester.py approx. 10e-12
+ van51	sonney2k: this sounds ok to me
+@sonney2k	hmmhh maybe CSparseFeatures<int32_t> is better considering that you use hashes :)
+ van51	sonney2k: I am not sure that the vector will be sparse
+@sonney2k	van51, it will be: look
+@sonney2k	hash(word1) -> some large int
+@sonney2k	and you do this for all words in the docuemnt
+@sonney2k	so depending on the number of bits you use for your hash
+ van51	sonney2k: yes but from what I understand it's for dimensionality reduction and afterwards you mod that number to a specific range 0...d
+@sonney2k	say 20
+@sonney2k	you have a 1048576 dimensional vector you create of a text document
+@sonney2k	van51, well if you specify number of bits to be say 8
+@sonney2k	then it will be dense
+@sonney2k	but we the more bits we can afford the better the results
+@sonney2k	so it is usually sparse
+@sonney2k	IIRC spam filters use sth like 32bit
+ van51	sonney2k: ok, got it
+ votjakovr	HeikoS: May be it's better to regenerate test data?
+@sonney2k	van51, anyway you should really get started with that
+ van51	sonney2k: I will today
+ van51	sonney2k: btw since we're at it
+ van51	sonney2k: how do I specify the number of bits in the hashes from CHash?
+ van51	hash functions*
+@sonney2k	van51, well just use bitwise &
+@sonney2k	as in x & ((1<<8)-1)
+@sonney2k	would give you an 8 bit hash
+@sonney2k	and btw use murmurhash3
+ van51	sonney2k: ok I will
+ van51	sonney2k: thanks, you've been really helpful :)
+-!- nube [~rho@49.244.97.103] has quit [Quit: Leaving.]
+@sonney2k	van51, you just have to do this once. afterwards you will realize how simple this is
+ votjakovr	HeikoS: i've just sent a PR, please have a look at it.
+-!- vgorbati [~vgorbati@212.2.159.34] has quit [Quit: vgorbati]
+@sonney2k	van51, I've found the reason for the crash with the feature iterator
+@sonney2k	van51, bad news is that it is not easy to fix
+ van51	sonney2k: what is it?
+@sonney2k	it is indeed the conversion to SGSparseVector and reference counting
+@sonney2k	the correct patch will be very intrusive
+@sonney2k	no idea what it will break besides that but I suspect serialization and lots of other stuff
+@sonney2k	so I will need HeikoS help then too
+@sonney2k	van51, ok let me try...
+ van51	sonney2k: good luck :)
+-!- vgorbati [~vgorbati@212.2.159.34] has joined #shogun
+ van51	sonney2k: it's in the get_sparse_feature_vector() method?
+@HeikoS	votjakovr:  looking...
+@sonney2k	van51, no it is the whole CSparseFeatureMatrix class
+ votjakovr	HeikoS: thanks :)
+@sonney2k	van51, it needs to be converted to internally use SGSparseMatrix
+@HeikoS	sonney2k: reference counting for sparse vectors?
+@sonney2k	van51, otherwise refcounts are kaboom
+@sonney2k	HeikoS, we have that already
+@sonney2k	HeikoS, but SGSparseMatrix is not yet used and I will need help with serialization support for that
+@HeikoS	sonney2k: I see
+@HeikoS	who wnats to have that?
+@sonney2k	HeikoS, sorry what?
+@HeikoS	sonney2k: how come you are working on this?
+@sonney2k	HeikoS, CSparseFeatureMatrix is half-way converted to use our refcounted stuff
+@HeikoS	I see
+-!- zxtx [~zv@rrcs-74-62-200-195.west.biz.rr.com] has joined #shogun
+@sonney2k	we have crashers now due to it not being done completely
+@sonney2k	so I am doing it now (or better trying to do it)
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Roman Votyakov :develop * cd27d05 / / (11 files): https://github.com/shogun-toolbox/shogun/commit/cd27d057b1c1a7cd2e5a22741c9b7be1e1d8e896
+ shogun-notifier-	shogun: Redesigned GP framework
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 53f4ea1 / / (11 files): https://github.com/shogun-toolbox/shogun/commit/53f4ea1ff26387eb1d85988c3f547c7e8f94676a
+ shogun-notifier-	shogun: Merge pull request #1150 from votjakovr/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Redesigned GP framework
+@HeikoS	sonney2k: I see, sounds like a nasty one
+-!- hushell [~hushell@c-24-21-141-32.hsd1.or.comcast.net] has joined #shogun
+@HeikoS	at some point we have to fix all these parameter issues and bugs
+@HeikoS	also streaming ....
+@HeikoS	but so much work :(
+@HeikoS	votjakovr: what is the next step?
+@HeikoS	votjakovr: pulling GP class out?
+@sonney2k	votjakovr, woaaah massive patch!
+ votjakovr	HeikoS: I'd like to remove check_members methods
+ votjakovr	HeikoS: Also solve the problem with recomputing cholesky
+@HeikoS	votjakovr: go ahead ! I agree
+@HeikoS	yep also on that
+@HeikoS	sonney2k:  votjakovr is like a steam train :)
+ votjakovr	HeikoS: I find that update_parameter_hash() will be very helpful with that
+ votjakovr	hehe :D
+@HeikoS	votjakovr: yep :)
+@sonney2k	HeikoS, hehe yeah I would say the same about lambday ;)
+@sonney2k	HeikoS, and you and lisitsyn btw :)
+@HeikoS	yeah lambday rocks totally
+@sonney2k	maybe even more like a start destroyer 'we break for nobody'
+@sonney2k	:D
+ lisitsyn	RE!
+@HeikoS	haha :)
+@sonney2k	lisitsyn, I finally understand why you didn't even try to convert sparse featurs to use SGSparseMatrix
+* sonney2k suffers
+ lisitsyn	sonney2k: why?
+ lisitsyn	because it is mega pain in the ass you mean?
+ lisitsyn	like megaupload
+ shogun-buildbot	build #909 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/909  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	whaaaaaat?
+ votjakovr	hmmm
+@HeikoS	votjakovr: its cyg, dont worry :)
+@sonney2k	HeikoS, btw you should ask Olivier if he wants to come to the workshop :)
+@HeikoS	sonney2k: will do
+@HeikoS	he seemed ultra busy though
+@HeikoS	as everyone always seems
+@HeikoS	weird isnt it?
+ lisitsyn	what is the magical moment it comes better with our busy deals
+ lisitsyn	sonney2k: everything is getting worse with years, right?
+ lisitsyn	:D
+@HeikoS	when my evil-nano-robots conquered the planet
+@sonney2k	lisitsyn, yes it is now that you have lots of time
+ lisitsyn	sonney2k: haha ok!
+@sonney2k	once you become as old as me you would wish you would have spent your lots and lots of time you had more wisely :D
+ lisitsyn	sonney2k: tell me what I should spend it on then!
+@sonney2k	doing cool stuff
+ lisitsyn	sonney2k: haha!
+@sonney2k	lisitsyn, so of course working on shogun :D
+@sonney2k	or HeikoS nano robots
+@sonney2k	but powered by shogun
+@HeikoS	of course they are
+@sonney2k	hmmhh
+ lisitsyn	sonney2k: let see what you say when you turn 50
+@HeikoS	they are in fact powered on unit-tests
+@sonney2k	lisitsyn, hey I am not there yet
+ lisitsyn	I will turn like 36
+ lisitsyn	:D
+@sonney2k	I first have to survive this decade
+ lisitsyn	sonney2k: oh I'll turn your current year when you turn 50
+@sonney2k	what?
+ lisitsyn	sonney2k: when you are 50 I am 36
+@sonney2k	HeikoS, lisitsyn does anyone use get_feature from our features? and the on-the-fly preprocessors?
+@HeikoS	I dont know
+ lisitsyn	sonney2k: I never used on-the-fly thing
+@sonney2k	I used to use them but haven't for a long time
+ lisitsyn	well it may be a good thing but
+ lisitsyn	something is wrong
+@sonney2k	it was working when I wrote it - I made sure
+@sonney2k	but now with all that refactoring and no tests
+@sonney2k	no idea
+ lisitsyn	sonney2k: no it works I think
+ lisitsyn	I mean something is wrong with its api and etc
+ lisitsyn	it is not attractive to use
+ lisitsyn	sonney2k: see a big shot in our list
+@sonney2k	what woudl you do better?
+@sonney2k	it is very easy to do
+ lisitsyn	sonney2k: if I had idea I would do that or say :)
+@sonney2k	just attach a list of preprocessors
+@sonney2k	done
+ lisitsyn	I usually say I don't like X because I don't know how to improve it
+@sonney2k	no idea how it could be even easier
+@sonney2k	I am a bit worried about the Cache in all this
+ lisitsyn	sonney2k: I'd like to drop some code
+ lisitsyn	:D
+@sonney2k	lisitsyn, do you know some LRU cache?
+ lisitsyn	sonney2k: basics - never implemented
+ lisitsyn	you mean implementation?
+@sonney2k	I would rather use some well written thing and drop ours
+ shogun-notifier-	shogun: lambday :develop * 23d134a / / (10 files): https://github.com/shogun-toolbox/shogun/commit/23d134aa08d65d5d8df380c46c4140af9ea76398
+ shogun-notifier-	shogun: error msgs fixed for complex64_t, unit-tests added
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 6a47272 / / (10 files): https://github.com/shogun-toolbox/shogun/commit/6a47272a5d5982979faddf98d551eef60ee04c60
+ shogun-notifier-	shogun: Merge pull request #1149 from lambday/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: error msgs fixed for complex64_t, unit-tests added
+@sonney2k	yeah something we could use
+ lisitsyn	lets google
+@sonney2k	HeikoS, you do that on purpose do you? Just when I branched you mega merge
+@HeikoS	ehm?
+@HeikoS	what?
+ lisitsyn	sonney2k: a lot of implementations
+ lisitsyn	sonney2k: what is it for?
+@sonney2k	lisitsyn, our on-the-fly preprocessors use a cache to cache feature vectors
+@sonney2k	preprocessed ones I mean
+ lisitsyn	sounds complex!
+@sonney2k	I know you never used it but our DenseFeatures don't have to be in memory
+ lisitsyn	haha yes I know
+ lisitsyn	but never tried
+@HeikoS	I gotta go now
+@HeikoS	see you guys tomorrow!
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+-!- HeikoS [~heiko@nat-173-83.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+@sonney2k	to late to say bye
+ shogun-buildbot	build #1078 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1078  blamelist: Roman Votyakov <votjakovr@gmail.com>
+ shogun-buildbot	build #910 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/910  blamelist: Roman Votyakov <votjakovr@gmail.com>
+@sonney2k	lisitsyn, could you please change this to 1e-14 http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1078/steps/test/logs/stdio
+@sonney2k	looks like fabs is b0rken in old libc's
+@lisitsyn	crazy precision
+@sonney2k	lisitsyn, why?
+@lisitsyn	sonney2k: I am scaried what these guys are going to compute
+@lisitsyn	intergalactic spaceships
+@lisitsyn	or what
+@sonney2k	lisitsyn, I was already scared when I read the proposal
+@lisitsyn	sonney2k: I believe they are going to compute 4d space warping to fly away from this planet
+@sonney2k	*yay* it is becoming kind of summer here :D
+@lisitsyn	sonney2k: bayessian theoretical aspects of teleportation
+@lisitsyn	sonney2k: we should ask if nasa uses such a precision
+@lisitsyn	they must be e-3 most of the times
+@lisitsyn	:D
+@sonney2k	lisitsyn, only our SVMs are 1e-3
+@lisitsyn	sonney2k: what about the others?
+@lisitsyn	oops I am into merging issue
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * e496115 / tests/unit/lib/SGVector_unittest.cc,tests/unit/mathematics/Complex_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/e4961157662ed92cac9139fd4eca1913a4548771
+ shogun-notifier-	shogun: Lowered precision of complex unit-tests
+@lisitsyn	finally
+-!- vgorbati [~vgorbati@212.2.159.34] has quit [Quit: vgorbati]
+-!- shogun-toolbox [~shogun@7nn.de] has quit [Ping timeout: 256 seconds]
+--- Log closed Wed Jun 05 21:21:27 2013
+--- Log opened Wed Jun 05 21:21:36 2013
+-!- shogun-t1olbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 15 nicks [2 ops, 0 halfops, 0 voices, 13 normal]
+-!- Irssi: Join to #shogun was synced in 9 secs
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has left #shogun ["QUIT :Leaving."]
+-!- shogun-toolbox [~shogun@7nn.de] has quit [Ping timeout: 256 seconds]
+@sonney2k	argh out of battery
+ shogun-notifier-	shogun: van51 :feature/model_selection_syntax * b1b8570 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/b1b85707654bed214973ec65aa8c9742143a31c0
+ shogun-notifier-	shogun: Changed CList to CDynamicObjectArray in CCombinedDotFeatures (WIP)
+ shogun-notifier-	shogun: lambday :feature/model_selection_syntax * d453390 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/d453390e7ecd231fea02d4e8259a9279ea30ca7d
+ shogun-notifier-	shogun: CMath::abs(complex64_t) changed to not to use std::abs()
+ shogun-notifier-	shogun: Thoralf Klein :feature/model_selection_syntax * a361752 / src/shogun/mathematics/Math.h,tests/unit/mathematics/Math_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/a361752210386dec5027ffc84427276b39895b8d
+ shogun-notifier-	shogun: Added test for sorting zero-sized vectors:
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: - CMath::qsort(* T, ...)
+ shogun-notifier-	shogun: - CMath::qsort(** T, ...)
+ shogun-notifier-	shogun: - CMath::qsort_index(...)
+ shogun-notifier-	shogun: Roman Votyakov :feature/model_selection_syntax * 5b94f09 / / (11 files): https://github.com/shogun-toolbox/shogun/commit/5b94f09a19731d6dc13160169efdddbf10897df1
+ shogun-notifier-	shogun: Redesigned GP framework
+ shogun-notifier-	shogun: Sergey Lisitsyn :feature/model_selection_syntax * f9cdccf / / (4 files): https://github.com/shogun-toolbox/shogun/commit/f9cdccf2cf48cf4168437cbc3741288a209a2727
+ shogun-notifier-	shogun: A prototype of builder-like modelselection syntax
+@lisitsyn	sonney2k: these guys are tiresome
+@lisitsyn	ehmm I get e+180 difference
+@lisitsyn	in FITCInferenceMethod
+@lisitsyn	vgorbati: hey how are ya doin?
+@lisitsyn	sonney2k: here goes a new branch
+-!- iglesiasg [d58f3220@gateway/web/freenode/ip.213.143.50.32] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@lisitsyn	oh shit
+ shogun-buildbot	build #911 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/911  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- zxtx [~zv@rrcs-74-62-200-195.west.biz.rr.com] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot	build #1079 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1079
+ shogun-notifier-	shogun: Sergey Lisitsyn :feature/model_selection_syntax * 8ac4ed7 / src/shogun/modelselection/ModelSelectionParameters.h: https://github.com/shogun-toolbox/shogun/commit/8ac4ed73c9edf590a2b8954b5bda49e49fbfe374
+ shogun-notifier-	shogun: Some documentation for model selection range helper
+-!- Netsplit *.net <-> *.split quits: @lisitsyn, hushell, flxb_, sonne|work, gsomix, shogun-notifier-, shogun-buildbot, @sonney2k, naywhayare, wiking,  (+2 more, use /NETSPLIT to show all of them)
+-!- zxtx [~zv@rrcs-74-62-200-195.west.biz.rr.com] has joined #shogun
+-!- Netsplit over, joins: @iglesiasg, hushell, shogun-notifier-, @lisitsyn, flxb_, shogun-buildbot, @sonney2k, gsomix, thoralf, naywhayare (+2 more)
+-!- shogun-t1olbox [~shogun@7nn.de] has quit [Ping timeout: 240 seconds]
+--- Log closed Wed Jun 05 22:39:25 2013
+--- Log opened Wed Jun 05 22:39:33 2013
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 16 nicks [4 ops, 0 halfops, 0 voices, 12 normal]
+-!- Irssi: Join to #shogun was synced in 6 secs
+-!- shogun-t1olbox [~shogun@7nn.de] has quit [Ping timeout: 240 seconds]
+-!- HeikoS [~heiko@nat-173-83.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- iglesiasg [d58f3220@gateway/web/freenode/ip.213.143.50.32] has quit [Quit: Page closed]
+--- Log closed Thu Jun 06 00:00:33 2013

@@ -1,0 +1,388 @@
+--- Log opened Fri Aug 21 00:00:45 2015
+ shogun-buildbot	build #1036 of nightly_default is complete: Failure [failed test notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1036  blamelist: Wu Lin <yorker.lin@gmail.com>, Bj?rn Esser <bjoern.esser@gmail.com>
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 250 seconds]
+-!- PirosB3 [~pirosb3@host216-94-dynamic.12-79-r.retail.telecomitalia.it] has joined #shogun
+-!- lambday [c40f1065@gateway/web/freenode/ip.196.15.16.101] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+@lambday	lisitsyn: hey
+ lisitsyn	lambday: hey
+@lambday	lisitsyn: so I was reading up a few articles regarding reducing compilation time and many of them say that pimpl helps a lot - sometimes it even halved the time required
+ lisitsyn	ahh
+ lisitsyn	yeah pimpl is good
+@lambday	lisitsyn: I am worried about the overhead - and how to fit it with the tag idea you had for getters setters
+@lambday	like additional mem alloc/dealloc
+@lambday	lisitsyn: http://www.gotw.ca/publications/mill04.htm and http://www.gotw.ca/publications/mill05.htm says custom allocator/deallocator helps at times
+@lambday	herb sutter
+ lisitsyn	lambday: see post in my blog :)
+ lisitsyn	I have crazy solution
+@lambday	lisitsyn: could you please give me the link?
+ lisitsyn	a sec
+ lisitsyn	http://sergey.lisitsyn.me/2014/04/17/opaque-pointers-revisited/
+@lambday	thanks - checking
+ lisitsyn	lambday: tldr make an assumption about pimpl size
+ lisitsyn	and keep it in object directly
+@lambday	outer object
+@lambday	umm won't that be nonportable?
+@lambday	I am reading the whole thing anyway :D
+ lisitsyn	lambday: portable but not ready for changes
+ lisitsyn	you get static assert error if you exceed provided size
+ lisitsyn	you add field
+ lisitsyn	and get struct of size 48 while storage size is 32
+ lisitsyn	you have to change header
+ lisitsyn	I have no idea but I don't feel its that bad
+@lambday	hmm.. actually herb mentioned an idea similar to yours in the article link I posted..
+@lambday	but he's advising against it
+@lambday	he's suggesting that use pimpl in general and use fast pimpl only if you think that all the hassle is worth taking (make some benchmarks)..
+@lambday	but the result is impressive!
+-!- PirosB3 [~pirosb3@host216-94-dynamic.12-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+ lisitsyn	lambday: yeah I wouldn't advocate using it everywhere :)
+ lisitsyn	but I was scaried with allocator patches
+@lambday	lisitsyn: in shogun we do have our custom allocators/deallocators - why can't we take it one step further?
+ lisitsyn	lambday: yes
+ lisitsyn	that's ok
+ lisitsyn	ohh
+ lisitsyn	I see it has exactly the same idea
+@lambday	yep
+ lisitsyn	pff I should have read all the article
+@lambday	lol that's impossible
+ lisitsyn	now I feel I presented an idea
+ lisitsyn	that was presented before my birth
+ lisitsyn	or so
+ lisitsyn	:D
+ lisitsyn	1998
+@lambday	:D
+ lisitsyn	when I was 7 okay okay
+@lambday	is that it?
+@lambday	oh ya 98
+@lambday	great minds think alike :D
+ lisitsyn	idea thief
+ lisitsyn	:D
+ lisitsyn	I am
+@lambday	so I'll toy with the idea of a fast memory allocator simialr to herb's and make some benchmarks
+@lambday	maybe in shogun also it could work out for good
+ lisitsyn	lambday: hmm yes lets do it
+ lisitsyn	:)
+@lambday	lisitsyn: did we settle with the Tag or Property<T> idea for getters/setters?
+ lisitsyn	lambday: neither
+ lisitsyn	can't decide
+@lambday	let me check the mail
+ lisitsyn	:D
+@lambday	pimpl and tag/property should go together
+ lisitsyn	they come together nicely
+ lisitsyn	lambday: one thing does not
+ lisitsyn	inheritance
+@lambday	why do we need inheritance :P
+ lisitsyn	lambday: although you need just one pimpl to rule them all
+ lisitsyn	in SGObject
+@lambday	lisitsyn: could you please explain that part a bit?
+ lisitsyn	lambday: if you use tags
+ lisitsyn	you just have Map<Tag, Value>
+ lisitsyn	in the impl
+ lisitsyn	but you need just one
+@lambday	yeah
+@lambday	just one map you're saying
+@lambday	yeah
+ lisitsyn	yes
+ lisitsyn	we can have other things
+ lisitsyn	to handle signals and shit
+ lisitsyn	everything can be in SGObject
+@lambday	yes
+ lisitsyn	inheritance solved
+ lisitsyn	:D
+@lambday	how about serialization?
+ lisitsyn	just save that map
+ lisitsyn	it is as easy as it gets
+@lambday	yeah
+@lambday	:D
+@lambday	awesome then!
+ lisitsyn	ok just one thing
+ lisitsyn	I don't like tags
+ lisitsyn	they don't come with plugins
+ lisitsyn	however
+ lisitsyn	no, they could be used with plugins
+ lisitsyn	lambday: maybe we can support *both* get(string), get(tag)
+ lisitsyn	get(string) is non typed and should be casted
+ lisitsyn	get(tag) is typed
+ lisitsyn	how do you like it?
+@lambday	what do you mean by should be casted?
+* lambday brb
+ lisitsyn	lambday: get("parameter").asInt()
+ lisitsyn	lambday: till you cast it it is of some magic type
+ lisitsyn	just generic 'parameter'
+ lisitsyn	if you want to use it as int/flaot/whatever please cast :)
+* lambday back
+@lambday	lisitsyn: yes it sounds good..
+@lambday	lisitsyn: why would we need typed get(tag) then?
+ lisitsyn	for speed
+@lambday	I mean, is there anything we'd miss if not that tag? apart from the fact of a bit overhead for that string comparison
+ lisitsyn	and typed
+ lisitsyn	typed is the most important
+ lisitsyn	say you integrate into something high performance
+ lisitsyn	you do call getters often
+@lambday	yeah that's true
+ lisitsyn	I think it would be better to have something typed and fast as well
+@lambday	yeah that's true
+@lambday	so SWIG-wise it would remain the same as before
+@lambday	actually let me dig the possible implementation from the chat history - I am not recalling the details correctly
+ lisitsyn	I see no swig issue
+@lambday	lisitsyn: could you please help me understand it a bit? say, I have struct C { int i; float f;}; .. how many setter/getters would we have
+@lambday	Tag get(std::string)
+ lisitsyn	why get(std::string) is tag?
+ lisitsyn	lambday: we need get(Tag<T>) for any T
+ lisitsyn	T is int,float, + base classes of shogun
+@lambday	you were talking about supporting both
+@lambday	so Tag<T> get(std::string) and T get(Tag<T>) ??
+@lambday	assuming Tag<T> has T asT() method ?
+ lisitsyn	no
+ lisitsyn	Parameter get(string)
+ lisitsyn	T get(Tag<T>)
+@lambday	okay
+ lisitsyn	Parameter has internal type
+ lisitsyn	and has T as{T}()
+ lisitsyn	if required type is not castable from the original one
+ lisitsyn	you get runtime error
+@lambday	okay that sounds good
+@lambday	so how Parameter is related to Tag
+ lisitsyn	no relation
+ lisitsyn	Parameter is just a generic holder for some value
+@lambday	alright
+@lambday	well, if Tag is template, how would the Map in SGObject would work?
+@lambday	aah I am not finding the stammtisch log
+@lambday	found it
+ lisitsyn	lambday: oops sorry
+ lisitsyn	lambday: map would use some hash
+ lisitsyn	whatever
+ lisitsyn	you can convert Tag<T> to hash
+@lambday	demangled stuff?
+@lambday	oh
+ lisitsyn	why?
+@lambday	na nevermind
+ lisitsyn	hash Tag<T> = hash of its object + hash of type T + hash of its name
+ lisitsyn	looks valid :)
+@lambday	yeah makes sense
+@lambday	name has to be there
+@lambday	along with others
+@lambday	actually all are important
+ lisitsyn	lambday: I wouldn't care about internals
+ lisitsyn	it is solvable for sure
+@lambday	yep
+ lisitsyn	the most important is api
+ lisitsyn	lambday: we can write unit-tests first maybe
+@lambday	yeah
+@lambday	let
+@lambday	let's first have these classes - and then we'll add SGObject
+@lambday	once this whole thing work we'll iteratively add other classes to shogun-lite
+@lambday	are
+@lambday	aer*
+ lisitsyn	lambday: can we maybe select some time
+ lisitsyn	to do some real coding
+ lisitsyn	is there any time that works for you tomorrow?
+@lambday	lisitsyn: I can devote weekends now
+ lisitsyn	I mean lets take a few really intense coding sessions :D
+@lambday	lisitsyn: tomorrow works - so does tonight
+@lambday	lisitsyn: yeah
+ lisitsyn	we should be able to prototype then
+@lambday	I will be online more often on irc
+ lisitsyn	lambday: what changed?
+@lambday	lisitsyn: weekend party session stopped :D friends are going to US for MS/PhD - I'm left alone here
+ lisitsyn	haha lol
+@lambday	I'll write GRE in a couple of months
+ lisitsyn	you going to the US as well?
+@lambday	no preparation yet whatsoever :D
+@lambday	lisitsyn: fingers crossed! Before that I want to go to UK once - maybe some internship
+ lisitsyn	oh okay cool
+ lisitsyn	so we have some time before you're gone
+ lisitsyn	:D
+@lambday	1 year at least
+ lisitsyn	that happened a few times to other people
+@lambday	hah Heiko too is doing super busy PhD but he's there :D
+ lisitsyn	lambday: ok what about tomorrow same time
+@lambday	so it really depends on the people
+ lisitsyn	lets take tmux and write code together lol
+@lambday	lisitsyn: I'll be online on IRC tomorrow, say, 7:30 GMT
+ lisitsyn	ok cool
+@lambday	lisitsyn: today I'll think a bit details regarding this Tag-Parameter framework
+@lambday	maybe make a small POC
+@lambday	will help us in the discussion for tomorrow
+ lisitsyn	I can discuss things a bit later today
+ lisitsyn	I am now heading to the office
+@lambday	super
+@lambday	I will be free in 5-6 hrs
+ lisitsyn	cool
+ lisitsyn	ok let me take bus and subway :D
+@lambday	hehe go safe!
+-!- lambday [c40f1065@gateway/web/freenode/ip.196.15.16.101] has quit [Quit: Page closed]
+-!- lambday [c40f1065@gateway/web/freenode/ip.196.15.16.101] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+ lisitsyn	lambday: hey
+@lambday	lisitsyn: heya
+ lisitsyn	do you have access to hedonismbot?
+@lambday	nope
+@lambday	don't even know what that is
+@besser82	lambday, still there?
+@lambday	besser82: yes
+@lambday	besser82: how are you?
+@lambday	besser82: using fedora 22 since last week - smooth! :D
+* lambday afk
+-!- lambday [c40f1065@gateway/web/freenode/ip.196.15.16.101] has quit [Quit: Page closed]
+-!- PirosB3 [~pirosb3@host216-94-dynamic.12-79-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host216-94-dynamic.12-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@host216-94-dynamic.12-79-r.retail.telecomitalia.it] has joined #shogun
+-!- lambdday [6a3386ac@gateway/web/freenode/ip.106.51.134.172] has joined #shogun
+-!- mode/#shogun [+o lambdday] by ChanServ
+@besser82	lambday, nice ^^  Have a few questions for you...
+@besser82	lambdday, sry... been afk...
+@lambdday	besser82: hey...
+@lambdday	besser82: yeah shoot :)
+@besser82	lambdday, I'm currently experimenting with splitting Shogun into "plugins"...
+@lambdday	besser82: awesome!
+@besser82	So we can significantly reduce, e.g. memory needed for compiling swig-bindingins
+@lambdday	lisitsyn: ^^
+@besser82	He already knows  ;)
+@besser82	lambdday, ^
+@lambdday	okay.. great!
+@lambdday	so what did you find
+@besser82	I was thinking of making the math-part of Shogun pluginzed as well...
+@besser82	like having a base-lib providing factory / prototypes of the methods
+@lambdday	besser82: yes that makes sense!
+@besser82	and dyn-loading plugins for several backends
+-!- lambdday is now known as lambday
+@besser82	like a plugin for "linalg"-impl, one for "atlas / blas" and one for openCL
+@besser82	lambday, ^
+-!- shaochuan [~shaochuan@2601:647:4600:fac5:84cc:4487:f96a:1751] has joined #shogun
+@lambday	so linalg-impl is the base?
+@lambday	or it's shogun's native impl
+@besser82	linalg is the current base-impl
+@lambday	besser82: ^
+@besser82	my plan is to have stubs as base-impl
+@besser82	and then use the plugin, which is avail
+@besser82	or if several are avail the one with better perdormance
+@besser82	performance
+@besser82	lambday, ^
+@lambday	besser82: hmm.. do you think it would be better than the present header-only scenario, which we just use as more of an external lib in Shogun's cpp files?
+-!- shaochuan [~shaochuan@2601:647:4600:fac5:84cc:4487:f96a:1751] has quit [Ping timeout: 246 seconds]
+@lambday	I mean, the present functionality is more like how Eigen does it
+@lambday	no dynlibs
+@lambday	besser82: would putting these stuffs into separate plugins help us compilation-wise or swig-wise?
+@besser82	lambday, it would help in both cases
+@besser82	lambday, if we have that split, we can fully hide math-impl from swig
+@besser82	lambday, like we just have the base-lib of shogun, which just holds factory / base classes for elementary-type like CSVM, exposed to swig
+@besser82	everything else is performed on full c++-level then
+@lambday	besser82: but those things that are only used in cpp files in the implementation are also hidden from swig, isn't it? sorry I don't have much idea of how swig works..
+@lambday	I mean, if we don't expose any of these math things in public API, would swig bother about them?
+@besser82	lambday, yes, what happnes in cpp-files is mostly hidden from swig
+@besser82	lambday, but stuff in headers, like template-stuff and all needs swig to generate wrappers for
+@lambday	besser82:  even if the header is only included in the cpp?
+@besser82	lambday, not sure, but likely yes
+@lambday	besser82: that's bad!!! cause in most cpp we include <Eigen/Eigen> and that's millions of lines of code!!
+@lambday	oh but our swig doesn't generate any wrappers for eigen types, does it?
+@besser82	lambday, afaik, no...
+@besser82	lambday, but it is still really big
+@lambday	besser82: yeah that's true
+@besser82	lambday, e.g. octave-bindings currently need 6+ Gigs of RAM
+@besser82	lambday, during build
+@lambday	so in every file that header is included, the compiler has to go through the same pain every time? or things are saved in some cache or so?
+@lambday	besser82: holy ****
+@besser82	lambday, if one uses ccache-swig, then there is cache otherwise no
+@lambday	hmm
+@lambday	yeah that's bad!
+@besser82	next thing is:  pluginizing math-stuff would help to write the plugins more general...
+@besser82	like it only interfaces the lib with those stubs...
+@besser82	which then instances the real class from plugin...
+@besser82	lambday, ^
+@lambday	besser82: yeah it sounds good
+@besser82	so there won't be any matter inside the plugin which backend we use for maths
+@lambday	besser82: so how it would work? say, I have eigen3 and viennacl both in my machine - i'd ask the factory to give me a llt solver with eigen3 backend - it then dynamically loads that plugin
+@besser82	lambday, yes that way
+@lambday	besser82: sounds great then!
+@besser82	lambday, like my_maths = mathalicious::llt_instance("eigen3");
+@besser82	my_maths.perform(&data)
+@lambday	besser82: sweet!!
+@besser82	lambday, =)
+@lambday	besser82: so the thing is, we'd be using inheritance and overloading instead of compile time things
+@lambday	like we'd have this base class derived class hierarchy
+@besser82	lambday, right,  factory-class with polymorphics
+@lambday	besser82: it might take a performance hit, but more manageable for sure
+@besser82	lambday, performance has just a little penalty on init
+@lambday	and also the current template-metaprogramming thingi is tough to maintain
+@besser82	lambday, just a bit...  we just need to turn the current stuff into generalized factories
+@lambday	besser82: well, virtual calls would cost us a bit compared to compile-time scenarios but that won't be bottleneck compared to the actual operation costs
+@besser82	okay... but that's pretty affordable I'd say
+@lambday	besser82: yeah it sounds good
+@besser82	lambday,  =)  So you think: Let's give it a shot?
+@lambday	besser82: yeah sure!
+@lambday	besser82: the issue is - from where we start? :D
+@lambday	lisitsyn has a prototype ready for the plugin framework - but it has to have a bit polishing - for the ABI compatibility issues with C++
+@lambday	we thought of having a C layer and on top of it C++ layer
+@lambday	for the plugin arch
+@besser82	lambday, I'm currently writing such a nice thingie  ;)
+@lambday	besser82: superb!! please share!
+@besser82	lambday, sure, when stuff is ready for test-running  ;)
+@lambday	besser82: awesome!!! :D
+-!- txomon|home [~txomon@unaffiliated/txomon] has quit [Read error: Connection reset by peer]
+-!- txomon|home [~txomon@unaffiliated/txomon] has joined #shogun
+@besser82	lambday, my deep idea behind it is:  we keep things in seperate libs, one is shogun-baselib, one is maths and one handles plugin-stuff...
+@lambday	besser82: yeah.. that would be good..
+@lambday	besser82: now which parts would go into baselib
+@lambday	we have to have all the base classes in the baselib, right?
+@besser82	lambday, we need to have all shogun-classes (like CSVM, ...) in the shogun-lib...
+@besser82	math-related factory-classes go into the math-lib and get interfaced with the shogun-plugins directly
+@besser82	shogun-lib and math-lib interface with the pluginmanager-lib to get instances of derived classes
+@besser82	lambday, ^
+@besser82	in that way, we can hide all but needed shogun-classes and their methods from swig
+@lambday	besser82: okay so no further granularity within shogun classes - yeah this solves one major issue
+@lambday	besser82: earlier when we thought of this, it was something like, say, CMachine would be in the base-lib, but CSVM would be inside a plugin..
+@lambday	and then we were restricted to use only the methods in CMachine in CSVM that can be overridden
+@lambday	but with this approach, we won't face that issue
+@besser82	lambday, that would be possible, but would cause ugly API and those short-comings you just mentioned...
+@besser82	so, yes
+@lambday	besser82: yeah this way sounds better
+@lambday	the one that you mentioned
+@lambday	cause maths takes up quite a lot of place
+@lambday	so shogun-algorithms are actually client code for the math-lib
+@besser82	yes, or at least the math-functions used within them
+@lambday	yeah basically
+@lambday	the algorithms are anyway mostly maths :D
+@besser82	sure...  but we need to keep the algorithms general
+@besser82	like having the algorithm is the shogun-plugin and have it called the needed maths func from math-lib
+@besser82	so we can easily change math-backends
+@lambday	so it's the user who decides
+@lambday	besser82: btw me and lisitsyn were discussing about rewriting SGObject using pimpl which should go well with plugin arch as well and reduce compile time further..
+@lambday	so all the parameter stuffs go inside SGObject itself, including mem-management..
+-!- txomon|home [~txomon@unaffiliated/txomon] has quit [Read error: Connection reset by peer]
+ lisitsyn	lambday: ah and shogun server!
+ lisitsyn	if we hide impl
+ lisitsyn	we can make remote sgobject
+@lambday	lisitsyn: REST API? :D
+ lisitsyn	yes
+ lisitsyn	inside
+-!- txomon|home [~txomon@unaffiliated/txomon] has joined #shogun
+@lambday	besser82: can't wait to see your stuff :D let's all align our aims
+@besser82	lambday, lisitsyn: Yeah!  Sure!  :D
+ lisitsyn	lets design by commitee! :D
+@lambday	would be cool if we could have had that hackathon Heiko talked about last year :D
+@besser82	for sure!
+ lisitsyn	oh no with hackathon we have a risk of aiming the same goal
+ lisitsyn	;)
+@lambday	lisitsyn: that's bad?
+@lambday	:P
+ lisitsyn	jk
+@lambday	:D
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Wu Lin :develop * 84c57cc / src/shogun/optimization/ (2 files): https://github.com/shogun-toolbox/shogun/commit/84c57cc3073055c349f91d55f1b35d99ede5d6fe
+ shogun-notifier-	shogun: update comments
+ shogun-notifier-	shogun: Wu Lin :develop * e7a54ad / src/shogun/optimization/ (5 files): https://github.com/shogun-toolbox/shogun/commit/e7a54ad1709cd671d857963f5c2662218bcba69d
+ shogun-notifier-	shogun: updated comments
+ shogun-notifier-	shogun: Wu Lin :develop * f3cfdfe / src/shogun/optimization/ (6 files): https://github.com/shogun-toolbox/shogun/commit/f3cfdfe94db233c2d9e93dee38a9596b8471f254
+ shogun-notifier-	shogun: Merge pull request #2896 from yorkerlin/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: update comments
+ shogun-buildbot	build #3476 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3476  blamelist: Wu Lin <yorker.lin@gmail.com>
+-!- PirosB3 [~pirosb3@host216-94-dynamic.12-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- shaochuan [~shaochuan@2601:647:4600:fac5:84cc:4487:f96a:1751] has joined #shogun
+-!- shaochuan [~shaochuan@2601:647:4600:fac5:84cc:4487:f96a:1751] has quit [Ping timeout: 246 seconds]
+-!- PirosB3 [~pirosb3@host216-94-dynamic.12-79-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host216-94-dynamic.12-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+--- Log closed Sat Aug 22 00:00:46 2015

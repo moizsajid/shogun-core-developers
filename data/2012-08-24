@@ -1,0 +1,595 @@
+--- Log opened Fri Aug 24 00:00:17 2012
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Read error: Operation timed out]
+ shogun-buildbot_	build #75 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/75
+-!- av3ngr [av3ngr@nat/redhat/x-unomdjhlngrsqlva] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- zxtx [~zv@guest-wireless-nup-198-147-120-231.usc.edu] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-unomdjhlngrsqlva] has quit [Ping timeout: 246 seconds]
+-!- av3ngr [av3ngr@nat/redhat/session] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/session] has quit [Ping timeout: 248 seconds]
+-!- uricamic [~uricamic@2001:718:2:1634:e9e5:5ab4:359d:813d] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-canvtavaulipugsg] has joined #shogun
+-!- zxtx [~zv@guest-wireless-nup-198-147-120-231.usc.edu] has quit [Ping timeout: 264 seconds]
+-!- av3ngr [av3ngr@nat/redhat/x-canvtavaulipugsg] has left #shogun ["Leaving"]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+-!- emrecelikten [~emre@trir-4d0d9a53.pool.mediaWays.net] has joined #shogun
+-!- yoo_ [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+-!- yoo_ [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Quit: Page closed]
+-!- nicococo [~nico@guest0.ml.tu-berlin.de] has joined #shogun
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+-!- blackburn [~blackburn@109.226.79.69] has joined #shogun
+ blackburn	HELLO
+-!- yoh_ [~yoh@washoe.dartmouth.edu] has joined #shogun
+ blackburn	n4nd0: around?
+ n4nd0	blackburn: yeah
+ n4nd0	blackburn: at skype with Nico :)
+ blackburn	oh any news on SO improvements?
+ blackburn	does he have any cool ideas?
+-!- Netsplit *.net <-> *.split quits: yoh
+ n4nd0	blackburn: I have been asking here about the bundle methods
+ n4nd0	blackburn: I have the ideas more clear now :)
+ blackburn	what about subtracting <w,Psi(x,y_truth)> in argmax?
+ n4nd0	yeah we talked about that
+ n4nd0	he said that the score in the ResultSet (the return value of argmax) can be defined as we like
+ n4nd0	so yes, we can make that the score is
+ n4nd0	score = <w,Psi(xi,y)> + Delta(yi, y) - <w,Psi(xi,yi)>
+ n4nd0	that way in the generic risk we'll just do
+ n4nd0	call to argmax
+ n4nd0	and
+ n4nd0	risk += ret->score
+ n4nd0	blackburn: do you like it like that?
+ blackburn	n4nd0: yes that's ok
+ n4nd0	cool
+ blackburn	n4nd0: but we need to not forget about subtracting loss from multiclass model
+ n4nd0	blackburn: yeah, sure
+ blackburn	however this is kind of inefficient it is more general this way
+ blackburn	n4nd0: what about HM SVM?
+ blackburn	is it correct now with provided risk function?
+ n4nd0	yes
+ n4nd0	the only thing is that now (in the PR I submitted) the loss is taken into account twice
+ n4nd0	but I'll fix that within minutes now
+ n4nd0	nicococo: anything to add? :)
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Quit: Page closed]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	blackburn: what do you think?
+-!- nicococo [~nico@guest0.ml.tu-berlin.de] has quit [Ping timeout: 265 seconds]
+ n4nd0	does it sound good?
+ blackburn	n4nd0: about what?
+ blackburn	:)
+ n4nd0	about having this working well finally
+ n4nd0	supported by Nico, it gives more confidence that it is ok
+ blackburn	well yeah I don't mind to make it work :)
+ blackburn	n4nd0: can you please also document in argmax description
+ blackburn	that in training mode it computes blablah
+ blackburn	with blahblah assumption
+ blackburn	:D
+ n4nd0	ok
+ blackburn	I will add director SO model
+ blackburn	once we have everything working
+ blackburn	this would be really kind of killer feature I hope
+ n4nd0	blackburn: yeah the SO director is very interesting
+ n4nd0	I told gsomix about it
+ n4nd0	blackburn: SO model and StateModel is very interesting too!
+ blackburn	well it is pretty easy to set up, not really needed any gsomix's expertise :)
+ blackburn	director StateModel?
+ n4nd0	I would welcome StateModel very very much
+ n4nd0	yeah
+ blackburn	it is HM right?
+ n4nd0	you know when you use the HM-SVM you need another piece
+ blackburn	so i.e. if you have 3 states
+ blackburn	you would need that
+ n4nd0	yes
+ blackburn	right?
+ n4nd0	apart from the number of states, the type of model too
+ blackburn	okay lets implement that too
+ blackburn	ah llike semi markovian?
+ n4nd0	e.g. in speech recognition people used right Markov models
+ n4nd0	the transitions to the left (think of a Markov chain of states) are not allowed
+ blackburn	I think about starting PGM course *seriously* this time
+ n4nd0	yeah me too
+ n4nd0	end of September
+ n4nd0	:D
+ blackburn	n4nd0: well I don't care about that competitive stuff
+ blackburn	lections are here anyway
+ blackburn	err lectures
+ n4nd0	true
+ blackburn	and you always can submit code
+ n4nd0	we should try to take to it and motivate each other not to drop it
+ blackburn	motivation should come from research interest
+ n4nd0	that one seems so far away...
+ blackburn	what do you mean?
+ n4nd0	I see research something sooo far
+ blackburn	no it is already here in front of you
+ blackburn	staring into your eyes :)
+ n4nd0	haha we shall see
+ n4nd0	the compilation time in my computer kills me
+ n4nd0	it makes me lose time for real
+ blackburn	--disable-optimization, multiple threads?
+ blackburn	ccache?
+ blackburn	are you using that
+ blackburn	or are you talking about interfaces?
+ n4nd0	I use ccache make -j2 normally
+ n4nd0	disable-optimization on
+ n4nd0	normally just with python-modular support
+ blackburn	well what can I suggest is to use libshogun only
+ blackburn	or lets try to find a way to split interface file
+ blackburn	n4nd0: hah were you here already then we disabled optimizations in interfaces?
+ blackburn	before it took 2-3 times more
+ n4nd0	I don't think so
+ n4nd0	really?
+ blackburn	we are now using -O0 in interfaces
+ blackburn	but before it was global
+ blackburn	-O3 or -O0
+ blackburn	for everything
+ n4nd0	can imagine
+ blackburn	n4nd0: but in general I agree we really need to improve dev experience
+ blackburn	n4nd0: what mostly slows down compilation is template classes
+ n4nd0	I see
+ blackburn	n4nd0: one of reasons I felt a little pain in my bottom when you introduced matrix features :D
+ n4nd0	it could be so cool if it is just re-compiled what is changed
+ n4nd0	when one changes a header file, all over again
+ n4nd0	haha
+ n4nd0	they were required I think, didn't find anything that could do the job
+ n4nd0	though I looked for it!
+ blackburn	yes, dense wouldn't work
+ blackburn	okay dense subset is not really needed we could merge it to dense
+ blackburn	argh no pluskid around
+ blackburn	okay I have to add a unit test then
+ n4nd0	blackburn: PR updated
+ blackburn	okay let me check
+ CIA-52	shogun: Sergey Lisitsyn master * r093b502 / (7 files): Merge pull request #756 from iglesias/master (+6 more commits...) - http://git.io/_rSCmA
+ CIA-52	shogun: Chiyuan Zhang master * rba02284 / src/shogun/multiclass/MulticlassOneVsOneStrategy.cpp : tie-breaking by decision values in One-vs-One. - http://git.io/uEjFmg
+ CIA-52	shogun: Sergey Lisitsyn master * r2f3688a / src/shogun/multiclass/MulticlassOneVsOneStrategy.cpp : Merge pull request #753 from pluskid/multiclass - http://git.io/kxI4lg
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ yoo	hi all
+ blackburn	hi
+-!- alexlovesdata [~binder@goldenezahl.ml.tu-berlin.de] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- uricamic [~uricamic@2001:718:2:1634:e9e5:5ab4:359d:813d] has quit [Quit: Leaving.]
+ CIA-52	shogun: Sergey Lisitsyn master * rd50e297 / src/interfaces/modular/modshogun_ignores.i : Ignored SGVector operator+ and operator+= - http://git.io/t-TRzA
+@sonney2k	yoh_, I think you can safely assume that debian wheezy will have shogun from squeeze
+-!- gsomix [~gsomix@178.45.65.87] has joined #shogun
+ yoh_	sonney2k: 0.9.3? how ? atm there is no single version in wheezy and only viable one to enter is in unstable/sid which is 1.1.0...   or do you mean that wheezy will not have any version? ;)
+ yoh_	btw -- probably for my own sake I will just build backports of 1.1.0 and distribute from neuro.debian.net
+ blackburn	yoh_: why not 2.0?
+ yoh_	blackburn: is it released? well tested? is there a debian package? ;)
+ blackburn	yoh_: is that done for 1.1.0? :D
+ blackburn	2.0 will be released on 1st of sept
+ yoh_	blackburn: 1.1.0 was out there for a while so hopefully it is a bit more tested ;)
+ blackburn	yoh_: no it is not
+ blackburn	I am sure 2.0 have less bugs than 1.1.0
+ yoh_	blackburn: it would be great! ;)  so, ok -- is 1.1.0 worth hassle over 0.9.3?
+ blackburn	yes, sure
+ blackburn	but 2.0 is worth even more :)
+ blackburn	not feature-wise but bug-wise
+ blackburn	there were a few bugs that has to be merged 1.1.0 if it was supported
+ blackburn	to 1.1.0*
+ blackburn	yoh_: 0.9.3 has no java, no ruby.. etc
+ blackburn	yoh_: two major (I do mean major) new features are director swig stuff and structured output framework
+ yoh_	good ;-) FWIW: myself I care about python  ;)
+ blackburn	yoh_: then directors are for you probably
+ blackburn	and zero-copy features
+ blackburn	yoh_: directors allow you to take care of e.g. kernels computing using python code
+ blackburn	or to define structured model via python code
+ blackburn	(in case you didn't know what it is) :)
+ yoh_	so, 1st of sept there also would be debian packages uploaded? ;)
+ blackburn	yoh_: I am just a stupid developer, let you rather ask soeren about that :)
+ yoh_	sonney2k: btw -- from the debian build log it is not clear -- are you running unit/regresion tests at pkg build time?  it might be cool if you did ;-)
+ blackburn	to be serious I am unsure about that - sonney2k takes care about that
+ blackburn	yoh_: can I see these logs?
+ yoh_	blackburn: no way -- they are a property of the communist part of C.!
+ yoh_	nah... of D.!
+ yoh_	;) https://buildd.debian.org/status/fetch.php?pkg=shogun&arch=armhf&ver=1.1.0-6&stamp=1345539853
+ yoh_	more from here: https://buildd.debian.org/status/package.php?p=shogun
+ blackburn	oh my it is pretty big
+ blackburn	super lu is absent
+ blackburn	strange, okay not a problem
+ CIA-52	shogun: Sergey Lisitsyn master * rcbc0150 / src/shogun/structure/StructuredModel.cpp : Changed type of loop variable in StructuredModel - http://git.io/JZa_1g
+@sonney2k	yoh_, of course we don't run any tests... otherwise the build will take >1d on arm etc
+ blackburn	sonney2k: are you willing to have modsel typemaps in 2.0?
+ blackburn	we have to freeze at some point
+ blackburn	sonney2k: has TU bb gone?
+ blackburn	cygwin one
+@sonney2k	blackburn, yeah
+@sonney2k	blackburn, extra typemaps for these kind would be nice but if they dont' make it we put them in 2.1 right?
+@sonney2k	or 2.0.1
+ blackburn	exactly
+ blackburn	but 2.0 should be more or less stable
+@sonney2k	blackburn, however these are totally non-intrusive and won't hurt if not yet ready
+@sonney2k	sure
+@sonney2k	as stable as possible
+ blackburn	I have time now but a little lost what to do
+ blackburn	now I am finishing multiclass output requested by yoo a few times
+@sonney2k	blackburn, update NEWS? try to get tests to work perfectly (even old ones?)
+ blackburn	oh NEWS
+ blackburn	I love to update news :D
+ blackburn	sonney2k: however warnings are at soft zero
+ blackburn	that's actually nice
+ blackburn	ahh I need to implement director structured model
+ blackburn	very important thing to have
+@sonney2k	yeah but could as well be in 2.0.1
+@sonney2k	tests / doc is probably most important now
+ blackburn	no, disagree here
+ blackburn	sounds very important
+ blackburn	however
+@sonney2k	blackburn, very few people will use directors!
+ blackburn	may be I am wrong
+ blackburn	sonney2k: BMRM + python code sounds vvverrry interesting
+ blackburn	pure prototyping
+@sonney2k	ahh and we have to write some blog entry with nice figures ...
+@sonney2k	though I didn't receive any further ones...
+ blackburn	lol
+ blackburn	well I really thought about that
+ blackburn	but still so hard to came with any idea for me
+ blackburn	:(
+@sonney2k	blackburn, well multiclass is easy ... just illustrate e.g. 3-5 gaussians and decision surfaces for all the MC methods
+@sonney2k	multitask is more difficult
+ blackburn	hmm multitask could be
+@sonney2k	but one could create one toy example showing the solution for the 'vanilla' svm and one for a dual task one
+ blackburn	like
+@sonney2k	so show how solutions changes...
+ blackburn	pictures coming from 3 sources
+ blackburn	I'll try something
+ blackburn	dimension reduction is the easiest here
+@sonney2k	for SO  / latent variable SO we really need some fancy example like license plate recognition, speech recognition, background detection (in images)...
+@sonney2k	but that is lots of work
+ blackburn	sonney2k: good example, sound like Phd
+ blackburn	:D
+@sonney2k	blackburn, no
+@sonney2k	not when you have all the methods available already
+@sonney2k	blackburn, it is of same effort as your traffic sign detector
+ blackburn	sonney2k: I still didn't get how could that even work (background detection with SO)
+ blackburn	sonney2k: I totally failed with L1/Lq btw :(
+ blackburn	I thought it is worth to regularize cells with L2
+@sonney2k	blackburn, it is a segmentation problem you have to decide for each pixel if it is background or foreground
+ blackburn	sonney2k: yes, I understand
+ blackburn	but how technically not yet
+@sonney2k	however doing so independently (naiive way) misses correlations... so SO can help here
+@sonney2k	blackburn, I am not an image guy so better ask wiking - he did things like this IIRC
+ blackburn	sonney2k: can that be done with HM having #pixels states?
+@sonney2k	blackburn, ahh for GPs we have nice figures right?
+@sonney2k	blackburn, between 2 ... #pixels states :D
+@sonney2k	#pixels sounds a bit stupid
+ blackburn	why?
+ blackburn	argh
+ blackburn	so hidden states are
+@sonney2k	would then be like SVM
+ blackburn	back and fore?
+@sonney2k	yes
+ blackburn	what are observations?
+ blackburn	pixels?
+@sonney2k	but maybe some more
+ blackburn	intensities?
+ blackburn	or some fancy stuff like hogs would work too?
+@sonney2k	some features computed based on pixels / neighborhood
+@sonney2k	I would guess so
+ blackburn	lbp etc?
+ blackburn	I see
+@sonney2k	yeah
+ blackburn	well
+ blackburn	I could develop an example then
+ blackburn	if I understand correctly
+ blackburn	we have everything
+ blackburn	to do that
+@sonney2k	well one thing maybe not
+ blackburn	which one?
+@sonney2k	I only understand how things work for 1d images
+ blackburn	:D
+@sonney2k	so you would go through an image from left to right
+ blackburn	1d images?
+ blackburn	lol
+@sonney2k	(one line only :)
+@sonney2k	and get a state sequence F-B-B-B-B-F-F ... etc
+ blackburn	why not to flatten it row by row then?
+@sonney2k	blackburn, the dependencies matter
+ blackburn	ahh wait wait
+ blackburn	so we observe only neighborhood
+ blackburn	of each pixel
+ blackburn	not the whole image
+ blackburn	right?
+@sonney2k	yes
+ blackburn	I start to understand these pictures I have seen with CRFs segmentation
+ blackburn	there they had 9 observations and some network of it
+@sonney2k	but in SO you have the state model (simplest 2 states F & B)
+@sonney2k	and you learn some weights going from F -> B and back
+@sonney2k	so this somehow needs to be taken into account
+@sonney2k	yeah it is more like a network
+@sonney2k	(e.g. markov network)
+ blackburn	okay I see
+ blackburn	you made me interested I should try
+@sonney2k	blackburn, in this sense speech recognition is much simpler
+ blackburn	this is the application I do not understand even more
+ blackburn	in means of features
+ blackburn	how do they construct features?
+@sonney2k	you just have a number of states (phonems) and combine these phonems into most likely words
+ blackburn	how do they detect phonems?
+@sonney2k	blackburn, well a sample of a phonem
+ blackburn	is it a solved problem?
+@sonney2k	blackburn, yes
+ blackburn	okay I see
+@sonney2k	well basically you have some known phonems in training
+@sonney2k	and then you can fit gaussians or so on them
+@sonney2k	(HMMs with guassians are the standard approach for that task)
+ blackburn	sonney2k: can I fit segmentation HM with one image?
+ blackburn	would that work at all?
+ blackburn	not in generalization means but at least would it segment the image I used?
+@sonney2k	well if you used say 30% of the image for training then maybe
+@sonney2k	blackburn, the methods here are all supervised
+ blackburn	in other words
+@sonney2k	so not like a HMM that could (in theory) also segment the image in one go
+ blackburn	would it reproduce the same pattern?
+ blackburn	at least approximately
+@sonney2k	blackburn, yes
+ blackburn	sounds like pretty interesting thing
+@sonney2k	depending on #states it will reproduce the exact image :D
+ blackburn	I have to do that because I hardly believe :D
+@sonney2k	let me better work on the website...
+ blackburn	instead of?
+ blackburn	sonney2k: do you have any (just any) idea what could make our HMM class fail?
+ blackburn	I assume it was working before?
+@sonney2k	blackburn, does it fail now?
+ blackburn	test - yes
+@sonney2k	ahh test... ohh well it is difficult. randomly initialized parameters NP hard problem...
+@sonney2k	I would need to check...
+@sonney2k	if the 3 dice problem still works then it is good though
+ blackburn	I see
+@sonney2k	(3 dice with different distributions are drawn lots of times - a 3 state HMM can learn the distribution of the dice figures and when they were drawn)
+ yoh_	sonney2k: well -- it would be neat if tests were run... at least selectively for some architectures... and yeah -- it does take a while to build some of my packages on ARM because of that... ARM people should make faster chips/ports ;)
+ yoh_	imho it is better to make machines sweat than later on troubleshoot bug reports (although it is indeed unlikely to see shogun users on eg s390 ;) ) ;)
+ blackburn	We have processed the evaluation for your project named Implement multitask and domain adaptation algorithms with Shogun Machine Learning Toolbox.
+@sonney2k	blackburn, and failed as usual ;-)
+@sonney2k	I have 8 emails of this kind
+ blackburn	sonney2k: how do I manage to fail it year by year?
+ blackburn	I am tired of it already :(
+@sonney2k	at least now the Rubel rolls right :D
+@sonney2k	blackburn, http://94.23.237.10:5000/
+* sonney2k Zzzz...
+ blackburn	sonney2k: doesn't work for me
+-!- AndChat49209 [~AndChat49@host86-178-156-19.range86-178.btcentralplus.com] has joined #shogun
+ AndChat49209	.
+ AndChat49209	.
+-!- AndChat49209 [~AndChat49@host86-178-156-19.range86-178.btcentralplus.com] has quit [Client Quit]
+-!- AndChat49209 [~AndChat49@host86-178-156-19.range86-178.btcentralplus.com] has joined #shogun
+ blackburn	. :)
+ AndChat49209	Its heiko with mobile but dont know how to change name
+ blackburn	hello mobile heiko
+ blackburn	how are you and your thesis?
+-!- heiko1 [~heiko@host86-178-156-19.range86-178.btcentralplus.com] has joined #shogun
+ heiko1	hey
+ blackburn	hey
+ heiko1	dude this is horros on the mobile keyboard :)
+ heiko1	thesis is coming along, has been a prett yintense week
+ blackburn	I imagine
+ heiko1	as always: its more work than I thought :)
+ blackburn	haha
+ blackburn	yeah
+ heiko1	but still 2 weeks left
+ heiko1	so this will be ok
+ blackburn	I thought I will do my bachelor thesis in a week LOL
+ heiko1	thats optimistic :)
+ blackburn	very
+ heiko1	but I have talked to people who havent start writing things down yet
+-!- AndChat49209 [~AndChat49@host86-178-156-19.range86-178.btcentralplus.com] has quit [Client Quit]
+ blackburn	I knew quite a few guys who acted this way
+ blackburn	they are in army now
+ blackburn	:D
+ heiko1	lol :)
+ blackburn	won't work for you though
+ heiko1	no too old already
+ heiko1	(and did civil service)
+ blackburn	I have 6 more years of hiding
+ blackburn	:D
+ heiko1	oh man
+ heiko1	come to Germany :)
+ blackburn	heiko1: well it won't work :)
+ blackburn	everybody would come to germany if it allows to avoid army :D
+ heiko1	ok
+ heiko1	is your thesis processed already?
+ blackburn	there is a traditional russian way
+ blackburn	processed in which mean?
+ heiko1	like feedback
+ blackburn	I am unsure what do you mean :)
+ blackburn	feedback from?
+ heiko1	supervisors
+ heiko1	like marks
+ blackburn	ah
+ blackburn	yes I defended it already
+ heiko1	oh really, nice
+ heiko1	congrats then :)
+ blackburn	hah thanks
+ blackburn	but I am a bachelor for two months already
+ heiko1	cool
+ heiko1	whats next?
+ blackburn	masters here
+ heiko1	computer science?
+ heiko1	what courses and stuff?
+ blackburn	oh well
+ blackburn	you know we are crazy here
+ blackburn	I will study just what they give me
+ blackburn	:D
+ heiko1	and that is?
+ blackburn	I have nothing to choose but it should be related to supercomputing
+ blackburn	I don't care much about that - I am coming along with shogun and other stuff
+ blackburn	I already had to learn everything by myself
+ heiko1	ok
+ blackburn	so no reason to change that
+ blackburn	:)
+ heiko1	well then :)
+ blackburn	heiko1: what about you then? :)
+ blackburn	are you going to do phd there?
+ heiko1	well, thesis first
+ heiko1	I got a small RA position here for about half a year afterwards
+ heiko1	and then I need another one :)
+ blackburn	research assistant?
+ blackburn	I have no clue what it is
+ heiko1	but i will apply for a phd that starts in sept
+ heiko1	yeah assistant
+ blackburn	so it is just like a normal job?
+ heiko1	no its uni and research stuff
+ heiko1	but applied
+ heiko1	kernel methods to detect xy
+ blackburn	yeah I mean normal research job
+ heiko1	yes
+ blackburn	I see
+ blackburn	is it well-paid in england btw?
+ heiko1	yes, especially in london
+ blackburn	I heard londongrad is not cheap to live
+ blackburn	:)
+ heiko1	no, its not cheap at all
+ heiko1	but my girlfriend has a well paid job, and I will join in that fashion, so its fine -- finally last year was so anoyying money wise
+ blackburn	what does she do?
+ heiko1	she works in the citi, for a digital media data mining company
+ blackburn	wow so a data mining?
+ heiko1	well, old fashioned data mining
+ heiko1	nothing advanced
+ heiko1	but collecting data
+ blackburn	still geeky
+ blackburn	:)
+ heiko1	shes more in the organisation and planning
+ blackburn	I see
+ blackburn	is she german too?
+ blackburn	I am currently debugging MC output stuff
+ blackburn	which collects ROCs
+ heiko1	yeah
+ heiko1	monte carlo ?
+ heiko1	multiclass :)
+ blackburn	multiclass :)
+ heiko1	sorry
+ blackburn	but I don't mind to have some monte carlo out there
+ blackburn	may be some casino royale
+ heiko1	Oh, I want to work on the labels a bit on the weekend
+ blackburn	would be interested
+ blackburn	:D
+ heiko1	lol :)
+ blackburn	have you seen Ernst&Young guy?
+ blackburn	in the ML
+ heiko1	yeah
+ heiko1	pretty cool :)
+ heiko1	machine learning arrives in the consulting
+ blackburn	we are all perplexed how can it be used
+ heiko1	dont know
+ blackburn	yeah
+ heiko1	all the bankers are using (bayesian) linear regression
+ blackburn	we was puzzled with the fashion he names himself
+ heiko1	one of our profs here always tells us whats going on in the citi
+ heiko1	linear regresseion :)
+ blackburn	heh
+ heiko1	I did not get your last scentence
+ blackburn	he names himself
+ blackburn	arthur (sean)
+ blackburn	at first he wrote sth like
+ blackburn	cheers, sean
+ blackburn	but email is arthur
+ blackburn	that's kind of puzzle :D
+ heiko1	ah, mmh no idea
+ heiko1	blackburn, what about the labels
+ heiko1	with the confidences /scores
+ blackburn	ah
+ heiko1	have you seen s?rens email?
+ blackburn	oh bad bad
+ blackburn	which one?
+ heiko1	I liked the idea of registering multiple vectors with a name
+ blackburn	I remember one
+ heiko1	and then you set the "current" one
+ heiko1	and call a method
+ heiko1	this way you can switchj
+ blackburn	the most confusing thing for me is that we all wanted to release
+ heiko1	yeah maybe leave that then
+ heiko1	the method is there
+ heiko1	though its only for binary
+ blackburn	I have checked multiclass stuff a little
+ heiko1	argh there is still the migration stuff
+ blackburn	oops
+ heiko1	that will be horrible
+ blackburn	so do we need to set up all the maps now?
+ heiko1	all these changes to the vectors cause loads of memory bugs
+ heiko1	dont know yet
+ heiko1	if we can migrate, maybe
+ heiko1	but I think this wont work
+ heiko1	so we will break
+ heiko1	and start from scratch
+ heiko1	that stuff is a mess, especially in c++ without any libraries
+ blackburn	argh mkl storage fails with mkl multiclass
+ heiko1	and whenever somethings changed, it fails
+ heiko1	oh reall, what happens?
+ blackburn	some error message I can't see
+ blackburn	hmm
+ blackburn	ahhhhh
+ blackburn	heiko1: it handles MKLMulticlass as multiclass
+ heiko1	and then?
+ blackburn	hmmm
+ blackburn	something strange happens then
+ heiko1	mmh, if errors should be easy to track
+ blackburn	heiko1: we should mark down all these *outputs as experimental stuff
+ blackburn	to aavoid some psycho trying to find us and eat
+ heiko1	mmh
+ heiko1	I mean the idea is that only classes that are supported work with it
+ heiko1	so every class gets another implementation of the output class
+ heiko1	the output class can ignore things
+ blackburn	heiko1: are you able to check code?
+ heiko1	yeah, I want to go to bed, but send it :)
+ blackburn	ah nevermind I'd rather paste
+ blackburn	 84 ????????????SG_PRINT("%smulti-class machine %d:\n", i);
+ blackburn	something is wrong out there
+ blackburn	what was the intention?
+ blackburn	there are two formatters but one var
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	n4nd0: !
+ n4nd0	blackburn: hey!
+ n4nd0	are we all happy with the final evaluations? did everyone pass?
+ blackburn	yes I think so
+ heiko1	should :)
+ heiko1	at least I am happy
+ blackburn	I wanted to develop a simple application that segments an image
+ n4nd0	blackburn: ok
+ blackburn	so it is a two state model I guess
+ blackburn	I wanted to ask if we are ready for that
+ blackburn	can that be done using current framework?
+ n4nd0	I have not much idea about image segmentation
+ n4nd0	can you tell me more about the application?
+ blackburn	n4nd0: okay let me try to describe
+ heiko1	blackburn, talk to you later, I need to sleep
+ blackburn	heiko1: okay sure
+ n4nd0	heiko1: good night!
+ blackburn	n4nd0: simplest case is image having foreground and background
+ heiko1	night guys! :)
+ blackburn	nite heiko1
+ blackburn	n4nd0: so two hidden states
+ blackburn	and each pixel has its own state
+ blackburn	observations are not so clear to me though
+ n4nd0	blackburn: the actual values of the pixels I guess
+ blackburn	yes but in neighborhood of each pixel
+ blackburn	I guess
+ n4nd0	and probably something that gives infor  about the pixels around
+ n4nd0	exatly
+ n4nd0	exactly*
+ blackburn	I still have weak belief how can that work :D
+ n4nd0	I'd say that the framework should work for that
+ n4nd0	but we need to find some information about the features that people use for this
+ blackburn	it is not a problem lets try to come along with pixels
+ n4nd0	blackburn: have you read about it in some paper?
+ blackburn	no, not really we discussed it with soeren
+ blackburn	so it comes from air
+ blackburn	and can be wrong :D
+ n4nd0	I think so far sounds reasonable
+ blackburn	I have to draw
+-!- heiko1 [~heiko@host86-178-156-19.range86-178.btcentralplus.com] has left #shogun []
+ n4nd0	but more research on the topic is probably necessary though
+ blackburn	I had a link somewhere
+ blackburn	to web service allowing to draw
+ blackburn	:D
+ blackburn	n4nd0: do you know any service like that?
+ n4nd0	mmm no
+ blackburn	http://www.twiddla.com/496234
+ blackburn	n4nd0: here you  go
+ blackburn	n4nd0: waiting for you ^ :)
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 240 seconds]
+ CIA-52	shogun: Sergey Lisitsyn master * rcfc8322 / (8 files in 3 dirs): Introduced CV MC storage - http://git.io/a_MgjA
+-!- gsomix [~gsomix@178.45.65.87] has quit [Ping timeout: 256 seconds]
+--- Log closed Sat Aug 25 00:00:17 2012

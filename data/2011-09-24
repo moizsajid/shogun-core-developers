@@ -1,0 +1,245 @@
+--- Log opened Sat Sep 24 00:00:21 2011
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Ping timeout: 252 seconds]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- blackburn [~blackburn@31.28.44.65] has joined #shogun
+ blackburn	sonney2k: can it be wrong includes or so?
+ blackburn	about arpack dsymv
+@sonney2k	blackburn, I think we should first check if his LDA really works
+@sonney2k	and what his configure output is
+ blackburn	sonney2k: he tested LDA and all good
+@sonney2k	he didn't say that
+ blackburn	with example from python_modular
+ blackburn	he told me in private haha
+ blackburn	The lda example (shogun/examples/documented/python_modular/classifier_lda_modular.py) seems to work. I had to change the data path to add toy.
+ blackburn	I.e. ../data/toy/fm_train_real.dat etc
+ blackburn	sonney2k: the only difference I noticed - I was including cblas in arpack.h and arpack.cpp
+ blackburn	while it is included in lapack.h
+ blackburn	it is not necessary
+ CIA-3	shogun: Sergey Lisitsyn master * r826ff44 / (2 files): Removed unnecessary includes in arpack.{cpp,h} - http://git.io/36Q4Cg
+ blackburn	and removed in commit ^
+@sonney2k	that all doesn't make sense
+@sonney2k	I will ask cheng again
+ CIA-3	shogun: Soeren Sonnenburg master * rbe97a43 / (3 files in 3 dirs): fix mixup of epsilon / tube epsilon in libsvr examples - http://git.io/Ty7s-A
+ blackburn	sonney2k: we've got at least one commit per day during Sep 16 - today
+@sonney2k	and we should keep it like this
+ blackburn	pace many libs don't have :)
+ blackburn	sonney2k: what is the tube epsilon?
+@sonney2k	the epsilon tube for the epsilon insensitve loss in support vectore regression
+ blackburn	oookk
+ blackburn	new algo to go into shogun in 10 minutes!
+ blackburn	:D
+ CIA-3	shogun: Sergey Lisitsyn master * r3308301 / (6 files in 3 dirs): Introduced DiffusionMaps dimension reduction preprocessor - http://git.io/5M4CKw
+ blackburn	sonney2k: vodka!
+@sonney2k	heh
+@sonney2k	blackburn, btw which dim red algo would you recommend to visualize data :)
+ blackburn	sonney2k: depends what is the data
+@sonney2k	some real-valued inputs
+@sonney2k	not much more prior knowledge really - hard to classify
+ blackburn	if there could be any underlying manifold - you can try LTSA
+ blackburn	it is pretty fast and robust
+ blackburn	well but MDS/Isomap would be useful too
+@sonney2k	any thoughts on PCA / kPCA - shouldn't I do these first?
+ blackburn	why not :)
+ blackburn	and we have kernel PCA, kernel LLE, kernel diffusion maps
+@sonney2k	thx
+@sonney2k	blackburn, btw recently someone here on IRC asked me about what our feature roadmap for shogun is
+@sonney2k	I am running a bit out of ideas what we want to focus on
+ blackburn	I'm still focused on dim reduction
+ blackburn	no idea what is your focused on :)
+@sonney2k	shogun does a  lot of stuff nowadays - so it is really not clear to me how to really improve it
+@sonney2k	some more dim red methods are not really 'the big picture'
+@sonney2k	and I also only have small things, like parallelize more code, cleanups, model selection w/ nice syntax etc
+ blackburn	sonney2k: I don't know about my plans on the long run
+ blackburn	sonney2k: http://www.kongregate.com/games/banthar/hell-tetris
+@sonney2k	blackburn, for example features like massive parallel or mpi or neural networks or gaussian processes or wahtever
+@sonney2k	blackburn, ^game is this even possible
+ blackburn	sonney2k: oh I hate neural networks :D
+ blackburn	no idea if it is possible
+ blackburn	I'm afraid I can't plan such a grand new features
+@sonney2k	blackburn, then it is not likely that you impl. them :D
+@sonney2k	for gsoc next year (if we want to participate) we need to
+ blackburn	gaussian processes is something chris like very much :)
+ blackburn	sonney2k: I was thinking about high performance computing things but I don't know if it is even possible to do
+ blackburn	without serious architecture changes, etc
+@sonney2k	blackburn, the problem with GPs is that it needs some matrix inverse (so the standard alg's are n^3)
+@sonney2k	and you need s.o. really deep into it
+@sonney2k	(I am not)
+ blackburn	sonney2k: most of dimreduction algos are n^3 :)
+@sonney2k	hpc stuff is sth you cannot do in general for all of shogun
+@sonney2k	so this is sth special for certain algos
+@sonney2k	blackburn, thinking about it - I guess I would most prefer to develop shogun in two ways
+@sonney2k	1) large scale / hpc stuff of whatever kind
+@sonney2k	2) breadth - many ml baseline algorithms (not necessarily fast)
+@sonney2k	so one always has some baseline to play with
+ blackburn	1) is preferrable for me but
+@sonney2k	lets call it the 'hammer'
+@sonney2k	and then if one knows what the baseline is can do 1) stuff on top of it
+ blackburn	I guess not MPI, but OpenCL, etc
+ blackburn	sonney2k: I've lost an idea. what to call 'hammer'?
+@sonney2k	I wouldn't want to get each and every algorithm in there - but maybe only the most successful ones
+@sonney2k	hammer == 2)
+@sonney2k	blackburn, one gsoc project could be some kind of opencv interfacing
+ blackburn	opencv?
+@sonney2k	the big computer vision lib
+ blackburn	I know
+ blackburn	but surprised
+@sonney2k	why?
+ blackburn	they have they own impls
+ blackburn	of some algos
+@sonney2k	one could get features from opencv and do some training on top of it
+@sonney2k	with some nice example
+ blackburn	sonney2k: I guess it would be better to have shogun in opencv
+ blackburn	you could ask opencv guys about it
+@sonney2k	blackburn ?
+@sonney2k	I don't understand
+@sonney2k	shogun in opencv?
+@sonney2k	what does that mean
+ blackburn	I mean it would be nice to become a machine learning library for opencv
+@sonney2k	I think you can already use it for that purpose
+ blackburn	sonney2k: but have a nice interface in opencv to shogun would be nice
+ blackburn	in more transparent way or so
+@sonney2k	I have no idea what that could be - I mean opencv produces any kind of feature representation one can think of
+@sonney2k	so using that representation + some shogun algo would work already
+ blackburn	sonney2k: that would be nice to treat OpenCV images as features of shogun somehow
+ blackburn	no idea about specific ways to do it
+@sonney2k	blackburn, well I will meet gary at the gsoc mentors meeting - I will ask him
+ blackburn	sonney2k: will you go to mentors meeting?
+@sonney2k	yes
+ blackburn	nice
+ blackburn	chris too?
+@sonney2k	yes us two
+ blackburn	I see
+ blackburn	sonney2k: will normalization of this kind:
+ blackburn	    X = X - min(X(:));
+ blackburn	    X = X / max(X(:));
+ blackburn	change the kernel matrix?
+ blackburn	*gaussian kernel
+@sonney2k	yes
+ blackburn	how significant?
+@sonney2k	wait first one not
+@sonney2k	translation invaraint but not scale
+@sonney2k	because you need to rescale kernel width
+ blackburn	aha, I see
+ blackburn	I guess it would be better to normalize features too
+@sonney2k	blackburn, so anyone else I should talk to at the mentors meeting?
+@sonney2k	the orange guys maybe?
+@sonney2k	such that they could somehow reuse what we provide in shogun in their guy?
+@sonney2k	gui
+ blackburn	sonney2k: well sure, ask if they want to collaborate
+@sonney2k	anyone else you could think of?
+ blackburn	no idea
+ blackburn	sonney2k: and no idea how to collaborate with scikits guys
+@sonney2k	blackburn, well I have one idea - we could provide some interface functions if it helps them to use our methods
+@sonney2k	so only interfacing
+@sonney2k	no more
+ blackburn	sonney2k: they have as much as we have
+@sonney2k	they have some other things
+@sonney2k	too
+ blackburn	e.g. they have gaussian processes
+@sonney2k	but not really large scale and only python
+@sonney2k	yes
+ blackburn	I think it is not the way they would like
+ blackburn	it will make things more complex
+ blackburn	while orange core is developed in C++ it would be useful to have some bridge
+@sonney2k	yeah, they have different focus
+ blackburn	I will take a look how they do the decomposition
+ blackburn	aha I see
+@sonney2k	I think we should implement the array interface for shogun features http://docs.scipy.org/doc/numpy/reference/arrays.interface.html
+ blackburn	sonney2k: agree
+ blackburn	sonney2k: okay you definitely could ask orange if they want to collaborate
+ blackburn	they have svms and some classifiers
+ blackburn	but at least they haven't any of fastest C++ dim reduction preprocessors :D
+@sonney2k	blackburn, btw one nice addition would be boosting algorithms
+@sonney2k	http://mloss.org/software/view/246/
+ blackburn	sonney2k: how can we integrate that?
+ blackburn	with code or interfacing?
+@sonney2k	use their code
+@sonney2k	and modify it for our purposes
+ blackburn	is it ok?
+@sonney2k	why not?
+@sonney2k	you can always do that
+@sonney2k	it is open source
+@sonney2k	and gpl
+ blackburn	sonney2k: I don't know, asking
+@sonney2k	blackburn, anyone can use code from shogun for their purpose and release the software under gpl terms
+ blackburn	sonney2k: I know but I don't like this way of develop
+ blackburn	I know it is not possible to interface to any library we want to have to
+ blackburn	but simply don't like :)
+@sonney2k	blackburn, true - but I spend like a month or so discussing with the MB guys and we simply have different ideas of how things should work
+ blackburn	I see
+@sonney2k	I even merged multiboost at some stage
+@sonney2k	wrote swig wrappers etc
+@sonney2k	but they do a lot of things very differently and the project is big too
+@sonney2k	so in the end I gave up
+@sonney2k	(due to lack of time to pursue this way to involved endeavor)
+ blackburn	bad
+@sonney2k	not bad good
+@sonney2k	!
+ blackburn	:)
+@sonney2k	this way we made some progress instead of wasting time for endless communication :)
+ blackburn	sonney2k: do you know what is faster: computing svd of A OR AA' and computing of eigenvectors?
+@sonney2k	no idea
+@sonney2k	what is the complexity of svd / eig ?
+ blackburn	don't know, I'm worried about AA' step
+ blackburn	it is n^3
+ blackburn	but SVD for 3000x3000 took 236s
+ blackburn	too bad for shogun :)
+@sonney2k	blackburn, if we had numpy array interface compatibility one could do things like
+@sonney2k	x=RealFeatures(sth)
+@sonney2k	x+=3
+ blackburn	sonney2k: fantastic
+ blackburn	we definetely should have it
+@sonney2k	and even any normal numpy operations
+@sonney2k	it is very easy to do
+@sonney2k	we only need to prove a dict called __array_interface__
+@sonney2k	with these fields filled
+@sonney2k	http://docs.scipy.org/doc/numpy/reference/arrays.interface.html#__array_interface__
+@sonney2k	I guess that is what is needed to directly work with scikits.learn
+ blackburn	how?
+ blackburn	oops..
+ blackburn	sonney2k: would you mind to place dimreduction techniques in another folder/module?
+@sonney2k	which and do would it communicate with preprocessors?
+ blackburn	I had some idea but I forgot
+ blackburn	ah
+ blackburn	there could be a Machine for this purposes
+ blackburn	and some Preprocessor proxy
+* sonney2k starts to implement the array interface
+ blackburn	I don't know if it is better hmm
+ serialhex	blackburn: drive by raspberry!!! :P
+ blackburn	serialhex: hi
+ blackburn	:)
+ serialhex	how are you??
+ blackburn	fine
+ blackburn	and you?
+ blackburn	shit, still slow
+ blackburn	sonney2k: AA' + eigenvectors is faster in practice
+@sonney2k	ok
+ blackburn	~260s vs ~60s
+ CIA-3	shogun: Sergey Lisitsyn master * r544c920 / src/shogun/preprocessor/DiffusionMaps.cpp : Improved performance and fixed Diffusion Maps - http://git.io/W3e1wg
+ blackburn	sonney2k: one unresolved problem still: how to use preprocessors that are possible to apply both to strings and simplefeatures
+ blackburn	in kernel LLE I did it with returning new feature matrix if given features arenot simple
+@sonney2k	that is not what preprocs where intended for
+ blackburn	sonney2k: I know, but it is really useful when embedding strings into euclidean space
+@sonney2k	a workaround would be to introduce obtain_from_functions that do get type X as argument and return type Y
+ blackburn	ehh?
+@sonney2k	btw, the array interface should no longer be used but instead http://docs.python.org/dev/c-api/buffer.html#Py_buffer
+@sonney2k	CSimpleFeatures<float64_t> obtain_from_string(CStringFeatures<char>)
+@sonney2k	or so
+@sonney2k	or instead of CStringFeatures* just CKernel
+ blackburn	apply_to_string_features?
+ blackburn	no, kernel is worse
+@sonney2k	not necessarily
+ blackburn	because every dimreduction preprocessor have its own kernel
+@sonney2k	it encapsulates the feature type
+@sonney2k	for example for kCPA it would be ok
+@sonney2k	kPCA
+ blackburn	there is already apply_to_string_features for kPCA
+@sonney2k	yeah but there is not apply_to_sparse_features and not apply_to_whatever
+ blackburn	hmm yes
+ blackburn	obtain_features
+@sonney2k	_from_generic_kernel
+ blackburn	I would even add this method to dimreductionpreprocessor interface
+@sonney2k	I don't know but I need to sleep now
+@sonney2k	cu
+ blackburn	see you
+--- Log closed Sun Sep 25 00:00:25 2011

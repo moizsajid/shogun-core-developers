@@ -1,0 +1,176 @@
+--- Log opened Wed Nov 07 00:00:17 2012
+-!- ptizoom__ [~christian@85.210.80.20] has quit [Quit: Ex-Chat]
+-!- ptizoom_ [~christian@85.210.80.20] has joined #shogun
+ shogun-buildbot	build #160 of nightly_default is complete: Failure [failed tutorial]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/160
+-!- Tenchumaru [188215f1@gateway/web/freenode/ip.24.130.21.241] has joined #shogun
+-!- Tenchumaru [188215f1@gateway/web/freenode/ip.24.130.21.241] has quit [Quit: Page closed]
+-!- zxtx [~zv@drawn2scale.static.monkeybrains.net] has joined #shogun
+ shogun-buildbot	build #161 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/161
+-!- zxtx [~zv@drawn2scale.static.monkeybrains.net] has quit [Ping timeout: 246 seconds]
+-!- ptizoom_ [~christian@85.210.80.20] has quit [Read error: Connection reset by peer]
+-!- ptizoom__ [~christian@85.210.80.20] has joined #shogun
+-!- zxtx [~zv@173-13-183-134-sfba.hfc.comcastbusiness.net] has joined #shogun
+-!- ptizoom__ is now known as ptizoom
+@sonney2k	wiking, we have a real soname for libshogun - I guess it is just not passed through for osx
+@sonney2k	wiking, it is in .config - LIBSHOGUN_SONAME
+ wiking	sonney2k: yes
+ wiking	sonney2k: i've more or less fixed this now in ./configure for darwin
+ wiking	but why dont we maintain a separate major/minor version number for libshogun
+ wiking	sonney2k: check this report: http://categorizer.tmit.bme.hu/~wiking/shogun.sa/2012-11-06-2/report-jmESH9.html#EndPath
+ wiking	the problem is that SG_ERROR currently it seems doesn't kill the function
+ wiking	as after 2501 condition being true it continues to execute
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 240 seconds]
+ blackburn	wiking: yahoo finally 'no'
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+@sonney2k	wiking, what does a minor version help?
+@sonney2k	we maintain a the soname (major) but no further minor
+@sonney2k	wiking, it raises an exception....
+ wiking	sonney2k: well just to be able to say that whether a the new library is at all compatible with the prev one
+ wiking	this way we are never compatible...
+@sonney2k	shogun/io/SGIO.cpp
+@sonney2k	            case MSG_ERROR:
+@sonney2k	            case MSG_CRITICAL:
+@sonney2k	            case MSG_ALERT:
+@sonney2k	            case MSG_EMERGENCY:
+@sonney2k	                if (sg_print_error)
+@sonney2k	                    sg_print_error(target, str);
+@sonney2k	                throw ShogunException(str);
+@sonney2k	                break;
+ wiking	as we always interate the major number by one
+ wiking	yes i saw that
+@sonney2k	so the program will always exit
+@sonney2k	except if you can somehow handle the situation
+ wiking	but i guess then scan-build has a bug or something
+ wiking	as it doesn't quit on an SG_ERROR
+@sonney2k	wiking, we only increase the major number if we do incompatible changes
+ wiking	and then how do you show at all change?
+ wiking	i.e. that's minor number should stand for...
+@sonney2k	yeah - looks like it doesn't find the throw()
+@sonney2k	wiking, well you could check if some some exit(0) would help it...
+@sonney2k	though of course that is not an option when sb is working in python_modular
+@sonney2k	he just wants to get back to the python console
+@sonney2k	wiking, yes but that is not part of the SONAME
+@sonney2k	the SONAME should stay the same
+@sonney2k	otherwise it marks that the thing is not compatible
+@sonney2k	wiking, note the difference between LIBSHOGUNSO and LIBSHOGUNVER
+@sonney2k	VER has the full version like libshogun.so.13.2
+@sonney2k	SO only libshogun.so.13
+ wiking	yeps
+ wiking	that's why i did this patch
+ wiking	https://github.com/shogun-toolbox/shogun/commit/118d15bc1c7d49311d54c53304dd3014b705b970
+@sonney2k	connection is slow...
+@sonney2k	wiking, on linux systems this is handled differently
+ wiking	yep i know
+@sonney2k	it is just the filename that is marking the major.minor version
+ wiking	yes
+ wiking	i know
+ wiking	:)
+@sonney2k	so then all good now
+@sonney2k	wiking, correct?
+ wiking	2.0.1 release should be 12.1 no?
+@sonney2k	no
+ wiking	is there so big api changes?
+@sonney2k	libshogun has a different version than shogun's
+@sonney2k	wiking, sure
+ wiking	yesh i know
+ wiking	but still
+ wiking	2.0 had 12.0 as libshogun
+ wiking	that's why i'm saying
+@sonney2k	read README.soname
+@sonney2k	in shogun/src
+ wiking	2.0.1 as a bugfixing release
+ wiking	should be 12.1
+@sonney2k	no we have had incompatible changes
+@sonney2k	according to README.soname
+ wiking	then shouldn't we mark it at least a 2.1 release
+@sonney2k	yes now we should
+ wiking	i mean according to most FOSS project
+ wiking	m.n.z release is really jsut about bugfixing
+@sonney2k	my intention was to have only 2.0.X releases for bugfixes
+ wiking	yep i get it
+@sonney2k	yeah n++ for new features
+ wiking	yes
+@sonney2k	and m++ for major new features
+ wiking	but now we have n++
+ wiking	so afaik we should release 2.1
+ wiking	instead of 2.0.1
+@sonney2k	yeah but we intended to have a bugfix release back then
+ wiking	or do both if it's easy to cherrypick bugfixes :P
+@sonney2k	that is also why I wanted to have a shogun2_0 branch
+ wiking	a tag would be enough
+@sonney2k	wiking, not if you expect commits to the 2_0 branch
+ wiking	you can essentially make your bugfixing branch from a tag
+@sonney2k	you mean later?
+ wiking	yes
+ wiking	anytime
+@sonney2k	yeah but why not have it immediately?
+@sonney2k	this way anyone can push there already
+ wiking	mmm well in sense of git's structure
+ wiking	it doesn't really matter :P
+@sonney2k	when we have small issues
+ wiking	so yeah you can have both
+@sonney2k	yeah - with git its cheap
+ wiking	but i don't see neither now
+@sonney2k	wiking, I told you... bug in make release script
+ wiking	ok no worris
+@sonney2k	I think it did the tagging locally but I forgot to push all tags
+@sonney2k	and in the meantime killed the repo once
+ wiking	can u find out which was the commit that you've checked out for making the tarballz?
+@sonney2k	wiking, the git id is in every release
+@sonney2k	lib/versionstring.h
+@sonney2k	gtg
+@sonney2k	cu
+ wiking	ok
+ wiking	then we can fix this easily soon
+-!- Tenchumaru [ce6f8cbe@gateway/web/freenode/ip.206.111.140.190] has joined #shogun
+-!- blackburn [~blackburn@188.168.13.4] has joined #shogun
+ wiking	blackburn: what no?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Client Quit]
+ blackburn	wiking: no money no honey :D
+ blackburn	wiking: I think I came with new name for my library
+ blackburn	tapki
+ blackburn	:D
+ blackburn	wiking: http://krossovki-dinamo.ru/upload/tapki4.jpg that is
+ blackburn	may be for better sounding tapkee :D
+ blackburn	https://github.com/lisitsyn/tapkee whoahah
+ wiking	blackburn: no money no sister no father nooooooo
+ wiking	:D
+ wiking	blackburn: nyiihaaaa
+ wiking	do u have that t-snr or whatever?
+ blackburn	t-sne?
+ blackburn	not yet but it will be here
+ wiking	ok let me know when
+ blackburn	are you interested in it in particular?
+ wiking	blackburn: yes indeed
+ wiking	blackburn: wanna try that for BoW
+ blackburn	why?
+ wiking	do u have lib/versionstring.h? :)
+ blackburn	no, what for?
+ wiking	make a git tag of that commit for 2.0.0
+ blackburn	:D
+ wiking	and update NEWS to be 2.1.0 instead of 2.0.1
+ wiking	yeeeah making release fuckyeah ;D
+ wiking	http://logout.hu/dl/upc/2011-06/139344_mem.jpg
+ wiking	:>
+ blackburn	heh
+ wiking	let's be total professionals :>
+-!- zxtx [~zv@173-13-183-134-sfba.hfc.comcastbusiness.net] has quit [Ping timeout: 264 seconds]
+-!- Tenchumaru [ce6f8cbe@gateway/web/freenode/ip.206.111.140.190] has quit [Ping timeout: 245 seconds]
+ blackburn	1863 ????????????*(SGString<char>**) m_parameter
+ blackburn	1864 ????????????????= SG_MALLOC(SGString<char>, new_length);
+ blackburn	wiking: can you fucking get idea what type it is?
+ blackburn	:D
+ wiking	mmm
+-!- zxtx [~zv@99-7-170-103.lightspeed.sntcca.sbcglobal.net] has joined #shogun
+ blackburn	shitty inplace new
+-!- cwidmer [8295587b@gateway/web/freenode/ip.130.149.88.123] has joined #shogun
+-!- cwidmer [8295587b@gateway/web/freenode/ip.130.149.88.123] has quit [Ping timeout: 245 seconds]
+ blackburn	sonney2k: may be around?
+-!- zxtx_ [~zv@99-7-170-103.lightspeed.sntcca.sbcglobal.net] has joined #shogun
+-!- zxtx [~zv@99-7-170-103.lightspeed.sntcca.sbcglobal.net] has quit [Ping timeout: 264 seconds]
+-shogungit:#shogun- [shogun] lisitsyn pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/ca4768d315ad2a60aba367ff3b300a44e6f56481
+-shogungit:#shogun- shogun/master ca4768d Sergey Lisitsyn: Reverted SGString transformation
+--- Log closed Thu Nov 08 00:00:17 2012

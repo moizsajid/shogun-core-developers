@@ -1,0 +1,187 @@
+--- Log opened Sun Jun 17 00:00:41 2012
+ blackburn	Ok finally first multitask regressor read
+ CIA-18	shogun: Sergey Lisitsyn master * rf621fdf / (14 files in 4 dirs): Updated TaskGroup, added train routines for MultitaskLS regression and fixed some bugs in SLEP ported code - http://git.io/Cb8x1A
+ CIA-18	shogun: Sergey Lisitsyn master * rafe730c / (14 files in 4 dirs): Merged SLEP updates - http://git.io/yJ0Baw
+ n4nd0	nice
+ blackburn	n4nd0: I'm now porting algo that does SVD each iteration (sic!)
+ n4nd0	blackburn: and how is it going?
+ blackburn	going ok but SVD!
+ blackburn	each iteration!
+ blackburn	:D
+ n4nd0	too much cost right?
+ blackburn	N^3
+ shogun-buildbot_	build #632 of octave_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/632
+ blackburn	well the only exciting thing about svd is its robustness
+ blackburn	with cond=1 it is very stable
+ n4nd0	ok
+-!- emrecelikten [~emre@176.40.254.205] has joined #shogun
+ shogun-buildbot_	build #608 of lua_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/lua_modular/builds/608  blamelist: blackburn91@gmail.com
+ shogun-buildbot_	build #633 of octave_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/633  blamelist: blackburn91@gmail.com
+-!- blackburn [~blackburn@62.106.111.221] has quit [Ping timeout: 244 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 246 seconds]
+-!- emrecelikten [~emre@176.40.254.205] has quit [Quit: Leaving.]
+-!- emrecelikten [~emre@176.40.254.205] has joined #shogun
+-!- emrecelikten [~emre@176.40.254.205] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- blackburn [~blackburn@62.106.111.221] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 240 seconds]
+-!- blackburn [~blackburn@62.106.111.221] has quit [Ping timeout: 248 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: Lost terminal]
+-!- emrecelikten [~emre@176.40.254.205] has joined #shogun
+-!- blackburn [~blackburn@62.106.111.221] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	n4nd0: hey any progress with your bug?
+ n4nd0	blackburn: I changed a couple of things and the results improved, but I don't find satisfactory yet
+ blackburn	I see
+ n4nd0	blackburn: but the way, let me ask you something
+ n4nd0	general SVM theory :D
+ blackburn	I've been waiting for this moment whole my life ;)
+ n4nd0	haha
+ n4nd0	I have seen that in the paper they write
+ n4nd0	min_w,\xi 1/2 ||w||^2 + C/n sum_i \xi_i
+ n4nd0	http://www.cs.cornell.edu/people/tj/publications/finley_joachims_08a.pdf
+ n4nd0	if you prefer to look at it ^
+ blackburn	so the question is C/n?
+ n4nd0	page 2, equation 1, near to the end of the first column
+ n4nd0	it is 1/n in particular
+ blackburn	yes found
+ n4nd0	I am not using that currently
+ n4nd0	I don't know if it should make a difference
+ blackburn	it doesn't make difference - just changes C implicitly
+ blackburn	what changes the game is \sum_i C_i \xi_i
+ n4nd0	why C_i?
+ blackburn	it can be done with differents C's
+ n4nd0	one for each example
+ blackburn	yes
+ n4nd0	I've never seen that, but it's ok
+ blackburn	but while you just play with constant before the sum
+ blackburn	I don't think it makes and difference
+ blackburn	I think it is easier for they to prove things with 1/n
+ n4nd0	I am going to use how liblinear does it internally
+ blackburn	n4nd0: does what?
+ n4nd0	use 1/n
+ blackburn	they do not use 1/n
+ blackburn	I am 99% sure they don't
+ n4nd0	why?
+ blackburn	n4nd0: because finley and joachims introduced that I think :)
+ n4nd0	the 1/n
+ n4nd0	?
+ blackburn	standart C-S does not involve 1/n
+ blackburn	yes
+ blackburn	neither W-W svm does
+ n4nd0	ok
+ blackburn	n4nd0: liblinears multiclass svm is just kind of gradient descent with cooling
+ n4nd0	cooling?
+ blackburn	simply they just exclude alphas that zeroed
+ blackburn	and work only with subset of alphas
+ n4nd0	ok
+ blackburn	ocas does cutting plane btw
+ n4nd0	yes
+@sonney2k	n4nd0, the 1/n is kind of a relegion
+@sonney2k	some use it some don't
+@sonney2k	n4nd0, rationale is that the \sum_i \xi_i is an upper bound on the training error
+@sonney2k	if you divide by n it is the risk aka fraction of misclassified examples
+@sonney2k	bringing that on the same scale as the ||w||_2^2 makes some sense
+@sonney2k	however, I find it not very intuitive in practice at least:
+@sonney2k	C does not scale linearly with n
+@sonney2k	n4nd0, btw what is up with your pull request? you never answered my comment...
+ n4nd0	sonney2k: yeah sorry, since there are still some things that I have to correct, apart from the renaming and re-allocating of the files you told me, I thought it was clear that it was not a definitive version to merge yet
+ n4nd0	I don't know if you have heard about my fight against the bugs during this week ...
+ n4nd0	I have not really coded anything new this week, I am just testing, debugging, testing, debugging, etc
+ n4nd0	:S
+ blackburn	sonney2k: mldata is not so cool! I never managed to find some popular datasets here :(
+ n4nd0	sonney2k: btw, you never answered either my mail on the mailing list about the issue with the modular interface :(
+ blackburn	O!
+ blackburn	did somebody review puffin444?
+ blackburn	I did
+ n4nd0	nice
+@sonney2k	n4nd0, it does not have to be ready as in everything is 100% - it needs to compile and uricamic/wiking can work with the infrastructure
+@sonney2k	n4nd0, so it is really highly needed
+@sonney2k	blackburn, what dataset is popular/missing?
+@sonney2k	blackburn, mldata just needs more users/uploaders...
+ blackburn	sonney2k: today I did not manage to find 'school' dataset
+ blackburn	for multitask
+@sonney2k	never heard of it
+@sonney2k	so upload it then :D
+ blackburn	yeah if I had
+ blackburn	it
+ blackburn	sonney2k: they compare on school dataset in every damned multitask paper
+ blackburn	:D
+ n4nd0	sonney2k: what I commited and introduced in the pull request compiles and doesn't crash anything
+ n4nd0	sonney2k: but I will introduce the changes you told me aobut asap so you can merge
+ n4nd0	sonney2k: anyway, I am sorry to ask you again, did you have time to take a look to the mail I sent about the modular interface?
+ n4nd0	blackburn: I am starting to be happy with my results :)
+ n4nd0	blackburn: at least they are similar on average with the ones given by multiclass liblinear not using bias
+ n4nd0	blackburn: around?
+ blackburn	n4nd0: yes
+ blackburn	n4nd0: that's cool
+ n4nd0	blackburn: I think I am going to include the possibility to include bias in LinearSOMachine
+ blackburn	regularized bias?
+ n4nd0	blackburn: if the results of multiclass SO improved more (as it does with LibLienar) then I will be more or less convinced that the impl. is ok
+ n4nd0	blackburn: I was thinking of including bias, not regularization as this moment
+ n4nd0	blackburn: I think that the way it's done in SO, regularization would be included using the matrix C
+ n4nd0	in
+ n4nd0	min w'*C*w
+ blackburn	n4nd0: is it possible to include bias in that kind of formulation?
+ n4nd0	why not?
+ blackburn	well how?
+ n4nd0	adding one more dimension to w
+ n4nd0	and the same for the feature vectors
+ n4nd0	the one in w is to be learnt and in the feature vectors fixed to 1
+ blackburn	n4nd0: it is regularized bias ;)
+ n4nd0	where is the regularization there?
+ blackburn	it goes to regularization term
+ blackburn	||w||
+ n4nd0	ok
+ blackburn	so when you optimize w you try to keep b low too
+ n4nd0	agree
+ blackburn	it is not bad (Mangasarian, 1992) but it is
+ blackburn	just is :D
+ n4nd0	haha
+ n4nd0	is what?
+ blackburn	it is regularized I mean :)
+ blackburn	actually our dear vojta did that in his fancy svm
+ blackburn	GMNP one with Kesler transformation and a lot of other stuff
+ blackburn	n4nd0: haven't you been watching por-ned?
+ n4nd0	blackburn: they showed germany-denmark here, not por-ned
+ blackburn	too bad
+ blackburn	ronaldo was fscking awesome
+ n4nd0	he's fucking awesome :)
+ blackburn	portugal has very strong sprinter skills I am amazed with
+ blackburn	I bet they do these 50-60 meters in 6-7 seconds
+ n4nd0	Greece-Germany in quarter finals
+ n4nd0	funny fact :D
+ blackburn	hmm
+ blackburn	Russia-Germany would be funnier
+ n4nd0	no way
+ blackburn	22th June
+ blackburn	the day war began
+ blackburn	:D
+ n4nd0	Greece - Germany with everything about the economic problems, seems fair enough to me
+ blackburn	heh well war is more important I believe :D
+ blackburn	22th June, 1941
+ n4nd0	aren't we talking about an old war dude?
+ n4nd0	some time has passed ever since
+ blackburn	very important still for russia and germany too I think
+ blackburn	in the end we have lost ~20M
+ blackburn	a little less than half of spain :D
+ n4nd0	haha
+ n4nd0	Spain has nothing to do with this ;)
+ blackburn	and two swedens
+ blackburn	n4nd0: http://www.wired.com/wiredenterprise/wp-content/uploads//2012/06/beard-programmers-final-two.png
+ blackburn	did you grow?
+ n4nd0	no ... I'm still getting shaved :)
+ blackburn	now I do understand why I have not so outstanding skills
+ n4nd0	Captain Soeren was at Guru level in this moment http://videolectures.net/icml08_sonnenburg_ipsvm/ :D
+ blackburn	yeah right
+ blackburn	hmm
+ blackburn	why do he call himself Kristian :D
+ n4nd0	who?
+ blackburn	joke
+ blackburn	in that video he is talking on behalf of some Kristian
+ blackburn	:)
+ n4nd0	aha :)
+ n4nd0	good night!
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+--- Log closed Mon Jun 18 00:00:41 2012

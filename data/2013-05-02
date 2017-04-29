@@ -1,0 +1,1344 @@
+--- Log opened Thu May 02 00:00:29 2013
+ cameron__	not sure my changes went in
+ cameron__	do people usually commit via the submodule - data or the master shogun project?
+-!- cameron__ [~quassel@global-2-1.nat.csx.cam.ac.uk] has quit [Remote host closed the connection]
+ gsomix	sonney2k, I sent the proposal.
+ gsomix	nite, guys
+@iglesiasg	night
+-!- codinninja [~satya@202.3.77.221] has joined #shogun
+-!- codinninja [~satya@202.3.77.221] has left #shogun []
+-!- syst3mw0rm [~quassel@ec2-54-235-165-148.compute-1.amazonaws.com] has left #shogun ["http://quassel-irc.org - Chat comfortably. Anywhere."]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ shogun-buildbot	build #326 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/326
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has quit [Quit: Argh! Flaky internet]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has quit [Quit: wencan]
+-!- mizobe [~mizobe@189.35.244.197] has joined #shogun
+-!- abi_ [3d0c137b@gateway/web/freenode/ip.61.12.19.123] has joined #shogun
+-!- abi_ [3d0c137b@gateway/web/freenode/ip.61.12.19.123] has quit [Ping timeout: 245 seconds]
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- abinayam [3d0c137b@gateway/web/freenode/ip.61.12.19.123] has joined #shogun
+ abinayam	Hi. Do we need to submit different proposals for different topics we are interested in or a single proposal listing all the topics is enough?
+-!- abinayam [3d0c137b@gateway/web/freenode/ip.61.12.19.123] has quit [Client Quit]
+@sonney2k	gsomix, seen it. You should get your hands dirty in that direction now. Write some function that reads a single line of an ascii file - like GNU's getline
+@sonney2k	and maybe start a .csv reader
+@sonney2k	abinayam, one per topic but no more than 2-3 otherwise we won't take you seriously :)
+@sonney2k	HeikoS, did you merge the last commit? Somebody forgot the git push to data / merge there
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * fdedc4c / src/shogun/regression/GaussianProcessRegression.h: https://github.com/shogun-toolbox/shogun/commit/fdedc4ce61f2921af61f9c4d5bfdcf68ecc8b46a
+ shogun-notifier-	shogun: fix compile error - GP regression only needs eigen3 now
+ shogun-buildbot	build #730 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/730  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ gsomix	sonney2k, ok!
+ shogun-buildbot	build #895 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/895
+-!- abinayam [3d0c137b@gateway/web/freenode/ip.61.12.19.123] has joined #shogun
+ abinayam	@sonney2k : I am interested in 2 topics only. Thank you :)
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has joined #shogun
+-!- abinayam [3d0c137b@gateway/web/freenode/ip.61.12.19.123] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot	build #327 of nightly_none is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/327
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Ping timeout: 268 seconds]
+-!- erlenda_ [~erlenda@fw-oslo.intelcom.no] has joined #shogun
+-!- erlenda [~erlenda@fw-oslo.intelcom.no] has joined #shogun
+-!- erlenda_ [~erlenda@fw-oslo.intelcom.no] has left #shogun ["Leaving"]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ hushell	Hi Soeren, may I ask a few questions about SGVector?
+ hushell	If I want to change the size of a sgvector in a function, and I want the change being passed back
+ hushell	Can I just use resize_vector inside that function?
+@iglesiasg	hey hushell
+@iglesiasg	hushell: yeah, that should work
+ hushell	What I am curious about is when passing a SGvector as a parameter, I don't need to use * or reference
+@iglesiasg	hushell: you should pass the reference
+@iglesiasg	I think that at least that passing the reference makes more explicit what you will do
+ sonne|work	hushell: yes resize_vector
+ hushell	Thanks! Are you Fernando?
+@iglesiasg	however, I think that even if you don't use reference, what you want to do will happen
+ sonne|work	what is important to know here is that sgvectors properties are always copied
+@iglesiasg	I am not entirely sure about it though
+ sonne|work	so if you resize_vector
+@iglesiasg	hushell: yeah I am Fernando :)
+ sonne|work	it won't change the original size
+ sonne|work	if you jsut do
+ sonne|work	a=b
+ hushell	Nice to meet you! I am Shell
+ sonne|work	b.resize_vector(...)
+@iglesiasg	hushell: nice to meet you to
+@iglesiasg	too*
+ hushell	So in my case rescale_outputs(const SGVector outputs, SGVector& new_outputs), Soeren you suggest inplace modify the outputs, and the function can be rescale_outputs(SGVector& outputs)?
+ hushell	The case is I have a vector, maybe length of 6, inside the function, the length of vector may be changed to 4
+-!- cameron__ [~quassel@global-2-1.nat.csx.cam.ac.uk] has joined #shogun
+@iglesiasg	hushell: I think the version rescale_outputs(SGVector& outputs) looks good
+@iglesiasg	hushell: why would you need outputs and new_outputs?
+ hushell	Fernando, I tried a bit, if passing SGVector, the content changed inside function will bring out, but if you just copy from another vector, like this a = b, then it won't bring out the change
+@iglesiasg	hushell: aham I see
+ hushell	I think have another copy looks safer, I tried SGVector::resize doesn't work, but maybe the resize_vector(&) would work
+@iglesiasg	I agree with sonne|work, use resize_vector looks the good option
+@iglesiasg	btw I did a small test
+@iglesiasg	http://pastebin.com/4GcHbjkD
+@iglesiasg	what I said before was wrong, it *must* be done with SGVector&
+ hushell	That's works for me! Thanks! So I can kill one parameter.
+@iglesiasg	hushell: btw, I read in your mail you have been using SO learning in CV, right?
+ hushell	Yep, SO becomes a mainstream in CV, especially the DPM, very popular
+ hushell	What are you working on?
+@iglesiasg	hushell: nice, so you are using it for something similar to facial landmark detection or so?
+ hushell	Yeah, everything can divide into parts can be learned by SO
+-!- cameron__ [~quassel@global-2-1.nat.csx.cam.ac.uk] has quit [Ping timeout: 256 seconds]
+@iglesiasg	hushell: I am writing my final degree project (undergrad thesis) on SSVMs applied to graphs
+ hushell	I used the facial landmark code recent, it's like a variant of the deformable part model, with different loss function and use supervision instead of use latent positives
+ hushell	That's awesome! I was doing something silly for my undergrad thesis. Are you going to apply a PhD?
+@iglesiasg	hushell: for sure :)
+ hushell	Machine learning?
+@iglesiasg	hushell: I am into machine learning and autonomous robots
+@iglesiasg	I will see what I can find around in those fields and choose what I like the most
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has joined #shogun
+ hushell	If you like more math, machine learning will be a better choice in my opinion
+@iglesiasg	aham, I will take it into account
+ hushell	Good luck for your application!
+@iglesiasg	hushell: thanks!
+@iglesiasg	I am actually trying to find something a little bit simple yet fancy to show during the project presentation
+@iglesiasg	something from the CV domain
+ hushell	How about image segmentation or denoising?
+@iglesiasg	hushell: those were the choices I was thinking of
+@iglesiasg	hushell: I tried fg/bg segmentation but I failed :S
+ hushell	I am going to include an example to Shogun, if I got accepted this year
+ hushell	try to use this inference lib http://www.di.ens.fr/~mschmidt/Software/UGM.html
+ hushell	you can switch the learning by SSVM
+@iglesiasg	hushell: I see, so you have previously done fg/bg segmentation with SSVMs?
+@iglesiasg	let me see
+@iglesiasg	so the idea would be to switch the parameter estimation part for the SSVM
+ hushell	I have some dirty code, maybe helpful for you https://code.google.com/p/avatol/source/browse/trunk/nematocyst/spinesproject/findMVC_UGM.m
+ hushell	The SSVM I am using is actually calling the libqp
+ hushell	Maybe this is not the best way, if you can include the loss into the node potential in the inference, the results will be better
+@iglesiasg	aham
+@iglesiasg	hushell: what sort of features do they use for this?
+@iglesiasg	I have seen some HOG around
+ hushell	yep, I divide the image into blocks, each block extracted HOG
+ hushell	For edge feature, just counts of y_i == y_j and y_i != y_j, so it's Potts model
+@iglesiasg	hushell: I am going to take a closer look at the code and will ask you again if you don't mind ;)
+ hushell	Sure. I am glad if I can help
+ hushell	Are you going to apply the GSOC this year?
+@iglesiasg	yeah
+@iglesiasg	hushell: I have applied for SO learning too and for LMNN
+@iglesiasg	but my main objective is LMNN
+-!- thoralf [~thoralf@enki.zib.de] has joined #shogun
+ thoralf	Hey.
+@iglesiasg	hey thoralf
+ hushell	Haha, don't worry I will also be happy if you get accepted to SO learning
+ hushell	The LMNN is a research topic of my college, you may like to talk to him
+@wiking	morning
+-!- mizobe [~mizobe@189.35.244.197] has quit [Remote host closed the connection]
+@wiking	HeikoS: ping
+ hushell	\quit
+@wiking	hushell: /quit ;)
+ hushell	:p
+-!- hushell [43bd6474@gateway/web/freenode/ip.67.189.100.116] has quit []
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+@HeikoS	wiking: pong
+@wiking	HeikoS: get_mean_vector
+@HeikoS	?
+@wiking	ah ok
+@wiking	it's not rdn
+@wiking	rnd
+@wiking	it's based on the model
+@HeikoS	wiking: no idea what you are talking about :D
+@HeikoS	explain
+@wiking	anyways i was looking into RNG
+@HeikoS	I see
+@wiking	and now i'm trying to figure out where the changes are going to be
+@HeikoS	cool what did you find
+@wiking	as i thought to use
+@wiking	or create an RND
+@wiking	RNG
+@HeikoS	what about sergey's c++11 idea?
+@wiking	that can give you back like a SGVector with samples of a standard distrib
+@wiking	like the new c++11
+@wiking	c++11 is great
+@wiking	but what if the user doesn't have a compiler yet
+@wiking	that supports c++11
+ sonne|work	wiking: changes would just be in CMath::rand* and init_random
+@wiking	HeikoS: std::normal_distribution<double> normal_dist(mean, stddeviation);  //
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has joined #shogun
+@wiking	HeikoS: it has a good api
+@wiking	only thing that we cannot say that we only support compilers that supports c++11
+@HeikoS	wiking yes, we need the random normals and the uniform ones, I think we dont have more distributions right?
+@wiking	sonne|work: i've checked a comparison between R's, c++11's and boost's RNG, and c++11 was the fastest
+@HeikoS	what about something as libssl then?
+@wiking	HeikoS: yeah i think that 2 distrib would be sufficient at the moment
+@wiking	HeikoS: well it's an option, but then again sonne|work disagrees
+@HeikoS	ok
+@HeikoS	but boost?
+@HeikoS	thats massive
+@wiking	boost is bloated
+@wiking	this RNG is meant to be really fast: http://en.wikipedia.org/wiki/Ziggurat_algorithm
+@wiking	the code for it is like 100 lines in c
+@wiking	what we could do is to have 2 standard engines for RNG
+@wiking	Ziggurat algorithm and Mersenne Twister
+@wiking	both of them are pretty standard for PRNG
+@wiking	and then one can choose, but would say default to Ziggurat the PRNG as that's faster than mersenne twister
+@wiking	and then we are pretty much done... :P
+@HeikoS	okay
+@HeikoS	question:
+@HeikoS	will we still have problems with the tests?
+@wiking	both of their implementation is available in various forms ...
+@wiking	HeikoS: well if we use our own PRNG then no
+@HeikoS	since the problem is that the streams are not reproducable
+@HeikoS	but why have two then?
+@HeikoS	also, btw for us, speed of rng does not really matter that much
+@HeikoS	so why not just go with one?
+@wiking	well then let's just decide which PRNG we would like to use
+@wiking	and that's it
+@HeikoS	wiking or actually
+@HeikoS	we can add more
+@HeikoS	and then let user decide which one to use in his code
+@HeikoS	but std one is fixed
+@HeikoS	so that the examples all work
+@wiking	HeikoS: well as said
+@wiking	we have a default PRNG engine
+ sonne|work	wiking: did you measure speed also for opencv's RNG?
+@HeikoS	this is the way its done for example in matlab, you can choose your stream and seed it
+@wiking	but we provide more...
+@wiking	sonne|work: they use Mersenne
+ sonne|work	didn't they have multiple?
+@lisitsyn	I woke up! :D
+@wiking	sonne|work: the code is imo too much bundled into opencv
+@lisitsyn	speed of RNG - does that matter?
+@wiking	sonne|work: so i'd rather not even touch opencv's RNG
+ sonne|work	lisitsyn: yes of course
+@HeikoS	sonne|work: why does it matter?
+@HeikoS	for shogun I mean
+ sonne|work	do you want to wait 1 hour to get a 1000x1000 rnd matrix?
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+@lisitsyn	well that's not possible to write that bad RNG :D
+ sonne|work	I used it in qsort for the pivot element
+@HeikoS	I think the speed differences wrt to matrices that you can store in memory (small) is minor, but I might be wrong
+ sonne|work	but sure one can always work around this
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 264 seconds]
+ sonne|work	lisitsyn: just compare /dev/random and /dev/urandom
+@lisitsyn	sonne|work: yeah I know they are different in perf
+@lisitsyn	but I mean it is not that usual thing to compute random values
+@lisitsyn	it usually happens when you either initialize random data (but that's just test) or initialize something in iterative algorithm
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+@wiking	anyhow
+@wiking	the implementations you can find
+@wiking	are like 100 lines
+@wiking	see http://www.bedaux.net/mtrand/mtrand.cpp.html for mersenne twister
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@wiking	afaik these are overoptimized already
+@wiking	as the point of these various PRNG is that who can create/define a faster PRNG :P
+ sonne|work	lisitsyn: well I don't mind having a slow but very accurate prng and a fast one for the other case
+@wiking	what's very accurate prng?
+@wiking	the things one usually measures of a prng is speed and the entropy of the output....
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+ sonne|work	wiking: in limit hist(x) will match the wanted distribution p(x)
+ sonne|work	like normal distribution, or equally distributed
+@wiking	sonne|work: well PRNG is simply a random generator
+@wiking	so the rest should be done by us
+@wiking	;)
+ sonne|work	HeikoS: could you please click the 'I want to mentor knob'!
+@wiking	PRNG will just assures us that what we get is actually something like a white noise
+ sonne|work	wiking: for uniform I guess?
+@HeikoS	sonne|work: will do!
+@wiking	sonne|work: white noise :)
+@wiking	nothing else
+ sonne|work	HeikoS: done?
+@wiking	and if we want to have different distribs
+@wiking	then we have to create our own methods for it
+@wiking	based on PRNG
+@wiking	so yeah indeed will get a uniform distrib with a good PRNG
+@wiking	uniform distrib that actually reproducible
+@wiking	over different os/arch etc
+@wiking	based on the seed
+@HeikoS	donre
+@wiking	so
+@wiking	let's have a CRNG class ;)
+@wiking	or rather CPRNG
+@wiking	shogun/lib/PRNG.h/cpp
+@wiking	all agree? :)
+@wiking	good
+@lisitsyn	guyz guyz
+@lisitsyn	I kan haz a betta soluktion
+@lisitsyn	we haz to criate a madule shogun-rendom
+@wiking	lisitsyn: doz it!
+@lisitsyn	& putz a few gigobytez of rendom veluez
+@wiking	lol
+@wiking	:>
+@wiking	lisitsyn: had too much vodka yesterday when u celebrated the day of work? :)
+ sonne|work	wiking: shogun/math/Random.{h,cpp}
+ sonne|work	wiking: lisitsyn is always like this
+@lisitsyn	haha
+ sonne|work	you know Russian ;)
+@wiking	ok let's gitflow this one as well
+@wiking	:)
+@lisitsyn	peace! vodka! putin!
+@wiking	lisitsyn: hasn't putin gave u the medal for the hero of work yesterday? :D
+@lisitsyn	wiking: no I am a foreign agent you know
+@lisitsyn	received money from the enemy two times
+@lisitsyn	no pasaran!
+@wiking	sonne|work: you've ment shogun/mathematics/Random.{h,cpp} right?
+ sonne|work	wiking: yes
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: iglesias :develop * 100d655 / src/shogun/ (4 files): https://github.com/shogun-toolbox/shogun/commit/100d655bf89fdbd135dd8119a506f869e562674b
+ shogun-notifier-	shogun: Drop static SGVector::resize().
+ shogun-notifier-	shogun: This method can be misleading since it should not be used for SGVectors,
+ shogun-notifier-	shogun: use SGVector::resize_vector() instead.
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 088dc29 / src/shogun/ (4 files): https://github.com/shogun-toolbox/shogun/commit/088dc299c9969da210290319afb28d23e4ec70bd
+ shogun-notifier-	shogun: Merge pull request #1040 from iglesias/feature/drop_resize
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Drop static SGVector::resize().
+@wiking	doh
+@wiking	why i cannot add parameter to a class that's derived directly from SGObject? :)
+@wiking	http://pastebin.com/ZVS2s7nR
+@lisitsyn	21 proposals so far!
+ shogun-buildbot	build #731 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/731
+@wiking	lol
+@wiking	i've just realised
+@wiking	http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/
+@wiking	so i think we should go with this
+@wiking	as this is a standard mersenne twister
+@wiking	but if sse2 or alitvec is available
+@wiking	it can use it in order to boost up the speed
+@wiking	sonne|work: ^ ?
+-!- poojits [75d35d4a@gateway/web/freenode/ip.117.211.93.74] has joined #shogun
+ poojits	I want to contribute to Shogun, so I looked at the entrance tasks and I want to give issue #1025 a shot. I don't know if it's a bad thing, but I feel like I need to understand the entire codebase, so I know exactly what I am doing. How do I start?
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ sonne|work	wiking: ohh a maintained thing very good!
+ sonne|work	website from 1995 but updated 2013 - so yes why not. give it a try...
+@wiking	sonne|work: the only question now of course
+@wiking	whether we want SFMT or dSFMT
+@wiking	and that or is not necessarily exclusive or ;)
+@wiking	as sfmt can create us fast int32/64 arrays
+@wiking	as dsfmt can do the same with double
+ sonne|work	both then :)
+ vgorbati	lisitsyn: here?
+@lisitsyn	vgorbati: yes
+@wiking	hehehe yeah i guessed so
+@wiking	sonne|work: there's only one stupid problem here with this lib
+ sonne|work	?
+@wiking	This function generates and returns 64-bit pseudorandom number. * init_gen_rand or init_by_array must be called before this function. * The function gen_rand64 should not be called after gen_rand32, * unless an initialization is again executed.
+@wiking	so basically i'll have to maintain a state
+@wiking	in the RNG
+@wiking	and reinit the struct if genrand32 or the other has been called
+ sonne|work	wiking: you have to add locking
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ sonne|work	maybe expose 2 functions then
+ sonne|work	one thread safe (where one has to input the state)
+ sonne|work	and one where the state is maintained internally
+@wiking	ah fuck yeah
+@wiking	i havent' thought about being thread safe
+ vgorbati	lisitsyn: about multidimensional scaling: the method description looks quite understandable, while implementation does not:) Theoretically, the only method parameters should be num_neighbors and squishing_rate, am I right?
+@lisitsyn	vgorbati: multidimensional scaling? it doesn't have any parameters at all
+ vgorbati	lisitsyn: wait, what?:) At least K - the number of neighbors
+@iglesiasg	poojits: hey, I think that issue is already been taken care of by another person but you are free to do it if you want
+@lisitsyn	no, MDS has no deals with neighbors - that's isomap
+ sonne|work	wiking: woahh!
+ sonne|work	rand() is also not thread safe
+ sonne|work	I guess that could explain some issues we were having
+ vgorbati	lisitsyn: oh, my fault - manifold sculpting:D
+@lisitsyn	vgorbati: ahh
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has quit [Ping timeout: 245 seconds]
+ vgorbati	lisitsyn: at least that's what the original paper says..
+@wiking	sonne|work: heheh ok i'll make it thread safe
+@wiking	just first i want to import then both of the libraries
+ vgorbati	lisitsyn: but since it is iterational, I am thinking whether I should use a max_iteration parameter as well..
+@lisitsyn	vgorbati: yes why not
+@lisitsyn	it always makes sense to limit # of iterations
+@wiking	oooh shit
+@wiking	redefinitions :S
+@lisitsyn	vgorbati: I wish there was a matlab implementation
+ vgorbati	lisitsyn: ok, one question solved:) Now another one:since it is also gradient-descend-like, it uses learning rate - but in the implementation, Gashler sets it to average distance to neighbors and then during each iterations multiplies it by magic numbers:)
+@lisitsyn	vgorbati: well he knows better - he is the author  :D
+ vgorbati	lisitsyn: So, leave it as it is?)
+@lisitsyn	yeah for now
+ vgorbati	lisitsyn: the algorithm is actually full of these numbers:) about matlab - that would be awesome)
+ vgorbati	lisitsyn: but, well, I have what I have)
+@lisitsyn	vgorbati: I googled it a little but haven't found anything
+-!- mikhailBelous [~quassel@37.98.242.99] has joined #shogun
+ vgorbati	lisitsyn: now 3rd question: as I see it now, in embedManifoldSculpting method I should get the neighbors using find_neighbors method, then find 2 SparseWeightMatrix - one for distances and one for angles, and then actually call the method passing these matrices and parameters into. Does it make sense?
+@lisitsyn	vgorbati: let me check teh paper
+ vgorbati	http://www.cc.gatech.edu/~isbell/reading/papers/ManifoldSculpting.pdf
+ mikhailBelous	I sent my aplication yesterday somebody please watch it
+@lisitsyn	mikhailBelous: yeah we have seen
+ mikhailBelous	Did you like it?
+ mikhailBelous	Any comments,question suggestions?
+@lisitsyn	mikhailBelous: alright, first - it should be one proposal per idea so if you are applying to two ideas (with two different mentors) - please send two proposal
+@lisitsyn	s
+@lisitsyn	next, please read it carefully
+ mikhailBelous	Ideas?
+-!- hoijui [~hoijui@dslb-088-074-121-064.pools.arcor-ip.net] has joined #shogun
+@wiking	sonne|work: ok question: the CMath::random* function are static... while now i'm creating a CRandom class... hence we need to statically allocate that CRandom object somewhere... like in init_shogun() ?
+@lisitsyn	mikhailBelous: if you are applying to LMNN or dimension reduction - send two proposals - one for LMNN and one for DR
+ sonne|work	wiking: ok
+@wiking	sonne|work: ah i see init_shogun creates a CMath class... then we can actually make CRandom part of CMath, or?
+ mikhailBelous	Year I got it.
+ mikhailBelous	What I have to read carefully?
+@wiking	sonne|work: i mean to be a private variable of CMath
+@wiking	although even then the reference on CRandom will be needed, i.e. like a global or something
+ sonne|work	wiking: maybe even make it a separate class
+@lisitsyn	mikhailBelous: your proposal, please check it for spelling and grammar
+@wiking	sonne|work: it'll be a separate class...
+@wiking	CRandome
+@wiking	*CRandom
+@lisitsyn	wiking: french class
+@lisitsyn	'CRandome'
+@lisitsyn	:D
+ mikhailBelous	Okay.Sorry I'm enlgish is not my native.
+@lisitsyn	that's ok it is not native for anyone here just read it carefully
+ mikhailBelous	May I copypaste my proposal?
+@lisitsyn	well except to some parts they can be similar
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has joined #shogun
+@lisitsyn	23
+@lisitsyn	sonne|work: I've told you soo!
+@lisitsyn	24
+ mikhailBelous	And how about me am I good for this project
+ mikhailBelous	?
+ votjakovr	Hi everyone! I have just submitted my proposal:)
+@lisitsyn	votjakovr: yeah I have seen
+@lisitsyn	mikhailBelous: we are unable to say whether any student is going to be accepted or not - that's going to happen on 27 May
+@wiking	sonne|work: any idea why i cannot do SG_ADD (see: http://pastebin.com/ZVS2s7nR
+ mikhailBelous	Oki-doki. I'm just intrested did you like it or not
+@lisitsyn	mikhailBelous: you have got no contributions so far - that should be the top priority now
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has joined #shogun
+-!- poojits [75d35d4a@gateway/web/freenode/ip.117.211.93.74] has quit [Ping timeout: 245 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has quit [Ping timeout: 248 seconds]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- erlenda [~erlenda@fw-oslo.intelcom.no] has quit [Remote host closed the connection]
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has quit [Ping timeout: 260 seconds]
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has joined #shogun
+-!- thoralf [~thoralf@enki.zib.de] has quit [Quit: Konversation terminated!]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- erlenda [~erlenda@fw-oslo.intelcom.no] has joined #shogun
+-!- thoralf [~thoralf@enki.zib.de] has joined #shogun
+ thoralf	Hey.
+@HeikoS	thoralf: hi!
+@HeikoS	just about going into the bug
+@HeikoS	sorry for the delay, gsoc eats a lot of time
+@wiking	sonne|work: ping ping ping
+ thoralf	Heiko: Tell me it's a bug, so I know that the solution is more than not beeing stupid. ;)
+ sonne|work	wiking: you have to include lib/parameter.h IIRC
+@HeikoS	thoralf: have to go into it :)
+@wiking	sonne|work: we need a macro HAVE_SSE2
+@wiking	in case there's sse2
+@wiking	i've already made some changes
+ sonne|work	wiking: lets try first w/o sse
+ sonne|work	we can speed things up later
+@wiking	kk i'm just doing the configure now
+ sonne|work	HeikoS: ping ping ping - please assign yourself as mentor to students you intend to mentor
+@HeikoS	sonne|work done
+@HeikoS	is this possible mentoring or definite vote?
+ sonne|work	we can change until may 22 IIRC
+ sonne|work	or 24 even
+@wiking	sonne|work: ok it's ready
+@wiking	sonne|work: i'll push the feature branch to the repo
+@wiking	and comment it
+@HeikoS	sonne|work: question is: do I have to say yes to multiple people?
+@wiking	it's purely the import of SFMT and adding a new CRandom class
+ sonne|work	you can say want to mentor to multiple people yes
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has joined #shogun
+ sonne|work	I will assign you only 1 per task for sure :)
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+@wiking	the static allocation of the object in init_shogun is not done yet
+@HeikoS	sonne|work: I am fine with that :D
+@wiking	nor that CMath::random is using the new PRNG
+@HeikoS	sonne|work: if people send PRs against shogun-data, they can only do it to "master", but thats fine right? The data version of the develop/master repository selects the correct one
+ sonne|work	11. What happens if two students are accepted to work on the same project, e.g. from an organization's Ideas list?
+ sonne|work	That's fine, a little duplication is par for the course in open source.
+ sonne|work	ohh look at this
+ sonne|work	one could even have two students working on the same task
+ sonne|work	I didn't know
+ sonne|work	HeikoS: yes that's ok
+@HeikoS	lisitsyn: ^
+@HeikoS	ok
+ sonne|work	wiking: then do the static analysis
+@wiking	ssh: connect to host github.com port 22: Connection refused
+@wiking	LOL
+@wiking	wtf is this
+@wiking	ok now it went ok
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * 35b7254 / src/shogun/lib/external/SFMT/ (16 files): https://github.com/shogun-toolbox/shogun/commit/35b7254d4e861b78a24ae35323450a9071b55d99
+ shogun-notifier-	shogun: Import SFMT PRNG
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * 31da88a / src/shogun/mathematics/Random.cpp,src/shogun/mathematics/Random.h: https://github.com/shogun-toolbox/shogun/commit/31da88aac065398f6aaf0ad0a0ff897fbb72c151
+ shogun-notifier-	shogun: Create class for PRNG
+ shogun-notifier-	shogun: wrapper class for SFMT
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * 81599e1 / src/configure: https://github.com/shogun-toolbox/shogun/commit/81599e1c93ab83d54c1599697990dfd9c713d5fb
+ shogun-notifier-	shogun: Add --mexp and HAVE_SSE2 defines in ./configure
+@wiking	there you go comment it
+ thoralf	sonne|work: AFAIK it must be clear, which contribution is attributed to which student.  Beside of this,
+ thoralf	sonne|work: i.e. no "team work"
+ sonne|work	wiking: what is +SFMT_MEXP=19937
+ sonne|work	thoralf: yes
+@wiking	sonne|work: mersenne exponent
+ sonne|work	but ML is soo wide spread basically any idea we have on the list can be diveded into multple
+@wiking	sonne|work: it's required by SFMT
+ sonne|work	wiking: so why is this in configure then?
+ sonne|work	or which one should one use
+@wiking	sonne|work: because one can use other exponents
+@wiking	see ./configure --help
+ sonne|work	how does it affect randomness
+ sonne|work	yeah seen it
+@wiking	SFMT_MEXP This macro is required. This macro means Mersenne exponent and the period of generated code will be 2SFMT_MEXP-1. SFMT_MEXP must be one of 607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049, 216091.
+@wiking	2^SFMT_MEXP-1
+@wiking	to be correct with the above copy paste
+@wiking	it's a prime i know that but how that effects randomness
+@wiking	no clue
+@wiking	one should read their paper
+ sonne|work	the period of way over 1e5000 is certainly good enough for my life time
+ sonne|work	yeah it is kind of weird. I guess it will affect speed or sth
+@wiking	let's stick to the default
+@wiking	but since it's a parameter
+@wiking	i reckon one should have access to change it
+ sonne|work	We have no clue what it does.
+ sonne|work	Changing it is dangerous aka might kill properties of the RN and I would rather not
+@wiking	sonne|work: ok then you'll fork it
+ sonne|work	but hey you did the work so whatever keep it
+@wiking	i strongly disagree with you hence it's up to you what you cherry-pick from the commmits
+ sonne|work	wiking: ?
+@wiking	sonne|work: ok then we agree ;)
+@wiking	that we disagree
+@wiking	:>
+@wiking	mmm
+ sonne|work	parse error
+@wiking	where?
+ sonne|work	I don't understand what you are saying
+@wiking	btw how do you SG_ADD a pthread?
+ sonne|work	where do we agree / disagree
+@wiking	pthread_mutex
+ sonne|work	don't
+@wiking	ah ok
+@wiking	any enum ?
+@wiking	and (void *) ?
+ sonne|work	void* -> impossible
+ sonne|work	enum IIRC machine_int_t
+@wiking	sfmt_t* m_sfmt;
+@wiking	as i have this
+@wiking	in the class
+ sonne|work	SG_ADD((machine_int_t*) &my_enum,...)
+ sonne|work	sfmt* is what?
+ sonne|work	wiking: please drop the sfmt_altivec file
+@wiking	sonne|work: well that's an internal struct of the SFMT
+ sonne|work	lets just keep the generic and the sse variant
+@wiking	sonne|work: eheh that will take some fair amount of digging :P
+@wiking	sonne|work: to get out altivec from that code
+@wiking	it's quite bundled
+@wiking	but if we never set the HAVE_ALTIVEC macro
+@wiking	as we do right now
+@wiking	then we are on the safe side
+ sonne|work	wiking: no - it is just included once
+ sonne|work	so just remove the file
+ sonne|work	+#if defined(HAVE_ALTIVEC)
+ sonne|work	+  #include "SFMT-alti.h"
+ sonne|work	+#elif defined(HAVE_SSE2)
+ sonne|work	+  #include "SFMT-sse2.h"
+ sonne|work	+#endif
+ sonne|work	and remove it from there too
+@wiking	sonne|work: you can commit to this branch as well ;)
+ sonne|work	no time
+@wiking	ok so how should i sg_add that sfmt*
+@wiking	?
+ sonne|work	no that cannot work if not derived from SGObject
+@wiking	mmm
+@wiking	but that'll cause troubles with python_modular
+@wiking	or?
+@wiking	or since this is not going to be directly used from modular interfaces
+@wiking	we are good?
+@HeikoS	thoralf: so yes you found a bug
+ sonne|work	well in principle we don't need any serialization for the RNG at all
+@HeikoS	I was aware that something in the streaming framework is wrong but this clearly points it out
+ sonne|work	since we set the seed anyway
+@HeikoS	in fact, there already occur problems without loading any files
+ sonne|work	ohh it would even hurt
+ sonne|work	we would then need to set the seed after de-serializing
+ sonne|work	wiking: I am rather in favor of not making the object serializable
+ thoralf	HeikoS: Okay, thanks.
+@HeikoS	thoralf: I will have a look now and put up an issue on git
+@HeikoS	something I wanted to have fixed for a while, but did not find the time yet
+ sonne|work	HeikoS: what is the bug
+@wiking	sonne|work: ok any special thing i should do to disable serialization?
+ sonne|work	just remove SG_ADD's
+@wiking	sonne|work: all of them? :) okey
+@HeikoS	sonne|work: streaming features have memory problems: double free an other things
+@HeikoS	currently trying to find out more
+ sonne|work	HeikoS: yes I know - but is this the SGVector thing?
+ sonne|work	wiking: then please do the initialization in init_shogun
+ sonne|work	and then run generator.py again
+ sonne|work	and check if you manage to get the same results on *bsd and linux...
+@wiking	ok
+@HeikoS	thoralf: does it currently prevent you from working?
+@HeikoS	sonne|work: not sure what you mean
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * 4736671 / src/shogun/mathematics/Random.cpp,src/shogun/mathematics/Random.h: https://github.com/shogun-toolbox/shogun/commit/473667152bc96e8bbbe2f1438b997ac918d7897f
+ shogun-notifier-	shogun: Add parameters of Random and add HAVE_PTHREAD macro check
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * 7dd6b47 / src/shogun/mathematics/Random.cpp,src/shogun/mathematics/Random.h: https://github.com/shogun-toolbox/shogun/commit/7dd6b47b92a73cf282135a6a936a060f622e0b12
+ shogun-notifier-	shogun: Make Random unserializable
+ thoralf	HeikoS: No, as I've got plenty of work.  Yes, as it blocks my shogun experiments. :)
+@HeikoS	thoralf: I mean, a quick hack for now is just to remove the SG_UNREF
+ thoralf	HeikoS: Yes, but then it does not free the memory - and my data files are quite big.
+@HeikoS	thoralf: I see
+@HeikoS	thoralf: I will explore and discuss with others, we are definitely interested in having this resolved soon
+@HeikoS	thoralf:  just wondering what do you want to do?
+ sonne|work	HeikoS: recall that we switched to using SGVector at some point?
+@HeikoS	sonne|work: yes
+ sonne|work	HeikoS: the streaming features were written when that stuff did not exist
+ sonne|work	so now we have the issue that SGVector auto-frees memory
+@HeikoS	sonne|work: so this still has to be migrated, right, but I think last time I went into this, there were some more problems
+ sonne|work	(or ot)
+@HeikoS	sonne|work: should be easy to fix then
+ thoralf	HeikoS: Ive got some external svmlight file and try to experiment with different hash kernels (MKL) on this data.
+ sonne|work	no it is not an easy fix :/
+ thoralf	HeikoS: And MKL lead me to shogun.
+ thoralf	sonne|work: Sounds bad.  If you need some assistance, let me know.
+ thoralf	sonne|work: I think the bug is easy to track down, since it already happens with a small one-vector-data set.  So it would be possible to track the reference counts "by foot". :)
+@HeikoS	thoralf: would you be interested in working on this? :)
+-!- erlenda [~erlenda@fw-oslo.intelcom.no] has quit [Quit: Leaving]
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * c204e89 / src/shogun/base/init.cpp,src/shogun/base/init.h: https://github.com/shogun-toolbox/shogun/commit/c204e89ad4828227c7c648bd0d3d5fc4903ebc1e
+ shogun-notifier-	shogun: Create a global Random object in init
+ thoralf	HeikoS: Damn. I was begging for this, right? ;)
+@wiking	sonne|work: ^ should be like this right?
+ thoralf	HeikoS: I'll have a look.
+ sonne|work	wiking: yes
+@wiking	ok now it's really only about starting to use this PRNG in shogun ;P
+@HeikoS	thoralf: hehe :)
+ sonne|work	wiking: yes just run generator.py
+@HeikoS	thoralf: would be nice if you have time, we are postponing this one for a while now :) let me know if you need any help/questions/answers
+ sonne|work	and then rsync this stuff to some *bsd machine and try if it gives the same result
+ sonne|work	wiking: and tester.py of course too :)
+@wiking	sonne|work: mmm how to i get reference on that sg_rand ? :)
+ sonne|work	wiking: did you add an #extern ?
+ sonne|work	extern actually
+@wiking	where?
+ sonne|work	wiking: whereever you need it
+ sonne|work	I don't know why you need it actually
+ sonne|work	you could just use the getter
+@wiking	yep
+@wiking	but i wonder why i cannot SG_UNREF(CRandom*)
+@wiking	/Users/wiking/shogun/src/shogun/mathematics/Math.h:476,4 - Error - member access into incomplete type 'shogun::CRandom'
+ sonne|work	I don't have time to look into this right now :/
+@wiking	ok done
+@wiking	will work now
+@wiking	now it's 'only' rewriting all the functions in CMath
+-!- travis-ci [~travis-ci@ec2-50-16-143-238.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6820176
+-!- travis-ci [~travis-ci@ec2-50-16-143-238.compute-1.amazonaws.com] has left #shogun []
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- gsomix_ [~gsomix@95.67.166.72] has joined #shogun
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has left #shogun ["QUIT :Leaving."]
+-!- gsomix [~gsomix@95.67.181.139] has quit [Ping timeout: 264 seconds]
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Morning, all
+@HeikoS	KMcQuisten:  hi!
+ KMcQuisten	Hope all is well
+@wiking	uff why :)
+@HeikoS	Hope for you too!
+ KMcQuisten	Why not?
+@HeikoS	about your mail
+@wiking	mmm i was commenting to travis-ci
+ KMcQuisten	Oh, ok
+@HeikoS	so this is an issue that the model selection framework has
+@HeikoS	if you wanted to do a search over multiple combined kernels
+-!- Asix3 [~Asix3@d47-69-144-148.nap.wideopenwest.com] has joined #shogun
+@HeikoS	you would have to create all of them by hand
+@HeikoS	but thats kind of not what you want
+ KMcQuisten	Exactly
+@HeikoS	so one thing I dont get is:
+@HeikoS	you do MKL right? so the program selects the subkernel weights for you
+@HeikoS	why do you want to optimise them seperately?
+@HeikoS	I would just throw in all kernels that might be relevant and look at the weights
+@HeikoS	modelselection only necessary for the SVM parameters
+@HeikoS	or am I wrong?
+ KMcQuisten	I don't want to optimize the subkernel weights separately.  I want to set up specific subkernels and optimize the parameters for those kernels, while still letting the MKL optimize the subkernel weights
+@HeikoS	I see
+@HeikoS	so one thing you could do:
+@HeikoS	say you want to select a Gaussian width
+@HeikoS	just add subkernels with all those widths to the combined kernel
+ KMcQuisten	That won't work
+ KMcQuisten	Let me explain:
+ KMcQuisten	I have two kernels, one for features related to one aspect of my data, and another for different features on the same data
+ KMcQuisten	If I just threw all the possible parameterizations for both types of kernels into an MKL, there is no way for me to force it to choose one from each aspect
+-!- _Asix3 [~Asix3@d47-69-144-148.nap.wideopenwest.com] has joined #shogun
+-!- Asix3 [~Asix3@d47-69-144-148.nap.wideopenwest.com] has quit [Ping timeout: 256 seconds]
+@HeikoS	KMcQuisten: I see
+ KMcQuisten	I want to be able to do a grid search of subkernel parameters
+@HeikoS	KMcQuisten: ok understoof
+@HeikoS	d
+ KMcQuisten	while letting the MKL optimize the subkernel weights
+@HeikoS	unfortunately, thats currently not possible
+-!- _Asix3 [~Asix3@d47-69-144-148.nap.wideopenwest.com] has quit [Client Quit]
+@HeikoS	since model selection does not handle subkernel stuff straight forwardly
+@HeikoS	its not a very big deal to extend it though
+@HeikoS	one more question:
+ KMcQuisten	Indeed.  I was thinking that there would need to be a CombinedKernel parameter for "subkernel parameters"
+ KMcQuisten	Ok
+ KMcQuisten	Shoot
+@HeikoS	I mean you can add SG_Objects llike the subkernels as parameters
+@HeikoS	so the other thing is
+@HeikoS	you choose only kernels on feature part A
+@HeikoS	put in all the subkernels
+@HeikoS	use MKL to select parameters
+@HeikoS	or something else
+@HeikoS	then do the same thing for feature part B
+@HeikoS	then use the best one for MKL
+@HeikoS	in fact you can use the existing modsel framework then
+ KMcQuisten	Doing that tends to overfit the model and is poor at generalizing.  I've tried that.
+@HeikoS	ok
+@HeikoS	well then, we have another item in our issues list :)
+@HeikoS	Interested in working on that btw?
+ KMcQuisten	I was thinking about how it could work, and if the CombinedKernel had a parameter that's just called "subkernel", then nodes for each subkernel could be built and added as children to the CombinedKernel node, and it would be rather intuitive.  I've not gotten into the guts of the modsel framework to know if that kind of thing would be simple to implement
+@HeikoS	thats exactly how we would do it
+ KMcQuisten	I model genetic regulatory pathways, so I use string and numerical kernels together quite a bit.
+@HeikoS	ah I see so even different features
+ KMcQuisten	Exactly
+@HeikoS	thats the difficulty with this combined stuff
+@HeikoS	and also the sukernels are stored in a list
+ KMcQuisten	I'm interested in looking at tree-based features as well, as there are some natural ways they could apply to some of my work.
+@HeikoS	which is not really registered for modelselection currently
+@HeikoS	I would love to have tree/graph based features in shogun
+@HeikoS	someone would have to code it up :)
+@HeikoS	the modelselection framework currently works like this:
+ KMcQuisten	Taht's a project i'd be interested in helping with once my dissertation's done
+@HeikoS	classes register their parameter available
+@HeikoS	then a user builds these trees
+@HeikoS	and shogun computes the tree "products" with all combinations of parameters (that make sense)
+@HeikoS	so we would just have to fit the combined kernel into this framework
+@HeikoS	KMcQuisten: feel free to get back to use thenm
+@HeikoS	I will add an issue on github and think on how to implement this stuff
+ KMcQuisten	Indeed.  I've used it for single kernel parameter optimization and it's worked great.
+@HeikoS	feel free to add your  comments to it, Ill send the link
+@HeikoS	KMcQuisten: yes, thats a thing it can do quite nicely
+ KMcQuisten	It's areally well-designed framework
+@HeikoS	thanks!
+ KMcQuisten	Thanks so much for looking into this for me.
+@HeikoS	we are currently looking into ways of making the syntax easier
+@HeikoS	in particular from python
+@HeikoS	KMcQuisten: welcome, its always nice to get feedback on things
+@HeikoS	KMcQuisten: btw have you used the nu-svr stuff that I added with that huge delay?
+-!- hoijui [~hoijui@dslb-088-074-121-064.pools.arcor-ip.net] has quit [Quit: Leaving]
+ KMcQuisten	I have.  It's been a nice way to look at SVR, and for some reason it's been a bit more intuitive when I've explained how it works to my biologist collegues
+ KMcQuisten	I always thought the epsilon tube was perfectly understandable, but they like proportions, it seems.
+ KMcQuisten	Thank you
+@HeikoS	I also like it more
+@HeikoS	its a bit slower to optimise though
+ shogun-notifier-	shogun: cameron :develop * 8f6de9c / examples/undocumented/python_modular/regression_gaussian_process_modular.py: https://github.com/shogun-toolbox/shogun/commit/8f6de9c14fb4ef232b31d75b1c7e53ab87407812
+ shogun-notifier-	shogun: Changed typo in GP regression from RETURN_TYPE_MEAN to RETURN_TYPE_COV
+ shogun-notifier-	shogun: cameron :develop * c381460 / / (135 files): https://github.com/shogun-toolbox/shogun/commit/c3814609396742a2c3fdf19d567d4f89fa3b20cb
+ shogun-notifier-	shogun: Merge remote-tracking branch 'shogun/develop'
+ shogun-notifier-	shogun: cameron :develop * 7790dd1 / data: https://github.com/shogun-toolbox/shogun/commit/7790dd146bf5e315faba55ff926d9f7e080b5408
+ shogun-notifier-	shogun: Modified submodule for gp regression test results
+ shogun-notifier-	shogun: cameron :develop * a33603b / data: https://github.com/shogun-toolbox/shogun/commit/a33603beb5fb35596f8d1309d797c7ee4804431c
+ shogun-notifier-	shogun: Updated submodule shogun-data for gp regression tests
+ shogun-notifier-	shogun: cameron :develop * 945a7ff / data: https://github.com/shogun-toolbox/shogun/commit/945a7ff7112becba39a32d5a12ad7345fb7734c3
+ shogun-notifier-	shogun: Revert "Updated submodule shogun-data for gp regression tests"
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: This reverts commit a33603beb5fb35596f8d1309d797c7ee4804431c.
+ shogun-notifier-	shogun: cameron :develop * e5c8dae / data: https://github.com/shogun-toolbox/shogun/commit/e5c8daed3d5b320929d7d1cff73404a1003bbece
+ shogun-notifier-	shogun: Revert "Modified submodule for gp regression test results"
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: This reverts commit 7790dd146bf5e315faba55ff926d9f7e080b5408.
+ shogun-notifier-	shogun: cameron :develop * b4e23c6 / data: https://github.com/shogun-toolbox/shogun/commit/b4e23c6f30a1680974688cbd85e89cb53284a473
+ shogun-notifier-	shogun: Update submodule data for gp regression
+ shogun-buildbot	build #1083 of deb1 - libshogun is complete: Failure [failed git]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1083  blamelist: cameron <cameronjml2@gmail.com>
+ shogun-buildbot	build #1084 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1084
+ shogun-buildbot	build #733 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/733  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, cameron <cameronjml2@gmail.com>
+@HeikoS	argh
+@HeikoS	I dont get this
+-!- travis-ci [~travis-ci@ec2-50-16-143-238.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6820691
+-!- travis-ci [~travis-ci@ec2-50-16-143-238.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	cameron__:  but the version is correct
+@HeikoS	17627e76436866ae52f35875c8cf41df31571bc2
+@HeikoS	both in data and shogun/data
+ pickle27	hey guys
+@HeikoS	lisitsyn, sonne|work could you help here?
+@HeikoS	pickle27: hi
+ pickle27	quick question about my GSoC application
+@HeikoS	yes?
+ cameron__	HeikoS: I am quite sure everything was right
+ cameron__	HeikoS: not sure what went wrong this time
+ sonne|work	HeikoS: did you git add data?
+ sonne|work	in the src
+ cameron__	sonne|work: i did git submodule update
+ pickle27	when I am actually submitting it on the GSoC site should I put the description from the shogun ideas list in the project description?
+ shogun-buildbot	build #899 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/899  blamelist: cameron <cameronjml2@gmail.com>
+ cameron__	sonne|work: then git commit -a -m "comment"
+@HeikoS	sonne|work: the data in src/ is set to the same hash as the head of shogun-data
+ shogun-buildbot	build #734 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/734  blamelist: cameron <cameronjml2@gmail.com>
+ pickle27	nvm sort of answered my own question by comparing the character limit
+@HeikoS	pickle27: no dont copy it
+@HeikoS	just your application which mentions which project you want to do
+ sonne|work	HeikoS: and you did push data?
+@HeikoS	https://github.com/shogun-toolbox/shogun/commit/abab8b64883c5479ddd3d9a533e38f4f50fc6f16
+@HeikoS	https://github.com/shogun-toolbox/shogun-data/commit/17627e76436866ae52f35875c8cf41df31571bc2
+ cameron__	sonne|work: Yes, data was pushed
+ sonne|work	HeikoS: maybe you pushed data *after* pushing src
+ sonne|work	http://shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun
+@HeikoS	no
+ sonne|work	it looks like it is happy
+@HeikoS	ah
+@HeikoS	cameron__: you had many intermediate commits right?
+ cameron__	HeikoS: yes I reverted the wrong commits I made beore
+ sonne|work	cameron__: ahh revert is a new commit
+ sonne|work	next time use git reset
+ sonne|work	or git commit --amend
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+ cameron__	sonne|work: okok, sorry for all the mess
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+@HeikoS	cameron__: no worries, works now, thanks for the patch!
+@HeikoS	now that you know how this works, you can help people wanting to do this :)
+ cameron__	HeikoS: Thanks for all the help! I can now do the unfinished gp regression interactive
+@HeikoS	nice!
+@HeikoS	thank roman for fixing the bug :)
+@HeikoS	votjakovr
+ cameron__	thanks votjakovr
+@HeikoS	sonne|work: any thoughts on modelselection for subkernels?
+ votjakovr	It's my pleasure :)
+@HeikoS	sonne|work: maybe this can be added to the model-selection syntax project
+@HeikoS	since people have asked about this a few times
+@wiking	sonne|work: make[1]: *** No rule to make target `../../shogun/SFMT-params.h', needed by `modshogun_wrap.cxx'.  Stop.
+@wiking	wtf?
+@wiking	 :)
+@wiking	ah shit
+@wiking	lisitsyn: ping
+-!- ErlendA [~ErlendA@cm-84.215.138.251.getinternet.no] has joined #shogun
+ ErlendA	@HeikoS: Did Dan talk to you about exactly how to precondition the methods?
+@HeikoS	ErlendA: hi
+@HeikoS	a little bit
+ ErlendA	Good
+@HeikoS	log_det=det_Krylov_preconditioned(Q, P, precomputed, tol, maxiter);
+@HeikoS	log_det=log_det+2*sum(log(diag(P)));
+@HeikoS	to speak in matlab
+@HeikoS	use P to create a better conditioned problem and then correct in the logdet result
+ ErlendA	Yes. Exactly, or similarly with a spectral approach
+@HeikoS	ErlendA: so I tried this on a large problem
+@HeikoS	and then discarded it
+@HeikoS	since its slower
+ ErlendA	What did you try?
+@HeikoS	applying P all the time causes so much overhead that the gain in the condition number is lost
+@HeikoS	preconditioned vs not preconditioned
+ ErlendA	Ahh. But this depends on how the preconditioner is constructed.
+ ErlendA	Incomplete cholesky?
+ sonne|work	wiking: you need the include path to be relative to /src/
+@HeikoS	ErlendA: true, so I (we) tried incomplete cholesky
+@HeikoS	did not really do well
+ sonne|work	<shogun/foo/bar>
+@HeikoS	jacobi
+ thoralf	HeikoS: Please have a look at shogun/lib/SGSparseVector.cpp, method ::copy_data, line "features = ((SGSparseVector*)(&orig))->features;"
+@HeikoS	and block wise jacobi
+ thoralf	HeikoS: The reference gets copied to the new vector, so it gets double-freed?
+@wiking	sonne|work: where...? i mean i have no idea where is this coming from
+@HeikoS	ErlendA: but thats on a very specific problem
+@wiking	sonne|work: ok i might have an idea...
+@wiking	:(
+ ErlendA	@HeikoS: Yes. But it is important to have the posibility of using it.
+@HeikoS	ErlendA: aggreed!
+@HeikoS	thoralf: which line is this?
+@HeikoS	number?
+ sonne|work	wiking: from the includes in the sfmt
+ sonne|work	you have to make them all like
+ ErlendA	@HeikoS: I tried incomplete cholesky with wavelet sparsification. Then it works quite well for SPDE problems
+ shogun-buildbot	build #1032 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1032  blamelist: cameron <cameronjml2@gmail.com>
+ sonne|work	#inlcude <shogun/foo/bar.h>
+@HeikoS	ErlendA: we should talka bout everything soon, we got a very promising guy here
+@HeikoS	ErlendA: nice, so then we should add it
+ thoralf	HeikoS: line 114
+@wiking	sonne|work: yep i got that in the meanwhile :P
+ ErlendA	@HeikoS: It's difficult to program it in a way that is general and useful. The gist should be (IMO) that you can use your customized preconditioner, if you happen to have a good one
+@HeikoS	ErlendA: ok, sounds good
+@HeikoS	yes, then we can make it optimal to code the actual preconditioner
+@HeikoS	thoralf: I dont think this is a problem
+ ErlendA	@HeikoS: Yes. I think that in the end, that's more useful
+@HeikoS	thoralf: I suspect if you run the code with SGVector instead of sparse vectors, then it will also crash
+@HeikoS	I think it has to do with the way the streaming framework handles vector data
+@HeikoS	ErlendA: looking forward, will be a cool project
+ sonne|work	HeikoS: I didn't follow what the issue with subkernels & MS is...
+@HeikoS	sonne|work: imageine you have two kernels that you combine in a combined one
+@HeikoS	now you want to select the parameters of the subkernels
+ sonne|work	ok
+ thoralf	HeikoS: But since the old vector (including the "features" array) is already freed, this is my suspect #1.
+ sonne|work	HeikoS: and?
+@HeikoS	thoralf: ok, maybe then try changing this and see where it brings you?
+@HeikoS	sonne|work: so this is currently not possible with shogun
+@HeikoS	and the modsel framework
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ sonne|work	HeikoS: because you need to combine each parameter setting of one kernel with the settings of the other right?
+ shogun-buildbot	build #1033 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1033  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, cameron <cameronjml2@gmail.com>
+@HeikoS	sonne|work yes
+@HeikoS	also, the subkernels are not really seperately registered
+@HeikoS	so some work to do there
+@HeikoS	might that fit within the modsel syntax task?
+ sonne|work	HeikoS: so best you could do is do various combined kernels ?
+@HeikoS	sonne|work: yes if one creates all combined kernels by hand, one can let shogun do the rest
+@HeikoS	but thats the point, we want to create those combinations automatically
+ sonne|work	HeikoS: if we had just 2 fixed kernels it would work right?
+ sonne|work	I mean the machine had 2 kernels
+ sonne|work	but not a combined one
+@HeikoS	how do you mean that?
+@HeikoS	ah I see
+@HeikoS	yes
+@HeikoS	two combined kernels
+ sonne|work	say CKernel a; CKernel b
+@HeikoS	yes or whatever kernel
+ sonne|work	yeah
+@HeikoS	this we can do
+ sonne|work	I don't see how we could do this in general
+@HeikoS	well
+ sonne|work	we only ever thought about Machines for that
+@HeikoS	the combined kernel gets subparameters
+@HeikoS	which are then applied to the subkernels one by one
+ sonne|work	ah so each kernel would be a sub-parameter
+@HeikoS	yes something like this
+@HeikoS	problem is its just a list
+@HeikoS	so every element of the list would need a name
+ sonne|work	kind of !?!? considering that we can have a dynamic number of sub kernels
+@HeikoS	and then we can give them parameters
+@HeikoS	gets even more complicated when you have different types with different types of subparameters
+ sonne|work	HeikoS: yeah but we assumed the parameters to be fixed
+@HeikoS	yes
+ sonne|work	this here will add parameters dynamically
+ sonne|work	and you might want sometimes 2 kernels sometimes 4
+@HeikoS	I mean, this would be a kind of hack for combined kernels
+ sonne|work	or so
+ sonne|work	horrible
+@HeikoS	mmh
+@HeikoS	maybe then instead, we should offer a method that creates a bunch of combined kernels for a user
+ sonne|work	I guess we are better of supplying some function to create the cross-product for kernels
+@HeikoS	and then these are passed to the machine one after another
+@HeikoS	exactly
+ sonne|work	haha
+@HeikoS	same thought :)
+ sonne|work	then it must be the better solution
+ sonne|work	also not so difficult
+@HeikoS	so given a list of kernel lists, this one create combined kernels with all the combinations
+ sonne|work	yes
+@HeikoS	that sounds reasonable
+@HeikoS	kernel type has to be fixed though since the features must not change
+ sonne|work	maybe you could even tell him how to do it
+@HeikoS	but thats fine
+ sonne|work	yeah well
+ sonne|work	there will always be too complex ways to automate things
+@HeikoS	indeed
+@HeikoS	this one would be good to have though, there was another guy that asked about it a while ago
+ sonne|work	so create an issue about it and mention the solution
+@HeikoS	will do
+ sonne|work	maybe someone has time...
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- abinayam [3d0c137b@gateway/web/freenode/ip.61.12.19.123] has joined #shogun
+-!- abinayam [3d0c137b@gateway/web/freenode/ip.61.12.19.123] has quit [Client Quit]
+ shogun-notifier-	shogun: Roman Votyakov :develop * 74ac381 / src/NEWS: https://github.com/shogun-toolbox/shogun/commit/74ac38185707411786f53a7f2fdd159a044532ed
+ shogun-notifier-	shogun: Updated news
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 22eb0a5 / src/NEWS: https://github.com/shogun-toolbox/shogun/commit/22eb0a5e85caae50f861c0cdd12bceef697a6af7
+ shogun-notifier-	shogun: Merge pull request #1041 from votjakovr/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Updated news
+@HeikoS	sonne|work: whats this proa in the news? :)
+ votjakovr	I'd like to ask same question :)
+@wiking	HeikoS: i'm getting [ERROR] assertion CMath::abs(mean1-mean2)<10E-8 failed in file statistics_hsic.cpp line 159 with the new PRNG :)
+@HeikoS	wiking: no surprise :(
+@HeikoS	relax the bound a bit
+@wiking	E-6?
+@HeikoS	I have to change this at some point
+@HeikoS	just try, seed should be fixed
+ thoralf	HeikoS: The second reference to the sparse features comes from StreamingSparseFeatures.cpp, line 426.  The reference is just copied.  So later on, the same "features" pointer can be found in the vector returned by get_vector() as well as the (distinct) current_sgvector.
+@wiking	HeikoS: well seed is fixed  ;)
+ thoralf	HeikoS: Can you verify this?
+@HeikoS	yes
+@HeikoS	!
+@HeikoS	ok I see
+@HeikoS	so the current vector is freed
+ thoralf	HeikoS: I just SG_MALLOC'ed the array and returned this, so the double-free disappeared.  But where to hook for proper deallocation?
+@HeikoS	which effectively deletes the data
+ shogun-buildbot	build #900 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/900
+ thoralf	HeikoS: Maybe the semantic of get_vector() is just broken by design: What about returning a pointer to the vector?  Should fix the problem without need to copy everything all over again.
+@HeikoS	get_vector should just add a reference count to the vector
+ thoralf	HeikoS: SG_REF?
+@HeikoS	we have automatic reference counts for copy by value on vectors
+@HeikoS	so as long as you only do copy by value (=), vectors are fine
+@HeikoS	when the counter reaches zero, memory is freed
+@HeikoS	this should be used here
+@HeikoS	then the framework internally deals with the vectors
+@HeikoS	the user also might
+@HeikoS	and once everyone is done it gets deleted
+@HeikoS	counter is decremented once a vector structure is removed from stack
+ thoralf	HeikoS: SG_ADD(current_sgvector.features)?
+ thoralf	HeikoS: SG_REF(current_sgvector.features)?
+@HeikoS	nono
+@HeikoS	see if you have
+@HeikoS	SGVector a
+@HeikoS	and you do SGVector b=a
+@HeikoS	then it is incremented
+@HeikoS	a and b share the same data
+ thoralf	Yes.
+@HeikoS	you if you return a vector
+@HeikoS	counter is incremented
+ thoralf	HeikoS: But which do I (we) have to take care about?
+ thoralf	HeikoS: Actually there is no explicit reference counting on .features
+@iglesiasg	HeikoS: too many PRs lately
+@iglesiasg	HeikoS: one forgets what's merged and what not :)
+@HeikoS	iglesiasg: indeed :D
+@HeikoS	thoralf: so thats what sonne|work meant when he said the issues are related to the SGVector stuff
+@HeikoS	the framework is from the days before we had the automatic stuff
+@HeikoS	so it takes care of the SGVectors
+@HeikoS	however, it should not
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * 972c7ea / src/shogun/lib/external/SFMT/ (4 files): https://github.com/shogun-toolbox/shogun/commit/972c7eaaf01491cbb768b9be246caa58a8927b72
+ shogun-notifier-	shogun: SFMT: add corrent shogun path for includes
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * 9b9866d / src/shogun/mathematics/Random.cpp,src/shogun/mathematics/Random.h: https://github.com/shogun-toolbox/shogun/commit/9b9866d33d17fd74e88473084356231f8793b02c
+ shogun-notifier-	shogun: Several changes in Random PRNG API
+ shogun-notifier-	shogun: move state check in the lock part to avoid invalid state checks
+ shogun-notifier-	shogun: inline reinit() for faster running time
+@HeikoS	no free'ing should happen, since its all done automatically
+ shogun-notifier-	shogun: add set/get function for seed
+ shogun-notifier-	shogun: add max macros for RAND_32 and RAND_64
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * aa75124 / src/shogun/mathematics/Math.h: https://github.com/shogun-toolbox/shogun/commit/aa7512414bce51ba40ef026b832ec893114e5fba
+ shogun-notifier-	shogun: Change CMath's PRNG generator
+ thoralf	HeikoS: Okay, and which part belongs to "the old stuff"?  I guess sg_ref and sg_unref are new?
+ shogun-buildbot	build #735 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/735
+@HeikoS	no SG_REF is for SGObject, so class instances
+@HeikoS	thoralf: the old stuff is
+@HeikoS	having a c-array float64_t* array
+@HeikoS	and a length variable int32_t array_len
+@HeikoS	and then allocate/deallocate array by hand
+@HeikoS	all those pairs can however be replaced by SGVector which does everything
+ shogun-buildbot	build #1034 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1034  blamelist: cameron <cameronjml2@gmail.com>
+@HeikoS	let me find an example ..
+@HeikoS	virtual float32_t dense_dot(const float32_t* vec2, int32_t vec2_len)=0;
+@HeikoS	in StreamingDotFeatures
+@HeikoS	this is how we handled vectors before
+@HeikoS	thoralf: it might be a bit of an overkill for you to solve this
+@HeikoS	its a lot of stuff
+ thoralf	HeikoS: But I think we are close.  We saw, that we store two references to the same .features *and* we know, that the first instance is created by the CStreamingSparseFeatures constructor and the second by get_vector().
+ thoralf	HeikoS: If I just create a copy of .features just before returning current_sgvector.  Will this leak or cleaned up automatically?
+@HeikoS	thoralf:  have you valgrinded the program?
+@HeikoS	then you get the line where the double free happens inside the framework
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+@lisitsyn	HeikoS: hey
+@lisitsyn	you asked for some help, is it still relevant?
+@HeikoS	lisitsyn: hi!
+@HeikoS	ehm, on what?
+@lisitsyn	I am lazy to read all these things :D
+@HeikoS	thoralf:  I would rather change the whole handling of vectors
+@HeikoS	lisitsyn: so streaming features memory errors
+@lisitsyn	but you asked a few hours ago or so
+@HeikoS	is the most recent
+@HeikoS	lisitsyn: ah that was the build, cannot remember
+@HeikoS	SGSparseVector<T> current_sgvector;
+@HeikoS	/// The current example's feature vector as an SGSparseVectorEntry<T>*.
+@HeikoS	SGSparseVectorEntry<T>* current_vector;
+@lisitsyn	alright
+@HeikoS	thoralf: these guys are in SparseStreaming
+ shogun-buildbot	build #1035 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1035  blamelist: Roman Votyakov <votjakovr@gmail.com>
+@HeikoS	and they get freed automatically on destructor call
+ thoralf	HeikoS: But thats alright - as long get_vector() is not called. ;)
+@HeikoS	cameron__: btw the python test fails ...
+@HeikoS	thoralf: exactly
+@HeikoS	so get_vector should has to either incremed counter or create a copy
+@HeikoS	maybe we can try to copy?
+@HeikoS	mmmh
+@HeikoS	damn, all the examples/tests are not working, so no way of checking whether this makes things lead
+@HeikoS	leak
+@HeikoS	thoralf: can you check what happens with dense vectors?
+@HeikoS	same issue there?
+@HeikoS	I use this for some kernel hypothesis testing stuff and fixed some things in there
+@HeikoS	might be the same problem
+ cameron__	HeikoS: but they do not fail on my machine
+@HeikoS	cameron__: weird, lets wait a bit, maybe they will start working at some point
+ thoralf	HeikoS: CStreamingDenseFeatures seems to work.
+@HeikoS	thoralf: actually now that I think of it, the issues with the dense ones were pretty similar
+@HeikoS	and I somehow managed to solve parts of it (its already a while ago) - so maybe thats a good point to look at
+ cameron__	HeikoS: I got to go , I'll hav a look later.
+@HeikoS	cameron__: ok see you
+ thoralf	HeikoS: Found a comment in dense features: /* needed to prevent double free memory errors */
+@HeikoS	thoralf: ha! these are mine, what did I do there? which line
+ thoralf	HeikoS: Related to the get_vector() and current_vector handling :)
+ thoralf	StreamingDenseFeatures.cpp, 59
+ thoralf	You just NULL'ed the vector, so it's not getting freed.
+ thoralf	Pragmatic solution ;)
+@HeikoS	thoralf: ehm, yes ..... hacks :)
+@HeikoS	not really the way to do it
+@HeikoS	but maybe for now, add a comment that makes sure our thoughts can be reconstructed
+ vgorbati	lisitsyn: here?
+@sonney2k	HeikoS, the isssue with this is that it needs a big overhaul - and so quite some time
+@sonney2k	that is why we keep postponing it
+@HeikoS	sonney2k: yes, maybe go with the hack for now and then fix at some point
+@HeikoS	currently is not the time for this
+@HeikoS	too many things already happening for gsoc
+@sonney2k	wiking, how does it look?
+@sonney2k	do tests fail completely now?
+@sonney2k	HeikoS, yeah overload mode
+@HeikoS	yes ...
+-!- gsomix_ is now known as gsomix
+@sonney2k	lisitsyn, hmmhh how many slots do we minimally need
+@sonney2k	it seems like 9 now...
+@sonney2k	which might be more than we can get
+@sonney2k	lisitsyn, https://help.github.com/articles/duplicating-a-repository
+@sonney2k	is this what we should do for the clone?
+@sonney2k	lisitsyn, any thoughts? should I call this say once per day?
+@sonney2k	cameron__, things fail on the buildbot because it is testing each commit
+@sonney2k	if you last commit is fine it will be happy then
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 8bf9583 / src/NEWS: https://github.com/shogun-toolbox/shogun/commit/8bf9583a964ad1c4a8834b8c9a59bf8499c06e73
+ shogun-notifier-	shogun: news update
+ shogun-notifier-	shogun: Heiko Strathmann :develop * cec2f66 / src/NEWS: https://github.com/shogun-toolbox/shogun/commit/cec2f66beb322eba6ad5977a6aeb28199bc57951
+ shogun-notifier-	shogun: Merge pull request #1043 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: news update
+@wiking	sonney2k: ok this is crazy.... when i run generator.py on linux it modifies like 10 files in data
+@wiking	sonney2k: the same on bsd it modifies 20+ files
+@sonney2k	wiking, only? cool!
+@sonney2k	hmhh
+@sonney2k	and there is no more call to rand etc in Math?
+@wiking	mmm ok question
+@wiking	in static inline uint64_t random(uint64_t min_value, uint64_t max_value)
+@wiking	random
+@wiking	call
+-!- vikalp [~chatzilla@115.245.61.191] has joined #shogun
+@wiking	but i think that actually calls system's random()
+@wiking	not CMath::random
+ thoralf	HeikoS: My ideas won't work out.  Setting current_sgvector.features to NULL seems to be the best way.
+@HeikoS	thoralf: go ahead then :)
+@HeikoS	can you add a comment in the streaming features issues on github?
+@sonney2k	wiking, haha there you have it!
+ thoralf	HeikoS: I can't easily fix the two references to to same data without introducing big leaks.
+@HeikoS	ok
+@HeikoS	its ok for now
+@HeikoS	sonney2k, lisitsyn I will be in Germany over the weekend, so I won't be around in IRC much, let me know if I should do anything via email, Ill try to check at least once a day
+-!- ErlendA [~ErlendA@cm-84.215.138.251.getinternet.no] has quit [Quit: Leaving]
+ shogun-buildbot	build #737 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/737  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@sonney2k	HeikoS, most important currently is to keep in touch with students somehow and to come up with some close to final candidate list
+@sonney2k	that's it
+@HeikoS	././configure-1095-2324.o: Permission denied
+@sonney2k	HeikoS, yeah cygwin
+@HeikoS	sonney2k: already doing that
+@sonney2k	I have no clue what's going wrong there
+@HeikoS	ok cool, will do tomorrow
+ shogun-buildbot	build #738 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/738  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	ok then, going home now, see you later!
+@sonney2k	I am not sure I can handle all students applying for the ideas I had
+@HeikoS	sonney2k: yeah seems a lot of work
+@lisitsyn	sonney2k: well you are going to have two right?
+@HeikoS	bye guys!
+@lisitsyn	HeikoS: bye
+ thoralf	Bye HeikoS, thanks.
+@sonney2k	lisitsyn, currently it is 3 on the list
+@lisitsyn	sonney2k: I'll take one
+@sonney2k	thoralf, thanks for `fixing' this!
+ vikalp	heya..
+@sonney2k	lisitsyn, ah ok
+@sonney2k	vikalp, hey
+@lisitsyn	sonney2k: just to low your load I mean
+ vikalp	hii sonney2k
+-!- HeikoS [~heiko@nat-171-79.internal.eduroam.ucl.ac.uk] has left #shogun []
+@sonney2k	lisitsyn, maybe we can get cheng involved too
+@lisitsyn	sonney2k: I hope so
+ vikalp	@sonney2k.. i have completed the task of writing general csv writer in C++
+ vikalp	i am about to write my proposal regarding Fast Reading and Writing Project..
+@sonney2k	vikalp, ahh nice!
+ vikalp	i mean..completing it..
+ vikalp	:)
+-!- 45PAAIYF0 [~travis-ci@ec2-50-16-143-238.compute-1.amazonaws.com] has joined #shogun
+ 45PAAIYF0	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6825754
+-!- 45PAAIYF0 [~travis-ci@ec2-50-16-143-238.compute-1.amazonaws.com] has left #shogun []
+@lisitsyn	haha nice nickname
+@lisitsyn	45PAAIYF0
+@sonney2k	I thought we were being attacked
+@lisitsyn	hahah
+@sonney2k	lisitsyn, recall the bot last year?
+@lisitsyn	sonney2k: yes I regret you kicked it
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has joined #shogun
+@sonney2k	c'mon it was getting nasty ;)
+ shogun-buildbot	build #1036 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1036  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@lisitsyn	it was quite intelligent!
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * 28311b0 / src/shogun/mathematics/Math.h: https://github.com/shogun-toolbox/shogun/commit/28311b0ba43d93f9721de4e68efb37e608bd512b
+ shogun-notifier-	shogun: Use CMath::random() in all other CMath::random functions
+ shogun-notifier-	shogun: Viktor Gal :feature/PRNG * 7f737fa / src/configure: https://github.com/shogun-toolbox/shogun/commit/7f737fa6f3a84c6733e48b81a6d797aaa2543de3
+ shogun-notifier-	shogun: Add -I. into test_mexp() function in configure
+@sonney2k	lisitsyn, what do you think about mirroring?
+@lisitsyn	sonney2k: what? which mirroring?
+@sonney2k	lisitsyn, git!
+@sonney2k	github -> google code
+@lisitsyn	ahh
+@sonney2k	& shogun toolbox
+@lisitsyn	why do we need it?
+@lisitsyn	I never knew
+@lisitsyn	I mean well if github was unreliable
+@sonney2k	lisitsyn, don't rely on one source
+@lisitsyn	but actually git is distributed so even if chinese attack github
+ vikalp	@sonney2k.. As I have gone through the task list of project..what all are the necessaries that I need to complete under the timeline?
+@sonney2k	services come and go
+@lisitsyn	we have the same thing on your machine
+@lisitsyn	and on my machine
+@sonney2k	vikalp, well depends on you :)
+@sonney2k	the project can be stretched quite a bit
+@lisitsyn	sonney2k: I'd put a cron on the website server that git pulls and git pushs
+@sonney2k	from lazy programming till super cow powers ;)
+@sonney2k	lisitsyn, yes that is what I was suggesting - I would do it once / day
+@lisitsyn	this is definitely not the manual thing
+ vikalp	thats not a problem.. I would love to work on machine learning
+@lisitsyn	well I have an alias
+@lisitsyn	gposg :D
+@lisitsyn	git push origin && git push shogun && git push google
+@wiking	sonney2k: do you know what library_fisher2x3_modular0.txt does
+@wiking	or shoudl contain?
+@wiking	sonney2k: because i dont really think that it depends on any random generator :)
+@sonney2k	wiking, ohh it is some fisher test for some snp stuff
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+ vikalp	So regarding timeline what all should I include in there?.. Can you please elaborate on this..:)
+@wiking	sonney2k: because the diff between the generated file and the one in the data repo is really just this but still of course it fails...
+@wiking	-(F0.09927493384017462
+@wiking	+(F0.09927493384018027
+@wiking	-S"\x11\xf7'\x02\x15j\xb9?\x06\xdd\xe3\x95{\xd2\xe7?:?\xbc%Qb\xe2>"
+@wiking	+S"\xa8\xf8'\x02\x15j\xb9?\x06\xdd\xe3\x95{\xd2\xe7?:?\xbc%Qb\xe2>"
+@sonney2k	wiking, so I guess exp() and whatever are different
+* sonney2k is scared
+@wiking	i dont know
+@wiking	but this has of course nothing to do with
+@wiking	rng :(
+@sonney2k	true
+@wiking	and i'm afraid same goes for kernel_log_modular0.txt
+@wiking	and the others
+@sonney2k	wiking, ohh do you have long double?
+@sonney2k	I mean long double is 128bit on some archs
+@sonney2k	and on some 96
+@wiking	where should i check what
+@sonney2k	sizeof(long double)
+@sonney2k	anyway it seems we have to rething the comparison strategy
+@sonney2k	rethink
+@wiking	sonney2k: 16
+ vikalp	sonney2k, So regarding timeline what all should I include in there?.. Can you please elaborate on this..:)
+@sonney2k	vikalp, what you think you can do
+@sonney2k	*reasonably*
+@sonney2k	there is always room for doing a little less /m ore
+@sonney2k	or maybe even continue in the future
+ vikalp	sonney2k, well m planning to continue it
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has quit [Ping timeout: 245 seconds]
+ vikalp	sonney2k, so I will be sending you my proposal for  your reviews in couple of hours..
+ mikhailBelous	I fixed my proposal.
+-!- vikalp [~chatzilla@115.245.61.191] has quit [Quit: ChatZilla 0.9.90 [Firefox 11.0/20120312181643]]
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has joined #shogun
+ thoralf	Bye guys.  Happy hacking.
+-!- thoralf [~thoralf@enki.zib.de] has left #shogun ["Konversation terminated!"]
+-!- mikhailBelous [~quassel@37.98.242.99] has quit [Remote host closed the connection]
+ shogun-buildbot	build #1037 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1037  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@wiking	sonney2k: this is not helping at all....
+@wiking	i mean the new PRNG
+@sonney2k	wiking, wait - it did get a bit better right?
+@sonney2k	I mean now the random stuff gives the same result or?
+@wiking	sonney2k: well i'll check
+@wiking	i'll now regenerate on linux
+@wiking	and copy it to osx
+@wiking	and check whether some at least got better or not
+@sonney2k	wiking, some should have gotten better
+@sonney2k	lisitsyn, git mirror to shogun toolbox works
+@sonney2k	but not to code.google
+@sonney2k	no idea why not
+@lisitsyn	ehmm
+@sonney2k	error: unable to push to unqualified destination: HEAD
+@sonney2k	The destination refspec neither matches an existing ref on the remote nor
+@sonney2k	begins with refs/, and we are unable to guess a prefix based on the source ref.
+@sonney2k	fatal: The remote end hung up unexpectedly
+@sonney2k	wtf??
+@wiking	yep
+@lisitsyn	never seen that madness
+@wiking	is it by github?
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has quit [Quit: Leaving]
+@sonney2k	wiking, no code.google.com
+@sonney2k	crazy!
+@sonney2k	it works from my notebook
+@sonney2k	but not from our server
+@wiking	sonney2k:
+@wiking	sonney2k: 2 of all failed examples are not failing anymore :D
+@sonney2k	wiking, hurray!
+@sonney2k	wiking, so how many are left?
+@wiking	about 30
+@wiking	but of course the new PRNG introduced fails in tests
+@wiking	:D
+@wiking	soooo fuck this shit
+@sonney2k	wiking, no no it is the way to go(tm)
+@sonney2k	hey yeah works now
+@sonney2k	with newer version of git
+ gsomix	sonney2k, wiking: hey, can we add bot for building python_modular with python3 bindings?
+@sonney2k	gsomix, I don't have a python3 aware system
+@sonney2k	wiking, do you?
+@sonney2k	lisitsyn, so we have a mirror now!
+@sonney2k	gtg
+@sonney2k	cu
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot	build #1038 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1038  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- travis-ci [~travis-ci@ec2-50-16-143-238.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6827204
+-!- travis-ci [~travis-ci@ec2-50-16-143-238.compute-1.amazonaws.com] has left #shogun []
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ vgorbati	lisitsyn: here?
+@lisitsyn	vgorbati: yes
+ vgorbati	lisitsyn: I am thinking of implementation of manifold sculpting. Should I create a SparseMatrix of local distances to neighbors from distance object, or should just pass the distance object inside the actual implementation of the method?
+@lisitsyn	vgorbati: it depends how many times it is going to be used
+ vgorbati	lisitsyn: you mean whether it will compute the same distances over and over again?
+@lisitsyn	I mean if it is used on each iteration it is worth to compute and store
+@lisitsyn	yes
+ vgorbati	lisitsyn: I thought that the distance object performs some caching
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@lisitsyn	vgorbati: it might but I would not rely on that in general case
+-!- makokal [~bokal@212.201.44.247] has joined #shogun
+ vgorbati	lisitsyn: agree
+ vgorbati	lisitsyn: ok, then I will use the SparseMatrix. Should I put the method that gets SparseMatrix of distances to neighbors from distance object into the locally_linear.hpp?
+@lisitsyn	vgorbati: no it is not related to LLE I think
+@lisitsyn	just put it to routines/manifold_sculpting.hpp for now
+@lisitsyn	it is not used anywhere more
+ vgorbati	lisitsyn: ok. Then I can (to make an 'embedManifoldSculpting' method more clear) pass in the distance object, and get the SparseMatrix from it inside the actual implementation function, what do you think?
+@lisitsyn	yes sure
+ vgorbati	lisitsyn: ok, thanks
+ gsomix	"so, we need a crane to lift another crane from a trench! wait... oh shi~" http://ic.pics.livejournal.com/human_oid/15606149/504066/504066_original.jpg
+ gsomix	happy day of workers
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has joined #shogun
+ van51	hey all
+ van51	quick question, do I have to include a cv in the GSoC proposal?
+@iglesiasg	van51: no need I think, but feel free if you'd like to
+@lisitsyn	van51: you don't have to
+ van51	ok, thanks!
+@sonney2k	lisitsyn, I am pretty pleased with the 28 we have now...
+@lisitsyn	sonney2k: 28 already?
+@lisitsyn	ohh
+@sonney2k	considering that we had almost 20 on the last day last year
+@sonney2k	so maybe we get a handful more
+@sonney2k	but it is not such a drastic decrease then... already ~60% of what we had last year
+@lisitsyn	we will get a few more I think
+@sonney2k	I should write some blog post about this ride again
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+ van51	I just submitted my proposal. Please let me know if you think I should change/clarify something :)
+@lisitsyn	van51: looks pretty ok
+ van51	lisitsyn: cool, thanks for taking the time to read it
+@lisitsyn	van51: you are the 29th submitted :)
+ van51	hehe should have waited a bit more, to have it rounded
+@lisitsyn	may be I should apply by myself as I am eligible to be a gsoc student haha
+ van51	naah it won't be a challenge for you
+ van51	and i'm not saying that because i want a spot :P
+@lisitsyn	haha
+@lisitsyn	mentor: me
+ van51	like some actors who write,direct and star in their movies
+ van51	you will propose,mentor and implement your proposal
+@lisitsyn	sounds like 'google, just give me money'
+@lisitsyn	:D
+ van51	yea
+ van51	in a more polite way
+ van51	I'm off for today
+ van51	cya
+@lisitsyn	see you
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has quit [Quit: Leaving.]
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has quit [Remote host closed the connection]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- makokal [~bokal@212.201.44.247] has quit [Read error: Connection reset by peer]
+-!- makokal [~bokal@212.201.44.247] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- makokal [~bokal@212.201.44.247] has quit [Quit: makokal]
+@sonney2k	wiking, poing?
+@sonney2k	still there?
+-!- makokal [~bokal@pD9EF09DC.dip0.t-ipconnect.de] has joined #shogun
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has quit [Ping timeout: 252 seconds]
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has joined #shogun
+ cameron__	cameronjml2
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has quit [Remote host closed the connection]
+@wiking	sonney2k: pong
+--- Log closed Fri May 03 00:00:30 2013

@@ -1,0 +1,220 @@
+--- Log opened Wed Feb 20 00:00:47 2013
+-!- FSCV_ [~FSCV@173.254.212.46] has quit [Ping timeout: 255 seconds]
+-!- FSCV [~FSCV@187.210.54.166] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Quit: Page closed]
+-!- FSCV [~FSCV@187.210.54.166] has quit [Quit: Leaving]
+-!- lambday [3ba2174f@gateway/web/freenode/ip.59.162.23.79] has joined #shogun
+ lambday	hi... this is soumyajit again.. I tried to run the java modular example [http://www.shogun-toolbox.org/doc/en/current/modular_tutorial.html] but got some errors...
+ lambday	 cannot find symbol symbol  : constructor RealFeatures(org.jblas.DoubleMatrix) location: class org.shogun.RealFeatures RealFeatures feats_train = new RealFeatures(traindata_real);
+ lambday	same with BinaryLabels class...
+ lambday	and another type mismatch
+ lambday	incompatible types found   : org.shogun.RealVector required: org.jblas.DoubleMatrix DoubleMatrix out = obtain_from_generic(svm.apply(feats_test)).get_labels();
+ lambday	is that a bug or I am doing something wrong? :(
+ lambday	shall I take a look at src/interfaces/java_modular/swig_typemaps.i ?
+-!- n4nd0 [~nando@n182-p16.kthopen.kth.se] has joined #shogun
+-!- blackburn [~blackburn@188.168.2.242] has quit [Quit: Leaving.]
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+ sonne|work	lambday: the java examples just compile fine?
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 2998970 / src/shogun/lib/SGMatrix.cpp: https://github.com/shogun-toolbox/shogun/commit/299897031ea438bbe18044d162cf4e9be4186885
+ shogun-notifier-	shogun: include SGMatrixList.h instead of .cpp (Closes: #855)
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Thanks bianjiang for the fix!
+ sonne|work	lambday: http://shogun-toolbox.org/doc/en/current/java_modular_examples.html
+ sonne|work	lambday: if you compile for java and run make check-examples these work...
+ blackburn	sonne|work: surprising bug
+ blackburn	with include.cpp
+ shogun-buildbot_	build #850 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/850  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ sonne|work	yeah stupid typo?
+ shogun-buildbot_	build #849 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/849  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ n4nd0	sonne|work: my bad
+ n4nd0	I got probably confused for using a templated class separated in cpp and header
+ shogun-notifier-	shogun: Sergey Lisitsyn :master * 35a512f / src/NEWS: https://github.com/shogun-toolbox/shogun/commit/35a512f25737b36f835a2613127e23f39a9a2d74
+ shogun-notifier-	shogun: Mention of include fix in NEWS. Related to #855
+ lambday	sonne|work: hi... I tried with the make check-examples but its not working..
+ lambday	make -C interfaces/java_modular check-examples-java_modular && true make[1]: Entering directory `/usr/home3/rahul/shogun/shogun/src/interfaces/java_modular' cd ../../../examples/undocumented/java_modular && \ ( LD_LIBRARY_PATH=//usr/home3/rahul/shogun/shogun_java/lib ./check.sh    ) Load.java:2: package org.jblas does not exist import org.jblas.*; ^ Load.java:7: cannot find symbol symbol  : class DoubleMatrix location: class Load pu
+ lambday	i have jblas-1.2.3.jar in /usr/share/java/jblas
+ sonne|work	lambday: seems not to be in CLASSPATH ...
+ lambday	sonne|work: while compiling with javac, I mentioned both jars (shogun.jar and jblas.jar) with -cp but even then its giving similar error :(
+ n4nd0	sonne|work: hey
+ n4nd0	sonne|work: is there any Username/password valid for the shogun-web in github?
+ sonne|work	n4nd0: errm for what?
+ sonne|work	n4nd0: you should be able to fork/checkout / just do a pull request as usual
+ n4nd0	n4nd0: I think we are not talking about the same thing
+ n4nd0	I mean
+ n4nd0	if I run locally my shogun-web
+ sonne|work	lambday: please try to create some minimal jblas example and try to get that work first
+ n4nd0	in 127.0.0.1:8000 for example
+ n4nd0	and I want to access 127.0.0.1:8000/admin/
+ sonne|work	n4nd0: ohh - ask your friend - I forgot the password
+ n4nd0	sonne|work: hehe ok - I think he is sleeping now or sth
+ lambday	sonne|work: okay... thanks
+ sonne|work	n4nd0: if you can figure out how to reset the passphrase - that would be good
+ sonne|work	I would also like to have access to that stuff again :D
+ n4nd0	sonne|work: I will ask him
+ n4nd0	sonne|work: it seems that he doesn't remember...
+ n4nd0	the credentials
+ n4nd0	sonne|work: lol I got in
+ lambday	sonne|work: hi... jblas example working.. [tried this one http://schabby.de/jblas-simple-example/]... used jblas with -cp, but then again tried to run classifier_domainadaptationsvm_modular.java and it doesn't compile... shall I try putting the jblas.jar in shogun installation dir/share/java?
+ n4nd0	lambday: hey
+ lambday	n4nd0: hello :)
+ n4nd0	can you paste the line you use to compile for the jblas example that works
+ n4nd0	and for the shogun example that doesn't
+ lambday	javac -cp ".:/usr/home3/rahul/jblas/jblas-1.2.3.jar" jblas_test.java
+ lambday	this works
+ lambday	javac -cp ".:/usr/home3/rahul/jblas/jblas-1.2.3.jar:/usr/home3/rahul/shogun/shogun_java/share/java/shogun.jar" classifier_domainadaptationsvm_modular.java
+ lambday	this doesn't :(
+ n4nd0	lambday: what does the error say?
+ lambday	classifier_domainadaptationsvm_modular.java:57: cannot find symbol symbol  : constructor BinaryLabels(org.jblas.DoubleMatrix) location: class org.shogun.BinaryLabels BinaryLabels labels = new BinaryLabels(new DoubleMatrix(label_train_dna));                       ^ classifier_domainadaptationsvm_modular.java:65: incompatible types found   : org.shogun.RealVector required: org.jblas.DoubleMatrix DoubleMatrix out = obtain_from_gene
+ n4nd0	lambday: mm alright
+ lambday	what am I missing here :(
+ n4nd0	so you could compile and run a minimal shogun java example?
+ lambday	n4nd0: no.. minimal jblas example compiles... but I couldn't get shogun java example compiled with the commands I mentioned
+ n4nd0	lambday: so no shogun example can be run?
+ n4nd0	I am interested in finding out if the problem is due to java_modular interface not properly setup in your system
+ n4nd0	or jblas not found with shogun examples
+ n4nd0	lambday: do you see what I mean?
+ lambday	well, i used configure with java_modular interface,
+ lambday	wait let me paste first few lines of make check-examples
+ lambday	http://pastebin.com/c2UBEi99
+ n4nd0	lambday: in what dir are you executing that?
+ lambday	shogun/src
+ n4nd0	lambday: ok in src
+ n4nd0	what I meant was
+ n4nd0	if any of the examples in examples/undocumented/java_modular worked for you
+ lambday	I tried with only one though and it didn't compile :(
+ lambday	tried this one "classifier_domainadaptationsvm_modular.java"
+ n4nd0	lambday: yep, but that one uses jblas
+ n4nd0	my point is
+ n4nd0	does your java_modular interface work at all?
+ n4nd0	or the error arises when jblas comes into play?
+ lambday	ohkay I got your point
+ lambday	I'm trying with a hello world program
+ n4nd0	yeah do that
+ n4nd0	sth similar to examples/undocumented/libshogun/basic_minimal.cpp (BUT translated into java!) should be enough
+ lambday	n4nd0: alright.... thanks a ton.. I'm trying :)
+ n4nd0	no worries :)
+ lambday	n4nd0: well, it compiles fine... I tried this code [http://pastebin.com/0bWfYiYf]... compiled with javac -cp ".:/usr/home3/rahul/shogun/shogun_java/share/java/shogun.jar" helloworld.java
+ lambday	but couldn't run it... with -Djava.library.path
+ n4nd0	lambday: aham!
+ lambday	java -cp ".:/usr/home3/rahul/shogun/shogun_java/share/java/shogun.jar" -Djava.library.path=".:/usr/home3/rahul/shogun/shogun_java/lib/jni/libmodshogun.so" helloworld
+ n4nd0	what happens when you run it?
+ lambday	it says
+ lambday	Exception in thread "main" java.lang.UnsatisfiedLinkError: no modshogun in java.library.path at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1681) at java.lang.Runtime.loadLibrary0(Runtime.java:840) at java.lang.System.loadLibrary(System.java:1047) at helloworld.main(helloworld.java:5)
+ lambday	tried with System.load() also but that too failed :-/
+ n4nd0	lambday: mmm
+ lambday	n4nd0: when I try with System.load("path/to/libmodshogun.so") it says -
+ lambday	Exception in thread "main" java.lang.UnsatisfiedLinkError: Can't load library: /usr/home3/rahul/shogun/shogun_java/share/java/libmodshogun.so
+ n4nd0	lambday: when you compiled shogun, what did you exactly?
+ n4nd0	did you ./configure, make and then sudo make install?
+ n4nd0	I am just guessing
+ lambday	yeah
+ lambday	not sudo, I installed it into another directory, specified with the configure --prefix option
+ n4nd0	mmm ok
+ n4nd0	I guess you should tell java somehow where your library is
+ n4nd0	it could be the one you specified, I am not sure
+ n4nd0	lambday: are you in linux?
+ n4nd0	then try running whereis libshogun
+ lambday	hmm... I thought -Djava.library.path=/path/to/libmodshogun.so" should do :(
+ lambday	n4nd0: yes... fedora 16
+ lambday	okay
+ n4nd0	mmm I guess <path/to> should be substituted byt the path to libshogun hehe
+ lambday	[rahul@cfdvs4-2 test]$ whereis libshogun libshogun: /usr/local/lib/libshogun.so /usr/local/lib/libshogun.a
+ lambday	well... I guess whereis is giving the libshogun.so from a previous installation that I did on /usr/local :)
+ lambday	n4nd0: okay I'm trying with libshogun.so path
+ n4nd0	hehe yeah it can be
+ n4nd0	I am not sure what kind of path is System.loadLibrary waiting for - I am not a java expert :D
+ blackburn	n4nd0: LD_LIBRARY_PATH I think
+ blackburn	n4nd0: and CLASSPATH should be set too
+ blackburn	just take a look at https://github.com/shogun-toolbox/shogun/blob/master/examples/undocumented/java_modular/check.sh
+ lambday	blackburn: now I am using System.load, which expects direct path to the shared library.. System.loadLibrary() didn't work for me
+ n4nd0	lambday: ^
+ lambday	blackburn: thanks... I'm checking :)
+ blackburn	lambday: does ./check.sh work for you?
+ lambday	blackburn: I guess I need to move a few files... according to the LD_LIBRARY_PATH and CLASSPATH... I'm trying..
+ blackburn	lambday: I don't think you should move anything - check.sh is supposed to run in a typical case
+ n4nd0	blackburn: maybe < lambday> not sudo, I installed it into another directory, specified with the configure --prefix option
+ n4nd0	that affects
+ lambday	blackburn: I had jblas.jar in a different directory... I just moved that to /usr/share/java/jblas.jar... and running check.sh
+ blackburn	ah
+ lambday	its running... most of the examples shows ERROR, some showed OK
+ blackburn	okay I see
+ lambday	blackburn: but when I run a simple example like [http://pastebin.com/0bWfYiYf], it compiles fine but doesn't run..
+ blackburn	lambday: something is wrong with LD_LIBRARY_PATH I guess
+ lambday	blackburn: okay.. I'm trying again :(
+-!- n4nd0 [~nando@n182-p16.kthopen.kth.se] has quit [Ping timeout: 260 seconds]
+ lambday	blackburn: thanks a lot... it works now... :)
+ lambday	did a make again, and installed in /usr/local/...
+ blackburn	nice
+-!- n4nd0 [~nando@n182-p16.kthopen.kth.se] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- n4nd0_ [~nando@n182-p16.kthopen.kth.se] has joined #shogun
+-!- n4nd0_ [~nando@n182-p16.kthopen.kth.se] has left #shogun []
+ n4nd0	lambday: is it working too already for examples using jblas and shogun?
+ lambday	n4nd0: tried running classifier_domainadaptationsvm_modular.class and it worked :)
+ n4nd0	lambday: cool
+ n4nd0	then you are ready to play :)
+ lambday	n4nd0: hope so.. can't wait to get my hands dirty :)
+ lambday	need to do an assignment this week... will be using shogun :)
+ n4nd0	lambday: cool, what is the assignment about?
+ lambday	I gotta implement a string kernel...
+-!- FSCV [~FSCV@173.254.212.46] has joined #shogun
+-!- n4nd0 [~nando@n182-p16.kthopen.kth.se] has quit [Quit: leaving]
+-!- sonney2k [~shogun@7nn.de] has quit [Ping timeout: 248 seconds]
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+-!- alexlovesdata [~binder@alex-tmp2.ml.tu-berlin.de] has joined #shogun
+ alexlovesdata	@sonney2k: I still have the CDOT feature extension of the random fourier preproc in my mind ... it is not forgotten
+-!- blackburn [~blackburn@188.168.14.119] has joined #shogun
+ blackburn	http://care.diabetesjournals.org/content/17/2/152.full.pdf+html hahahhah
+ alexlovesdata	blackburn? Tai's formula? What is that person doing there?explicit integration??
+ blackburn	alexlovesdata: hhahaha yeeeeeees
+ blackburn	alexlovesdata: biologists reinvented integration
+ alexlovesdata	who reviewed that?? A monkey? A Donkey?
+ blackburn	alexlovesdata: it is even listed in wikipedia page 'Peer-review fail'
+ blackburn	alexlovesdata: wait wait
+ blackburn	this one would kill you
+ alexlovesdata	Thats the joke of the day :D :D :D
+ blackburn	http://scholar.google.ru/scholar?hl=ru&q=http%3A%2F%2Fcare.diabetesjournals.org%2Fcontent%2F17%2F2%2F152.full.pdf%2Bhtml&btnG=
+ blackburn	alexlovesdata: see # of citations
+ alexlovesdata	zitirueyetsa 176 ???
+ alexlovesdata	sorry ... I cant type kyrillian or the proper english replacement
+ alexlovesdata	176 cites???
+ blackburn	alexlovesdata: oops my url is bad for you
+ alexlovesdata	O-M-G
+ blackburn	yes
+ blackburn	176 cites
+ alexlovesdata	life is sooo unfair :'(
+ alexlovesdata	somebody cites this wheel reinvention 176
+ alexlovesdata	my papers :'( :D
+ alexlovesdata	bookmarked that! :D
+ blackburn	alexlovesdata: next time you use integration cite it
+ alexlovesdata	hahaha, the risk is that some reviewers would not get the irony
+ alexlovesdata	7 months review time for THAT
+ alexlovesdata	I guess they used an ant colony to rate that paper or so\
+ alexlovesdata	unfortunately Ms. Tai has no webpage
+ blackburn	alexlovesdata: yeah it is pretty old
+ alexlovesdata	I still cant believe that reviewing these two pages took 7 months. Monty pythons happens every day
+ blackburn	alexlovesdata: there are a lot of things to reinvent still
+ blackburn	we should take it
+ alexlovesdata	blackburn: there was a time when I thought about a career in mathematical physics, took courses in differential geometry about fiber bundles and classifications of lie groups and stuff like that
+ blackburn	alexlovesdata: I guess it is nearly impossible to get such fake in math. physics
+ alexlovesdata	how about astrology :D ?
+ blackburn	alexlovesdata: I had to take a few courses on that actually (especially on numeric)
+ blackburn	yeah astrology is a great field
+ blackburn	everything is possible
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Ping timeout: 245 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	n4nd0: http://care.diabetesjournals.org/content/17/2/152.full.pdf+html
+ blackburn	n4nd0: new gsoc idea
+ alexlovesdata	I am not sure whether anybody has the qualifications to mentor it :D
+ blackburn	alexlovesdata: we should contact DOCTOR mary tai
+ n4nd0	blackburn: hehe
+-!- alexlovesdata [~binder@alex-tmp2.ml.tu-berlin.de] has left #shogun []
+-!- lambday [3ba2174f@gateway/web/freenode/ip.59.162.23.79] has quit [Ping timeout: 245 seconds]
+ n4nd0	sonney2k, sonne|work : is it possible to open the option of issues in shogun-web?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+--- Log closed Thu Feb 21 00:00:48 2013

@@ -1,0 +1,126 @@
+--- Log opened Tue May 03 00:00:42 2011
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Remote host closed the connection]
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has joined #shogun
+-!- alesis-novik [~alesis@188.74.87.84] has joined #shogun
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has quit [Ping timeout: 276 seconds]
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has joined #shogun
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has quit [Ping timeout: 260 seconds]
+-!- blackburn [~qdrgsm@188.168.5.65] has joined #shogun
+-!- mikiobraun [~mikio@squid.ml.tu-berlin.de] has joined #shogun
+-!- blackburn [~qdrgsm@188.168.5.65] has left #shogun []
+-!- mikiobraun [~mikio@squid.ml.tu-berlin.de] has quit [Quit: Leaving.]
+ alesis-novik	Good day
+-!- vojta [~quassel@2001:718:2:1634:221:6aff:fe58:151a] has joined #shogun
+-!- vojta is now known as VojtechFranc
+ VojtechFranc	hi alesis
+ alesis-novik	Hello VojtechFranc
+ VojtechFranc	I prepared Matlab implementation of the GMM-EM algorithm plus some examples.
+ alesis-novik	can you send it over email? I'll have a look at it
+ VojtechFranc	It is a small Matlab toolbox. you can install it from SVN: svn co http://ptak.felk.cvut.cz/datagrid/svn/stprtool/
+ VojtechFranc	username is stprtool, no pasword
+ VojtechFranc	the algorithms relevant to your work are in the folder "probab"
+ VojtechFranc	there are functions for deadling with the GMM and the EM algorithm itself
+ VojtechFranc	there are also few examples of usage on systhetical 1d and 2d data
+ VojtechFranc	in addition there is one example using the GMM-EM algorithm to train OCR classifier on USPS database
+ alesis-novik	I'll have a look at it then.
+ VojtechFranc	Great! Do not hasiate to ask questions.
+ VojtechFranc	Curently there is a basic implementation of the EM which you shoul re-implement to C++.
+ VojtechFranc	There a few differneces compared to textbook implementaion of GMM-EM.
+ VojtechFranc	1) the covariance matrix is represented in decomposed form which is uself fo several reasons (speed, numerical stability, ...)
+ VojtechFranc	2) Most of the computations are done in log domain which is more robust
+ VojtechFranc	3) there is a kind of regularization (namely, bound on the minimal variance) which makes the log-likelihood problem well posed
+ VojtechFranc	In the time before you start implementing, you could try to get familiar with the code.
+ alesis-novik	so log domain deals with high/low numbers and regularization deals with singular Gaussians then?
+ VojtechFranc	Do you need to recomend some literature on EM ? I think it would be necessary only if you are not familiar with the EM
+ VojtechFranc	yes, exactly
+ VojtechFranc	if we have time, I'd like you to implement other imporvements: like merge/split rules etc.
+ alesis-novik	I've studied EM from C. M. Bishops "Pattern Recognition and Machine Learning", so I think I know the general theory behind it
+ VojtechFranc	yes, this should be enough
+ VojtechFranc	you can ask me if you find something strange in the code
+ VojtechFranc	but it should not be difficult
+ alesis-novik	merge/split would be dynamically changing number of components?
+ VojtechFranc	exactly
+ VojtechFranc	it is useful to avoid some "bad" local maxima of the log-likelihood
+ VojtechFranc	and to remove gaussian components not supported by enough data
+ alesis-novik	So it would be a more robust way of dealing with singular Gaussians than minimal variance as well
+ VojtechFranc	No, it does not improve robustness.
+ VojtechFranc	It makes the model more meaningfull (by removing the singular components) and helps to escape some local maxima
+ alesis-novik	I think I should have time to implement that
+ VojtechFranc	it would be nice. However, let us proceed gradually: i) implementing the basic version, ii) testing/ debuggin and iii) implementing other improvements
+ alesis-novik	well, I guess the *very* basic version is already there
+ VojtechFranc	by basic I mean the one I sent you
+ VojtechFranc	it would be also nice if you implement some demosntation scripts
+ VojtechFranc	both toy examples and close to some real application
+ VojtechFranc	this will require some graphical output
+ VojtechFranc	do you prefer Matlab to Python or something else?
+ alesis-novik	I think I would prefer Matlab, though I can't really use it from home. I'm not really that good at Python though.
+ VojtechFranc	great, I also prefer Matlab
+ alesis-novik	Like I said, the only problem is that I can't really do Matlab because I can only use it in the University
+ VojtechFranc	Then decide what is better for you. I can use Python as well.
+ alesis-novik	I assume I can do the demonstration scripts at the end, after doing the implementation?
+ VojtechFranc	Yes, but it is useful to have at least some simple example which you can used during development
+ VojtechFranc	like some synthetic data where you can visualized the found model to see whether the estimate makes a sense ...
+ VojtechFranc	the code I sent you contains such examples
+ alesis-novik	I wonder if R could be used for this?
+ VojtechFranc	no idea, I know nothing about R.
+ VojtechFranc	As I said I would prefer i) Matlab or ii) Python or iii) Octave
+ VojtechFranc	So, that's it from my side. I'll have to disconnect soon.
+ VojtechFranc	Please, go though the code and don't hasitate to send me an email if you meet any problem.
+ alesis-novik	Hmm, Octave looks quite similar to Matlab, and given that it's not going to be used for computation, just visualization, it might port to Matlab easily
+ alesis-novik	So the implementation should also have an input parameter where you can specify if the cov is "full" "diag" or "spherical"?
+ VojtechFranc	I thing the same holds for Matlab and python - they will be used just for visualization
+ VojtechFranc	the code will be in C++
+ VojtechFranc	in the shogun library linked to the corresponding environment
+ alesis-novik	But I can't really use Matlab from where I'll be developing this and I'm not too comfortable with Python. I think I'll deal with this issue when time comes
+ VojtechFranc	ok, think about other alternatives
+ alesis-novik	so about the covariance types, I should use the 3 used in the Matlab code, correct?
+ VojtechFranc	for now yes, in the future I'd like to ask other options lake the Factor Analysis Decomposition etc
+ VojtechFranc	it sould not be problem to add other representations if the code is well implemented
+ alesis-novik	I'll think about separating different parts so they can be expanded on later
+ VojtechFranc	great, the code I sent you might give you an inspiration beause it allows simple extensions
+ VojtechFranc	unfortunatelly, I need to go now. Shell we agree on another chat (besides emails) ?
+ alesis-novik	I think we can agree on it over the emails. I'll probably only have time to analyse the Matlab code during the next 2 weeks because of my exams
+ VojtechFranc	yes, of course. Let's communicate via emails.
+ alesis-novik	When the actual coding starts we could have weekly talks or so
+ VojtechFranc	yes, sure.
+ VojtechFranc	So, I wish you succesful examination period.
+ alesis-novik	Thanks. 4 exams to go.
+ VojtechFranc	then good luck!
+ VojtechFranc	bye
+@bettyboo	VojtechFranc, back to real-life?
+ alesis-novik	See you
+ VojtechFranc	bettyboo, sorry don't know who is hiding behind this nice nickname
+@bettyboo	VojtechFranc: most however try to improve kpca in terms of robustness and not run-time performance
+ VojtechFranc	bettyboo, I concentrate on the EM becasue KPCA doesn't seem to be very practical algorithm
+@bettyboo	VojtechFranc: Going to discuss details of EM with Vojtech tomorrow
+ alesis-novik	A bot that is now saying scary relevant things
+ VojtechFranc	battyboo, sorry have to disconnect now. See you
+-!- VojtechFranc [~quassel@2001:718:2:1634:221:6aff:fe58:151a] has quit [Remote host closed the connection]
+ alesis-novik	bettyboo, you scare me sometimes
+@bettyboo	alesis-novik: now I am already scared of having to wade through all of them
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Quit: I'll be Bach]
+-!- blackburn [~qdrgsm@188.168.2.173] has joined #shogun
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has joined #shogun
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has quit [Ping timeout: 260 seconds]
+-!- blackburn [~qdrgsm@188.168.2.173] has left #shogun []
+-!- blackburn [~qdrgsm@188.168.2.173] has joined #shogun
+@sonney2k	So Blackburn you are now the one to take over my job
+ blackburn	sonney2k: oh..
+ blackburn	sonney2k: your baby is born?
+@sonney2k	Yes exactly
+ blackburn	sonney2k: congrats!
+@sonney2k	Sleeping next to me currently.
+@sonney2k	Thanks.
+ blackburn	sonney2k: is it a boy or girl?
+@sonney2k	Boy
+ blackburn	nice, did you chose a name?
+@sonney2k	Yes Jan
+ blackburn	nice! congrats to you again and pass congrats to your wife from cold russia :)
+@bettyboo	:Q blackburn
+@sonney2k	I am still full of adrenaline so cannot sleep.
+ blackburn	sonney2k: I'll try to take some your work
+@sonney2k	Thanks ... I hope we can leave the hospital this week then I also have my computer plus kbd back
+@sonney2k	Anyways good night
+ blackburn	sonney2k: no problem, I will just react on some things there will be
+ blackburn	sonney2k: good night! let you have some sleep
+--- Log closed Wed May 04 00:00:43 2011

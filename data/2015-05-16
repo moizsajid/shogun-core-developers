@@ -1,0 +1,205 @@
+--- Log opened Sat May 16 00:00:27 2015
+@wiking	who
+-!- witness [uid10044@gateway/web/irccloud.com/x-szcegnbdojcbycxm] has joined #shogun
+-!- lambday [6a3386ac@gateway/web/freenode/ip.106.51.134.172] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+@lambday	besser82: hey
+@lambday	besser82: today after I did a regular yum update, my f21 isn't booting up.. could you please help me with that?
+@besser82	lambday, sure
+@besser82	lambday, what's the error you get?
+@lambday	besser82: well, a bunch of services didn't start... fedora-import-state.service, systemd-logind.service
+@lambday	I tried booting into rescue mode with root, tried yum history undo last... didn't work due to no network
+@besser82	lambday, ahh I see...  looks like some trouble with SELinux, I suppose...
+@besser82	lambday, boot into rescue and `touch /.autorelabel`
+@lambday	besser82: okay trying that
+@besser82	lambday, then reboot as usual and see if it works then  ;)
+@besser82	lambday, will restore all SELinux-contexts and will do an automated-reboot after on
+@lambday	okay I'm trying
+@lambday	besser82: so .autorelebel shoud be in /root ?
+@besser82	lambday, not in /root
+@besser82	lambday, directly in /
+@besser82	lambday, /.autorelabel
+@lambday	ok
+@besser82	lambday, shall be an empty file, 0-size
+@lambday	besser82: okay.. rebooting now
+@besser82	lambday, okie
+@lambday	besser82: it rebooted again but then I'm getting same errors
+@lambday	fedora-import-state
+@lambday	logind
+@besser82	lambday, mhh...  then go into rescue and do `systemctl start network`
+@lambday	failed accounts-daemon.service
+@besser82	lambday, after on you can do `yum history undo last`
+@lambday	besser82: okay.. trying
+@besser82	lambday,`systemctl start network` shall bring up networking
+@lambday	besser82: well, after I did that, it sent me back to root login prompt
+@lambday	besser82: ifconfig doesn't show wlan
+@besser82	lambday, did you login again?
+@lambday	besser82: yes
+@besser82	okay...
+@besser82	can you use ethernet instead?
+@besser82	lambday, ^
+@lambday	besser82: umm.. ya.. then this connection will be lost :D
+@lambday	besser82: let me try and I'll come back after that
+@besser82	Ahh... I see...  :(
+@besser82	or that way  ;)
+@besser82	okie...  see ya in 5 minutes or so
+-!- lambday [6a3386ac@gateway/web/freenode/ip.106.51.134.172] has quit [Ping timeout: 246 seconds]
+-!- lambday [6a3386ac@gateway/web/freenode/ip.106.51.134.172] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+@lambday	besser82: hey.. no that too didn't work
+@lambday	btw it's actually emergency mode..
+@lambday	besser82: that's different from rescue?
+@besser82	lambday, no afaik
+@besser82	lambday, did you bring up your lan-connection, btw?
+@lambday	besser82: umm I did systemctl start network
+@lambday	nothing more
+@besser82	lambday, that neccessarily doesn't mean the connection is brought up...
+@lambday	besser82: okay there was some ifconfig commands, right
+@besser82	lambday, yes or wait... lemme check...
+@besser82	lambday, inside /etc/sysconfig/network-scripts/
+@besser82	lambday, there are your lan-connections
+@besser82	lambday, look for your Wifi
+@besser82	lambday, and edit the file
+@lambday	besser82: okay
+@besser82	lambday, there is a line "onboot="
+@besser82	lambday, make it read "onboot=yes"
+@besser82	then reboot and `systemctl start network-online`
+@lambday	besser82: it's already set onboot=yes
+@besser82	lambday, then reboot and `systemctl start network-online`  :P
+@besser82	lambday, shall bring up all onboot ifs
+@lambday	besser82: aah failed to start network-online.service, Unit network-online.service failed to load : no such file or directory
+@besser82	lambday, then reboot and `systemctl start Networking`
+@besser82	lambday, `systemctl start Networking`
+@besser82	lambday, or get a Fedora 21 Live image...
+@besser82	lambday, and I'll give you the commands to mount and rollback your system  ;)
+@lambday	besser82: yeah I downloaded that...created a liveusb with liveusb creator .. but when I booted using that it was giving some weird errors that I haven't seen before
+@lambday	besser82: Netorking failed too
+@lambday	live image
+@besser82	lambday, just dd it to the stick  ...
+@besser82	lambday, that should be fail-proof
+@besser82	dd if=live.iso of=/dev/my_stick bs=4M
+@lambday	besser82: ah there's the issue.. this machine runs Windows :|
+@lambday	from which I can create it
+@besser82	lambday, i see...
+@besser82	lambday, http://www.chrysocome.net/dd   :D
+@lambday	besser82: hehe okay trying this
+@besser82	lambday, allrighty ^^
+@lambday	besser82: hey.. booted using liveusb
+@lambday	besser82: troubleshooting?
+-!- besser82_ [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has joined #shogun
+-!- besser82_ [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has quit [Changing host]
+-!- besser82_ [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82_] by ChanServ
+@lambday	besser82_ hey
+-!- besser82 was kicked from #shogun by besser82_ [besser82]
+@besser82_	lambday, yes?
+@lambday	besser82_: booted using livecd
+@besser82_	lambday, allrighty
+@besser82_	lambday, network up?
+@besser82_	lambday, terminal ready?
+@lambday	besser82_: network not ready
+-!- Netsplit *.net <-> *.split quits: witness
+@besser82_	lambday, what's the beef?
+@lambday	besser82_: done
+@lambday	besser82_: everything up
+@besser82_	lambday, allrighty  ^^
+@besser82_	lambday, sudo -i on terminal
+@lambday	ok
+@besser82_	lambday, mkdir -p /chroot
+@lambday	besser82_: ok
+@besser82_	lambday, mount $your_drive /chroot
+@besser82_	lambday, then mount all parts as needed inside the hierarchie of /choot
+@besser82_	lambday, so that your systems' /home, /usr, /var, etc. are mounted within /chroot
+-!- witness [uid10044@gateway/web/irccloud.com/x-wyjhihkontqechhq] has joined #shogun
+@lambday	besser82_: everything needs to be mounted?
+@besser82_	lambday, yes
+@besser82_	lambday, starting with root partition in /chroot
+@besser82_	lambday, then all other partitions of your sys
+@lambday	besser82_: okay
+@lambday	besser82_: okay I have 3... root, home, usr
+@lambday	mounted at /chroot, /chroot/home, /chroot/usr
+@besser82_	lambday, fine :D
+@besser82_	then let's go
+@besser82_	yum --installroot="/chroot" history undo last
+@besser82_	lambday, ^
+@lambday	besser82_: working :D
+@besser82_	sweet :D
+@lambday	fingers crossed until next reboot
+@besser82_	lambday, dont forget to `sync`
+@lambday	besser82_: sync? ah I rebooted already
+@besser82_	lambday, and works?
+@lambday	besser82_: nope
+@besser82_	lambday, make sure to relabel...
+@besser82_	lambday, SELinux-contexts are messed-up now...
+@besser82_	lambday, touch /.autorelabel
+@besser82_	lambday, and reboot...
+@besser82_	lambday, then let's see...
+@lambday	besser82_: booted finally.. :D .. the last update included a kernel update as well.. when I tried with the previous one it worked
+@lambday	besser82_: thanks man! :D
+@besser82_	lambday, np...  your welcome  :D
+@lambday	besser82_: where is the grub entries from where I can remove the new kernel in the menu?
+@besser82_	lambday, just remove the affected kernel version...
+@besser82_	lambday, otherwise there is /boot/grub.cfg
+@lambday	besser82_: you mean just rm the vmlinuz image ? that would work?
+@besser82_	lambday, nope
+@besser82_	lambday, with yum
+@lambday	besser82_: ok
+@besser82_	lambday, like yum erase kernel-%{version}-%{release}
+@lambday	besser82_: okay.. it's already removed :) just gotta delete the grub entry
+@besser82_	lambday, that should've been done automatically
+@lambday	besser82_: I mean in the yum repo it doesn't show.. but in /boot the images are still there
+@besser82_	lambday, a it see...
+@besser82_	lambday, the just edit /boot/grub.cfg
+@besser82_	or /boot/grub/grub.cfg
+@lambday	besser82_: done! works :)
+@besser82_	fine ^^
+-!- lambday [6a3386ac@gateway/web/freenode/ip.106.51.134.172] has quit []
+-!- lambday [6a3386ac@gateway/web/freenode/ip.106.51.134.172] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+@lambday	besser82_: what was that sync thing that you said? should I do that?
+@besser82_	lambday, just precaution...  `sync` actually tells the fs to write out the cache / buffer to disk
+-!- besser82_ is now known as besser82
+@lambday	besser82_: okay
+@besser82	so it's nothing really special
+@besser82	just some habbit of me, to be sure all is flushed before shutting down  :P
+@lambday	besser82: hehe :D
+-!- witness [uid10044@gateway/web/irccloud.com/x-wyjhihkontqechhq] has quit [Quit: Connection closed for inactivity]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Wu Lin :develop * c36bce8 / src/shogun/base/SGObject.cpp: https://github.com/shogun-toolbox/shogun/commit/c36bce8024afb800201cf0553ab65658689f4f73
+ shogun-notifier-	shogun: fix a bug in SGObject
+ shogun-notifier-	shogun: Wu Lin :develop * b8524f5 / src/shogun/machine/gp/ (2 files): https://github.com/shogun-toolbox/shogun/commit/b8524f55572f6646d66727f60b3d1d1568779dd8
+ shogun-notifier-	shogun: lazy update for gradient computation
+ shogun-notifier-	shogun: Wu Lin :develop * 7e52491 / src/shogun/machine/gp/ (2 files): https://github.com/shogun-toolbox/shogun/commit/7e52491dff807b677fe7e65e8a2bfc2ed9049363
+ shogun-notifier-	shogun: update the exact inference
+ shogun-notifier-	shogun: Wu Lin :develop * 92a2346 / src/shogun/machine/gp/ (2 files): https://github.com/shogun-toolbox/shogun/commit/92a234643a6516439dc76256088e51425ae6f648
+ shogun-notifier-	shogun: update the EP inference
+ shogun-notifier-	shogun: Wu Lin :develop * caa3d2d / src/shogun/machine/gp/ (2 files): https://github.com/shogun-toolbox/shogun/commit/caa3d2db8d977a7ad08250d9eea23b64b43da6c0
+ shogun-notifier-	shogun: update the FITC inference
+ shogun-notifier-	shogun: Wu Lin :develop * 31b5102 / src/shogun/machine/gp/ (2 files): https://github.com/shogun-toolbox/shogun/commit/31b510202d64c75cd6740d9787f89337ae512383
+ shogun-notifier-	shogun: update the FITC laplace inference
+ shogun-notifier-	shogun: Wu Lin :develop * 424162d / src/shogun/machine/gp/ (5 files): https://github.com/shogun-toolbox/shogun/commit/424162d4351c42f0c34b9425fa326a7ca3e8ceb0
+ shogun-notifier-	shogun: update the laplace inference
+ shogun-buildbot	build #310 of trusty - libshogun - viennacl is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/310  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #311 of trusty - libshogun - viennacl is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/311
+ shogun-buildbot	build #2694 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2694  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1029 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/1029  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #14 of FC22 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC22%20-%20libshogun/builds/14  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #2651 of deb3 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2651  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- travis-ci [~travis-ci@ec2-54-162-222-187.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/62813764
+-!- travis-ci [~travis-ci@ec2-54-162-222-187.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #639 of deb4 - python3 is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/639  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has joined #shogun
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has quit [Read error: Connection reset by peer]
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has joined #shogun
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has quit [Remote host closed the connection]
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- lambday [6a3386ac@gateway/web/freenode/ip.106.51.134.172] has quit [Ping timeout: 246 seconds]
+-!- dataVinci [~Akash@117.208.113.214] has joined #shogun
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- dataVinci [~Akash@117.208.113.214] has quit [Read error: Connection reset by peer]
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+--- Log closed Sun May 17 00:00:28 2015

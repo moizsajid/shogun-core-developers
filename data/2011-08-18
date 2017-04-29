@@ -1,0 +1,607 @@
+--- Log opened Thu Aug 18 00:00:33 2011
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- f-x [~user@117.192.194.115] has quit [Remote host closed the connection]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+--- Log opened Thu Aug 18 03:49:06 2011
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
+!leguin.freenode.net [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+-!- Irssi: Join to #shogun was synced in 6 secs
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- You're now known as Guest39380
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Remote host closed the connection]
+-!- mode/#shogun [+o sonney2k] by ChanServ
+-!- You're now known as shogun-irclog
+-!- blackburn [~blackburn@188.122.238.50] has joined #shogun
+-!- heiko [~heiko@134.91.54.64] has joined #shogun
+@sonney2k	good morning heiko
+-!- heiko [~heiko@134.91.54.64] has quit [Ping timeout: 258 seconds]
+ blackburn	sonney2k: he we've got 364 warnings left
+@sonney2k	blackburn, and mostly simple ones
+@sonney2k	it is about time that I enable make check-examples :)
+ blackburn	serialization fixed?
+@sonney2k	blackburn, no heiko fled when I said good morning :D
+ blackburn	I'm really wondering why there are 5 online here
+ blackburn	less than ever
+@sonney2k	considering that there are 3 bots in here - yes not a lot
+@sonney2k	I guess I shouldn't write positive emails ;-)
+@sonney2k	blackburn, once we have make check-examples I will ask everyone again to help fix /port all the examples / bugs
+ blackburn	today warnings should lower to <200
+@sonney2k	and once serialization migration works I will enable make tests
+ blackburn	if it is <200 I will be happy hehe
+@sonney2k	I will be happy when all examples run
+ blackburn	I'll try to finish kpca today
+ blackburn	I hope I understood things right here
+ blackburn	a little tricky thing
+@sonney2k	if we progress as much as we do currently then it is 2-3 weeks until a release...
+@sonney2k	not too bad I would say
+ blackburn	I should finish all the serious work before 1st of September
+ blackburn	or 5th of September as hard 'deadline'
+ blackburn	because it is first day of work :)
+ blackburn	as I will be studying and work 'in parallel'
+@sonney2k	blackburn, me too actually 31.8 should be our hard deadline
+@sonney2k	it is do-able
+@sonney2k	blackburn, I would say most important is to check that we did not break anything that worked before
+ blackburn	how?
+@sonney2k	blackburn, by running make tests when serialization migration works
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+ CIA-87	shogun: Sergey Lisitsyn master * r560d6cd / (8 files): Various UI warnings fixes - http://bit.ly/oIZdfx
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Quit: Leaving]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 258 seconds]
+-!- heiko [~heiko@134.91.54.64] has joined #shogun
+ heiko	sonney2k, around?
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has joined #shogun
+-!- mode/#shogun [+o bettyboo] by ChanServ
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+ blackburn	sonney2k: 261!
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- f-x [~user@117.192.198.45] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+ CIA-87	shogun: Soeren Sonnenburg master * r9f7740a / (8 files in 4 dirs):
+ CIA-87	shogun: Merge pull request #302 from karlnapf/master
+ CIA-87	shogun: working SGVector serialization (+9 more commits...) - http://bit.ly/oDHWbU
+ blackburn	sonney2k: what is elastic net?
+@sonney2k	heiko, hi
+@sonney2k	again :)
+ heiko	sonney2k, hi
+@sonney2k	heiko, I am just compiling ...
+ heiko	sonney2k, I hope it all works, my tests here went fine - same for the svmlight serial example
+@sonney2k	heiko, did you manage to fix the destroy() issue?
+ heiko	sonney2k, yes I did
+@sonney2k	I looked at your patch - do you create empty SGVectors - no right?
+ heiko	where?
+ heiko	in new_cont?
+@sonney2k	ever
+ heiko	what I basically did is:
+ heiko	there is already code which does the MALLOC/FREE stuff for arrays/matrices
+ heiko	but the pointer was wrong when using SGMatrix
+@sonney2k	you mean double* ptrs
+ heiko	it pointed to the method
+ heiko	I now simply changed the pointer the the vector/matrix address
+@sonney2k	you mean it pointed to the object right?
+@sonney2k	heiko, wouldn't it be better to really use the contructor in this case of SGVector etc?
+ heiko	this would be possible
+ heiko	but then I would have to write this for every type
+ heiko	this way, I could simply reuse the old code
+ heiko	which already works, if the pointer is correct
+@sonney2k	heiko, so what are the assumption when doing this...
+* blackburn hates libshogunui
+ heiko	sonney2k, ?
+@sonney2k	1) the SGVector is correctly initialized before it is being messed with
+ heiko	yes, but NULL also works
+@sonney2k	2) there is nothing going on after the vector has been set (whatever processing etc)
+ heiko	oh you mean, the SGVector has to be there
+ heiko	this is true
+ heiko	how do you mean 2)
+ heiko	?
+@sonney2k	blackburn, fix siwg's R wrapper and implement matlab-swig support then it will go
+@sonney2k	heiko, think of something more complicated than SGCachedVector - where the vector is put somewhere / or processed
+ blackburn	sonney2k: sure
+@sonney2k	blackburn, it is ok if you finish by the end of today :D
+ blackburn	sonney2k: yeah I plan to finish it in a min
+@sonney2k	blackburn, as always - you are the man :)
+@bettyboo	he!?!
+ heiko	sonney2k, currently, the SGVector is treated like a class variable.
+ heiko	only the content is changed
+@sonney2k	heiko, yes
+@sonney2k	I have mixed feelings about this - this will cause trouble at some point
+ heiko	Well, I could change this
+ heiko	but it would not be possible to add class member SGVectors then
+ heiko	because they are deleted
+ heiko	from stack memory
+ heiko	Currently, all SGVector replacements are on stack
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+@sonney2k	heiko, if you do class->vector = SGVector x(some_memory, len)?
+@sonney2k	ahh not working because not public
+@sonney2k	ok then, so there is no way other than messing around directly in the SGVector
+@sonney2k	heiko, so lets keep it like this
+@sonney2k	heiko, I just tried serialization_complex_example.py
+@sonney2k	it fails in hdf5 and xml
+ heiko	sonney2k, yes it complains about missing imprts here
+@sonney2k	no
+@sonney2k	it just works
+ heiko	sonney2k, ok great :)
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+@sonney2k	but I think the vector patch needs to be done for xml and hdf5
+@sonney2k	too
+@sonney2k	json, ascii work
+ heiko	ah ok
+ heiko	well, ok then
+ heiko	not too much stuff
+@sonney2k	heiko, another question - SGNDArray, SGStringList and SGSparseMatrix also need to be treated like this right (but not yet done - or?)
+ heiko	yes, not yet done
+ heiko	should I also add this?
+@sonney2k	heiko, the types yes, the support can probably wait - or do you know any class that uses these already?
+ heiko	sonney2k, I dont know any
+ heiko	sonney2k, adding the types is basically the only step for adding support
+ heiko	just a few switch cases once one knows what to do
+@sonney2k	heiko, I thought you need to change every serializable file format too?
+@sonney2k	lets prioritize things
+ heiko	yes true, but only minor changes there
+@sonney2k	I have to enable make check-exampels tonight
+@sonney2k	for that I need hdf5/xml support too
+@sonney2k	then all examples run through
+ heiko	ok then
+@sonney2k	so that first please
+ heiko	I will do the xml/hdf5 stuff for vector and matrix
+ heiko	are there any serialization examples with the other types?
+@sonney2k	then you said there are problems with the migration?
+ heiko	well yes, its tricky
+@sonney2k	heiko, just save a stringfeature object
+@sonney2k	or sparse feature matrix
+ heiko	ehm that means, which types have to work? vector, matrix, sparsematrix?
+@sonney2k	stringlist
+@sonney2k	heiko, but not for make check-examples tonight
+@sonney2k	for that we need just vector/matrix
+ CIA-87	shogun: Sergey Lisitsyn master * rbd45c6c / (6 files in 2 dirs): More UI warnings removal - http://bit.ly/rnVzmv
+ blackburn	bet if it is <200
+ heiko	ok then
+ heiko	I will finish this now, have lunch and then continue on migration
+@sonney2k	heiko, ok thank you very much for the great job you are doing!
+@sonney2k	blackburn, please cheer heiko up too :)
+ shogun-buildbot	build #62 of cmdline_static is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org:5347/builders/cmdline_static/builds/62  blamelist: heiko.strathmann@gmail.com
+ blackburn	genosse heiko you are doing great job for the soviet people!
+ heiko	sonney2k, blackburn thanks for the flowers :)
+ heiko	blackburn, lol ;)
+@bettyboo	^_^
+ blackburn	heiko: did I said I want to marry you?
+@sonney2k	heiko, ^ look at the build failure
+@sonney2k	blackburn, it is legal even in germany
+ heiko	blackburn, true, so lets go for it :D
+ blackburn	:D
+@bettyboo	blackburn, :^)
+ heiko	sonney2k, yes the blamelist
+ blackburn	yeah I'll got german citizenship
+ shogun-buildbot	build #57 of r_static is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org:5347/builders/r_static/builds/57  blamelist: heiko.strathmann@gmail.com
+@sonney2k	blackburn, not so easy you first have to code with heiko 10 years in a row on shogun *while being married*
+ blackburn	:D
+ heiko	hehe, unpaid :)
+ heiko	sonney2k, the build error is strange
+@sonney2k	heiko, I think some include is missing
+ heiko	do I have to introduce these enums at another point?
+ heiko	i mean if CT_VECTOR is known, how can it be that CT_SGVECTOR is unknown?
+@sonney2k	heiko, could be that this is from some early git commit that you did - so it is one that doesn't compile that you checked
+ heiko	sonney2k, ok
+@sonney2k	heiko, btw in shogun/lib/DataType.h - in the enum
+ heiko	sonney2k, thats where i introduced the new type
+@sonney2k	you cannot change the meaning of CT_SGMATRIX
+@sonney2k	you have to put these CT_SG* types at the end
+ heiko	sonney2k, ?
+@sonney2k	err  you cannot change the meaning of CT_MATRIX
+ heiko	oh
+ heiko	is the integer saved somewhere?
+@sonney2k	I mean  CT_MATRIX was 2 before or so
+@sonney2k	heiko, starting with 1 I suppose
+ blackburn	why is it compiles here?
+@sonney2k	I wouldn't mind if you do CT_MATRIX=2 etc
+@sonney2k	blackburn, revision f059083741272ad277cdd527935fca4b87c919e0 ?
+ heiko	sonney2k, i just moved them to the end
+@sonney2k	heiko, no I meant you make all these explicit
+ heiko	ok, will do
+@sonney2k	heiko, this way numbers are fixed & clear
+ heiko	guys, I will go for lunch now, mensa is closing soon
+ blackburn	ehh how to get revision num
+@sonney2k	just make sure you don't change the default
+@sonney2k	heiko, yeah cu
+ heiko	sonney2k, will be back in the afternoon for all the stuff we just talked about
+@sonney2k	blackburn, git log | head -n 1
+ blackburn	commit bd45c6ca83b1ab9b8f2f1ed2cef13beaceebb194
+@sonney2k	heiko, yes thanks
+@sonney2k	blackburn, so you see - the new builds are already schedules (cf http://www.shogun-toolbox.org:5347/waterfall )
+@sonney2k	http://www.shogun-toolbox.org:5347/builders/libshogun/builds/62
+ blackburn	I see
+@sonney2k	will build your bd45c6ca83b1ab9b8f2f1ed2cef13beaceebb194
+@sonney2k	we really need some more stable buildbot :(
+ blackburn	I wait for <200 warnings here
+-!- heiko [~heiko@134.91.54.64] has quit [Ping timeout: 258 seconds]
+ blackburn	libshogun is ahead of 10 builds oh
+ blackburn	buildbot is slow today
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ is now known as in3xes
+ blackburn	sonney2k: kernelpca -> dimensionreductionpreprocessor?
+ shogun-buildbot	build #63 of cmdline_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/cmdline_static/builds/63
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Remote host closed the connection]
+ shogun-buildbot	build #58 of r_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/r_static/builds/58
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+ shogun-buildbot	build #60 of octave_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org:5347/builders/octave_modular/builds/60  blamelist: heiko.strathmann@gmail.com
+ CIA-87	shogun: Sergey Lisitsyn master * rbd8f328 / (6 files): Added SGREFing while applying to feature matrices in dimensionality reduction preprocessors, fixed wrong already owned matrices return in MDS and Isomap - http://bit.ly/qW7H1e
+-!- blackburn [~blackburn@188.122.238.50] has quit [Quit: Leaving.]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+ shogun-buildbot	build #61 of octave_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/octave_modular/builds/61
+-!- heiko [~heiko@134.91.54.64] has joined #shogun
+ heiko	sonney2k, does shogun compile now?
+@sonney2k	shogun-buildbot, status all
+ shogun-buildbot	cmdline_static: idle, last build 1h26m50s ago: build successful
+ shogun-buildbot	csharp_modular: idle, last build 17m23s ago: build successful
+ shogun-buildbot	java_modular: idle, last build 7m54s ago: build successful
+ shogun-buildbot	libshogun: building(no current step) [ETA 1m57s]
+ shogun-buildbot	lua_modular: idle, last build 12m40s ago: build successful
+ shogun-buildbot	nightly_all: idle, last build 19h02m50s ago: failed compile
+ shogun-buildbot	nightly_none: idle, last build 19h07m41s ago: build successful
+ shogun-buildbot	octave_modular: idle, last build 22m12s ago: build successful
+ shogun-buildbot	octave_static: idle, last build 1h36m21s ago: build successful
+-!- shogun-buildbot was kicked from #shogun by bettyboo [flood]
+@sonney2k	heiko ^
+-!- bettyboo was kicked from #shogun by sonney2k [bettyboo]
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has joined #shogun
+-!- mode/#shogun [+o bettyboo] by ChanServ
+ heiko	sonney2k, also just checked it :)
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	heiko, did you manage to support hdf5 / xml?
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has quit [Remote host closed the connection]
+ heiko	currently doing ...
+@sonney2k	ok
+@sonney2k	l8r
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 258 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Ping timeout: 258 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- heiko [~heiko@134.91.54.64] has quit [Quit: Leaving.]
+-!- heiko [~heiko@134.91.54.64] has joined #shogun
+ heiko	sonney2k, which debian package to install for hdf5 support?
+@sonney2k	heiko, libhdf5-serial-dev
+ heiko	sonney2k, thanks
+ heiko	sonney2k, and for xml? my std choices do not work, configure script sais ok but compiler sais cannot find libxml/parser.h
+ heiko	SerializableHdf5 File leaks memory
+ heiko	which is not tracked by trace-mallocs :(
+-!- heiko [~heiko@134.91.54.64] has quit [Ping timeout: 258 seconds]
+ CIA-87	shogun: Soeren Sonnenburg master * r12b8f95 / (10 files in 3 dirs):
+ CIA-87	shogun: Merge pull request #303 from karlnapf/master
+ CIA-87	shogun: serialization of SGMatrix/SGVector (+6 more commits...) - http://bit.ly/mTNJjd
+ serialhex	sonney2k: are you on??
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+@sonney2k	serialhex, yes
+ serialhex	ok, labels are going to be a vector right?
+ serialhex	i'm like 90% certain but i want to be 100%
+@sonney2k	yes
+ serialhex	ok cool!
+ serialhex	we're ar v 0.99.9?? :P
+-!- blackburn [~blackburn@188.122.238.50] has joined #shogun
+ serialhex	hey blackburn, whats up??
+ blackburn	serialhex: hi, i'm fine and you?
+ serialhex	pretty good
+@sonney2k	blackburn, 177 warnings?!
+ serialhex	working on these examples
+ serialhex	WOW!!!
+ blackburn	sonney2k: seems so
+ blackburn	I haven't checked
+ blackburn	yeah as you can see
+ blackburn	hmm lets make it 100
+@sonney2k	blackburn, heiko committed the fix
+ blackburn	fix about?
+@sonney2k	so I will try to get some make check-examples into the buildbot
+@sonney2k	serialization
+ blackburn	ah, serialization
+ blackburn	yeah
+@sonney2k	\o/
+ blackburn	sonney2k: what about moving kpca under dimreductionpreprocessor?
+ blackburn	now it is pretty crazy
+ blackburn	we set threshold in constructor (sic!) and then use it as int
+@sonney2k	blackburn, makes sense but PCA then too
+ blackburn	yeah sure
+ blackburn	and I would remove alesis' stuff here
+ blackburn	with various modes..
+ blackburn	I don't sure if I should
+@sonney2k	why remove?
+@sonney2k	it makes sense to preprocess and say I want 10 components
+@sonney2k	or all components with eigenvalues > 0.001
+@sonney2k	(these are the 2 modes)
+ blackburn	because target dimensionality is useless when there are two modes
+ blackburn	not really predictive acting
+ blackburn	I don't know
+@sonney2k	blackburn, one has to select one of these modes of course
+ blackburn	well I don't think preprocessor should think about this thresholding
+@sonney2k	I don't mind that you make them extra functions
+@sonney2k	such that one has to call them manually like
+@sonney2k	compute_pca
+@sonney2k	keep_top_n_components
+@sonney2k	or so
+ blackburn	yeah ok
+ blackburn	but this time I have to finish kpca
+ shogun-buildbot	build #6 of nightly_all is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/nightly_all/builds/6
+ blackburn	sonney2k: ?! nighly all compiled!!!
+@sonney2k	blackburn, no buildbot crashed
+ blackburn	shit
+@sonney2k	I wish I would figure out what the problem is
+ blackburn	serialhex: hey should I write your name in NEWS? or better nickname?
+ serialhex	either or... you could say: "Justin Patera aka serialhex" or something... or just serialhex... whatever works :)
+ blackburn	serialhex: how can I mention your spiffy trancekoder? :)
+ serialhex	so are we gonna have a newsletter or something blackburn?
+ blackburn	oh I'm talking about this:
+ serialhex	how?  erm, you mean describe??
+ blackburn	https://github.com/serialhex/shogun/blob/master/src/NEWS
+ blackburn	hmm strange I got link to your fork hah
+ serialhex	hmm
+ blackburn	yeah describe whatever
+ blackburn	:D
+ blackburn	not fair you are not in authors and news
+ blackburn	hmm does "example transition tool" work?
+ serialhex	yeah thats cool
+ serialhex	i'm probably going to kill that file once i'm done with moving the python files to ruby...  though it was a stroke of pseudo-genius getting that done :D
+ serialhex	so have you finished work on the java serialization blackburn??
+ blackburn	seems so
+ serialhex	sweet!!
+ CIA-87	shogun: Sergey Lisitsyn master * ra3b6203 / (src/CONTRIBUTIONS src/NEWS): Updated news and contributions - http://bit.ly/p82rg1
+ blackburn	serialhex: +1 to fame :D
+ serialhex	YAY!!!
+@sonney2k	and flame :D
+ serialhex	sonney2k!!!  i keep getting this error: "/usr/lib/ruby/1.8/i486-linux/modshogun.so: warning: rb_define_const: invalid name `__STDC_FORMAT_MACROS' for constant" when i load modshogun.so and i found the line/place where said error originates: shogun/src/shogun/lib/common.h line # 43
+ serialhex	idk what is to be done about it (if anything) but i'm just letting you know what i've found!
+@sonney2k	serialhex, looks like I already tried to fix it:
+@sonney2k	#define __STDC_FORMAT_MACROS 1
+@sonney2k	#include <inttypes.h>
+@sonney2k	#undef __STDC_FORMAT_MACROS
+@sonney2k	seems like it didn't help
+ serialhex	hmm...
+ serialhex	yeah, ruby dosnt like constants with names like that... all constants start with a capital letter... hmm...........
+ blackburn	hey guys I've found the strangest function of shogun
+ blackburn	here it is
+ blackburn	int* cntsrtna(int *sx, int k, int r, int na);
+ serialhex	though everything else seems to be running peachy-keen!
+ serialhex	do wahh??
+ blackburn	I'm stucked what to write in its description ahaha
+@sonney2k	blackburn, guessing from the name it sounds like count sort
+@sonney2k	na == no idea
+ blackburn	sonney2k: I'll write that it makes CNTSRTNA
+@sonney2k	blackburn, very useful
+ blackburn	sure
+@sonney2k	serialhex, I don't actually know why we need inttypes.h
+ serialhex	hmm, ok... what's it do?
+@sonney2k	serialhex, let me try to compile w/o
+ serialhex	oh, and blackburn, when you make yourself famous for all the spiffy docs you can say that i did the russian-english -> english edit :P
+ blackburn	hehe
+ serialhex	ok cool sonney2k, cause it'd take ~ 20 min to compile here :-/
+@sonney2k	serialhex, now I know what it is for
+@sonney2k	PRIi32
+@sonney2k	^ that is a format specifier
+@sonney2k	for int32
+ serialhex	...which does?
+ serialhex	ahh, i see
+@sonney2k	for printf()
+ serialhex	oh, ok
+@sonney2k	serialhex, still it doesn't make sense that __STDC_FORMAT_MACROS is visible from the swig interfaces
+@sonney2k	lets try a %ignore
+ blackburn	uh
+ CIA-87	shogun: Sergey Lisitsyn master * rb0eb823 / (16 files in 7 dirs): Warning removal - http://bit.ly/qICK3f
+ blackburn	should be <100 now
+ serialhex	:D
+ blackburn	time to bomb saddam^W^W finish kpca
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	shogun-buildbot, status all
+ shogun-buildbot	cmdline_static: idle, last build 17m02s ago: build successful
+ shogun-buildbot	csharp_modular: idle, last build 7m08s ago:
+ shogun-buildbot	java_modular: idle, last build 4m07s ago:
+ shogun-buildbot	libshogun: idle, last build 7m08s ago:
+ shogun-buildbot	lua_modular: idle, last build 7m08s ago:
+ shogun-buildbot	nightly_all: idle, last build 47m09s ago: build successful
+ shogun-buildbot	nightly_none: idle, last build 47m09s ago: build successful
+ shogun-buildbot	octave_modular: building(compiling)
+ shogun-buildbot	octave_static: idle, last build 11m55s ago: build successful
+ shogun-buildbot	python_modular: idle, last build 7m08s ago:
+ shogun-buildbot	python_static: idle, last build 12m06s ago: build successful
+ shogun-buildbot	r_modular: idle, last build 7m08s ago:
+ shogun-buildbot	r_static: idle, last build 17m01s ago: build successful
+ shogun-buildbot	ruby_modular: idle, last build 7m08s ago:
+ CIA-87	shogun: Soeren Sonnenburg master * r3747c4d / src/interfaces/modular/modshogun_ignores.i : ignore __STDC_FORMAT_MACROS in modular interfaces - http://bit.ly/qsuZOt
+ CIA-87	shogun: Soeren Sonnenburg master * r1807bc2 / (18 files in 8 dirs): Merge branch 'master' of github.com:shogun-toolbox/shogun - http://bit.ly/rfzPMy
+@sonney2k	blackburn, do you know if we can ourselves use --rebase when pulling?
+@sonney2k	I mean not that we screw up history?
+ blackburn	rebase what to what?
+@sonney2k	blackburn, when you do a git push
+@sonney2k	and I have some commits already on my local master
+@sonney2k	and then do git pull github master
+ blackburn	ah
+ blackburn	really? and there wouldn't be merge?
+@sonney2k	then would a git pull github master --rebase work?
+ blackburn	ahh it was a question
+ blackburn	ahaha
+ blackburn	no, I don't know
+@sonney2k	blackburn, can you try with some small change?
+ blackburn	I try to git pull things just before commiting
+ blackburn	yeah
+@sonney2k	(I just pushed)
+@sonney2k	so when you change some file and do a --rebase
+ blackburn	so commit then rebase
+@sonney2k	then we will see
+@sonney2k	yes
+@sonney2k	then push and pray :)
+ blackburn	I like the concept of push&prahy
+ blackburn	pray
+* sonney2k praises $DEITY dancing the ~~~lumbojumboshogunolaaaa~~~~
+ blackburn	refusing to pull with rebase: your working tree is not up-to-date
+ CIA-87	shogun: Sergey Lisitsyn master * rdb25278 / src/shogun/preprocessor/MultidimensionalScaling.cpp : Update MDS thread doc - http://bit.ly/pYOnVP
+ CIA-87	shogun: Sergey Lisitsyn master * r2ac0b0f / src/interfaces/modular/modshogun_ignores.i : Merge branch 'master' of github.com:shogun-toolbox/shogun - http://bit.ly/qeV7xZ
+ blackburn	seems the answer is no
+@sonney2k	hmmhh
+@sonney2k	serialhex, what marks a comment in ruby?
+ blackburn	ehh how to call static SGMatrix' method?
+@sonney2k	?
+@sonney2k	SGMatrix:xxx
+ blackburn	yeah
+ blackburn	got stupidity assault
+ serialhex	sorry about the delay sonney2k, a # marks a comment
+ serialhex	just like python
+@sonney2k	serialhex, ok
+@sonney2k	I am just creating documented examples from the undocumented ones
+ serialhex	ok cool
+@sonney2k	(we have the description in a separate dir and prepend it to each file)
+@sonney2k	so I need the comment symbol
+@sonney2k	it is really fun to see
+@sonney2k	we have '%' '#' '- ' '//'
+@sonney2k	but # is the winner now :)
+@sonney2k	blackburn, would you mind to move yourhemisphere.py swissroll.py into graphical?
+ blackburn	yeah sure
+@sonney2k	blackburn, if you want prepend it with dimreduct_
+@sonney2k	them
+ blackburn	not really necessary to mark them anyhow
+ blackburn	just move it
+@sonney2k	blackburn, ok I will do
+ blackburn	I thought there will be a millions of examples
+ blackburn	but I did two
+@sonney2k	blackburn, but you did one for each in the non-graphical dir
+ blackburn	yeah but useless
+@sonney2k	why useless?
+ blackburn	how can one use it? :)
+@sonney2k	blackburn, copy the example in $DIR, load own data - > run
+@sonney2k	easy :)
+ blackburn	but no visualization - useless
+@sonney2k	but visualization is trivial to add right - everyone can do that
+ CIA-87	shogun: Soeren Sonnenburg master * r33a399d / (5 files in 3 dirs):
+ CIA-87	shogun: create documented examples for all supported languages and move the
+ CIA-87	shogun: dimreduct examples one dir up - http://bit.ly/rjsFh0
+@sonney2k	blackburn, the rebase worked here
+ blackburn	sonney2k: what is the best way to implement getters with matrices/vectors?
+ blackburn	worked?
+ blackburn	hmm
+@sonney2k	I just did it
+ blackburn	I did something wrong
+@sonney2k	I did
+@sonney2k	git commit -a
+ blackburn	ah
+@sonney2k	git pull --rebase github master
+ blackburn	I know
+@sonney2k	and push
+ blackburn	I forgot to specify what to pull
+ blackburn	just git pull rebase
+@sonney2k	doh
+@sonney2k	blackburn, I don't understand the question - inside SGVector you mean?
+ blackburn	SGMatrix<float64_t> get_transformation_matrix() const
+ blackburn	->->->->->->->->->->->->->->->->{
+ blackburn	->->->->->->->->->->->->->->->->->->->->->->->->SGMatrix<float64_t> matrix = SGMatrix<float64_t>(m_transformation_matrix);
+ blackburn	->->->->->->->->->->->->->->->->->->->->->->->->matrix.do_free = false;
+ blackburn	->->->->->->->->->->->->->->->->->->->->->->->->return matrix;
+ blackburn	->->->->->->->->->->->->->->->->}
+ blackburn	oh
+ blackburn	sonney2k: is it right way to do that?
+ blackburn	or better to make it no-do-free internally?
+@sonney2k	yeah - not sure if const will work though
+@sonney2k	blackburn, I would make it no-do-free internally
+@sonney2k	(I mean you own the object anyways and will do destroy in destructor)
+ blackburn	yeah I luv it much more
+ blackburn	like heiko
+ blackburn	hey gaytoolbox sounds pretty good
+ blackburn	shogun gaytoolbox
+ blackburn	sonney2k: should kernel be added to m_parameters thing?
+ blackburn	in kpca essentially
+@sonney2k	blackburn, if the kernel is later needed
+ blackburn	when - later?
+@sonney2k	think of the preproc is created
+@sonney2k	and things added
+ blackburn	hmm okay
+@sonney2k	then someone wants to save it to disc (can happen at any time)
+@sonney2k	and then continue
+ blackburn	this time I will just try to get it work
+ blackburn	:D
+@sonney2k	blackburn, the marriage of heiko and you will end the cold work
+ blackburn	sonney2k: when cleanup is called?
+@sonney2k	cold war
+ blackburn	yeah berlin wall will fall
+@sonney2k	this can only mean hot times and of course that shogun-toolbox is hot :D
+@sonney2k	blackburn, when the user calls it
+ blackburn	I would say it is perestroyka now
+@sonney2k	anytime so
+ blackburn	shogun looks like ussr in 89 hahah
+@sonney2k	it is just the end of the world .... of shogun 0.x
+ blackburn	btw tomorrow is a 20th anniversary of USSR government take-over
+ blackburn	if I born 6 months later I would born in russia :D
+ serialhex	lol blackburn!
+ blackburn	serialhex: you should hope obama will not do perestroyka :D
+ serialhex	perestroyka?  /searches wikipedia...
+ blackburn	or perestroika
+ blackburn	http://en.wikipedia.org/wiki/Perestroika
+ serialhex	ahhh... i see :P
+ blackburn	serialhex: one of + of perestroika - in sonney2k's city there was no wall since 1989
+ blackburn	probably that was awful thing :)
+ serialhex	cool... i vaguely remember the bringing down of the wall
+ blackburn	I didn't born yet in 1989 hehe
+ blackburn	whoaa got kpca to compile
+ blackburn	but still need to get to work haha
+ blackburn	sonney2k: hey but why it doesn't compile if test failed
+ blackburn	I can't count warnings haha
+-!- f-x [~user@117.192.198.45] has left #shogun ["ERC Version 5.3 (IRC client for Emacs)"]
+ serialhex	hey, i keep getting an error when i run classifier_averaged_perceptron_modular.rb: "[WARN] Averaged Perceptron algorithm did not converge after 1000 iterations."  does this happen normally?
+ serialhex	in the py version?
+@sonney2k	yes
+@sonney2k	blackburn, hmmhh how should I fix the issue?
+ serialhex	ok, just making sure noting was borked! :D
+ blackburn	sonney2k: which?
+@sonney2k	blackburn, the linker requires -llapack
+@sonney2k	for compiling 1 of the examples
+ blackburn	where is it used?
+@sonney2k	don't know exactly - I guess dot() for computing kernel
+@sonney2k	but that is not the relevant point
+ CIA-87	shogun: Soeren Sonnenburg master * rf5254de / examples/undocumented/libshogun/Makefile : add -llapack in examples - http://bit.ly/mPOrns
+ blackburn	can't it be removed?
+@sonney2k	blackburn, what can be removed?
+ blackburn	lapack usage in examples
+@sonney2k	blackburn, the problem is the example needs to be linked to lapack
+ blackburn	yeah but can we modify it to not use lapack
+@sonney2k	blackburn, sure we could but we don't know if atlas is installed (we are not using the configure system for examples...)
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+ blackburn	ah okay
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+ CIA-87	shogun: Soeren Sonnenburg master * r615d2a2 / examples/undocumented/libshogun/Makefile : add flag LIBS_ADD to add libs in addition to LIBS - http://bit.ly/q9qRqm
+@sonney2k	blackburn, btw the problem is only due to using an inline function
+@sonney2k	because of that the clbas_ddot is in the header and when linking we need to specify the lib
+ blackburn	inline function calls cblas??
+ blackburn	I wouldn't make it inline
+ shogun-buildbot	build #72 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/libshogun/builds/72
+@sonney2k	hurray :)
+@sonney2k	blackburn, please create a bug report in trac saying that we need to rework Math.h
+@sonney2k	and add that we should not have library calls in inline functions
+@sonney2k	(otherwise we get hard to track linker deps in C++ extensions)
+ blackburn	in one ticket?
+@sonney2k	2
+@sonney2k	now with check-examples enabled things become much harder
+@sonney2k	blackburn, I guess some text would not be bad :)
+@sonney2k	like why rework and what should be done...
+ blackburn	no idea what to rework
+@sonney2k	blackburn, split the file up
+@sonney2k	blackburn, removing inline is not sufficient btw
+@sonney2k	these calls have to be in the .cpp file
+ shogun-buildbot	build #63 of r_static is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org:5347/builders/r_static/builds/63  blamelist: sonne@debian.org
+ blackburn	hope you satisfied :D
+@sonney2k	yeah everything fails finally
+ blackburn	nice
+ blackburn	sonney2k: perestroika
+@sonney2k	blackburn, thanks
+ blackburn	thanks to gorbachew :D
+--- Log closed Fri Aug 19 00:00:00 2011

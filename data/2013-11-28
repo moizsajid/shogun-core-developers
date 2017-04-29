@@ -1,0 +1,395 @@
+--- Log opened Thu Nov 28 00:00:43 2013
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+ shogun-buildbot_	build #631 of nightly_default is complete: Failure [failed test notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/631
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Remote host closed the connection]
+-!- sonne|osx [~sonne@f053041072.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f053041072.adsl.alicedsl.de] has quit [Client Quit]
+-!- sonne|osx [~sonne@f053041072.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f053041072.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Quit: Leaving.]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+ besser82	sonne|work, wiking: Guten Morgen  :D
+ besser82	wiking: are you able to login into obs, today?  http://build.opensuse.org
+@wiking	besser82: noup... it does not complain about user/pass being wrong or not existing
+@wiking	it just processes the login information
+@wiking	and then nothing
+ besser82	wiking: mhhhh....
+@wiking	i get back to the same page
+@wiking	and  Sign Up | Log In  is still there
+@wiking	suse(r) ;
+@wiking	:)
+@wiking	and i can keep on requesting login
+@wiking	but nothing happens it's the same
+ besser82	mhh... sounds weird....
+ besser82	I'll check that with me SUSE buddies  ;)
+@wiking	heheh i'm sorry but this is just wrong :)
+-!- new_lido [~walid@41.218.176.141] has quit [Ping timeout: 272 seconds]
+ besser82	wiking: you can login now  :D
+ besser82	wiking: and now you are a member of science:shogun-project  ;)
+ besser82	wiking: maintainer actually
+@wiking	besser82: what was the problem?
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ besser82	wiking: someone changed the way user are created on osc....
+@wiking	ic
+ besser82	wiking: now new users need to login first using the osc-client to be created on obs  :(  Sh17 h34|)5   XD
+ besser82	^^ those obs developers
+ besser82	lisitsyn: plz, give me your novell-credentials on pm, so I can activate your login, too ;)
+ lisitsyn	besser82: activate like?
+-!- new_lido [~walid@41.218.180.167] has joined #shogun
+ lisitsyn	besser82: I mean I can log in :D
+ besser82	lisitsyn: activate like you can login to OBS
+ lisitsyn	isn't it enough?
+ lisitsyn	ah let me try to login to obs
+ besser82	lisitsyn: and I can add you as a maintainer to science:shogun  ;)
+ lisitsyn	besser82: ohkay so what do you mean by credentials? :D
+ besser82	lisitsyn: novel-account  user/passwd
+ lisitsyn	besser82: okay let us change it later then :D lisitsyn/123abc
+ besser82	lisitsyn: kk, thanks!
+ besser82	lisitsyn: done && added  :D
+ lisitsyn	besser82: thanks, can I change it now?
+ lisitsyn	:D
+ lisitsyn	123abc which was published online is a bit unsecure
+ lisitsyn	:D
+ besser82	lisitsyn: sure, go and change that high-level-security-passwd  ;)
+ lisitsyn	besser82: I am curious if street address 'Shitfactory' is ok for them
+ lisitsyn	telephone number 777 haha
+@wiking	besser82: patch?
+ besser82	wiking: patch, what?!?
+ besser82	lisitsyn: Why not?  Mine is General T'So Alley  ;)
+ besser82	wiking: I'm puzzled....
+@wiking	besser82: the crazy cmake patch
+ besser82	wiking: I'm still working on that...
+ besser82	wiking: getting the Modules build and testsuite run from build-tree
+-!- sonne|osx [~sonne@89.204.154.66] has joined #shogun
+ besser82	sonne|osx: Guten Morgen  ;)
+ sonne|osx	besser82: to you too :)
+ sonne|osx	besser82: I read you do 100000 times compile speed ups?
+ sonne|osx	much appreciated :D
+ besser82	sonne|osx: not that much, but ~600% on rebuid with ccaches
+ lisitsyn	how's that?
+ besser82	sonne|osx: and ~70% without
+ lisitsyn	*just curious*
+ besser82	lisitsyn: besser82-magick(tm9  :-P
+ sonne|osx	besser82: so when can I haz it?
+ besser82	sonne|osx: as soon as the swig-module are building and testuite runs from build-tree  ;)
+ besser82	sonne|osx: I think during this week
+ besser82	sonne|osx: currently I'm working to get the modules build with blazing speed-up
+ sonne|osx	besser82: so long way still - swig is not so easy to get to work...
+ sonne|osx	besser82: and we always needed the stupid -Dfoo on g++
+ sonne|osx	and siwg
+ sonne|osx	for some reason it totally ignored our lib/config include attempts
+ sonne|osx	besser82: modules == the interface right?
+ besser82	sonne|osx: there's ways to get around that  ;)  If you know the deep internals of cmake....
+ besser82	sonne|osx: right modules= lang-interface for py,...
+ sonne|osx	besser82: no I mean when you call swig <somefile.i>
+ sonne|osx	and somefile.i includes the config.h
+ sonne|osx	then for some reason the defines are not known in there
+ sonne|osx	and don't ask me why not
+ besser82	sonne|osx: broken / dirty-hacks cmake-scripts is 90% of your problems....
+ besser82	sonne|osx: broken = it does build, but you ship stuff around of cmake's internal bookkeeping....
+ besser82	lisitsyn: the most speed-up is gained by splitting the BIG glob of *.cpp into several obj-lib and later linking them back to one single big libshogun
+ besser82	lisitsyn: the next big speed-up is from moving the headers out of sources  mv src/shogun/*/*.h ---> includes/shogun/
+* sonne|osx likes that
+ sonne|osx	sound like x-mas :)
+ besser82	sonne|osx: actually the whole libshogun builds in < 1:30 mins without ccache
+ besser82	sonne|osx: rebuilds from ccache are ~25 sec.
+ sonne|osx	besser82: libshogun rebuilds?
+ sonne|osx	25s is due to the linking steps?
+ besser82	sonne|osx: like doing a commit and build that new checkout with ccaches
+ besser82	sonne|osx: yes, the longest part is linking
+ sonne|osx	besser82: ahh ok and if you just recompile w/o change?
+ besser82	sonne|osx: linking actually takes ~12 secs  / 50%
+ besser82	sonne|osx: that's done in less 15 secs.
+ besser82	sonne|osx: times without configure-stage....
+ besser82	sonne|osx: as: cmake -DMY_SETTINGS ...
+ besser82	sone|osx: pure `make all`
+ sonne|osx	I can live with that :)
+ besser82	sonne|osx: is there any specific reason not to use arc4random on linux?
+@wiking	besser82: ?
+ besser82	wiking: !
+@wiking	besser82: arc4random is just seeding the prng
+ besser82	wiking: so it is superfluous on linux i guess?
+@wiking	?
+ besser82	wiking: because of other function in stdlib
+ besser82	wiking: doing the same
+@wiking	noup
+@wiking	we have our own prng
+@wiking	we just need a good seed for the prng
+@wiking	and that is by arc4random if possible
+@wiking	if not then /dev/[u]random
+ besser82	wiking: so we should use that on linux as well
+@wiking	yep anywhere it's possible
+@wiking	just as it is now in cmake
+ besser82	wiking: that way it would be skipped on linux and is used on bsd / oscrap only
+@wiking	besser82: why?
+@wiking	CHECK_FUNCTION_EXISTS(arc4random HAVE_ARC4RANDOM)
+ besser82	wiking: which on linux always report not found
+@wiking	why
+-!- sonne|osx [~sonne@89.204.154.66] has quit [Quit: sonne|osx]
+ besser82	wiking: because on linux one would need to look-up libbsd and run the check against that....
+@wiking	lol
+ besser82	wiking: arc4random is a bsd-stdlib thing....
+@wiking	and that's only available if u haev libbsd installed?
+ besser82	wiking: yes, at least on linux
+@wiking	ok
+@wiking	then leave it as it is
+@wiking	/dev/urandom is fine as well
+ besser82	wiking: kk...
+ besser82	wiking: But I could have added the check in new cmake with few lines
+@wiking	nah not necessary
+@wiking	urandom should be there in linux
+@wiking	and that's good enough as well
+ besser82	wiking: which is better arc4random or urandom?
+@wiking	doesn't matter really
+@wiking	as we call it once...
+ besser82	wiking: as you say....
+@wiking	or say 2-3 times max
+@wiking	and in that aspect both of them are good enough seeds
+ besser82	wiking: alrighty!
+ besser82	wiking: on the other hand libbsd is cheap by means of check && size...
+ besser82	wiking: it's ~60 kbytes and has pkg-conf on board
+@wiking	besser82: really that's just unecessary
+@wiking	*unnecessary
+ besser82	wiking: ok
+-!- sonne|osx [~sonne@24-134-74-216-dynip.superkabel.de] has joined #shogun
+-!- sonne|osx [~sonne@24-134-74-216-dynip.superkabel.de] has quit [Quit: sonne|osx]
+-!- new_lido is now known as new_lido_afk
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- sonne|work [~sonnenbu@24-134-74-216-dynip.superkabel.de] has quit [Read error: No route to host]
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- sonne|work [~sonnenbu@24-134-74-216-dynip.superkabel.de] has joined #shogun
+ besser82	sonne|work: I have some good news  :D
+ sonne|work	shoot!
+ besser82	sonne|work, wiking, lisitsyn: Actually I improved compile time ~8-times with da modules and without ccaches  :D
+ besser82	sonne|work, wiking, lisitsyn: in values that is 15 Minutes with current HEAD and on my improvement / changes ~2 minutes (using -j8)
+ lisitsyn	besser82: cool
+ sonne|work	errm? whats the magic behind this?
+ besser82	sonne|work, wiking, lisitsyn: with da ccache it takes < 40 secs and modules enabled
+ besser82	sonne|work: extreme optimizations
+ lisitsyn	besser82: like? ;)
+ lisitsyn	this would be very important
+ lisitsyn	because currently development is like blocked :D
+ besser82	sonne|work, lisitsyn: external header guards and all defines put into config.h and used from there
+ lisitsyn	with compile times
+ sonne|work	besser82: and you are sure that the defines from config.h are used?
+ besser82	sonne|work: absoluteliy
+ sonne|work	besser82: what did you do that the defines from config.h are being used?
+ besser82	sonne|work: included them properly in the $swig_file.i
+ lisitsyn	not sure what you mean by that
+ besser82	sonne|work: and autogenerating some of that .i
+ besser82	sonne|work: like having $swig.i.in  ----> $swig.i
+ besser82	sonne|work: and making cmake: configure_file( in out )
+ besser82	no external defines needed anymore  :D
+ besser82	lisitsyn: what exactly?
+ lisitsyn	besser82: so what did you put to config.h?
+ sonne|work	that really sounds super cool - I will have a thorough look once your patch is ready
+ besser82	lisitsyn: basically every define done by cmake
+ besser82	sonne|work: will push my first stage to my gh-fork during this eve
+ lisitsyn	besser82: but why does it change stuff that significantly?
+ lisitsyn	are defines that slow?
+ besser82	lisitsyn: defines on the compiler-cli actually slow down gcc significatly and shred ccaches useless....
+ lisitsyn	besser82: so it matters a lot whether I put 20 defines or 40 defines to gcc while compiling some .o?
+ sonne|work	where do you learn such stuff?!
+ besser82	lisitsyn: for one file no, but for a 20 or more yes.  Explicitly when using ccache
+ lisitsyn	but ain't that sound stupid for gcc?
+ lisitsyn	besser82: is there any define that is changed each compilation?
+ besser82	sonne|work: self-studies  :D
+ lisitsyn	is that the thing that makes ccache useless?
+ besser82	sonne|work: but i can give enterprise trainings for some $$$$  XD
+ besser82	lisitsyn: for ccache every cli-define is basically a fresh compile
+ sonne|work	besser82: better mentor some gsoc student doing such magic :)
+ lisitsyn	besser82: why?
+ sonne|work	besser82: that would explain the slowdown
+ besser82	lisitsyn: because it doesn't cache cli-define
+ lisitsyn	besser82: essentially what you did looks like that stdafx.h shit from visual studio
+ lisitsyn	but I'd never expect it matters that much..
+ besser82	lisitsyn: Visual Studio?!? Who uses that?!?
+ lisitsyn	besser82: welcome to cruel world
+ lisitsyn	:D
+ lisitsyn	I have to compile some project in VS even though I develop it in linux
+ besser82	lisitsyn: from gcc-pov cli-defines need expensive checks for possible collisions with included headers...
+ lisitsyn	besser82: well that explains *a bit*
+ lisitsyn	but expensive?
+ besser82	lisitsyn: use mingw  ;)  It's about da 10-times beddah u know?
+ lisitsyn	besser82: why?
+ besser82	lisitsyn: because M$ doesn't gain any $$$ for that  ;)
+ lisitsyn	target os is windows why to run it using that shit? :)
+ besser82	lisitsyn: mingw will produce native ddl
+ besser82	lisitsyn: or exe
+ lisitsyn	that's way too fanatic for me, I have VS here to compile, thats easy and works
+ lisitsyn	and hey VS is quite advanced IDE actually, its debugger is very powerful ;)
+ lisitsyn	we'd have to live with that but there is nothing free that is as good as it is
+ besser82	lisitsyn: expensive, because gcc preferes the cli-define over header-define and preprocessor needs to override that into every header. after that gcc needs to check whether all is still sane, ......
+ besser82	lisitsyn: use mingw from ECLIPSE  :D
+ lisitsyn	besser82: but that's like operating on a few sets of strings right?
+ besser82	lisitsyn: unfortunately no...
+ besser82	lisitsyn: much more complicated....
+ lisitsyn	well okay, probably I overlook some additional complexity here
+ besser82	lisitsyn: and the worst is: it bypasses ccaches
+ lisitsyn	but looks easy, any typical application does more advanced stuff and it doesn't take 15 minutes you know :)
+ besser82	lisitsyn, sonne|work: with the right setup I think, i can gain another 150% - 200% ; like getting it about da 10-times faster without ccaches
+ besser82	lisitsyn, sonne|work: and limiting the speed with ccaches to the output rate of your tty
+ sonne|work	this will save a few trees :)
+ besser82	lisitsyn, sonne|work: so one could build the whole stack with all(!!) modules within < 2 minutes on recent hw
+ besser82	lisitsyn: ever build libreoffice from sources?!?
+ besser82	lisitsyn: it's da 5|-|17
+ sonne|work	it is what?
+ besser82	sonne|work: shit
+ besser82	sonne|work: |_1ZZ4|2|)57`/|_3 you know?
+ besser82	sonne|work: lizzardstyle  ;)
+ sonne|work	heh
+ besser82	sonne|work: I usually use that to `crypt` swears in irc  ;)
+ besser82	sonne|work: as iglesiasg, he can read that, too  :D
+ besser82	s/as/&k/
+ besser82	lisitsyn: actually one can make compilation of every code blazingly fast with just some small, but additional work / steps
+@wiking	ok but basically the downplay of this is better use clang ;)
+ lisitsyn	besser82: yeah what about clang
+ lisitsyn	does it help with normal compiler?
+ besser82	wiking: the comeback is: better use brains on planning a project's build-sys.  :-P
+@wiking	besser82: noup
+@wiking	besser82: sorry but that gcc is not handling well .cpp and .h in the same place
+@wiking	it's really gcc specific
+ besser82	lisitsyn: I think there should be some speedup, too...
+@wiking	as u told yesterday
+ besser82	wiking: which compiler is more common && versatile? clang or gcc?
+@wiking	besser82: nowadays?
+@wiking	i would say llvm
+ lisitsyn	I'd say clang is better now
+ lisitsyn	:D
+@wiking	i mean sorry but since gcc went gpl3
+ besser82	wiking: what's wrong about that?
+@wiking	a lot of entities out there went on developing llvm
+@wiking	it's not that it's wrong or not
+@wiking	it's just the facts
+@wiking	llvm was nowhere when gcc was 4.2
+@wiking	and gpl2
+@wiking	and suddenly when gcc went gpl3
+@wiking	llvm boomed
+ sonne|work	coincidence
+@wiking	sonne|work: pure coincidence of course :)
+ besser82	wiking: but actually in most enterprise envs there is gcc
+ besser82	sonne|work: there no connection between that  :-P
+@wiking	besser82: u can roll llvm an a toaster
+ besser82	wiking: noup.  My 6502 doesn't like llvm  :(
+ besser82	wiking: but handles well with gcc  :-P
+ besser82	wiking: the comeback: if you need 8-bit you can't use llvm  :(
+ besser82	wiking: and with the right build-sys setup gcc perform as good as llvm / clang...
+@wiking	besser82: noup
+@wiking	besser82: have u really checked benchmarks of gcc vs clang?
+@wiking	sorry man but numbers are saying differently
+ besser82	wiking: no, because i heavily use gcc
+@wiking	besser82: and hence benchmarks doesnt matter i guess...
+ besser82	wiking: that's the redhat way for at least the next 2 yrs...
+@wiking	ok i really dont want to go into a relegious discussion
+ besser82	wiking: me neither; it's just the redhat-way for me, not more not less
+ lisitsyn	allah versus jesus haha
+@wiking	besser82: but redhat is just one player amongs so many
+ besser82	wiking: when redhat switches over to clang / llvm in fedora 24 - 26, i'll start using that  ;)
+@wiking	besser82: none of us is on redhat's payroll apart from maybe you
+ lisitsyn	as llvm is younger I'd say you are compiler-muslim, wiking
+@wiking	so we really dont give too much damn about rh or any other distrib
+ lisitsyn	:D
+@wiking	lisitsyn: heheheh
+ lisitsyn	and besser82 is like compiler-orthodox-christian
+@wiking	besser82: and dont get me wrong... it's a problem that we dont give a damn
+ besser82	wiking: it's all ok  :)  Use whatever you want  ;)
+ besser82	wiking: btw. i'm not on rh-payroll, too  ;)
+@wiking	but let's be honest, we all do this semipartime
+@wiking	so there's best efford
+@wiking	*effort
+ sonne|work	from what I've seen is that gcc generates faster code than clang...
+@wiking	sonne|work: depends. if u use openmp of course
+ lisitsyn	I measured same thing for tapkee
+ besser82	sonne|work: some actually say the different...
+ lisitsyn	clang was faster than gcc
+ sonne|work	this might not hold for long though
+@wiking	as clang is a shit with anything openmp related by far
+ lisitsyn	and intel c++ compiler was faster than both haha
+ sonne|work	no it was not
+ besser82	lisitsyn: no even close
+ lisitsyn	besser82: ehm have you done my experiments or what? :D
+@wiking	lisitsyn: let's start using intel c++ and optimmize everything for that :D
+ lisitsyn	I just say I got that numbers with my simple experiment haha
+ lisitsyn	why do you argue
+ besser82	lisitsyn, wiking: who pays the $$$$ for lincense?
+ lisitsyn	it is free for open source
+ lisitsyn	but doesn't matter
+ besser82	lisitsyn: i didnt want to argue  :D
+ besser82	lisitsyn: but real speed is archived with intel's proppy c[++]-lib and such....
+ lisitsyn	besser82: yeah as they know their cpus better
+ lisitsyn	that's perfectly clear
+ besser82	lisitsyn: with other means there wouldn't be much benefit with intel's cc
+ besser82	wiking, lisitsyn: actually every cc has it's pros and cons....
+@wiking	oh well neverming i'm back to my sweet jvm :D
+ lisitsyn	haha yeah
+ sonne|work	http://slashdot.org/topic/bi/speed-test-comparing-intel-c-gnu-c-and-llvm-clang-compilers/
+ lisitsyn	jvm is much better anyway
+ besser82	wiking, lisitsyn: but only the openJDK one  ;)
+ besser82	wiking, lisitsyn: who needs proppy stuff  :-P
+@wiking	besser82: of course i'm using oracle jdk :D
+ lisitsyn	besser82: no openjdk is the worst one
+ sonne|work	haha
+ lisitsyn	who needs slow java :D
+@wiking	openjdk is just a fucking mess
+ sonne|work	it is like emacs vs. vim
+ sonne|work	or fortran and C indexing
+ lisitsyn	oh emacs vs vim is solved
+ sonne|work	0 vs 1
+ sonne|work	haha
+ lisitsyn	they are both outdated
+ lisitsyn	:D
+@wiking	lisitsyn: :D
+ sonne|work	lisitsyn: you are too young!
+@wiking	sonne|work: noup he is actually right :D
+ lisitsyn	sonne|work: ohh it was true but I am getting older and older
+ besser82	sonne|work: let's collect some fundings and buy lisitsyn a C64 for christmas  :D
+ lisitsyn	some day I'll catch you
+ lisitsyn	who needs old shit, come on
+ sonne|work	lisitsyn: in my grave in my grave!
+ lisitsyn	sonne|work: one day we both become useless grandpas :D
+@wiking	lisitsyn: yeah i mean it's sooo fucking cool that you can run both of them on toaster... but come on, who the hell wants to develop on a toaster :P
+@wiking	for sure somebody now will raise their hand :P
+ besser82	wiking: is C64 more smart than toaster?!?
+@wiking	besser82: depends which  toaster
+ lisitsyn	SNOOOOOOOW
+@wiking	lisitsyn: how much? :)
+ lisitsyn	wiking: first time!
+@wiking	lisitsyn: we've got like 2cm on monday
+@wiking	lisitsyn: ah u r then slow :)
+ sonne|work	wiking: I would love to see a demo on a toaster
+ lisitsyn	wiking: yes stoopid slow winter
+@wiking	lisitsyn: you are soooooo day before yesterday's news :D
+ sonne|work	now the Siberian guys become awake!
+@wiking	sonne|work: http://www.embeddedarm.com/software/arm-netbsd-toaster.php
+ lisitsyn	sonne|work: finally I'll get more energy
+ lisitsyn	SNOOOOW
+ lisitsyn	haha
+ besser82	wiking: these guys are bored much too often  :)
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ besser82	real0m9.150s
+ besser82	user0m5.406s
+ besser82	sys0m2.214s
+ besser82	sonne|work, wiking:  ^^ current compile-time for libshogun from ccache  :D
+ besser82	sonne|work, wiking:  with serial make && gcc
+ sonne|work	besser82: excellent!
+ besser82	sonne|work: expect ~30 secs for the build with ALL lang-modules  ;)
+ besser82	real2m26.958s
+ besser82	user2m8.217s
+ besser82	sys0m15.631s
+ besser82	sonne|work, wiking:  ^^ without ccache, serial make, gcc
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 252 seconds]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+-!- besser82 [~besser82@77-20-95-52-dynip.superkabel.de] has joined #shogun
+-!- besser82 [~besser82@77-20-95-52-dynip.superkabel.de] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- sonne|osx [~sonne@89.204.138.143] has joined #shogun
+-!- sonne|osx [~sonne@89.204.138.143] has quit [Quit: sonne|osx]
+-!- new_lido_afk is now known as new_lido_bsy
+-!- new_lido_bsy [~walid@41.218.180.167] has quit [Ping timeout: 246 seconds]
+-!- sonne|osx [~sonne@f053041072.adsl.alicedsl.de] has joined #shogun
+ sonne|osx	besser82: time machine already invented?
+-!- sonne|osx [~sonne@f053041072.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+--- Log closed Fri Nov 29 00:00:45 2013

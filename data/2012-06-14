@@ -1,0 +1,537 @@
+--- Log opened Thu Jun 14 00:00:41 2012
+-!- heiko [~heiko@host86-183-72-166.range86-183.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-183-72-166.range86-183.btcentralplus.com] has quit [Ping timeout: 265 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection timed out]
+-!- emrecelikten [~Anubis@176.41.25.77] has joined #shogun
+-!- emrecelikten [~Anubis@176.41.25.77] has quit [Quit: Leaving.]
+-!- emrecelikten [~emrecelik@176.41.25.77] has joined #shogun
+-!- gsomix [~gsomix@188.168.5.148] has quit [Ping timeout: 240 seconds]
+-!- gsomix [~gsomix@188.168.5.148] has joined #shogun
+-!- emrecelikten1 [~emrecelik@176.40.254.205] has joined #shogun
+-!- emrecelikten [~emrecelik@176.41.25.77] has quit [Ping timeout: 245 seconds]
+-!- emrecelikten1 is now known as emrecelikten
+-!- emrecelikten [~emrecelik@176.40.254.205] has quit [Quit: Leaving.]
+-!- gsomix [~gsomix@188.168.5.148] has quit [Ping timeout: 244 seconds]
+-!- gsomix [~gsomix@188.168.5.148] has joined #shogun
+-!- vikram360 [~vikram360@117.192.163.180] has quit [Ping timeout: 248 seconds]
+-!- vikram360 [~vikram360@117.192.176.63] has joined #shogun
+-!- vikram360 [~vikram360@117.192.176.63] has quit [Ping timeout: 248 seconds]
+-!- vikram360 [~vikram360@117.192.175.104] has joined #shogun
+-!- wiking [~wiking@ip191.67-202-72.static.steadfastdns.net] has joined #shogun
+-!- wiking [~wiking@ip191.67-202-72.static.steadfastdns.net] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- vikram360 [~vikram360@117.192.175.104] has quit [Ping timeout: 244 seconds]
+-!- vikram360 [~vikram360@117.192.175.104] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 265 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- vikram360 [~vikram360@117.192.175.104] has quit [Read error: Connection reset by peer]
+-!- vikram360 [~vikram360@117.192.175.104] has joined #shogun
+-!- gsomix [~gsomix@188.168.5.148] has quit [Ping timeout: 246 seconds]
+-!- gsomix [~gsomix@188.168.5.148] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:5c39:53a4:ae34:8c40] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- gsomix [~gsomix@188.168.5.148] has quit [Ping timeout: 265 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- heiko1 [~heiko@host86-181-80-133.range86-181.btcentralplus.com] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- vikram360 [~vikram360@117.192.175.104] has quit [Ping timeout: 240 seconds]
+ n4nd0	uricamic: hi! how is it going?
+ uricamic	hi n4nd0
+ uricamic	I have noticed that you have done some changes in the so framework
+ n4nd0	yes, I had a discussion with Nico, he didn't support the design separated into classes different classes for the argmax, the loss, etc
+ n4nd0	uricamic: does the change affects you a lot?
+ uricamic	ok, in that case I think the class for the Risk function is not necessary and it would be better to provide the risk function in the same way as you did it with argmax, etc.
+ n4nd0	yes
+-!- vikram360 [~vikram360@117.192.175.104] has joined #shogun
+ n4nd0	but at first sight it shouldn't be problematic right?
+ n4nd0	I mean if you have some implementation already done in a risk function class
+ n4nd0	what we should do is
+ n4nd0	1) add a method for the risk function in CStructuredModel
+ n4nd0	2) the computation of the risk you may have done is moved to a class that inherits from CStructuredModel
+ n4nd0	do you agree?
+ uricamic	yes, I agree, the computation of the risk will be provided only in some examples, for example you are now working on the multiclass classifier, I can easily extend this example with the possibility to use dual BM solver instead of the primal one
+ uricamic	so, I can write the implementation of the risk function for the multiclass classifier
+ uricamic	now I just need some of your pieces of so framework to be pushed into shogun, then I will be able to create some examples, and so on
+ n4nd0	ok
+ n4nd0	aobut the multiclass classification example
+ n4nd0	I would like to ask you about it
+ n4nd0	since my results are pretty bad right now
+ n4nd0	i.e. there must be something wrong :D
+ uricamic	ok
+ uricamic	I will look for my implementation of risk function etc. in matlab
+ n4nd0	so I wonder if the election of the matrix C can be the problem
+ n4nd0	is this important?
+ n4nd0	right now I am just using the identity matrix
+ uricamic	C is the regularizer?
+ n4nd0	yes
+ n4nd0	it is the matrix in the quadratic term of the optimization problem
+ uricamic	well, I was using just a single regularization constant
+ n4nd0	mmm
+ uricamic	I think for the BMRM it is possible to use such matrix also, but then one needs to compute the inverse of this matrix
+ n4nd0	I am just thinking how I should input it to mosek then
+ n4nd0	the problem in mosek is formulated as
+ n4nd0	0.5?x'Q^0?x
+ n4nd0	Q^0 is all zeros except the left-top most part
+ n4nd0	that is the regularizer C
+ n4nd0	if I want to input a constant, then I guess I have to give a matrix of all terms equal?
+ n4nd0	or a diagonal matrix?
+ n4nd0	do you see what I mean?
+ uricamic	yep, but I need to see the definition of the problem in mosek
+ n4nd0	ok, I am sending it to you
+ n4nd0	http://docs.mosek.com/6.0/capi/node007.html#329747704
+ uricamic	I think it should be diagonal
+ n4nd0	ok
+ n4nd0	so probably to use the identity matrix is not the problem
+ uricamic	it shouldn't be, but it is important to choose some reasonable value of the regularization constant
+ n4nd0	how does one choose a reasonable value?
+ uricamic	e.g. split training data to 3 parts, 1 part will be training on which you will try several values of this constant, like 1e-3, 1e-2, ... the next part will be validation, on which you will find out which regularization constant performs best on your data and the last one is for testing purposes, where you will use the classifier trained with the "optimal " regularizer
+ n4nd0	ok, like using cross validation then
+ uricamic	yep, exactly
+ uricamic	so for you it is sufficient now just to have 2 parts - one for training and the other one for validation of the regularization constant
+ n4nd0	ok
+ uricamic	you will train the classifier with all regularization constants from you set and then according to the value of the objective function computed on the validation data you will select the regularizer which minimizes this
+ n4nd0	I will read again the code first though, just in case I can find any bug
+ uricamic	ok, sure
+ n4nd0	I think that the results are pretty bad, I thought they should look better even if I am not performing cross validation
+ uricamic	I will have to go away for approx. 1 hour
+ uricamic	everything depends on the value of the regularization constant
+ uricamic	if it is e.g. too high, then the results can be really bad
+ n4nd0	aham
+ n4nd0	I will try with other values then as well
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 265 seconds]
+-!- vikram360 [~vikram360@117.192.175.104] has quit [Ping timeout: 244 seconds]
+-!- heiko1 [~heiko@host86-181-80-133.range86-181.btcentralplus.com] has quit [Ping timeout: 265 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- nicococo [~nico@lacedcoffee.ml.tu-berlin.de] has joined #shogun
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+ cronor	How can I enable debug output in Python? I get: terminate called after throwing an instance of 'shogun::ShogunException'
+ n4nd0	cronor: hi
+ n4nd0	cronor: you should run ./configure --enable-debug and re-compile shogun
+-!- blackburn [d5578d4d@gateway/web/freenode/ip.213.87.141.77] has joined #shogun
+ nicococo	n4nd0: hi there
+ n4nd0	nicococo: hey
+ nicococo	so, the example is working, you wrote?
+ n4nd0	nicococo: but the results are not good
+ blackburn	hey I am a bit lost last days
+ blackburn	:D
+ blackburn	n4nd0: does everything go ok? :)
+ n4nd0	I am going to try with different values for the regularization C
+ nicococo	n4nd0: thats a good idea.. they should have comparable results
+ n4nd0	blackburn: so so, I keep on working :)
+ n4nd0	nicococo: as I told you, I am just using C = I, is that a good election?
+ n4nd0	blackburn: done with your thesis and exams?
+ blackburn	n4nd0: just had hmm lets say pre-defence talk :)
+ n4nd0	blackburn: all right
+ blackburn	yesterday passed my exam about everything
+ n4nd0	blackburn: I bet you'll defend it good
+ n4nd0	nice, congrats
+ nicococo	yes, thats fine.. if you want to change the regularization just multiply the constant with the identity matrix R = reg*I
+ blackburn	thanks
+-!- vikram360 [~vikram360@117.192.175.104] has joined #shogun
+ n4nd0	nicococo: any good intuition for a value for reg?
+ nicococo	1 ;)
+ n4nd0	well
+ n4nd0	that is to use the identity matrix right?
+ nicococo	take the same as for the other method
+ n4nd0	that is what I was doing and getting bad results
+ n4nd0	the other method?
+ nicococo	one-vs-rest svm
+ nicococo	is the formulation of the 1-vs-rest svm with or without biad term?
+ nicococo	ops.. bias term
+ blackburn	gmnp should support bias
+ blackburn	not regularized - true bias I mean
+ n4nd0	with bias
+ n4nd0	blackburn: I am using liblinear
+ nicococo	that would be a reason.. we are currently not using a bias term, right?
+ blackburn	n4nd0: multiclassliblinear?
+ n4nd0	blackburn: no, one vs rest strategy built with liblinear
+ blackburn	ahh
+ blackburn	ok
+ n4nd0	blackburn: but those results are ok, perfect
+ n4nd0	it is multiclass so what fails
+ n4nd0	so my bad
+ blackburn	I understand
+ blackburn	I just wanted to say composition of liblinears won't exactly coincide
+ n4nd0	blackburn: ok, thank you :)
+ n4nd0	I don't think that is exactly the problem now though
+ blackburn	yeah got it
+ n4nd0	blackburn: why are the two different Cs in LibLinear btw?
+ blackburn	n4nd0: pos / neg
+ n4nd0	aham, all right
+ n4nd0	nicococo: it is set to 1 as well
+ blackburn	allows you to balance a little
+ n4nd0	nicococo: so there must be some bugs in the code definetely
+ blackburn	e.g. if you have 10 pos and 10000000 negs
+ blackburn	:)
+ n4nd0	blackburn: yeah, I guess it can be good for applications with skewed training data
+ n4nd0	blackburn: exactly
+ n4nd0	nicococo: so it seems that the bias was playing an important role
+ n4nd0	nicococo: now the results of one-vs-rest are bad too
+ n4nd0	but still, they are very different
+ n4nd0	nicococo: https://dl.dropbox.com/u/11020840/results
+ n4nd0	if you want to see the results ^
+ nicococo	i would suggest to use c=2 classes .. the code looks okay to me
+ n4nd0	the first column is so-multiclass and the second one-vs-rest
+-!- pluskid [~pluskid@202.130.113.138] has joined #shogun
+ n4nd0	and at the beginning of each line is a number for the index of the training example that has no use :D
+ nicococo	seems that there are only two classes assigned (9 and 4)
+ n4nd0	nicococo: oh wait
+ n4nd0	nicococo: it looks that they are not using the same labeling or something, what I find pretty weird
+ n4nd0	but with an example for 2 classes
+ n4nd0	thre results are entirely swapped
+ nicococo	swapped means that sosvm delivers 1-vs-r-svm result *(-1) ??
+ n4nd0	yeah
+ n4nd0	nicococo: https://dl.dropbox.com/u/11020840/results
+ nicococo	did you assign -1 and +1 classes the right way for 1-vs-rest (seems that you swapped these classes)
+ n4nd0	nicococo: I just used some code in shogun for one-vs-rest, let me check
+ n4nd0	nicococo: eeeh in the last file I sent everything looks all right
+ n4nd0	ok
+ n4nd0	I have executed several times and it looks good
+ n4nd0	for two classes
+ nicococo	ok.
+ nicococo	do both algorithm train on the very same (same same) data (not just same distribution)
+ n4nd0	I am using the same same data
+ nicococo	and you test on the train set
+ n4nd0	nicococo: do you want to use the come for the example?
+ n4nd0	yes, I am testing in the training test
+ nicococo	then you also have corresponding slack variables.. right
+ n4nd0	corresponding?
+ nicococo	for each training example exist one slack variable
+ n4nd0	in sosvm we're doing it like that yes
+ n4nd0	I am not sure about one-vs-rest
+ n4nd0	I am using the primal for it
+ nicococo	not important.. but you can plot::    id: true_class pred_class slack for each example
+ n4nd0	the slack in sosvm?
+ nicococo	yes
+ n4nd0	what do you want me to print associated to each class exactly?
+ n4nd0	the variable introduced in the optimization vector for each training example?
+ nicococo	the outcome of the optimization is a vector x containing the w_i and slack_n  n=1..#train_exmaple
+ n4nd0	yes
+ nicococo	hence, for each example you have the true class, the predicted class and the slack-value.. if you print this information instead of just id: pred_class we probably see more whats going on
+ nicococo	when 90% of the example have a slack >0 we can assume that the regularization-value is too restrictive
+ n4nd0	aham, good idea
+ n4nd0	let me do that then
+ n4nd0	nicococo: we should use the slacks of the last time the optimization problem is solved?
+ n4nd0	with use I mean to print them on screen
+ nicococo	yes
+ n4nd0	nicococo: but one thing
+ n4nd0	so we are doing
+ n4nd0	min w'*C*w + sum_i slack_i
+ n4nd0	right?
+ nicococo	jep
+ nicococo	0.5w'Cw ...
+ n4nd0	yeah
+ n4nd0	ok sorry, I thought one thing wrong :D
+ n4nd0	anyway
+ n4nd0	right now I get that all the slacks are equal to zero
+ n4nd0	I am going to check more carefully
+ nicococo	if they are zero then there shouldn't be any wrong label assignment
+ n4nd0	true
+ cronor	Why is there no module Labels? i.e. I have to from shogun.Features import RegressionLabels, why not from shogun.Labels import RegressionLabels?
+ n4nd0	cronor: they are in features
+ n4nd0	cronor: the labels were placed inside this directory
+ n4nd0	cronor: the creation of the labels directory is somewhat new and regarding the modules they remain in the same place so far
+ cronor	ah ok
+ n4nd0	nicococo: so the slacks were not exactly but most of them are very small
+ n4nd0	about e-11
+ nicococo	and the predicted labels == training labels?
+ cronor	n4nd0: I recompiled shogun with --enable-debug. How can I enable debug output now? I don't' see any debug messages so far
+-!- emrecelikten [~emre@176.40.254.205] has joined #shogun
+ n4nd0	nicococo: for the two class problem yes, https://dl.dropbox.com/u/11020840/results
+ n4nd0	nicococo: the order there is true label, predicted label, slack
+ n4nd0	cronor: I think you have to set the debug level somewhere too
+ n4nd0	blackburn: do you know how it works exactly?
+ nicococo	well, seems to work pretty good.. now the multiclass example
+ n4nd0	blackburn: cronor is trying to see the debug messages from python
+ cronor	I saw .io.set_loglevel(..) but what do i fill in?
+ n4nd0	nicococo: for three clases it looks pretty bad :( https://dl.dropbox.com/u/11020840/results
+ n4nd0	cronor: I am not totally sure because I have never used this functionality
+ n4nd0	cronor: but, set_loglevel accepts an EMessageType
+ cronor	from shogun.Regression import MSG_DEBUG; ...io.set_loglevel(MSG_DEBUG) could be possible
+ n4nd0	cronor: http://www.shogun-toolbox.org/doc/en/current/namespaceshogun.html#ad2ca0a3c84404274f8bfaa618869fdf9
+ n4nd0	these ^ are the possible values of EMessageType
+ cronor	i'll ty
+ cronor	try
+ n4nd0	but better check it in the code since the doc may not be updated
+ nicococo	n4nd0: back in 1h..
+ n4nd0	nicococo: any clue about this?
+ blackburn	+uh
+ blackburn	n4nd0: okay shogun.Anything is just for legacy
+ blackburn	it is setup somewhere in python modular iirc
+ blackburn	set up*
+ n4nd0	yeah
+ n4nd0	the doubt was more related about the debug messages
+ n4nd0	but I think cronor figured it out already
+ blackburn	ah sorry
+ cronor	yes i have debug output now
+ blackburn	I was asleep actually so just woke up with that msg sound :D
+ n4nd0	haha
+ n4nd0	I am sorry I woke you man
+ blackburn	no problem I shouldn't be asleep I think :)
+ pluskid	hi boys
+ n4nd0	hey
+ pluskid	is there any lib in shogun if I want to use gradient descent to solve an optimization problem?
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+ n4nd0	I don't know about that :S
+ pluskid	blackburn: any suggestion?
+ blackburn	pluskid: in shogun?
+ pluskid	blackburn: yes, one of the algorithm needs a gradient descent in a step
+ pluskid	actually, it is using the "Nesterov's accelerated gradient method", but I guess ordinary gradient descent might also work
+ blackburn	huh no I don't think we have something here
+ blackburn	I port some code from SLEP that is based on Nesterov's method but I don't think it is helpful..
+ wiking	asdf!@$%
+ cronor	I get a shogun Exception when I use MKLRegression.apply(). Training works fine. I can't find the error. Can someone check the debug output: http://pastebin.com/5Wp6emf0 ?
+ pluskid	so do you guys know there are some 3rd party libraries usable for my case?
+ pluskid	n4nd0: I heard you are using an optimization library
+ pluskid	what's it for?
+ pluskid	is it specifically for convex optimization? or more general?
+ blackburn	pluskid: what is type of problem you solve?
+ n4nd0	pluskid: I am using mosek to solve a QP
+ pluskid	it IS convex I guess
+ n4nd0	pluskid: I am not sure if they have methods for non-convex problems
+ pluskid	hmm, seems to be convex but not QP
+ n4nd0	pluskid: what?
+ pluskid	my problem
+ n4nd0	your problem?
+ n4nd0	ok
+ pluskid	from ShareBoost
+ n4nd0	but mosek can be used for more apart from QP
+ n4nd0	how does the problem look like?
+ pluskid	a little bit complicated, log \sum exp (blah blah)
+ pluskid	maybe I should look at mosek
+ nicococo	pluskid: log-sum-exp is a convex funktion.
+ pluskid	nicococo: ah, ok
+ pluskid	and thanks!
+ pluskid	then I guess mosek can handle this if it handles general convex problem
+ nicococo	i think mosek won't help but it is a smooth function therefore quasi-newton methods
+ nicococo	would fit nice
+ pluskid	nicococo: should I implement quasi-newton myself or use some library?
+ blackburn	generally I'd like to avoid mosek here if you can implement some (even a little worse) method by yourself
+ nicococo	use some library, i think there are open source implementations
+ pluskid	OK, I see
+ pluskid	I'll google for that
+ pluskid	or do you already know some famous or standard open source lib for this?
+ nicococo	mmhh.. sorry, i just use code snippets flying around my harddrive..
+ pluskid	hmm, thanks anyway
+ nicococo	but lookout for l-bfgs.. i guess they are implemented more or less the same (have a look at marc schmidts homepage .. http://www.di.ens.fr/~mschmidt/)
+-!- blackburn [d5578d4d@gateway/web/freenode/ip.213.87.141.77] has quit [Quit: Page closed]
+ pluskid	ok
+ pluskid	seems most of his codes are for matlab?
+ nicococo	ahh.. yes.. sorry.. we like c++  , i sometimes forget this ;)
+ pluskid	:D
+-!- pluskid [~pluskid@202.130.113.138] has quit [Quit: Leaving]
+ n4nd0	nicococo: do you know if there is another implementation of the SO framework similar to  what we have done so far?
+ n4nd0	I think it could be useful to find the bugs
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric_	hi
+ nicococo	n4nd0: the hmsvm toolbox (from mloss.org) is quite similar
+ n4nd0	nicococo: aham, I thought it was exclusively for hmsvm
+ ckwidmer	hi
+ ckwidmer	anyone here?
+ n4nd0	ckwidmer: yes
+ ckwidmer	what's the new speak for labels->get_labels() for the current design?
+ ckwidmer	cplex is still broken
+ ckwidmer	trying to fix cplex svm
+ ckwidmer	I haven't followed too closely how the new label classes work
+ n4nd0	I am not sure what you mean with new speak :S
+ n4nd0	probably my bad
+ ckwidmer	how to express it now
+ nicococo	n4nd0: yes, but the solver is still the same.. otherwise i don't know any implementation of multi-class in so-manner
+ ckwidmer	what was it replaced by
+ nicococo	hi chrissss.
+ ckwidmer	hi nicocococococo
+ ckwidmer	coco
+-!- heiko [~heiko@host86-181-80-133.range86-181.btcentralplus.com] has joined #shogun
+ ckwidmer	n4nd0, any idea?
+ n4nd0	ckwidmer: so now there's no get_labels in the base Labels class
+ n4nd0	ckwidmer: but I guess you are probably using it for something that needs DenseLabels?
+ n4nd0	then get_labels should work just fine
+ ckwidmer	ah
+ ckwidmer	so, all the other SVMs use DenseLabels?
+ n4nd0	so maybe you just need to do an explicit casting
+ n4nd0	we have StructuredLabels, BinaryLabels and MulticlassLabels
+ n4nd0	and it looks like this
+ n4nd0	Labels <--- StructuredLabels
+ n4nd0	Labels <--- DenseLabels
+ n4nd0	DenseLabels <--- BinaryLabels
+ n4nd0	DenseLabels <--- MulticlassLabels
+ ckwidmer	and are binary labels actually binary
+ ckwidmer	as in 0 and 1
+ ckwidmer	or int
+ n4nd0	-1 and 1
+ ckwidmer	or can I get floats from them
+ ckwidmer	ok
+ n4nd0	internally are stored with float64_t
+ ckwidmer	so for predictions
+ ckwidmer	which output scores
+ ckwidmer	I use BinaryLabels?
+ n4nd0	maybe RegressionLabels?
+ n4nd0	I forgot to tell you about those :O
+ ckwidmer	okok
+ n4nd0	DenseLabel <--- RegressionLabels
+ ckwidmer	so even svm *classifiers* output regression labels then?
+-!- uricamic [~uricamic@2001:718:2:1634:5c39:53a4:ae34:8c40] has quit [Quit: Leaving.]
+ n4nd0	it depends I think
+ n4nd0	in the problem you want to solve
+ n4nd0	I would say that most of them return BinaryLabels
+ ckwidmer	but what if you don't want the sign(output), but rather output?
+ n4nd0	then I think you have to look to something different, not to the labels
+ n4nd0	let me check if I see it
+ n4nd0	mmm maybe you can get the weight vector after training and just perform the product?
+ n4nd0	I wonder if that can turn out to be too tedious
+ ckwidmer	ah, it's ok for now
+ ckwidmer	do you know what happened to SGMatrix?
+ n4nd0	what do you mean?
+ ckwidmer	seems there were some changes
+ n4nd0	I know that a bunch of methods from CMath where moved to SGMatrix and SGVector
+ ckwidmer	e.g. H.destroy_matrix(); seems to be gone
+-!- vikram360 [~vikram360@117.192.175.104] has quit [Ping timeout: 244 seconds]
+ n4nd0	aham
+ n4nd0	I think they are not required any more
+ n4nd0	if you just create your matrix using true in the constructor
+ ckwidmer	great :)
+ n4nd0	what's done by default
+ n4nd0	then it will be "automagically" dereferenced
+-!- vikram360 [~vikram360@117.192.168.146] has joined #shogun
+ n4nd0	if you want to it similar to how it used to be, then you should use free_data
+ n4nd0	I think this change comes from the introduction of SGReferencedData, a base class for SGVector and SGMatrix
+ n4nd0	nicococo: I am just thinking how we can debug the method effectively
+ nicococo	n4nd0: so the two-class problem works (which is a great indicator) lets try the multi-class again.. check, the slacks and select the regularization .. i have to go now, but tomorrow we can discuss the results. if it is still not convincing we have to dive deeper
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- nicococo [~nico@lacedcoffee.ml.tu-berlin.de] has left #shogun []
+ ckwidmer	n4nd0, I fixed a few problems with cplex dependent classes and made a pull request
+ ckwidmer	there are still problems left in SubGradientLPM, which need to be fixed (adjusting to the new label design)
+ ckwidmer	could you please take a look?
+-!- heiko [~heiko@host86-181-80-133.range86-181.btcentralplus.com] has left #shogun []
+ n4nd0	ckwidmer: sorry I am half-absent
+ n4nd0	ckwidmer: to the pull request or to the other problems to be fixed?
+ ckwidmer	ideally both :)
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+ n4nd0	I have not power to merge pull requests so let's leave that to blackburn or sonney2k
+ n4nd0	I am not proffesional :P
+ n4nd0	and what are the problems with SubGradienLPM? at least it should compile, right?
+ ckwidmer	doesn
+ ckwidmer	t
+ ckwidmer	compile unfortunately
+ ckwidmer	there are problems with get_labels all over the place
+ ckwidmer	not a biggie
+ ckwidmer	but needs to be fixed
+ ckwidmer	is sonney2k around today?
+ n4nd0	I think he is a bit off these last days
+ ckwidmer	ok
+ n4nd0	ckwidmer: is it only in SubGradientLPM where the compilation with cplex enabled fails or also in other parts?
+ ckwidmer	as far as I can tell, it's the only problem left
+ ckwidmer	I fixed two other problems
+ ckwidmer	in CPLEXSVM
+ ckwidmer	and LPM
+ n4nd0	I am saying it because it would be nice to have all these fixes together in a pull request
+ n4nd0	and in any case, how do you manage to continue with the work if the compilation still fails?
+ ckwidmer	well
+ ckwidmer	disable cplex
+ ckwidmer	;)
+ puffin444	Hey is it better to submit a pull request and ask about small changes to the submitted code, or would it be better to ask them beforehand?
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has quit [Ping timeout: 245 seconds]
+-!- vikram360 [~vikram360@117.192.168.146] has quit [Ping timeout: 240 seconds]
+ n4nd0	puffin444: when they are small details I normally send it and just comment about them
+ n4nd0	but maybe that is not the right way :P
+ puffin444	okay
+ puffin444	I think it would help if people had the code to look at.
+ puffin444	Which would be available in a pull request.
+ n4nd0	sure
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 244 seconds]
+ CIA-18	shogun: Soeren Sonnenburg master * r5477eb7 / (3 files in 2 dirs): Merge pull request #584 from cwidmer/master - http://git.io/oMXCUA
+ CIA-18	shogun: Christian Widmer master * r33a2582 / (3 files in 2 dirs): fixed a few problems with the new label architecture in CPLEX dependent classes - http://git.io/hHQc2Q
+@sonney2k	puffin444, I don't understand the question
+ puffin444	sonney2k, I have a chunk of code ready to be pulled into the main branch. I have some questions about some details, and I wonder whether I should ask them in the pull request or before submitting the request.
+@sonney2k	puffin444, as you wish
+@sonney2k	doesn't make a difference
+ puffin444	ok.
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Quit: Page closed]
+ shogun-buildbot_	build #932 of r_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/932  blamelist: sonne@debian.org
+ shogun-buildbot_	build #843 of octave_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/843  blamelist: sonne@debian.org
+-!- gsomix [~gsomix@109.169.156.50] has joined #shogun
+ gsomix	hi all
+@sonney2k	hi gsomix
+ gsomix	philosophy - passed
+ gsomix	time to work
+-!- vikram360 [~vikram360@117.192.171.39] has joined #shogun
+-!- vikram360 [~vikram360@117.192.171.39] has quit [Ping timeout: 244 seconds]
+ shogun-buildbot_	build #626 of octave_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/626
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Ping timeout: 244 seconds]
+ shogun-buildbot_	build #613 of csharp_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/csharp_modular/builds/613
+ shogun-buildbot_	build #601 of lua_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/lua_modular/builds/601  blamelist: cwidmer@tuebingen.mpg.de
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+@sonney2k	ckwidmer, does it compile w/ cplex now?
+ ckwidmer	sonney2k, there are still a few problems with CLabels, I asked n4nd0 to take care of them
+ ckwidmer	sonney2k, have you recently disabled cplex?
+ ckwidmer	there were quite a few problems with it
+ ckwidmer	since changes were made to labels
+@sonney2k	ckwidmer, disabled? no.
+@sonney2k	no one has cplex so we don't know if it works
+ ckwidmer	ok, so you don't have it either
+ ckwidmer	that's where i was going
+ ckwidmer	I guess one of the students should have it enabled
+ ckwidmer	to catch all the regressions in cplex dependent classes
+ ckwidmer	it's apparently free for academic use
+ ckwidmer	I wasn't using it myself, but marius wanted to use LPBoost
+@sonney2k	ckwidmer, anyway we didn't change anything that would make it hard to fix
+@sonney2k	only Labels got split up
+ ckwidmer	true
+@sonney2k	and functions from CMath moved to reasonable places
+ ckwidmer	but there is nothing wrong with checking if it still compiles
+ ckwidmer	it's certainly not hard to fix
+ ckwidmer	but was broken
+@sonney2k	ckwidmer, sure bot none of us has cplex so we cannot
+ ckwidmer	I understand, but it might be worthwhile to have one of the students install it (it's free)
+@sonney2k	ckwidmer, they are all busy...
+ ckwidmer	well, I guess then cplex is broken
+@sonney2k	ckwidmer, I wouldn't even mind removing that crap
+ ckwidmer	me neighter
+ ckwidmer	neither
+ ckwidmer	I guess LPBoost could be solved using GLPK anyway
+ ckwidmer	right?
+@sonney2k	just slow :D
+ ckwidmer	heh, yeah maybe
+@sonney2k	LPBoost == LPM == SVM with L1 norm regularizer
+@sonney2k	ckwidmer, well it uses hotstarts...
+ ckwidmer	ah
+ ckwidmer	and GLPK doesn't support that?
+@sonney2k	exaclty
+ ckwidmer	I mean, I don't really use any of that
+ ckwidmer	I know Marius needs LPBoost
+@sonney2k	I think liblinear has that too
+ ckwidmer	about the other Cplex dependent stuff, I don't care at all
+@sonney2k	not so sure
+ ckwidmer	I just think that if you choose to keep it in there
+ ckwidmer	it should at least compile
+@sonney2k	well if someone complains we can fix the errors one by one
+@sonney2k	otherwise there is nothing we can do
+ ckwidmer	hmmm
+ ckwidmer	don't you have a build server?
+@sonney2k	yes
+@sonney2k	but it will only ever run oss
+ ckwidmer	so, why not install cplex there
+ ckwidmer	but it would help to catch your errors
+ ckwidmer	if no one else has it installed
+ ckwidmer	in the end, it's up to you
+ ckwidmer	I think it's bad to deliver software that is sure to break if a particular tool is installed
+ ckwidmer	no if cplex is not maintained, at least disable it by default
+@sonney2k	well then fix it if you care so much :)
+@sonney2k	it is just a matter of resources...
+ ckwidmer	I don't really care that much :P
+ ckwidmer	yeah, ok
+ ckwidmer	then it should be disabled
+ ckwidmer	or checked automatically
+ ckwidmer	on a different note
+ ckwidmer	is there a sparse matrix class in shogun?
+@sonney2k	yes
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has quit [Ping timeout: 245 seconds]
+-!- gsomix [~gsomix@109.169.156.50] has quit [Ping timeout: 245 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has left #shogun []
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	sonney2k: hi there
+-!- cronor [~cronor@e178178115.adsl.alicedsl.de] has joined #shogun
+--- Log closed Fri Jun 15 00:00:41 2012

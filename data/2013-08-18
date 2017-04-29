@@ -1,0 +1,252 @@
+--- Log opened Sun Aug 18 00:00:20 2013
+-!- Heiko [5accf27c@gateway/web/freenode/ip.90.204.242.124] has joined #shogun
+ Heiko	lisitsyn: hey!
+ lisitsyn	Heiko: hey again :)
+ Heiko	how is it going?
+ lisitsyn	still ok ;)
+ lisitsyn	Heiko: I was kind of researching 'parameters' thing
+ Heiko	you mean how shogun parameters?
+ lisitsyn	I'd say I have been doing that for a while though
+ lisitsyn	not really shogun but paraemeters in general
+ Heiko	ok you mean how to register etc?
+ lisitsyn	Heiko: what I came with is https://github.com/lisitsyn/stichwort
+ Heiko	getter setter
+ lisitsyn	yes more in this direction
+ Heiko	sweet stichwort :)
+ lisitsyn	Heiko: I broke my mind with casting idea - wanted to make it support implicit casts
+ lisitsyn	like you assign keyword to int and get float
+ Heiko	ah sweet that looks nice!
+ Heiko	are there some more examples?
+ lisitsyn	Heiko: not yet
+ lisitsyn	well I added some unit-tests to be sure it works
+ Heiko	ravis fails
+ lisitsyn	Heiko: the workflow with that thing is
+ lisitsyn	I know
+ lisitsyn	I have C++11 issues :D
+ lisitsyn	so you define keyword
+ lisitsyn	Keyword<double> width("width", 10.0);
+ lisitsyn	then you define function
+ hushell	wiking: Does 'sudo make install' need to be executed before ctest?
+ lisitsyn	hmm say
+ Heiko	lisitsyn: so this uses maps internally?
+ lisitsyn	bool train(Parameters ps);
+ lisitsyn	you obtain the provided value with ps[width]
+ lisitsyn	and call the function with
+ lisitsyn	train({width=3.0})
+ lisitsyn	Heiko: well it uses more C++ than I ever knew about :D
+ Heiko	looks quite nice, why is not not yet in shogun?
+ lisitsyn	Heiko: I guess it is crazy slow
+ lisitsyn	Heiko: the main challenge with it is I try to keep the Parameter class non-templated
+ lisitsyn	Parameter = Keyword<T> + T
+ lisitsyn	i.e. width = 3.0 is the instance of Parameter
+ lisitsyn	that uses some internal shit underneath
+ lisitsyn	:D
+ Heiko	sweet
+ Heiko	speed is a concern though
+ Heiko	setters should be fast
+ lisitsyn	no that doesn't solve setters problem
+ lisitsyn	as it has nothing to do with swig
+ Heiko	ah ok
+ Heiko	cool stuff though
+ Heiko	c++11 is really cool
+ lisitsyn	Heiko: actually it worked with older C++
+ Heiko	finally one gets the syntactic stuff that one wants and that is possible to offer
+ lisitsyn	the only difference was
+ lisitsyn	train(kwargs[width=3.0])
+ lisitsyn	not a big deal
+ lisitsyn	Heiko: {} is possible due to std::initializer_list
+ lisitsyn	Heiko: you may find std::optional<T> convenient too btw
+ lisitsyn	but it is C++14 :D
+ lisitsyn	lol
+ lisitsyn	I pushed DIY version of it to my code though
+ Heiko	lisitsyn: cool!
+ lisitsyn	Heiko: std::optional is used to represent a value that might not be present
+ lisitsyn	so you don't have to deal with pointers or whatever
+ Heiko	lisitsyn: wow I wonder how you cam eup with all this cool stuff
+ Heiko	very nice
+ lisitsyn	Heiko: what exactly?
+ Heiko	so how can we get rid of pointers in shogun?
+ Heiko	:D
+ lisitsyn	Heiko: no pointers are inside of shogun due to very OOP design
+ Heiko	?
+ lisitsyn	a lot of related objects
+ lisitsyn	Heiko: what's the deal with pointers btw? :)
+ lisitsyn	do you mean raw pointers we have?
+ Heiko	yeah
+ lisitsyn	shared_ptr :)
+-!- iglesiasg [~iglesias@89-77-4-38.dynamic.chello.pl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has left #shogun []
+ lisitsyn	Heiko: we have to find a solution for setters/getters
+ Heiko	lisitsyn: would be nice
+ lisitsyn	Heiko: I hate them! :D
+ Heiko	lisitsyn: btw I would still drop the grid-search things
+ Heiko	yeah would be so nice
+ Heiko	in particular for modular bindings
+ lisitsyn	Heiko: each time I find a way it breaks with something else
+ Heiko	although I guess proper examples which illustrate real problems would cause us to write all getters we need )
+ Heiko	lisitsyn: I am counting on you!
+ lisitsyn	Heiko: in python we might have svm.parameter(width=3)
+ lisitsyn	as keywords can be converted to strings
+ Heiko	should have something for all languages
+ lisitsyn	and they are not to be defined anywhere
+ lisitsyn	but this fails for java
+ Heiko	I think its not a good idea to do things specific to single languages
+ lisitsyn	most of things fail for java
+ lisitsyn	yes totally bad idea
+ Heiko	what about using strings?
+ Heiko	is this too slow?
+ lisitsyn	that's ok
+ Heiko	say we have a c backend for it
+ lisitsyn	well a bit slower
+ lisitsyn	we have other problem here
+ Heiko	question is does it matter if its slow?
+ Heiko	which is?
+ lisitsyn	how to get the type :D
+ lisitsyn	just think about the declaration of such a function
+ lisitsyn	? parameter(const std::string& name);
+ Heiko	we have a parameter type
+ Heiko	TSGDatetype
+ lisitsyn	okay lets have
+ Heiko	its possible to match things maybe
+ lisitsyn	Parameter parameter(const std::string& name)
+ lisitsyn	the problem is I don't see a way to go from
+ lisitsyn	Parameter
+ lisitsyn	to say double
+ lisitsyn	getDouble();
+ lisitsyn	that's the only way I see
+ lisitsyn	Heiko: that's essentially the same problem I met in that stichwort
+ Heiko	yeah true, I ea it could be solved with runtime errors
+ Heiko	user can call the method which exist for everything
+ Heiko	and then if types dont match there is an error
+ lisitsyn	I was stucked with no possible virtual template methods
+ lisitsyn	:D
+ lisitsyn	Heiko: I don't mind such way to do that
+ Heiko	lisitsyn: ah I dont know
+ lisitsyn	no I mean runtime errors
+ lisitsyn	I am ok with them
+ Heiko	lisitsyn: did you see my suggestion for the obtain from generic thing?
+ Heiko	lisitsyn: almost the only way (runtime errors)
+ lisitsyn	auto generate things?
+ Heiko	lisitsyn: yeah
+ lisitsyn	yes
+ lisitsyn	that's the same wall
+ lisitsyn	runtime vs compile-time
+ lisitsyn	Heiko: swig obsoletes CRTP so no static polymorphism for us :(
+ Heiko	lisitsyn: but the idea should work, no?
+ lisitsyn	yes sure
+ lisitsyn	Heiko: what you suggest is totally ok and should work
+ Heiko	lisitsyn: so should we do it?
+ Heiko	would at least solve all the mailing list questions ;0
+ Heiko	\;)
+ lisitsyn	yes as we have no other solution
+ Heiko	lisitsyn: ok then, will push it a bit more this week
+ lisitsyn	Heiko: the only other solution I can think of
+ lisitsyn	is to preprocess headers somehow
+ Heiko	lisitsyn: yes I also thought about that
+ Heiko	but its tricky
+ Heiko	its a bit annoying that c doesnt allow to modify classes in a different file
+ Heiko	but I guess there are reasons for that
+ lisitsyn	shogun_class(SVM)
+ lisitsyn	{
+ lisitsyn	}
+ lisitsyn	Heiko: I think we could do that like that ^
+@iglesiasg	oh you guys are on!
+@iglesiasg	:)
+ lisitsyn	the definition of such a macro is
+ lisitsyn	iglesiasg: yes, hey
+ Heiko	lisitsyn: but then we have another layer
+ Heiko	and everyone has to use it
+ Heiko	while obtain from generic is only for a few
+ Heiko	so I rather prefer a solution with global functions
+ Heiko	iglesiasg: hi!
+ lisitsyn	Heiko: yeah but later we can add more functions
+ lisitsyn	Heiko: I guess what he have is just a typical stuff in every big project :)
+ lisitsyn	a lot of classes and you have to sort the shit out
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ Heiko	lisitsyn: I guess
+ Heiko	lisitsyn:  ok sleep
+ Heiko	see you Monday probably when I have my computer back :)
+@iglesiasg	Heiko, you still on holidays?
+ lisitsyn	alright
+ Heiko	iglesiasg: well its weekend and my machine is at work
+ Heiko	btw I think we should meet in person this year again
+ Heiko	but ets discuss that next dev meeting
+ Heiko	see you, have a good night
+-!- Heiko [5accf27c@gateway/web/freenode/ip.90.204.242.124] has left #shogun []
+@iglesiasg	Heiko, ah! Just out of curiosity if you were still out somewhere  holidays :)
+@iglesiasg	good night
+-!- iglesiasg [~iglesias@89-77-4-38.dynamic.chello.pl] has quit [Quit: Ex-Chat]
+ shogun-buildbot	build #438 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/438
+-!- gsomix [~gsomix@109.169.225.75] has quit [Ping timeout: 248 seconds]
+-!- lambday [67157f37@gateway/web/freenode/ip.103.21.127.55] has joined #shogun
+-!- gsomix [~gsomix@88.200.244.212] has joined #shogun
+-!- lambday [67157f37@gateway/web/freenode/ip.103.21.127.55] has quit []
+-!- gsomix [~gsomix@88.200.244.212] has quit [Ping timeout: 256 seconds]
+-!- gsomix [~gsomix@88.200.244.212] has joined #shogun
+-!- gsomix_ [~gsomix@109.169.248.101] has joined #shogun
+-!- gsomix [~gsomix@88.200.244.212] has quit [Ping timeout: 256 seconds]
+-!- iglesiasg [~iglesias@89-77-4-38.dynamic.chello.pl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Roman Votyakov :develop * d60b0b1 / src/shogun/ (10 files): https://github.com/shogun-toolbox/shogun/commit/d60b0b1c364ef0eaacc07082c2c165f1701283a2
+ shogun-notifier-	shogun: fix some formulas
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 901c758 / src/shogun/ (10 files): https://github.com/shogun-toolbox/shogun/commit/901c7581e8b44177648bb1284685526d2c0f1ac5
+ shogun-notifier-	shogun: Merge pull request #1436 from votjakovr/feature/gp_refactoring
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix some formulas
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+ shogun-buildbot	build #1431 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1431  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #925 of rpm1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/925  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #1462 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1462  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #1550 of deb3 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1550  blamelist: Roman Votyakov <votjakovr@gmail.com>
+ shogun-buildbot	build #1432 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1432  blamelist: Roman Votyakov <votjakovr@gmail.com>
+ shogun-buildbot	build #926 of rpm1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/926  blamelist: Roman Votyakov <votjakovr@gmail.com>
+ shogun-buildbot	build #1463 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1463  blamelist: Roman Votyakov <votjakovr@gmail.com>
+@iglesiasg	pickle27, hey!
+@iglesiasg	pickle27, travis failed again in the same line https://travis-ci.org/shogun-toolbox/shogun/jobs/10336090#L7046
+@iglesiasg	same test, sorry
+-!- gsomix__ [~gsomix@88.200.247.36] has joined #shogun
+-!- gsomix_ [~gsomix@109.169.248.101] has quit [Ping timeout: 248 seconds]
+@sonney2k	gsomix__, ping?
+@iglesiasg	sonney2k, hi! how are you doing?
+@iglesiasg	sonney2k, do you think we could update a few things in the buildbot to solve the crashes ^?
+@iglesiasg	one of them seems to be caused by cmake's version
+ gsomix__	sonney2k, pong.
+@sonney2k	iglesiasg, I am not root on rpm1
+@iglesiasg	oh I see
+-!- iglesiasg [~iglesias@89-77-4-38.dynamic.chello.pl] has quit [Quit: Ex-Chat]
+ shogun-notifier-	shogun: lambday :develop * 91e1a00 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/91e1a00db4db6d989c8c8cbed5321feff9e6cfb9
+ shogun-notifier-	shogun: Rational approximation CG-M job unit-test modified (log-det)
+ shogun-notifier-	shogun: lambday :develop * 7ea907b / / (4 files): https://github.com/shogun-toolbox/shogun/commit/7ea907b75359f55f43eaa0afd0e33b2280641671
+ shogun-notifier-	shogun: Log Rational approximation CG-M operator function added
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 1fb1a95 / / (7 files): https://github.com/shogun-toolbox/shogun/commit/1fb1a956e0803417dd53cc4e11d31829f31155a7
+ shogun-notifier-	shogun: Merge pull request #1437 from lambday/feature/log_determinant
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Log Rational approximation CG-M operator function added
+ shogun-buildbot	build #1433 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1433  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+ shogun-buildbot	build #927 of rpm1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/927  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+ shogun-buildbot	build #1464 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1464  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * f3d7110 / src/shogun/distributions/classical/ (2 files): https://github.com/shogun-toolbox/shogun/commit/f3d7110f848c848e7c47baf57aeed4a85722d222
+ shogun-notifier-	shogun: fix warning
+ shogun-buildbot	build #1551 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1551
+ shogun-buildbot	build #928 of rpm1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/928  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #1434 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1434  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #1435 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1435  blamelist: lambday <heavensdevil6909@gmail.com>
+ shogun-buildbot	build #929 of rpm1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/929  blamelist: lambday <heavensdevil6909@gmail.com>
+ shogun-buildbot	build #1553 of deb3 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1553  blamelist: lambday <heavensdevil6909@gmail.com>
+ shogun-buildbot	build #1465 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1465  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #1466 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1466  blamelist: lambday <heavensdevil6909@gmail.com>
+-!- lambday [67157e37@gateway/web/freenode/ip.103.21.126.55] has joined #shogun
+ lambday	Heiko not here :(
+-!- gsomix__ is now known as gsomix
+-!- lambday [67157e37@gateway/web/freenode/ip.103.21.126.55] has quit [Client Quit]
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has left #shogun []
+-!- iglesiasg [~iglesias@89-77-4-38.dynamic.chello.pl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ lisitsyn	iglesiasg: you must be in poland due to your hostname ;)
+@iglesiasg	lisitsyn, you got me :)
+ lisitsyn	iglesiasg: how do you like it?
+@iglesiasg	lisitsyn, it is nice
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+--- Log closed Mon Aug 19 00:00:21 2013

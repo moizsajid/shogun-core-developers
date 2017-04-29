@@ -1,0 +1,616 @@
+--- Log opened Wed Apr 09 00:00:14 2014
+-!- HeikoS [~heiko@31.85.167.119] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- kislay [~kislay@14.139.41.150] has joined #shogun
+-!- HeikoS1 [~heiko@31.75.97.193] has joined #shogun
+-!- HeikoS [~heiko@31.85.167.119] has quit [Ping timeout: 240 seconds]
+-!- HeikoS1 [~heiko@31.75.97.193] has quit [Ping timeout: 240 seconds]
+-!- HeikoS [~heiko@ra-vpn230.ra-vpn.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@ra-vpn230.ra-vpn.ucl.ac.uk] has quit [Client Quit]
+-!- rho_ [~quassel@217.55.153.97] has quit [Read error: Connection reset by peer]
+ lisitsyn	thoralf: hey
+ thoralf	Hey lisitsyn
+ lisitsyn	thoralf: I see some singleton issue :)
+ thoralf	Yeah. :)
+ thoralf	I opened the battle.
+ thoralf	Wanna join? ;)
+ lisitsyn	thoralf: actually we can go ahead and just make shogun itself instantiable
+ lisitsyn	run multiple shoguns :D
+ thoralf	lol
+ thoralf	Yeah, that's true.
+ lisitsyn	well that's natural extension
+ thoralf	We would loose that.
+ lisitsyn	everything that's single will get multiple
+ lisitsyn	somebody wise should have said that before I bet
+ lisitsyn	like karl marx haha
+ thoralf	lol
+ lisitsyn	OpenSSL is written by monkeys https://www.peereboom.us/assl/assl/html/openssl.html
+ lisitsyn	can't resist to share
+ thoralf	Hahah.
+ lisitsyn	ah and if anybody is interested I dumped my c++ssy brain again
+ lisitsyn	http://sergey.lisitsyn.me/2014/04/08/actions-with-raii/
+ thoralf	lisitsyn: The monkey-story is great.
+ thoralf	tl;sr;
+ lisitsyn	thoralf: yeah they sucked a big time
+ lisitsyn	our bugs lead to wrong nothing
+ lisitsyn	but their bugs are like important :)
+ thoralf	Yeah. :)
+ thoralf	But really, I still don't know why every object needs to have all this crap.  I never used serialization *or* model-selection *or* parameter framework to compare objects.
+ lisitsyn	thoralf: they should have one thing
+ lisitsyn	shogun instance ;)
+ lisitsyn	which has vresion parallel etc
+ thoralf	I was about to fork shogun and rip it of.
+ lisitsyn	thoralf: it is a known syndrome
+ thoralf	Or making it de-configurable by -DDISABLE_PARAMETER and -DDISABLE_MODEL_SELECTION.
+ thoralf	Yeah.
+ thoralf	I decided against forking, because I want better code... not worse. ;)
+ lisitsyn	it is called shogun forking disorder
+ lisitsyn	:D
+ lisitsyn	sometimes referred as shogunophrenia
+ thoralf	ophrenia?
+ thoralf	You're suffering this as well?
+ lisitsyn	well I am mentally disabled since I got ill
+ lisitsyn	:D
+ lisitsyn	sometimes I walk into walls
+ lisitsyn	ok actually yes everybody in shogun wanted to rewrite this f'ing s't
+ thoralf	Hmm.  So why are we (everybody except me) putting more sh't in instead of removing it?
+ thoralf	Well, wiking is good in consolidating I guess.
+ lisitsyn	have you seen my commits lately? ;)
+ thoralf	And cleaning up.
+ thoralf	lisitsyn: You're still committing?
+ thoralf	I thought you're just hanging up here because you're used to. :D
+ lisitsyn	not really :D
+ lisitsyn	not really to both
+ thoralf	Are you using shogun somewhere?
+ lisitsyn	no :)
+ lisitsyn	that's a major point
+ thoralf	lol
+ lisitsyn	thoralf: I have nothing to use it for
+ lisitsyn	thoralf: but I am not just hanging up I am just sloooooow
+ thoralf	That's a bad starting point for discussing improvements. ;)
+ lisitsyn	I am sloowly getting to some solution for modular shogun
+ lisitsyn	that's what I devote my life for hahah
+ lisitsyn	thoralf: I use it pretty rarely but nothing advanced
+ lisitsyn	well though I have some vague understanding what our users need
+ lisitsyn	so you are mostly right ;)
+ thoralf	:D
+ thoralf	So does it mean you're joining the battle to improve something that has no effect on you? ;)
+ lisitsyn	thoralf: I am pretty far away from all the battles
+ lisitsyn	thoralf: well I have some idea how software should look like - that's what I am based on
+ thoralf	A good-code based life form? :)
+ thoralf	I know carbon-based life forms... they don't perform well.
+ lisitsyn	thoralf: I am not sure what you mean ;) I don't put my opinion on things that affect user experience
+ lisitsyn	if someone says X would be better I would believe that
+ thoralf	Hmm.  Interesting approach.
+ thoralf	Saves a lot of hassle.
+ lisitsyn	so I believe I am not that harmful ;)
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has quit [Quit: Page closed]
+ thoralf	I should adapt this.
+ thoralf	Cool thing.
+ thoralf	Will try this out tomorrow at work. :D
+-!- Khalednasr [~khalednas@41.69.201.100] has quit [Quit: Leaving]
+-!- HeikoS [~androirc@90.201.62.238] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- thoralf [~thoralf@91-65-136-14-dynip.superkabel.de] has quit [Ping timeout: 240 seconds]
+-!- zxtx [~zv@129-79-241-102.dhcp-bl.indiana.edu] has quit [Ping timeout: 240 seconds]
+-!- mode/#shogun [+o sonney2k] by ChanServ
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-dtywjmpzbjyduxgi] has quit [Quit: Connection closed for inactivity]
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has joined #shogun
+-!- zxtx_ [~zxtx@sunnythinking.org] has joined #shogun
+-!- zxtx__ [~zv@c-98-223-196-32.hsd1.in.comcast.net] has joined #shogun
+-!- zxtx__ [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Remote host closed the connection]
+-!- zxtx__ [~zv@c-98-223-196-32.hsd1.in.comcast.net] has joined #shogun
+-!- zxtx__ [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Client Quit]
+-!- zxtx_ [~zxtx@sunnythinking.org] has quit [Quit: ZNC - http://znc.in]
+-!- zxtx_ [~zxtx@sunnythinking.org] has joined #shogun
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Quit: Leaving]
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has joined #shogun
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Client Quit]
+-!- zxtx_ [~zxtx@sunnythinking.org] has quit [Quit: Strong teeth for a strong nation]
+-!- zxtx [~zxtx@sunnythinking.org] has joined #shogun
+-!- kislay [~kislay@14.139.41.150] has quit [Remote host closed the connection]
+-!- kislay [~kislay@220.227.97.99] has joined #shogun
+-!- kprah [67157d55@gateway/web/freenode/ip.103.21.125.85] has joined #shogun
+-!- kprah [67157d55@gateway/web/freenode/ip.103.21.125.85] has quit [Ping timeout: 240 seconds]
+-!- kislay [~kislay@220.227.97.99] has quit [Remote host closed the connection]
+-!- pl8787 [9fe22b60@gateway/web/freenode/ip.159.226.43.96] has joined #shogun
+ lisitsyn	HeikoS: hey
+-!- kislay [~kislay@14.139.41.150] has joined #shogun
+ lisitsyn	HeikoS: it seems we have some weight, they always give us what we want :D
+-!- kislay [~kislay@14.139.41.150] has quit [Ping timeout: 240 seconds]
+-!- thoralf [~thoralf@91-65-136-14-dynip.superkabel.de] has joined #shogun
+ thoralf	Hey.
+-!- thoralf [~thoralf@91-65-136-14-dynip.superkabel.de] has quit [Ping timeout: 240 seconds]
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-lddjzlfvibszeghc] has joined #shogun
+ sonne|work	lisitsyn: yeah we are a fat cow that cannot be stopped
+ lisitsyn	sonne|work: a fat cow on speed
+ sonne|work	yeah magic potion overdose
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Ping timeout: 246 seconds]
+-!- lambday [67157f54@gateway/web/freenode/ip.103.21.127.84] has joined #shogun
+-!- HeikoS1 [~heiko@90.201.62.238] has joined #shogun
+ lambday	HeikoS1: hi
+ lambday	I was just going to mail you and Dino..
+-!- HeikoS1 [~heiko@90.201.62.238] has quit [Ping timeout: 250 seconds]
+-!- HeikoS1 [~heiko@ra-vpn-94.ra-vpn.ucl.ac.uk] has joined #shogun
+ lambday	HeikoS1: hi.. there?
+-!- HeikoS2 [~heiko@90.201.62.238] has joined #shogun
+-!- HeikoS1 [~heiko@ra-vpn-94.ra-vpn.ucl.ac.uk] has quit [Ping timeout: 246 seconds]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ lisitsyn	HeikoS HeikoS2 !
+-!- HeikoS2 [~heiko@90.201.62.238] has quit [Ping timeout: 240 seconds]
+-!- HeikoS1 [~heiko@ra-vpn-100.ra-vpn.ucl.ac.uk] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Wu Lin :develop * 39c3e90 / / (6 files): https://github.com/shogun-toolbox/shogun/commit/39c3e90918e666f90f2f5197c1f21dbd4e5cc6bf
+ shogun-notifier-	shogun: add the helper function for unit test
+ shogun-notifier-	shogun: Wu Lin :develop * 6181673 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/6181673e3560631daebe3e3e62c4b69ea0739727
+ shogun-notifier-	shogun: fix
+ shogun-notifier-	shogun: Wu Lin :develop * 8160ed1 / src/shogun/mathematics/Math.cpp: https://github.com/shogun-toolbox/shogun/commit/8160ed18a93d7d7adf96c8fbe3f53e01211a549b
+ shogun-notifier-	shogun: minor fix
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 59e9f13 / / (7 files): https://github.com/shogun-toolbox/shogun/commit/59e9f13bfe051f3da303c6b8ce6dec12addfebd8
+ shogun-notifier-	shogun: Merge pull request #2115 from yorkerlin/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: a helper function for unit test
+-!- newlido [~quassel@193.227.20.2] has joined #shogun
+-!- PirosB3 [~pirosb3@89-97-67-159.ip16.fastwebnet.it] has joined #shogun
+ lisitsyn	we need kaggle team
+ lisitsyn	:D
+ lisitsyn	HeikoS: wiking: besser82: lambday: sonne|work: we need kaggle team!
+ lambday	lisitsyn: who's competing? :-o
+ wiking	lisitsyn: for which task?
+ lisitsyn	wiking: any
+ wiking	https://www.kaggle.com/c/risky-business
+ wiking	?
+ wiking	:)
+ wiking	we cannot do that ;P
+ lisitsyn	well small steps
+ lisitsyn	:D
+ lisitsyn	we can just start from these simple test tasks
+ wiking	https://www.kaggle.com/c/allstate-purchase-prediction-challenge
+ lisitsyn	that's the way we can improve our API
+ HeikoS1	lisitsyn: I agree :)
+ wiking	lisitsyn: let's start a python notebook ;)
+ wiking	*ipython
+ wiking	for the task
+ wiking	)
+ wiking	that would be the best i think
+ HeikoS1	wiking: I agree :)
+ wiking	lisitsyn: new repo?
+ wiking	shogun-kaggle ?
+ lisitsyn	yes
+ lambday	sounds great!
+ lisitsyn	let me create that
+ lisitsyn	https://github.com/shogun-toolbox/shogun-kaggle
+ lisitsyn	HeikoS: wiking: besser82: lambday: sonne|work: ok and another thing - we have to get distributed
+ wiking	lisitsyn: hah u were faster :)
+ wiking	lisitsyn: what do u mean? :)
+ wiking	lisitsyn: btw we would need a team as well
+ wiking	i mean on kaggle
+ lisitsyn	yes
+ wiking	i have a kaggle account
+ wiking	anybody else?
+ lisitsyn	I have
+ lambday	I do
+ lisitsyn	hmm guys
+ lisitsyn	just an idea
+ lisitsyn	can we create some roles in our team?
+ wiking	like?
+ lisitsyn	hmm e.g. HeikoS knows about X
+ lisitsyn	and you wiking know about Y
+ lisitsyn	so we delegate responsibilitie
+ lisitsyn	I have vague idea but want to share
+ lisitsyn	:D
+ wiking	k
+ lisitsyn	wiking: ok actually may be we should denote maintainers for modules
+ lisitsyn	what do you think about that?
+ wiking	sounds like a plan
+ wiking	btw anybody has a fucking dashboard on kaggle? )
+ lisitsyn	I mean I should be responsible for multiclass things
+ lisitsyn	and everybody should kick me to care about that
+ wiking	yeah that'd be good
+ lisitsyn	:D
+ lisitsyn	okay may be we can go on later
+ wiking	so that we dont have scary merges
+ lisitsyn	I have no clue what's the dashboard on kaggle
+ wiking	me neither
+ wiking	ok fuck
+ wiking	i've found it :D
+ wiking	anybody care to give me his kaggle account?
+ wiking	or rather the email addr u use for kaggle?
+ lambday	wiking: mine is heavensdevil6909@gmail.com
+ lambday	rahul-de is the username
+ wiking	lisitsyn: ping?
+ lisitsyn	my login is no-idea
+ lisitsyn	just a sec
+ wiking	lisitsyn: email u used for kaggle
+ lisitsyn	I feel idiot when clicking forgot username
+ lisitsyn	:D
+ wiking	lambday: u should receive an email
+ lambday	got it
+ lisitsyn	wiking: lisitsyn.s.o@gmail.com
+ wiking	lisitsyn: sent the invite
+ wiking	seems we cannot have permanent teams
+ wiking	only per competition teams
+ lisitsyn	oh
+ lisitsyn	really?
+ wiking	lisitsyn: yeah seems like
+ lambday	holy crap that's a long list of rules
+ lisitsyn	sucks
+ wiking	heheh accept it
+ wiking	:)
+ lambday	yeah did :D
+ wiking	ok so now we have a team
+ wiking	and we can do submissions
+ lambday	only the outputs are to be submitted iirc
+ wiking	yep
+ wiking	so now the task is pretty easy
+ lisitsyn	yeah win it
+ lisitsyn	that's the easy part
+ lambday	$50k
+ wiking	i mean read in file
+ wiking	and the output file creator
+ wiking	that's like step -1
+ lisitsyn	...
+ lisitsyn	profit
+ lisitsyn	:D
+ wiking	:D
+ wiking	and then we'll see the rest
+ wiking	btw any ideas of the structure for the repo ?
+ wiking	like each competition a separate directory?
+ lisitsyn	competition-name/...
+ lisitsyn	yeah
+ wiking	and the data should be always like
+ wiking	competiton-name/data directory
+ wiking	since we are not allowed to distribute the data
+ lisitsyn	uhmm github will kill us
+ lisitsyn	if we put data
+ wiking	so everybody has to download that for ourselves
+ lisitsyn	yeah
+ wiking	lisitsyn: nana we are not allowed i think
+ lambday	btw why notebook? I mean the data is usually *H-U-G-E*..
+ lisitsyn	wiking: yeah we are not allowed as well
+ wiking	lambday: well the notebook was just for having a great way to present our solution already
+ wiking	so it's not just messy code
+ lambday	alrighty
+ wiking	but somebody can right away like check the whole solution
+ wiking	of course it'll make things much more complicated
+ wiking	so maybe it's not the good idea
+ wiking	as honestly coding and doing experiments with a notebook
+ wiking	i think is a bit pain...
+ lambday	we need to submit multiple solutions with different approaches..
+ lambday	and the best one is our score
+ wiking	lambday: well that's easy
+ wiking	random()
+ wiking	:D
+ wiking	that'll put us somewhere on the leaderboard already :PPP
+ lambday	lol...
+ lisitsyn	ah guys
+ lisitsyn	language?
+ lambday	doesn't matter
+ wiking	yeah that's what i was about to ask
+ lisitsyn	hmm matters
+ wiking	go hardcore and do everything in c++
+ lisitsyn	hahah
+ lisitsyn	no
+ wiking	or be more subtle and python
+ wiking	?
+ lisitsyn	python
+ wiking	yeah i'm for python as well
+ lambday	will take ages to process GBs of data
+ wiking	lambday: where do u see the gigs of data?
+ lisitsyn	yeah
+ lisitsyn	10 mb
+ lisitsyn	:D
+ lisitsyn	5.63mb train
+ lisitsyn	2.02 test
+ lambday	last competition I participated in had 500MB compressed data
+ lisitsyn	that's not big data
+ lisitsyn	:D
+ lambday	this one is easy then :D
+ lambday	python +1
+ wiking	l-rw-r--r-- 1 wiking staff  46M Feb 18 09:37 train.csv
+ lisitsyn	oops
+ lisitsyn	I told you zip
+ wiking	so the first thing we need to do is fix the readline :)))))
+ lisitsyn	I can start with IO actually
+ HeikoS1	just talked to dino, who is also interested
+ lisitsyn	tonight
+ lisitsyn	HeikoS1: are you in?
+-!- sejDino [~rudo@cpc1-dals14-2-0-cust31.hari.cable.virginm.net] has joined #shogun
+ lisitsyn	hey sejDino
+ wiking	ok please register on kaggle and give me email addr that u used for registering on kaggle.com
+ wiking	so i can invite u guys to the team
+ lambday	sejDino: hi :)
+ HeikoS1	lisitsyn: yes I would like to join this stuff
+ sejDino	hey!
+ HeikoS1	good way to make shogun more usable for some more applied things :)
+ lisitsyn	okay employ more guys and we will win
+ lisitsyn	:D
+ wiking	:D
+ HeikoS1	I guess we will come up with a list of things that would be useful to have and discover loads of bugs ;)
+ lisitsyn	we need a tracker
+ lisitsyn	to distribute tasks and so on
+ lisitsyn	who's up to use github?
+ wiking	lisitsyn: github/issues and create a new label called kaggle?
+ wiking	or since it's a different repo
+ wiking	we can do that there
+ wiking	https://github.com/shogun-toolbox/shogun-kaggle/issues
+ lisitsyn	created milestone
+ lisitsyn	and label
+ wiking	and if we need to fix a bug within shogun because we found it because of kaggle task we can still label it kaggle
+ wiking	so that we know what might be a priority bug to fix
+ wiking	and for later statistics
+ wiking	to see how many bugs we actually found/fixed because of kaggling
+ wiking	lisitsyn: sounds like a plan
+ sejDino	so is the plan to go for allstate challenge or risky business or both? :)
+ wiking	sejDino: we cannod to risky business
+ wiking	as it's only for master members of kaggle
+ wiking	and none of us has that XP points on kaggle :P
+ wiking	sejDino: but we can do other 'educational' task as well
+ sejDino	I see - oh, well - now we'll start building those XP pts quickly :)
+ wiking	just to promote shogun
+ lisitsyn	https://github.com/shogun-toolbox/shogun-kaggle/issues
+ wiking	lisitsyn: is on fire
+ sejDino	that sounds like a good idea as well
+ lisitsyn	https://github.com/shogun-toolbox/shogun-kaggle/issues/2
+ lisitsyn	dump your mind here
+ lisitsyn	who's up describing the input /output data?
+ lisitsyn	in the #2
+ lisitsyn	sooo whoo
+ lisitsyn	do we need a cluster?
+ wiking	lisitsyn: no ... worst case we use fatbot :P
+ wiking	teh amount of data is really not so much
+ lisitsyn	wiking: want to describe dataset?
+ wiking	665250 data/train.csv
+ wiking	-1 because it has header
+ wiking	lisitsyn: yeah sure i'm up for that
+ lisitsyn	wiking: https://github.com/shogun-toolbox/shogun-kaggle/issues/3
+ lisitsyn	sejDino: HeikoS: HeikoS1: you are scientific guys
+ lisitsyn	so waiting your input https://github.com/shogun-toolbox/shogun-kaggle/issues/2
+ lisitsyn	;)
+ HeikoS1	lisitsyn: happy to do :) Ill talk to sejDino a bit later today and then well give some output
+ lisitsyn	HeikoS: assigned you responsible for this issue ;)
+ sejDino	lisitsyn: yep, will work on it :)
+ lisitsyn	ok that's going much funny now
+ lisitsyn	:D
+ sejDino	it seems like an interesting problem actually - each customer samples a bunch of these "options" and then they pick one of those (or a new one)
+ lisitsyn	HeikoS1: okay lets organize it this way
+ sejDino	so it's not really a standard classification/regression task
+ lisitsyn	we discuss it in #2
+ lisitsyn	then everything that is worth trying
+ lisitsyn	is forked to a new task
+ lisitsyn	agree?
+ sejDino	lisitsyn: sounds good
+ lisitsyn	sejDino: cool thanks
+ lisitsyn	lambday: mind to start notebook?
+ lisitsyn	or other words
+ lisitsyn	want to be responsible for notebook?
+ lisitsyn	;)
+ lambday	lisitsyn: what should we start with?
+ lambday	yeah I can do that
+ lisitsyn	lambday: hmm okay actually
+ lisitsyn	you could create some draft
+ lisitsyn	and make sure everybody can work on notebook in one click
+ wiking	lambday: use the template and put it in shogun-kaggle/allstate
+ lisitsyn	so makefile or sth like that
+ wiking	lambday: and u can have the assumption that the data is in shogun-kaggle/allstate/data
+ lisitsyn	I want to organize it that way
+ lisitsyn	so we have some 'library'
+ lisitsyn	that is used in notebook
+ wiking	lisitsyn: yeah
+ lisitsyn	so we can hide some routine things
+ lisitsyn	load_dataset()
+ lisitsyn	that's it
+ wiking	lisitsyn: yeah i think all the .py + ipynb should be in shogun-kaggle/allstate
+ lisitsyn	yes
+ wiking	and then u can from . import load_dataset
+ lisitsyn	okay will be back a bit later
+ wiking	in the notebook
+ lisitsyn	yes
+ wiking	lisitsyn: thing is though
+ wiking	lisitsyn: this dataset is more or less a timeline
+ wiking	lisitsyn: so actually a pandas dataframe would be the best option to store the data ;)
+ wiking	not CFeatures of any kind
+ wiking	although this is just the first thought i had now looking at the dataset
+ wiking	bbl
+-!- HeikoS1 [~heiko@ra-vpn-100.ra-vpn.ucl.ac.uk] has quit [Ping timeout: 246 seconds]
+ pl8787	hi, see issue https://github.com/shogun-toolbox/shogun/issues/2119. Dose any one has any suggestion?
+-!- newlido [~quassel@193.227.20.2] has quit [Ping timeout: 246 seconds]
+ pl8787	I think add a subclass of CFeatures may solve this problem. Such as CIndexFeatures
+ pl8787	If CIndexFeatures pass in CCustom::init, we just change the subset of the kernel matrix, and then get_kernel_matrix will return the right value.
+-!- HeikoS1 [~heiko@90.201.62.238] has joined #shogun
+-!- sejDino [~rudo@cpc1-dals14-2-0-cust31.hari.cable.virginm.net] has left #shogun []
+-!- PirosB3 [~pirosb3@89-97-67-159.ip16.fastwebnet.it] has quit [Quit: PirosB3]
+-!- HeikoS1 [~heiko@90.201.62.238] has quit [Ping timeout: 246 seconds]
+-!- HeikoS1 [~heiko@ra-vpn-81.ra-vpn.ucl.ac.uk] has joined #shogun
+-!- PirosB3 [~pirosb3@89-97-67-159.ip16.fastwebnet.it] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- kislay [~kislay@117.239.94.112] has joined #shogun
+-!- HeikoS1 [~heiko@ra-vpn-81.ra-vpn.ucl.ac.uk] has quit [Read error: Connection reset by peer]
+-!- newlido [~quassel@193.227.20.2] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Read error: Connection reset by peer]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- pl8787 [9fe22b60@gateway/web/freenode/ip.159.226.43.96] has quit [Quit: Page closed]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- prams [~pratheekm@122.167.124.235] has joined #shogun
+-!- newlido [~quassel@193.227.20.2] has quit [Remote host closed the connection]
+-!- prams [~pratheekm@122.167.124.235] has quit [Ping timeout: 246 seconds]
+-!- dhruv13j [dhruv13j@gateway/shell/bnc4free/x-zivjvwoyvehjepue] has joined #shogun
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+-!- PirosB3 [~pirosb3@89-97-67-159.ip16.fastwebnet.it] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@89-97-67-159.ip16.fastwebnet.it] has joined #shogun
+-!- PirosB3 [~pirosb3@89-97-67-159.ip16.fastwebnet.it] has quit [Client Quit]
+-!- kislay [~kislay@117.239.94.112] has quit [Quit: Leaving]
+@besser82	wiking, ping?
+-!- kislay|exams [~kislay@210.212.61.185] has joined #shogun
+ wiking	pong
+-!- khalednasr [~k.nasr92@41.69.241.51] has joined #shogun
+-!- kislay|exams [~kislay@210.212.61.185] has quit [Read error: Connection reset by peer]
+-!- pl8787 [9fe22b60@gateway/web/freenode/ip.159.226.43.96] has joined #shogun
+-!- lambday [67157f54@gateway/web/freenode/ip.103.21.127.84] has quit [Ping timeout: 240 seconds]
+-!- zxtx [~zxtx@sunnythinking.org] has quit [Quit: Strong teeth for a strong nation]
+-!- zxtx [~zxtx@sunnythinking.org] has joined #shogun
+ wiking	khalednasr: thnx for joinng the pr review process
+ khalednasr	wiking, no problem, I'm happy to participate :)
+ wiking	cool
+ wiking	khalednasr: u can join as well the kaggle team if u fancy and have time :)
+ khalednasr	wiking, there's a kaggle team? :)
+@besser82	wiking, WTF is kaggle?!?
+ wiking	khalednasr: we've just started today
+ wiking	besser82: kaggle.com
+@besser82	wiking, thx!  Will have a look  ;)
+ khalednasr	wiking, do you guys have a specific competition in mind?
+ wiking	khalednasr: we've started with allstate
+ khalednasr	wiking, thanks for inviting me! I'll take a look at it
+ wiking	nw
+-!- khalednasr [~k.nasr92@41.69.241.51] has quit [Quit: Leaving]
+-!- Khalednasr [~khalednas@41.69.241.51] has joined #shogun
+-!- Khalednasr [~khalednas@41.69.241.51] has quit [Ping timeout: 240 seconds]
+-!- khalednasr [~k.nasr92@41.69.156.29] has joined #shogun
+-!- lambday [67157f54@gateway/web/freenode/ip.103.21.127.84] has joined #shogun
+-!- sunil1337 [0e8bd055@gateway/web/freenode/ip.14.139.208.85] has joined #shogun
+ sunil1337	lambday: hey!
+ lambday	sunil1337: hi!
+ sunil1337	lambday: please review https://github.com/sunil1337/shogun/commit/ef30f622df44ab51cb97c4a66c5ea3a673348dfe
+ lambday	sunil1337: checking
+ sunil1337	lambday: okay! fails at compiling class_list.cpp because we have 3 defs of eigen3 and naive. need a work around there
+ lambday	3 defs of eigen3 and naive?
+ sunil1337	lambday: partial specialization they py scripts adds them to class_list.cpp
+ sunil1337	lambday:*the
+ lambday	sunil1337: you could have just left the sparse thing for now
+ lambday	the code won't be same for dense and sparse
+ lambday	as in, we can't use map
+ sunil1337	lambday: yeah.. i just called existing sparse_dot for now
+ sunil1337	lambday: i've commented the problem please take a look
+ lambday	okie
+ lambday	sunil1337: could you please split the definition and declarations?
+ lambday	into separate .h and .cpp
+ lambday	each class - one .h one .cpp
+ sunil1337	lambday: sure..
+ wiking	btw u could use macros
+ sunil1337	wiking: for new calls ?
+ lambday	sunil1337: umm you didn't need to add VectorDotOperator already... first just VectorDotProduct and Eigen3DotProduct which would work independently
+ lambday	then we would add CLinearAlgebra factory class
+ lambday	after that we'll add VectorDotOperator
+ lambday	under LinearOperator interface
+ lambday	this iterative approach makes it easy to find bugs
+ lambday	Naive - we don't really need.. I just added in the gist for demonstration purpose
+ sunil1337	lambday: okay! :)
+ lambday	this looks good :)
+ lambday	good work :)
+ sunil1337	lambday: thanks :) naive is already there in existing SGVector class...
+ lambday	but if you could please send patches containing those two first
+ lambday	it would make it so much easier
+ sunil1337	lambday: will do.. :)
+ lambday	yeah - no one needs a sophisticated interface to do naive things ;)
+ sunil1337	lambday: :)
+ lambday	sunil1337: we *don't* need to put VectorDotProduct under SGObject
+-!- thoralf [~thoralf@91-65-136-198-dynip.superkabel.de] has joined #shogun
+ lambday	and please avoid using __ in #ifndef __CLASSNAME_H__... make it #ifndef CLASSNAME_H_
+ sunil1337	lambday: okay :)
+ thoralf	Hey.
+ lambday	thoralf: hi...
+ lambday	thoralf: where are we about the singleton issue?
+ thoralf	lambday: We didn't decide anything... currently we're collecting arguments. ;)
+ thoralf	lambday: Do you have an optinion about it?
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ lambday	thoralf: not particularly.. I agree with HeikoS's suggestion
+ lambday	but I am eager to see what sonney2k says about this
+ thoralf	Me too :)
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-lddjzlfvibszeghc] has quit [Quit: Connection closed for inactivity]
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Ping timeout: 252 seconds]
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ thoralf	lisitsyn: Awake?
+ lisitsyn	thoralf: yes
+ thoralf	Hello :)
+ thoralf	I just realized we're having global variables anyway and are just copying them to each object.
+ thoralf	So it does means we cannot have multiple shoguns even right now.
+ thoralf	And the difference between global variables and singletons is artificial for this discussion. ;)
+ lisitsyn	yeah
+ lisitsyn	we have it tied together already
+ thoralf	We're doomed anyway.  So let's change it while everybody is sleeping. :D
+ lisitsyn	thoralf: what exactly?
+ lisitsyn	I am completely lost in discussions
+ lisitsyn	:D
+ thoralf	Removing SGIO, Version, Parallel members from CSGObject.
+ lisitsyn	thoralf: want to do that?
+ lisitsyn	;)
+ thoralf	Wrong question.
+ thoralf	Want to write a ticket for that? :D
+ lisitsyn	ahh students
+ lisitsyn	thoralf: that's the same thing happens at my job
+ lisitsyn	constantly forgetting I have 3 programmers to delegate job
+ lisitsyn	:D
+ thoralf	lisitsyn: To me honest, I'm a bit lost how to improve this "thing" and I want to discuss which options we have (without making it worse by adding another 1000 classes).
+ thoralf	Changing it would only be the technical part.
+ lisitsyn	thoralf: I think making SGContext a singleton first
+ lisitsyn	would work
+ thoralf	I have no concerns about this.
+ thoralf	Putting Version, Parallel, SGIO into it.
+ thoralf	Most functionality on these things is based on macros, so easy to change without touching many classes.
+ lisitsyn	yeah
+ thoralf	And then we would naturally lose the duplication of SG_SINFO/SG_INFO, etc., because everything is depending on the singleton.
+ lisitsyn	uh
+ thoralf	What?  Did I miss something?
+ lisitsyn	well if we don't want multiple contexts
+ lisitsyn	it should work
+ lisitsyn	I overlooked the SG_SINFO/SG_INFO thing
+ lisitsyn	thoralf: if we use the singleton in SG_INFO
+ lisitsyn	this member of SGObject makes no sense
+ lisitsyn	won't be used
+ thoralf	Yes.
+ thoralf	So we can remove it.  Hooray :)
+ lisitsyn	this denies multiple contexts
+ lisitsyn	I would be ok with multiple contexts
+ lisitsyn	so that's disputable
+ thoralf	Okay, how would it work with multiple contexts?
+ thoralf	Lets say, you have machine1 from context1 and machine2 from context2.  How would each machine create a new CLabel of the right context?
+ lisitsyn	we should ask for labels in context
+ lisitsyn	:D
+ lisitsyn	that sounds like a factory
+ thoralf	Yeah.
+ thoralf	Sounds like JavaEE
+ thoralf	CLabels l = context.register(new CLabels);
+ thoralf	vs
+ thoralf	CLabels l = context.getInstanceOf(class CLabels);
+ lisitsyn	thoralf: actually there is a lot of beauty in that :D
+ lisitsyn	makes things really extensible
+ lisitsyn	thoralf: if we go modular
+ lisitsyn	we'd need factories anyway
+ thoralf	Correct me if I'm wrong, but this doesn't make things simpler. ;)
+ lisitsyn	thoralf: this makes things extensible ;)
+ thoralf	Correct me if I'm wrong, but this doesn't make things simpler. ;)
+ thoralf	lol, okay.
+ thoralf	No free lunch.
+ lisitsyn	well the simplest thing is no objects
+ lisitsyn	;)
+ lisitsyn	but the issue is that we really need factories to go modular
+ lisitsyn	say I wrote SuperSVM
+ lisitsyn	how do I spawn it?
+ lisitsyn	there is no SuperSVM in headers/interfaces
+ lisitsyn	I can only ask for SVM
+ lisitsyn	(effectively)
+ thoralf	Damn.
+-!- newlido [~quassel@41.218.173.235] has joined #shogun
+ thoralf	You're playing in the opposite team.
+ thoralf	I'm on simplification (white circle on white background)
+ thoralf	You're on, well, you're on maximum extensible. ;)
+ lisitsyn	thoralf: we need plugins
+ lisitsyn	to not wait \infty before it compiles
+ lisitsyn	and to use only what you want :)
+ lisitsyn	plugins are not only about extensibility but to put development on speed
+ thoralf	Hmm.
+ thoralf	But this involves *many* design decisions that haven't been met.  For example: simple "data" classes like vectors, matrices, etc. that need to be fast.  No need to ask daddy every time you want to create an instance.
+ lisitsyn	but they are not sgobjects, right?
+ thoralf	Hmm.
+ thoralf	Hmm!
+ thoralf	Yes.
+ lisitsyn	I am talking only about sgobjects because they are not lightweight
+ lisitsyn	and never been :)
+ thoralf	I got your point.
+ lisitsyn	okay destination bed
+ thoralf	Good night.
+-!- newlido [~quassel@41.218.173.235] has quit [Remote host closed the connection]
+--- Log closed Thu Apr 10 00:00:15 2014

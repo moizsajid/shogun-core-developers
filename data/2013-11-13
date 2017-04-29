@@ -1,0 +1,439 @@
+--- Log opened Wed Nov 13 00:00:22 2013
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- hushell [~hushell@8-12.ptpg.oregonstate.edu] has quit [Ping timeout: 264 seconds]
+ shogun-buildbot_	build #616 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/616
+-!- hushell [~hushell@c-24-20-167-124.hsd1.or.comcast.net] has joined #shogun
+-!- hushell [~hushell@c-24-20-167-124.hsd1.or.comcast.net] has quit [Ping timeout: 240 seconds]
+-!- new_lido [~walid@41.218.173.7] has joined #shogun
+-!- new_lido [~walid@41.218.173.7] has quit [Ping timeout: 244 seconds]
+-!- hushell [~hushell@c-24-20-167-124.hsd1.or.comcast.net] has joined #shogun
+-!- new_lido [~walid@41.218.179.85] has joined #shogun
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has joined #shogun
+-!- benibadman [~benibadma@94.135.236.129] has joined #shogun
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- benibadm_ [~benibadma@94.135.236.129] has joined #shogun
+-!- benibadman [~benibadma@94.135.236.129] has quit [Ping timeout: 246 seconds]
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has joined #shogun
+-!- lisitsyn1 [~lisitsyn@80.252.20.67] has quit [Ping timeout: 245 seconds]
+ sonne|osx	guys have you seen? the next europython is in berlin :)
+ sonne|osx	maybe we should just have our shogun workshop before / after that date :)
+ sonne|osx	http://www.ep14.org/
+ lisitsyn	ha
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- hushell [~hushell@c-24-20-167-124.hsd1.or.comcast.net] has quit [Ping timeout: 246 seconds]
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:9895:4f04:e0e5:ccbc] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	BTW, MKL experts
+@iglesiasg	did you see this mail on the mailing lists regarding MKL regression?
+@wiking	rer
+@wiking	sonne|work: ping?
+@wiking	btw why do we need 2 pass reading for processing a CSV file?
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has joined #shogun
+@wiking	sonne|work: ping
+ sonne|osx	wiking: pong
+@wiking	sonne|osx: 1) why do we need 2 pass reading for processing a CSV file? 2) so gunnar doesn't need any help from our side, apart from signatures?
+ sonne|osx	wiking: well it requires much less memory
+ sonne|osx	50% actually
+ sonne|osx	wiking: do you know of any python based github markdown format renderer?
+@wiking	sonne|osx: so the thing is that libarchive has a problem with seeking :P
+@wiking	sonne|osx: mmm none pops up in my head
+@wiking	i guess u googled around already
+ sonne|osx	wiking: but couldn't you then open /close and again open/close ?
+@wiking	sonne|osx: well i hoped that i dont have to
+@wiking	sonne|osx: but seems that's the only option
+ sonne|osx	wiking: rationale really is - if you load a small .csv it doesn't matter that you read it twice
+@wiking	sonne|osx: yeah but that's the thing
+ sonne|osx	wiking: if you read a big one - you wouldn't be able to load it in memory when you read it just once
+@wiking	i guess if u want to load a gz-ed or bzip2 csv
+@wiking	then u rather have a big feature matrix :P
+ sonne|osx	of course you can use hdf5/protobuf based files that have known number of vectors etc
+@wiking	sonne|osx: reallocing memory ?
+ sonne|osx	wiking: well yeah but not 100% reliable
+@wiking	sonne|osx: i mean libarchive is actually designed in mind for big archives
+@wiking	i.e. tar.bz etc
+@wiking	which of course is going to be super tricky if we want to support that
+@wiking	e.g. we dont want to :P
+@wiking	so just one file with various compression would be ok to support i guess
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has joined #shogun
+ sonne|osx	wiking: yeah...
+@wiking	sonne|osx: i want to change from FILE* to some other type of stream
+ sonne|osx	wiking: to what?
+ sonne|osx	I mean from FILE you can get the fd
+ sonne|osx	but hmmh
+@wiking	the problem is that we are currently passing around FILE*
+@wiking	and obviously if we want to use libarchive
+@wiking	we have to use for that something else
+@wiking	as it doesn't provide FILE* stream
+ sonne|osx	wiking: yeah sure but what do you need to use?
+@wiking	well some kind of an abstract stream
+@wiking	where i can both wrap a single file fd (or FILE*) and a more complex libarchive stream
+ sonne|osx	wiking: sure do it then
+@wiking	as for example now i'm not able to do a close/open operation on a libarchive handle... as i only have a handle
+@wiking	that doesn't say anything about the filename or fd it was used to open that archive
+@wiking	hence i do not even know what i need to reopen
+@wiking	sonne|osx: ok... i mean there's one very straightforward way to do this
+@wiking	if we can use std:: PP
+@wiking	:P
+ sonne|osx	wiking: could you use fileno(FILE*)
+ sonne|osx	wiking: and then fdreopen?
+ sonne|osx	ha fdreopen doesn't exist
+@wiking	sonne|osx: i do not have a way to get a FILE* or fd from libarchive that actually streaming the uncompressed content
+ sonne|osx	I see
+@wiking	there's only archive_read_data_into_fd
+@wiking	but that is putting all the content of an archive into the given fd
+-!- taylan [d5f4a885@gateway/web/freenode/ip.213.244.168.133] has joined #shogun
+@wiking	which is basically a shit in sense of that it writes everything into a file
+ taylan	Hi Everyone..
+@iglesiasg	sup
+ taylan	I have a question about the C2 parameter..
+@wiking	of course this way it's much easier as that FD can be used to generate the FILE*
+@wiking	and after that we just do the usual business
+ taylan	apparently this parameter controls the weights of the classes, but I don't understand why there is an indirection for it, i.e dividing by C1 before setting teh weights..
+ taylan	can someone point me any clues?
+@iglesiasg	taylan, what class?
+ taylan	so ok, I am looking at the libsvm class now, but I think this is the same for other implementations as well
+ taylan	sth like this: float64_t weights[2]={1.0,get_C2()/get_C1()};
+ taylan	so C2 indirectly sets the weight of classes..
+@iglesiasg	taylan, are C1 and C2 weights por positive and negative examples?
+ taylan	if I am working with an imbalanced dataset, I would like to set this seperately..But I feel like I am missing sth as it is the same for all implementations
+@iglesiasg	taylan, well, I see that set_C accepts two arguments
+ taylan	I thought C is the cost parameter for misclassification..
+ taylan	and weights represent the imbalance of the dataset
+ taylan	so ideally I would keep weights constant to the ratio of positive and negative samples, and do a  grid search on C
+ taylan	but I cannot do a grid search on C without actually changing the weights
+@iglesiasg	C is the typical regularization
+@iglesiasg	and in this case you get the option to set different regularization for each of the classes
+@iglesiasg	because that is good when you have skewed class distributions
+@iglesiasg	I don't quite see where the problem comes
+ taylan	I think there is no problem, it's probably I misunderstand the concept..
+ taylan	so setting the weight in svm is actually shifting the regularization parameter internally, is that correct?
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+@iglesiasg	taylan, mmm I am not sure if you are calling weight to the regularization
+@iglesiasg	I believe the alphas are sometimes called weights
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has joined #shogun
+ taylan	ok, I see in libsvm code that the weights are actually the regularization for each class..
+ taylan	This means that I don't need to do any grid search for the c2 parameter, just on C1 will be enough
+ taylan	I have some other questions, I'd appreciate if you can help
+@iglesiasg	taylan, it can be that libsvm allows you to set regularization (your "weights") for each example
+@iglesiasg	it is just more general
+@iglesiasg	but you probably don't want to do model selection allowing every weight to be different
+ taylan	ok , I think it's clear now..
+ taylan	from libsvm docs:  -wi weight : set the parameter C of class i to weight*C, for C-SVC (default 1)
+ lisitsyn	oh well
+ lisitsyn	it happens all the time and we still didn't manage to fix it
+ lisitsyn	taylan: it is known issue but we don't have good solution to search just for C but not C1 C2
+ lisitsyn	iglesiasg: hey there
+@iglesiasg	hello hello
+ lisitsyn	taylan: it is just about too much code that uses this C1 C2 :) I am sorry you have to do double work here
+ taylan	so my other question is mainly about training huge datasets. I run out of memory with > 20K samples on 7 features..any tips on this?
+ lisitsyn	with your machine I mean
+ lisitsyn	taylan: just 20K samples and it fails?
+ taylan	lisitsyn, work is no problem..I just want to understand..
+ lisitsyn	I find it strange
+ taylan	yep, on that range
+ taylan	let me give it a try to be sure..
+ lisitsyn	taylan: how much memory do you have?
+ taylan	8GB
+ taylan	I mean I can up the memory of course, but I just have the impression that I am doing sth wrong..
+ lisitsyn	taylan: no no should be totally enough
+ taylan	SystemError: Out of memory error, tried to allocate 1599840004 bytes using malloc.
+ taylan	This is with 20K samples
+ taylan	It actually fails in the first iteration
+ lisitsyn	1.6 gb
+ lisitsyn	strange
+ sonne|osx	yeah should work
+ taylan	before running it I have 2.7GB free..
+ lisitsyn	taylan: can you share the code doing that?
+ taylan	sorry, 2.7GB full
+ taylan	ah, ok, I think it tries to allocate this 4 times, since I set the parallel to 4..
+ taylan	sth like this:
+ taylan	 self.gridSearch = GridSearchModelSelection(self.crossValidation, self.paramTree)         p = Parallel()         p.set_num_threads(4)         self.gridSearch.set_global_parallel(p)         best_combination = self.gridSearch.select_model(True)
+ taylan	sorry, couldn't paste well enough -))
+ taylan	ok, let's say that my dataset is actually a lot bigger..is there any way to use memory mapped files for feature storage?
+ dsockwell	i had a weird segfault with gridsearch a few months ago
+ lisitsyn	well your dataset is pretty small right now
+ dsockwell	haven't tried the new release or bothered debugging too much because it was a toy project
+ sonne|osx	we had an issue with a  memory leak w/ modular interfaces
+ lisitsyn	taylan: are you doing binary classification?
+ taylan	I see, so this might point to a memory leak somewhere..
+ sonne|osx	but no idea why it would alloc 1.5GB
+ dsockwell	but you may benefit from running valgrind on your project
+ taylan	yes, binary classification..
+ lisitsyn	taylan: I see absolutely no reason to allocate that much memory
+ taylan	I will give it a try, everything points me to using C++ now, so I wll port the code to C++. I have been using python, it might have an effect as well
+ dsockwell	i had to recompile libshogun targeting i486 to get valgrind to run
+ lisitsyn	taylan: no there is no matter in python
+ lisitsyn	it is about internal things
+ lisitsyn	dsockwell: why?
+ taylan	ok, I will debug this, and come back if I find sth. Just wanted to make sure I'm not doing anything stupid..
+ lisitsyn	did you get illegal instruction?
+ dsockwell	i had compiled it targeting an i7 and valgrind choked on some of the instructions
+ dsockwell	they're just behind
+ lisitsyn	dsockwell: ah you should have updated valgrind ;)
+ dsockwell	i did
+-!- krispin [0e8bb973@gateway/web/freenode/ip.14.139.185.115] has joined #shogun
+ lisitsyn	valgrind had an issue with i5 and i7
+ lisitsyn	newer one doesn't have it
+ dsockwell	since when is it gone?
+ dsockwell	i might have been doing that before the fix came
+ lisitsyn	dsockwell: ah okay
+ taylan	ok guys, thanks a lot for your feedback..I have one last question though.
+ lisitsyn	dsockwell: then just fyi now it is ok
+ taylan	is there any extension in shogun that can do mpi like parallelization?
+ sonne|osx	with valgrind you should always just use debug mode and no optimization flags
+ taylan	so if I want to run my training on multiple machines, any clues?
+ lisitsyn	taylan: so it would be helpful if you track down where allocation happens
+ dsockwell	anyway taylan valgrind should see through python into libshogun which is C++
+ lisitsyn	taylan: Heiko has some environment for that iirc
+ taylan	lisitsyn: i will investigate it..
+ lisitsyn	taylan: other way round you can send me some snippet
+ lisitsyn	I can take a look
+ lisitsyn	but later tonight
+@iglesiasg	taylan, you may want to check out GraphLab for MPI stuff
+ taylan	lisitsyn: It's ok, I believe I can learn a couple of things debugging..some sort of masochism ;)
+ taylan	iglesiasg: thanks, i will have a look at it now..
+ dsockwell	yes if it's your first time using valgrind, put a cloth down to catch the blood
+@iglesiasg	haha
+ lisitsyn	masochist and sadist were put into a jail, masochist cries - hurt me and sadist laughs - I won't I won't
+ lisitsyn	taylan: well if there are leaks - they shouldn't be here, if there are no leaks but it still wants all of your memory I'd suspect a bug here
+-!- krispin [0e8bb973@gateway/web/freenode/ip.14.139.185.115] has quit [Ping timeout: 250 seconds]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+@wiking	asdf
+ sonne|osx	or a user error
+ dsockwell	my personal guess is bad reference counting
+-!- FSCV [~FSCV@204.45.30.198] has joined #shogun
+@wiking	lol
+@wiking	https://www.destroyallsoftware.com/talks/wat
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun-web: Soeren Sonnenburg :master * 1056a50 / / (8 files): https://github.com/shogun-toolbox/shogun-web/commit/1056a50fa005e604e8ee03959b90140936ed0ce1
+ shogun-notifier-	shogun-web: create feature matrix under /page/features
+@sonney2k	iglesiasg, wiking, http://shogun-toolbox.org/page/features
+@sonney2k	(shift reload the page if it looks weird)
+@wiking	mmm
+@sonney2k	wiking, *lol*
+@sonney2k	wiking, the link you sent it is really hilarious :))
+@wiking	yeps
+@wiking	watMAN
+@wiking	sonney2k: how do we force regen of the matrix?
+@wiking	i see i guess feature_matrix.csv update would solve that
+@wiking	the feature groups should be *strong*
+@iglesiasg	feature matrix back again then!
+@wiking	i.e. *General Features* *Supported Operating Systems* etc
+@sonney2k	wiking, well easy just some css
+@wiking	sonney2k: go ahead ;)
+@sonney2k	wiking, the rotated text was not so easy..
+@wiking	sonney2k: r u feeling comfortable
+@wiking	with std::iostream?
+@wiking	or not so much
+@wiking	instead of FILE*
+@sonney2k	http://www.youtube.com/watch?v=9UP1LVNhTis
+@sonney2k	german though
+@sonney2k	german radio - moderator freak out
+@sonney2k	iglesiasg, well it is not really back yet - still hidden. we should get rid of the ? first
+@sonney2k	iglesiasg, and then proper integration...
+@sonney2k	wiking, you just run util/matrix.py - that will fetch the latest .csv
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has joined #shogun
+@wiking	sonney2k: got it
+@wiking	sonney2k: iostream?
+ sonne|osx	wiking: we are talking the c library libarchive?
+ sonne|osx	iglesiasg: any news on the markdown rendered stuff?
+@iglesiasg	sonne|osx, what I told you yesterday, I am stuck with one thing
+ sonne|osx	iglesiasg: didn't see it with what?
+@iglesiasg	so I pretty much put the javascript code in a new template
+@iglesiasg	https://github.com/iglesias/shogun-web/blob/readme/templates/readme.html
+@iglesiasg	but that is not showing anything
+@iglesiasg	actually, even if remove the line that includes the markdown.js, it is still the same thing going on
+@iglesiasg	so I was trying to debug that using the chrome dev tools
+@iglesiasg	but don't really get what is going on
+@iglesiasg	sonne|osx, do you see anything missing?
+@wiking	sonne|osx: yeps
+@wiking	sonne|osx: btw have u tried this: https://pypi.python.org/pypi/Markdown
+ sonne|osx	iglesiasg: I guess CORS issues - what does the console say?
+@iglesiasg	no idea what CORS is
+@iglesiasg	wikipedia...
+ sonne|osx	wiking: not sure if this is sufficient but I would actually prefer a server side solution
+ sonne|osx	iglesiasg: http://en.wikipedia.org/wiki/Cross-origin_resource_sharing
+@iglesiasg	yep, I was there
+ sonne|osx	iglesiasg: any errors on the console?
+@iglesiasg	sonne|osx, Uncaught SyntaxError: Unexpected token ILLEGAL
+ sonne|osx	hmmhh
+ sonne|osx	iglesiasg: or you render server side - maybe that is sufficient for us
+@wiking	sonne|osx: https://github.com/shogun-toolbox/shogun/issues/1619#issuecomment-28402597
+ sonne|osx	iglesiasg: so no .js but just the markdown python -pkg
+@wiking	sonne|osx: there
+@iglesiasg	got to run now
+@iglesiasg	will ask you later again
+@wiking	sonne|osx: full explanation about what we need
+ sonne|osx	wiking: sounds good - so you could wrap simple files with that (filename based and so could open / reopen)
+ sonne|osx	wiking: so we have some abstract class that defines these operations
+@wiking	sonne|osx: purely derived from SGObject?
+ sonne|osx	maybe we should rename CFile to something else and then use CFile for that
+ sonne|osx	wiking: yes
+ sonne|osx	maybe CFile -> CDataFile
+ sonne|osx	then define a new CFile with open/read/write/rewind
+@wiking	sonne|osx: or just have CFileHandle
+@wiking	or CFileStream
+ sonne|osx	that could be a normal FILE underneath or sth
+ sonne|osx	wiking: yes or that
+ sonne|osx	sounds good to me
+@wiking	CFileStream like an abstract class
+@wiking	and then inherit from there the simple posix based file reading
+ sonne|osx	so one could make it work with std::iostream / filename / http urls or anything filish
+@wiking	and the libarchived based one
+@wiking	yeps
+@wiking	what we can do is that simply have like CLibarchiveStream as default
+@wiking	if libarchive is available
+@wiking	as it supports raw file reading
+@wiking	i.e. null-compression files
+@wiking	as well as compressed files
+@wiking	and if libarchive is not available we use the posix backend by default
+ sonne|osx	you mean you would add some convenience constructor or what?
+ sonne|osx	if you just work with the abstract class it doesn't really matter...
+@wiking	sonne|osx: no... i mean that we leave CFile as is (almost.. remove some of the ctors)
+@wiking	and then if u call
+ sonne|osx	an then?
+@wiking	CFile(const char* fname, char rw='r', const char* name=NULL);
+@wiking	then that would use a default backend (depending what is available)
+@wiking	see above
+@wiking	of course there would be another ctor
+@wiking	where u can set your own backend
+@wiking	or prefered one
+@wiking	and as well get reference on the CFileStream
+ sonne|osx	wiking: ahh ok
+@wiking	but before doing this
+ sonne|osx	so CFile gets some set_stream() ?
+@wiking	yes
+ sonne|osx	sounds good!
+@wiking	but now i'm just looking into io/stream
+@wiking	i dont know
+@wiking	either we try to somehow merge these abstract classes somehow
+@wiking	or the completely different way to do libarchive support
+@wiking	is to add only to StreamingFile libarchive
+@wiking	i.e. StreamingAsciiFile.h
+@wiking	as actually libarchive as it's arch is more suitable for StreamingFile
+@wiking	(see the problem with seeking
+@wiking	)
+ sonne|osx	wiking: na what you proposed sounds pretty good so I would do that rather
+@wiking	mmm
+@wiking	i'm just looking at this
+@wiking	and actually having this in streaming
+@wiking	is basically only changing
+@wiking	IOBuffer
+@wiking	and that's aal
+@wiking	that's all
+@wiking	instead of this whole hacking
+@wiking	ok i'll have a look in this
+@wiking	as i really hate actually all these io classes hanging around
+@wiking	The vote ends Wednesday 13 November 2013 at 17h 27min 00s (local Paris).
+@wiking	aaah
+@wiking	in 1 hour we have the release of results for the shogun e.V
+@wiking	Please wait for 47 minutes 35s.
+ sonne|osx	wiking: finally...
+ shogun-notifier-	shogun-web: Soeren Sonnenburg :master * 64cd4da / static/media/feature_matrix.csv,templates/matrix.html,util/matrix.py: https://github.com/shogun-toolbox/shogun-web/commit/64cd4dabb7cd54c45f946166f999e5f071e66ee9
+ shogun-notifier-	shogun-web: add overview table for related toolboxes
+ shogun-notifier-	shogun-web: Soeren Sonnenburg :master * a3e207a / templates/matrix.html,util/matrix.py: https://github.com/shogun-toolbox/shogun-web/commit/a3e207a424779a29c3a823148af49bff212e5fb2
+ shogun-notifier-	shogun-web: make feature bold
+ sonne|osx	wiking: iglesiasg votes are in ... http://adoodle.org/index.php?action=showresults&survey=82ca76510d645ecf85961fcaffd36181
+-!- benibadm_ [~benibadma@94.135.236.129] has quit [Ping timeout: 264 seconds]
+@wiking	\o/
+@wiking	sonne|osx: coffin fw within should = streaming?
+-!- krispin [0e8bb972@gateway/web/freenode/ip.14.139.185.114] has joined #shogun
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+-!- lambday [67157f37@gateway/web/freenode/ip.103.21.127.55] has joined #shogun
+ sonne|osx	wiking: coffin what?
+-!- benibadman [~benibadma@port-92-206-233-160.dynamic.qsc.de] has joined #shogun
+-!- sonne|osx [~sonne@f053042012.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Quit: Leaving.]
+-!- krispin [0e8bb972@gateway/web/freenode/ip.14.139.185.114] has quit [Ping timeout: 250 seconds]
+@wiking	sonney2k: fw=framework
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+-!- new_lido [~walid@41.218.179.85] has quit [Quit: Leaving]
+@wiking	ok woah
+@wiking	i've just downloaded 22gigs in 10 seconds :D
+ lisitsyn	wiking: with quantum computer?
+ lisitsyn	or what?
+ lisitsyn	wiking: ahh you put it to /dev/null directly? ;)
+@wiking	noup
+@wiking	zfs
+@wiking	and gigabit
+ lisitsyn	wiking: but hard drive throughput?
+ lisitsyn	how can that be?
+-!- new_lido [~walid@41.218.179.85] has joined #shogun
+@wiking	zfs
+@wiking	the zfs cache is 14 gigs
+@wiking	lisitsyn: now i've upgraded myself from working with win7 to working on rdf+sparql
+@wiking	fucking hell... i'm really suprised how semantic web got boosted in the last 5 years
+-!- hushell [~hushell@8-12.ptpg.oregonstate.edu] has joined #shogun
+ lisitsyn	wiking: I have no idea what these rdfs sparqls are :D
+ lisitsyn	potlw uwcs goyus
+ lisitsyn	;)
+@wiking	:D
+@wiking	semantic web
+@wiking	it's your friend
+@wiking	see: freebase.org
+@wiking	it's fucking crazy
+@wiking	and amazing
+@wiking	we should try to use shogun on that
+@wiking	(i see it dying on it)
+@wiking	the database itself is 250gigs decompressed :)
+-!- gsomix [~gsomix@188.168.3.111] has joined #shogun
+ gsomix	good evening
+ gsomix	sorry for my absence
+@iglesiasg	sonney2k,  100% of votes, amazing :D
+@iglesiasg	haha this is funny
+@iglesiasg	we have taken measures to make it anonymous
+@iglesiasg	and now it isn't at all, because everyone voted, and voted the same :D
+-!- benibadman [~benibadma@port-92-206-233-160.dynamic.qsc.de] has quit [Remote host closed the connection]
+-!- benibadman [~benibadma@port-92-206-233-160.dynamic.qsc.de] has joined #shogun
+ lisitsyn	iglesiasg: three logicians walk into the bar
+ lisitsyn	you know that joke yes? :)
+-!- benibadman [~benibadma@port-92-206-233-160.dynamic.qsc.de] has quit [Ping timeout: 272 seconds]
+@iglesiasg	mmm I am not sure!
+@iglesiasg	the one of half a beer?
+ lisitsyn	so the bartender asks
+ lisitsyn	do ALL of you want some bear?
+ lisitsyn	1: I don't know
+ lisitsyn	2: I don't know
+ lisitsyn	3: YES!
+@iglesiasg	hahaha
+ lisitsyn	it is the same catch as we all know who voted for who
+@iglesiasg	all right, I will catch you later guys
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:9895:4f04:e0e5:ccbc] has quit [Quit: Ex-Chat]
+@wiking	lisitsyn: :D
+@wiking	let's import 250 gigs of rdf
+@wiking	and then lets index it
+@wiking	yey what amazing world we live in ;)
+-!- benibadman [~benibadma@port-92-206-233-160.dynamic.qsc.de] has joined #shogun
+@wiking	"that the huge amount of memory assigned to the indexing tool (32GByte) will only
+@wiking	be needed during the final optimization of the created Solr Index"
+@wiking	heh
+@wiking	i remember the time i bought a 640 megz harddrive
+@wiking	;P
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- hushell [~hushell@8-12.ptpg.oregonstate.edu] has quit [Ping timeout: 272 seconds]
+-!- hushell [~hushell@8-12.ptpg.oregonstate.edu] has joined #shogun
+ gsomix	nite
+@wiking	gnite
+-!- lambday [67157f37@gateway/web/freenode/ip.103.21.127.55] has quit [Quit: Page closed]
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	sup guys
+-!- benibadman [~benibadma@port-92-206-233-160.dynamic.qsc.de] has quit [Remote host closed the connection]
+-!- benibadman [~benibadma@port-92-206-233-160.dynamic.qsc.de] has joined #shogun
+-!- benibadm_ [~benibadma@port-92-206-233-160.dynamic.qsc.de] has joined #shogun
+-!- benibadman [~benibadma@port-92-206-233-160.dynamic.qsc.de] has quit [Ping timeout: 245 seconds]
+@wiking	notmuch
+@wiking	crunching data
+@wiking	:)
+-!- benibadm_ [~benibadma@port-92-206-233-160.dynamic.qsc.de] has quit [Remote host closed the connection]
+-!- benibadman [~benibadma@port-92-206-233-160.dynamic.qsc.de] has joined #shogun
+-!- benibadman [~benibadma@port-92-206-233-160.dynamic.qsc.de] has quit [Ping timeout: 248 seconds]
+@iglesiasg	hehe as usual then
+--- Log closed Thu Nov 14 00:00:24 2013

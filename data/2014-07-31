@@ -1,0 +1,333 @@
+--- Log opened Thu Jul 31 00:00:38 2014
+-!- kislay [~Abhijeet@117.239.94.112] has quit [Read error: Connection reset by peer]
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- mE\Ta [~rain@95.211.184.195] has quit [Ping timeout: 245 seconds]
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-204-239-28.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's khalednasr's turn to pay the next round of drinks for the massacre he caused in khalednasr/shogun: http://travis-ci.org/khalednasr/shogun/builds/31290884
+-!- travis-ci [~travis-ci@ec2-54-204-239-28.compute-1.amazonaws.com] has left #shogun []
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Client Quit]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: leaving]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- mode/#shogun [+o wiking] by ChanServ
+-!- cheng [cb8fa5a2@gateway/web/freenode/ip.203.143.165.162] has joined #shogun
+ cheng	Hi guys, anybody awake yet? As usual, I have a noob question about compilation on OSX.
+ cheng	2 issues: First, for some reason the variational_approx_example.cpp doesn't compile. It dies asking for a _main symbol. After removing it from CMakeLists.txt, compilation completes.
+ cheng	Second: with the python modular interface, import modshogun gives a segmentation fault.
+ cheng	I'm guessing it is some sort of path problem, but I've looked at a few standard things, but nothing seems to help.
+ cheng	I'm compiling the develop branch from github
+@wiking	mmm hey
+@wiking	cheng: what is your swig versio?
+ cheng	Swig version 3.0.2
+@wiking	mmm
+@wiking	:<
+@wiking	i have a bad nes for you
+@wiking	*news
+ cheng	I need some special swig version?
+@wiking	https://github.com/shogun-toolbox/shogun/issues/2313
+@wiking	yeah unfortunately until we dont find out what's happening
+@wiking	you would need swig2
+@wiking	if you want modular interface
+ cheng	I see. I'll try to downgrade.
+@wiking	sorry for the inconvenience...
+ cheng	Price for being bleeding edge. :-)
+@wiking	hehehe
+ cheng	Downgraded to swig 2.0.12. Still segfaulting. What's the right environment variable to set for lib on OSX?
+@wiking	mmmm
+@wiking	you need to set PYTHONPATH
+@wiking	and DYLD_LIBRARY_PATH
+ cheng	Hmm.. I have those environment variables right.
+ cheng	make install puts my python code into site-packages and not dist-packages, but I assume that with PYTHONPATH pointing to site-packages, then it should be ok.
+@wiking	yes
+@wiking	cheng: http://stackoverflow.com/questions/9387928/whats-the-difference-between-dist-packages-and-site-packages
+@wiking	i.e. dist-packages = debian stuff
+@wiking	everywhere else it's site-packages
+ cheng	by using python -v, it seems that I'm calling dlopen("./_modshogun.so", 2);
+@wiking	where's your PYTHONPATH pointing exactly?
+ cheng	PYTHONPATH=/Users/cong/lib/python2.7/site-packages:/Users/cong/lib/python2.7/dist-packages:/usr/local/lib/python2.7/site-packages:
+@wiking	how do you import shogun?
+ cheng	fresh python terminal.
+@wiking	cheng: can you plz paste the output of this: ls /Users/cong/lib/python2.7/site-packages
+ cheng	_modshogun.so is in /Users/cong/lib/python2.7/site-packages
+@wiking	btw how's winter over there? :)
+ cheng	$ ls /Users/cong/lib/python2.7/site-packages/ Cartopy-0.11.x-py2.7.egg-infomodshogun.py OptWok-0.4-py2.7.egg-infomodshogun.pyc _modshogun.sooptwok cartopyshogun
+@wiking	mmmhm
+ cheng	Winter is pretty good in Australia. Temperature is 16C at the moment here in Canberra.
+@wiking	is there anything in /Users/cong/lib/python2.7/site-packages/shogun ?
+@wiking	cheng: what the heck r u doing in canberra again? :)
+ cheng	$ ls /Users/cong/lib/python2.7/site-packages/shogun/ ClassifierDistributionKernelMathematicsStatistics ClusteringEvaluationLatentModelSelectionStructure ConverterFeaturesLibraryPreprocessor__init__.py DistanceIOLossRegression
+@wiking	okok that's the old shogun stuff...
+ cheng	They closed the lab down in Melbourne. Tough story...
+@wiking	damn
+@wiking	so you r in nicta on london circuit?
+ cheng	Basically, bioinformatics was not that popular in NICTA.
+@wiking	:<<<
+ cheng	So, now I'm back in the machine learning group.
+ cheng	The same one.
+@wiking	that was always pretty good @ nicta in canberra
+@wiking	i've just relocated to singapore... if you happend to b around drop me a msg
+ cheng	Oh where to?
+@wiking	ah i'm just nowhere now
+@wiking	i've come here coz of my wife
+ cheng	I lived there for two years ages ago.
+@wiking	so i'm now just hanging around... till i find something
+ cheng	What type of job are you looking for?
+@wiking	mmm anything :)
+ cheng	I know a few people there.
+ cheng	Academic?
+@wiking	happy to do anything if it's interesting
+@wiking	you know ML (possibly shogun) :P
+@wiking	usual stuff :>
+ cheng	Send me your resume: cheng-soon.ong@nicta.com.au
+@wiking	ehehh cool will do
+@wiking	thnx heaps!
+@wiking	let's see your problem though
+ cheng	These path craziness is killing me. /usr/local/lib/python2.7/site-packages does not contain shogun.
+@wiking	ok
+@wiking	PYTHONPATH=/Users/wiking/shogun-latest-build/lib/python2.7/site-packages DYLD_LIBRARY_PATH=/Users/wiking/shogun-latest-build/lib ipython
+@wiking	import modshogun
+@wiking	that does it for me
+@wiking	so i would say
+@wiking	in your case
+@wiking	PYTHONPATH=<the same one you've just pasted> DYLD_LIBRARY_PATH=/Users/cong/lib python
+@wiking	i assume the libshogun.16.1.dylib is in /Users/cong/lib
+@wiking	irght?
+ cheng	yes.
+@wiking	ok  then try that
+ cheng	Huh, that works!
+@wiking	great
+ cheng	What in the world is wrong with my path?
+@wiking	nothing
+ cheng	Maybe dist-packages?
+@wiking	it's just that you haven't installed shogun
+@wiking	to a default path
+@wiking	that's why you have to do these tricks
+@wiking	you can set -DDCMAKE_INSTALL_PREFIX=/usr/local
+ cheng	All those exports in .profile doesn't do it??
+@wiking	i mean cmake -DCMAKE_INSTALL_PREFIX=/usr/local
+@wiking	..
+@wiking	and that will then isntall shogun under /usr/local/lib...
+ cheng	I did set INSTALL_PREFIX to /Users/cong/lib
+@wiking	yeah
+@wiking	then you have to set the right env variables
+@wiking	;)
+@wiking	.profiles?
+@wiking	ah yeah
+ cheng	I set environment variables in .profile
+@wiking	you can set then there
+ cheng	cong:~ cong$ env | grep DYLD DYLD_LIBRARY_PATH=/Users/cong/lib: cong:~ cong$ env | grep PYTHONPATH PYTHONPATH=/Users/cong/lib/python2.7/site-packages:/usr/local/lib/python2.7/site-packages: cong:~ cong$ python Python 2.7.6 (default, Mar 27 2014, 09:59:51)  [GCC 4.2.1 Compatible Apple LLVM 5.1 (clang-503.0.38)] on darwin Type "help", "copyright", "credits" or "license" for more information. >>> import modshogun Segmentation fault: 11 
+ cheng	Oops, sorry for the lack of newlines.
+ cheng	maybe my python is not reading the environment variables?
+ cheng	which python
+ cheng	gives /usr/local/bin/python
+ cheng	Red herring! Sorry, In the window with the paths set before calling python, I accidentally imported shogun, *not* modshogun.
+ cheng	That still segfaults.
+@wiking	mmmm
+@wiking	damn
+@wiking	whats your osx version?
+ cheng	10.9.4
+@wiking	same here :S
+ cheng	cmake version 3.0.0
+@wiking	gotta run out for 30 mins
+@wiking	if u r still around
+@wiking	we can debug it
+ cheng	Thanks for your patience @wiking!
+@wiking	nw
+-!- kislay [~Abhijeet@210.212.61.185] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 30d89be / src/shogun/ui/GUIClassifier.cpp: https://github.com/shogun-toolbox/shogun/commit/30d89bec813df4aa6177f2384b6c86490db9f350
+ shogun-notifier-	shogun: Use the correct guard (HAVE_EIGEN3 instead of HAVE_EIGEN) in GUIClassifier. This fixes broken test in cmdline static.
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 5c91980 / src/shogun/ui/GUIClassifier.cpp: https://github.com/shogun-toolbox/shogun/commit/5c919806d8933d4e0e1a518af814f008d7239157
+ shogun-notifier-	shogun: Merge pull request #2436 from iglesias/fix/cmdline_static_classifier_lda_test
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Use the correct guard (HAVE_EIGEN3 instead of HAVE_EIGEN)
+ shogun-buildbot	build #3143 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3143  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- kislay [~Abhijeet@210.212.61.185] has quit [Quit: Leaving]
+-!- PirosB3 [~pirosb3@178.19.210.162] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-91-110-179.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/31308644
+-!- travis-ci [~travis-ci@ec2-54-91-110-179.compute-1.amazonaws.com] has left #shogun []
+@thoralf	wiking: You pinged me yesterday.
+@thoralf	I've got a few minutes now.
+-!- travis-ci [~travis-ci@ec2-54-198-13-10.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/31308644
+-!- travis-ci [~travis-ci@ec2-54-198-13-10.compute-1.amazonaws.com] has left #shogun []
+@wiking	thoralf: hey morning
+@thoralf	Hey.
+@wiking	thoralf: yeh i was wondering about your idea about protobuf
+@thoralf	wiking: Well, HeikoS said he wants to get rid of out home-grown serialization stuff and wants to use boost for it.  I suggested to use protobuf, because we already have this dependency.
+@thoralf	I discussed boost vs. protobuf once and I've been told that protobuf is more lightweight and less overengineered.
+@thoralf	But I don't have *strong* emotions on this.
+@thoralf	My main point was not to talk about boost as long as we don't know why to not use protobuf.
+@thoralf	I also like the boost API.
+@thoralf	In any case... we have to check how to integrate this to shogun without writing each mapping by hand.
+@thoralf	wiking: What do you think about this?
+@wiking	just a sec i had a call
+@wiking	couldn't read till now
+@wiking	yeah but the thing is that it was till now a really good thing that having our own serialization engine
+@wiking	we could produce different outputs
+@wiking	i.e. json, xml, protobuf
+@wiking	etc
+@wiking	and there are far better serialization libraries out there than protobuf
+@wiking	check this for example: http://kentonv.github.io/capnproto/
+@wiking	or avro for that matter
+@wiking	shogun-buildbot: force build --branch=develop 'deb1 - libshogun'
+ shogun-buildbot	build forced [ETA 5m11s]
+ shogun-buildbot	I'll give a shout when the build finishes
+-!- cheng [cb8fa5a2@gateway/web/freenode/ip.203.143.165.162] has quit [Quit: Page closed]
+ shogun-buildbot	build #3144 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3144
+@wiking	shogun-buildbot: force build --branch=develop 'deb2 - static_interfaces'
+ shogun-buildbot	build forced [ETA 3m14s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #2260 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb2%20-%20static_interfaces/builds/2260
+@thoralf	wiking: I like avro a lot.
+@thoralf	wiking: Still we have to see how to integrate all this stuff.
+@thoralf	wiking: Anyway, I shouldn't put my opinion on this because I never used this serialization.  The whole discussion started with things to throw out with serialization as one example.
+@thoralf	wiking: Then HeikoS said he wants to use boost serialization.
+@thoralf	wiking: Then I said why not protobuf, because we already depend on this one.
+@thoralf	Now we're here. ;)
+@thoralf	Am, btw., the first point on our list was to put promote the nightly images so that we can offer "easy" installation of shogun for various distributions.
+@thoralf	s/Am/And/
+-!- thoralf [~thoralf@91-64-98-140-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+-!- rajul [~rajul@115.242.126.169] has joined #shogun
+-!- thoralf [~thoralf@91-64-98-140-dynip.superkabel.de] has joined #shogun
+-!- mode/#shogun [+o thoralf] by ChanServ
+@besser82	thoralf, wiking:  Workshop Videos are online, now!  See the mailinglist for an announcement && links... ^^
+@besser82	wiking, do we want to make a torrent, too?
+-!- rajul [~rajul@115.242.126.169] has quit [Ping timeout: 260 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@wiking	no that's fine if its' on youtube
+-!- HeikoS [~heiko@0544f030.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@besser82	HeikoS, g' morning! ^^
+@besser82	HeikoS:  Workshop Videos are online, now!  See the mailinglist for an announcement && links... ^^
+@HeikoS	besser82: i just saw them
+@HeikoS	besser82: nice! thanks
+@besser82	HeikoS, np yw!  :D
+@HeikoS	besser82: bit of a pityy with the sound
+@besser82	HeikoS, why?
+@HeikoS	distorted
+@besser82	HeikoS, like clipping?
+@besser82	HeikoS, or you talking about the side-noise...
+@HeikoS	besser82: like the mic input is too much
+@HeikoS	besser82:  not your fault
+@besser82	HeikoS, *phew* then i'm a a bit released, now! ^^
+@besser82	HeikoS, do we want to share them by bittorrent, too?
+@besser82	HeikoS, I have enconded all vids with ogg/theora in CATV airing quali;  yt somehow reprocesses them with a lousier quali...
+@HeikoS	besser82: could you share the raw data?
+@besser82	HeikoS, you mean the disk_img from the sdcards?
+@besser82	HeikoS, files on it isn't touched and are encoded as MPEG-2-streams...
+@besser82	HeikoS, vids on yt are mainly untouched; just cut a bit at the beginning and the end...
+@besser82	HeikoS, and I tried to get the 'noise' out from them as good as possible...
+-!- PirosB3 [~pirosb3@178.19.210.162] has quit [Ping timeout: 250 seconds]
+@besser82	HeikoS, or what do you mean by `raw` data...
+-!- mE\Ta [~rain@95.211.184.195] has joined #shogun
+-!- HeikoS [~heiko@0544f030.skybroadband.com] has quit [Quit: Leaving.]
+@lisitsyn	huh
+@lisitsyn	besser82: so how was the workshop? ;)
+@besser82	lisitsyn, *very* nice && good  ^^
+@besser82	lisitsyn, how was your move to moscow?
+@lisitsyn	besser82: crazy :)
+@besser82	lisitsyn, let's move query  ;)
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-yzsfnwcxhczbufpc] has joined #shogun
+-!- PirosB3 [~pirosb3@178.19.210.162] has joined #shogun
+ PirosB3	Hi all, I have a list of 10 parameters of a function. Each parameter is a boolean value. As the function needs to be very performant, I need to find an intelligent way of caching. Each set of paramenters has a unique output that can be cached. Said this, it probabily is better to cached the most used common parameters first, and the less common used latest (I'm thinking of a sort of decision tree). Is there any algorithm you can suggest to handle this
+ PirosB3	problem? thanks!
+@lisitsyn	PirosB3: hey, it looks like something similar to tree in huffman coding
+@lisitsyn	so its like decision tree yes
+ PirosB3	but how can I encode it?
+ PirosB3	how can I find the best split
+ PirosB3	I have a list of all occurrancies for each parameter
+@lisitsyn	ok let me think
+@lisitsyn	so you have like 1010101010
+ PirosB3	ex: ('(False, False, False, True, False, True, True, True, True, False)', called 9398 times),
+@lisitsyn	ahh ok
+ PirosB3	('(False, True, False, False, False, True, True, False, False, True)', 6020),
+ PirosB3	called 6020 times
+@lisitsyn	yeah got it so you need to optimize for this frequent cases
+ PirosB3	exactly
+ PirosB3	it's a cool problem, and probably an overkill for what I'm doing
+@lisitsyn	then you need some kind of prefix tree but still not clear how to split it
+ PirosB3	what about if I write a cost fn
+ PirosB3	where cost == number of times called
+ PirosB3	but then, once I write that, I still don't know how to split :D
+@lisitsyn	PirosB3: what's pretty clear is that you'd need some kind of tree each node of which checks multiple bits at the moment
+@lisitsyn	I mean basic tree won't make it faster for you
+ PirosB3	what I could do
+ PirosB3	is actually encode the "cost" in between transitions
+ PirosB3	from one state to another state
+ PirosB3	each decision makes a split
+ PirosB3	then just use some optimizer
+-!- parijat [75c7d150@gateway/web/freenode/ip.117.199.209.80] has joined #shogun
+-!- parijat [75c7d150@gateway/web/freenode/ip.117.199.209.80] has quit [Ping timeout: 246 seconds]
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has quit [Ping timeout: 272 seconds]
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has joined #shogun
+@wiking	sonne|work: ping :)
+ sonne|work	wiking: pong
+@wiking	sonne|work: no news yet?
+-!- lambday [7aa773d8@gateway/web/freenode/ip.122.167.115.216] has joined #shogun
+ sonne|work	wiking: they are asking for some tax id which we don't have and I told them so...
+@wiking	lol
+@wiking	:>
+@wiking	so we are now hanging in the air :)
+@wiking	okey
+-!- PirosB3 [~pirosb3@178.19.210.162] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@178.19.210.162] has joined #shogun
+-!- yorkerlin [81617cb4@gateway/web/freenode/ip.129.97.124.180] has joined #shogun
+ lambday	wiking: hi!
+ lambday	wiking: can we merge linalg to develop now?
+ lambday	wiking: I too needed to add a few methods there
+-!- PirosB3 [~pirosb3@178.19.210.162] has quit [Quit: PirosB3]
+@wiking	lambday: no not yet
+@wiking	lambday: i want to test it on a machine
+@wiking	before actually merging it
+ lambday	wiking: yeah that would be the best
+@wiking	which means we need a builtbot
+@wiking	for that
+@wiking	which is actually under progress
+@wiking	but we dont know yet when it's going to be ready
+@wiking	i hope this week
+ lambday	wiking: so as of now I am working on feature/linalg branch only
+ lambday	and send PRs there
+@wiking	yeah i see that
+@wiking	heiko pointed on gsomix as being me :DDD
+-!- yorkerlin [81617cb4@gateway/web/freenode/ip.129.97.124.180] has quit [Ping timeout: 246 seconds]
+-!- khalednasr [~k.nasr92@41.69.158.122] has joined #shogun
+-!- kislay [~Abhijeet@117.239.94.112] has joined #shogun
+-!- kislay [~Abhijeet@117.239.94.112] has quit [Remote host closed the connection]
+-!- kislay [~Abhijeet@117.239.94.112] has joined #shogun
+-!- kislay [~Abhijeet@117.239.94.112] has quit [Remote host closed the connection]
+-!- kislay [~Abhijeet@210.212.61.185] has joined #shogun
+-!- kislay [~Abhijeet@210.212.61.185] has quit [Read error: Connection reset by peer]
+-!- parijat [75c7daa3@gateway/web/freenode/ip.117.199.218.163] has joined #shogun
+-!- khalednasr [~k.nasr92@41.69.158.122] has quit [Quit: Leaving]
+-!- kislay [~Abhijeet@117.239.94.112] has joined #shogun
+-!- kislay_ [~Abhijeet@210.212.61.185] has joined #shogun
+-!- kislay [~Abhijeet@117.239.94.112] has quit [Ping timeout: 255 seconds]
+-!- HeikoS [~heiko@0544f030.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- parijat [75c7daa3@gateway/web/freenode/ip.117.199.218.163] has quit [Ping timeout: 246 seconds]
+-!- HeikoS [~heiko@0544f030.skybroadband.com] has quit [Client Quit]
+@besser82	HeikoS, you got my mail about the different torrents?
+@besser82	HeikoS, so you can pick the one which fits what you want and leech it...
+-!- HeikoS [~heiko@0544f030.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@besser82	HeikoS, you got my mail about the different torrents?
+@besser82	HeikoS, so you can pick the one which fits what you want and leech it...
+-!- HeikoS [~heiko@0544f030.skybroadband.com] has quit [Client Quit]
+-!- kislay_ [~Abhijeet@210.212.61.185] has quit [Ping timeout: 255 seconds]
+-!- rajul [~rajul@180.151.18.31] has joined #shogun
+-!- parijat [75c7daa3@gateway/web/freenode/ip.117.199.218.163] has joined #shogun
+-!- princearora [~princearo@117.55.241.55] has joined #shogun
+-!- kislay_ [~Abhijeet@14.139.41.150] has joined #shogun
+-!- princearora [~princearo@117.55.241.55] has quit [Ping timeout: 272 seconds]
+-!- rajul [~rajul@180.151.18.31] has quit [Quit: Leaving]
+-!- kislay_ [~Abhijeet@14.139.41.150] has quit [Read error: Connection reset by peer]
+@wiking	y u no build
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- parijat [75c7daa3@gateway/web/freenode/ip.117.199.218.163] has quit [Quit: Page closed]
+--- Log closed Fri Aug 01 00:00:39 2014

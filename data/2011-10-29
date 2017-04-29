@@ -1,0 +1,140 @@
+--- Log opened Sat Oct 29 00:00:10 2011
+ CIA-3	shogun: Soeren Sonnenburg master * re9c8ecd / src/interfaces/lua_modular/swig_typemaps.i : fix an error in the lua typemaps (checking for the typecode without using strcmp) - http://git.io/PIgx2g
+-!- BrianC_ [43dc92a2@gateway/web/freenode/ip.67.220.146.162] has quit [Ping timeout: 265 seconds]
+-!- blackburn [~blackburn@188.168.2.187] has joined #shogun
+ blackburn	sonney2k: wow you did a lot of fixes
+-!- blackburn [~blackburn@188.168.2.187] has quit [Read error: Operation timed out]
+-!- blackburn [~blackburn@188.168.4.216] has joined #shogun
+-!- blackburn1 [~blackburn@188.168.5.175] has joined #shogun
+-!- blackburn [~blackburn@188.168.4.216] has quit [Ping timeout: 258 seconds]
+ supernaught	sonney2k: When you say "use the signum of these numbers, e.g. if the sign is negative then it is a letter from group A, if positve then from group B"
+ supernaught	how do I feed in a number for which training has not been done?
+ supernaught	e.g. In the program, one creates points {0,1,2} with labels {-1,1,-1}
+ supernaught	but when I attempt to extrapolate from my inputs and determine which group {3} belongs to, I pull an exception "terminate called after throwing an instance of 'shogun::ShogunException'"
+ blackburn1	supernaught: are you doing multi-class classification?
+ supernaught	I believe not
+ blackburn1	how many letter groups you have?
+ supernaught	I'm working with third one from top at http://www.shogun-toolbox.org/doc/en/current/developer_tutorial.html
+ supernaught	I'm not sure what a letter group is
+ blackburn1	well you said group A, group B, ..?
+ supernaught	oh, sure
+ blackburn1	and there are only A and B, right?
+ supernaught	2
+ supernaught	+1, -1
+ supernaught	yes
+ blackburn1	and you set up labels with +1 and -1
+ blackburn1	and got exception?
+ supernaught	yes
+ supernaught	the example is nearly verbatim what I have
+ supernaught	except when I go to "classify over training variables"
+ supernaught	I loop from 0 to 4 instead of 0 to 3
+ blackburn1	can you send the example reproducing the error to me?
+ supernaught	sure
+ blackburn1	I would check it and fix then
+ blackburn1	or say what is wrong
+ supernaught	let me paste it somewhere
+ blackburn1	just send it by email
+ blackburn1	to blackburn91@gmail.com
+-!- blackburn1 is now known as blackburn
+ blackburn	supernaught: btw what are the features you do use?
+ supernaught	https://gist.github.com/1325029
+ blackburn	ah sure gist works too
+ supernaught	I'm a complete newb to machine learning
+ supernaught	I'm not sure what you mean by "features" ?
+ blackburn	hmm for example simple features is just dense vectors
+ blackburn	[1,2,3,4]
+ supernaught	whoops, I forgot the error
+ blackburn	and feature is 1 and 2 and 3 and 4
+ blackburn	then [1,2,3,4] is a feature vector
+ blackburn	and matrix containing feature vector is a feature matrix
+ supernaught	ok
+ blackburn	but sometimes feature vector is just a string ("some string")
+ blackburn	and there is no feature matrix
+ supernaught	Ok: so a feature vector is an input which is used for training?
+ blackburn	yes, it is vector representing some object
+ supernaught	ok. Lingo :)
+ blackburn	something like that :)
+ blackburn	okay
+ supernaught	so in this case, I am using a feature vector of [0,1,2,3,4,5]
+ blackburn	so do you understand what are train set and test set?
+ blackburn	no
+ blackburn	[[0,2,4],
+ blackburn	 [1,3,5]]
+ blackburn	it is a feature matrix
+ supernaught	oh, right
+ blackburn	[0,1] [2,3] [4,5] is a feature vectors
+ supernaught	and the fortran-style indexing
+ supernaught	gotcha
+ blackburn	yeah old-school hah
+ blackburn	okay I got it
+ blackburn	about train features and test features
+ blackburn	you are trying to classify 4th object/vector
+ blackburn	that are not here anyhow
+ supernaught	perhaps I am misunderstanding a training and a test
+ supernaught	you say
+ supernaught	this makes sense
+ supernaught	how do I input some test data then ?
+ blackburn	supernaught: you could use set_features
+ blackburn	or apply to whole features
+ supernaught	I will check out the documentation now
+ blackburn	well we have pretty bad doc
+ supernaught	just so I am sure,
+ blackburn	svm->apply(features)
+ blackburn	will return CLabels instance
+ blackburn	when you can get classified labels
+ blackburn	supernaught: btw why are you using C++ for doing that?
+ supernaught	so what is happening is I will get:     <interpretted/classified data>   =  svm->apply(  <test data>  );
+ supernaught	?
+ supernaught	I am tinkering with embedding shogun in a set of medical physics libraries which are written in c++
+ blackburn	ah
+ blackburn	I see
+ blackburn	apply(features) returns CLabels
+ blackburn	which are containing labels (-1,+1,..)
+ supernaught	Awesome. Thanks for the clarification. I'll check out the documentation and come back when I get stuck again :)
+ blackburn	i.e. the results of classification
+ supernaught	thanks!
+ blackburn	you could just ask here :)
+ supernaught	unfortunately I never seem to learn anything unless I struggle through it a little
+ supernaught	maybe it is 'starving artist' syndrome
+ supernaught	: /
+ blackburn	everyone do the same I guess
+ blackburn	https://gist.github.com/1325045
+ blackburn	good thing is you understand my broken english :D
+ supernaught	not a problem
+ supernaught	thanks again - this is some unbelieveably cool software
+ supernaught	I'm grateful, thanks
+ blackburn	supernaught: in the example I sent to you
+ blackburn	there are features and features_test
+ blackburn	ah I did it wrong
+ blackburn	okay when there are features and features_test
+ blackburn	and if you do svm->train with features
+ blackburn	and then svm->apply with features_test
+ blackburn	you will get classification results
+ supernaught	:D
+ blackburn	supernaught: it is nice to hear our software is any cool :)
+ supernaught	Ok
+ supernaught	I understand
+ supernaught	one more question, though
+ supernaught	how stable is the c++ api ?
+ blackburn	supernaught: in what means?
+ supernaught	in a few years, will I be able to compile my code?
+ supernaught	e.g. shogun is 1.0.0 right now. How much will things change at 8.0.0 ?
+ blackburn	oh, I hope so
+ blackburn	are you doing eternal software? :D
+ supernaught	in the medical world, everything is supposed to be 'eternal' and 'error-free'
+ supernaught	;)
+ blackburn	yeah sure
+ blackburn	I'm not sure about every method but I think apply/train/CLabels/etc things won't be changed
+ supernaught	cool
+ supernaught	Well, I'm off for now. I'll catch you later blackburn
+ blackburn	supernaught: okay see you
+ blackburn	supernaught: I'm really interested with attaching shogun to any other software (as Soeren does too) - so don't hesitate to ask
+ CIA-3	shogun: Sergey Lisitsyn master * r5ced67a / (src/shogun/base/SGObject.cpp src/shogun/base/SGObject.h): Fixed spacings at SGObject - http://git.io/I0J7rQ
+ supernaught	blackburn: the application will be a compatibility layer between raw medical data and a uniform-surface application layer
+ blackburn	supernaught: I see, I hope that will work
+ supernaught	it is a for a master's thesis, but the (public) organization I work for covers a large part of Canada
+ supernaught	and they are eager to adopt it
+ supernaught	so I would _love_ to put shogun to work
+ blackburn	supernaught: what are the tasks that software specialize with?
+ blackburn	supernaught: anyway as I said before don't hesitate to ask me or Soeren and if there is no one of us here - ask on the mailing list or by email
+--- Log closed Sun Oct 30 00:00:17 2011

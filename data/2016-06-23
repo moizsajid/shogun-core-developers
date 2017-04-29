@@ -1,0 +1,329 @@
+--- Log opened Thu Jun 23 00:00:51 2016
+-!- OXPHOS [c68f0c0c@gateway/web/freenode/ip.198.143.12.12] has joined #shogun
+ OXPHOS	standup: linalg - sgvector now supports gpu vector. implemented linalg cpu/gpu backend and linalg dot. clean-up of some cookbooks. Plan: MAKE LINALG WORK. gp classifier cookbook
+ bazdmeg	bzadmeg
+-!- arianepaola [~ariane@unaffiliated/arianepaola] has quit [Ping timeout: 272 seconds]
+ OXPHOS	HeikoS_web: there? u wanna check the PR?
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 260 seconds]
+-!- GandalfTheWizard [~Eva@112.10.171.169] has joined #shogun
+-!- arianepaola [~ariane@unaffiliated/arianepaola] has joined #shogun
+-!- Saurabh7 [~Saurabh7@117.248.208.58] has joined #shogun
+-!- Saurabh7 [~Saurabh7@117.248.208.58] has quit [Ping timeout: 264 seconds]
+-!- OXPHOS [c68f0c0c@gateway/web/freenode/ip.198.143.12.12] has quit [Ping timeout: 250 seconds]
+-!- Saurabh7 [~Saurabh7@117.248.208.58] has joined #shogun
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+-!- Saurabh7 [~Saurabh7@117.248.208.58] has quit [Quit: Leaving]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- GandalfTheWizard [~Eva@112.10.171.169] has quit [Quit: Leaving.]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+-!- Saurabh7 [~Saurabh7@117.248.208.58] has joined #shogun
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+-!- Saurabh7_ [~Saurabh7@117.248.208.58] has joined #shogun
+-!- Saurabh7 [~Saurabh7@117.248.208.58] has quit [Ping timeout: 260 seconds]
+-!- OXPHOS [c68f0c0c@gateway/web/freenode/ip.198.143.12.12] has joined #shogun
+-!- Saurabh7_ is now known as Saurabh7
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- Saurabh7 [~Saurabh7@117.248.208.58] has quit [Quit: Leaving]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+-!- HeikoS [~heiko@AAubervilliers-652-1-253-126.w83-112.abo.wanadoo.fr] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ OXPHOS	HeikoS: hey
+@HeikoS	OXPHOS: jo
+@HeikoS	was just looking for you
+@HeikoS	so about the macros, did wiking explain how to do it?
+ OXPHOS	HeikoS: not yet..@wiking
+@HeikoS	OXPHOS: asked google?
+ OXPHOS	HeikoS: tried..
+ c4goldsw	HeikoS: almost done.  Just getting over some type mismatch errors.
+@HeikoS	c4goldsw: great
+@HeikoS	OXPHOS: ok pls ping him thoroughly
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Client Quit]
+@HeikoS	he tends to disappear when asking for details on what he means :)
+ OXPHOS	HeikoS: haha sure
+@HeikoS	OXPHOS: until then, leave the macro in
+ OXPHOS	HeikoS: the problem is - how to call linalgbackendeigen.dot method from the linalgbackendbase* ?
+@HeikoS	OXPHOS: not sure
+@HeikoS	what you mean
+@HeikoS	line?
+ OXPHOS	HeikoS: so once the user assigns a backend, like sg_linalg->set_gpu_backend(new LinalgBackendViennaCL());
+ OXPHOS	it is casted to linalgbackendbase*
+@HeikoS	no need to cast
+@HeikoS	since it extends linalgbackendbase
+@lambday	OXPHOS: overriding :)
+@HeikoS	lambday: joooo
+@lambday	HeikoS: hola
+ OXPHOS	when i try to call sg_linalg->get_gpu_backend()->dot(a, b);
+@lambday	HeikoS: how's it going?
+@HeikoS	lambday: you have an idea how to avoid macros / explicit using c++11 ?
+@HeikoS	lambday: good here
+@HeikoS	lambday: have to go soon
+@HeikoS	but just wanted to check that all is going fine
+ OXPHOS	i **think** it is overriding, but the pointer is base type
+@lambday	HeikoS: can you have a quick look at the gaussian kernel patch? travis is green now
+ OXPHOS	so it won't even consider the derived methods
+@lambday	HeikoS: sorry I don't have an idea..
+@lambday	those methods are virtual.. they can't be templated
+@lambday	my fucking screen is broken.. I can't see the left side of the screen it's all blurry white lines argh!
+@HeikoS	lambday: gotta go, see you
+-!- HeikoS [~heiko@AAubervilliers-652-1-253-126.w83-112.abo.wanadoo.fr] has quit [Quit: Leaving.]
+@lambday	OXPHOS: yo
+ OXPHOS	sooooooo fast
+ OXPHOS	lambday: hi
+ OXPHOS	lambday: none of you cares about the vote :)?
+@lambday	OXPHOS: pointer is of base type ==> that's how runtime polymorphism is achived
+ OXPHOS	yep
+@lambday	OXPHOS: I'll be out of here in a month.. can't care less :D
+ OXPHOS	good call
+@lambday	but if you ask me, I should say that it should stay in the EU
+@lambday	OXPHOS: so, are you clear about how the thing works?
+ OXPHOS	I have no standpoint at all. just gossiping
+ OXPHOS	nope..let me explain
+@lambday	shoot!
+@lambday	bazdmeg: bazdmeg
+ OXPHOS	so in the unit-test, i called: linalgns::dot(a, b); where a and b are both SGVector on gpu (true)
+@lambday	(why 'ns' :/, just wondering)
+ OXPHOS	hence it should run sg_linalg->get_gpu_backend()->dot(a, b);
+@lambday	OXPHOS: yep
+ OXPHOS	and call linalgbackendviennacl.dot, as the registered backend is that
+@lambday	OXPHOS: ye[
+@lambday	p
+ OXPHOS	but it is calling linalgbackendbase
+ OXPHOS	.dot
+ OXPHOS	as i have tested
+@lambday	OXPHOS: you must have forgotten to make it virtual
+ OXPHOS	it is virtual..like:
+ OXPHOS	    #define BACKEND_GENERIC_TO_GPU(Type) \ virtual GPUMemoryBase<Type>* to_gpu(SGVector<Type>) const \     {  \ SG_SWARNING("BASE BACKEND.\n") \ SG_SNOTIMPLEMENTED; \     }
+@lambday	OXPHOS: that's to_gpu method, what about "dot" ?
+ OXPHOS	i tried virtual GPUMemoryBase<Type>* to_gpu(SGVector<Type>) const=0
+ OXPHOS	the same
+@lambday	OXPHOS: let me check your patch
+ OXPHOS	lambday: cool thx! https://github.com/shogun-toolbox/shogun/pull/3310
+@lambday	OXPHOS: check.. I commented
+@wiking	muccos
+@wiking	lavida
+@wiking	:)
+@wiking	sorry OXPHOS yesterday i had an emergency thing
+@wiking	so i had to go
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 260 seconds]
+ OXPHOS	wiking: it's okay. you can also shoot me an e-mail if I'm away
+ OXPHOS	lambday: u think it's just because of the 'virtual' i'm missing..? but i tried to_gpu and from_gpu, they both failed too
+@lambday	OXPHOS: can't be! :)
+ OXPHOS	lambday: or is it because in the base macro the params are (SGVector) but in derived class they are (const SGVector&)?
+@lambday	OXPHOS: add that virtual first, and then check - something must be missing
+ OXPHOS	sure
+@lambday	OXPHOS: of course!
+@lambday	the overridden methods should have **the exact same** signature
+@lambday	make both `const SGVector<T>&`
+ OXPHOS	sure
+@lambday	same goes for cv-qualifiers
+ OXPHOS	lambday: IT WORKS
+ bazdmeg	bzdmeg
+@wiking	bazdmeg: :D
+@wiking	http://bazdmeg.github.io/
+@wiking	:>
+@wiking	best site ever
+ OXPHOS	im blind
+-!- sanuj [~sanuj@117.204.255.234] has joined #shogun
+ sanuj	bazdmeg, yo
+-!- sanuj [~sanuj@117.204.255.234] has quit [Quit: Leaving]
+@lambday	OXPHOS: I KNOW :D
+@lambday	bazdmeg:
+@lambday	bazdmeg: if you have a moment, can you please review this - https://github.com/shogun-toolbox/shogun/pull/3305/files
+@wiking	bazdmeg: new thing: baszom a szadat :)
+@wiking	lambday: the uncalled review is there :)
+@lambday	wiking: err what?
+@wiking	lambday: in the pr :)
+@lambday	wiking: hehe thanks.. checking
+@wiking	nw
+@lambday	wiking: btw EuclideanDistance now works with any CDotFeatures (earlier it only used to work with CDenseFeatures<float64_t>)
+@lambday	which doesn't make any sense
+@wiking	cool
+@wiking	yeah we have many of these supershitty
+@wiking	explicit casts
+@lambday	wiking: yeah
+@wiking	for no particular reasons
+@lambday	totally loses the purpose of generics
+@wiking	but then we have all the features templates
+@wiking	go figure :)
+@lambday	wiking: if I had time, I'd have fixed some of the sparse stuffs
+@wiking	yeah that's another one :)
+@lambday	maybe later
+@lambday	we actually should not have sparse kernel at all.. the features and the distances should be able to handle different shits..
+@lambday	then same gaussian kernel would work with sparse features as well as dense
+@wiking	(nod)
+@lambday	anyway
+@wiking	if anyway then http://bazdmeg.github.io/
+@wiking	:)
+@lambday	hah
+ CaBa_	is there any time where it't particularly likely to catch sonney2k? ;)
+-!- CaBa_ is now known as CaBa
+-!- CaBa [~Diu7saig@lounge.imp.fu-berlin.de] has quit [Changing host]
+-!- CaBa [~Diu7saig@unaffiliated/caba] has joined #shogun
+@wiking	CaBa: mailing list is your friend
+ CaBa	wiking: you're right, that'd probably work best...
+-!- Saurabh7 [~Saurabh7@117.248.208.58] has joined #shogun
+-!- OXPHOS [c68f0c0c@gateway/web/freenode/ip.198.143.12.12] has quit [Quit: Page closed]
+-!- Saurabh7 [~Saurabh7@117.248.208.58] has quit [Ping timeout: 272 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: lambday :develop * 9ac1483 / / (8 files): https://github.com/shogun-toolbox/shogun/commit/9ac148306a6fe53149d52246b85472602857ceaf
+ shogun-notifier-	shogun: refactored GaussianKernel as a subclass of CShiftInvariantKernel
+ shogun-notifier-	shogun: Soumyajit De :develop * 4ec8ca7 / / (8 files): https://github.com/shogun-toolbox/shogun/commit/4ec8ca713590b8b8956fde4737b4fab09c4986c9
+ shogun-notifier-	shogun: Merge pull request #3305 from lambday/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: refactored GaussianKernel as a subclass of CShiftInvariantKernel
+ shogun-buildbot	build #737 of trusty - libshogun - viennacl is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/737  blamelist: lambday <heavensdevil6909@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>
+-!- Saurabh7 [~Saurabh7@1.39.98.232] has joined #shogun
+-!- Saurabh7 [~Saurabh7@1.39.98.232] has quit [Read error: Connection reset by peer]
+-!- Saurabh7 [~Saurabh7@1.39.98.232] has joined #shogun
+-!- Saurabh7 [~Saurabh7@1.39.98.232] has quit [Ping timeout: 244 seconds]
+-!- Saurabh7 [~Saurabh7@1.39.98.232] has joined #shogun
+-!- sanuj [~sanuj@117.204.255.234] has joined #shogun
+ sanuj	bazdmeg, !!!!!!
+ sanuj	HeikoS_web, can you review a PR?
+-!- Saurabh7 [~Saurabh7@1.39.98.232] has quit [Ping timeout: 258 seconds]
+-!- Saurabh7 [~Saurabh7@1.39.87.14] has joined #shogun
+-!- sanuj [~sanuj@117.204.255.234] has quit [Quit: Leaving]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: lambday :feature/bigtest * 08fc25b / src/shogun/statistics/experimental/internals/ (34 files): https://github.com/shogun-toolbox/shogun/commit/08fc25b294467ab8485ce541ae2409ab17bf9a91
+ shogun-notifier-	shogun: added first version of bigtesting framework
+ shogun-notifier-	shogun: lambday :feature/bigtest * e0fe1b0 / src/shogun/statistics/experimental/internals/ (5 files): https://github.com/shogun-toolbox/shogun/commit/e0fe1b0dc2aec370679b8ab1e54bf061dab42124
+ shogun-notifier-	shogun: documentation and code-style changes
+ shogun-notifier-	shogun: lambday :feature/bigtest * 1115436 / src/shogun/statistics/experimental/ (3 files): https://github.com/shogun-toolbox/shogun/commit/1115436ed81adfb6c3bfefd88c82521ba7cd0ed7
+ shogun-notifier-	shogun: added hypothesis test (experimental) base class
+ shogun-notifier-	shogun: lambday :feature/bigtest * 17beb09 / src/shogun/ (108 files): https://github.com/shogun-toolbox/shogun/commit/17beb09436b8a56ba316e48c27d8960ade2d6c7b
+ shogun-notifier-	shogun: removed old files
+ shogun-notifier-	shogun: lambday :feature/bigtest * e6c0f6f / src/shogun/hypothesistest/ (38 files): https://github.com/shogun-toolbox/shogun/commit/e6c0f6f22566ebf07df78f99985aa6909b00fae0
+ shogun-notifier-	shogun: added rest of the files
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * 167944e / examples/meta/src/statistical_testing/quadratic_time_mmd.sg: https://github.com/shogun-toolbox/shogun/commit/167944e7117561fceed1c57282ceb7fb714e193f
+ shogun-notifier-	shogun: first meta example for mmd
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * 0c31563 / / (4 files): https://github.com/shogun-toolbox/shogun/commit/0c31563b54004e153ee4a624cdf6e4f303e78d9b
+ shogun-notifier-	shogun: Add an initial cookbook page for quadratic time mmd
+ shogun-notifier-	shogun: add all test types
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * a594319 / src/shogun/statistical_testing/ (2 files): https://github.com/shogun-toolbox/shogun/commit/a59431932381593663decdcebaaa4e49bdbe30a8
+ shogun-notifier-	shogun: some updates to method names and proper error messages
+ shogun-notifier-	shogun: lambday :feature/bigtest * 7798bca / tests/unit/ (3 files): https://github.com/shogun-toolbox/shogun/commit/7798bcaf4c66c8ffd0fad5af1497c1b7a1b5a17a
+ shogun-notifier-	shogun: temporarily removed unit-tests to avoid compilation issues
+ shogun-notifier-	shogun: lambday :feature/bigtest * 92e4648 / src/shogun/statistical_testing/MMD.cpp,src/shogun/statistical_testing/MMD.h: https://github.com/shogun-toolbox/shogun/commit/92e464812d2681497c6342887f84972f3546f96f
+ shogun-notifier-	shogun: removed statistic computation API for multiple kernels
+ shogun-notifier-	shogun: lambday :feature/bigtest * 02ff704 / src/shogun/statistical_testing/MMD.cpp: https://github.com/shogun-toolbox/shogun/commit/02ff704031a3bae11bceefb2a35c89f1f7990270
+ shogun-notifier-	shogun: removed simulate_null
+ shogun-notifier-	shogun: lambday :feature/bigtest * 5b27ca8 / src/shogun/statistical_testing/MMD.cpp: https://github.com/shogun-toolbox/shogun/commit/5b27ca8d8e46973463f18f66dff8eb6dc1ab618f
+ shogun-notifier-	shogun: added permutation test with precomputed kernel matrices
+ shogun-notifier-	shogun: lambday :feature/bigtest * 1a7577d / examples/meta/src/statistical_testing/linear_time_mmd.sg: https://github.com/shogun-toolbox/shogun/commit/1a7577ddb045748bcc71b32f9fe3c56131f13cd0
+ shogun-notifier-	shogun: added number of samples (mandatory for streaming samples) to lineartime mmd meta example
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * eee28b9 / src/shogun/statistical_testing/QuadraticTimeMMD.cpp: https://github.com/shogun-toolbox/shogun/commit/eee28b9099ce1fc2aa2f53ed0f107125402e38a7
+ shogun-notifier-	shogun: todo for later
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * 5d80c2f / / (3 files): https://github.com/shogun-toolbox/shogun/commit/5d80c2fc5088c455e2f0c5a8dfd8dc2393be822b
+ shogun-notifier-	shogun: add constructor to QuadraticTimeMMD
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * 6ad94bc / doc/cookbook/source/examples/statistical_testing/quadratic_time_mmd.rst: https://github.com/shogun-toolbox/shogun/commit/6ad94bcfca408ff4d38ce5d7f3d7cee934dcbbb7
+ shogun-notifier-	shogun: fixed evil running average bug
+ shogun-notifier-	shogun: lambday :feature/bigtest * f662ce7 / tests/unit/statistical_testing/ (2 files): https://github.com/shogun-toolbox/shogun/commit/f662ce7528d07180be62f5af136db0ab5bc091c2
+ shogun-notifier-	shogun: added data-manager and init-per-feature unit-tests
+ shogun-notifier-	shogun: lambday :feature/bigtest * bffb2b4 / tests/unit/statistical_testing/ (8 files): https://github.com/shogun-toolbox/shogun/commit/bffb2b4a44435d17bb5646639afde77bb89242ec
+ shogun-notifier-	shogun: added data-fetchers and kernel-manager unit-tests
+ shogun-notifier-	shogun: lambday :feature/bigtest * 4211379 / / (8 files): https://github.com/shogun-toolbox/shogun/commit/42113798b014c8e16422f564e2be007de1181023
+ shogun-notifier-	shogun: fixed quadratic time mmd bugs and speedup
+ shogun-notifier-	shogun: lambday :feature/bigtest * 00816bf / / (3 files): https://github.com/shogun-toolbox/shogun/commit/00816bfbc7982d3406302be7047dc1f935fe4d73
+ shogun-notifier-	shogun: added more tests, fixed more bugs
+ shogun-notifier-	shogun: lambday :feature/bigtest * 64c96fc / / (6 files): https://github.com/shogun-toolbox/shogun/commit/64c96fc9737b31620f908cf2eeeca204fb6fe38e
+ shogun-notifier-	shogun: removed temporary permuted matrix creation for mmd
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun:   - since SIMD doesn't help in this case, rather slows things down
+ shogun-notifier-	shogun:     due to temporary matrix creation
+ shogun-notifier-	shogun: lambday :feature/bigtest * e4d0b3b / / (5 files): https://github.com/shogun-toolbox/shogun/commit/e4d0b3b2895770f75dd0b576a9f31b58d62aace8
+ shogun-notifier-	shogun: added cache-friendly sum-computation for permutation
+ shogun-notifier-	shogun: lambday :feature/bigtest * 7ba2669 / src/shogun/statistical_testing/ (4 files): https://github.com/shogun-toolbox/shogun/commit/7ba2669579bcca24d33ee662a8105948a1709205
+ shogun-notifier-	shogun: Added task-parallel computation support
+ shogun-notifier-	shogun:     float32 type. So, instead of creating a double matrix and
+ shogun-notifier-	shogun:     doing computation on that, let's use the float32 matrix
+ shogun-notifier-	shogun: lambday :feature/bigtest * 49089cb / src/shogun/statistical_testing/ (4 files): https://github.com/shogun-toolbox/shogun/commit/49089cb12412fa61f373721fc47ecadde969a56f
+ shogun-notifier-	shogun: added add_kernel method in MMD
+ shogun-notifier-	shogun: lambday :feature/bigtest * 3cc107d / / (3 files): https://github.com/shogun-toolbox/shogun/commit/3cc107d32c21d71dd24ddb0f68121af9a1be8bf1
+ shogun-notifier-	shogun: added feature shallow copy and merged copy methods
+ shogun-notifier-	shogun: lambday :feature/bigtest * 94c305e / / (2 files): https://github.com/shogun-toolbox/shogun/commit/94c305e0608577e34b2cdfda0b92bc790b21bde3
+ shogun-notifier-	shogun: made the data manager work with shallow copy
+ shogun-notifier-	shogun: lambday :feature/bigtest * 3ac7cd3 / tests/unit/statistical_testing/ (2 files): https://github.com/shogun-toolbox/shogun/commit/3ac7cd3300e0c8e63820fb34b35d163ab0d4481e
+ shogun-notifier-	shogun: added kernel selection unit tests
+ shogun-notifier-	shogun: lambday :feature/bigtest * 161033b / / (3 files): https://github.com/shogun-toolbox/shogun/commit/161033b1ace5c1ffb325d773d68d3b5fb73111ad
+ shogun-notifier-	shogun: added block data structure
+ shogun-notifier-	shogun: lambday :feature/bigtest * c1192b6 / src/shogun/statistical_testing/internals/ (2 files): https://github.com/shogun-toolbox/shogun/commit/c1192b61cce9948df95bd0485ad0d4e52e65122d
+ shogun-notifier-	shogun: updated next samples data structure with blocks
+ shogun-notifier-	shogun: lambday :feature/bigtest * fffdabc / / (6 files): https://github.com/shogun-toolbox/shogun/commit/fffdabc4e7ae261b39204546116266e0ba59440d
+ shogun-notifier-	shogun: updated data fetchers to return naked pointers
+ shogun-notifier-	shogun: lambday :feature/bigtest * a168a05 / src/shogun/statistical_testing/internals/DataManager.cpp: https://github.com/shogun-toolbox/shogun/commit/a168a05152c14fc2039dace4dd0fe2a21414f4bf
+ shogun-notifier-	shogun: updated data manager to work with blocks
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * 4421d33 / doc/cookbook/source/references.bib: https://github.com/shogun-toolbox/shogun/commit/4421d33c43241f9a3f10fb500b1a65ab9625a2b6
+ shogun-notifier-	shogun: added large scale kernel to sample testing kernel learning paper
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * 10b91de / / (2 files): https://github.com/shogun-toolbox/shogun/commit/10b91deafb62d1fceb43ae5a4a6f36b07f488b79
+ shogun-notifier-	shogun: some clean ups
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * d54468c / examples/meta/src/statistical_testing/ (2 files): https://github.com/shogun-toolbox/shogun/commit/d54468cf2f9797faa011870d3d6a0e122a4a8ce4
+ shogun-notifier-	shogun: added compiling (but not running) examples of kernel selection for MMD
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * 751ad90 / doc/cookbook/source/examples/statistical_testing/linear_time_mmd_kernel_selection.rst: https://github.com/shogun-toolbox/shogun/commit/751ad90e577a96acd750525d911ab2b4b3b23a19
+ shogun-notifier-	shogun: initial sketch for kernel learning example
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * cd27cdc / doc/ipython-notebooks/ (2 files): https://github.com/shogun-toolbox/shogun/commit/cd27cdca9c88e6f63b9fe5236eee4014539f1eb0
+ shogun-notifier-	shogun: rename folder
+ shogun-notifier-	shogun: Heiko Strathmann :feature/bigtest * 512c35b / examples/meta/src/statistical_testing/quadratic_time_mmd_kernel_selection.sg: https://github.com/shogun-toolbox/shogun/commit/512c35bc59f1bf574ba0a618e73feb29d001ed42
+ shogun-notifier-	shogun: use different data in testing than in kernel learning
+ shogun-notifier-	shogun: lambday :feature/bigtest * 3145415 / / (9 files): https://github.com/shogun-toolbox/shogun/commit/3145415ddb339f5191772c5e2e0611b20904af4e
+ shogun-notifier-	shogun: renamed OPTIMIZE_MMD to MAXIMIZE_POWER in kernel selection
+ shogun-notifier-	shogun: lambday :feature/bigtest * bf23483 / src/shogun/statistical_testing/MMD.cpp: https://github.com/shogun-toolbox/shogun/commit/bf2348381361dd33b140d7572755d320653995a4
+ shogun-notifier-	shogun: removed precomputed kernels (if there are any) while selecting kernel
+ shogun-notifier-	shogun: lambday :feature/bigtest * 2c9f008 / src/shogun/statistical_testing/MMD.cpp: https://github.com/shogun-toolbox/shogun/commit/2c9f0086e12768a436e2b803dfcb5b39699cb43b
+ shogun-notifier-	shogun: added statistic and Q computation methods
+ shogun-notifier-	shogun: lambday :feature/bigtest * b80848c / src/shogun/statistical_testing/ (3 files): https://github.com/shogun-toolbox/shogun/commit/b80848c1bf7976ec7064c6bb90ff3b2d00a6c9d6
+ shogun-notifier-	shogun: added Eigen::initParallel() for statistical testing framework
+ shogun-notifier-	shogun: lambday :feature/bigtest * 5c7fe5b / / (11 files): https://github.com/shogun-toolbox/shogun/commit/5c7fe5b0d81ffa109643049ee46983dc28f90e99
+ shogun-notifier-	shogun: added median heuristic for kernel selection for quadratic time mmd
+ shogun-notifier-	shogun: lambday :feature/bigtest * ad534f5 / src/shogun/statistical_testing/ (6 files): https://github.com/shogun-toolbox/shogun/commit/ad534f5af13303f20531e3e72e7e01f55ab15c65
+ shogun-notifier-	shogun: added support for cross-validation setting for kernel selection (incomplete)
+ shogun-notifier-	shogun: lambday :feature/bigtest * 47b95fe / / (20 files): https://github.com/shogun-toolbox/shogun/commit/47b95fe5a8db21e94b9cfc09f61d4a508f372d6f
+ shogun-notifier-	shogun: made the enum classes in statistical testing simple enums
+ shogun-notifier-	shogun: lambday :feature/bigtest * 6c1547b / / (6 files): https://github.com/shogun-toolbox/shogun/commit/6c1547b60fa24b1a934924cc1da8c62f554e1b5b
+ shogun-notifier-	shogun: added first draft of train-test data split
+ shogun-notifier-	shogun: lambday :feature/bigtest * 3ea20a8 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/3ea20a8923dff6f2a2b3882c6434675e80c5a3c4
+ shogun-notifier-	shogun: fixed clone subset stack bug in features util
+ shogun-notifier-	shogun: lambday :feature/bigtest * 70b38b7 / / (4 files): https://github.com/shogun-toolbox/shogun/commit/70b38b739544eba171a2e0367b0f302abc42e83b
+ shogun-notifier-	shogun: full and blockwise train/test data fetchers fixed
+ shogun-notifier-	shogun: lambday :feature/bigtest * 89e7496 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/89e7496796e50cb45f411260a270560a15198b64
+ shogun-notifier-	shogun: fixed memory bug for streaming data parser and added unit-test
+ shogun-notifier-	shogun: lambday :feature/bigtest * 6573264 / / (5 files): https://github.com/shogun-toolbox/shogun/commit/6573264cef71b42f24aa0abb84ab6ca6d6b35bb4
+ shogun-notifier-	shogun: full and blockwise train/test streaming data fetchers added
+ shogun-notifier-	shogun: lambday :feature/bigtest * 0425826 / / (14 files): https://github.com/shogun-toolbox/shogun/commit/04258268b7475850be65e9bf449d661d5c801d8e
+ shogun-notifier-	shogun: added kernel selection strategy wrapper class
+ shogun-notifier-	shogun: lambday :feature/bigtest * f467067 / src/shogun/statistical_testing/ (2 files): https://github.com/shogun-toolbox/shogun/commit/f467067cb69e5e524ce964f9adeb8daf65f2efe6
+ shogun-notifier-	shogun: save the kernel selection policy
+ shogun-notifier-	shogun: lambday :feature/bigtest * 8f91d7a / src/shogun/statistical_testing/ (16 files): https://github.com/shogun-toolbox/shogun/commit/8f91d7a5c0b179f64f85002fd5d9eb9d8c0c16ef
+ shogun-notifier-	shogun: save the kernel selection measures for later query
+ shogun-notifier-	shogun: lambday :feature/bigtest * 2db1bf7 / src/shogun/statistical_testing/internals/ (6 files): https://github.com/shogun-toolbox/shogun/commit/2db1bf7c6d0e50c1e89927964b4b98e837a70164
+ shogun-notifier-	shogun: refactored maximize cross validation kernel selection method
+ shogun-notifier-	shogun: lambday :feature/bigtest * d78812b / src/shogun/statistical_testing/ (6 files): https://github.com/shogun-toolbox/shogun/commit/d78812b310fd61d9846c212d850f09bb2be1155d
+ shogun-notifier-	shogun: refactor API (incomplete)
+ shogun-notifier-	shogun: lambday :feature/bigtest * 59f0fdd / / (31 files): https://github.com/shogun-toolbox/shogun/commit/59f0fdd81c70a24a2c28ab6e43b11e3772abe529
+ shogun-notifier-	shogun: refactored train/test subsetting and hypothesis test framework
+ shogun-notifier-	shogun: lambday :feature/bigtest * 8a9087e / src/interfaces/modular/Statistics.i,src/interfaces/modular/Statistics_includes.i: https://github.com/shogun-toolbox/shogun/commit/8a9087e6828dfbe79229b5bb50bee365f60e9987
+ shogun-notifier-	shogun: added kernel selection strategy in modular interface
+ shogun-notifier-	shogun: lambday :feature/bigtest * 7016e9d / / (8 files): https://github.com/shogun-toolbox/shogun/commit/7016e9ddeaa99d55e50844dacabeffa5c8d00288
+ shogun-notifier-	shogun: refactored the interface for specifying kernel selection strategy
+ shogun-notifier-	shogun: lambday :feature/bigtest * 1040083 / src/shogun/statistical_testing/internals/MaxXValidation.cpp: https://github.com/shogun-toolbox/shogun/commit/104008374a625c6450dede5f69990f7d7a7b48c0
+ shogun-notifier-	shogun: fixed cross validation bug
+ Saurabh7	wooo
+-!- Saurabh7 [~Saurabh7@1.39.87.14] has quit [Quit: Leaving]
+-!- travis-ci [~travis-ci@ec2-54-204-245-104.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's lambday's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/139819073
+-!- travis-ci [~travis-ci@ec2-54-204-245-104.compute-1.amazonaws.com] has left #shogun []
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has quit [Ping timeout: 250 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+ c4goldsw	Hey y'all
+ c4goldsw	ping pong HeikoS_web
+--- Log closed Fri Jun 24 00:00:53 2016

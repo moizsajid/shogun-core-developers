@@ -1,0 +1,174 @@
+--- Log opened Wed Nov 14 00:00:17 2012
+@sonney2k	ptizoom, excellent work as usual...
+ blackburn	la la
+-shogungit:#shogun- [shogun] sonney2k pushed 3 new commits to master: https://github.com/shogun-toolbox/shogun/compare/742b70c55a8c...2f3bb6289502
+-shogungit:#shogun- shogun/master c3dd767 ptizoom: perl_modular: fixed matrix SG to PDL conversion....
+-shogungit:#shogun- shogun/master f566eba ptizoom: tests/perl_modular: increase max_train_time of linear classifiers
+-shogungit:#shogun- shogun/master 2f3bb62 Soeren Sonnenburg: Merge pull request #822 from ptizoom/perl_121113...
+-!- blackburn [~blackburn@46.20.65.191] has quit [Quit: Leaving.]
+-!- ptizoom [~christian@85.210.94.175] has quit [Quit: Ex-Chat]
+-!- ptizoom [~christian@85.210.94.175] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+ ptizoom	blackburn:yet another exemple of backward propagation training...reward from the master, jealousy from the others....
+ sonne|work	work == reward, more work == more reward
+ sonne|work	wiking: I will ask today.
+ sonne|work	this situation is not really helpful
+ wiking	sonne|work: yo
+ wiking	sonne|work: yeah but i think they have their 'good reason' for it
+ wiking	so by asking we are not going to go any further
+ wiking	i guess the latest we'll know something about it on the 3rd of december :D
+ wiking	when we realise that we are not there or when we are ther ;)
+ wiking	*there
+ sonne|work	hehe
+ wiking	sonne|work: you should make a shogun-foundation ;)
+ wiking	sonne|work: where people can donate :>
+ sonne|work	wiking: well I asked upfront and carol said that they know that the schedule is extremely tight so they want to do the decision w/i a week
+ wiking	they can even make donation for a given feature ;)
+ wiking	that'd be cool
+ wiking	:D
+ sonne|work	haha
+ sonne|work	carol is on vacations
+ wiking	hehehe
+ wiking	mm isn't thanksgiving is about to happen soon?
+ sonne|work	returning just before the meeting :)
+ wiking	oh yeah 22nd of nov
+ wiking	so maybe she went on hunting some turkey ;P
+ wiking	sonne|work: here?
+ sonne|work	yes?
+ wiking	sonne|work: any suggestion which machine would be adecvate to solve this dual problem:
+ wiking	i hate pdf
+ wiking	sorry gimme a sec to formulate the problem
+ wiking	sonne|work: http://test.izyba.com/latex?&space;D%28\alpha_*,\beta_*%29=max_{\alpha,%20\beta}%20\sum_i%20\alpha_i%20+%20\sum_j\sum_h%20\beta_{j,h}%20-%20\frac{1}{2}%20||\sum_{\alpha}%20\alpha%20\Phi%28x_i,%20h_i%29%20-%20\sum_j%20\sum_h%20\beta_{j,h}%20\Phi%28x_j,%20h%29||^2%20\\%20\mattext{s.t.%200%20%3C=%20\alpha_i%20%3C=%20C_i,%20\forall%20i;%200%20%3C=%20\beta_{j,h}%20%3C=%20C_2,%20\forall%20j,%20\forall%20\in%20H}
+ wiking	shiiit
+ wiking	sonne|work: this is the problem http://pastebin.com/X2t8bEAd
+ wiking	and just copy-paste it there: http://www.codecogs.com/latex/eqneditor.php
+ sonne|work	http://mathbin.net/113694
+ wiking	yeeey
+ wiking	that :D
+ sonne|work	it looks very SVMish
+ wiking	yeah it's a dual form
+ sonne|work	yeah but you also only have box constraints on alpha / beta
+ sonne|work	you should make the quadratic term explicit btw
+ sonne|work	you could certainly use ocas to solve that
+ wiking	ocas?
+ sonne|work	well libqp
+ wiking	aaah
+ sonne|work	ocas assumes fixed Cs
+ wiking	mmm
+ wiking	i'm just checking libqp's formulation
+ sonne|work	I mean you could introduce gamma = [alpha beta] and reformulate the problem to use only that
+ sonne|work	then you have just one variable to optimize over
+ sonne|work	different box constraints for different parts
+ sonne|work	and some linear term
+ sonne|work	and quadratic term
+ sonne|work	http://cmp.felk.cvut.cz/~xfrancv/libqp/html/
+ wiking	yeah
+ sonne|work	you have no bias term so no equality constraint even
+ sonne|work	so the problem is more simple but I don't know if libqp has something internally that works w/o one
+ wiking	but this is minimizing the problem :S
+ wiking	i mean qp
+ wiking	*libqp
+ sonne|work	then mimimize -qp :D
+ wiking	mmmm
+ wiking	i hope S_{equ} can be a zeroset
+ sonne|work	no not allowed
+ sonne|work	ask vojtech
+ wiking	:S
+ sonne|work	I am pretty sure one of the sub-solvers for solving the problem w/ bias constraint needs a solver w/o one - so that one should be in libqp too
+ sonne|work	btw I guess you tested this with mosek already?
+ wiking	no not at all
+ sonne|work	why not?
+ wiking	i've just seen this paper
+ wiking	and it would be great to have a solver that doesn't depend on mosek :)
+ sonne|work	sure but first build a reference then do the real impl.
+ wiking	mmm i guess mosek has a solver for this
+ sonne|work	sure it is a QP
+ sonne|work	but you still need to create that gamma
+ wiking	ah yeah
+ wiking	the question still the same
+ wiking	sonne|work: https://gist.github.com/4072038
+ wiking	line 197
+ wiking	i want to commit this solver tday
+ wiking	so i need a solution ;)
+ sonne|work	its only in a .cpp so I don't care
+ wiking	sonne|work: ah sure?
+ wiking	ok then here goes the PR
+-shogungit:#shogun- [shogun] vigsterkr opened pull request #823: Add SO-SVM solver based on Chun-Nam Yu's implementation (master...so)  https://github.com/shogun-toolbox/shogun/pull/823
+ sonne|work	wiking: did you ifdef with HAVE_MOSEK ?
+ sonne|work	wiking: and could you do w/o vector in the .h?
+ wiking	i've done ifdef for mosek
+ sonne|work	apart from that ok
+ wiking	since this solver could use SVMlight
+ sonne|work	cannot see it
+ wiking	it's only within cpp at a given place
+ wiking	https://github.com/shogun-toolbox/shogun/pull/823/files#L0R329
+ wiking	ah ok i'll remove the std::vector header includ ethere...
+ wiking	but we need to update svmlight somehow for that
+ wiking	:)
+ wiking	sonne|work: ok i cannot move the include ;)
+ wiking	sonne|work: https://github.com/shogun-toolbox/shogun/pull/823/files#L1R137
+ wiking	as the u can see the resize_cleanup function args contain std::vector
+-shogungit:#shogun- [shogun] ptizoom opened pull request #824: perl_modular: fixed string_from_pdl<char> conversion. (master...perl_121114)  https://github.com/shogun-toolbox/shogun/pull/824
+ sonne|work	wiking: couldn't you use SGVector for that or dynarray?
+-shogungit:#shogun- [shogun] sonney2k pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/2f3bb6289502...0cdc7eb45a44
+-shogungit:#shogun- shogun/master d2765ab ptizoom: perl_modular: fixed string_from_pdl<char> conversion....
+-shogungit:#shogun- shogun/master 0cdc7eb Soeren Sonnenburg: Merge pull request #824 from ptizoom/perl_121114...
+ wiking	sonne|work: i'd need to define the template for SGVector<SGSpsarseVector...>
+ wiking	but i need to send a fix anyways for that PR
+ wiking	i'm just checking whether it compiles now
+ sonne|work	wiking: btw do you understand why std::vector works even with SGVector objects?
+ sonne|work	I mean it is on the stack
+ sonne|work	or is it using new[] ?
+ sonne|work	wiking: anyway you could use DynArray
+ sonne|work	but you need these sh... inplace constructors
+ wiking	sonne|work: it's on the heap
+ wiking	there... let's see if travis can compile it now
+ wiking	ok at least now it compiles on travis
+ ptizoom	sonne*:red concerns on formatting...I cannot promise a good style, but suggest to indent at the end of development and doc....but will try anyway!
+ ptizoom	sonne*:there are still many big problems in perl....
+ ptizoom	sonne*:sparse stuff is not tested at all! inf and nan values handling.
+ ptizoom	sonne*: also, string_to_pdl does not work as expected...I was looking at that.
+-!- blackburn [~blackburn@37.61.179.13] has joined #shogun
+ blackburn	wiking: oppan gangnam style solver?
+ blackburn	sonne|work: yes std vector uses constructors
+ blackburn	so no problem with sgvector
+ blackburn	std is safe you should believe :)
+ wiking	blackburn: :DDDDDDDDDDDDDDDDD
+@sonney2k	wiking, I just learned - tonight (timeout of your choice) we will get some notification email
+@sonney2k	so so after lunch tomorrow CET
+@sonney2k	s/timeout/timezone
+ wiking	:>
+ wiking	i guess that means we are not in :)
+ wiking	otherwise they would have sent that yeah you are in but we'll announce it officially tonight :)
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+* wiking having the flow with boost
+ blackburn	wiking: boost is illegal in germany
+ wiking	idontcare
+ wiking	i'm working on my shit
+ wiking	:)
+ blackburn	:D
+ blackburn	we are all working on our own shit
+ wiking	somebody figure out wha tto do with that std::vector so that it can be merged
+ blackburn	wiking: I have nothing against it in .cpp
+ wiking	its in .h
+ wiking	as for a func args
+ blackburn	ah
+ blackburn	wiking: may be some vodka?
+ wiking	:>
+ blackburn	hard to speed up brain activity w/o
+ wiking	:>
+ wiking	yes yes
+ wiking	hahaha i think the most i like about c++11 is the auto variable :)
+ blackburn	why?
+ wiking	no more fucking
+ wiking	std::map<something long, somethingevenlonger>::const_iterator
+ blackburn	typedef
+ wiking	lolface
+ blackburn	you should not use such types in your code I think
+ wiking	i'm not creating industry standard code
+ blackburn	I use typedefs for that
+ wiking	just trying to test something as fast as possible
+ wiking	and usually at that moment
+ blackburn	I'd rather have ParameterMap than std::unordered_map<fdsfsdfdsf,fsdfsdfs>
+ wiking	my code changes like everyfuckingtime
+--- Log closed Thu Nov 15 00:00:17 2012

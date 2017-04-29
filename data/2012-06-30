@@ -1,0 +1,165 @@
+--- Log opened Sat Jun 30 00:00:17 2012
+-!- blackburn [~blackburn@81.28.187.0] has joined #shogun
+-!- blackburn [~blackburn@81.28.187.0] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@81.28.187.0] has joined #shogun
+-!- blackburn [~blackburn@81.28.187.0] has quit [Ping timeout: 240 seconds]
+ alexlovesdata	bye all
+-!- alexlovesdata [55b21452@gateway/web/freenode/ip.85.178.20.82] has quit [Quit: Page closed]
+-!- gsomix [~gsomix@109.169.240.118] has joined #shogun
+-!- gsomix [~gsomix@109.169.240.118] has quit [Ping timeout: 250 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- heiko [~heiko@host86-180-216-139.range86-180.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-180-216-139.range86-180.btcentralplus.com] has quit [Ping timeout: 264 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 265 seconds]
+-!- blackburn [~blackburn@81.28.187.0] has joined #shogun
+ blackburn	sonney2k: around?
+@sonney2k	wassup
+@sonney2k	blackburn, if you can please fix the buildbot errors - this is really highest prio now...
+ blackburn	sonney2k: sparse w/ python?
+ blackburn	I got stucked there a little yesterday
+ blackburn	sonney2k: can I ask you some debian things?
+ blackburn	ok leaving now for a while - will ask later :)
+@sonney2k	blackburn, where did you get stuck?
+@sonney2k	what is the problem?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+--- Log closed Sat Jun 30 16:34:24 2012
+--- Log opened Sat Jun 30 16:34:35 2012
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 8 nicks [1 ops, 0 halfops, 0 voices, 7 normal]
+-!- Irssi: Join to #shogun was synced in 6 secs
+--- Log closed Sat Jun 30 16:40:42 2012
+--- Log opened Sat Jun 30 16:46:53 2012
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 9 nicks [1 ops, 0 halfops, 0 voices, 8 normal]
+-!- Irssi: Join to #shogun was synced in 6 secs
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Read error: Operation timed out]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+ blackburn	sonney2k: with detecting error
+@sonney2k	blackburn, ?
+ blackburn	sonney2k: yesterday I got stucked with detecting error
+@sonney2k	doesn't valgrind help?
+@sonney2k	I mean it must be due to the refcounting business
+ blackburn	yes it helps but I didn't localized the error
+ blackburn	sonney2k: how can I get bootable usb for installing debian?
+@sonney2k	don't know out of my head
+ blackburn	they provide some crazy ways of installing it in debian doc
+ blackburn	is that really so complex?
+ blackburn	ok probably live version can be copied via dd
+ puffin444	Hey blackburn can I ask you a question.
+ blackburn	sure
+ puffin444	I'm trying to think of ways to reduce computational redundancy in my GP code, so I store kernel matrices and other calcuated matrices until parameters are changed.
+ puffin444	This way they are not recalculated. A problem with this though is that when I use Heiko's model selection scheme to set parameters, the CMachine has no idea that parameters have been changed.
+ puffin444	Do you what caching/matrix storage schemes have been used in the past to overcome these things? Heiko may have more information, but he is not here at the moment.
+ blackburn	uhh
+ puffin444	Don't worry about it :)
+ blackburn	let me try to get into it
+ blackburn	so you work with CMachines
+ puffin444	Yes.
+ blackburn	and you want to know when parameters are changed?
+ puffin444	Exactly.
+ blackburn	I don't see how to get it done currently
+ blackburn	puffin444: that parameters framework actually don't know about changing parameters too
+@sonney2k	puffin444, what you could do is extend the framework and e.g. compute the md5sum of all parameters
+@sonney2k	if that sum changes
+ puffin444	Would it be bad to add some abstract update() function to CMachine? Or is that just a lazy solution?
+@sonney2k	-> parameters changed
+ blackburn	that would take some time for you puffin444
+ blackburn	but actually it is worth I think
+ blackburn	void fire_parameter_changed(const char* name)
+ puffin444	Is there an md5sum algorithm already in shogun, or would I have to use an external library/implement it myself?
+@sonney2k	puffin444, yes there is
+ blackburn	why to compute md5?
+@sonney2k	look at CHash
+@sonney2k	blackburn, to see if parameters change
+ blackburn	sonney2k: well if set_* is called we can assume it is changed
+@sonney2k	why?
+ blackburn	sonney2k: are you on debian sid now?
+ puffin444	Okay. So would it make sense to add an md5sum member in SGObject that stores the md5sum of its model selection parameter tree?
+@sonney2k	blackburn, yes
+ puffin444	Or would simply a function that calculates an md5sum of a parameter tree suffice?
+@sonney2k	puffin444, heiko is the expert here
+@sonney2k	not sure what is best
+ puffin444	okay.
+ blackburn	puffin444: why do you need to work with parameters at all?
+ blackburn	just curious
+ puffin444	I use the model selection framework to do hyperparameter learning. Whenever one of those parameter changes I need to recalcuate the matrices I need.
+ blackburn	why is it so general?
+ puffin444	The gradient search was written to be used with arbitrary machines.
+ blackburn	I see
+ blackburn	hah nice no wi-fi driver in debian live
+ blackburn	no display driver as well
+ blackburn	and I have no cable
+@sonney2k	puffin444, btw I would go for a m_parameter_checksum in SGObject for the time being
+ puffin444	Okay. I think I can write an MD5 sum function using CHash.
+ blackburn	will that approach require you to add anything to setters?
+@sonney2k	puffin444, alternatively you can also use murmurhash2 (also in CHash) should be good enough I think
+ blackburn	hmm it failes here to link with nlopt for some reason
+ blackburn	I guess I compiled nlopt w/o shared
+ blackburn	sonney2k: hmm I just got I do what I did yesterday
+ blackburn	probably my commit went to hell
+ blackburn	I was really sure I pushed it
+-!- heiko [~heiko@host86-181-9-226.range86-181.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-181-9-226.range86-181.btcentralplus.com] has quit [Ping timeout: 264 seconds]
+@sonney2k	wiking, any news on your PR?
+ CIA-18	shogun: Sergey Lisitsyn master * ra10eab1 / (3 files in 3 dirs): Fixed sparse matrix handling in static - http://git.io/356OIw
+ blackburn	sonney2k: found it in backups :D
+ blackburn	kind of mystic
+ blackburn	sonney2k: do you know where one should report if kernel does not detect whether AC adapter changes status?
+@sonney2k	blackburn, reportbug <packagename>
+@sonney2k	blackburn, or lkml
+ blackburn	no idea about package name :D
+ blackburn	I tried everything
+ blackburn	still acpi does not fire that AC is plugged
+ blackburn	state is being set correctly
+ blackburn	in /proc/acpi/battery
+ blackburn	the only bug left with my new notebook (I spent some time forcing it to produce lesser heat)
+@sonney2k	blackburn, did you try to compile your own 3.4 / 3.5-rc kernel to see if it is fixed there?
+ blackburn	sonney2k: I installed 3.4 from kernel-ppa - no help here
+@sonney2k	blackburn, then send an email to lkml asking for help
+ blackburn	sonney2k: problem is I am unsure it is a kernel bug
+ blackburn	sonney2k: /proc/ stuff updates perfectly - but acpi doesn't catch it
+ blackburn	may be I should try newer acpid?
+ blackburn	still the same with newer acpid argh
+@sonney2k	cat /proc/acpi/ac_adapter/ADP1/state
+@sonney2k	state:                   off-line
+@sonney2k	cat /proc/acpi/ac_adapter/ADP1/state
+@sonney2k	state:                   on-line
+@sonney2k	blackburn, ^ it is all in kernel stuff
+@sonney2k	so kernel bug
+ blackburn	sonney2k: that thing is being updated
+ blackburn	sonney2k: run acpi_listen and plug in / plug out your AC
+ blackburn	you should see some msgs here - I do not
+@sonney2k	I don't have acpid installed
+ blackburn	hmm
+ blackburn	sonney2k: how does it detect whether you are running AC??
+@sonney2k	why should it detect it?
+ blackburn	well for gnome
+@sonney2k	some gnome stuff no idea
+ blackburn	and for laptop mode
+@sonney2k	I think upowerd does that
+@sonney2k	which laptop mode?
+ blackburn	sonney2k: laptop-mode-tools package
+@sonney2k	useless stuff...
+ blackburn	sonney2k: well it controls cpufreqd
+@sonney2k	why that
+@sonney2k	just use in kernel on-demand
+ blackburn	sonney2k: hmm well it has its own configuration
+@sonney2k	snakeoil
+ blackburn	may be it could be a good idea to use only cpufreqd
+@sonney2k	not even that
+@sonney2k	just use ondemand in kernel
+@sonney2k	*always*
+ blackburn	sonney2k: in kernel??
+ blackburn	how do you handle that in kernel?
+@sonney2k	echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+@sonney2k	(and all your other cpu's)
+ blackburn	sonney2k: how do you make it persistent?
+@sonney2k	put it in some init script
+ blackburn	sonney2k: do you have anything in /etc/cpufreqd.conf?
+@sonney2k	I don't have that installed
+@sonney2k	nite
+-!- gsomix [~gsomix@109.169.232.38] has joined #shogun
+-!- gsomix [~gsomix@109.169.232.38] has quit [Client Quit]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Quit: Page closed]
+--- Log closed Sun Jul 01 00:00:17 2012

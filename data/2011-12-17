@@ -1,0 +1,157 @@
+--- Log opened Sat Dec 17 00:00:19 2011
+-!- puneetgoyal [~puneetgoy@117.197.177.239] has joined #shogun
+-!- Ram108 [~amma@14.96.21.81] has joined #shogun
+-!- puneetgoyal [~puneetgoy@117.197.177.239] has quit [Quit: Leaving]
+-!- puneetgoyal [~puneetgoy@117.197.177.239] has joined #shogun
+-!- blackburn [~blackburn@31.28.51.215] has joined #shogun
+@sonney2k	blackburn, I think we should try to get http://web.engr.oregonstate.edu/~shindler/kMeansCode/ this fast k-means code into shogun
+@sonney2k	shouldn't be too difficult so if someone asks for what to do...
+@sonney2k	also, porting birch (java) to c++ would make sense
+ blackburn	sonney2k: hmm sure
+@sonney2k	and I would propose some new branch of algorithms for sampling from data, i.e. getting a uniform subset
+@sonney2k	or some other more complicated ways
+ blackburn	you are nipsted
+ blackburn	:D
+@sonney2k	there is more
+@sonney2k	someone here had a fast cross - validation scheme
+@sonney2k	that would be very cool stuff for heiko
+ blackburn	sorry but I'm really out of time till new year
+ blackburn	fast CV scheme? how can it be fast?
+@sonney2k	btw, we have now shogun in debian unstable again...
+ blackburn	did you packed it?
+@sonney2k	it does CV on small subsets of the data first
+@sonney2k	and this way can throw away lots of combinations to be tested. then it increases these subsets slowly - speedups of 2 orders of magnitude without loss are possible
+ blackburn	sonney2k: I now need some binary tree classifier making possible to use say LDA for multiclass
+ blackburn	how do you think it is useful?
+@sonney2k	I am currently messing with python -builtin
+ blackburn	what is builtin?
+@sonney2k	no more .py files but direct py objects
+@sonney2k	an option for swig
+@sonney2k	blackburn, you are talking about a certain error correcting codes scheme right?
+ blackburn	sonney2k: yes, it is a variant of binary tree classifier
+@sonney2k	to convert any binary classifier into a multiclass classifier?
+ blackburn	yes
+@sonney2k	there was another very nice algorithm at nips for that
+@sonney2k	some boosting with minimal set of features - massively many classes - but very fast and accurate
+@sonney2k	ahh and a binary tree thingy too - that sounded very reasonable work - let me check if I find it
+ blackburn	I need something like that for my road signs work
+@sonney2k	how many classes do you have?
+ blackburn	now 43, but will have much more
+ blackburn	some of them should be grouped for sure
+ blackburn	like red signs, blue signs, etc
+@sonney2k	one is ShareBoost: Efficient multiclass learning with feature sharing
+@sonney2k	S. Shalev-Shwartz, Y. Wexler, A. Shashua
+ blackburn	got it thanks
+@sonney2k	the other is http://nips.cc/Conferences/2011/Program/event.php?ID=2647
+@sonney2k	this is probably more what you could directly use
+@sonney2k	it infers the tree and learns the SVms / LDA whatever
+@sonney2k	seemed very reasonable
+ blackburn	yes, I had similar idea before I get to know it is already done :D
+@sonney2k	blackburn, ohh yes please add pointers to all of that in the bts :-)
+ blackburn	bts?
+@sonney2k	these are all very worthwhile ideas for gsoc
+@sonney2k	bug tracking system
+@sonney2k	aka github issues
+ blackburn	ah yes I'll add it
+@sonney2k	blackburn, that is the thing with the sampling http://nips.cc/Conferences/2011/Program/event.php?ID=3000
+@sonney2k	they use it to do fast GMM estimation
+@sonney2k	i.e. they sample from the data and then on that sample estimate the GMM
+@sonney2k	but the sampling is very clever...
+ blackburn	pretty simple idea heh
+ blackburn	well and my point is that all the things should be as simple as it could be
+@sonney2k	yeah - and easy to implement... we just need some new class of 'sampler' algorithms
+@sonney2k	the get as input some data and then return an index with a subset :)
+ blackburn	sonney2k: TreeMulticlassMachine?
+@sonney2k	no I think this should be under classifier
+@sonney2k	MulticlassTreeClassifier ?
+ blackburn	why classifier?
+ blackburn	ah yes
+ 15SAAI18M	shogun: Sergey Lisitsyn master * rce5c547 / src/shogun/converter/DiffusionMaps.h : Mentioned paper on DiffusionMasp - http://git.io/jmqxHg
+ blackburn	sonney2k: is your TU mail available for you still?
+@sonney2k	better use mey debian.org address
+@sonney2k	it is but not for long I think
+ blackburn	sonney2k: I'm asking cause Ori Cohen wrote to both of us, have you seen?
+ blackburn	it is a guy who was working on C# examples too
+@sonney2k	yes I have seen - I don't know what to do about it
+@sonney2k	I thought you added him to NEWS?
+ blackburn	sonney2k: yes, he said it is ok for him
+@sonney2k	btw we have to update the website right to point to github issues
+@sonney2k	what is the url btw?
+ blackburn	ehm
+ blackburn	https://github.com/shogun-toolbox/shogun/issues
+ blackburn	?
+@sonney2k	yes that one, let me do the update
+@sonney2k	then I can also include Ori in the NEWS on the site
+ blackburn	yes please do then
+@sonney2k	done
+@sonney2k	btw, we got our windows7 buildbot
+@sonney2k	I just didn't have time to administer it
+ blackburn	heh nice
+-!- puneetgoyal [~puneetgoy@117.197.177.239] has quit [Ping timeout: 240 seconds]
+-!- puneetgoyal [~puneetgoy@117.197.166.8] has joined #shogun
+@sonney2k	blackburn, just one thought - should we add some print / string function to show a compact output of shogun objects?
+@sonney2k	e.g. they could show their name and list parameters this way?
+ blackburn	sonney2k: well why not
+ blackburn	sonney2k: not the crucial thing though, no idea how to use it
+@sonney2k	well you could just do
+@sonney2k	x=GaussianKernel()
+@sonney2k	print x
+@sonney2k	and then it will not say
+@sonney2k	<Swig Object of type 'shogun::CGaussianKernel *' at 0x7fe290d0db90>
+@sonney2k	but
+@sonney2k	GaussianKernel - Parameters width=1
+ blackburn	sure, I understand
+@sonney2k	for features it could show the same kind of summary we have for numpy arrays
+@sonney2k	rather useful I would say
+ puneetgoyal	hey :), why do we generally use this gaussian kernel ?
+ puneetgoyal	I mean..in most examples, I had seen this kernel only
+ blackburn	puneetgoyal: it has some nice features
+ blackburn	like 'virtual' infinite-dimension gilbert space mapping hah :)
+ puneetgoyal	ok
+-!- naywhayare [~ryan@128.61.149.136] has joined #shogun
+-!- Ram108 [~amma@14.96.21.81] has quit [Remote host closed the connection]
+ puneetgoyal	hello, I was trying to tokenize emails and now a bit close to it...I wanted to know if there is a way to parse all the files containing the email data to store them in a matrix ?
+ blackburn	hmm how?
+ puneetgoyal	how I made tokens from an email..or How I wanna parse all files?
+ blackburn	how can you store email data in matrix?..
+ puneetgoyal	to tokenize emails...I used the email package and its various modules
+ puneetgoyal	I can extract various information from an email that will be used to calculate the probability of an email being a spam or a ham using that email package of python
+ puneetgoyal	and store them in a matrix
+ blackburn	is it a matrix of probabilities?
+ puneetgoyal	no, I guess probabilities will be calculated after I train my system using some emails ?
+ blackburn	so it is a token matrix?
+ puneetgoyal	yes
+ blackburn	how do you plan to use it?
+ puneetgoyal	should I use some other method for training?
+ blackburn	you may feel free to use any but I'm in doubts
+ blackburn	cause stringfeatures in shogun supports just a list of strings
+ blackburn	but not a list of list of strings
+ puneetgoyal	ok, so from where should I procede?
+ blackburn	puneetgoyal: I would suggest you to compute similarity measure with some written-by-you-technique
+ blackburn	and then form similarity matrix to train SVM or so
+ blackburn	puneetgoyal: for example you can count identical tokens
+ puneetgoyal	blackburn: sry, forgot to reply...I was reading about similarty measures
+ blackburn	np
+ puneetgoyal	identical tokens?
+ blackburn	puneetgoyal: ['this','is','spam'] is 1.0 to ['this','is','spam'], but 0.6667 to ['this','is','sparta']
+ puneetgoyal	blackburn: yes, but while testing right? I mean the list I will compare the mail with...would be made after training
+ blackburn	not sure I understood you
+ puneetgoyal	I mean suppose the first list you gave is a mail you want to check, and second is the list you already have...that you know is a spam or a ham
+ blackburn	so?
+ puneetgoyal	but to get the second list, you will first have to get some training data
+ blackburn	yes
+ blackburn	well just get some training mails, determine its status
+ blackburn	and form matrix containing similarity between i-th and j-th mails
+ puneetgoyal	ok, and would have to write the respective weights against each of the keywords
+ puneetgoyal	ok, I will make a module to construct this matrix asap
+ blackburn	puneetgoyal: hey why do you hurry?
+ puneetgoyal	blackburn: I dont have anything else to do now...so can spend the whole time over this :D
+-!- ishaanmlhtr [~ishaan@115.241.187.65] has joined #shogun
+-!- ishaanmlhtr [~ishaan@115.241.187.65] has quit [Ping timeout: 240 seconds]
+-!- ishaanmlhtr [~ishaan@115.241.221.69] has joined #shogun
+-!- ishaanmlhtr [~ishaan@115.241.221.69] has quit [Ping timeout: 240 seconds]
+-!- ishaanmlhtr [~ishaan@115.241.221.69] has joined #shogun
+-!- ishaanmlhtr [~ishaan@115.241.221.69] has quit [Ping timeout: 244 seconds]
+-!- ishaanmlhtr [~ishaan@115.241.221.69] has joined #shogun
+-!- puneetgoyal [~puneetgoy@117.197.166.8] has quit [Quit: Leaving]
+--- Log closed Sun Dec 18 00:00:19 2011

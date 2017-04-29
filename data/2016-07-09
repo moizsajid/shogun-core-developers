@@ -1,0 +1,270 @@
+--- Log opened Sat Jul 09 00:00:14 2016
+-!- lambday [56a397c5@gateway/web/freenode/ip.86.163.151.197] has quit [Ping timeout: 250 seconds]
+ shogun-buildbot	build #28 of clang - thread analysis is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang%20-%20thread%20analysis/builds/28  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+ shogun-buildbot	build #26 of clang - undefined behaviour analysis is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang%20-%20undefined%20behaviour%20analysis/builds/26  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+ shogun-buildbot	build #42 of memleak - valgrind is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/memleak%20-%20valgrind/builds/42  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+ shogun-buildbot	build #1040 of nightly_none is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_none/builds/1040  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+ shogun-buildbot	build #1170 of nightly_default is complete: Failure [failed test notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1170  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+-!- mizari [~mizari@95-174-213-100.nts.su] has quit [Quit: Leaving]
+-!- sanuj [~sanuj@59.97.245.51] has joined #shogun
+ sanuj	bzdmgz, there?
+-!- sanuj [~sanuj@59.97.245.51] has quit [Ping timeout: 264 seconds]
+-!- sanuj [~sanuj@117.203.12.168] has joined #shogun
+-!- sanuj [~sanuj@117.203.12.168] has quit [Quit: Leaving]
+-!- sanuj [~sanuj@117.203.12.168] has joined #shogun
+ sanuj	bzdmgz, there?
+ bzdmgz	sanuj: FINALLY yes
+ bzdmgz	just fixed some crazy thing
+ sanuj	:D
+ sanuj	haha
+ sanuj	bzdmgz, office work on weekend?
+ bzdmgz	no but fixing it
+ bzdmgz	crazily out of SLA
+ sanuj	hmm
+ bzdmgz	ok seen your mail
+ bzdmgz	let me check
+ sanuj	bzdmgz, https://github.com/shogun-toolbox/shogun/pull/3357#issuecomment-231361440
+ sanuj	cool
+ bzdmgz	I agree with heiko but we need to separare those
+ bzdmgz	I mean we need that list
+ bzdmgz	but we can't combine list and create
+ bzdmgz	SO
+ bzdmgz	what about removing swig part YET
+ sanuj	okay
+ bzdmgz	we tried, it works
+ bzdmgz	let me put that so heiko knows
+ sanuj	bzdmgz, i'll remove swig from create() and update the PR
+ bzdmgz	yeah tanks
+ bzdmgz	thanks
+ sanuj	bzdmgz, see the other PR also
+ bzdmgz	sanuj: yeah
+ bzdmgz	sanuj: actually creating
+ bzdmgz	like clone
+ bzdmgz	and equals
+ bzdmgz	maybe it makes sense?
+ sanuj	bzdmgz, are you talking about jinja?
+ bzdmgz	yeah
+ bzdmgz	sanuj: I tend to think it makes sense
+ sanuj	i've done like the jinja generated unit-tests only
+ bzdmgz	what do you think?
+ sanuj	yes
+ sanuj	jinja is good
+ bzdmgz	no I mean
+ bzdmgz	just copy what happens in
+ bzdmgz	clone unit test
+ bzdmgz	to test all the clasess are created
+ sanuj	I see
+ sanuj	bzdmgz, but we need to decide what classes to add
+ bzdmgz	the only thing bothers me
+ bzdmgz	is that you use
+ bzdmgz	create<CKernel>
+ bzdmgz	ok they all have base class
+ bzdmgz	just use create<CSGObject>
+ sanuj	bzdmgz, see my updated MockObject
+ sanuj	i have created a pointer of CKernel* there
+ bzdmgz	where where
+ sanuj	in the jinja pr
+ bzdmgz	ok let me check
+ bzdmgz	sanuj: oh that looks cool
+ sanuj	bzdmgz, the PR?
+ bzdmgz	yeah
+ sanuj	thanks
+ bzdmgz	jinja thing look fancy
+ sanuj	haha
+ sanuj	bzdmgz, R is failing
+ bzdmgz	yeah
+ sanuj	did you see my last comment
+ bzdmgz	not sure
+ bzdmgz	I think it just doesn't support overloading?
+ bzdmgz	or?
+ bzdmgz	sanuj: we need a patch to disable it for R then
+ sanuj	bzdmgz, does anyone use shogun in R?
+ bzdmgz	does anyone use shogun
+ bzdmgz	:D :D JK
+ sanuj	:D
+ bzdmgz	sanuj: no idea
+ bzdmgz	we do not track that
+ bzdmgz	should intergrate some spyware
+ bzdmgz	!
+ bzdmgz	sanuj: just ignore it do not let it stop you :D
+ bzdmgz	I mean some #ifdef maybe
+ sanuj	i see
+ bzdmgz	you can find some examples actually
+ bzdmgz	in our .i files
+ sanuj	the error happens because of this line in modshogun.R
+ sanuj	vaccessors = c('io', 'parallel', 'version', 'm_parameters', 'm_model_selection_parameters', 'm_gradient_parameters', 'm_hash', 'get''get''get''get''get''get''get''get');
+ sanuj	the 'get' madness
+ sanuj	bzdmgz, some similar issues were reported by
+ sanuj	https://sourceforge.net/p/swig/mailman/message/35071142/
+ sanuj	https://github.com/swig/swig/issues/697
+ bzdmgz	yeah I've seen
+ sanuj	cool
+ bzdmgz	shit happens so we have to avoid that
+ sanuj	okay
+ sanuj	bzdmgz, so no tags-swig for R?
+ sanuj	will use ifdef as you suggested
+ bzdmgz	yeah
+ bzdmgz	unless it is fixed in swig
+ sanuj	bzdmgz, i think will take time
+ sanuj	if they fix it
+ bzdmgz	yes
+ bzdmgz	lets just wait
+ bzdmgz	once fixed we enable it for R
+ sanuj	okay
+ sanuj	bzdmgz, look at this https://github.com/shogun-toolbox/shogun/pull/3357/files#diff-5cdc2a59820a53342121f311fbbe4d51R26
+ sanuj	if i use CGaussianKernel* instead
+ sanuj	it gives error from because the type are not same as i use setKernel() which expects a CKernel*
+ bzdmgz	shouldnt be casted?
+ sanuj	bzdmgz, will try casting
+ bzdmgz	no I mean implicitly
+ sanuj	no
+ bzdmgz	why?
+ sanuj	bzdmgz, well if it was implicitly casted, then it would have worked
+ bzdmgz	yeahh
+ bzdmgz	strange
+ sanuj	bzdmgz, if we do this....is there a problem?
+ bzdmgz	I am not sure what's the problem
+ bzdmgz	:)
+ sanuj	cool :D
+ sanuj	i was just confirming
+ sanuj	bzdmgz, i can't add classes till we decide what classes to add
+ bzdmgz	yeah
+ sanuj	bzdmgz, so what are the next steps for tags
+ sanuj	and for plugins
+ sanuj	i'll update the create PR
+ bzdmgz	sanuj: ok it is hard to decide what classes
+ sanuj	and the jinja PR to handle R error
+ bzdmgz	sanuj: what about selecting just a few
+ sanuj	bzdmgz, yes
+ bzdmgz	just to make the simplest complete example work
+ bzdmgz	classification with kernel svm
+ sanuj	bzdmgz, okay
+ bzdmgz	whole thing should be created by create
+ bzdmgz	no `new` involved
+ sanuj	bzdmgz, i will have to change internals of classes to support tag-parameters
+ sanuj	bzdmgz, are you talking about using tag-parameters for kernel svm classification example?
+ sanuj	or just create?
+ bzdmgz	sanuj: I think tag is tougher
+ bzdmgz	just create firt
+ bzdmgz	first
+ sanuj	bzdmgz, so i think the bottleneck is to decide what classes to add for tags
+ sanuj	bzdmgz, and it is better if you and heiko do it
+ bzdmgz	it is nearly impossible
+ bzdmgz	we can start with something and iterate
+ sanuj	bzdmgz, okay so what is the next step for the tags PR after i fix R issues
+ bzdmgz	sanuj: I have to think about it
+ bzdmgz	there are quite a few things to do
+ bzdmgz	not sure how to decompose
+ bzdmgz	but it is moving quite good
+ bzdmgz	we will have something fancy quite soon
+ sanuj	okay
+ sanuj	bzdmgz, next thing for plugins, after i have the svm example ready with create()
+ bzdmgz	sanuj: dlopen thing is due I guess
+ sanuj	just asking this now.....because i don't know when you will be available on irc next :D
+ bzdmgz	hahah
+ bzdmgz	ok
+ sanuj	bzdmgz, so migrate aer code in shogun
+ bzdmgz	I will try to follow up next week
+ bzdmgz	this week was crazy
+ sanuj	haha i see
+ bzdmgz	sanuj: so the basic idea
+ bzdmgz	as you have create by string
+ bzdmgz	make it able to call some library
+ bzdmgz	to ask it to create this object
+ sanuj	bzdmgz, so it is like using create with your aer plugin code
+ sanuj	i'll have to modify create again then
+ bzdmgz	yeah
+ bzdmgz	but inside of create
+ bzdmgz	no interface involved
+ sanuj	bzdmgz, what interface?
+ bzdmgz	of this 'create' function
+ sanuj	abstract class
+ bzdmgz	I mean from user experience it is still create
+ bzdmgz	the only difference is how we load it
+ sanuj	i see
+ sanuj	so from user point of view, create() doesn't change
+ bzdmgz	yeah
+ sanuj	only it's internal implementation changes
+ bzdmgz	yeap
+ sanuj	bzdmgz, so i'll first make this create svm example work
+ sanuj	bzdmgz, and migrate your aer plugin code on a different branch
+ bzdmgz	yes makes sense
+ sanuj	and make it work with create()
+ bzdmgz	yeap
+ sanuj	bzdmgz, but for this i think i would also need to write a plugin
+ sanuj	dummy plugin
+ bzdmgz	yes
+ bzdmgz	:)
+ bzdmgz	gaussian kerel
+ bzdmgz	e.g.
+ sanuj	bzdmgz, so what's the point of merging create in develop right now?
+ bzdmgz	did I say that?
+ bzdmgz	oops
+ bzdmgz	:D
+ sanuj	okay, not merging then?
+ bzdmgz	I think it can go to tags
+ sanuj	haha
+ sanuj	yeah
+ sanuj	bzdmgz, will send a pr to tags
+-!- sanuj [~sanuj@117.203.12.168] has quit [Ping timeout: 264 seconds]
+-!- Saurabh7 [Saurabh7@gateway/shell/panicbnc/x-xohcuxorptqneppp] has quit [Ping timeout: 264 seconds]
+-!- Saurabh7 [Saurabh7@gateway/shell/panicbnc/x-qqkcvttzzqzpgvhm] has joined #shogun
+-!- HeikoS [~heiko@ppp-2-86-179-77.home.otenet.gr] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@ppp-2-86-179-77.home.otenet.gr] has quit [Quit: Leaving.]
+-!- sanuj [~sanuj@117.203.12.168] has joined #shogun
+-!- sanuj [~sanuj@117.203.12.168] has quit [Ping timeout: 272 seconds]
+-!- sanuj [~sanuj@117.203.12.168] has joined #shogun
+-!- HeikoS [~heiko@ppp-2-86-179-77.home.otenet.gr] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@ppp-2-86-179-77.home.otenet.gr] has quit [Quit: Leaving.]
+ sanuj	wiking, there?
+ sanuj	?
+ sanuj	bzdmgz, there?
+ bzdmgz	sanuj: yeap
+ sanuj	bzdmgz, i have a cmake question
+ sanuj	JINJA2_FOUND is not set
+ bzdmgz	yes?
+ sanuj	by FIND(Jinja2)
+ sanuj	instead there is this variable
+ sanuj	FIND_PACKAGE_MESSAGE_DETAILS_Jinja2=[1][v()]
+ sanuj	i was trying to do this
+ sanuj	IF(JINJA2_FOUND AND (NOT SWIGR))
+ sanuj	# Generate automatic shogun-base.i from jinja2 templates
+ sanuj	ADD_CUSTOM_COMMAND(OUTPUT shogun-base.i
+ sanuj	    COMMAND ${PYTHON_EXECUTABLE} ${COMMON_MODULAR_SRC_DIR}shogun-base.i.py
+ sanuj	    ${COMMON_MODULAR_SRC_DIR}shogun-base.i.jinja2
+ sanuj	    shogun-base.i
+ sanuj	    ${COMMON_MODULAR_SRC_DIR}shogun-base-list.txt
+ sanuj	    DEPENDS ${COMMON_MODULAR_SRC_DIR}shogun-base.i.py
+ sanuj	    ${COMMON_MODULAR_SRC_DIR}shogun-base.i.jinja2
+ sanuj	    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+ sanuj	    COMMENT "Generating shogun-base.i")
+ sanuj	ENDIF()
+ sanuj	bzdmgz, ^
+ bzdmgz	yeah it is not being set
+ bzdmgz	you can find it in cmake/FindJinja2.cmake
+ bzdmgz	sanuj: I think you can patch it
+ bzdmgz	find_package_handle_standard_args(LibXslt FOUND_VAR LibXslt_FOUND
+ bzdmgz	                                         REQUIRED_VARS LibXslt_LIBRARIES LibXslt_INCLUDE_DIRS
+ bzdmgz	                                         VERSION_VAR LibXslt_VERSION_STRING)
+ bzdmgz	from https://cmake.org/cmake/help/v3.0/module/FindPackageHandleStandardArgs.html
+ bzdmgz	you can add FOUND_VAR
+ bzdmgz	with JINJA2_FOUND
+ bzdmgz	just like in this example
+ bzdmgz	it should work
+ sanuj	ohkay
+ sanuj	bzdmgz, it is for this https://github.com/shogun-toolbox/shogun/pull/3357#discussion-diff-70074452R46
+ bzdmgz	yeah
+ bzdmgz	good
+ sanuj	bzdmgz, thanks
+ sanuj	goingg to sleep
+ sanuj	will do this tomorrow
+ sanuj	goodnight
+ bzdmgz	gnite
+-!- sanuj [~sanuj@117.203.12.168] has quit [Quit: Leaving]
+-!- HeikoS [~heiko@80.106.205.93] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@80.106.205.93] has quit [Quit: Leaving.]
+--- Log closed Sun Jul 10 00:00:16 2016

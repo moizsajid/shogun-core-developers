@@ -1,0 +1,550 @@
+--- Log opened Wed Apr 11 00:00:00 2012
+--- Day changed Wed Apr 11 2012
+ n4nd0	so tomorrow I will make sure that this cover tree is actually giving the right answers
+ n4nd0	and if it does, I will start to port it :)
+ blackburn	n4nd0: okay
+ n4nd0	good night :)
+ blackburn	good night
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ harshit_	good night everyone :)
+-!- harshit_ [~harshit@182.68.210.237] has quit [Quit: Leaving]
+ PhilTillet	blackburn, not sleeping?
+ PhilTillet	:p
+-!- av3ngr [av3ngr@nat/redhat/x-fslqwfzaqdfhtuml] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Remote host closed the connection]
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Quit: Page closed]
+@sonney2k	wiking, btw the qnorm 'bug' should not have been critical because for mkl we only considered positive kernel weights
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- pluskid [~chatzilla@111.120.64.123] has joined #shogun
+-!- pluskid [~chatzilla@111.120.64.123] has quit [Client Quit]
+-!- pluskid [~chatzilla@111.120.81.178] has joined #shogun
+-!- gsomix [~gsomix@188.168.128.186] has quit [Ping timeout: 245 seconds]
+-!- pluskid [~chatzilla@111.120.81.178] has quit [Quit: ChatZilla 0.9.88.2 [Firefox 11.0/20120314124128]]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ n4nd0	sonne|work: I finished cheking all the results, this cover tree gives the right output :)
+ n4nd0	sonne|work: at least the same as our current KNN with qsort
+ n4nd0	and the interesting part, the query time is quite shorter!
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@vpna213.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpna213.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ n4nd0	blackburn: hey, good morning!
+ n4nd0	blackburn: I just sent a small pull request for KNN
+ blackburn	n4nd0: morgen :)
+ blackburn	damn I thought I pushed my changes
+ n4nd0	I didn't see them in the repo
+ n4nd0	no problem :)
+ n4nd0	blackburn: a detail for the cover tree
+ n4nd0	blackburn: should I substitute directly the current one we have or use another name (CoverTree2 for example)
+@sonney2k	n4nd0, so JL's covertree works right?
+@sonney2k	morning blackburn
+ n4nd0	sonney2k: it is not JL's implementation
+ n4nd0	sonney2k: it is this one https://github.com/mbrucher/CoverTree
+@sonney2k	hmmhh - admittedly I am a big fan of JL's stuff.
+@sonney2k	what he does is reall fast(tm)
+ blackburn	sonney2k: morgen. today is the day? ;)
+ n4nd0	sonney2k: yeah but I don't really understand that implementation
+@sonney2k	that is the downside of his code - but just ask him then
+@sonney2k	blackburn, not my day
+ n4nd0	sonney2k: mailing list?
+@sonney2k	tomorrow I would say :D
+@sonney2k	n4nd0, personal email
+ n4nd0	sonney2k: ok, in any case, do you think it pays off to start porting this implementation?
+@sonney2k	I would rather try to get JL's implementation to work
+ n4nd0	ok ...
+ n4nd0	this one presents a good improvement in time though
+ n4nd0	Shogun's time: 00:00:00.328804
+ n4nd0	CoverTree time 00:00:00.053650
+ blackburn	sonney2k: btw I managed to beat all my competitors with 'brand new libedrt' :D
+-!- uricamic [9320543b@gateway/web/freenode/ip.147.32.84.59] has joined #shogun
+ n4nd0	that is just 100 queries using 10000 training vectors
+ n4nd0	sonney2k: another thing I was thinking about our KNN
+ uricamic	Hi
+ n4nd0	sonney2k: right now we have N?log(N) for every query, because we sort the distances from the query vector to all the training vectors
+@sonney2k	n4nd0, well then benchmark JLs impl against this one
+@sonney2k	uricamic, hi...
+ n4nd0	sonney2k: yeah, I can do that ... but we won't know if the results are correct
+@sonney2k	are you back from vacations? did you think of some small patch?
+ n4nd0	sonney2k: so it won't fell safe in any case
+@sonney2k	n4nd0, but you can compare the output to the qsort/other covertree
+ n4nd0	sonney2k: yes, to the cover tree I am using now, the comparison is done
+ n4nd0	sonney2k: I am quite certain it is correct
+ uricamic	sonney2k: yes, I plan to work on it this week, and I have one question
+@sonney2k	n4nd0, yeah - I meant you can do the same with JL
+ n4nd0	sonney2k: I have tried a very long test (10000 training vector, 10000 queries with 5 neighbors) and it works
+ n4nd0	sonney2k: no, I cannot do that with JL
+@sonney2k	and the winner is the one we integrate
+ uricamic	sonney2k: is it possible to write very simple interface for the libbmrm as a patch, or hsould I choose something different?
+@sonney2k	n4nd0, why not?
+@sonney2k	uricamic, I would prefer something completely different
+@sonney2k	blackburn, do you have some *small* idea for uricamic?
+ uricamic	sonney2k: ok
+ n4nd0	sonney2k: when I query 10 points with k = 10 with JL, I get 10 neighbors for the first query
+ n4nd0	sonney2k: 1 for each of the others ...
+ blackburn	sonney2k: I proposed parzen stuff before
+@sonney2k	uricamic, ^
+@sonney2k	so feel free
+ blackburn	sonney2k: do you think it worths?
+@sonney2k	uricamic, other relatively simple algos are also ok
+ uricamic	ok, I will start with the Parzen windows
+ uricamic	ok
+ uricamic	thanks
+ blackburn	ah or some nadaraya-watson or etc
+ n4nd0	sonney2k: but I can try to check again if I am doing correctly this test, but I think so
+ blackburn	:D
+@sonney2k	for example some iterative method for ridge regression (not computing pinv)
+@sonney2k	n4nd0, well ask JL directly in CC me in the email why this is the case and give him your code snippet
+ n4nd0	sonney2k: good idea :) thank you
+@sonney2k	uricamic, that was for you: you could for example also do some iterative method for ridge regression (not computing pinv)
+@sonney2k	if that is more in your field of expertise
+@sonney2k	as optimization guru :)
+ uricamic	sonney2k: ok, I will look at it and then decide
+@sonney2k	uricamic, just look in the shogun/regression/ directory... these all are pinv based things
+ uricamic	sonney2k: ok, thanks
+ n4nd0	sonney2k: about the other strategy for KNN, the qsort one, right now we are in N?log(N) but that can be done in N easy
+ n4nd0	sonney2k: instead of sorting all the distances and taking the K shortest
+ n4nd0	sonney2k: loop through all the distances and keep a record of the K shortest one found
+ blackburn	n4nd0: really, how? ;)
+@sonney2k	n4nd0, yes that would be faster for small k
+ blackburn	it won't be N still I mean
+@sonney2k	n4nd0, I guess no one is using k>11
+@sonney2k	blackburn, it is N*k
+ n4nd0	sonney2k: I think it is something like N?k?log(k)
+ blackburn	depends on structure you will use to store neighbors
+ blackburn	but with lame way it is even Nk^2
+ n4nd0	using just a vector of k elements
+ n4nd0	that you order in every iteration
+ n4nd0	is just N?k?log(k)
+ n4nd0	and I know nothing lamer than that ...
+ blackburn	but you would need to compare with elements
+ blackburn	in worst case with each element
+@sonney2k	n4nd0, I thought you meant sth like going through the N elements and keeping a history of the k neighreast
+ blackburn	right?
+ n4nd0	sonney2k: yeah, that is the idea
+ blackburn	n4nd0: I used fibonacci heap for that before :D
+ n4nd0	blackburn: what complexity gives with fibonacci heap?
+ n4nd0	I normally solve this problem using std::set
+ blackburn	minimum is log N amortized
+ n4nd0	you insert in log(k)
+ blackburn	so k*log N
+@sonney2k	gtg
+@sonney2k	cu
+ blackburn	insert is O(1) in the fib heap
+ n4nd0	sonney2k: bye
+ n4nd0	blackburn: so you insert in O(1) and later you sort it?
+ blackburn	yes something like that
+ n4nd0	ok
+ blackburn	actually you could measure it too
+ n4nd0	but when you said
+ n4nd0	09:22 < blackburn> but you would need to compare with elements
+ n4nd0	09:22 < blackburn> in worst case with each element
+ n4nd0	you are playing there with worst-time complexity of qsort??
+ blackburn	no
+ n4nd0	if not, I don't see what you mean
+ blackburn	okay let us have x1,x2,x3,x4,...
+ blackburn	when you collect neighbors
+ blackburn	let we have some collection already
+ blackburn	xi1,xi2,xi3
+ n4nd0	ok
+ blackburn	and if we need to know if new vector x is a neighbor
+ blackburn	we would need to compare all these distances right?
+ n4nd0	no
+ blackburn	why?
+ n4nd0	you just compare with the one that gives the largest distance
+ n4nd0	among these neighbors
+ n4nd0	that's why you need to have it sorted
+ blackburn	sorted?
+ n4nd0	yeah
+ n4nd0	so you have this collection of k tentative neighbors
+ n4nd0	sorted
+ blackburn	okay and if you have distance 1.5
+ blackburn	while largest is 5
+ blackburn	and smallest is 1.25
+ n4nd0	then 5 pops out
+ blackburn	you would need to compare to place it?
+ n4nd0	1.5 enters
+ n4nd0	no
+ n4nd0	the largest goes out
+ blackburn	ah
+ n4nd0	the new one goes in, and you sort again
+ blackburn	okay got it
+ n4nd0	N?k?log(k) :D
+ n4nd0	"assuming" that qsort is n?log(n) for n elements
+ n4nd0	so we will normally have complexity N because N >> k
+ n4nd0	and that would make our current KNN to work in O(N) instead of O(N?log(N))
+ n4nd0	blackburn: did I convince you?
+ blackburn	n4nd0: just measure :)
+ n4nd0	sure
+ n4nd0	blackburn: I think that is my homework for today
+ n4nd0	I am going to change it, measure and mail JL
+ blackburn	yeah a lot of things to do
+-!- nickon [~noneedtok@dD5774105.access.telenet.be] has joined #shogun
+ n4nd0	blackburn: I was thinking of that because I remember you said that scikits people wrote that our KNN is slow
+ n4nd0	blackburn: and AFAIK they don't have cover tree either
+ blackburn	n4nd0: kdtree
+ blackburn	or balltree
+ n4nd0	I think kd-trees work fine in low dimensionality problems
+ n4nd0	blackburn: I have just realized that KNN comes with SG_PROGRESS, how is that used?
+ blackburn	I would avoid kdtree
+ blackburn	n4nd0: knn.io.enable_progress()
+ n4nd0	blackburn: ok, thank you
+ n4nd0	blackburn: why would you avoid kd-trees?
+ blackburn	n4nd0: that thing should be everywhere actually
+ blackburn	n4nd0: because it would work only for simplefeatures
+ sonne|work	n4nd0: mail JL first then start the play stuff :)
+ sonne|work	n4nd0: btw JL is located in NY so you cannot quickly get an answer
+ n4nd0	sonne|work: :( haha ok, I was starting to play first, such a kid :P
+ n4nd0	sonne|work: the sooner I mail him, the better then
+ blackburn	sonne|work: is there anything except covertree and vw he has we can integrate?
+ sonne|work	blackburn: his vw stuff changed completely
+ sonne|work	they have some massiviely parallel thing in there now
+ blackburn	sonne|work: I have seen that - bfgs-l is here now
+ n4nd0	particle filters! :P
+-!- av3ngr [av3ngr@nat/redhat/x-fslqwfzaqdfhtuml] has quit [Ping timeout: 246 seconds]
+ n4nd0	sonne|work: there is sth weird, JL's non-templated implementation gives the correct number of neighbors while the templated (the one I was using for my test) not
+ sonne|work	then sb introduced a bug :)
+ n4nd0	sonne|work: I am going to try to find out why is this, the mail may wait
+ n4nd0	yeah, either I did it in the test or it was in this templated version
+ sonne|work	n4nd0: maybe you can then even compare the 2 cover trees first
+ n4nd0	I think the first alternative is more likely
+ n4nd0	sonne|work: which two ones?
+ sonne|work	the one you dig up and JLs
+ blackburn	n4nd0: could you please remind me how does non-templated stuff works?
+ n4nd0	blackburn: the point is fixed to: typedef float* point
+ blackburn	n4nd0: how distances are computed then?
+ sonne|work	floats are really crazy ... http://www.altdevblogaday.com/2012/04/05/floating-point-complexities/
+ n4nd0	blackburn: normal Euclidean distance
+ n4nd0	blackburn: I think I didn't get the point of the question sorry
+ blackburn	n4nd0: hardcoded? can you change it?
+ n4nd0	blackburn: you mean like how many elements do they use?
+ blackburn	n4nd0: no how hard it could be to adapt non-templated?
+ blackburn	or in other words is it any possible ?
+ n4nd0	blackburn: so take a look to the distance function for example
+-!- wiking [~wiking@vpnb121.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpnb121.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ blackburn	sorry overwhelmed with stuff at job but was curious :)
+ blackburn	n4nd0: I mean can you provide you own distance there?
+ wiking	mmm
+ wiking	anybody knows how can i force an ext3 fs to be clean?
+ wiking	:)
+ blackburn	no idea
+ n4nd0	blackburn: http://snipt.org/uhGh8
+ n4nd0	blackburn: I think that by changing that function that can be done
+ blackburn	yes
+ blackburn	ok
+ n4nd0	wiking: no idea either
+ wiking	hehehe trying to hack with tune2fs and dumpfs :>
+ sonne|work	wiking: hi ... what errors where you getting with clang? because here it compiles fine w/ clang...
+ n4nd0	blackburn: there are things I don't get anyway
+ wiking	sonne|work: will give you the list
+ n4nd0	blackburn: if I set k = 9, I get 10 neighbors
+ wiking	sonne|work: just now i'm trying to save my work while the FS is collapsing :)
+ n4nd0	blackburn: the k used is the k given +1
+ blackburn	n4nd0: Iguess you get object itself?
+ n4nd0	blackburn: aham, let me check
+ sonne|work	wiking: why do you want the fs to become clean
+ sonne|work	wiking: just mount it
+ wiking	sonne|work: i cannot boot
+ wiking	just in single user mode
+ n4nd0	blackburn: I don't really know if it is because of that
+ sonne|work	wiking: then boot in single user mode copy stuff over and run fsck
+ wiking	hehehe i'm actually on it
+ wiking	the problem here is that it's an nfs
+ wiking	a
+ wiking	and i don't have space to save that much data only when i have network
+ wiking	but i think
+ wiking	iiii think i've made it now :)
+ wiking	damn raid controllers...
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+ CIA-64	shogun: puffin444 master * r6f128a5 / (4 files in 3 dirs):
+ CIA-64	shogun: Mean predictions in GaussianProcessRegression now solved using Cholesky
+ CIA-64	shogun: decomposition. Predicted Covariance Matrix is also accessible. - http://git.io/wJMwHg
+ CIA-64	shogun: Soeren Sonnenburg master * ra27e1ae / (8 files in 5 dirs):
+ CIA-64	shogun: Merge pull request #406 from puffin444/master
+ CIA-64	shogun: Gaussian Process Regression - http://git.io/1hENEw
+ CIA-64	shogun: Soeren Sonnenburg master * r2d37d40 / src/shogun/classifier/KNN.cpp :
+ CIA-64	shogun: Merge pull request #440 from iglesias/knn-covertree
+ CIA-64	shogun: Minor bugfixes in KNN - http://git.io/20opjw
+ n4nd0	it was my bad, there were some bugs in my implementation of the point I was using for JL
+ n4nd0	I am sorry for the confusion
+ sonne|work	:)
+ sonne|work	n4nd0: so now benchmark please :D
+ sonne|work	then we can decide
+ n4nd0	sonne|work: there is one issue though
+ n4nd0	I believe that JL doesn't give the points in order (closest to farthe)
+ n4nd0	the neighbors I mean
+ n4nd0	so a test to ensure that the results are correct would take me a bit more time
+ n4nd0	we can benchmark it though and assume that the results are correct (they must be)
+ sonne|work	well try if they are exactly the same...
+ sonne|work	then you know for sure that JL's covertree gives (un)ordered results
+ sonne|work	however, it is very cheap if you would just compute the distance to these k points and sort accordingly (compared to all the n log(n) stuff before)
+ shogun-buildbot	build #662 of cmdline_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/662  blamelist: root@localhost.(none), sonne@debian.org, jacobw@localhost.(none)
+ shogun-buildbot	build #640 of r_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/640  blamelist: root@localhost.(none), sonne@debian.org, jacobw@localhost.(none)
+ shogun-buildbot	build #641 of octave_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/641  blamelist: root@localhost.(none), sonne@debian.org, jacobw@localhost.(none)
+-!- gsomix [~gsomix@188.168.2.126] has joined #shogun
+ gsomix	hello all
+ shogun-buildbot	build #628 of python_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/628  blamelist: root@localhost.(none), sonne@debian.org, jacobw@localhost.(none)
+-!- Johannes__ [55e5c1c3@gateway/web/freenode/ip.85.229.193.195] has joined #shogun
+ Johannes__	Hello, where can i find the shogun-java-modular package the installation guide talks about on ubuntu?
+ Johannes__	I can find some of the others through the usual channels but not that one.
+ n4nd0	Johannes__: hey! it doesn't appear directly in my apt-get either, is it said around there to include any special repository for apt-get??
+ n4nd0	sonne|work: I got results of the benchmark :)
+ Johannes__	n4nd0: Doesen't mention any special repository to include as far as I can see.
+ n4nd0	Johannes__: aham, then I don't really know
+ n4nd0	Johannes__: have you considered installing from source?
+ n4nd0	sonne|work: JL's is considerably faster
+ n4nd0	sonne|work: it is reasonable to some extent since in his version the algorihtms for creation of the tree and query are batch algorihtms
+ Johannes__	Considered, yes but will probably look around for alternatives first, tried the macport install on my laptop without success aswell ;p
+ n4nd0	Johannes__: but you are on ubuntu or in mac?
+ Johannes__	both, the shogun-java-modular question was in regards to ubuntu
+ n4nd0	Johannes__: ahm
+ n4nd0	Johannes__: anyway, it should not be hard to install in ubuntu from source, just say it if you want some help with that
+ Johannes__	Yea perhaps that's the way to go, we'll see. Thanks for the offer and answers regardless :)
+ n4nd0	no problem :)
+ sonne|work	hi gsomix
+ sonne|work	n4nd0: with batch you mean - one has to specify *all* train data at once and *all* test data at once?
+ n4nd0	sonne|work: yes, both for the training data and the test data
+ n4nd0	sonne|work: actually the way it works is doing a cover tree for the test data too
+ sonne|work	so you end up with k*T indices?
+ sonne|work	uhh and what are the memory requirements for that?
+ n4nd0	I have not measured it myself
+ n4nd0	but in the paper they say that a cover tree needs O(n) in memory
+ sonne|work	ok
+ n4nd0	http://snipt.org/uhHe8
+ sonne|work	sounds great...
+ n4nd0	the build time of the other's cover tree really sucks
+ sonne|work	impressive
+ sonne|work	build time?
+ sonne|work	why? what?
+ sonne|work	you mean compile time
+ n4nd0	no
+ sonne|work	or construction of the tree?
+ n4nd0	to create the cover tree
+ sonne|work	well I think it is pretty clear that we want JL's tree :)
+ n4nd0	yeah ... bad new for my health status :P
+ n4nd0	sonne|work: so how would you like that we use it? use the same code and provide wrappers?
+ n4nd0	sonne|work: is it better to re-write?
+ n4nd0	btw, I didn't check the correctnes of the results in JL yet!
+ n4nd0	I just assumed that they are ok
+ sonne|work	n4nd0: will I said so upfront :D
+ sonne|work	ok
+ sonne|work	n4nd0: it depends - a shallow wrapper is easier to maintain in case there are fixes to JL's covertree
+-!- nickon [~noneedtok@dD5774105.access.telenet.be] has quit [Quit: ( www.nnscript.com :: NoNameScript 4.22 :: www.esnation.com )]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- Johannes__ [55e5c1c3@gateway/web/freenode/ip.85.229.193.195] has quit [Quit: Page closed]
+-!- PhilTillet_ [~Philippe@157.159.42.154] has joined #shogun
+-!- PhilTillet_ [~Philippe@157.159.42.154] has quit [Ping timeout: 240 seconds]
+ gsomix	sonne|work, moin. I'm working on SGVector, but slow. I think I can turn on "berserk mode" in Friday or Saturday.
+ sonne|work	gsomix: before doing that - did you fix the  SG_PROGRESS stuff?
+ sonne|work	yes ok
+ sonne|work	no problem
+-!- pluskid [~chatzilla@173.254.214.60] has joined #shogun
+ sonne|work	*argh*
+ sonne|work	http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/642/steps/test_1/logs/stdio
+ sonne|work	buildbot failing
+ gsomix	sonne|work, about SG_PROGRESS. should I do overall progress on all four cycle?
+ sonne|work	one overall progress (approximate is sufficient)
+ gsomix	sonne|work, ok.
+ gsomix	sonne|work, and about references. I figured out, that references is true way.
+ sonne|work	gsomix: ahh how come?
+ sonne|work	gsomix: what changed your mind
+ sonne|work	?
+ sonne|work	pluskid: could you please set a proper username?
+ sonne|work	http://help.github.com/set-your-user-name-email-and-github-token/
+ sonne|work	pluskid, uricamic these are the instructions
+ pluskid	sonne|work: you mean set username to real name?
+ gsomix	sonney2k, wiking wonderful analyzed this situation, hehe. :)
+ gsomix	* sonne|work,
+ wiking	:>
+-!- harshit_ [~harshit@182.68.45.192] has joined #shogun
+ sonne|work	pluskid: yes
+ pluskid	ok, changed
+ sonne|work	it helps you to get credit!
+ pluskid	but we cannot update already committed code maybe?
+ sonne|work	gsomix: I see :)(
+ uricamic	sonne|work: I have already set it, sorry that I haven't done it for the first commit
+ sonne|work	pluskid: no that is not possible
+ sonne|work	but for new pull requests at least
+ pluskid	ok, see it
+ sonne|work	https://github.com/shogun-toolbox/shogun/contributors
+ sonne|work	pluskid: we have a couple of weird contributors in there
+ sonne|work	invalid-email-address (You didn't set your git config correctly)
+ sonne|work	is the best one (blackburns favourite :)
+ pluskid	:D
+ pluskid	it consists of a lot of people :D
+ sonne|work	uricamic: no problem
+ sonne|work	we all are not yet git experts
+-!- vikram360 [~vikram360@117.192.173.208] has joined #shogun
+ pluskid	 /quit
+ pluskid	er...
+ pluskid	failed to quit...
+-!- pluskid [~chatzilla@173.254.214.60] has quit [Quit: ChatZilla 0.9.88.2 [Firefox 11.0/20120314124128]]
+-!- pythonroar [d2198538@gateway/web/freenode/ip.210.25.133.56] has joined #shogun
+-!- pythonroar [d2198538@gateway/web/freenode/ip.210.25.133.56] has quit [Quit: Page closed]
+-!- vikram360 [~vikram360@117.192.173.208] has quit [Ping timeout: 265 seconds]
+-!- vikram360 [~vikram360@117.192.180.124] has joined #shogun
+ gsomix	I'm going to a dance classes.
+ gsomix	cu
+-!- uricamic [9320543b@gateway/web/freenode/ip.147.32.84.59] has quit [Quit: Page closed]
+-!- puffin444 [230bf329@gateway/web/freenode/ip.35.11.243.41] has joined #shogun
+ puffin444	Hi
+-!- harshit_ [~harshit@182.68.45.192] has quit [Ping timeout: 244 seconds]
+-!- harshit_ [~harshit@182.68.45.192] has joined #shogun
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+ puffin444	hello
+ PhilTillet	hello
+ puffin444	Do you know when/if Sergey or Soeren will be on IRC?
+ PhilTillet	I have no idea :p
+ PhilTillet	I think they are eagerly waiting for the number of slots to be announced =D
+ blackburn	puffin444: I'm partially available
+ blackburn	I am first one ;)
+ puffin444	So blackburn it looks like I broke the build :(
+ blackburn	I've seen the mail
+ blackburn	first of S heh
+ blackburn	let me check logs
+ blackburn	puffin444: does it work on your machine?
+ puffin444	yes
+ puffin444	That's what I don't understand
+ blackburn	any errors detected by valgrind?
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 245 seconds]
+ puffin444	There are no memory leaks. However, it does complain about freeing memory. This happens to all the examples though.
+ puffin444	In Valgrind
+ blackburn	puffin444: do you copy the covariance matrix when you return it?
+ puffin444	Hmm... maybe not.
+ blackburn	I mean is it a member?
+ puffin444	No.
+ blackburn	ah no
+ puffin444	But the problem is that I can't reproduce this error on my system, so I don't really know how to fix it.
+ blackburn	yeah
+ blackburn	let me try to compile and test that
+ blackburn	puffin444: actually the problem is some matrix is free'd two times
+ puffin444	Aah I see
+ puffin444	blackburn, I am extremely sorry to do this, but I need to leave the IRC immediately
+ blackburn	puffin444: no problem
+ puffin444	I'll check and find this double-freed matrix.
+-!- puffin444 [230bf329@gateway/web/freenode/ip.35.11.243.41] has quit [Quit: Page closed]
+ blackburn	yeah and I'll try to reproduce
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+-!- flxb [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+ flxb	are kernels in shogun centered?
+-!- PhilTillet [~Philippe@157.159.42.154] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ flxb	or is it normalized in any way if I use custom kernels?
+-!- harshit_ [~harshit@182.68.45.192] has quit [Ping timeout: 260 seconds]
+-!- harshit_ [~harshit@182.68.45.192] has joined #shogun
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+ blackburn	flxb: we have kernel normalizers for that
+-!- flxb [~cronor@fb.ml.tu-berlin.de] has quit [Quit: flxb]
+ wiking	nyapp
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has joined #shogun
+-!- harshit_ [~harshit@182.68.45.192] has quit [Ping timeout: 245 seconds]
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has quit [Ping timeout: 276 seconds]
+-!- PhilTillet [~Philippe@157.159.42.154] has quit [Ping timeout: 245 seconds]
+-!- harshit_ [~harshit@182.68.45.192] has joined #shogun
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has joined #shogun
+ wiking	blackburn: here?
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+-!- harshit_ [~harshit@182.68.45.192] has quit [Ping timeout: 252 seconds]
+-!- harshit_ [~harshit@182.68.45.192] has joined #shogun
+-!- PhilTillet [~Philippe@157.159.42.154] has joined #shogun
+@sonney2k	hey therre
+ n4nd0	hi
+@sonney2k	ohh the man with the fast covertree :)
+ n4nd0	haha not yet :)
+ n4nd0	I won't say until we can use it within shogun
+ n4nd0	;)
+@sonney2k	hmmh does anyone know when the business day of pacific time is over
+@sonney2k	looks like in 5-6 hours but I guess at google they work a bit longer so lets say 8 hrs ;-)
+ n4nd0	I am around the channel in case I get something, I have seen you there too
+@sonney2k	no I will go to bed need to recover a bit
+ n4nd0	we'll know tomorrow then
+ CIA-64	shogun: Soeren Sonnenburg master * rc80508e / src/shogun/mathematics/Math.cpp : Fix compile error in twonorm() when lapack is not available - http://git.io/zvw5Qg
+* gsomix have returned from dance floor.
+ PhilTillet	hey sonney2k
+@sonney2k	hey
+ wiking	oops sonney2k sorry about that bug :(
+@sonney2k	yeah luckily we have that buildbot (last year we didn't and that was really causing us quite some headache
+ wiking	dooooh
+ wiking	javac] symbol  : constructor RealFeatures(org.jblas.DoubleMatrix)
+ wiking	    [javac] location: class org.shogun.RealFeatures
+ wiking	how come?
+@sonney2k	got to leave train
+ wiking	was working till now
+ wiking	doh these days...
+@sonney2k	cu
+ wiking	cya
+ gsomix	good night
+@sonney2k	nite gsomix
+@sonney2k	wiking, what is the exact error?
+@sonney2k	seems a little unspecific...
+ n4nd0	good night gsomix
+ wiking	sonney2k: i think i had some trouble with detecting jblas
+ wiking	now i'm recompiling and i guess it'll work now
+@sonney2k	not in CLASSPATH ?
+@sonney2k	hmmhh
+ wiking	it was actually
+@sonney2k	wiking, are you using java interface of shogun?
+ wiking	i mean the problem was with
+ wiking	that javac was defined to be gcj
+ wiking	and that had some troubles detecting the jblas (it's at default location)
+@sonney2k	hmmhh maybe
+ wiking	but now trying with sun's javac
+ wiking	ok now it's fixed
+ wiking	only thing now is
+ wiking	no that is my error
+ wiking	ok now compiled fine
+ wiking	yeah i'm using sometimes java interface
+@sonney2k	wiking, so are you using the java interace?
+@sonney2k	ahh ok
+ wiking	yep yep
+ wiking	need to
+ wiking	i have some features coming from hadoop
+@sonney2k	I haven't used it except for crafting some examples
+@sonney2k	so all feedback welcome
+ wiking	and i don't want to do constantly a transforming the features into some other formats
+@sonney2k	wiking, btw you should be even able to serialize a shogun object from java and load it later from python :)
+ wiking	so in order to be able to simply use hadoop created sequence file i just use java interface
+ wiking	let's see multi class linear machine
+ wiking	with homo kernel mapping :))
+@sonney2k	heh
+ wiking	mm i wonder what's happening
+ wiking	still calculating :)))
+ wiking	i thought it's a fast linear machine
+ wiking	can it be that this linear machine is slower than a kernel machine with linear kernel?
+@sonney2k	wiking, liblinear?
+@sonney2k	no should be very fast
+-!- PhilTillet [~Philippe@157.159.42.154] has quit [Ping timeout: 252 seconds]
+ wiking	mmm
+ wiking	wtf
+ wiking	Exception in thread "main" java.lang.NullPointerException
+ wiking	at bme.iclef.shogun.Classify.classify(Classify.java:412)
+ wiking	:))))
+ wiking	ahhahaha
+ wiking	Exception in thread "main" java.lang.NullPointerException
+ wiking	at bme.iclef.shogun.Classify.classify(Classify.java:412)
+ wiking	mmm not htis
+ wiking	ok again my bug
+ wiking	ok i'm gonna time this one now :)
+ n4nd0	time to sleep today, good night guys!
+ wiking	gnite
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- puffin444 [230bf329@gateway/web/freenode/ip.35.11.243.41] has joined #shogun
+-!- puffin444 [230bf329@gateway/web/freenode/ip.35.11.243.41] has quit [Client Quit]
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has left #shogun ["Leaving"]
+-!- blackburn [~qdrgsm@83.234.54.186] has joined #shogun
+--- Log closed Thu Apr 12 00:00:19 2012

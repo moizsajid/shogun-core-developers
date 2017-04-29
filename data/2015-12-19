@@ -1,0 +1,230 @@
+--- Log opened Sat Dec 19 00:00:35 2015
+-!- HeikoS [~heiko@98.143.210.167] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@98.143.210.167] has quit [Quit: Leaving.]
+-!- dooms [51408745@gateway/web/freenode/ip.81.64.135.69] has joined #shogun
+ dooms	hi everyone
+ dooms	I'm trying to install shogun
+ dooms	but not ith so much results
+ dooms	* not with
+ dooms	here is the problem:
+ dooms	:info:configure ./configure-11619-9060.cpp:1:10: fatal error: 'Eigen/Dense' file not found
+ dooms	:info:configure #include <Eigen/Dense>
+ dooms	I've read that using #include "Eigen/Dense" might work
+-!- besser82_ [~besser82@port-92-200-92-224.dynamic.qsc.de] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 256 seconds]
+ dooms	any idea how can I change the cpp file ?
+ dooms	ls /opt/local/include/eigen3/
+ dooms	Eigen, unsupported, signature_of_eigen3_matrix_library
+-!- dooms [51408745@gateway/web/freenode/ip.81.64.135.69] has quit [Quit: Page closed]
+-!- sanuj [~sanuj@117.203.1.65] has joined #shogun
+-!- sanuj [~sanuj@117.203.1.65] has quit [Ping timeout: 240 seconds]
+-!- besser82_ is now known as besser82
+-!- besser82 [~besser82@port-92-200-92-224.dynamic.qsc.de] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- dooms [51408745@gateway/web/freenode/ip.81.64.135.69] has joined #shogun
+ dooms	hi
+-!- dooms [51408745@gateway/web/freenode/ip.81.64.135.69] has quit [Client Quit]
+-!- besser82 [~besser82@fedora/besser82] has quit [Remote host closed the connection]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- sanuj [~sanuj@117.220.50.22] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Sergey Lisitsyn :feature/sphinxdoc * 2b9c6e7 / / (49 files): https://github.com/shogun-toolbox/shogun/commit/2b9c6e72f33debf1f0061b274accc80cddb8125f
+ shogun-notifier-	shogun: Create some sandbox for automatically built examples
+ shogun-notifier-	shogun: Sergey Lisitsyn :feature/sphinxdoc * d364602 / / (14 files): https://github.com/shogun-toolbox/shogun/commit/d3646028e9f4bd3f7cafa427c3d002e73c865f40
+ shogun-notifier-	shogun: Store generated examples in the build directory
+-!- HeikoS [~heiko@98.143.210.167] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- sanuj [~sanuj@117.220.50.22] has quit [Quit: Leaving]
+@HeikoS	besser82: around?
+@HeikoS	lisitsyn:
+@besser82	HeikoS, here, sir!
+@HeikoS	besser82: hey I get a really weird error
+@HeikoS	when compiloing shogun examples by hand
+@HeikoS	maybe you know a quick fix
+@HeikoS	g++  -I /home/heiko/git/shogun/shogun_develop/shogun/src/:/home/heiko/git/shogun/shogun_develop/shogun/third_party -L /home/heiko/git/shogun/shogun_develop/shogun/build/src/shogun/ shogun-test.cpp -lshogun  -o shogun-test
+@HeikoS	/tmp/ccKaz43q.o: In function `main':
+@HeikoS	shogun-test.cpp:(.text+0x26e): undefined reference to `shogun::SGRefObject::unref()'
+@HeikoS	shogun-test.cpp:(.text+0x29b): undefined reference to `shogun::SGRefObject::unref()'
+@HeikoS	collect2: error: ld returned 1 exit status
+@HeikoS	make: *** [shogun-test] Error 1
+@HeikoS	besser82: any idea?
+@HeikoS	note that its the only undefined reference
+@besser82	HeikoS, try to place "-lshogun" before the source-file...
+@HeikoS	then all undefined references pop up
+@HeikoS	for all calls
+@besser82	g++  -I /home/heiko/git/shogun/shogun_develop/shogun/src/:/home/heiko/git/shogun/shogun_develop/shogun/third_party -L /home/heiko/git/shogun/shogun_develop/shogun/build/src/shogun/ -lshogun -o shogun-test shogun-test.cpp
+@besser82	HeikoS, ^ should work
+-!- travis-ci [~travis-ci@ec2-54-90-139-79.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/97862927
+-!- travis-ci [~travis-ci@ec2-54-90-139-79.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	besser82: nope
+@HeikoS	all undefined references
+@besser82	If you run the binary?  Or during ld?
+@HeikoS	ld
+@HeikoS	compiling works
+@besser82	g++  -I /home/heiko/git/shogun/shogun_develop/shogun/src/:/home/heiko/git/shogun/shogun_develop/shogun/third_party -L /home/heiko/git/shogun/shogun_develop/shogun/build/src/shogun/ -lshogun -Wl,-rapth /home/heiko/git/shogun/shogun_develop/shogun/build/src/shogun/ -o shogun-test shogun-test.cpp
+@HeikoS	and my ld library path is empty
+@besser82	g++  -I /home/heiko/git/shogun/shogun_develop/shogun/src/:/home/heiko/git/shogun/shogun_develop/shogun/third_party -L /home/heiko/git/shogun/shogun_develop/shogun/build/src/shogun/ -lshogun -Wl,-rpath /home/heiko/git/shogun/shogun_develop/shogun/build/src/shogun/ -o shogun-test shogun-test.cpp
+@HeikoS	nope
+@HeikoS	I mean, it is inly the UNREF undefined references in my case
+@HeikoS	all other references are found
+@HeikoS	so the path and the setup must be correct
+@HeikoS	only the UNREF call is missing in the .so file somehow
+@HeikoS	besser82: weird
+@HeikoS	I dont really understand how that can be
+@HeikoS	am I forgetting a library?
+@besser82	HeikoS, me neither...  none, that _I know of...
+@HeikoS	how can I see the command that is executed from cmake?
+@HeikoS	because this works
+@HeikoS	for compiling the examples
+@besser82	Wait...  I can look it up
+@HeikoS	thanks
+@besser82	g++  -I /home/heiko/git/shogun/shogun_develop/shogun/src/:/home/heiko/git/shogun/shogun_develop/shogun/third_party -L /home/heiko/git/shogun/shogun_develop/shogun/build/src/shogun/ -rdynamic -lshogun -Wl,-rpath,/home/heiko/git/shogun/shogun_develop/shogun/build/src/shogun/ -o shogun-test shogun-test.cpp
+@besser82	HeikoS, ^ it adds rdynamic
+@HeikoS	besser82:  it still give s the error :(
+@HeikoS	in the form you pasted all references are undefined, but if I change the order, the two are still undefined
+@HeikoS	wtf
+@HeikoS	can I tell cmake somehow to output its commands?
+@HeikoS	so that I see the exact g++ command that it executes?
+@HeikoS	cmake . make VERBOSE=1
+@HeikoS	besser82: mmh
+@HeikoS	the command that is executed by cmake, adjusted to my example, also fails
+@HeikoS	but when cmake runs it
+@HeikoS	it works
+@HeikoS	puzzled......
+@besser82	HeikoS, me, too...  :S
+ shogun-notifier-	shogun: Wu Lin :develop * e99ef4e / src/shogun/optimization/AdaDeltaUpdater.h: https://github.com/shogun-toolbox/shogun/commit/e99ef4eeb237308ee53ba8df222666ea5619b971
+ shogun-notifier-	shogun: added comments for the AdaDelta method
+@HeikoS	maybe its some artifact of git and the recent SGRefobject patch
+ shogun-notifier-	shogun: Wu Lin :develop * 211f84d / src/shogun/optimization/ (2 files): https://github.com/shogun-toolbox/shogun/commit/211f84d274b25cc6f9b4f1787205fcbe923f7e9f
+ shogun-notifier-	shogun: added comments for the AdaGrad method
+ shogun-notifier-	shogun: Wu Lin :develop * 4d8dd3a / src/shogun/optimization/ (2 files): https://github.com/shogun-toolbox/shogun/commit/4d8dd3a5971f30bafad65ce04bccd54aa4536fa5
+ shogun-notifier-	shogun: Merge pull request #2954 from yorkerlin/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun:  Fix python_modular warnings by adding API documentation
+@HeikoS	besser82: recompiling with fresh source
+@HeikoS	 besser82 still same error gnaaa
+ shogun-buildbot	build #396 of trusty - libshogun - viennacl is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/396  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #3526 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3526  blamelist: Wu Lin <yorker.lin@gmail.com>
+@besser82	HeikoS, I'm puzzeled too...  No idea
+@HeikoS	besser82: what happens if you compile examples?
+@besser82	Lemme try...
+@HeikoS	I got the same error when I manually try to compile
+@HeikoS	so cmake must change something else that the g++ command
+@HeikoS	since that does not work either
+@besser82	HeikoS, manually compiling works fine for me here
+@HeikoS	command?
+@besser82	g++ -std=c++11 -I /usr/include/shogun-4.0.1/ -I /usr/include/eigen3/ -lshogun classifier_bagging_liblinear.cpp -o test
+@HeikoS	weird
+@HeikoS	does make install do something to the so file?
+@HeikoS	since I haven't called make install
+@HeikoS	but use the dir straigt
+@HeikoS	but no
+@HeikoS	cmake also does that
+@besser82	there is nothing altered by make install, afaik
+@HeikoS	besser82: only thing I see is if USE_REFERENCE_COUNTING was false
+@HeikoS	then preprocessor ignores the unref
+@HeikoS	but it is ON
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 265 seconds]
+-!- travis-ci [~travis-ci@54.160.141.201] has joined #shogun
+ travis-ci	it's Wu Lin's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/97869191
+-!- travis-ci [~travis-ci@54.160.141.201] has left #shogun []
+-!- besser82 [~besser82@hari23.besser82.io] has joined #shogun
+-!- besser82 is now known as Guest7414
+@HeikoS	Guest7414: ok
+@HeikoS	got it
+@HeikoS	compiles AND fixed the serialisation bug
+-!- Guest7414 is now known as besse82
+-!- besse82 is now known as besse8r2
+-!- besse8r2 is now known as besser82_
+ besser82_	HeikoS, Yay!  =)
+ besser82_	HeikoS, PR is opened?
+ lisitsyn	HeikoS: abend!
+@HeikoS	lisitsyn: jojo
+@HeikoS	besser82_: coming
+ lisitsyn	already back?
+ lisitsyn	HeikoS: i've got some question we'd need to resolve
+ lisitsyn	apparently we should have generated examples in the build directory
+@HeikoS	lisitsyn:  not yet
+@HeikoS	flying later
+ lisitsyn	this seem to be right
+ lisitsyn	although
+@HeikoS	lisitsyn: ok?
+ lisitsyn	do we need to have it elsewhere?
+@HeikoS	if they are copied over in installation
+@HeikoS	then ok
+ lisitsyn	like in base examples
+ lisitsyn	yes
+ lisitsyn	they would be
+@HeikoS	lisitsyn: is that really important?
+ lisitsyn	depends :)
+ lisitsyn	anyway as I've got them in the build dir
+ lisitsyn	it would be easier to get them when generating sphinx
+@HeikoS	ok then
+@HeikoS	fine with me
+ lisitsyn	okie
+@HeikoS	besser82_: PR sent
+ besser82_	HeikoS, will review it in short
+@HeikoS	besser82_: feel free to merge it and close the old one
+@HeikoS	I will go to airplane soon
+ besser82_	HeikoS, have nice flight!  =)
+ besser82_	HeikoS, going to Deutschland?
+@HeikoS	besser82_: yes
+@HeikoS	ah no
+@HeikoS	sry
+@HeikoS	London
+ besser82_	HeikoS, no x-mas @ home this year?
+@HeikoS	besser82_: London is my home
+@HeikoS	lisitsyn: when will the patch be ready? :)
+ lisitsyn	HeikoS: you mean whole pr?
+ lisitsyn	working atm
+@HeikoS	yeah the docs
+@HeikoS	I want to get my hands on this soon
+@HeikoS	so even if not 100% complete, at least push it to the feature branch
+ lisitsyn	it is already
+@HeikoS	then I can have a look and think how to structure the pages more etc
+@HeikoS	lisitsyn: ah is it sent?
+ lisitsyn	I think mostly yes
+ lisitsyn	I don't have any changes yet
+ lisitsyn	I will push some parameters forwarding for our sgexample extension
+ lisitsyn	then it should work
+ besser82_	HeikoS, I thought Cologne was?
+@HeikoS	lisitsyn: yes cool
+@HeikoS	besser82_: I grew up there but it is not my home anymore
+ besser82_	HeikoS, Ok, I see
+ shogun-notifier-	shogun: Heiko Strathmann :develop * b6a6e6d / src/shogun/base/SGObject.cpp: https://github.com/shogun-toolbox/shogun/commit/b6a6e6dc08f10defffc5b83cc776d6a9bb692757
+ shogun-notifier-	shogun: fix serialisation again by re-adding accidentially remove "load" command
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 80d0362 / src/shogun/base/Parameter.cpp,src/shogun/base/Parameter.h: https://github.com/shogun-toolbox/shogun/commit/80d03627c67ef3c770aee2b21e7a18078e293796
+ shogun-notifier-	shogun: re-introduce Parameter::load as migration framework is removed, remove more migration related methods
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 5999609 / examples/undocumented/libshogun/ (9 files): https://github.com/shogun-toolbox/shogun/commit/599960901fca85a12e0ae0cee1e336aaa473d016
+ shogun-notifier-	shogun: remove old migration examples/tests from blacklist and files
+ shogun-notifier-	shogun: Heiko Strathmann :develop * af8c1df / / (12 files): https://github.com/shogun-toolbox/shogun/commit/af8c1df859ed3d5780bbea5615a5c523e5651db9
+ shogun-notifier-	shogun: Merge pull request #2955 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix serialisation segfaults
+ shogun-buildbot	build #397 of trusty - libshogun - viennacl is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/397  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #3527 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3527  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- HeikoS [~heiko@98.143.210.167] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@98.143.210.167] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ shogun-buildbot	build #398 of trusty - libshogun - viennacl is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/398
+ shogun-buildbot	build #3528 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3528
+ shogun-buildbot	build #2732 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2732  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #2721 of deb3 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2721  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- travis-ci [~travis-ci@ec2-54-145-217-45.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/97879801
+-!- travis-ci [~travis-ci@ec2-54-145-217-45.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #1098 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/1098  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #83 of FC22 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC22%20-%20libshogun/builds/83  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-notifier-	shogun: Sergey Lisitsyn :feature/sphinxdoc * af2d9d9 / doc/CMakeLists.txt,doc/sphinx/source/conf.py,doc/sphinx/extensions/sgexample.py: https://github.com/shogun-toolbox/shogun/commit/af2d9d9887a01a95e0f6236699a83d73c2ee3c4d
+ shogun-notifier-	shogun: Pass paths to sgexample by parameter
+ shogun-buildbot	build #697 of deb4 - python3 is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/697
+-!- HeikoS [~heiko@98.143.210.167] has quit [Quit: Leaving.]
+-!- yorkerlin [d18dc31c@gateway/web/freenode/ip.209.141.195.28] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-145-217-45.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/97886036
+-!- travis-ci [~travis-ci@ec2-54-145-217-45.compute-1.amazonaws.com] has left #shogun []
+--- Log closed Sun Dec 20 00:00:36 2015

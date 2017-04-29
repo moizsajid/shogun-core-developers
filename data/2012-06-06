@@ -1,0 +1,693 @@
+--- Log opened Wed Jun 06 00:00:41 2012
+-!- heiko [~heiko@host86-179-59-69.range86-179.btcentralplus.com] has quit [Ping timeout: 256 seconds]
+-!- blackburn [d5578aee@gateway/web/freenode/ip.213.87.138.238] has quit [Ping timeout: 245 seconds]
+-!- romi_ [~mizobe@187.66.121.115] has quit [Quit: Leaving]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Read error: Operation timed out]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:29b5:2f5b:6ebd:d1b0] has joined #shogun
+-!- gsomix [~gsomix@109.169.142.23] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ gsomix	hi
+-!- wiking [~wiking@we02c096.ugent.be] has joined #shogun
+-!- wiking [~wiking@we02c096.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- gsomix [~gsomix@109.169.142.23] has quit [Quit: Ex-Chat]
+-!- gsomix [~gsomix@109.169.142.23] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 265 seconds]
+-!- alexlovesdata [82955843@gateway/web/freenode/ip.130.149.88.67] has joined #shogun
+ alexlovesdata	may I ask: who is zxtx, naywhayare, and the CIA agent ?
+ alexlovesdata	with respect to the others I have an idea who they are
+ zxtx	fan of the software
+ zxtx	working on a patch to get pegasos into the repo
+ alexlovesdata	ahh thx!
+ gsomix	alexlovesdata, CIA-9 is github bot.
+ alexlovesdata	thx
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- alexlovesdata [82955843@gateway/web/freenode/ip.130.149.88.67] has quit [Ping timeout: 245 seconds]
+-!- alexlovesdata [82955843@gateway/web/freenode/ip.130.149.88.67] has joined #shogun
+-!- puffin444 [472e31fb@gateway/web/freenode/ip.71.46.49.251] has joined #shogun
+ alexlovesdata	viking?
+ wiking	alexlovesdata: yeps here
+ alexlovesdata	nice
+ alexlovesdata	ok so what you would like to do next?
+ wiking	alexlovesdata: so yeah as i was writing to you earlier the very short plan for the latent extension of shogun would be to get a simple -1,1 labelled data and solve for that the optimization problem. currently i have a dataset with mammal's in it. and the 'task' is basically to label the image (i.e. give the right mammal present in the image) and give a bounding box for it
+ alexlovesdata	so joint object detection and classification
+ wiking	so this is a very typical example for object recognition in images, i.e. your h would be something like (x,y) and (w, h)
+ alexlovesdata	caltech256 animals? a dataset which I had used
+ alexlovesdata	then yuo could cite me :)
+ wiking	hheheheh :)
+ alexlovesdata	unofficial Gsoc rule: cite your mentor, joke aside:
+ wiking	imho there's only 6 different mammals in this dataset
+ alexlovesdata	caltech256 animals has 52 or so
+ wiking	i cannot recall now which dataset is this
+ alexlovesdata	except for the fantasy animals like minotaur
+ wiking	but then again it's small and simple...
+ wiking	and the features are already ready
+ alexlovesdata	thats not important
+ wiking	so yeah anyhow... i was trying now that example to get working
+ alexlovesdata	so you want to implement the felzenszwalb style latent svm>
+ wiking	yes
+ alexlovesdata	so you want to implement the felzenszwalb style latent svm?
+ wiking	so first that one
+ wiking	and after that try to work on a SO latent svm
+ wiking	as soon as i can start using the solver of n4nd0 (fernando)
+ alexlovesdata	and psi(x,h) would be = ? HoG feature over the box?
+ wiking	yep
+ wiking	so now i have like n hog for each image
+ alexlovesdata	ok, sounds easy
+ alexlovesdata	my suggestion would be to get a base latentpsi class and then derive your special class from it\
+ alexlovesdata	which has its own argmax
+ alexlovesdata	and its own way to get the psi(x,h)
+ wiking	ah so that one can already use this 'example' for other object recognition
+ alexlovesdata	what do you mean by your last question?
+ wiking	so i mean that we have this derived class
+ alexlovesdata	yes
+ wiking	which users can use out of box
+ wiking	if they wanna have an object detector
+ wiking	for exmaple..
+ wiking	ok
+ alexlovesdata	yes, good idea
+ wiking	that should be fine, although i have to discuss about this with blackburn (sergey)
+ wiking	since i think it should be part of the library itself and not the example part in the repository
+ wiking	but this is some minor thing
+ alexlovesdata	what to discuss?
+ wiking	well where exactly to store the code for this 'example'
+ wiking	anyhow i was just wondering if there's such easy example for latent svm
+ wiking	that would be a usual use case
+ wiking	as it would be good to have 2-3 use cases for latent svm implemented in the library
+ alexlovesdata	in examples/someinterface ?
+ alexlovesdata	examples/undocumented/*
+ alexlovesdata	or do you mean C++ code?
+ alexlovesdata	C++ code you can have as test method even
+ wiking	alexlovesdata: i mean that i think these basic 'examples' should actually be really part of the library itself. so that one could just basically include in his own code an ObjectDetector.h or something which is basically a latent svm based object recognizer...
+ alexlovesdata	yes, this is ok
+ alexlovesdata	you have a base class and a derived example
+ wiking	yep
+ wiking	but i need to talk about this with blackburn... how exactly we should do this
+ wiking	i mean where to put the actual code/header...
+ alexlovesdata	and then some code for interfaces  (python whatever)
+ alexlovesdata	yes put it into shogun main
+ wiking	yeah the modular interfaces will be the last step ...
+ wiking	so first only c++ and then when it all works fine i'll do the modular interfaces for python etc..
+ alexlovesdata	because it is a usable piece of code
+ alexlovesdata	my question would be
+ alexlovesdata	will you also implement the mining of hard negatives
+ wiking	aaaah
+ wiking	not this week :D
+ alexlovesdata	no not this week
+ alexlovesdata	I wanted to say: it is NOT mandatory for latent SVM
+ wiking	but yeah i was thinking about it
+ alexlovesdata	I think it is not your core duty to implement Felszenszwalb in all details, ok?
+ alexlovesdata	so if you do binary latent SVM fine
+ alexlovesdata	doing more like hard negatives mining is NOT mandatory.
+ alexlovesdata	everything besides mining hard negatives is luxury ... for donald Trumps wife
+ wiking	yea but actually it would be great to have imho
+ wiking	and of course when SO is in a working shape, it'd be great to have latent structural svm
+ wiking	what i want this week is really the simple solver i've mentioned earlier.... based on ocas
+ alexlovesdata	thats fine!
+ alexlovesdata	and pls do not waste time on more than mining hard negatives
+ wiking	:>
+ wiking	will try :)
+ alexlovesdata	hmm, should we discuss nandos struct while he is not in chat?
+ alexlovesdata	bash it and talk about our wishes :) ?
+ wiking	:D
+ alexlovesdata	https://github.com/iglesias/shogun/tree/master/src/shogun/so
+ wiking	ahhahaha
+ alexlovesdata	because if we discuss this is three weeks it might be too late
+ alexlovesdata	so now is time for wishing what we want
+ wiking	yeah i've already told him 2 weeks ago
+ wiking	w
+ wiking	what i want :D
+ alexlovesdata	any desired changes which you could tell me ?
+ alexlovesdata	so that I know what you want, too :D ?
+ wiking	well i think the problem here will be
+ wiking	that i'll have basically 2 base classes
+ wiking	1) a base class latent svm solver with -1,1 labelling
+ wiking	2) same but with structured labelling
+ wiking	i don't see it being able to cover by only 1 base class
+ wiking	so lets say i'll have something like: LatentLinearMachine and LatentStructuredLinearMachine
+ alexlovesdata	does that affect nandos framework? because for -1,+1 labels you could use ocas and fine
+ alexlovesdata	am i wrong?
+ alexlovesdata	wait I get myself a coffee for 3 minutes
+ wiking	no you are wrong
+ wiking	ok no worries
+ wiking	i'll write the rest here in the meanwhile... so afaik LatentStructuredLinearMachine can be derived from CLinearStructuredOutputMachine
+ wiking	and that would be the latent s-svm solver
+-!- romi_ [~mizobe@187.66.121.115] has joined #shogun
+ alexlovesdata	if I am wrong then pls correct me
+ alexlovesdata	back from getting coffee
+ wiking	ok
+-!- uricamic [~uricamic@2001:718:2:1634:29b5:2f5b:6ebd:d1b0] has quit [Quit: Leaving.]
+ alexlovesdata	afaik LatentStructuredLinearMachine can be derived from CLinearStructuredOutputMachine ...
+ alexlovesdata	I would say: you use it rather as a solver instead of deriving
+ alexlovesdata	so it would be a member
+ alexlovesdata	or called in train()
+ alexlovesdata	or called in train() only
+ alexlovesdata	that might be easier than deriving it
+ alexlovesdata	then you can use nandos stuff only as a solver and are free to design your own interfaces as you like them most
+ wiking	mmm
+ wiking	but we'll have to change it
+ wiking	since the PSI is different in case of a
+ wiking	LatentStructuredLinearMachine and CLinearStructuredOutputMachine
+ wiking	PSI(x,y,h) vs PSI(x,y)
+ wiking	so i wouldn't be able to use it directly
+ alexlovesdata	right
+ alexlovesdata	for solver calls you know the h's already
+ alexlovesdata	so you could add to your member a getpsi_knowhiddenlabels
+ alexlovesdata	method
+ alexlovesdata	which inputs the right psi into nandos olver
+ alexlovesdata	wrong?
+ wiking	mmm
+ alexlovesdata	if you see a problem in it pls say so ... mistakes belong to me like rotten fruits to a market
+* wiking thinking
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ wiking	so this is the current implementation of an SO solver: https://github.com/iglesias/shogun/blob/master/src/shogun/so/VanillaStructuredOutputMachine.cpp
+ wiking	this as is i won't be able to use as a solver directly in CLinearStructuredOutputMachine
+ wiking	i've meant: LatentStructuredLinearMachine
+ wiking	or i don't see it yet
+ wiking	mmm
+ wiking	ok i'll be able
+-!- blackburn [d5578d64@gateway/web/freenode/ip.213.87.141.100] has joined #shogun
+ wiking	i'll only need to change the CStructuredModel
+ blackburn	hey
+ blackburn	I just read logs - wiking what is the code you want to discuss where to put it in?
+ wiking	because in https://github.com/iglesias/shogun/blob/master/src/shogun/so/VanillaStructuredOutputMachine.cpp#L34 the passed CFeatures* data would be actually the already calculated PSI(x,y,h)
+ wiking	blackburn: ok so let's say i have a basic latent svm solver, e.g. LatentLinearMachine
+ blackburn	right
+ wiking	that needs a lot of parameters/functions implemented if you actually want to use it for an actual problem
+ wiking	so let's say u want to have an object detector in an image based on latent svm (typical use case)
+ wiking	that would be something like ObjectDetector : public LatentLinearMachine
+ n4nd0	wiking: there have been some changes in Vanilla and other classes
+ n4nd0	wiking: check my branch so to see the latest ones
+ wiking	imho that class is so 'often' used that actually having it in shogun library would be good
+ blackburn	yes
+ wiking	n4nd0: https://github.com/iglesias/shogun/blob/master/src/shogun/so/VanillaStructuredOutputMachine.cpp#L34
+ blackburn	I don't mind to put it into shogun/latent
+ wiking	isn't this the latest?
+ wiking	blackburn: ok
+ n4nd0	wiking: no
+ wiking	n4nd0: ?
+ wiking	:D
+ wiking	where is it then? :D
+ blackburn	however there could be some issues
+ blackburn	i.e if you want HoG there
+ n4nd0	wiking: in the branch
+ n4nd0	wiking: not in master
+ wiking	n4nd0: oh shit yeah sorry :DDD
+ n4nd0	no problem :D
+ wiking	blackburn: well that implementation is not dependent on HoG itself
+ wiking	so you could use other features
+ n4nd0	I have a bunch of new changes too I will push soon them to the branch
+ alexlovesdata	right, all what we need is a class for psi(x,y,h)
+ blackburn	wiking: then it could become pretty big
+ alexlovesdata	can anyone give me the link to the relevanr branch?
+ blackburn	I don't mind to put it into applications as well
+ wiking	alexlovesdata: https://github.com/iglesias/shogun/tree/so/src/shogun/so
+ wiking	n4nd0: liked the other api better :)))
+ wiking	n4nd0: was more flexible :P
+ n4nd0	wiking: because of the function pointers?
+ wiking	not just because of that
+ alexlovesdata	right, this api is a bit more special
+ alexlovesdata	because it separates the structures labels from the features
+ alexlovesdata	in SO this split is artificial
+ alexlovesdata	one works over Psi(x,y)
+ n4nd0	wiking, alexlovesdata : tell me what parts you don't like and we can adapt it
+ alexlovesdata	this can be constructed from phi(x) and y
+ alexlovesdata	but that is not necessary ...
+ wiking	n4nd0: i'm just checking https://github.com/iglesias/shogun/blob/so/src/shogun/so/StructuredModel.h
+ wiking	as basically that's the thing i'll have to modify
+ wiking	or create a derived class
+ alexlovesdata	if I am allowed to say something ...
+ n4nd0	what do you want to modify?
+ n4nd0	alexlovesdata: sure :)
+ wiking	go ahead
+ alexlovesdata	if we would habe an alternate setter which allows to input the Psi(x,y) directly
+ alexlovesdata	without constructing them from struct labels and features
+ alexlovesdata	for our stuff we will probably use a psi class to get this abstraction ... I do not require this
+ n4nd0	alexlovesdata: the part of Psi is quite undone so far
+ alexlovesdata	but as thinking input it might be an idea
+ alexlovesdata	the psi class has its own argmax
+ alexlovesdata	depending on the structure
+ alexlovesdata	and can be initialized as one likes
+ alexlovesdata	eg explicitly by set structlables and set features
+ alexlovesdata	the point is: the struct solver needs only psi(x,y) and information which x and which y belongs to each psi and the set of all possible ys and x's
+ alexlovesdata	everything else is more specialized to some applications
+ alexlovesdata	am I wrong??
+ alexlovesdata	thats why I would like to have a way such that one can input the psis directly together with an argmax
+ alexlovesdata	and that was possible with the old C-style interface
+ alexlovesdata	by overriding the function pointer
+ alexlovesdata	but you can do that with the new interface as well
+ blackburn	please prefer interfaces
+ n4nd0	alexlovesdata: my idea is that Psi would be a class member of the StructuredModel
+ alexlovesdata	... with a different abstraction however
+ blackburn	pointers is more painful for modular interfaces
+ n4nd0	alexlovesdata: then you could have a set_psi there too
+ alexlovesdata	I agree blackburn
+ alexlovesdata	and its uglier
+ blackburn	with brand new directors (TM) we can do some funky shit here
+ alexlovesdata	however even set_psi is bad when the psis are too big for memory
+ alexlovesdata	so it would be better to have a psi class which has its get_a_specific_psi member
+ alexlovesdata	because the solver could just use the getter to get the right psi
+ alexlovesdata	and its associated struct label
+ alexlovesdata	and no need for members like vector<fullpsis>
+ n4nd0	we should also take into account that sonney2k wants to have the joint features or psi with the idea of COFFIN
+ n4nd0	so I think that at the end we will use a class similar to CDotFeatures
+ alexlovesdata	well, the psis need then a scalar prod (member of class) and a linadd ...
+ alexlovesdata	yep
+ alexlovesdata	I have not looked into CDoTFeatures but my idea behind it is: it needs then some getter for the psi(x_i,y_i)
+ alexlovesdata	and for its associated label index and feature index
+ alexlovesdata	that should be enough for the solver
+ alexlovesdata	and a derivied class could implement a psi from Cfeatures and Cstructlabels ... as done now in the current code
+ alexlovesdata	so you would retain the current functionality
+ alexlovesdata	just split the solver from getting the psis
+ alexlovesdata	thats my suggestion ... sorry for assholing around
+ alexlovesdata	so the structuredmodel would have a setpsiclass member or so
+-!- puffin444 [472e31fb@gateway/web/freenode/ip.71.46.49.251] has quit [Quit: Page closed]
+ alexlovesdata	is that an idea?>
+ wiking	n4nd0: ping :)
+ n4nd0	alexlovesdata: so what you suggest is to have a psi_function that is a member of the model with a setter
+ n4nd0	or?
+ alexlovesdata	yes
+ alexlovesdata	but psifunction is a class itself
+ n4nd0	wiking: I was answering, it takes some time to read and think :P
+ wiking	n4nd0: :>>> no worries
+ n4nd0	alexlovesdata: I agree with that suggestion, it's the idea I have
+ alexlovesdata	I get older, too ...
+ wiking	ok
+ n4nd0	I have not so clear though what functionality we should provide in this base psi_function class
+-!- puffin444 [472e31fb@gateway/web/freenode/ip.71.46.49.251] has joined #shogun
+ alexlovesdata	what the solver needs ...
+ alexlovesdata	1)accessing the i-th psi
+ alexlovesdata	getting its index into training data (no x_i actually  necessary)
+ alexlovesdata	getting its index into structlabels
+ alexlovesdata	if we assume that structlabels are discrete
+ n4nd0	where i-th represents both an index for a feature and another for a label?
+ alexlovesdata	the index could be for a continuous case also a vectro of real numbers
+ alexlovesdata	but in the simplest discrete case it is a long or a vector of long
+ alexlovesdata	for prediction it needs the range of struct labels
+ alexlovesdata	not for the solver: ways to construct these psis
+ alexlovesdata	index for training data means the i for which trainning data point x_i
+ alexlovesdata	index for structlabels means: which y was used
+ alexlovesdata	so these indices are two different things
+ alexlovesdata	so these two indices are two different things
+ alexlovesdata	I need a black tea for a moment
+ alexlovesdata	back
+ n4nd0	ok, tell me then
+ alexlovesdata	nando: you could check for a struct formulation what it needs besides the Psis
+ alexlovesdata	then you know what members you will need for the psi class
+ alexlovesdata	it will also have its own argmax
+ alexlovesdata	because that depends on the structure of Psi
+ n4nd0	why?
+ n4nd0	I think that Psi and ArgMax should be different parts
+ n4nd0	I don't understand why the psi function have its own argmax
+ alexlovesdata	because  max_{y \in Y}  w*psi(x,y)
+ alexlovesdata	depends on the structure of psi(x,y) and y
+ alexlovesdata	in the most generic case it would be searching all y's brute force
+ alexlovesdata	in more special cases you would search only some y's based on their structure
+ alexlovesdata	eg in computer vision only some bounding boxes close to a given one
+ alexlovesdata	y=bounding box params
+ alexlovesdata	thats why argmax would be a mamber of the psi class
+ alexlovesdata	wrong?
+ n4nd0	I understand your point
+ n4nd0	but thinking of the code, it looks to me kind of weird that the psi function has its own argmax
+ n4nd0	it is like, the psi function is computed independently of how the argmax is computed
+ n4nd0	then, why argmax should me a member of psi?
+ alexlovesdata	because I would say that computing the argmax depends on the structure of psi and y
+-!- romi_ [~mizobe@187.66.121.115] has quit [Ping timeout: 244 seconds]
+ alexlovesdata	I think a good starting point would be if you look into the SO formulation based on: how wouldwe start if we would load psi(x,y) from disk
+ alexlovesdata	what member would the psi class need
+ n4nd0	psi class needs labels and features
+ alexlovesdata	if you work directly with precomputed psis
+ alexlovesdata	only labels, no x's
+ n4nd0	why not?
+ alexlovesdata	because in SO SVM you never use the X directly in optimization
+ alexlovesdata	only Psi(x,y)
+ alexlovesdata	am I worng?
+ alexlovesdata	am I wrong?
+ n4nd0	ok, so you mean like we use a particular example of X (let's sat an x_i) but not the whole X?
+ alexlovesdata	what you need is only for psi(x_i,y_i) to remember y_i and the index i
+ alexlovesdata	no
+ alexlovesdata	psi(x,y)=cos(x)*log(y)
+ alexlovesdata	you will can work directly with the psis
+-!- heiko [~heiko@host86-179-192-248.range86-179.btcentralplus.com] has joined #shogun
+ alexlovesdata	you will never need to know the value of x at no point in training or testing
+-!- romi_ [~mizobe@187.66.121.115] has joined #shogun
+ n4nd0	providing that psis are precomputed, or?
+ alexlovesdata	right!
+ alexlovesdata	and our derived psi class takes care of precomputing them in the style which you like
+ alexlovesdata	e.g. precomputing on the fly from x's and y's like you and nico are used to do
+ n4nd0	ok, I understand what you mean
+ alexlovesdata	but we can also load psis from disk or an SSD on demand (thats why the getter for required single psi(x_i,y))
+ n4nd0	your point implies that m_features should not be in CStructuredModel, right?
+ alexlovesdata	right!
+ alexlovesdata	because you can still load them if necessary form SSD by get_your_psi
+ alexlovesdata	even when they do not fit into your mem
+ alexlovesdata	that would be scalable ;)
+-!- heiko1 [~heiko@host86-180-43-237.range86-180.btcentralplus.com] has joined #shogun
+ alexlovesdata	and a derived psi class could take care of that loading on demand or whatever
+ alexlovesdata	stop me if I am talking crap
+-!- heiko [~heiko@host86-179-192-248.range86-179.btcentralplus.com] has quit [Ping timeout: 256 seconds]
+ alexlovesdata	may happen ;)
+ n4nd0	aham, so m_features could even dissapear from LinearSOMachine
+ n4nd0	alexlovesdata: haha ook :D
+ alexlovesdata	right because it asks the getter member to provide the next psi
+ alexlovesdata	yeah!
+ n4nd0	alexlovesdata: ok, so I can understand that but you have still to convince with Psi having the Argmax :)
+ alexlovesdata	hehehe
+ alexlovesdata	so the goal is t ocompute argmax_y w*psi(x_i,y) right?
+ n4nd0	yes
+ alexlovesdata	I look up something
+-!- puffin444 [472e31fb@gateway/web/freenode/ip.71.46.49.251] has quit [Quit: Page closed]
+ alexlovesdata	so what happens if you have prior knowledge about how to compute the psis from x and y
+ alexlovesdata	encoded in your derived class
+-!- puffin444 [472e31fb@gateway/web/freenode/ip.71.46.49.251] has joined #shogun
+ alexlovesdata	then you can write a very efficient argmax
+ alexlovesdata	as memeber of this class
+ alexlovesdata	which exploits properties of the psi to compute argmax
+ alexlovesdata	to skip some candidate y's
+ alexlovesdata	example y \in \RR^d
+ alexlovesdata	x in \RR^d
+ n4nd0	still, I see the relation in the other way; argmax has psi as a member
+ CIA-9	shogun: Heiko Strathmann master * rdaeea81 / examples/undocumented/libshogun/statistics.cpp : put different values to examples - http://git.io/r9gYDA
+ CIA-9	shogun: Heiko Strathmann master * r724eb3b / examples/undocumented/libshogun/statistics.cpp : Merge pull request #570 from karlnapf/master - http://git.io/CqY94g
+ n4nd0	alexlovesdata: would that fit for what you are saying?
+ n4nd0	I think it would
+ alexlovesdata	psi(x,y)=cos(sum(x))*y
+ alexlovesdata	psi is one d
+ alexlovesdata	then for w>0 and cos(sum(x))>0 you can skip all negative y's
+ alexlovesdata	the argmax is a function ...
+ alexlovesdata	you want to make it a class?
+ n4nd0	yes
+ n4nd0	it's already a class in the last version of the code
+ n4nd0	we cannot afford to use function pointers
+ alexlovesdata	or better psi(x,y)=cos(sum(x))*y*difficultcomplexbutpositivefunctionof(x,y)
+ alexlovesdata	then an efficient argmax can just look at the signs of the first two terms
+ alexlovesdata	and skip the difficultcomplexbutpositivefunctionof(x,y)
+ alexlovesdata	if psi is one dimensional
+ alexlovesdata	does that serve as an example
+ alexlovesdata	my argument for making psi a member is that it needs only the w and knowledge about the structure of psi and y
+ alexlovesdata	this is already present in the psi class
+ n4nd0	ok
+ n4nd0	but thinking of argmax as a class too
+ alexlovesdata	which is no contradiction
+ alexlovesdata	because a derived class could call a member argmax, right?
+ n4nd0	your idea should fit also if psi IS the member of argmax
+ n4nd0	alexlovesdata: yes
+ alexlovesdata	your idea should fit also if psi IS the member of argmax: yes
+ alexlovesdata	I agree
+-!- blackburn1 [~blackburn@188.168.3.9] has joined #shogun
+ alexlovesdata	hmm, C++ has no real pope for it, what a pity
+ n4nd0	alexlovesdata: for what?
+ alexlovesdata	for being an instance which tells us what to choose and can never make a mistake  :)
+ alexlovesdata	with the psi being member of the argmax you would call then argmax->psiclass->getnextpsi in optimization
+ alexlovesdata	toget psi(xi,yi)
+ alexlovesdata	also possible ...
+ n4nd0	it is because IMHO to have argmax inside psi is not intuitive
+ alexlovesdata	I would be tempted to ask why not intuitive
+ alexlovesdata	but I do not want to go on your nerves
+ n4nd0	haha
+ n4nd0	no problem
+ alexlovesdata	you can tell nico to berate me fofr today :)
+ n4nd0	because Psi doesn't need to know anything about the argmax in order to do its task
+ alexlovesdata	right
+ alexlovesdata	but sometimes the argmax can use specialized information about the psi for computation
+ alexlovesdata	and I think technically it would not make the argmax more special by putting into the psi, right?
+ n4nd0	that is still in the direction of argmax needs psi
+ n4nd0	but not psi needs argmax :D
+ alexlovesdata	right
+ alexlovesdata	but psi also needs no getter
+ alexlovesdata	but the getter needs psi
+ n4nd0	?
+ alexlovesdata	thats why the getter which delivers the i-th psi is a member
+ alexlovesdata	could be that we are stuck in a question which needs a pope ... :)
+ n4nd0	yeah
+ alexlovesdata	or you do as you prefer as long as we can implement a specialized argmax for special psi
+ n4nd0	it feels better if we all agree
+ alexlovesdata	I would attach functions to the data classes ... but I will not require that from another ... because that is a style matter
+ alexlovesdata	(a papal matter)
+ blackburn1	alexlovesdata: I am curious - can one use latent svm with not only bounding box but some transformations like rotation or perspective?
+ alexlovesdata	I can agree on anything which allows users to implement specialized argmaxes and psi-getters
+ alexlovesdata	I think for general users yes
+ alexlovesdata	thats why I want an abstract psi
+ alexlovesdata	so that any guy who needs something more weird can program it
+ n4nd0	yes, that's important too
+ alexlovesdata	so that construction of the actual psi cn be done outside the solver code
+ alexlovesdata	except for where it is unavoidable
+ alexlovesdata	maybe I forgot the important point:
+ alexlovesdata	which I had mentioned just now ... splitting solving the problem from constructing the psi
+ alexlovesdata	because with the current interface that is inside the solver
+ n4nd0	I am sorry but I don't understand
+ alexlovesdata	 void set_labels(CStructuredLabels* labs);  /** set features * * @param feats features */ void set_features(CFeatures* feats);  /** computes \f$ \Psi(\bf{x}, \bf{y}) \f$ */ SGVector< float64_t > compute_joint_feature(int32_t feat_idx, int32_t lab_idx)
+ alexlovesdata	1. now we store the features and labels in memory (can be loaded on the fly ... your virt memory will like that :D )
+ alexlovesdata	2.  compute joint feature is now inside the solver class,
+ alexlovesdata	with a getter it would be outside the solver algorithm
+ alexlovesdata	with a psi class and a getter it would be outside the solver algorithm
+ alexlovesdata	no one understands me :'-((
+ alexlovesdata	:)
+ alexlovesdata	I need to check MKL regression .. wasbroken in 0.10.0 and 1.1.0 for matlab with custom kernels
+ blackburn1	alexlovesdata: are you the author of MKL in svmlight?
+ alexlovesdata	no
+ alexlovesdata	that was marius kloft
+ n4nd0	alexlovesdata: it is not like the compute join feature is inside the solver
+ blackburn1	aham
+ alexlovesdata	but I have a little bit insight in it
+ blackburn1	we had some issue there
+ blackburn1	with LINADD optimizations
+ blackburn1	basically it is broken
+ alexlovesdata	ok, that part I never looked into
+ n4nd0	alexlovesdata: the idea at that moment was that the model has a in a member the joint feature function and provides this compute_joint_feature for the solver
+ blackburn1	ok
+ n4nd0	alexlovesdata: since the solver does not have a reference to the psi function directly but a reference to the model
+ alexlovesdata	I understand ... but that requires to store  CStructuredLabels* m_labels;  /** feature vectors */ CFeatures* m_features;
+ alexlovesdata	with an external psi class this would be transparent
+ alexlovesdata	or do some complex hacks which insert artificially a psi
+ alexlovesdata	I am strongly for keeping that computation out of the solver and let the psi getter do that job
+ alexlovesdata	because then you can init the solver with a nando-style psi
+ n4nd0	alexlovesdata: would you mind to sketch in a class diagram or using gist how would you like it to be then?
+ alexlovesdata	or an object detection psi
+ alexlovesdata	or a custom psi
+ alexlovesdata	I am mathemtician
+ wiking	n4nd0: i can do that for ya
+ n4nd0	wiking: ok
+ alexlovesdata	I could write an example header, ok?, but I am not familiar with diagrams
+ n4nd0	alexlovesdata: ok
+ wiking	alexlovesdata: afaik i know what you'd like to do here so i'll try to sketch it up in gist
+ wiking	and let you and n4nd0 check it out
+ alexlovesdata	great! thank you!
+ wiking	nw
+ alexlovesdata	nw = ??
+ wiking	i'll post it on the mailing list
+ wiking	nw = no worries
+ n4nd0	nice
+ alexlovesdata	hi nando, I hope you can live with my blabla ;)
+ wiking	:D
+ blackburn1	n4nd0: I failed with 'curl' word :)
+ n4nd0	alexlovesdata: sure no problem! it's good to talk and discuss
+ n4nd0	blackburn1: noooooo
+ blackburn1	I have absolutely no idea where to put any curl here :D
+ n4nd0	alexlovesdata: I did some modifications to a diagram I was using introducing today's conversation
+ n4nd0	alexlovesdata: can you take a look to it and tell me if it represents what you said?
+ n4nd0	http://dl.dropbox.com/u/11020840/shogun/diagram.pdf
+ alexlovesdata	thank you!
+ n4nd0	it is the left-most part
+ alexlovesdata	I take alook
+ alexlovesdata	the arrow means derived class, right?
+ alexlovesdata	the 45 degree rotated cube means class is member of another?
+ alexlovesdata	at the first sight looks nice
+ alexlovesdata	should give us the possibility to do what we need ...
+ alexlovesdata	wiking: what do you think?
+ wiking	alexlovesdata: just checking
+ n4nd0	alexlovesdata: arrow derived class and the cube member yes
+ wiking	ah yeah
+ wiking	one thing
+ n4nd0	I think it strictly means weak aggregation or something like that, but member is fine :D
+ wiking	get_psi (lab_idx, feat_idx)
+ wiking	ok never mind
+ wiking	it's ok
+ wiking	i mean essentially it'd be the same idx or?
+ alexlovesdata	probably compute_joint_feature would use get_psi again?
+ wiking	or can it be that you want get_psi(0,1) ?
+ wiking	ok yeah you may actually want to do that... so ok
+ alexlovesdata	I think feat_idx refers to the index in x_i
+ n4nd0	alexlovesdata: yes, compute_joint_feature is get_psi
+ alexlovesdata	lab_idx refers to the index into all possibly Ys
+ n4nd0	not into all possibly Ys
+ alexlovesdata	right? wrong?
+ wiking	alexlovesdata: well afaik you cannot have all the possible Ys
+ wiking	alexlovesdata: only the ones that are present ;)
+ n4nd0	but the index into the Ys we got in training data
+ n4nd0	like the true Ys
+ wiking	^ what n4nd0 means here ;)
+ alexlovesdata	youe are right, I agree
+ alexlovesdata	but I think lab_idx would be not the index into y_i , right?
+ alexlovesdata	otherwise I should go to bed soon
+ n4nd0	yes, it is
+ n4nd0	but don't go to bed :P
+ alexlovesdata	I need to be awake until 1:30 am :(
+ n4nd0	why did you say that lab_idx is not the i in y_i?
+ alexlovesdata	so it is the index in y_i  ?
+ wiking	alexlovesdata: not in but of
+ wiking	so i guess y_{lab_idx}
+ alexlovesdata	ok
+ wiking	it actually refers to a given y in the set
+ alexlovesdata	so lab_idx is NOT the training data index, but the index into all available values for Y ?
+ alexlovesdata	that I would think
+ alexlovesdata	I get myself a black tea again
+ wiking	alexlovesdata: actually it is
+ wiking	index in the training data index
+ n4nd0	yes, in the training data index
+ wiking	or i understand it as such
+ n4nd0	me too
+ wiking	ok if n4nd0 as well then we are good ;)
+ n4nd0	I mean, for me the index into all available values for Y makes no sense
+ wiking	as it can be an infinite set
+-!- romi_ [~mizobe@187.66.121.115] has quit [Ping timeout: 260 seconds]
+ n4nd0	and there's not order defined there
+ wiking	countable but not finite ;)
+ alexlovesdata	ok then I do not get it currently
+ alexlovesdata	never mind ... temporary confusion
+-!- romi_ [~mizobe@187.66.121.115] has joined #shogun
+ alexlovesdata	nice that we could agree today ...
+ blackburn1	hard discussion tonight
+ wiking	\o/
+ n4nd0	:)
+ gsomix	n4nd0, hey
+ n4nd0	gsomix: hi
+ gsomix	can you concretize about director classes that you wish?
+ n4nd0	yeah sure, I don't know if you read the conversation about it with sonney2k
+ n4nd0	basically is that I think it would be a good idea to have the argmax and the psi function of SO with director classes
+ n4nd0	so we can prototype in python and so on
+ n4nd0	wiking, alexlovesdata: do you think it would be good to have that?
+ alexlovesdata	yes, sounds practical :)
+ wiking	second that
+ alexlovesdata	maybe we should prioritize the wishes of directors among all objects ... what people use most??
+ n4nd0	gsomix: what do you think?
+ n4nd0	I have no idea how hard or how much time does it take to do these director classes
+ n4nd0	gsomix: you have done any already right?
+ gsomix	n4nd0, I just can tell you I'll do whatever you want :)
+ gsomix	n4nd0, e.g. DirectorDistance, last day
+ n4nd0	ok
+ n4nd0	so let's wait some days so we can say that the design of these classes is better established and I will tell you about it
+ gsomix	n4nd0, ok
+ n4nd0	I am going now, talk to you later guys!
+-!- romi_ [~mizobe@187.66.121.115] has quit [Ping timeout: 252 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Read error: Operation timed out]
+ alexlovesdata	anobody has an idea how the regression label class is initialized in matlab?
+ alexlovesdata	blackburn: what do the scores for the german sign recognition data?
+ blackburn1	alexlovesdata: ah I stopped at 97.84%
+ blackburn1	not enough time to try different hogs, etc :(
+ alexlovesdata	seems to be +0.4 or so
+ alexlovesdata	ok
+ blackburn1	yes colors are great
+ blackburn1	for curiosity I tried to put test images to train ones
+ blackburn1	99.84% :D
+ alexlovesdata	maybe they did???
+ alexlovesdata	hmm, the winner got pretty much like 99.84
+ blackburn1	winner got 99.46%
+ blackburn1	well they use LeNet
+ alexlovesdata	I mean there is this transductive stuff
+ blackburn1	yes I just wanted to say I could try transductive
+ alexlovesdata	:D
+ blackburn1	but unfortunately I have to get all things done in 4 hours
+ alexlovesdata	with a neural net it could be implicitly transductive
+ blackburn1	so I just claim my 97.82 w/o any cheating
+ alexlovesdata	well but for a thesis you can point out that there are some hard cases missing in training and adding them ... blablabla
+ blackburn1	haha
+-!- romi_ [~mizobe@187.66.121.115] has joined #shogun
+ blackburn1	alexlovesdata: I have other thing that makes me able to claim I've got 100% accuracy :D
+ blackburn1	rejects
+ alexlovesdata	also nice ... in particular if you can reject automatically
+ blackburn1	alexlovesdata: I just threshold outputs
+ blackburn1	with high threshold I get no errors *at all*
+ alexlovesdata	then you could grab similar data from the web, add it to training and get 99.99%
+ blackburn1	however 50% are rejected hen
+ alexlovesdata	haha
+ alexlovesdata	thats the ML trick of the day
+ blackburn1	:D
+ blackburn1	alexlovesdata: too bad I spent too much time on fun instead of training efficient classifier :D
+ alexlovesdata	aren't we all doing it similar? :D
+ blackburn1	i.e. I managed to cite Karl Popper but did not do overlapping HoG
+ blackburn1	because it was funnier
+ alexlovesdata	and noetherian rings, too?
+ blackburn1	no, it is impossible I think
+ blackburn1	alexlovesdata: okay lesser cheating - added to trainset images from testset with errors :D
+ blackburn1	only 183 images actually
+ alexlovesdata	but then did images from the test set improve which have not been added, as well?
+ blackburn1	I am not sure I understand that
+ blackburn1	what do you mean? :)
+ alexlovesdata	so you added images from testset to trainset, this implies that all added images will be classified well (because SVMs overfit terribly)
+ blackburn1	hmm yes probably
+ alexlovesdata	but were there images which you did not add to the trainset, which have been classified wrongly before and then have been classified correctly after
+ alexlovesdata	i.e. these images would have profited from improved generalization by adding the 183 other
+ alexlovesdata	and not from mere overfitting
+ blackburn1	no I added all images there I had errors
+ blackburn1	results will be in a min I think
+ blackburn1	alexlovesdata: does SVM really overfit terribly?
+ alexlovesdata	yea, usually AUC=100 on training data
+ blackburn1	alexlovesdata: what about NNs then?
+ alexlovesdata	I have no idea for neural nets ...
+ blackburn1	alexlovesdata: in my world it was thought that NNs overfit and SVMs are better because they do not overfit so much
+ blackburn1	alexlovesdata: wow adding 183 images lead to 99.69%
+ blackburn1	these 183 images would make me a winner of a contest
+ blackburn1	huuh
+ alexlovesdata	on training data with what I work get AUC=100
+ alexlovesdata	error=0
+ blackburn1	alexlovesdata: I feel confused because you make me feel all the capacity control, blabla is useless stuff :)
+ blackburn1	and probably all that stuff is useless for real
+ alexlovesdata	well capacity control is made for getting a reasonable error on testing data (cross-validation)
+ alexlovesdata	it is not made to tune error rate on train set = error rate on test set
+ blackburn1	isn't that for some generalization ability?
+ blackburn1	I mean I thought max margin is the point of good generalization
+ blackburn1	am I wrong?
+ blackburn1	alexlovesdata: I remember you are a big fan of our 'president' - let you become a fan of our parliament http://cs304702.userapi.com/v304702563/1de3/Spom2VHmg4o.jpg
+ blackburn1	oops not 183 but 276
+ alexlovesdata	yes, it is for generalization but still you get zero error at trainingdata
+ alexlovesdata	what does the image mean?? - you can explain me tomorrow, I go home, 12 hours is enough!
+ blackburn1	alexlovesdata: image? one I send?
+ blackburn1	well deputy playing teddy bear
+ blackburn1	:D
+-!- alexlovesdata [82955843@gateway/web/freenode/ip.130.149.88.67] has quit [Ping timeout: 245 seconds]
+-!- blackburn [d5578d64@gateway/web/freenode/ip.213.87.141.100] has quit [Ping timeout: 245 seconds]
+-!- puffin444 [472e31fb@gateway/web/freenode/ip.71.46.49.251] has quit [Ping timeout: 245 seconds]
+@sonney2k	blackburn1, SVMs don't overfit and your SVM giving that high accuracy on test data certainly does not
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ gsomix	sonney2k, hey
+@sonney2k	gsomix, ho :)
+ gsomix	EuclidianDistance vs DirectorDistance 10:37 (in seconds)
+@sonney2k	gsomix, how is it going?
+ gsomix	sonney2k, working, programming, building.
+@sonney2k	gsomix, you mean again 10 times slower right?
+@sonney2k	sounds good
+ gsomix	sonney2k, nope. 3.7 times
+@sonney2k	ahh ok - I guess you have the non-optimized atlas version like blackburn1
+@sonney2k	gsomix, you could do a director for a general kernel machine
+@sonney2k	next I mean
+ gsomix	sonney2k, ok
+@sonney2k	same with general linearmachine
+@sonney2k	maybe these two should be next
+@sonney2k	I think the only important thing to overload here is the train method
+@sonney2k	that's about it
+ n4nd0	sonney2k: by the way, did you read part of conversation wiking, alexander and I had before?
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 240 seconds]
+-!- wiking_ is now known as wiking
+@sonney2k	n4nd0, superficially yes
+ n4nd0	sonney2k: ok, just in case you had a comment or whether psi should be member of argmax or vice versa :D
+ blackburn1	sonney2k: hmm do not overfit at all?
+ n4nd0	that has the hop topic
+ blackburn1	you all confusing me with contradictive claims :D
+ gsomix	good night guys
+ gsomix	ah, btw, google summer of building report http://instagr.am/p/Lf3WXUMs4H/
+ gsomix	first wall
+ gsomix	hehe
+ gsomix	.___.
+--- Log closed Thu Jun 07 00:00:41 2012

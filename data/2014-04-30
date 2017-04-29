@@ -1,0 +1,140 @@
+--- Log opened Wed Apr 30 00:00:28 2014
+-!- x4i [~A2o@unaffiliated/x4i] has joined #shogun
+-!- x4i [~A2o@unaffiliated/x4i] has quit [Quit: irc]
+-!- HeikoS [~heiko@85-220-3-15.dsl.dynamic.simnet.is] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- khalednasr [~k.nasr92@196.221.64.143] has quit [Quit: Leaving]
+ shogun-buildbot	build #696 of nightly_none is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_none/builds/696  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+ shogun-buildbot	build #689 of nightly_all is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_all/builds/689  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+-!- abinash_panda [0e8b2998@gateway/web/freenode/ip.14.139.41.152] has joined #shogun
+-!- abinash_panda [0e8b2998@gateway/web/freenode/ip.14.139.41.152] has quit [Ping timeout: 240 seconds]
+-!- HeikoS [~heiko@85-220-3-15.dsl.dynamic.simnet.is] has quit [Ping timeout: 240 seconds]
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-rfdbvlwfgtssyfwl] has quit [Quit: Connection closed for inactivity]
+-!- abinash_panda [d2d43d97@gateway/web/cgi-irc/kiwiirc.com/ip.210.212.61.151] has joined #shogun
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Ping timeout: 252 seconds]
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has joined #shogun
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- abinash_panda [d2d43d97@gateway/web/cgi-irc/kiwiirc.com/ip.210.212.61.151] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- lisitsyn [~qdrgsm@80.252.20.67] has left #shogun []
+-!- thoralf [~thoralf@91-65-219-80-dynip.superkabel.de] has joined #shogun
+ thoralf	Funny facts about code on github: http://sideeffect.kr/popularconvention/
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-ymokqiijtxjdzofv] has joined #shogun
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit []
+-!- HeikoS [~heiko@85-220-3-15.dsl.dynamic.simnet.is] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- khalednasr [~k.nasr92@41.69.174.89] has joined #shogun
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+ lambday	HeikoS: there??
+@HeikoS	lambday:  hi
+ lambday	HeikoS: hey!
+ lambday	HeikoS: just upgraded my RAM and did the benchmark with vectorized Eigen3 sum calls
+ lambday	HeikoS: sent a PR - results are remarkable
+@HeikoS	lambday: cool!
+@HeikoS	checking
+ lambday	HeikoS: according to this - we should definitely override these sum methods in CCustomKernel
+@HeikoS	lambday: I see
+@HeikoS	lambday: how does it do the magic?
+ lambday	HeikoS: I'm not sure! Eigen3 says its operations are vectorized
+ lambday	so that could be it
+ lambday	HeikoS: compiled the benchmark with " g++ -std=c++0x -O3 -fopenmp benchmark.cpp -I/usr/include/eigen3 -lshogun"
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: lambday :develop * dd56776 / benchmarks/kernel_matrix_sum_benchmark.cpp: https://github.com/shogun-toolbox/shogun/commit/dd567760a3c1a31a202c62c4807fd172b75eaf38
+ shogun-notifier-	shogun: added kernel matrix sum benchmark - CKernel::kernel calls vs Eigen3::sum
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 6c71771 / benchmarks/kernel_matrix_sum_benchmark.cpp: https://github.com/shogun-toolbox/shogun/commit/6c717713913a8a32f50f180c0d3a640f82735648
+ shogun-notifier-	shogun: Merge pull request #2196 from lambday/feature/quadratic_time_mmd
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: added kernel matrix sum benchmark - CKernel::kernel calls vs Eigen3::sum
+@HeikoS	lambday: I see, so thats vector operations on hardware level
+ lambday	HeikoS: yep!
+@HeikoS	lambday: super cool
+ lambday	yooo!
+@HeikoS	lambday: ah man, we need linear algebra framework to be working
+@HeikoS	lambday: can you push that a bit?
+ lambday	HeikoS: sunil is having exams
+@HeikoS	at least for basic things such as summing up matrix values, factorisations etc
+@HeikoS	lambday: yeah
+@HeikoS	ah I mean ok, it will come :)
+ lambday	HeikoS: khaled wanted to work on that CPU/GPU stuff
+@HeikoS	lambday: in the mean time, feel free to override the CCusotmKernel things
+@HeikoS	lambday: but could you already put summing over matrices in the linear algebra backend?
+@HeikoS	so that the stuff you are adding there is available for others
+ lambday	HeikoS: he wanted to replace current SGVector with GPUVector instead - although I don't think that its a good diea
+@HeikoS	lambday: should be straight forward not?
+ lambday	HeikoS: absolutely
+@HeikoS	lambday: no, no replacement
+ lambday	HeikoS: umm do we need summing in the linear algebra backend?
+@HeikoS	lambday: why not?
+@HeikoS	lambday: why should it rely on eigen?
+ lambday	umm yeah it would be cool!
+ lambday	yeah you're right
+@HeikoS	lambday: if we change the linalg lib then we have to change everything again
+@HeikoS	that should not be the case
+ lambday	seeing how it performs with GPU would be actually interesting
+@HeikoS	would in fact like to get rid of most eigen3 calls in algorithms and rather call shogun classes that do the eigen3 stuff inside (or any other lib)
+@HeikoS	lambday: I gotta go now, out for a hiking trip
+@HeikoS	so see you later today
+ lambday	HeikoS: yo man! have fun! :D
+ lambday	HeikoS: see you!
+ lambday	I'll send a PR with overridden CCustomKernel calls soon and then start the backend stuff
+@HeikoS	cool!
+-!- HeikoS [~heiko@85-220-3-15.dsl.dynamic.simnet.is] has quit [Quit: Leaving.]
+ khalednasr	lambday, I didn't  want to replace SGVector, I meant handling both GPU and CPU memory inside SGVector
+ lambday	khalednasr: ah sorry man I didn't get you completely
+ lambday	wanted to talk to you regarding this
+ lambday	khalednasr: what's wrong with having 2 different classes for 2 different implementations?
+ khalednasr	If you have an algorithm that can run on both cpu or gpu, you'd have to have instances of both SGVector and GPUVector for every vector you have
+ lambday	khalednasr: we can always manage that using templates, right?
+ khalednasr	possible, but it might be complicated if you wanted more control on what data is stored on the gpu and what data is stored on the gpu
+ lambday	khalednasr: I am not getting the problem properly - may be we can discuss this in more details when heiko is here?
+ shogun-buildbot_	build #624 of FCRH - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/624
+ khalednasr	lambday, yeah sure
+ lambday	khalednasr: but if you think that its problematic for some specific instance, could you please post an example on that thread? it would be really helpful
+ khalednasr	lambday, ok, I'll see what I can do
+ lambday	khalednasr: thanks man!
+ lambday	:)
+* lambday afk
+-!- travis-ci [~travis-ci@ec2-54-221-8-80.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/24099440
+-!- travis-ci [~travis-ci@ec2-54-221-8-80.compute-1.amazonaws.com] has left #shogun []
+-!- thoralf [~thoralf@91-65-219-80-dynip.superkabel.de] has quit [Ping timeout: 265 seconds]
+-!- thoralf [~thoralf@91-65-219-80-dynip.superkabel.de] has joined #shogun
+ shogun-buildbot_	build #282 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/282  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- abinash_panda [0126158c@gateway/web/cgi-irc/kiwiirc.com/ip.1.38.21.140] has joined #shogun
+ abinash_panda	thoralf: Hi !
+ thoralf	Hey abinash_panda
+ abinash_panda	thoralf:So finally my exams are over :)
+ abinash_panda	thoralf:I can now devote my full time for shogun
+ thoralf	abinash_panda: That's great :)
+ thoralf	abinash_panda: I guess you already have ideas on this, right?
+ abinash_panda	thoralf: You mean ideas regarding my project, right?
+ thoralf	Yes.
+ abinash_panda	thoralf: Yeah, I have been going through various papers and tutorials
+ abinash_panda	thoralf: There is an implementation of multi-label learning in scikit-learn. I was playing with it to get an idea
+-!- abinash_panda [0126158c@gateway/web/cgi-irc/kiwiirc.com/ip.1.38.21.140] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- abinash_panda [0126158c@gateway/web/cgi-irc/kiwiirc.com/ip.1.38.21.140] has joined #shogun
+-!- jd_tx [80538d58@gateway/web/freenode/ip.128.83.141.88] has joined #shogun
+ jd_tx	hi, I'm using LibSVM through the python swig interface. I've trained a classifier, and I'd like to now get margins(decision values) for my task. apply() only returns the hard +1/-1 outputs. How can I access the decision values?
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Ping timeout: 240 seconds]
+-!- thor|alf [~thoralf@91-66-34-47-dynip.superkabel.de] has joined #shogun
+ thor|alf	Hey
+ thor|alf	abinash_panda: Sorry, had to leave...
+ thor|alf	abinash_panda: I played with scikit-learn's multilabel stuff as well, but back then it implemented intractable methods like label-combination.
+ thor|alf	abinash_panda: I checked and it changed a bit...
+-!- thor|alf [~thoralf@91-66-34-47-dynip.superkabel.de] has quit [Ping timeout: 265 seconds]
+-!- HeikoS [~heiko@85-220-3-15.dsl.dynamic.simnet.is] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-ymokqiijtxjdzofv] has quit [Quit: Connection closed for inactivity]
+-!- HeikoS [~heiko@85-220-3-15.dsl.dynamic.simnet.is] has quit [Ping timeout: 240 seconds]
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- khalednasr [~k.nasr92@41.69.174.89] has quit [Quit: Leaving]
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+-!- jd_tx [80538d58@gateway/web/freenode/ip.128.83.141.88] has quit [Quit: Page closed]
+--- Log closed Thu May 01 00:00:29 2014

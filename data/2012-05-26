@@ -1,0 +1,336 @@
+--- Log opened Sat May 26 00:00:41 2012
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 265 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Client Quit]
+ shogun-buildbot	build #573 of csharp_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/csharp_modular/builds/573
+-!- blackburn [~blackburn@31.28.59.65] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- blackburn [~blackburn@31.28.59.65] has quit [Ping timeout: 246 seconds]
+-!- pluskid [~pluskid@111.120.68.25] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ CIA-113	shogun: Jacob Walker master * r349d66c / (5 files in 2 dirs): Added Element-wise Product Kernel. This Kernel is based heavily on - http://git.io/1oRpRw
+ CIA-113	shogun: Soeren Sonnenburg master * rf29facf / (5 files in 2 dirs): Merge pull request #555 from puffin444/master - http://git.io/yvezww
+ CIA-113	shogun: Soeren Sonnenburg master * r156a436 / (6 files): use appropriate label types for ruby modular - http://git.io/APkF0w
+ shogun-buildbot	build #796 of octave_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/796  blamelist: walke434@msu.edu
+ shogun-buildbot	build #797 of octave_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/797
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 246 seconds]
+-!- n4nd0 [~nando@n155-p45.kthopen.kth.se] has joined #shogun
+-!- pluskid [~pluskid@111.120.68.25] has quit [Ping timeout: 246 seconds]
+-!- pluskid [~pluskid@li400-235.members.linode.com] has joined #shogun
+ n4nd0	hi pluskid, I have just read your mail
+ n4nd0	I really like the idea
+ pluskid	n4nd0: :D
+ pluskid	I remembered that I saw somebody trying to set up standard ml benchmarks that compares some state-of-the-art algorithms on some *real world* datasets, but no longer be able to find this site, maybe he didn't continue...
+ n4nd0	pluskid: interesting
+ n4nd0	pluskid: let's try not to forget about it and maybe we can think of it more carefully once our GSoC projects are more advanced
+ n4nd0	and well, let's see what the others think :)
+ pluskid	yeah
+-!- pluskid [~pluskid@li400-235.members.linode.com] has quit [Ping timeout: 246 seconds]
+-!- pluskid [~pluskid@111.120.68.25] has joined #shogun
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- n4nd0 [~nando@n155-p45.kthopen.kth.se] has quit [Quit: leaving]
+-!- pluskid [~pluskid@111.120.68.25] has quit [Ping timeout: 246 seconds]
+-!- pluskid [~pluskid@li164-218.members.linode.com] has joined #shogun
+-!- blackburn [~blackburn@31.28.59.65] has quit [Ping timeout: 250 seconds]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- oliver [55b43dc2@gateway/web/freenode/ip.85.180.61.194] has joined #shogun
+ oliver	puffin444, just ping me when you are here.
+ puffin444	oliver: I'm here
+ oliver	great.
+ oliver	Perhaps let's start with what we'd like to discuss.
+ oliver	Anything specific on your side?
+ oliver	I mainly a have a number of suggestions of order and how to avoid the (usual) pain in getting some of the GP details to work to save your time.
+ oliver	But if you want to start with sth. else - let's do that first.
+ puffin444	I do not have any question right now
+ oliver	Ok. What is on your list for next week?
+ puffin444	I believe I start working on the inference methods according to the plan
+-!- Francis_Chan1 [~Adium@58.194.224.108] has joined #shogun
+ oliver	great. That's a good time then to discuss a few things.
+ oliver	You previously coded up the basic GP model.
+ oliver	I'd just like to share a few points of things which could be cumbersome to get moving quickly.
+ oliver	As a first goal I'd use the simlest possible GP model and basically just extend your existing GP class.
+ oliver	You have a flexible kernel function in there already; the only thin you need is to add noise, a diagonal term.
+ oliver	How did you plan to handle the noise in the standard Gaussian case?
+ puffin444	Do you mean the eta in y = f(x) + eta ?
+ oliver	THere is some ambiguity. For standard GP stuff noise is effectively just a component of the covariance - which is one option.
+ oliver	I mean: is it strictly part of the likelihood model?
+ oliver	Perhaps the cleanest way to start out with
+ oliver	Basically: what I'd suggest is to just get the GP class you have now running, including gradient optimization and simple Gaussian noise.
+ oliver	Just one kernel (RBF would be suitable), Gaussian noise and gradient based optimization.
+ oliver	When you have that start structuring it into different components, it's merely pulling the pieces apart.
+ oliver	Have you looked into an interface for kernels to provide gradient information and math needed to calc the derivatives of marginal likelihoods w.r.t. kernel parameters etc. ?
+ puffin444	No I actually have not. Right now I only have the likelihood model return derivatives. Perhaps I need to add this interface
+ oliver	Yes, you will need it one way or the other.
+ oliver	Have you done stuff with gradient optimization before ?
+ puffin444	Only in simple cases. I wrote a gradient search for a neural network a while back.
+ oliver	ok, great.
+ oliver	What's generally good here.
+ oliver	You have a complex function, which is the marginal likelihood
+ oliver	There is a likelihood model and the kernel.
+ oliver	THe kernel may itself be a product or sum of other kernels.
+ oliver	In the end you want the gradient and it better be correct.
+ oliver	It's best to check gradients for every component independently using a grad check - did you use dthat back then?
+ puffin444	No.
+ oliver	It's part of most optimizers, but the approach is merely to compute the numerical gradient and compare to the analytical form.
+ oliver	i.e. f'(x) = (f(x+h)-f(x)) / h
+ oliver	you just calc that for small h
+ oliver	if multi dimensional as here, you have one step in every direction.
+ oliver	then you can check that this numericla implementation of f' matches your analytical solution.
+ oliver	you can debug that for the kernel separately and all components and then put together.
+ puffin444	Okay. Because we are computing the gradient analytically, doesn't this mean that an specific way to compute the gradient must be added to every kernel?
+ oliver	aboslutely
+ oliver	every kernel needs to calculate the derivate of all kernel entries w.r.t. to parameters
+ oliver	I'd start with RBF kernel first
+ oliver	do you have matlab?
+ puffin444	I have octave
+ puffin444	and I can get access to matlab if necessary
+ oliver	yeah, equally good. YOu can either steal from gpml as you wrote in your proposal or if you prefer python I have a similar thing in pythohn.
+ oliver	Both implement all these gradients for various kernels, soo good to get inspiration of how to do things.
+ oliver	FOr example, here are implementations of the rbf kernel derivaives:
+ oliver	https://github.com/PMBio/pygp/blob/master/pygp/covar/se.py
+ oliver	This contains a variant of grad check to get inspiration from:
+ oliver	https://github.com/PMBio/pygp/blob/master/pygp/optimize/optimize_base.py
+ oliver	And this is an example of a simple demo with optimization we should try to replicate in shogun (very similar ones in gpml)
+ oliver	https://github.com/PMBio/pygp/blob/master/pygp/demo/demo_gpr.py
+ puffin444	okay
+ oliver	I guess take a look and ping me if you need anything. It will take you a bit of time to get it to work at all (and getting the maths right), so keep things low complexity with few classes until you have a working thing and then build all the framework machinery on top.
+ oliver	I am travelling quite a bit next week, so best is to arrange discussions via email.
+ oliver	I'll be back to regular office mode on Firday
+ puffin444	So in this case I should first work with the class I have (GPRegression) and write what is necessary to learn the hyperparameters?
+ puffin444	After this is accomplished, write the infrastructure for this functionality to be generalized
+ oliver	yes
+ oliver	exactly. Play around with a simple test bed where you have everything under control and can move quickly.
+ oliver	And then complicate it.
+ puffin444	What do you think is a reasonable timeframe for this? According to may project plan all the infrastructure needed for hyperparameter learning
+ puffin444	(no approximations or non-gaussian likelihoods) is written by half time
+ oliver	I think if you strip down all the complexity.
+ oliver	Take just one kernel, one likelihood model and the GP base class that coud be 1-2 weeks.
+ oliver	There is a lot of code (python/matlab) to get inspiration from.
+ puffin444	I was thinking the same
+ oliver	Probably it's more on the order of 2 weeks.
+ oliver	Then you have always a version to compare to and can check that the framework etc. is correct and produces the correct results.
+ puffin444	In 1-2 weeks, get the simple case running correctly, and then the next two weeks generalize this into the infrastructure we discussed earlier
+ oliver	yes, agree.
+ oliver	And use gradcheck for everything ;-)
+ oliver	I never coded up a single gradient that was correct first shot.
+ puffin444	How should I go about merging this into the main branch? Should I just make changes to my fork and only have a pull request at the very end?
+ oliver	I think it's good to get all the feedback early on, otherwise it will be painful in the end.
+ oliver	If it's clearly code that is temporary keep it local, otherwise merging is good.
+ puffin444	Okay.
+ oliver	Even if some of the GP base class will change it ensures that the code is in line with shogun guide lines right from the start.
+ oliver	Anything else?
+ puffin444	So I will make pull request incrementally
+ puffin444	Not at this point
+ oliver	great
+ puffin444	Thanks for taking time for this meeting
+ oliver	Let's keep in touch. Email will be best next week.
+ oliver	No prob, thanks for getting up early. I am just leaving tonight and thought it would be good to catchup before then.
+ oliver	Talk soon.
+ puffin444	I will probably be emailing you over next week.
+ oliver	excellent
+ puffin444	Do you have any other questions for me?
+ oliver	Not right now.
+ oliver	Let's use email till Friday. Take care and happy coding.
+ puffin444	Okay. You too.
+-!- oliver [55b43dc2@gateway/web/freenode/ip.85.180.61.194] has quit [Quit: Page closed]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has left #shogun []
+-!- Francis_Chan1 [~Adium@58.194.224.108] has left #shogun []
+-!- pluskid [~pluskid@li164-218.members.linode.com] has quit [Quit: Leaving]
+-!- gsomix [~gsomix@109.169.139.36] has joined #shogun
+ gsomix	hi all
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- gsomix [~gsomix@109.169.139.36] has quit [Ping timeout: 244 seconds]
+-!- blackburn [~blackburn@31.28.59.65] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- gsomix [~gsomix@109.169.151.2] has joined #shogun
+@sonney2k	gsomix, hi there ... so how is the director kernel stuff progressing?
+ gsomix	sonney2k, moin, I'm working now.
+ gsomix	just checked directors with templates, trying integrate it to shogun
+ CIA-113	shogun: Soeren Sonnenburg master * r216b658 / examples/undocumented/ruby_modular/classifier_libsvm_minimal_modular.rb : fix ruby example - http://git.io/WvBveA
+ gsomix	sonney2k, and about exams. I have last at 4 June (there are some exams after, but it's easy).
+ gsomix	that's all
+ blackburn	that's all folks :D
+@sonney2k	gsomix, ok... but what about the simple test I suggested?
+@sonney2k	gsomix, enabling directors for some *simple* class in shogun that derives from SGObject?
+@sonney2k	gsomix, I mean even just an example like the one you had
+@sonney2k	you could just take this class and derive it from sgobject
+@sonney2k	then test if it still works within all the shogun stuff
+* sonney2k awaits the buildbot to complete with 100% success now
+ gsomix	sonney2k, =___= please wait, I need 15-20 mins.
+ shogun-buildbot	build #799 of octave_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/799  blamelist: sonne@debian.org
+ gsomix	sonney2k, directored DynamicArray works fine.
+ gsomix	but there is just simple overloaded setter.
+ gsomix	but with templates
+ gsomix	sonney2k, should I commit it?
+ gsomix	sonney2k, http://pastebin.com/yUpN06YJ
+ gsomix	simple test
+* gsomix afk
+@sonney2k	gsomix, thats very cool then :))
+@sonney2k	then I really wonder why my directorkernel didn't work...
+@sonney2k	gsomix, maybe because it was a protected method!
+ blackburn	:D
+ blackburn	sonney2k: did you try to redefine compute?
+@sonney2k	How could I miss that compute() of CKernel is protected
+* sonney2k smacks head
+ blackburn	:D
+ blackburn	:D
+* sonney2k once
+* sonney2k twice
+* sonney2k bumps head on the table
+* sonney2k ouuuuch
+ blackburn	lolotron
+ gsomix	sonney2k, yep. I think problem in protected methods.
+ gsomix	sonney2k, what to do next?
+ CIA-113	shogun: Soeren Sonnenburg master * r817fb76 / src/shogun/kernel/DirectorKernel.h : create *public* kernel_function method to be overidden in directorkernel - http://git.io/dTgxqw
+@sonney2k	gsomix, please have a look at this
+@sonney2k	in principle it should now be possible to override kernel_function when you compile shogun with --enable-swig-directors
+@sonney2k	the exampe for that is in kernel_director_modular.py
+@sonney2k	it needs some adjustments - maybe you create an example your own
+ gsomix	sonney2k, ok
+ gsomix	sonney2k, do you have some ideas for directored kernel?
+@sonney2k	gsomix, maybe you do the reverselinear kernel from the shogun tutorial in python
+@sonney2k	gsomix, in libshogun examples kernel_revlin.cpp
+ blackburn	may be just compute linear
+ blackburn	and compare matrices
+@sonney2k	blackburn, or that
+@sonney2k	true
+ blackburn	gsomix: linear kernel is numpy dot
+@sonney2k	blackburn, one has to pay attention though
+@sonney2k	linear kernel might be normalized
+ blackburn	to accuracy
+ blackburn	yes
+ blackburn	ah
+ blackburn	normalization ture
+* sonney2k checks
+ blackburn	no need to check before
+ blackburn	gsomix: just generate random data and compare linear kernel with director kernel
+ blackburn	compute is
+@sonney2k	blackburn, no it uses identity kernel normalizer
+@sonney2k	so all good
+ blackburn	just numpy.dot
+ blackburn	clear?
+ gsomix	yep
+@sonney2k	blackburn, it is not so easy
+ blackburn	why?
+@sonney2k	there is sth we should discuss
+ blackburn	what?
+@sonney2k	kernel.kernel(row,col)
+@sonney2k	operates on indices
+@sonney2k	so how should it work
+@sonney2k	should one do get_lhs()->get_feature_vector(row)
+ blackburn	lhs = get_lhs().get_computed_feature_vector()
+@sonney2k	same for rhs
+@sonney2k	and then dot()
+ blackburn	or lhs = X[:,i]
+ blackburn	where X is a feature matrix
+@sonney2k	or should the features be set somewhere in the overloaded class?
+ blackburn	depends
+ blackburn	:D
+@sonney2k	blackburn, well...
+@sonney2k	if data is in the class
+ blackburn	let me write compute function
+ blackburn	:D
+@sonney2k	then we need a way to set num_lhs / num_rhs in directorkernel
+@sonney2k	otherwise kernel.kernel(i,j) will check if i<num_lhs
+@sonney2k	etc
+ blackburn	I think no need to have extra features
+@sonney2k	and fail because num_lhs is 0
+@sonney2k	gsomix, please add two functions to directorkernel
+ blackburn	sonney2k: whY?
+@sonney2k	void set_num_vec_lhs(int32_t num_lhs)
+@sonney2k	and set_num_vec_rhs
+ blackburn	why?
+ blackburn	I think no need to add extra data to class
+@sonney2k	blackburn, you might have some complex data you want to compute kernels for
+ blackburn	true
+@sonney2k	blackburn, think of graphs
+ blackburn	agree
+@sonney2k	or parse trees
+@sonney2k	etc
+@sonney2k	blackburn, we have one issue here
+@sonney2k	if we use directors we cannot use threads
+ blackburn	what?
+ blackburn	okay fits perfectly with openmping
+@sonney2k	so we have to make sure that whenever some director* stuff is involved that num_threads = 1
+@sonney2k	blackburn, no
+@sonney2k	same problem
+@sonney2k	python has the GIL
+ blackburn	we have threads only in kernel matrix
+ blackburn	let me check
+@sonney2k	so calling the (from python) overloaded function multiple times in parallel from threads is not possible
+ blackburn	okay just some virtual function for # of threads
+@sonney2k	gsomix, so please when you do the test do kernel.parallel.set_num_threads(1)
+@sonney2k	gsomix, then kernel.get_kernel_matrix()
+ blackburn	ARGH
+ blackburn	I have no idea when to continue with openmp
+ blackburn	I need someone to help me to test it
+@sonney2k	blackburn, openmp is not the issue here
+@sonney2k	problem will be there with openmp nevertheless
+ blackburn	yes yes I understand
+ blackburn	just recalled
+@sonney2k	gsomix, so once you have implemented the linear director kernel as example
+@sonney2k	just compute it's kernel matrix
+@sonney2k	and compare how fast computing the matrix is (say for a 1000x1000) matrix
+@sonney2k	compared to using LinearKernel() from shogun
+ blackburn	fast heh
+@sonney2k	I would expect about 10-100 times slower...
+ blackburn	do you care?
+ blackburn	different thing
+ gsomix	sonney2k, ok
+@sonney2k	I care yes. That will tell us the overhead and to what extend this is at all useful
+@sonney2k	if it is 1000 times slower it is not worth the effort
+ blackburn	it is worth anyway I believe
+@sonney2k	gsomix, doing all that should take just 1-2 hours...
+ blackburn	too cool to leave
+@sonney2k	cool indeed
+ shogun-buildbot	build #161 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/161
+ gsomix	sonney2k, ok, time to work.
+ blackburn	hmm lets try to kill some doc warinngs
+ gsomix	btw, today I worked as builder. http://piccy.info/view3/3062330/d0afe3a699bb4a6ee6a21cd667f0f501/
+ blackburn	hahah
+ gsomix	I think I should add some text about shogun and gsoc at this photo...
+ gsomix	hehe
+ gsomix	<\offtop>
+@sonney2k	hardcore talent abuse!
+ blackburn	sonney2k: typical russian house :D
+ blackburn	sonney2k: that's what I think about your stl hate: http://dl.dropbox.com/u/10139213/share/IMG_0031d.JPG
+ gsomix	blackburn, pink >__<
+ blackburn	yes yes my gf's room is pink
+ gsomix	blackburn, http://dl.dropbox.com/u/19029407/IMG_0116.JPG
+ blackburn	:D
+ blackburn	lol
+ gsomix	I don't have photos with me and blackburn :(
+ shogun-buildbot	build #800 of octave_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/800
+ CIA-113	shogun: Sergey Lisitsyn master * r676b942 / (3 files in 3 dirs): Removed a few doc warnings - http://git.io/anO22w
+ shogun-buildbot	build #558 of ruby_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/558
+ gsomix	sonney2k, have strange error
+ gsomix	DirectorLinear
+ gsomix	Traceback (most recent call last):
+ gsomix	  File "kernel_director_linear_modular.py", line 43, in <module>
+ gsomix	    kernel_director_linear_modular(*parameter_list[0])
+ gsomix	  File "kernel_director_linear_modular.py", line 31, in kernel_director_linear_modular
+ gsomix	    dkernel.init(feats_train, feats_train)
+ gsomix	RuntimeError: maximum recursion depth exceeded while calling a Python object
+ gsomix	and init...
+ gsomix	virtual bool init(CFeatures* l, CFeatures* r)
+ gsomix	{
+ gsomix	return CKernel::init(l, r);
+ gsomix	}
+ gsomix	in DirectorKernel
+ blackburn	what is code?
+ gsomix	blackburn, http://pastebin.com/PXvUSyTh
+ gsomix	and I know, that my kernel_function is wrong
+ gsomix	hehe
+ gsomix	tired, need to sleep
+ blackburn	hmm try to trace calls
+ blackburn	what is calling by recursive?
+ gsomix	init
+ blackburn	init calls init?
+ gsomix	blackburn, yep in Kernel
+ gsomix	good night, guys =___=
+ blackburn	nite
+-!- gsomix [~gsomix@109.169.151.2] has quit [Ping timeout: 244 seconds]
+@sonney2k	hmmhh
+@sonney2k	that is the error I was getting
+ blackburn	yes I do remember
+--- Log closed Sun May 27 00:00:41 2012

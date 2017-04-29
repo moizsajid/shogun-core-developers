@@ -1,0 +1,483 @@
+--- Log opened Thu Mar 29 00:00:19 2012
+ OgreMagi	@sonney2k: there?
+-!- OgreMagi [~vinaygarg@14.139.82.6] has left #shogun []
+-!- Peter_Gr [~Peter_Gr@115.248.130.148] has quit [Remote host closed the connection]
+ shogun-buildbot	build #425 of octave_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/425
+-!- Peter_Gr [~Peter_Gr@115.248.130.148] has joined #shogun
+ n4nd0	sonney2k: I am commenting more the code now :)
+-!- flxb [~cronor@e178172254.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- flxb [~cronor@e178172254.adsl.alicedsl.de] has joined #shogun
+-!- ansh [b49531e5@gateway/web/freenode/ip.180.149.49.229] has joined #shogun
+-!- ansh [b49531e5@gateway/web/freenode/ip.180.149.49.229] has quit [Quit: Page closed]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 260 seconds]
+-!- ankit [18e9e06a@gateway/web/freenode/ip.24.233.224.106] has joined #shogun
+-!- ankit [18e9e06a@gateway/web/freenode/ip.24.233.224.106] has left #shogun []
+-!- trailblazer [18e9e06a@gateway/web/freenode/ip.24.233.224.106] has joined #shogun
+-!- flxb [~cronor@e178172254.adsl.alicedsl.de] has quit [Quit: flxb]
+-!- puffin444 [230bf329@gateway/web/freenode/ip.35.11.243.41] has joined #shogun
+ puffin444	hello
+ trailblazer	hello are any moderators online ?
+ trailblazer	i have a question about the GSOC 12
+ puffin444	hi trailblazer I don't know if there are moderators here
+ puffin444	I'm a student too
+ trailblazer	are u applying for GSOC too ?
+ puffin444	I'll see if I can put together an application
+ puffin444	so yes
+ trailblazer	yea i was going through it ,it says  under one section ---"Make yourself familiar with the github interface and start to interact with us by sending a (small) patch via a github pull request."
+ trailblazer	i am not really sure how can i contributr to it
+ trailblazer	any ideas??
+ puffin444	There are instructions how to do that on Github. You make an account on github and make your own personal fork.
+ trailblazer	i mean i have a girhub set up and everything
+ trailblazer	its this part i am wondering  about  ---"start to interact with us by sending a (small) patch via a github pull request."
+ puffin444	Oh yeah material for a patch. Good question. I am actually submitting some initial code for my proposed project.
+ trailblazer	do we need to work on some of their bugs or something
+ puffin444	Do you have a specific project in mind?
+ trailblazer	yep
+ trailblazer	i think i am gonna for ---Implement multitask and domain adaptation algorithms
+ puffin444	So one mentor told me any bug fix, even if it was unrelated to the proposed project would be helpful
+ trailblazer	i see
+ puffin444	You could also talk to the proposed mentor and ask if there is anything initially you could do.
+ puffin444	This is what I did.
+ trailblazer	that seems a good idea
+ puffin444	What I don't know is when to do the actual pull request. I have some questions about how my code fits into the API
+ puffin444	I don't know if I should submit the pull request right away and ask then, or ask on IRC/mailing lists and then submit the PR after talking with them
+ trailblazer	i see , i guess mentors can better answer that question
+ puffin444	I just don't want to bother them with half-baked additions
+ trailblazer	so what are you studying?
+ puffin444	CS right now, probably at Robotics in the fall
+ puffin444	how about you?
+ trailblazer	same here bachelors in CS
+ trailblazer	i did ML course by stanford thats what got me hooked up in this area
+ puffin444	That's awesome!
+ puffin444	Well goodluck on your application!
+-!- puffin444 [230bf329@gateway/web/freenode/ip.35.11.243.41] has left #shogun []
+-!- pluskid [~chatzilla@60.191.2.230] has joined #shogun
+-!- pluskid [~chatzilla@60.191.2.230] has quit [Quit: ChatZilla 0.9.88.1 [Firefox 11.0/20120312181643]]
+-!- trailblazer [18e9e06a@gateway/web/freenode/ip.24.233.224.106] has quit [Quit: Page closed]
+-!- vikram360 [~vikram360@117.192.175.5] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- hpsoar_ [7c108901@gateway/web/freenode/ip.124.16.137.1] has joined #shogun
+-!- PSmitAalto [82e9b263@gateway/web/freenode/ip.130.233.178.99] has joined #shogun
+ n4nd0	sonney2k: hi! are you around?
+ n4nd0	sonney2k: I have a doubt ... it turns out that there is an object, CLabels* created in the method classify_one_vs_one
+ n4nd0	sonney2k: the method returns that object, so it is not responsible of freeing it
+ n4nd0	sonney2k: however this method also does SG_REF(labels)
+ n4nd0	sonney2k: and if I use that method from another file, I am trying right now with an example, and also do SG_REF(labels)
+ n4nd0	sonney2k: then there is a memory leak
+ n4nd0	sonney2k: if I remove the SG_REF from the example then it disappear
+ n4nd0	sonney2k: but it seems to me more reasonable that it is the library the one that shouldn't do SG_REF because it is not responsible of freeing it, what do you think?
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ n4nd0	blackburn: hey!
+ blackburn	n4nd0: could you please describe this problem a little more?
+ blackburn	hey
+ n4nd0	blackburn: I was going to ask you about it :)
+ blackburn	if I got you right
+ blackburn	it should work in the following way
+ blackburn	any method returning new object should REF it before
+ blackburn	then you don't need to REF this object cause it has 1 ref already
+ blackburn	all you need to destroy it is to UNREF it
+ blackburn	then ref counter becomes 0 it is automagically destroyed
+ n4nd0	ok
+ n4nd0	then the thing I was doing wrong is to ref it after
+ n4nd0	do you know why is it correct to do it like this and not the other way?
+ blackburn	hmm yes
+ n4nd0	the other way = ref and unref where the method is callexd
+ blackburn	well we should rather ref all the objects automatic
+ blackburn	and unref manually
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ blackburn	e.g. how can you SG_REF in python?
+ n4nd0	aham
+ n4nd0	I see it
+ n4nd0	blackburn: ok thank you very much man :)
+ blackburn	you are welcome
+ blackburn	oh I got late for 1.5 hours
+ n4nd0	blackburn: btw, it turned out not to solve the seg fault
+ n4nd0	blackburn: ups ... I can tell you later then
+ blackburn	no problem
+ blackburn	n4nd0: what turned out not to solve?
+ n4nd0	blackburn: the init_machines_for_apply at the end of train_machine
+ blackburn	ah
+ n4nd0	blackburn: I have not investigated why, but it didn't solve it
+ n4nd0	blackburn: so I am still doing init_machines_for_apply(NULL) at the very beginning of aplly()
+ blackburn	try to check what in NULL
+ n4nd0	apply(), sorry
+ n4nd0	the features of each of the trained machines
+ blackburn	hmm does this all the job?
+ blackburn	no segfault?
+ n4nd0	of m_machine
+ n4nd0	yes, like that, it works just fine
+ blackburn	ok then
+ n4nd0	another thing here
+ n4nd0	the constructor without argument of LinearMulticlassMachine
+ n4nd0	I think it brings problems
+ n4nd0	because if one uses it, then m_machine cannot be set
+ n4nd0	and it screws quite a bit ...
+ blackburn	uhh.
+ blackburn	well actually it shoudln't be used
+ n4nd0	train can be called because the object m_machine is created with the default constructor of CMachine
+ blackburn	but should safe though
+ n4nd0	but it turns out to seg fault that way
+ blackburn	n4nd0: just block all the things in this case
+ n4nd0	blackburn: block, with an SG_ERROR??
+ blackburn	yes
+ blackburn	I mean if someone would like to train machine without machine
+ n4nd0	yeah
+ blackburn	may be is_ready() stuff should be modified
+ n4nd0	I tried to do that
+ n4nd0	the easy thing to do if (!m_machine)
+ n4nd0	does not work
+ n4nd0	because there is m_machine, the default constructor initializes it
+ blackburn	with value??
+ n4nd0	I don't understand that sorry :S
+ n4nd0	it initializes it like CMachine()
+ n4nd0	with the default constructor
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ blackburn	there is no initialization of m_machine actually
+ blackburn	shogun / src / shogun / machine / MulticlassMachine.cpp : 20
+ blackburn	should be therre
+ blackburn	m_machines as well btw
+ n4nd0	oh fuck that is right
+ n4nd0	I made a mistake because CMachine is called
+ n4nd0	but it is called because MulticlassMachine is also a machine ...
+ blackburn	I guess that is the problem
+ blackburn	then you can check if m_machine is here
+ n4nd0	so
+ n4nd0	in the default constructor
+ n4nd0	if I just set m_machine to null
+ n4nd0	it would do the work right?
+ blackburn	yes should
+ n4nd0	great :)
+ blackburn	if I do not get crazy
+ n4nd0	let's hope not ;)
+ n4nd0	another issue
+ n4nd0	MulticlassMachine.cpp:40
+ n4nd0	well wait, I probably not talking of the same line number as you can see
+ blackburn	clear_machines()?
+ n4nd0	but SG_UNREF(m_machine) in the destructor
+ blackburn	yes
+ n4nd0	valgrind detects that as invalid read of size 4
+ n4nd0	I guess that this must be because this is already unreferenced in another place?
+ blackburn	what is the case?
+ wiking	blackburn: hey sorry but did you get the point of alex's email?/
+ blackburn	wiking: oh I glanced over it and postponed to read thoroughly a little bit later
+ blackburn	so not really :D
+ wiking	ehhehe ok
+ wiking	let me know since i really don't get some stufff
+ n4nd0	blackburn: in an example, create a machine*, create a multiclassMachine* with using the previous one
+ blackburn	I'll just answer in this thread
+ blackburn	n4nd0: oh and it fails??
+ n4nd0	blackburn: it doesn't really fail
+-!- PSmitAalto [82e9b263@gateway/web/freenode/ip.130.233.178.99] has quit [Ping timeout: 245 seconds]
+ blackburn	that's a bit strange
+ n4nd0	blackburn: it is just that valgrind complains that there is an error when doing SG_UNREF in ~CMulticlassMachine()
+ n4nd0	maybe I am doing UNREF in my example and I shouldn't
+ blackburn	UNREF of?
+ n4nd0	I am actually doing UNREF in the example, yes, of the machine*
+ blackburn	hmm then you destroy machine
+ blackburn	it should be unrefed from the top
+ n4nd0	http://snipt.org/uggif1
+ n4nd0	that is a part of the example
+ blackburn	aha
+ blackburn	looks legal
+ n4nd0	mmm then
+ n4nd0	the unref shouldn't be in the destructor of CMulticlassMachine??
+ blackburn	should be I think
+ n4nd0	then there must another something wrong mmmm
+ blackburn	you didn't ref svm actually
+ blackburn	but refed mc_svm
+ n4nd0	let me check it again, some other things changed so maybe it was a problem somewhere else
+ blackburn	I don't know whether it caused the problem
+ n4nd0	ahm
+ n4nd0	let me see
+ blackburn	but I am 90% sure m_machine should be unrefed
+ blackburn	in mc machine
+ n4nd0	ok
+ n4nd0	you can be 100% :)
+ n4nd0	it was the missing SG_REF in the example probably
+ blackburn	nice
+ n4nd0	I think I am almost done with the job for one-vs-one then
+ blackburn	that's nice
+ blackburn	actually I came up with reproducing case
+ n4nd0	what do you mean?
+ blackburn	imagine you have a machine (binary one)
+ blackburn	and create some multiclass machine based on that in some function or so
+ blackburn	once it is done, multiclass machine is destroyed
+ blackburn	but machine REF counter is still has extra 1
+ blackburn	remove *is*
+ blackburn	:D
+ blackburn	so machine won't be destroyed at all!
+ n4nd0	mmm I see
+ n4nd0	but
+ n4nd0	I don't know if you mean that this is a potential error
+ n4nd0	or?
+ blackburn	yes
+ blackburn	so all dependencies should be free'd once they are not needed any more
+-!- mayanks43 [~marcus@115.248.130.148] has joined #shogun
+ n4nd0	but if the machine already existed, before creating the multiclass machine
+ n4nd0	it might be that it is needed somewhere else
+ blackburn	sure
+ blackburn	SG_UNREF will not delete it then
+ n4nd0	but that is good
+ n4nd0	is not a problem
+ blackburn	yes but w/o SG_UNREF
+ blackburn	machine would have 2 references
+ blackburn	even when multiclass machine is gone
+ blackburn	and it won't be deleted
+ n4nd0	ah ok
+ n4nd0	you are just ensuring that it is good to do the SG_UNREF right?
+ blackburn	yes
+ blackburn	:D
+ n4nd0	ok :)
+ n4nd0	my bad
+ n4nd0	I was thinking that it was a problem that arose *leaving* the SG_UNREF in ~CMulticlassMachine
+ blackburn	nono it should be here
+ n4nd0	cool
+ n4nd0	btw, I am just curious
+ n4nd0	not so long time ago I heard about smart pointers
+ blackburn	yeah
+ n4nd0	woulnd't that make things easier?
+ n4nd0	I don't know that much about them thoug! :S
+ blackburn	I do not know about swig and these pointers..
+ n4nd0	aham, I understand
+-!- mayanks43 [~marcus@115.248.130.148] has left #shogun []
+ n4nd0	it seems that it is something new in C++
+ blackburn	it is ok to be gay^W^W^W to use smart pointers but we should always keep swig in mind
+ n4nd0	hahaha
+ n4nd0	I was just curious ... c'mon don't call be gay for that :P
+ n4nd0	call me*
+ blackburn	I just recalled a good old song lol
+ blackburn	btw sonney2k rejected me when I asked him to marry me
+ blackburn	even this song didn't help
+ n4nd0	wtf?!
+ n4nd0	don't you have a gf? :P
+ n4nd0	which song is that?
+ blackburn	so I decided to go to siberia and start dating with bear
+ blackburn	http://www.youtube.com/watch?feature=player_detailpage&v=3j4t185wl-0
+ n4nd0	:O
+ blackburn	oh sh~ I have to get to work
+ blackburn	see you alter
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+ n4nd0	ok
+-!- harshit_ [~harshit@59.177.197.85] has joined #shogun
+ harshit_	hey n4nd0
+ n4nd0	hey harshit_, qu? tal? ;)
+ harshit_	bian,y tu?
+ n4nd0	bien tambi?n
+ harshit_	hey i was thinking to make a new example in matlab : by using 20NewsGroup dataset on linearSVM
+ harshit_	what do you think should i do it ?
+ n4nd0	harshit_: yeah sure
+ harshit_	i thought of doing it in libshogun but i dont know how to open *.mat files in C++
+ harshit_	do you hav any idea on how to do that, coz 20Newsgroup datase is available in matlab file only
+ n4nd0	I am going to push an example doing that
+ harshit_	oh gr8
+ n4nd0	but the issue is that the file I am using has no format
+ harshit_	that would be useful
+ harshit_	ohh
+ n4nd0	is just the vector values directly
+ n4nd0	the ones you are going to use has format?
+ n4nd0	I am downloading the data set to take it a look
+ harshit_	yes, matlab stores its matrix and objects in some specific format
+ harshit_	i dont think your example could be used on *.mat files
+ n4nd0	yeah ... then we cannot do that :(
+ n4nd0	but it is something we shoould learn probably
+ n4nd0	we have to ask blackburn or sonney2k about that
+ n4nd0	eh but wait
+ harshit_	yeah.. i'll try to figure that out and if possible i can get an pull out of it
+ harshit_	what
+ n4nd0	the don't actually have any specific format
+ n4nd0	I am reading the files .data .label with a text editor
+ n4nd0	and no problem
+ n4nd0	so I think you can do that with CStreamingSparseFeatures
+ n4nd0	because the representaion of the training data is sparse
+ n4nd0	and the labels with CStreamingSimpleFeatures
+ n4nd0	in the example I am going to push soon I use CStreamingSimpleFeatures
+ n4nd0	so it should be ok to follow as a reference
+ n4nd0	in any case ...
+ n4nd0	it turned out to be kind of painful for me to do it ... I am not completely sure I got it completely right done
+ harshit_	yeah you are right for .label and .data files
+ harshit_	but
+ n4nd0	so I suggest you to do it first in matlab/octave or python (you can read .mat with python very easy too)
+ harshit_	there are also other *.mat files need some way to be used in C++ .no ?
+ n4nd0	yes, I totally agree
+ harshit_	yeah exactly, thats what i thought, first in matlab and then in C++
+ n4nd0	don't know the general way to do it with shogun (don't really know if there is one already actually)
+ harshit_	okay so lets do some work ..
+ n4nd0	:)
+ harshit_	hey one last thing .. i have read a lot of differences between static and modular interfaces but actually till now i dont hav a clear idea of what is the main difference between them
+ n4nd0	I don't know exactly either
+ n4nd0	I know that static has limitations
+ n4nd0	for example it can just one classifier for each program (I think blackburn told me this)
+ harshit_	oh thats actually confusing
+-!- harshit_ [~harshit@59.177.197.85] has quit [Ping timeout: 264 seconds]
+-!- Peter_Gr [~Peter_Gr@115.248.130.148] has quit [Quit: Leaving]
+-!- flxb [~cronor@e178172254.adsl.alicedsl.de] has joined #shogun
+-!- harshit_ [~harshit@59.177.197.85] has joined #shogun
+-!- vikram360 [~vikram360@117.192.175.5] has quit [Ping timeout: 265 seconds]
+-!- hpsoar_ [7c108901@gateway/web/freenode/ip.124.16.137.1] has quit [Quit: Page closed]
+-!- flxb [~cronor@e178172254.adsl.alicedsl.de] has quit [Quit: flxb]
+-!- harshit_ [~harshit@59.177.197.85] has quit [Ping timeout: 240 seconds]
+ wiking	asdf
+-!- Peter_Gr [~Peter_Gr@115.248.130.148] has joined #shogun
+-!- vikram360 [~vikram360@117.192.187.98] has joined #shogun
+-!- flxb [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- flxb_ [~cronor@141.23.80.206] has joined #shogun
+-!- flxb_ [~cronor@141.23.80.206] has quit [Remote host closed the connection]
+-!- flxb_ [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+-!- flxb [~cronor@fb.ml.tu-berlin.de] has quit [Read error: Connection reset by peer]
+-!- flxb_ is now known as flxb
+-!- harshit_ [~harshit@182.68.160.94] has joined #shogun
+-!- flxb [~cronor@fb.ml.tu-berlin.de] has quit [Quit: flxb]
+-!- harshit_ [~harshit@182.68.160.94] has quit [Ping timeout: 260 seconds]
+-!- blackburn [~qdrgsm@109.226.113.113] has joined #shogun
+-!- flxb [~cronor@e178169201.adsl.alicedsl.de] has joined #shogun
+-!- vikram360 [~vikram360@117.192.187.98] has quit [Read error: Connection reset by peer]
+-!- vikram360 [~vikram360@117.192.187.98] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	n4nd0: main difference between static and modular
+ blackburn	is that later rocks
+ blackburn	while first one sucks
+ blackburn	:D
+ n4nd0	haha
+ blackburn	latter*
+ n4nd0	I knew you were going to say that static sucks :P
+ blackburn	the only reason (for me) to keep static is matlab suppor
+ n4nd0	but what are the reasons why it does suck?
+ blackburn	have you seen static scripts?
+ blackburn	pretty poor capabilities
+ blackburn	once you add new parameter you HAVE to implement this in static
+ n4nd0	I don't see the last point
+ blackburn	n4nd0: check shogun/gui folder
+ n4nd0	blackburn: I don't see that directory man
+ blackburn	ui?
+ blackburn	:)
+ n4nd0	??
+ blackburn	shogun/ui?
+ blackburn	is there ui?
+ blackburn	:)
+ n4nd0	mm don't see that
+ blackburn	src/shogun/ui
+ n4nd0	got it :)
+ blackburn	n4nd0: so each time you want to add new feature
+ blackburn	you HAVE to implement it in shogun/ui
+ n4nd0	aha
+ n4nd0	you mean for static right?
+ blackburn	yes
+ blackburn	while modular is a bleeding edge stuff hah
+ n4nd0	I understand
+-!- PhilTillet [~Philippe@38.124.160.27] has joined #shogun
+ PhilTillet	Hey :p
+ PhilTillet	sonney2k, surprise in your mailbox!
+ blackburn	sonney2k: here?
+-!- PhilTillet [~Philippe@38.124.160.27] has quit [Ping timeout: 248 seconds]
+-!- PhilTillet [~Philippe@38.124.160.27] has joined #shogun
+-!- PhilTillet [~Philippe@38.124.160.27] has quit [Read error: Connection reset by peer]
+ CIA-64	shogun: Sergey Lisitsyn master * r777e558 / (2 files): Some final fixes for #401 (+11 more commits...) - http://git.io/dENg2w
+-!- vikram360 [~vikram360@117.192.187.98] has quit [Ping timeout: 244 seconds]
+-!- vikram360 [~vikram360@117.192.161.171] has joined #shogun
+ shogun-buildbot	build #636 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/636  blamelist: fernando.iglesiasg@gmail.com
+-!- blackburn [~qdrgsm@109.226.113.113] has quit [Ping timeout: 246 seconds]
+-!- blackburn1 [~qdrgsm@62.106.114.183] has joined #shogun
+ shogun-buildbot	build #637 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/637
+-!- blackburn1 is now known as blackburn
+ shogun-buildbot	build #576 of r_static is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/576  blamelist: fernando.iglesiasg@gmail.com
+ blackburn	ohhh
+ n4nd0	this guy, shogun-buildbot, is always blaming me :(
+ blackburn	n4nd0: did not you implement it?
+ n4nd0	blackburn: they're with SG_NOTIMPLEMENTED
+ blackburn	that's strange
+ n4nd0	I wanted to discuss with you again first :S
+ blackburn	I mean it should work
+ blackburn	hah no worries, I'll implement it
+ blackburn	ah old build
+ blackburn	lets wait
+ n4nd0	old build?
+ n4nd0	ah ok, the number
+ n4nd0	maybe I should change my way of making commits ...
+ n4nd0	blackburn: should I do sth about it?
+ n4nd0	shogun-buildbot: work!
+ shogun-buildbot	What you say!
+ shogun-buildbot	build #577 of r_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/577
+ n4nd0	shogun-buildbot: that is nicer!
+ shogun-buildbot	What you say!
+ blackburn	n4nd0: yeah, all is ok
+ n4nd0	blackburn: did you need to do those methods yourself?
+ blackburn	n4nd0: kernel stuff?
+ n4nd0	blackburn: yeah
+ blackburn	no, feel free to do that if you want :)
+ n4nd0	blackburn: ok ;)
+ blackburn	but it is not a lot of work
+ n4nd0	not at all
+ blackburn	it is up to you
+ blackburn	so do you want to do that?
+ n4nd0	yeah sure
+ blackburn	all you need is to implement set_subset methods for kernel
+ blackburn	for custom it should set_row_subset and set_col_subset
+ blackburn	for simple kernels it should add subset to features
+ blackburn	same with remove_subset
+ n4nd0	for simple is like for the LinearMachine
+ blackburn	yes
+ n4nd0	it will be ready soon with some example of use ;)
+ blackburn	ok thanks
+ shogun-buildbot	build #406 of java_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/java_modular/builds/406  blamelist: fernando.iglesiasg@gmail.com
+ CIA-64	shogun: Sergey Lisitsyn master * rafb8b5e / (src/CONTRIBUTIONS src/NEWS): Updates for NEWS and CONTRIBUTIONS - http://git.io/I9FuYg
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 265 seconds]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: No route to host]
+-!- wiking_ is now known as wiking
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Client Quit]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ gsomix	hi
+ gsomix	blackburn, yo.
+ blackburn	hi
+ shogun-buildbot	build #402 of python_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_modular/builds/402  blamelist: fernando.iglesiasg@gmail.com
+ blackburn	naah
+ n4nd0	:(
+ n4nd0	./classifier_averaged_perceptron_modular.py??
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 260 seconds]
+ shogun-buildbot	build #407 of java_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/java_modular/builds/407
+ n4nd0	:)
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- gsomix [~gsomix@188.168.2.195] has quit [Ping timeout: 252 seconds]
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has quit [Remote host closed the connection]
+ shogun-buildbot	build #403 of python_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_modular/builds/403
+-!- Peter_Gr [~Peter_Gr@115.248.130.148] has quit [Quit: Leaving]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+* sonney2k wakes up
+ blackburn	sonney2k: how do you do?
+ blackburn	sonney2k: we just talked to n4ndo, and I wasn't able to recall why do you hate STL?
+@sonney2k	I feel every muscle / bone today :)
+ blackburn	sonney2k: trained yesterday?
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+@sonney2k	blackburn, went to the zoo with the 'little' one
+ blackburn	ah
+@sonney2k	carrying him all day
+@sonney2k	+ backpack
+ blackburn	I see
+@sonney2k	what does n4ndo need STL for?
+ blackburn	sonney2k: we didn't come up with any example yet :D
+ blackburn	but actually there could be places where it would fit better
+@sonney2k	10 proposals...
+ blackburn	only 2 more today?
+ blackburn	sonney2k: do you think it is ok to provide Kernel LLE capabilities in LocallyLinearEmbedding class?
+ blackburn	I mean to remove such duplication
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ blackburn	now we have both
+@sonney2k	I would keep both...
+ blackburn	sonney2k: hmm ok
+-!- flxb_ [~cronor@g231240112.adsl.alicedsl.de] has joined #shogun
+-!- flxb [~cronor@e178169201.adsl.alicedsl.de] has quit [Ping timeout: 246 seconds]
+-!- flxb_ is now known as flxb
+ blackburn	sonney2k: so is there any actual reason to avoid STL?
+@sonney2k	except that I don't like it you mean?
+@sonney2k	probably not
+ blackburn	ok
+@sonney2k	blackburn, what was that SG_REF / UNREF issue you had with n4nd0?
+ blackburn	sonney2k: he forgot to SG_REF svm that he was using
+ blackburn	later this svm was passed to generic multiclass thing
+@sonney2k	yeah usually that is the issue or that something is not inited with NULL
+ blackburn	all is ok now
+@sonney2k	or forgotten SG_REF when returning stgh
+@sonney2k	sth
+--- Log closed Fri Mar 30 00:00:19 2012

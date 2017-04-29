@@ -1,0 +1,128 @@
+--- Log opened Fri May 13 00:00:57 2011
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Quit: I'll be Bach]
+-!- blackburn [~qdrgsm@188.168.4.251] has quit [Quit: Leaving.]
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has quit [Ping timeout: 240 seconds]
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has joined #shogun
+-!- alesis-novik [~alesis@188.74.87.84] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- f-x [b49531e3@gateway/web/freenode/ip.180.149.49.227] has joined #shogun
+-!- f-x [b49531e3@gateway/web/freenode/ip.180.149.49.227] has quit [Quit: Page closed]
+-!- warpy [~warpy@bzq-79-183-44-64.red.bezeqint.net] has joined #shogun
+ CIA-31	shogun: Soeren Sonnenburg master * r88994f7 / (71 files in 17 dirs):
+ CIA-31	shogun: Introduce SGVector, SGMatrix, SGString, SGSparseMatrix data types.
+ CIA-31	shogun: And add a get_labels() function for SGVector testing. - http://bit.ly/lghujb
+ CIA-31	shogun: Heiko Strathmann master * r764d28d / src/libshogun/base/SGObject.cpp : remove redundant save/load for model selection parameters - http://bit.ly/kFh5AR
+ CIA-31	shogun: Heiko Strathmann master * rffeca12 / examples/undocumented/libshogun/parameter_set_from_parameters.cpp : added copyright - http://bit.ly/iMyXmr
+ CIA-31	shogun: Heiko Strathmann master * r5bc70da / examples/undocumented/libshogun/Makefile : added parameter iteration example - http://bit.ly/iiQFe2
+ CIA-31	shogun: Soeren Sonnenburg master * ra7c1e48 / src/libshogun/features/Labels.h : introduce set_labels based on SGVector<float64_t> data type - http://bit.ly/lrrFU6
+ CIA-31	shogun: Soeren Sonnenburg master * rec32295 / (6 files in 3 dirs): Merge branch 'master' of git://github.com/karlnapf/shogun - http://bit.ly/khzbZ5
+@sonney2k	warpy, you wanted to ask sth?
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has quit [Ping timeout: 240 seconds]
+ CIA-31	shogun: Soeren Sonnenburg master * r29dfea9 / (3 files in 3 dirs): add get/set vector in/out typemap for python - http://bit.ly/iTTFPA
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- blackburn [~qdrgsm@188.168.3.72] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has joined #shogun
+@sonney2k	warpy, ?
+@sonney2k	blackburn, I did the SGVector thing for one examples - CLabels
+ blackburn	sonney2k: aha, I have seen
+@sonney2k	blackburn, it seems to work from python already
+ blackburn	nice!
+@sonney2k	I realized that we need this fro ndim arrays too
+ blackburn	sonney2k: what do you think about implementing CLLE this way?
+@sonney2k	ehh how is this related?
+ blackburn	I could use SGMatrix instead of float64_t :)
+@sonney2k	yes but algorithmwise there is no difference...
+ blackburn	it could be more readable
+@sonney2k	hmmhh not much
+ blackburn	ok
+@sonney2k	anyways I will try to do the python typemaps for matrix...
+ warpy	what about c# ? :P
+ blackburn	but the problem is if we will use *only* SGVector - we have to change internals for its usage
+ blackburn	i.e. if get_feature_vector will return SGVector we would rather use it
+ blackburn	I'm not sure I understand concept
+ blackburn	are SG* structures purposed for interfaces?
+@sonney2k	warpy, well I won't do more except the draft - I was hoping you continue work on this...
+@sonney2k	blackburn, we have to change serialization code to only work with SGVector/Matrix etc and indeed all classes to internally use these things
+ warpy	i was talking about the code daniel did
+ warpy	didnt he send it to you
+ warpy	the alpha version
+ warpy	to put inside the git repo
+@sonney2k	warpy, did he finally get the example to run?
+ warpy	i think so.
+ blackburn	sonney2k: so would you like if I will change algos I implement(ed) for its usage?
+@sonney2k	warpy, I answered but he didn' treply
+ warpy	he told me we can start using more than just the simple basic example
+ warpy	because it compiled and returned "1" or something, correct ?
+@sonney2k	yes
+@sonney2k	blackburn, yes :)
+ blackburn	sonney2k: okay
+ warpy	was that yes for me ?
+ warpy	ah yes i wanted to ask you
+ warpy	how does swig/shogun deal with sparse matrices
+ warpy	as far as we see the java code that we trnaslated to c# only deals with arrays and matrices.
+ warpy	is there something special that we need to do to support sparse matrices ?
+@sonney2k	warpy, yes
+@sonney2k	warpy, is there any sparse matrix library in c#?
+@sonney2k	blackburn, the good news is that typemaps are drastically simplified
+@sonney2k	we now just need in and out typemaps
+@sonney2k	and no more %apply stuff
+ blackburn	aha, I see, moreover it is more comprehensive
+@sonney2k	as soon as someone returns a SGVector or SGMatirx etc these things are swig wrapped
+@sonney2k	same for inputting
+@sonney2k	the only problem I have is that it is hard to do without breaking things at the moment
+@sonney2k	I think one would need to a) write all the new typemaps for all languages
+@sonney2k	b) add set/get functions to all relevant classes
+@sonney2k	(that use SGVector & friends)
+@sonney2k	c) add functions to do the serialization with SGVector etc
+ blackburn	who it could be? :D
+@sonney2k	d) translate all classes to use SGVector internally
+@sonney2k	converting typemaps is piece of cake (I just did matrix for python)
+@sonney2k	adding set/get functions too
+@sonney2k	serialization is something heiko could help
+ blackburn	aha, d) is for me :)
+@sonney2k	d) is potentially more demanding
+ blackburn	anyway we don't need to rush d), right?
+ blackburn	sonney2k: LLE for the moment works ~20s on 10000
+ blackburn	with no eigenproblem solving though
+@sonney2k	there is no rush for anything - but it will give us much more readable code
+ blackburn	I mean I could do it for sure, but I haven't much time right now :(
+@sonney2k	blackburn, well you cannot start before a-c are done
+ blackburn	-ac?
+@sonney2k	and believe me - you have much more time than I have currently...
+ blackburn	a-c?
+@sonney2k	a)-c)
+ blackburn	ah
+ blackburn	sonney2k: hrr, looks like you think I'm relaxing :)
+@sonney2k	blackburn, no I don't think you are.
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+ blackburn	sonney2k: SystemError: Out of memory error, tried to allocate 800000000 bytes using new[].
+@sonney2k	We should postpone this discussion until you too have 2 babies at home :)
+ blackburn	:D
+* sonney2k counts the zeros
+ blackburn	float64_t 10000*10000 matrix
+ blackburn	I really need sparse matrix :D
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+@sonney2k	if the matrix is sparse then yes :)
+ blackburn	sonney2k: 5.690s for 5000 examples
+ blackburn	not so bad this time
+ blackburn	but memory complexity is terrifying
+ blackburn	in each row of that NxN matrix only k<<N values aren't zero
+* blackburn is in the crape, russia is beaten in 1/2
+@sonney2k	ok then sparse could work
+@sonney2k	but no idea if all the algos you need are available for sparse matrices
+ blackburn	sonney2k: only eigenvalues
+@sonney2k	I never did that fro sparse matrices...
+ blackburn	me too but I don't know any other way
+ blackburn	sonney2k: nevermind, on last stage it is not sparse
+@sonney2k	heh
+@sonney2k	anyways I wouldn't optimize before you have a set of baseline algos
+ blackburn	W is sparse matrix, then (I-W)'*(I-W) is computed and eigenvectors of it are feature vectors
+ blackburn	(I-W)'*(I-W) is exactly don't sparse :)
+@sonney2k	good night!
+ blackburn	good night..
+ blackburn	LLE is almost working now
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has quit [Ping timeout: 260 seconds]
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has joined #shogun
+--- Log closed Sat May 14 00:00:58 2011

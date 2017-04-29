@@ -1,0 +1,144 @@
+--- Log opened Fri Dec 27 00:00:24 2013
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Read error: Operation timed out]
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has joined #shogun
+@sonney2k	does anyone know here a stress testing web thing?
+@sonney2k	to simulate load?
+-!- bb [458fc8de@gateway/web/freenode/ip.69.143.200.222] has quit [Ping timeout: 272 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot	build #662 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/662
+-!- tricksy_ [uid12458@gateway/web/irccloud.com/x-zficvzowljlofhxt] has joined #shogun
+-!- tricksy [uid12458@gateway/web/irccloud.com/x-vpshlkvbmqrqbwik] has quit [Ping timeout: 240 seconds]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Ping timeout: 272 seconds]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+-!- siddharth950 [~siddharth@triband-mum-59.182.160.47.mtnl.net.in] has joined #shogun
+ siddharth950	besser82, which installation method should I follow?
+ siddharth950	besser82, one is mentioned on the shogun installation page and the other one on the Github docs
+-!- Netsplit *.net <-> *.split quits: besser82, tricksy_
+-!- siddharth950 [~siddharth@triband-mum-59.182.160.47.mtnl.net.in] has quit [Ping timeout: 252 seconds]
+-!- Netsplit over, joins: tricksy_, besser82
+-!- siddharth950 [~siddharth@triband-mum-59.182.174.88.mtnl.net.in] has joined #shogun
+ siddharth950	sonney2k, is it necessary to build from source if I want to contribute?
+-!- siddharth950 [~siddharth@triband-mum-59.182.174.88.mtnl.net.in] has quit [Quit: Leaving]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Ping timeout: 272 seconds]
+-!- siddharth950 [~siddharth@triband-mum-59.182.143.164.mtnl.net.in] has joined #shogun
+-!- siddharth950 [~siddharth@triband-mum-59.182.143.164.mtnl.net.in] has quit [Ping timeout: 252 seconds]
+-!- siddharth950 [~siddharth@triband-mum-59.182.153.184.mtnl.net.in] has joined #shogun
+ siddharth950	besser82, where is init_shogun() defined?
+ besser82	siddharth950: src/shogun/base/init.{cpp,h}
+-!- siddharth950 [~siddharth@triband-mum-59.182.153.184.mtnl.net.in] has quit [Ping timeout: 246 seconds]
+-!- iglesiasg [~iglesiasg@211.Red-83-40-129.dynamicIP.rima-tde.net] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ besser82	sonney2k, wiking, iglesiasg: mornin'  :D
+@sonney2k	besser82, heh evening!
+-!- HeikoS [~heiko@90.211.150.15] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@90.211.150.15] has quit [Client Quit]
+-!- HeikoS [~heiko@90.211.150.15] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@90.211.150.15] has quit [Client Quit]
+@iglesiasg	besser82, hello :)
+@sonney2k	besser82, if I understand your plugin concept correctly
+@sonney2k	(FYI to the others - that one http://blog.nuclex-games.com/tutorials/cxx/plugin-architecture/ )
+@sonney2k	one would e.g. define CKernel as interface
+@sonney2k	and then e.g. CGaussianKernel would be a .dll / .so?!
+@sonney2k	What I don't get though is how cross connections are done
+@sonney2k	like CKernel needs CFeatures
+@wiking	i reckon that we could learn a lot from gstreamer arch
+-!- HeikoS [~heiko@90.211.150.15] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ besser82	sonney2k: every plugin can communicate with another one through the "interface-lib"
+ besser82	sonney2k: I could imagine using plugins that way:
+ besser82	having an interface-lib, which provides all (common-)stuff needing to deal with the "functional"-plugins
+ besser82	that would be the ui-exposing interface, too.  like user writes his code using that interface, only
+ besser82	the interface-lib looksup all avail plugins on init()
+ besser82	and registers them to the plugin-manager
+ besser82	which provides func-ptrs to the corrensponding plg's functions / methods
+ besser82	all plugins need to interface that interface-lib in any way
+ besser82	if one plugin needs to interact with another one this is made through the interface-lib as well...
+ besser82	the if-lib then checks whether the req. plg is already loaded and if neccessary loads && inits it
+ besser82	sonney2k, wiking:  ^^^
+ besser82	so there is just one main interface, which doesn't have any "exotic" deps and provides the generic-stuff need for the user to interact
+ besser82	that would solve the d-ptr stuff and some other things as well....
+ besser82	iglesiasg, HeikoS:  ^^^
+-!- HeikoS [~heiko@90.211.150.15] has quit [Ping timeout: 252 seconds]
+ besser82	will be back in ~5 mins  ---> router reboot
+@iglesiasg	besser82, how do the if-lib and plugins communicate?
+@iglesiasg	besser82, is everything solved at compile time, I mean all of these are libraries with headers to include and so on
+@iglesiasg	besser82, or IPC?
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 246 seconds]
+-!- besser82 [~besser82@2a02:8108:8840:1800:e8b:fdff:fe16:bb33] has joined #shogun
+-!- besser82 [~besser82@2a02:8108:8840:1800:e8b:fdff:fe16:bb33] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+ besser82	re
+-!- HeikoS [~heiko@90.211.150.15] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	iglesiasg: no ipc...
+@iglesiasg	ok!
+@wiking	iglesiasg: dynamic lib (.so
+@iglesiasg	I guess it was an stupid/insane question :D
+@wiking	nono i'm just saying
+@iglesiasg	all right gtg, catch you later
+-!- iglesiasg [~iglesiasg@211.Red-83-40-129.dynamicIP.rima-tde.net] has quit [Quit: Leaving]
+-!- Saurabh7 [~Saurabh7@59.88.37.112] has joined #shogun
+-!- HeikoS [~heiko@90.211.150.15] has quit [Quit: Leaving.]
+-!- Saurabh7 [~Saurabh7@59.88.37.112] has quit [Ping timeout: 272 seconds]
+ besser82	sonney2k: btw. communication between the plugins could be done with Protobufs as well  ;)
+@wiking	besser82: nooooo
+ besser82	wiking: ???
+@wiking	besser82: i hope that was just a joke about the protobuf's current state in shogun :)))0
+ besser82	wiking: I just said "could be done", not is the *BEST* solution  ;)
+@wiking	besser82: ok i've sent my 2 cents
+@wiking	besser82: but basically i would really suggest to check on gstreamer on this manner
+@wiking	*matter
+@wiking	they did an awesome job for creating a plugin based media framework
+@wiking	and they only had ansi c for doing it ;)
+ besser82	wiking: yes, i did have a look on gstreamer and the work is nice, but...
+@wiking	what's the but? :)
+ besser82	wiking: since we are using C++11 things can be done a lot easier than just using ansi-c  ;)
+@wiking	besser82: yeah sure i'm just saying that doing something similar or based on that
+@wiking	would be highly adviseable
+@wiking	as they are really working on this for 5+ years
+@wiking	besser82: i know one of the core developers personally so i can even get him to tell us a bit about the pitfalls one might encounter
+ besser82	wiking: that would be a nice idea  :D
+ besser82	wiking: and one other thing about gstreamer is: It looks a bit overcomplicated to me, but that might be because of using pure ansi-c  ;)
+@wiking	besser82: but i would really go with doing this in memory
+@wiking	and not some library to do the communication among the different plugins
+@wiking	besser82: well yeah ansi c makes everything a little bit more complicated... or let's say harder to read
+ besser82	wiking: you're talking about the interface-lib?!?
+ besser82	wiking: like in my proposal?
+@wiking	besser82: but then again as u can see now the different plugins can be glued together automagically
+ besser82	wiking: by "interface-lib" i refer to some lib, which is:
+ besser82	the lib the user links against
+ besser82	the lib providing the public interfaces
+ besser82	the lib which has common data-structures used by all plugins
+ besser82	wiking:  so I think, I basically meant the same, what those gstreamer-folks already did  ;)  But in the C++11-way
+@wiking	well i wouldnt push c++11 that much
+@wiking	as it'll take another 2 years to have compilers supporting that on many other systems...
+@wiking	certenly we can do some ifdefs as it is now
+ besser82	wiking:  all major compilers actually support c++11 quite well now  ;)  Clang, GCC, MSVC
+ besser82	wiking:  shall we really care about exotics like HP-Ux?!?
+@wiking	besser82: yeah the latest stable of those compilers...
+@wiking	but not everybody has that on their system :P
+ besser82	wiking: afaik all we need of c++11 in the "interface"-lib, should work from gcc 4.3+  or MSVC2009
+ besser82	wiking: no sure about clang....
+ besser82	wiking: but you can tell ;)
+ besser82	wiking: so supporting the basic "c++0x"-features should be enough
+ besser82	wiking: or shall we really care about people using up-to-date stuff like Internet Explorer for Mac?  :-P
+-!- FSCV [~FSCV@fixed-203-250-138.iusacell.net] has joined #shogun
+@sonney2k	besser82, I still don't have a clear picture
+@sonney2k	besser82, I guess I will only get one if we try this with some minimal code example
+@sonney2k	but first things first
+@sonney2k	we need to get cmake in shape and 3.1 out
+ besser82	sonney2k: ack  :D
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+-!- FSCV_ [~FSCV@fixed-203-250-138.iusacell.net] has joined #shogun
+-!- FSCV [~FSCV@fixed-203-250-138.iusacell.net] has quit [Ping timeout: 245 seconds]
+-!- sonne|osx [~sonne@e179076064.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@e179076064.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@e179076064.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@e179076064.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- Guest51809 [~androirc@fedora/besser82] has joined #shogun
+-!- Guest51809 [~androirc@fedora/besser82] has quit [Remote host closed the connection]
+-!- besser82|afk [~android@fedora/besser82] has joined #shogun
+-!- besser82|afk [~android@fedora/besser82] has quit [Client Quit]
+--- Log closed Sat Dec 28 00:00:25 2013

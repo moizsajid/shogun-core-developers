@@ -1,0 +1,226 @@
+--- Log opened Sun May 06 00:00:37 2012
+ CIA-113	shogun: Soeren Sonnenburg master * rc896d91 / src/shogun/lib/GCArray.h :
+ CIA-113	shogun: fix uninited memory reads in gcarray
+ CIA-113	shogun: SG_MALLOC -> SG_CALLOC does the job - http://git.io/7m9AAg
+ CIA-113	shogun: Soeren Sonnenburg master * rbed68da / src/shogun/base/Parameter.cpp : fix typo in comment - http://git.io/FPBRpw
+ CIA-113	shogun: Soeren Sonnenburg master * r9fb6130 / src/shogun/lib/SGVector.h : free old ref before copying - http://git.io/zCsyug
+-!- emrecelikten [~emrecelik@82.222.102.86] has quit [Quit: Leaving.]
+-!- vikram360 [~vikram360@117.192.190.221] has quit [Ping timeout: 240 seconds]
+-!- vikram360 [~vikram360@117.192.167.5] has joined #shogun
+-!- pluskid [~pluskid@111.120.1.69] has joined #shogun
+-!- pluskid [~pluskid@111.120.1.69] has quit [Quit: Leaving]
+-!- blackburn [~qdrgsm@83.234.54.222] has joined #shogun
+-!- Marty28 [~marty@cable-158-181-78-199.cust.telecolumbus.net] has joined #shogun
+-!- Marty28 [~marty@cable-158-181-78-199.cust.telecolumbus.net] has quit [Quit: Colloquy for iPad - http://colloquy.mobi]
+-!- gsomix [~gsomix@85.26.165.80] has joined #shogun
+ gsomix	morning
+ blackburn	morgen
+-!- blackburn [~qdrgsm@83.234.54.222] has quit [Ping timeout: 245 seconds]
+ gsomix	sonney2k, around?
+-!- gsomix [~gsomix@85.26.165.80] has quit [Ping timeout: 248 seconds]
+-!- vikram360 [~vikram360@117.192.167.5] has quit [Ping timeout: 245 seconds]
+-!- gsomix [~gsomix@83.149.21.227] has joined #shogun
+-!- vikram360 [~vikram360@117.192.176.243] has joined #shogun
+ gsomix	sonney2k, oh, we cannot use hashset for MemoryBlocks.
+ gsomix	because we add MemoryBlock(ptr, size) and remove MemoryBlock(prt) - different hashes.
+ gsomix	I will replace CSet to CMap<void* ptr, MemoryBlock>. ok?
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+-!- gsomix [~gsomix@83.149.21.227] has quit [Ping timeout: 276 seconds]
+-!- gsomix [~gsomix@83.149.21.227] has joined #shogun
+-!- vikram360 [~vikram360@117.192.176.243] has quit [Ping timeout: 255 seconds]
+-!- vikram360 [~vikram360@117.192.169.145] has joined #shogun
+-!- pluskid [~pluskid@li400-235.members.linode.com] has joined #shogun
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Ping timeout: 250 seconds]
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Ping timeout: 260 seconds]
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Ping timeout: 276 seconds]
+-!- blackburn [~qdrgsm@83.234.54.222] has joined #shogun
+-!- vikram360 [~vikram360@117.192.169.145] has quit [Ping timeout: 244 seconds]
+-!- vikram360 [~vikram360@117.192.170.117] has joined #shogun
+ blackburn	pluskid: hey
+ blackburn	it looks like recent commits caused this error
+ blackburn	it appeared on my machine too
+ pluskid	blackburn: I think I already fix this error locally
+ blackburn	pluskid: what caused it?
+ pluskid	hmm, let me think...
+ pluskid	ahh
+ pluskid	I see
+ pluskid	virtual void add_machine_subset(SGVector<index_t> subset)
+ pluskid	this method in CMulticlassMachine
+ pluskid	becomes virtual void add_machine_subset(const SGVector<index_t> subset)
+ pluskid	in CLinearMulticlassMachine
+ pluskid	one more const
+ blackburn	haha
+ pluskid	then SWIG confused
+-!- gsomix [~gsomix@83.149.21.227] has quit [Quit: Ex-Chat]
+ blackburn	sure it is different methods
+ pluskid	but C++ example runs without problem
+ blackburn	pluskid: const should be everywhere here I guess
+ blackburn	do you think so?
+ blackburn	ah init_machines shouldn't be
+ pluskid	blackburn: but I don't think they are different in C++ here
+ pluskid	I mean copy and const copy
+ blackburn	pluskid: hmm anyway to be fixed
+ pluskid	fixing some other errors
+ pluskid	segfault, etc
+ blackburn	pluskid: shall I wait for yor pr or fix it?
+ pluskid	blackburn: btw: I also fixed the error you mentioned before, ECOC producing 0 in binary labels
+ blackburn	your*
+ blackburn	oh that's nice
+ blackburn	I forgot to send an example sorry
+ pluskid	I'll push my current fixes
+ pluskid	now
+ blackburn	ok I'll merge it then
+ pluskid	the remaining segfaults seems not easy to find in a moment
+ blackburn	btw did you recover?
+ pluskid	not yet, but much better
+ blackburn	I had some illness yesterday and now I'm going to fix a few bugs
+ pluskid	blackburn: get well
+ blackburn	you too :)
+ pluskid	I'm afraid I have to go to the hospital again tomorrow :p
+ pluskid	blackburn: here comes the pull request
+ blackburn	thanks!
+ pluskid	I'll continue to hunt the other segfault
+ pluskid	blackburn: do you know how to tell where's the fault when the python example simply say segfault and print nothing?
+ CIA-113	shogun: Chiyuan Zhang master * r9a18a64 / (7 files in 4 dirs): Fix typeerror in SWIG python modular - http://git.io/SFTAWA
+ CIA-113	shogun: Chiyuan Zhang master * r786359f / (6 files in 2 dirs): Fix ECOC memory error with new SGVector. - http://git.io/rQx7bA
+ CIA-113	shogun: Chiyuan Zhang master * r485f94a / (4 files in 3 dirs): Fix ECOC Random coding bug. - http://git.io/NMD1pQ
+ blackburn	pluskid: valgrind
+ pluskid	hmm
+ blackburn	pluskid: a lot of python fixes but segfaults are in the end so you can check it usually
+ blackburn	errr
+ blackburn	python errors*
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+ blackburn	oh that's becoming serious in moscow
+ pluskid	what's that?
+ pluskid	blackburn: please another small pull request
+ blackburn	pluskid: police is trying to block rally
+ blackburn	merged
+ pluskid	thanks
+ CIA-113	shogun: Chiyuan Zhang master * r555d971 / src/shogun/multiclass/MulticlassOneVsOneStrategy.cpp : Fix memory error related to new SGVector API. - http://git.io/V6EJJg
+ CIA-113	shogun: Chiyuan Zhang master * r394b8a5 / src/shogun/multiclass/ecoc/ECOCRandomSparseEncoder.h : Increase default maxiter of random sparse coding to avoid failure. - http://git.io/eJ8F3A
+ blackburn	http://www.ustream.tv/channel/badze123
+ pluskid	totally not understand Russian
+ blackburn	pluskid: you don't have to understand they are fighting :D
+ pluskid	hmm
+ pluskid	this kind of event will never be live casted in China :p
+ blackburn	pluskid: yeah
+ blackburn	pluskid: tomorrow putin is going to become a president officially - that's why people rally
+ pluskid	blackburn: Vladimir Putin ?
+ blackburn	yes that piece of shit
+ pluskid	wasn't he already the president?
+ blackburn	yes that bloody bastard was :D
+ blackburn	I hope he will die really soon
+ pluskid	how long can your president keep his seat?
+ pluskid	Putin has been there since 2000 according to wikipedia
+ pluskid	haha
+ blackburn	pluskid: he get one fool (medvedev) to his seat instead of him for 4 years
+ blackburn	2008-2012
+ blackburn	and now he becomes a president again
+ blackburn	for third time
+ pluskid	oops
+ blackburn	but now for 6 years
+ pluskid	interesting to see the left president comes back again, haha, this will never happen in China
+ blackburn	pluskid: yeah you have one for a long time :D
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Ping timeout: 276 seconds]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- pluskid [~pluskid@li400-235.members.linode.com] has quit [Quit: Leaving]
+-!- blackburn [~qdrgsm@83.234.54.222] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~qdrgsm@83.234.54.222] has joined #shogun
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Quit: Ex-Chat]
+ CIA-113	shogun: Soeren Sonnenburg master * r7754d8c / src/shogun/multiclass/MulticlassOneVsOneStrategy.cpp : revert change - previous (simpler) solution was correct - http://git.io/2s4ADg
+ CIA-113	shogun: Soeren Sonnenburg master * rcf38631 / src/shogun/multiclass/MulticlassOCAS.cpp : fix crasher in mc ocas - http://git.io/54RGXA
+ CIA-113	shogun: Soeren Sonnenburg master * r63cce74 / src/shogun/features/Labels.cpp : remove forgotten debug code - http://git.io/KrsRHA
+ blackburn	sonney2k: hey
+@sonney2k	blackburn, hey
+@sonney2k	I wonder why now some pythonmodular examples fail
+@sonney2k	I mean some in converters that were working before...
+ blackburn	sonney2k: one solution could be to merge my libedrt stuff
+ blackburn	makes no use of sgvectors actually
+@sonney2k	hmmh even libshogun examples fail now
+@sonney2k	they all worked yesterday?!
+ blackburn	yes
+@sonney2k	wtf?
+ blackburn	no idea
+ blackburn	sonney2k: http://www.ridus.ru/_ah/img/eCD9fzuY-qrshjm73wvAnw again
+ blackburn	sonney2k: let me focus on libedrt - this code is going to be obsolete anyway
+-!- gsomix [~gsomix@188.168.4.126] has joined #shogun
+ gsomix	blackburn, h
+ blackburn	sonney2k: arround?
+-!- vikram360 [~vikram360@117.192.170.117] has quit [Ping timeout: 276 seconds]
+-!- vikram360 [~vikram360@117.192.166.236] has joined #shogun
+@sonney2k	blackburn, you cannot use SGMatrix in LINRECONSTRUCTION_THREAD_PARAM
+@sonney2k	or any of the objects on stack
+ blackburn	sonney2k: yeah I know
+@sonney2k	SG_MALLOC won't work for that
+@sonney2k	you have to use a ptr or explicit fields
+ blackburn	sonney2k: sg_malloc for what?
+@sonney2k	SG_MALLOC(LINRECONSTRUCTION_THREAD_PARAM, 10)
+ blackburn	ah
+ blackburn	sonney2k: anyway it is obsolete
+@sonney2k	but we have to fix this first
+@sonney2k	it is not a good idea to merge some new version at this stage
+@sonney2k	otherwise we risk to not getting back to a stable state
+ blackburn	sonney2k: right, but this could be useless..
+ blackburn	sonney2k: but why SG_MALLOC does not fit there?
+ blackburn	for threads I mean
+@sonney2k	it never fits
+@sonney2k	when objects need to be allocated
+ blackburn	sonney2k: do you suggest new?
+@sonney2k	one needs new []() for that
+@sonney2k	I suggest to not use objects
+@sonney2k	in these structs
+@sonney2k	(ptrs are ok though)
+ blackburn	sonney2k: I am changing it to pointers
+ blackburn	sonney2k: do you have birch trees in berlin?
+ CIA-113	shogun: Soeren Sonnenburg master * r7d802f1 / src/shogun/machine/KernelMachine.cpp :
+ CIA-113	shogun: don't use Objects in structs allocated via SG_MALLOC
+ CIA-113	shogun: - convert SGVector to ptr*, len - http://git.io/8kBlDA
+@sonney2k	gsomix, please explain
+ gsomix	sonney2k, a?
+ blackburn	someone has a bad mood :D
+ gsomix	T____T
+@sonney2k	gsomix, a?
+@sonney2k	you asked sth above ...
+-!- vikram360 [~vikram360@117.192.166.236] has quit [Ping timeout: 248 seconds]
+ blackburn	sonney2k: battlesystem operational
+-!- vikram360 [~vikram360@117.192.165.53] has joined #shogun
+ gsomix	sonney2k, ah. we add MemoryBlock(ptr, size) in sg_mallocs.
+ gsomix	and remove MemoryBlock(ptr).
+ CIA-113	shogun: Sergey Lisitsyn master * r3bc5f3e / (3 files): Fixed crashers in converters - http://git.io/2bTG5Q
+ blackburn	was trivial
+ gsomix	MemoryBlock(ptr, size) and MemoryBlock(ptr) have different hashes.
+@sonney2k	ah ok
+@sonney2k	gsomix, so did you fix it?
+ gsomix	sonney2k, in progress.
+ blackburn	sonney2k: one multiclass example and modelselection are b0rken
+ blackburn	almost ok
+ blackburn	I will take care of multiclass crasher
+@sonney2k	blackburn, if things are back to normal we can continue with SGMatrix and friends
+@sonney2k	shouldn't be as intrusive (not so many things use it...)
+ blackburn	I'll try to fix multiclass today
+ blackburn	tomorrow I'm out - exam on 8th
+ CIA-113	shogun: Soeren Sonnenburg master * r8264e5c / (src/shogun/features/Subset.cpp src/shogun/features/Subset.h): no longer copy subset index - http://git.io/zSy7GQ
+@sonney2k	blackburn, k
+@sonney2k	multilass seems not so easy ...
+@sonney2k	something wrong with subsets
+ gsomix	sonney2k, btw, gf said now that you looks very nice :) just funny fact
+ blackburn	:D
+ blackburn	sonney2k: it can be the same issue in evaluation, modelselection and multiclass
+ blackburn	I bet it is
+@sonney2k	gsomix, haha - probably because picture was taken when I was your age
+@sonney2k	well +7 I guess :D
+@sonney2k	blackburn, yeah
+@sonney2k	easier for heiko to fix this
+ blackburn	sonney2k: no in ICML video you are a little younger than now :)
+@sonney2k	still not twenty like gsomix
+@sonney2k	alright I need sleep
+@sonney2k	cu
+ blackburn	see you
+ gsomix	sonney2k, we watched videolectures.
+ gsomix	good night :)
+--- Log closed Mon May 07 00:00:37 2012

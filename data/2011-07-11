@@ -1,0 +1,263 @@
+--- Log opened Mon Jul 11 00:00:05 2011
+--- Log closed Mon Jul 11 00:06:30 2011
+--- Log opened Mon Jul 11 00:21:44 2011
+-!- shogun-irclog [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 8 nicks [2 ops, 0 halfops, 0 voices, 6 normal]
+-!- Irssi: Join to #shogun was synced in 4 secs
+@sonney2k	alright bed is calling
+@sonney2k	g'night
+ blackburn	nite
+-!- blackburn [~blackburn@188.122.238.99] has quit [Quit: Leaving.]
+-!- in3xes_ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.230] has quit [Quit: Ooops..!!]
+-!- blackburn [~blackburn@188.122.238.99] has joined #shogun
+-!- heiko [~heiko@main.uni-duisburg.de] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- blackburn [~blackburn@188.122.238.99] has quit [Ping timeout: 255 seconds]
+-!- blackburn [~blackburn@188.122.238.99] has joined #shogun
+* sonney2k the bear opens its eyes :D
+ blackburn	hehe
+-!- theuser [~theuser@212.179.28.34] has joined #shogun
+-!- blackburn1 [~blackburn@188.122.238.99] has joined #shogun
+-!- blackburn [~blackburn@188.122.238.99] has quit [Read error: No route to host]
+@sonney2k	theuser, still there?
+@sonney2k	theuser, please issue a github pull request with the examples and I will take a look
+-!- theuser [~theuser@212.179.28.34] has quit [Read error: Connection reset by peer]
+-!- theuser [~theuser@212.179.28.34] has joined #shogun
+@sonney2k	theuser, still there?
+@sonney2k	theuser, please issue a github pull request with the examples and I will take a look
+ blackburn1	why do you want him to issue a pull request? :D
+@sonney2k	blackburn1, he translated the *.java examples to c#
+ blackburn1	ah, secret affairs - haven't seen anything on channel ;)
+-!- heiko [~heiko@main.uni-duisburg.de] has quit [Quit: Leaving.]
+@sonney2k	the iron curtainh :D
+ blackburn1	great soviet firewall
+ blackburn1	sonney2k: your dissertation fits very well on kindle dx ;)
+ bettyboo	8) blackburn1
+ blackburn1	thank somebody I have no farsightedness but nearsightedness :D
+-!- theuser [~theuser@212.179.28.34] has quit [Ping timeout: 258 seconds]
+@sonney2k	hmmh theuser is acting weird?!
+ blackburn1	perfectly fits his nickname
+-!- theuser [~theuser@212.179.28.34] has joined #shogun
+-!- theuser is now known as warpy123
+@sonney2k	warpy123, I answered a couple of times yes
+ warpy123	can you paste for me please
+@sonney2k	please issue a git pull request and I will look at the examples
+ warpy123	i have no idea what that is
+ warpy123	i am not working with the git repository yet
+ warpy123	and i am not familiar with the commands
+ warpy123	i just downloaded the latest master branch
+ warpy123	ina zip file
+-!- Netsplit *.net <-> *.split quits: blackburn1, in3xes_
+-!- Netsplit over, joins: in3xes_
+-!- blackburn [~blackburn@188.122.238.99] has joined #shogun
+ blackburn	damn you soviet kgb firewall
+@sonney2k	warpy123, ok then email it or put it somewhere :)
+ blackburn	"I'm going to start a band called the Newton-Raphson Method. Each of our songs will be slightly better than the one before."
+ blackburn	lol
+-!- heiko [~heiko@main.uni-duisburg.de] has joined #shogun
+@sonney2k	hi heiko
+ heiko	hi sonney2k
+ bettyboo	heiko, smoochy
+@sonney2k	if you have small patches to merge already - would be nice
+@sonney2k	(not to get such a big one in the end again)
+ heiko	yes I got a lot
+@sonney2k	I was afraid of that
+ heiko	the problem is when I touch one part, the others will not work anymore
+ heiko	so I ended up in lots of changes again this time
+@sonney2k	heiko, yeah I know my bad...
+ heiko	currently everything in libshogun is working
+ heiko	but my python stuff is not
+ heiko	perhaps I already send this and correct?
+@sonney2k	heiko, but that is already worth a pull request
+ heiko	ok then here it comes:
+@sonney2k	and you python code is new anyways and not used so far...
+ heiko	ok sent
+ heiko	nearly all changes are in my own classes
+ heiko	and the examples do work with this base
+ heiko	Next, there will be some interface changes
+ heiko	with the DynArray vs DynamicObjectArray stuff:
+ heiko	I would like to stay with DynArray internally for now, because it works and is memory neutral.
+ heiko	I will only change the methods that interact with python
+ heiko	to get the example wokring this week
+@sonney2k	heiko, why did you not use SGObject's for DynamicObjectArray but made it templated?
+ heiko	and then stepwise change the internal stuff (like tree multiplication and stuff) later
+* blackburn wants to run from his country
+ heiko	because of type safety
+ heiko	remember, we talked about this a few days ago
+ heiko	?
+@sonney2k	heiko, I don't understand
+@sonney2k	type safety?
+@sonney2k	now you can pass arbitrary objects to the dynamicobjectarray - right?
+@sonney2k	so types can be off
+ heiko	now, I added runtime checks that these are only CSGObjects
+ heiko	but now I can call methods on the elements
+@sonney2k	if you directly use SGObject then these checks are not necessary
+ heiko	without having to cast
+ heiko	if I do the non-generic variant I would always have to cast an element of the array to its actual type
+ heiko	What I wanted to do is something similar to:
+ heiko	java:
+@sonney2k	I understand the problem
+ heiko	DynamicObjectArray<T extends CSGObject>
+@sonney2k	though we have done the same for lists
+@sonney2k	err I meant to say in lists we do it with SGObject and now in the array not
+@sonney2k	that is confusing
+@sonney2k	I see the benefits but also the cons
+ heiko	Both solutions end in runtime errors if used wrong
+ heiko	mmh, well I could change it again, but the template solutions saves you from casting, and also if one would like to have an CSGObject array, one could do by setting T=CSGObject
+ heiko	I have a lunch date now, are you still there in one hour?
+-!- warpy123 [~theuser@212.179.28.34] has quit [Read error: Connection reset by peer]
+@sonney2k	yeah or later
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+@sonney2k	heiko, I am tempted to say change it and rather define a ParameterCombinations class on top and make it type safe / run-time type safe
+-!- in3xes1 [~in3xes@180.149.49.227] has joined #shogun
+@sonney2k	svae
+ heiko	ok, I will do this this noon
+ heiko	mmh
+ heiko	but I use the array for two different types already
+ heiko	ModelSelectionParameters and ParameterCombination
+-!- theuser [~theuser@212.179.28.34] has joined #shogun
+ heiko	ok, but lets talk later, I am so hungry :)
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+ theuser	disconnected... again i hate this
+-!- theuser is now known as warpyyy
+-!- heiko [~heiko@main.uni-duisburg.de] has quit [Ping timeout: 258 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes1 [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 252 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Client Quit]
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 255 seconds]
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 252 seconds]
+-!- heiko [~heiko@main.uni-duisburg.de] has joined #shogun
+ blackburn	http://mikiobraun.tumblr.com/post/7489592129/checking-out-hangout sonney2k spotted!
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+ heiko	blackburn, where is a picture of you? :)
+ blackburn	heiko: where it should be? ;)
+ heiko	where? :)
+ blackburn	I have one in twitter: http://twitter.com/#!/qdrgsm :)
+ heiko	hehe nice one, very personal :D
+ blackburn	yeah
+ blackburn	kgb doesn't allow me to make photos :(
+ heiko	because of your work for google ?
+-!- in3xes1 [~in3xes@180.149.49.227] has joined #shogun
+ heiko	;)
+ blackburn	I worked in stasi, tsss
+ blackburn	:D
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 260 seconds]
+-!- warpyyy [~theuser@212.179.28.34] has quit [Ping timeout: 258 seconds]
+-!- blackburn [~blackburn@188.122.238.99] has quit [Ping timeout: 255 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes1 [~in3xes@180.149.49.227] has quit [Ping timeout: 260 seconds]
+-!- in3xes1 [~in3xes@180.149.49.227] has joined #shogun
+-!- f-x [~user@117.192.192.38] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 260 seconds]
+ heiko	sonney2k
+ heiko	are you there?
+-!- f-x [~user@117.192.192.38] has left #shogun ["ERC Version 5.3 (IRC client for Emacs)"]
+-!- f-x [~user@117.192.192.38] has joined #shogun
+@sonney2k	yes
+@sonney2k	heiko, ^
+ heiko	hej
+ heiko	about this template vs cast stuff
+ heiko	I use the structure at lots of places in my get_combinations code
+ heiko	also nested templates
+ heiko	and if I put away the template (what I just did) this becomes really messy
+ heiko	like an array of arrays of Parametercombinations
+ heiko	and no type safety
+ heiko	I really like the typed stuff more
+ heiko	I think there are just lots of traps when it is not typed
+ heiko	which I do not see if its the other way round
+ heiko	Also, I do not understand what speaks for the "weak typed" variant. Are there any advantages?
+-!- in3xes_ [~in3xes@59.163.196.121] has joined #shogun
+@sonney2k	heiko, when you do dynamic_casts should you not also check fot std::bad_cast ?
+@sonney2k	heiko, otherwise OK then your code :)
+ heiko	but dynamic_cast returns NULL if it fails or not?
+@sonney2k	seems not, http://answers.yahoo.com/question/index?qid=20071106101012AAggZAk
+ heiko	oh ok, for references
+ heiko	I only cast pointers
+@sonney2k	I see
+-!- in3xes1 [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+ CIA-32	shogun: Heiko Strathmann master * rf1a6877 / src/libshogun/modelselection/ParameterCombination.h : made an helper method private - http://bit.ly/q3AIxQ
+ CIA-32	shogun: Heiko Strathmann master * r24d4066 / (18 files in 5 dirs):
+ CIA-32	shogun: Merge remote-tracking branch 'upstream/master'
+ CIA-32	shogun: Conflicts:
+ CIA-32	shogun:  data - http://bit.ly/nt0UlQ
+ CIA-32	shogun: Soeren Sonnenburg master * re3bcc1e / (16 files in 6 dirs):
+ CIA-32	shogun: Merge pull request #186 from karlnapf/master
+ CIA-32	shogun: reworked memory managment of model selection framwork - http://bit.ly/pr8tcc
+ CIA-32	shogun: Soeren Sonnenburg master * r37817ad / (13 files):
+ CIA-32	shogun: Merge pull request #187 from sploving/master
+ CIA-32	shogun:  add java features examples - http://bit.ly/o6xbRm
+-!- warpyyy [~theuser@212.179.28.34] has joined #shogun
+-!- sploving1 [~sploving@180.168.7.246] has joined #shogun
+ CIA-32	shogun: Soeren Sonnenburg master * r5de9c2e / (data examples/undocumented/csharp_modular/minimal_test.cs): use default init - http://bit.ly/oDDdwT
+ CIA-32	shogun: Soeren Sonnenburg master * rc43baca / (3 files): fix compilation of modular modelselection - http://bit.ly/nSL93O
+@sonney2k	heiko,  I couldn't compile with python
+@sonney2k	I applied some minor fixes to get it to work.
+ sploving1	sonney2k,
+@sonney2k	sploving1, ?
+ sploving1	 javac ../../examples/undocumented/java_modular/classifier_averaged_perceptron_modular.java
+ sploving1	my dir is testsuite/java_modular
+ sploving1	then .class file is generated in testsuite/java_modular dir
+ sploving1	then I use java classifier_averaged_perceptron_modular
+ sploving1	it said: Unable to create matrix from ../data/fm_train_real.dat: ../data/fm_train_real.dat (No such file or directory)
+ sploving1	sonney2k, any idea?
+ sploving1	sonney2k, now I am testing generator.java
+ sploving1	I think the class file should be generated in the undocumented/java_modular dir
+ sploving1	then it can find the file
+-!- warpyyy [~theuser@212.179.28.34] has quit [Ping timeout: 276 seconds]
+@sonney2k	sploving1, javac -help says javac -d could solve your problem
+ sploving1	okay
+ heiko	sonney2k, sorry for the compile error
+-!- sploving1 [~sploving@180.168.7.246] has left #shogun []
+-!- in3xes_ is now known as in3xes
+@sonney2k	heiko, does python modular compile for you now?
+@sonney2k	and can you run a very minimal example?
+ heiko	I already had this wokring, but will try now.
+ heiko	was already building a more complex example until i came to changing this data structure :)
+@sonney2k	I had to remove the %template to get it to compile
+@sonney2k	and doxygen dir was worng
+ heiko	yes just, check it, sorry
+ heiko	ah ok I did disable doxygen
+@sonney2k	no worries
+ heiko	that was the reason
+ heiko	Currently I am changing the last steps for usage of the new array
+ heiko	then hopefully the example will run
+ heiko	after so much time :)
+@sonney2k	ok
+@sonney2k	looking forward to it :)
+ heiko	me too :)
+ heiko	ha, finally compiles :D
+ heiko	after 1mio type and referencing changes :)
+ heiko	argh, assert error :(
+ heiko	sonney2k, has shogun the possibility to print a stack trace?
+ heiko	currently I am doing this via valgrind
+ heiko	int*a; delete a;
+ heiko	which produces one :)
+ heiko	but is there an elegant way?
+-!- f-x [~user@117.192.192.38] has quit [Remote host closed the connection]
+-!- heiko [~heiko@main.uni-duisburg.de] has quit [Ping timeout: 258 seconds]
+-!- alesis-novik [~alesis@188.74.87.206] has joined #shogun
+-!- VojtechFranc [~quassel@gw-101.scnet.cz] has joined #shogun
+-!- blackburn [~blackburn@188.122.238.99] has joined #shogun
+-!- f-x [~user@117.192.192.38] has joined #shogun
+-!- f-x [~user@117.192.192.38] has left #shogun []
+-!- f-x [~user@117.192.192.38] has joined #shogun
+-!- in3xes [~in3xes@59.163.196.121] has quit [Ping timeout: 240 seconds]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+@sonney2k	gdb / valgrind...
+ blackburn	hooray
+ blackburn	hoh, you guys are valgrinding here
+-!- blackburn1 [~blackburn@188.122.238.99] has joined #shogun
+-!- blackburn [~blackburn@188.122.238.99] has quit [Read error: No route to host]
+-!- VojtechFranc [~quassel@gw-101.scnet.cz] has quit [Remote host closed the connection]
+-!- blackburn1 [~blackburn@188.122.238.99] has quit [Ping timeout: 240 seconds]
+-!- f-x [~user@117.192.192.38] has quit [Remote host closed the connection]
+--- Log closed Tue Jul 12 00:00:09 2011

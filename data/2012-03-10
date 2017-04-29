@@ -1,0 +1,199 @@
+--- Log opened Sat Mar 10 00:00:19 2012
+-!- in3xes [~in3xes@180.149.49.230] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Read error: Operation timed out]
+-!- in3xes_ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.230] has quit [Ping timeout: 248 seconds]
+-!- in3xes_ [~in3xes@180.149.49.230] has quit [Ping timeout: 252 seconds]
+-!- in3xes_ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.230] has quit [Ping timeout: 246 seconds]
+-!- in3xes__ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.230] has quit [Ping timeout: 260 seconds]
+-!- in3xes__ [~in3xes@180.149.49.230] has quit [Ping timeout: 244 seconds]
+-!- in3xes__ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.230] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~qdrgsm@109.226.78.202] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- in3xes__ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.230] has quit [Ping timeout: 244 seconds]
+-!- vikram360 [~vikram360@117.192.164.156] has quit [Ping timeout: 265 seconds]
+-!- vikram360 [~vikram360@117.192.174.187] has joined #shogun
+ CIA-64	shogun: Sergey Lisitsyn master * r0e176ef / (4 files in 2 dirs): Improvements for MC classifiers - http://git.io/vlgSIA
+-!- in3xes_ [~in3xes@180.149.49.230] has joined #shogun
+-!- cronor [~cronor@e178169201.adsl.alicedsl.de] has quit [Ping timeout: 260 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.230] has quit [Ping timeout: 246 seconds]
+-!- cronor [~cronor@e178176255.adsl.alicedsl.de] has joined #shogun
+-!- cronor [~cronor@e178176255.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- flxb [~flxb@e178176255.adsl.alicedsl.de] has joined #shogun
+-!- flxb [~flxb@e178176255.adsl.alicedsl.de] has left #shogun []
+-!- vikram360 [~vikram360@117.192.174.187] has quit [Ping timeout: 245 seconds]
+-!- vikram360 [~vikram360@117.192.174.163] has joined #shogun
+-!- vikram360 [~vikram360@117.192.174.163] has quit [Ping timeout: 252 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- in3xes_ is now known as in3xes
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	blackburn: good morning!
+ n4nd0	blackburn: how is it going?
+ blackburn	n4nd0: guten tag ;)
+ blackburn	fine, and you?
+ n4nd0	blackburn: fine too :)
+ n4nd0	blackburn: I have a couple of questions
+ blackburn	shoot
+ n4nd0	blackburn: yesterday I was checking if the QDA stuff I have done so far had some memory leaks
+ blackburn	yeah painful shit
+ n4nd0	so I used valgrind and target an example done with python modular
+ blackburn	right
+ n4nd0	and the thing is that I got stuff as "still reachable" or "possibly lost"
+ n4nd0	I was a bit concerned about that
+ n4nd0	but actually it also appeared when I run the example with the lines where QDA is used commented out
+ blackburn	n4nd0: valgrind always reports some errors on python itself
+ blackburn	use valgrind --leak-check=full --log-file=somelog python yourexample
+ blackburn	and then just find 'shogun' in your log file :)
+ n4nd0	blackburn: ok cool
+ n4nd0	I used a suppressions file for the python stuff
+ blackburn	there is a way to ignore python things with valgrind
+ n4nd0	but I get it doesn't remove everything
+ blackburn	yeah, you'd have to recompile python for that IIRC
+ n4nd0	I read something about that
+ n4nd0	does it pay off? I mean is it sth good to do?
+ blackburn	C++ example would be simplier to check for leaks etc
+ blackburn	hmm I did not it
+ n4nd0	ok
+ n4nd0	and another thing
+ n4nd0	I am having a hard time trying to find the svd :S
+ n4nd0	I am using this wrap_dgesvd function
+ blackburn	aha
+ blackburn	what's the problem?
+ n4nd0	so when I run it with valgrind it looks to work fine
+ n4nd0	but without it fails on an assert
+ n4nd0	python: malloc.c:4631: _int_malloc: Assertion `(unsigned long)(size) >= (unsigned long)(nb)' failed.
+ blackburn	hmm
+ n4nd0	but I think this one is related to the parameters work and lwork that I thought I shouldn't worry about when using the wrap function
+ n4nd0	they are in dgesvd but the wrap seems to take care of them
+ blackburn	try to insert SG_SPRINT("lworka=%d",lworka); at lapack.cpp:260
+ blackburn	and check whether it is positive
+ n4nd0	in any case I found it really weird that it runs with valgrind but not without it
+ blackburn	no, not really weird, it is sometimes
+ n4nd0	really, why so? any clue?
+ blackburn	some sandbox or so
+ blackburn	valgrind takes more care :)
+ n4nd0	what is this thing about that sometimes sg_print doesn't work but sg_sprint does?
+ n4nd0	(this looks like a tv show, many questions :P)
+ blackburn	n4nd0: sg_print uses m_sgio field of class derived from SGObject
+ n4nd0	blackburn: lworka is positive, >>>>>>> lworka=14
+ blackburn	and sg_sprint uses global SGIO
+ blackburn	hm..
+ blackburn	when something could be wrong with your params
+ n4nd0	blackburn: I am checking changing the ones that were not example the same as they are used in pinv, let's see
+ n4nd0	blackburn: it seems there was a problem using 'N' in jobu
+ n4nd0	blackburn: it worked after changing it to 'A'
+ n4nd0	the thing is that I am not interested in U in the svd decomposition A = U * S * V^T so I just wanted to ignore it
+ n4nd0	I thought 'N' was for that
+ blackburn	n4nd0: is it a QDA?
+ n4nd0	blackburn: yes, I am doing this for QDA
+ blackburn	what is the matrix you decompose?
+ n4nd0	but I said nothing before ... it does still fail
+ blackburn	feature?
+ n4nd0	features of one class - mean of the features of that class
+ n4nd0	and that thing is to be done for every class
+ n4nd0	scikit-learn's code
+ blackburn	ah I see
+ blackburn	n4nd0: I just mean you could compute gram matrices instead of it
+ n4nd0	http://snipt.org/ufgp6
+ n4nd0	blackburn: I have no idea what is that :S
+ blackburn	gram matrix?
+ blackburn	XX'
+ blackburn	err
+ blackburn	X'X
+ blackburn	eigvectors(X'X) = V, where UEVT = svd(X)
+ n4nd0	and you mean to get the eigenvalues of that?
+ blackburn	UEV' I mean
+ n4nd0	ok I see
+ blackburn	I don't know if it is better
+ blackburn	dinner time
+ blackburn	:)
+ n4nd0	the matrix will be bigger I think
+ blackburn	brb
+ n4nd0	dinner?
+ n4nd0	what time is it in Russian man? :P
+ blackburn	14.18
+ n4nd0	early dinner then
+ blackburn	probably :)
+ blackburn	lunch is a better word may be? ;)
+ blackburn	n4nd0: ok did you trace the error?
+ n4nd0	blackburn: haha oh lunch! that's better now yes
+ n4nd0	I think I had some trouble with the dimensions :S
+ n4nd0	my bad
+-!- in3xes [~in3xes@180.149.49.230] has quit [Remote host closed the connection]
+ CIA-64	shogun: Sergey Lisitsyn master * r835eb0b / (2 files in 2 dirs): Rejection strategies fixes - http://git.io/tKwikQ
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ CIA-64	shogun: Sergey Lisitsyn master * r47abf3f / src/shogun/classifier/svm/MulticlassOCAS.cpp : Warning fix for mc ocas - http://git.io/5u2KkQ
+ CIA-64	shogun: Sergey Lisitsyn master * rd123ca6 / (3 files in 2 dirs): Proper rejection handling - http://git.io/sk3ZfA
+-!- vikram360 [~vikram360@117.192.166.231] has joined #shogun
+ blackburn	damn i'm an idiot
+-!- vikram360 [~vikram360@117.192.166.231] has quit [Ping timeout: 272 seconds]
+-!- vikram360 [~vikram360@117.192.162.199] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 252 seconds]
+ CIA-64	shogun: Sergey Lisitsyn master * reee5670 / (2 files in 2 dirs): Finally proper rejects handling - http://git.io/ZtZ0RA
+ CIA-64	shogun: Sergey Lisitsyn master * rdf59536 / src/shogun/machine/MulticlassMachine.cpp : Quick fix - http://git.io/AJ0CCQ
+ CIA-64	shogun: Sergey Lisitsyn master * rf9907d2 / (2 files): Added reject number counting - http://git.io/ejr_2A
+-!- harshit_ [~harshit@182.68.130.241] has joined #shogun
+ harshit_	hello everyone
+ vikram360	hello harshit_
+ harshit_	so there are some ppl out there i thought i hav entered some ghostcity !
+ harshit_	btw i was planning to implement C5.0 in shogun
+ harshit_	need some starting advise
+ vikram360	harshit_ : haha, I was planning on doing the same thing for my gsoc proposal
+ harshit_	that seems to be the most easiest one
+-!- blackburn [~qdrgsm@109.226.78.202] has left #shogun []
+ vikram360	harshit_ : not really, I chose it because I've worked with DTrees before.
+ harshit_	thats exactly what i am saying decision trees are easiest to implement at least for me
+ shogun-buildbot	build #586 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/586  blamelist: blackburn91@gmail.com
+ shogun-buildbot	build #587 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/587
+-!- harshit_ [~harshit@182.68.130.241] has left #shogun ["Leaving"]
+-!- vikram360 [~vikram360@117.192.162.199] has quit [Ping timeout: 248 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- vikram360 [~vikram360@117.192.162.199] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 260 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- vikram360 [~vikram360@117.192.162.199] has quit [Read error: Connection reset by peer]
+-!- vikram360 [~vikram360@117.192.162.199] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- flxb [~flxb@e178168097.adsl.alicedsl.de] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.35] has joined #shogun
+-!- flxb [~flxb@e178168097.adsl.alicedsl.de] has quit [Ping timeout: 244 seconds]
+-!- vikram360 [~vikram360@117.192.162.199] has quit [Ping timeout: 272 seconds]
+-!- vikram360 [~vikram360@117.192.188.21] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 252 seconds]
+-!- blackburn [~qdrgsm@83.234.54.35] has quit [Ping timeout: 252 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 244 seconds]
+-!- blackburn [~qdrgsm@188.168.13.202] has joined #shogun
+-!- vikram360 [~vikram360@117.192.188.21] has quit [Ping timeout: 264 seconds]
+-!- blackburn [~qdrgsm@188.168.13.202] has quit [Quit: Leaving.]
+-!- vikram360 [~vikram360@117.192.188.21] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- asm_ [4e352848@gateway/web/freenode/ip.78.53.40.72] has joined #shogun
+-!- vikram360 [~vikram360@117.192.188.21] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.188.21] has joined #shogun
+-!- asm_ [4e352848@gateway/web/freenode/ip.78.53.40.72] has quit [Quit: Page closed]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 272 seconds]
+-!- vikram360 [~vikram360@117.192.188.21] has quit [Read error: Connection reset by peer]
+-!- vikram360 [~vikram360@117.192.188.21] has joined #shogun
+-!- harshit_ [~harshit@182.68.130.241] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- flxb [~flxb@g225027199.adsl.alicedsl.de] has joined #shogun
+-!- flxb [~flxb@g225027199.adsl.alicedsl.de] has quit [Quit: flxb]
+-!- harshit_ [~harshit@182.68.130.241] has quit [Quit: Leaving]
+ CIA-64	shogun: Sergey Lisitsyn master * rfa1f8cd / (57 files in 9 dirs): Some rearrangements again - http://git.io/VHnYpQ
+ CIA-64	shogun: Sergey Lisitsyn master * rcb7c871 / (4 files in 2 dirs): Added supervised KLTSA - http://git.io/lsrBUQ
+ shogun-buildbot	build #588 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/588  blamelist: blackburn91@gmail.com
+--- Log closed Sun Mar 11 00:00:19 2012

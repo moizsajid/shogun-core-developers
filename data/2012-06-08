@@ -1,0 +1,468 @@
+--- Log opened Fri Jun 08 00:00:41 2012
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 245 seconds]
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Hello all
+ KMcQuisten	I have some questions.  I've been trying to use the new DirectorKernels, but I'm having some trouble.
+ KMcQuisten	Anyone awake to give me a hand?
+@sonney2k	KMcQuisten, well ask... if no one answers maybe tomorrow someone will
+ KMcQuisten	Allrighty
+ KMcQuisten	I noticed in the example provided, the kernel function is accessing a global variable in order to calculate the kernel function in terms of the indices
+ KMcQuisten	This is really horrible coding style, and I was hoping there was a way to acess data for the kernel internally using the init() function and the acessors built in to the kernel object
+ KMcQuisten	But when I use get_lhs() to get one of my features, it has no get_feature_vector method since it's returned only as a CFeatures, not the descended class that I instantiated.
+@sonney2k	true
+ KMcQuisten	So how can I access the data to overload kernel_function?
+@sonney2k	that's a limitation of going from type aware to type unaware languages
+@sonney2k	only fix is to introduce (in C++) a function that dyn_casts into the right type
+@sonney2k	there really is no other way...
+ n4nd0	I remember we talked about these functions for doing casts
+ KMcQuisten	What are the chances of that getting added in?  It seems like without it the DircetorKernel framework isn't as useful as it could be
+ n4nd0	sonney2k: isn't what we did for the labels?
+@sonney2k	n4nd0, yes
+@sonney2k	someone just has to write those...
+@sonney2k	we do this in CBinaryLabels etc too
+@sonney2k	anyway
+* sonney2k Zzzzz....
+ KMcQuisten	Ha.  I know it's late over there
+ n4nd0	sonney2k: good night then
+ n4nd0	KMcQuisten: would you like to add this functionality?
+ n4nd0	there is something equivalent for labels already done
+ KMcQuisten	n4nd0, how much work would it take to include that sort of thing for feature accessors within kernels and for kernel accessors within SVMs?
+ n4nd0	the methods are called obtain_from_generic
+ KMcQuisten	I could give it a shot
+ KMcQuisten	if I had the example from the labels implementation i could probably figure it out
+ n4nd0	yeah, the methods are really short
+ KMcQuisten	i'm assuming it's in the definition for Lavbels?
+ n4nd0	do you have the code locally?
+ KMcQuisten	Yes I do, but I don't have authorization to commit to the repository
+ n4nd0	most of us don't have it :)
+ KMcQuisten	I"ll see if I can implement it, then we can worry about that, though
+ n4nd0	we have a fork in github and do pull requests there
+ KMcQuisten	Well yeah, don't want all kinds of pushes walking all over each other
+ n4nd0	the method is implemented in the children of CLabels
+ n4nd0	C{Binary, Multiclass, Regression}Labels
+ KMcQuisten	So i'd have to implement it in all the Cfeatures children i want to use
+ KMcQuisten	And similarly if I want to pull kernels from SVMs
+ n4nd0	I think so
+ n4nd0	I am not totally sure though, let me think about it a moment
+ n4nd0	for the info you have written I would say so
+ n4nd0	but I suggest that you first implement it for the class you were talking about and try it out
+ KMcQuisten	Oh of course
+ KMcQuisten	Now, I have pulled down the code previously using git
+ KMcQuisten	but I pulled down the master
+ KMcQuisten	is there another branch I should pull before I try this
+ KMcQuisten	?
+ n4nd0	no
+ n4nd0	just create a new branch and do your stuff there
+ KMcQuisten	Sounds good
+ KMcQuisten	if/when I get it working I'll come back here and figure out how to proceed
+ n4nd0	I am checking a thing for you first
+ KMcQuisten	Ok
+ n4nd0	since in labels we implemented this LabelsType class
+ n4nd0	that is precisely used in obtain_from_generic
+ n4nd0	there is no such a FeaturesType class though
+ KMcQuisten	So it would have to be written as well
+ n4nd0	I said nothing
+ KMcQuisten	?
+ n4nd0	that class exists :)
+ KMcQuisten	Ah!
+ n4nd0	shogun/features/FeatureTypes.h
+ KMcQuisten	Ah, yes, with the Enums
+ n4nd0	I think that you may use here the EFeatureClass tyep
+ n4nd0	type*
+ n4nd0	that you can get it using the method get_feature_class() that should be defined for all the features hierarchy
+ KMcQuisten	Yes, I do have access to that from cfeatures
+ n4nd0	nice
+ n4nd0	a btw, if it is not a huge trouble
+ n4nd0	mind to do commits that leave the code in compilable state
+ n4nd0	the buildbot compiles commit by commit so in that way the proccess goes smooth and faster
+ KMcQuisten	Yes.  CI is a good thing
+ n4nd0	I am used to small commits and I broke it some times at the beginning :D
+ n4nd0	it is not a big deal in any case
+ KMcQuisten	I'll only commit to my local branch one I get the thing working
+ n4nd0	that's the spirit
+ KMcQuisten	My advisor's a stickler for making sure those of us in the group use good version control habits
+ n4nd0	that's very very good
+ n4nd0	I still cannot believe that they didn't tell me about VC in any of my courses
+ KMcQuisten	So i'll branch the code off of the master, make my edits, commit them only to my branch, then come back here and go over how to properly merge them in
+ KMcQuisten	Sound like a plan?
+ n4nd0	yes
+ n4nd0	before you start get the final version of the code in the repo
+ KMcQuisten	Yes, i'll pull the latest before I start
+ n4nd0	in master git pull --rebase upstream master or equivalent
+ KMcQuisten	The whole line?  I'm not yet totally familiar with all of git's command line options
+ KMcQuisten	NM, I got it
+ KMcQuisten	:)
+ n4nd0	from master it would be enough just to do
+ n4nd0	git pull upstream master
+ n4nd0	since you don't normally use master as a branch for development
+ n4nd0	but I think it is a good practice to use the rebase so you keep it in your head for the moments when it really does matter
+ KMcQuisten	Right
+ n4nd0	e.g. when you have working in your branch for some days and want to sync with master before merging
+ n4nd0	then it is good that you rebase instead of merging with git pull
+ KMcQuisten	Ah, yes
+ n4nd0	I am far from being a git expert so be critic towards my comments too ;)
+ KMcQuisten	No worries.  I fully plan to RTFM
+ KMcQuisten	So in the most recent build, Is the RealFeatures wrapper for python_modular named that way for backwards compatibility?  Is the code in the DenseFeatures.cpp file, since there is no RealFeatrues.cpp?
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+ n4nd0	ups sorry I missed that
+ n4nd0	I guess that is RealFeatures because it has not been updated, a bug
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- romi_ [~mizobe@187.66.121.115] has quit [Remote host closed the connection]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- gsomix [~gsomix@109.169.255.59] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- gsomix_ [~gsomix@109.169.153.39] has joined #shogun
+-!- gsomix [~gsomix@109.169.255.59] has quit [Ping timeout: 252 seconds]
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- gsomix__ [~gsomix@109.169.230.79] has joined #shogun
+-!- gsomix_ [~gsomix@109.169.153.39] has quit [Ping timeout: 245 seconds]
+-!- uricamic [~uricamic@2001:718:2:1634:284e:b30f:f03f:5117] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-oexcxshsepjrscvy] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-oexcxshsepjrscvy] has quit [Quit: That's all folks!]
+-!- av3ngr [~av3ngr@60-241-222-244.static.tpgi.com.au] has joined #shogun
+-!- av3ngr [~av3ngr@60-241-222-244.static.tpgi.com.au] has quit [Remote host closed the connection]
+-!- blackburn [~blackburn@31.28.59.65] has quit [Ping timeout: 260 seconds]
+ gsomix__	sonney2k, hey
+-!- gsomix__ is now known as gsomix
+-!- foo__ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ foo__	hi
+ foo__	I would like to know if you planed to add into multiclass evaluation, equal error rate for each class ? thx.
+-!- blackburn [6da9c935@gateway/web/freenode/ip.109.169.201.53] has joined #shogun
+-!- blackburn [6da9c935@gateway/web/freenode/ip.109.169.201.53] has quit [Ping timeout: 245 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	gsomix: is it really that written http://9gag.com/gag/4410715 :D?
+ gsomix	n4nd0, hah, everything is possible in Russia
+ n4nd0	haha so really?
+ gsomix	It's example of stupid transliteration.
+ gsomix	"Oh god NO! That should be ice cream in assortment."
+-!- ckwidmer [~chris@HSI-KBW-046-005-237-106.hsi8.kabel-badenwuerttemberg.de] has joined #shogun
+-!- emrecelikten [~emrecelik@176.40.238.218] has joined #shogun
+-!- hoijui [~hoijui@dslb-088-074-106-085.pools.arcor-ip.net] has joined #shogun
+-!- blackburn [6da9c935@gateway/web/freenode/ip.109.169.201.53] has joined #shogun
+-!- blackburn [6da9c935@gateway/web/freenode/ip.109.169.201.53] has quit [Quit: Page closed]
+ n4nd0	sonney2k: around?
+ n4nd0	does someone know how to add a module for modular interfaces?
+ n4nd0	I created a directory so with some classes inside
+ n4nd0	I have modified the files for swig insid interfaces/modular to include these files
+ n4nd0	but I still got ImportError: No module named SO in my python program
+ ckwidmer	hi n4nd0
+ n4nd0	ckwidmer: hi
+ ckwidmer	have you trying to replicate the steps needed for another module
+ ckwidmer	?
+ ckwidmer	usually what I do when e.g. adding a new class
+ n4nd0	yes, but it seems that there must be a step that I am missing
+ ckwidmer	check where another particular class name occures in interface files etc
+ ckwidmer	have you grepped through all the files?
+ n4nd0	yeah I am grepping all the way :)
+ ckwidmer	hmm
+ n4nd0	but I must be missing something
+ ckwidmer	the other (rather obvious) thing that comes to my mind is make clean
+ ckwidmer	before compiling?
+ n4nd0	I thought that they key was to add my SO.i and SO_includes.i in interfaces/modular/modushogun.i but didn't work
+ n4nd0	I actually changed a make file too
+ n4nd0	so I think that it built everything again but I am going to try forcing the clean
+ ckwidmer	oh btw
+ ckwidmer	have you talked to nico about the cplex error?
+ n4nd0	oh I remember he pasted for me on a mail about an error
+ ckwidmer	yes
+ n4nd0	but I didn't look into it, sorry
+ ckwidmer	there is some problem with CLabels
+ ckwidmer	if cplex compile flag is set
+ n4nd0	ahm
+ n4nd0	can you paste the error for me again please?
+ gsomix	n4nd0, do you use python_modula?
+ n4nd0	in the mail it appears with quite a few of strange characters
+ ckwidmer	well, you can reproduce it if you have cplex
+ n4nd0	gsomix: yeah, configure is run for python-modular
+ ckwidmer	otherwise it'll be hard to do
+ n4nd0	ckwidmer: ok, I'll do that then once I am done with my multiclass example for SO
+ gsomix	ah, yes. n4nd0, maybe you should look at makefiles?
+ ckwidmer	so, back to your module problem, so you've included SO.i and SO_includes.i from modshogun.i?
+ n4nd0	ckwidmer: yes
+ ckwidmer	and it compiles just fine, but you don't see it from python?
+ n4nd0	gsomix: so in shogun/Makefile I added SO in a for loop inside install-python-modular
+ n4nd0	ckwidmer: make and make install work well
+ n4nd0	ckwidmer: but from shogun.SO import bla bla bla doesn't work
+ n4nd0	there must be somewhere where to define explicitily a module for modular interfaces
+ n4nd0	mmm I have just found something that could be the answer to my problem in shogun/CMakeLists.txt
+ n4nd0	I am going to try
+ n4nd0	but actually I am not using cmake so I don' have much hope here
+ ckwidmer	n4nd0, have you checked whether your new module (or files therein) is included in some "intermediate" file, such as python_modular/modshogun_wrap.cxx
+ n4nd0	ckwidmer: so I have several lines like this one
+ n4nd0	#define SWIGTYPE_p_shogun__CStructuredModel swig_types[947]
+ n4nd0	CStructuredModel is something I have defined inside shogun/so/
+ ckwidmer	ok
+ ckwidmer	also the includes?
+ ckwidmer	e.g.  #include <shogun/classifier/LPBoost.h>
+ n4nd0	ckwidmer: yes
+ n4nd0	although I have found that python_modular/Makefile didn't contain SO in a for loop it does in what seems to me each of the modules
+ n4nd0	so I have added SO and I am building again
+ n4nd0	nice it worked!!
+ ckwidmer	awesome
+ n4nd0	yeah
+ ckwidmer	yeah, just saw that loop
+ n4nd0	but I don't think it is the good solution though
+ n4nd0	isn't this makefile automatically generated?
+ ckwidmer	is that makefile autogenerated?
+ ckwidmer	i guess not
+ n4nd0	:)
+ n4nd0	no idea
+ n4nd0	I will see next time I build
+ ckwidmer	well
+ n4nd0	it is not in the repo so probably it is autogenerated
+ ckwidmer	if it isn't
+ ckwidmer	this should be documented
+ ckwidmer	yeah, I would think os
+ ckwidmer	so
+ n4nd0	agree
+ ckwidmer	have you tried configure again
+ n4nd0	I read README.developer but there is nothing about creating new modules
+ n4nd0	no, I have not
+ ckwidmer	yeah
+ ckwidmer	I think just quickly figure out if its autogen
+ n4nd0	I hope you don't mind but I will do this later since I don't want to re-build everything again now :S
+ ckwidmer	just don't forget about it, as you've figured it out now - if we don't get this right, now someone else will have to retrace your steps in the future
+ n4nd0	yes
+ ckwidmer	great :)
+ n4nd0	ckwidmer, gsomix : thank your very much for your help guys!
+ ckwidmer	you're welcome
+ n4nd0	I am very excited about doing this test :D
+* n4nd0 has changed to debug mode after weeks of untested coding
+ n4nd0	ckwidmer: do you have another moment?
+-!- uricamic1 [~uricamic@2001:718:2:1634:9d6b:332c:ffea:54e8] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:284e:b30f:f03f:5117] has quit [Ping timeout: 248 seconds]
+ ckwidmer	n4nd0 sure
+ ckwidmer	what's up?
+ n4nd0	yeah, I have a python/swig problem that I don't manage to fix
+ n4nd0	I am sorry, I think I am kind of abusing consulting today :S
+ ckwidmer	no worries, go ahead
+ n4nd0	it looks like this
+ n4nd0	NotImplementedError: Wrong number or type of arguments for overloaded function 'new_PrimalMosekSOSVM'.
+ n4nd0	  Possible C/C++ prototypes are:
+ n4nd0	    shogun::CPrimalMosekSOSVM::CPrimalMosekSOSVM()
+ n4nd0	    shogun::CPrimalMosekSOSVM::CPrimalMosekSOSVM(shogun::CStructuredModel *,CLossFunction *,shogun::CStructuredLabels *,shogun::CFeatures *)
+ n4nd0	I have checked that the arguments are correct in order
+ ckwidmer	hmm
+ n4nd0	I find weird that the second argument doesn't have shogun::
+ ckwidmer	maybe a good place to start is trying methods that take only CStructuredModel or CStructuredLabels as arguments
+ ckwidmer	true
+ ckwidmer	are you sure the individual ones work elsewhere?
+ ckwidmer	possibly your new classes aren't registered correctly
+ n4nd0	do you mean like for example using setters to try them out?
+ ckwidmer	yes
+ ckwidmer	exactly
+ ckwidmer	so you can narrow down the problem
+ n4nd0	I am going to create those setters then and try it
+ ckwidmer	alright
+ ckwidmer	if you discover that it doesn't work with one particular class
+ ckwidmer	retrace all the occurences of another class
+ ckwidmer	and make sure you have it registered in all right places
+ n4nd0	I don't think I understand what do you mean with retrace all the occurrences of another class
+ ckwidmer	well
+ ckwidmer	grepping through all files
+ ckwidmer	looking for e.g. LPBoost
+ n4nd0	ok, I think I got you now
+ gsomix	gedit works with modshogun_wrap.cxx too slow :(
+ n4nd0	too many lines there
+ n4nd0	gsomix: join the vim club!
+-!- nicococo [~nico@lacedcoffee.ml.tu-berlin.de] has joined #shogun
+ n4nd0	ckwidmer: I have found the arguments that fire the error, I am passing a child class and the method is declared to accept the parent
+ n4nd0	ckwidmer: maybe I have to do something in swig to indicate inheritance?
+ n4nd0	hey nicococo
+ nicococo	hi n4nd0 & chrisssss
+ n4nd0	nicococo: I finished the multiclass model but I am still stuck with the example
+ n4nd0	nicococo: quite a few errors appearing :(
+ n4nd0	nicococo: please, tell me what do you think https://github.com/iglesias/shogun/blob/so/src/shogun/so/MulticlassModel.cpp
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+ nicococo	n4and0: very good! i don't see any logical mistakes :)
+ n4nd0	nicococo: nice then!
+ n4nd0	nicococo: let's see if I manage to solve the problems I am finding
+ n4nd0	they are turning out to be tough ones :S
+ nicococo	ohh. why?
+ n4nd0	I don't manage to solve them :P
+ nicococo	i see
+ n4nd0	I don't know if they are just swig/python related or of the framework in general
+ nicococo	okay.. i am sorry i can not help with that :(
+ n4nd0	it is like if the hierarchy is not detected  when I want to make use of it from python
+ n4nd0	e.g. I do in an object called sosvm that is of type PrimalMosekSOSVM
+ n4nd0	sosvm.set_model(model)
+ n4nd0	model is of type MulticlassModel
+ n4nd0	MulticlassModel inherits from StructuredModel
+ n4nd0	but it tells me that I cannot do that set_model
+ n4nd0	that the argument needs to be StructuredModel
+ n4nd0	:S
+ nicococo	oha
+ n4nd0	nicococo: just tell me if you have any guess, I am already witout ideas ...
+ nicococo	well its rather technical .. i wouldn't guess, instead i would call soeren :)  (or someone else like ckwidmer)
+ n4nd0	blackburn: hey! do you have any idea about it ^?
+ blackburn	a min
+ n4nd0	thank you
+ blackburn	n4nd0: which problem exactly?
+ n4nd0	when I do set_model(model) I get
+ n4nd0	TypeError: in method 'StructuredOutputMachine_set_model', argument 2 of type 'CStructuredModel *'
+ n4nd0	the object model I am using is from a child class of CStructuredModel
+-!- ckwidmer [~chris@HSI-KBW-046-005-237-106.hsi8.kabel-badenwuerttemberg.de] has quit [Remote host closed the connection]
+ blackburn	what is header?
+ n4nd0	it is like it doesn't recognize the inheritance
+ n4nd0	https://github.com/iglesias/shogun/blob/so/src/shogun/so/MulticlassModel.h
+ n4nd0	that is the child class
+ n4nd0	here is the parent
+ n4nd0	https://github.com/iglesias/shogun/blob/so/src/shogun/so/StructuredModel.h
+ blackburn	no swig works perfectly with inheritance :)
+ n4nd0	yeah sure
+ n4nd0	I meant it more like I am doing something wrong somewhere about it :D
+ n4nd0	I have the same problem with another member CLossFunction
+ blackburn	just some quick guess while I'm thinking
+ blackburn	try to add "class CStructuredModel;" in multiclass model
+ blackburn	and check whether they are included in SO.i in a proper order
+ n4nd0	all right
+ n4nd0	first parent, then child right?
+ blackburn	yes
+ n4nd0	they were in the right order
+ n4nd0	I am compiling after including class CStructuredModel
+ blackburn	aham
+ n4nd0	it didn't make the trick :(
+ blackburn	hmm
+ blackburn	bad
+ n4nd0	I think I will have to wait and ask Soeren about this
+ n4nd0	nicococo: I will try later to do the example in C++
+ n4nd0	I don't think that this error will appear there
+ nicococo	ok
+ n4nd0	nicococo: I can let you know by mail once I know something more about it ok?
+ nicococo	that would be fine
+ n4nd0	nicococo: did you take a look to the other parts of the code as well?
+ n4nd0	MulticlassSOLabels and PrimalMosekSOSVM
+ nicococo	yep
+ n4nd0	anything about it?
+ nicococo	looks pretty good :)
+ nicococo	i need to have a look again on PrimalMosekSOSVM
+ n4nd0	ok
+ nicococo	looks okay to me too.. so, i am looking forward to hear some exciting news about working multiclass example ;)
+ n4nd0	ok
+ n4nd0	I will let you know :)
+ n4nd0	I am off now for a while so bye!
+ nicococo	happy coding.. see you
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- nicococo [~nico@lacedcoffee.ml.tu-berlin.de] has left #shogun []
+-!- hoijui [~hoijui@dslb-088-074-106-085.pools.arcor-ip.net] has quit [Quit: Leaving]
+ gsomix	vim .__.
+-!- uricamic1 [~uricamic@2001:718:2:1634:9d6b:332c:ffea:54e8] has quit [Quit: Leaving.]
+ gsomix	midnight commander and nano! :)
+ blackburn	nano sucks
+ gsomix	:(
+ blackburn	145             //dear god, this is super verbose, isn't there a way to shorten this?
+ blackburn	:D
+-!- gsomix [~gsomix@109.169.230.79] has quit [Ping timeout: 252 seconds]
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Hello
+ blackburn	hey
+ KMcQuisten	How's things?
+ blackburn	going on :)
+-!- gsomix [~gsomix@109.169.230.79] has joined #shogun
+ blackburn	KMcQuisten: is it ok now with mkl?
+ KMcQuisten	Yeah, the MKL is working.  Avoiding the LINADD seems to help.  I'm working on something else now.
+ KMcQuisten	I'm really excited about using DirectorKernels, but the examples acess data from a global.  to access data from withing one, using get_rhs() and get_lhs(), i'm working on a version of obtain_from_generic for DenseFeatures and StringFeatures
+ blackburn	ah that's nice
+ gsomix	KMcQuisten, hello. Sorry, I don't replied to your mail. I'm working on this problem now.
+ KMcQuisten	Well, I wrote up the code, it compiles properly, wraps properly in swig, and when I test it I can extract the data.  However, I get the following code when I actually try and use it in a kenrel in LibSVR:
+ blackburn	KMcQuisten: do you have a fork?
+ KMcQuisten	Yes
+ blackburn	so will you do a pull request with it?
+ KMcQuisten	(This is the output from training with MSG_DEBUG on
+ KMcQuisten	:
+ KMcQuisten	[INFO] 522 trainlabels
+ KMcQuisten	[INFO] training one class svm or doing epsilon sv regression
+ KMcQuisten	[INFO] Computing gradient for initial set of non-zero alphas
+ KMcQuisten	Fatal Python error: GC object already tracked
+ KMcQuisten	Aborted
+ blackburn	whoops
+ KMcQuisten	If I can get it to work, yes.
+ KMcQuisten	What kind of approach have you taken with the, gsomix
+ KMcQuisten	?
+ KMcQuisten	I know you're working on Director stuff, so I don't want to step on your solution if you have one
+ KMcQuisten	All i've done is modify the obtain_from_generic used in BinaryLabels, and adapeted it to the features
+ blackburn	KMcQuisten: what is code of that compute method?
+ KMcQuisten	def kernel_function(self, idx_a, idx_b):
+ KMcQuisten	genf1 = self.get_lhs()
+ KMcQuisten	genf2 = self.get_rhs()
+ KMcQuisten	f1 = StringCharFeatures.obtain_from_generic(genf1)
+ KMcQuisten	f2 = StringCharFeatures.obtain_from_generic(genf2)
+ KMcQuisten	s1 = f1.get_feature_vector(idx_a).tostring()
+ gsomix	KMcQuisten, I'm trying to make automagically converting in swig typemaps.
+ KMcQuisten	s2 = f2.get_feature_vector(idx_b).tostring()
+ KMcQuisten	return exp(-self.gamma * editdist.distance(s1,s2))
+ blackburn	aham
+ KMcQuisten	gamma is a parameter of the object I descended from DirectorKernel
+ blackburn	could you please cut after genf2 and return 0.0
+ KMcQuisten	gsomix:  That sounds like the best way
+ KMcQuisten	blackburn: Sure
+ blackburn	just to check whether obtain does something wrong
+ KMcQuisten	it gets to [INFO] Computing gradient for initial set of non-zero alphas, and then segfaults
+ blackburn	wow
+-!- foo__ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Ping timeout: 245 seconds]
+ blackburn	and without anything? just return 0.0
+ KMcQuisten	lets see
+ KMcQuisten	Fatal Python error: GC object already tracked
+ blackburn	hmm that sounds bad
+ KMcQuisten	Yeah, something's getting garbage collected before it should
+ KMcQuisten	I looked around to find a solution, and the only seemingly informative thing I've found is this:
+ KMcQuisten	http://pyrit.wordpress.com/2010/02/18/385/
+ KMcQuisten	It has an explanation of a similar problem, along with a specific link to some python documentation
+ KMcQuisten	But I don't know enough about SWIG to do anythign useful with this info
+ KMcQuisten	gsomix:  What do you think?  How's the typemapping work going so far?
+ blackburn	hmm let me check
+ blackburn	KMcQuisten: I'll check typemaps
+ KMcQuisten	Ok, if I strip out everything but return 0 in the kernel_function, and use only the DirectorKernel default __init__(), I get this:
+ KMcQuisten	terminate called after throwing an instance of 'Swig::DirectorMethodException'
+ blackburn	hmm
+ CIA-9	shogun: Sergey Lisitsyn master * rf54eb89 / (8 files in 3 dirs): Merged code of LibLinearMTL by Chris Widmer - http://git.io/UwYHNg
+ gsomix	KMcQuisten, 'Swig::DirectorMethodException' | it's seems that I forget about some virtual methods.
+ gsomix	sorry, need some time to check .____.
+ KMcQuisten	No sweat :)
+ gsomix	KMcQuisten, aha, forgot
+ KMcQuisten	?
+ gsomix	KMcQuisten, forgot to add some virtuals methods from CKernel to CDirectorKernel. it's might be a reason of 'Swig::DirectorMethodException'.
+ KMcQuisten	Ah, I see
+ KMcQuisten	Let me know how it goes so I can test it
+ KMcQuisten	:)
+ gsomix	KMcQuisten, ok.
+ gsomix	KMcQuisten, little experiment with automagically converting (CFeatures* to CDenseFeatures*) is works
+ KMcQuisten	Sweet!
+ KMcQuisten	That and CStringKernels are the two main types I use
+ gsomix	I need time to write complete converting.
+ KMcQuisten	Right
+-!- KMcQuisten_ [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten_	Can someome please kill ym clone
+ KMcQuisten_	my
+ blackburn	what?
+ blackburn	ahh
+ blackburn	I can't
+ KMcQuisten_	I have a duplicate in the chat room
+ blackburn	sonney2k could but I guess he is afk
+ KMcQuisten_	Well, shucks.  it'll time out eventually
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Ping timeout: 245 seconds]
+-!- KMcQuisten_ is now known as KmcQuisten
+-!- KmcQuisten is now known as KMcQuisten
+ KMcQuisten	bbiab
+-!- KMcQuisten is now known as KMcQuisten-afk
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection reset by peer]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- KMcQuisten-afk [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+ emrecelikten	Only he can kill clones as far as I know
+ emrecelikten	using /msg nickserv ghost
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	back
+ CIA-9	shogun: Soeren Sonnenburg master * rabe2a85 / (81 files in 26 dirs): Clean up CMath: move respective functions to CStatistics, SGVector and SGMatrix - http://git.io/T9L6bA
+ blackburn	the commit from island
+ CIA-9	shogun: Soeren Sonnenburg master * r25d7549 / (2 files): hopefully fix b0rken merge attempt in statistics - http://git.io/a1kTSA
+-!- wiking_ [~wiking@huwico/staff/wiking] has quit [Quit: wiking_]
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 260 seconds]
+-!- gsomix [~gsomix@109.169.230.79] has quit [Ping timeout: 256 seconds]
+--- Log closed Sat Jun 09 00:00:41 2012

@@ -1,0 +1,689 @@
+--- Log opened Fri Feb 17 00:00:19 2012
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 245 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- blackburn [~qdrgsm@188.168.2.140] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- blackburn [~qdrgsm@188.168.2.140] has quit [Quit: Leaving.]
+-!- Ram108 [~amma@14.96.154.124] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- peter_berlin [5ce7d8eb@gateway/web/freenode/ip.92.231.216.235] has joined #shogun
+ peter_berlin	hi
+ peter_berlin	I've got a question concerning shogun for python
+ peter_berlin	Can I somehow access the neighbors in kNN or the distance from the hyperplane in SVM?
+ peter_berlin	I need a confidence measure for my prediction and thought those information could be useful
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection reset by peer]
+-!- wiking_ is now known as wiking
+ sonne|work	peter_berlin: svms give you just real values outputs so yes
+ sonne|work	peter_berlin: for KNN you would need to modify code ..
+ peter_berlin	okay
+ peter_berlin	does the multiclass svm give also real value output?
+ peter_berlin	I think I only got the labels
+-!- Ram108 [~amma@14.96.154.124] has quit [Ping timeout: 260 seconds]
+ n4nd0	peter_berlin: hey! I think you should get a real value using the method apply
+ peter_berlin	ah, okay. I'll hceck that
+ peter_berlin	thx
+ n4nd0	no problem
+ sonne|work	peter_berlin: labels.get_labels() gives you the real valued vector
+-!- peter_berlin [5ce7d8eb@gateway/web/freenode/ip.92.231.216.235] has quit [Ping timeout: 245 seconds]
+ wiking	sonne|work: around?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ sonne|work	?
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has joined #shogun
+ wiking	i know i could dig it out from the sources but in case a preprocessor is defined and i do the following: feats_train.add_preprocessor(preprocessor)    feats_train.apply_preprocessor()
+ wiking	what function is being called in preprocessor
+ sonne|work	apply?
+ sonne|work	actually it depends on the feature type... apply_to_feature_matrix() for simple features IIRC
+ wiking	mmm
+ wiking	i wonder then why my preprocessor doesn't make it
+ wiking	since i've defined both apply_to_feature_matrix and apply_to_feature_vector
+ sonne|work	you have to in-place modify the matrix
+ sonne|work	could that be the reason?
+ wiking	ah
+ wiking	i'm creating a new matrix
+ wiking	as the preprocessor changes the matrix dimension
+ wiking	should i just change the reference within the supplied matrix the data array?
+ sonne|work	that won't do any change (local variable)
+ sonne|work	you could use set_feature_matrix to replace the feature matrix
+ wiking	does it do the memory management?
+ wiking	i.e. freeing the previous matrix
+ wiking	doh i'm confused now... if i create a kernel with 2 feature sets and then call get_kernel_matrix... in the resulting matrix m, m_i,j = k (featureSet1_i, featureSet2_j) or?
+-!- Ram108 [~amma@14.99.219.214] has joined #shogun
+ wiking	yey
+ wiking	added new preprocessor \o/
+ CIA-18	shogun: Soeren Sonnenburg master * rd7d10b9 / src/shogun/mathematics/Math.cpp : fix PI -> M_PI - http://git.io/jHmeIw
+ sonne|work	wiking: ^ I hope that fixes the PI issue
+ wiking	sonne|work: yeps
+ wiking	that's what i did here locally as well
+ sonne|work	argh I missed that
+ wiking	if u have any time to comment on my pull request i'd really appreciate it... i've tested the method
+ wiking	the error rate is very good
+ sonne|work	well even better when you did the same thing :)
+ wiking	i.e. 1e-3
+ wiking	i mean comparing a kernel and the generated homogeneous mapping and using linear kernel on that
+ sonne|work	which kernel did you compare it with?
+ CIA-18	shogun: Soeren Sonnenburg master * r9abe870 / (8 files in 4 dirs):
+ CIA-18	shogun: Merge pull request #374 from vigsterkr/master
+ CIA-18	shogun: Add Homogeneous Kernel Mapping preprocessor - http://git.io/JRJ-oQ
+ wiking	JensenShannon
+ sonne|work	ok
+ wiking	since in shogun the Chi2 is exponential
+ wiking	and the one implemented in the homogeneous mapping is not
+ sonne|work	wiking: one question - how difficult would it be to do the mapping on-the-fly as in CDotFeatures? - I mean would that be fast or is the result about same dimensional and dense?
+ wiking	aaah
+ wiking	haven't timed the thingy
+ wiking	i mean how long would it take to do the mapping
+ wiking	imho not that much
+ wiking	as there's a precomputed lookup tabe
+ wiking	*table
+ wiking	you are thinking about adding an option to the given kernels, whether one wants to use the approximation or the real kernel?
+ sonne|work	wiking: no there are various *fast* linear methods for which it might be beneficial to on-demand compute these Jensenshannonfeatures
+ sonne|work	this makes sense if data woudl become to big to fit in memory
+ sonne|work	(with your preprocessor)
+ wiking	ah yeah
+ wiking	doable
+ sonne|work	wiking: btw you should add yourself as copyright holder
+ wiking	should i ?
+ wiking	i thought the (C) goes for the original implementation
+ sonne|work	you wrote the shogun adjustments code right?
+ wiking	true :P
+ wiking	btw i don't know about the licensing header
+ wiking	as the original code was BSD licensed
+ wiking	and now the 'wrapper' code is in gplv3
+ wiking	is it ok?
+ sonne|work	wiking: one more thing please don't do m_table.vector == NULL checks
+ sonne|work	yes just put your gpl copyright header on top of the BSD one
+ wiking	SG_*ALLOC will do it for me?
+ sonne|work	yes
+ wiking	ok i'll drop it then
+ wiking	and there's still of course some problem
+ sonne|work	and if you need to throw errors use SG_ERROR("bla\n")
+ wiking	ah one thing!
+ wiking	how do i turn on debugging in c++/
+ wiking	i've tried this
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+ wiking	 CHomogeneousKernelMap hkm (HomogeneousKernelChi2, HomogeneousKernelMapWindowUniform, 1, 1, -1);
+ wiking	 hkm.io->set_target_to_stdout ();
+ wiking	hkm.io->set_loglevel (MSG_DEBUG);
+ wiking	but i'm not getting any debugging message :(
+ sonne|work	wiking: let me guess you are doing this from C++
+ wiking	yeps
+ sonne|work	then you probably did call init_shogun() with no args?
+ sonne|work	so you should call init_shogun_with_defaults() or use proper args (to register print functions)
+ wiking	i had troubles with the python api before and couldn't debug only with std::cout in CHomogeneousKernelMap that actually the my problem was that PI=0 ;P
+ wiking	oh yeah i've just called init_shogun
+ sonne|work	yeah weird - with PI
+ wiking	anyhow now it works... thnx for the tip... so next time i can debug better :)
+-!- blackburn [~qdrgsm@109.226.88.39] has joined #shogun
+ blackburn	wiking: nice work!
+ wiking	blackburn: yeah
+ blackburn	did you try it already?
+ wiking	u should pull the last two commits as well from my repo
+ wiking	should i do a pull request
+ wiking	?
+ blackburn	yeah do please
+ Ram108	hi
+ Ram108	blackburn: can i email u my code?
+ blackburn	Ram108: sure, what is the code?
+ Ram108	back propagation algorithm
+ Ram108	i used a pdf file as refrence and worked on the calculations manually but there seems to be somethn wrong.........
+ wiking	blackburn: done
+ Ram108	could u help me rectify that if u r free?
+ wiking	blackburn: only tested it on dummy dataset till now
+ blackburn	wiking: ok thanks
+ blackburn	Ram108: ok I'll check
+ Ram108	thanks a lot :)
+ Ram108	i have sent it :)
+ CIA-18	shogun: Sergey Lisitsyn master * rab828dc / : Merge branch 'master' of github.com:shogun-toolbox/shogun - http://git.io/6u7giQ
+ CIA-18	shogun: Viktor Gal master * reb1eff2 / src/shogun/preprocessor/HomogeneousKernelMap.cpp :
+ CIA-18	shogun: Remove memory allocation check
+ CIA-18	shogun: SG_MALLOC checks itself if the memory allocation was successful
+ CIA-18	shogun: or not - http://git.io/-GCJKA
+ CIA-18	shogun: Viktor Gal master * re3b7d0e / src/shogun/preprocessor/HomogeneousKernelMap.cpp :
+ CIA-18	shogun: HKM: set reference in apply_to_feature_matrix func
+ CIA-18	shogun: Althouth the reference for the new feature matrix has been returned
+ CIA-18	shogun: it hasn't been set for the supplied SimpleFeatures class. - http://git.io/ZUq_ZQ
+ blackburn	wiking: merged
+ wiking	cheers
+ Ram108	blackburn: did u get my email? :)
+ blackburn	Ram108: have you checked e.g. this: arctrix.com/nas/python/bpnn.py?
+ Ram108	no i havent
+ Ram108	i ll do that now
+ blackburn	I mean better compare with existent implementations
+ Ram108	oh okay i ll do that
+ Ram108	thanks anyway :)
+ Ram108	lol
+ Ram108	compared to his i think mines so messy...........
+ blackburn	heh
+ Ram108	lol i mean my code is big and totally messed up
+ blackburn	seems so
+ Ram108	:( lol
+ Ram108	its just the error in the reverse propagation method, it seems to go smaller and smaller
+ Ram108	i tried manually working out the calculations using pen and paper they yield the same results.........
+ Ram108	dunno what really went wrong
+ blackburn	me neither :)
+ Ram108	lol i ll sit on it till it works..........
+ wiking	blackburn: do u know any good GMM clustering implementation?
+ blackburn	wiking: we have one here, no idea whether it is good :)
+ blackburn	should be good
+ wiking	in shogun?
+ blackburn	yeah didn't you notice? ;)
+ wiking	oh eah
+ wiking	fuck
+ wiking	it's there
+ wiking	hahahah
+ blackburn	it was gsoc 2011 project btw
+ wiking	ok let's test it then :)))
+ blackburn	yeah try it
+ blackburn	(I never did)
+ blackburn	wiking: going to try homogay map now!
+ wiking	letmeknow how it works out
+ wiking	:)
+ wiking	haven't tested it myself yet
+ blackburn	I still believe it should be called homogay
+ wiking	i mean on real data
+ wiking	:))
+ blackburn	homogayfag
+ blackburn	:D
+ wiking	i should test it myself as well
+ wiking	time to switch to vpn then
+ blackburn	we will know soon
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@vpnj177.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpnj177.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ wiking	hehe i need a recompile still
+ blackburn	wiking: damn I like your codestyle
+ wiking	cheers
+ blackburn	the only problem
+ wiking	whichwhat
+ blackburn	void blabla() {
+ blackburn	}
+ blackburn	please use
+ blackburn	{
+ blackburn	}
+ wiking	ah ok
+ wiking	old habbit
+ wiking	i really prefer that one
+ wiking	but i'll do it for shogun then \n{\n} :P
+ blackburn	just global codestyle
+ blackburn	well that compact style is rather java
+ blackburn	we are hardcore oldschool (C)
+ blackburn	damn haha we have no multiclass linear svm
+ wiking	hahahah
+ wiking	why not use multi class whatever svm
+ wiking	with linear kernel?
+ blackburn	much slower
+ wiking	heheh true
+ wiking	:)
+ wiking	then give us multi class linear svm NOW
+ wiking	i think liblinear can do it
+ blackburn	yes
+ blackburn	but a little work
+ wiking	but there's no wrapper for it i guess?
+ blackburn	exactly
+ wiking	doooit! :>
+ wiking	daaamn java is killing me
+ blackburn	wiking: could you please tell me what is approximation order here?
+ wiking	well just put it 1
+ wiking	the higher the bigger the vector gets
+ wiking	but the better the approx is
+ blackburn	ah I see
+ blackburn	would 1 be sufficient??
+ wiking	well according to the vlfeat implementatation
+ wiking	yest
+ blackburn	it maps each feature to vector of size #order, right?
+ wiking	yes
+ wiking	2*order+1
+ blackburn	ah, then with 1
+ blackburn	it is 3
+ wiking	y
+ wiking	i mean each feature!
+ wiking	so if your dim(featureVector)=n then the output will be n*(2*order+1)
+ blackburn	yeah, I got it
+ blackburn	thanks
+ wiking	ok cool
+ blackburn	I have checked
+ blackburn	nice
+ blackburn	okay looks like it is working
+ blackburn	lets run it on THE BIG DATA
+ blackburn	:D
+-!- Ram108 [~amma@14.99.219.214] has quit [Quit: Ex-Chat]
+ wiking	heheh
+ wiking	i'm running as well
+ wiking	not much faster
+ wiking	although as you said
+ wiking	i'm using a slow multi class svm
+ wiking	indeed it's slow
+ wiking	ok
+ wiking	done
+ wiking	faster though
+ wiking	i've lost about 0.1 accuracy
+ wiking	0.1%
+ wiking	but yeah it's linear
+ wiking	and i wasn't fine-tuning the parameters either :P
+ blackburn	well it would be MUCH faster than JS anyway?
+ wiking	ye
+ blackburn	wiking: did I tell you walltime of applying libsvm multiclass with JS to 2000 vectors?
+ wiking	still running? :)
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+ wiking_	blackburn: oh yeah one more little thing.... there's a little bit of problem still with the implementation
+ wiking_	maybe you could give tips the smoothest way to solve it
+ blackburn	what's the problem?
+ wiking_	if you create the HKM with default constructor
+ wiking_	and then u use setter functions for defining the various parameters
+ wiking_	the ::init is not called
+ wiking_	because it should be only called after at least 2 parameters are set
+ wiking_	i.e setKernel and setWindow
+ wiking_	but let's say u do setKernel and setWindow and then after that init
+ wiking_	but later on u do a setGamma
+ wiking_	then the thing should be reinitialised...
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 244 seconds]
+-!- wiking_ is now known as wiking
+ wiking	the init sets up a n SGVector... which is sort of a lookuptable
+ wiking	e
+ wiking	so now the only way to have HKM in a proper way is to call the 'long' constructor...
+ wiking	kernel type, window...
+ blackburn	wiking: then feel free to reinitialize on every set
+ wiking	that's a bit hardcore :P
+ blackburn	why? I thought you have init there
+ wiking	yeah i mean not because of that
+ wiking	but it's not so nice
+ blackburn	because of what?
+ wiking	if you know what i mean
+ blackburn	I'd suggest to not care about it
+ wiking	so if you call 3 different setters
+ wiking	then 3 times it'll do an init
+ wiking	instead of doing only once
+ wiking	but i guess yeah that way i can assure that there's no fuckup :P
+ blackburn	anyway you can't detemine where was last one setter
+ wiking	i'll just then modify this a little bit and do a commit soon
+ blackburn	I don't think somebody would want to use setters
+ blackburn	instead of constructors
+ blackburn	hhmm taking a look on liblinear now
+ wiking	great!
+ blackburn	there is cramer-singer
+ blackburn	even in shogun already
+ blackburn	but not finished
+ wiking	mm
+ wiking	realloc will shrink the memory if i give a small memory size than the original?
+-!- Ram108 [~amma@14.99.219.214] has joined #shogun
+ Ram108	blackburn:there?
+ blackburn	yes
+ blackburn	wiking: yes
+ Ram108	sorry
+ Ram108	blackburn: carry on i guess u r busy
+ blackburn	not really
+ Ram108	oh thanks....... i have been trying to debug my code..........
+ Ram108	culdnt find anything wrong with its execution
+ Ram108	i tried it out with a calculator manually......... yeilds the same results as the computer
+ Ram108	atleast for the first cycle
+ blackburn	then why do you think it is wrong?
+ Ram108	well i think the algorithm given in the book might be wrong....... but its a very simple algorithm and nothing seems wrong
+ blackburn	no idea :)
+ Ram108	thanks :) i ll fix it sooner or later.........
+ Ram108	by the way hw r u? and hws life?
+ wiking	blackburn: ok question... when i do m_parameters->add the variable's value is actually not saved... only that there is such a variable... right?
+ blackburn	Ram108: fine, and what about you?
+ blackburn	wiking: it just saves reference to this variable
+ wiking	ok cool
+ Ram108	blackburn:lol exhausting.......... c u tomorrow......... its getting late here........ bye :)
+ blackburn	see you
+ Ram108	:)
+-!- Ram108 [~amma@14.99.219.214] has quit [Quit: Ex-Chat]
+ wiking	blackburn: ok soon there's gonna be then a final pull request
+ blackburn	nice
+ blackburn	thanks!
+@sonney2k	blackburn, wiking liblinear/ocas could in principle do it but i didn't integrate these in shogun ...yet
+ wiking	mmm yeah
+ blackburn	sonney2k: what is the problem with MCSVM thing?
+ blackburn	marked as FIXME
+@sonney2k	no problem - just work
+ blackburn	sonney2k: shogun/classifier/svm/SVM_linear.cpp:461
+ blackburn	sonney2k: is it related to no support of MC for linear machines?
+ blackburn	btw do would you like some MulticlassLinearMachine?
+ blackburn	no do
+ blackburn	:D
+ wiking	yes
+ wiking	gimmie
+ blackburn	wiking: you would like to have some?;)
+ wiking	will u do it? :P
+ blackburn	do you want? :D
+@sonney2k	blackburn, I guess we should use the BTS more :)
+@sonney2k	we need the updated version of liblinear (read multiclass) and ocas
+@sonney2k	blackburn, also I was discussing with heiko and I think we should change SGVecto/Matrix again
+@sonney2k	introducing a reference count like we have for SGObject instead of do_free crap
+@sonney2k	not difficult but work (as usual)
+ blackburn	sonney2k: exactly
+@sonney2k	blackburn, I guess we first need BinaryLables / MultiClassLabels :)
+@sonney2k	then MultiClassMachine / LinearMultiClassMachine :)
+@sonney2k	another bug :)
+@sonney2k	wiking, btw did you submit a small example for python_modular illustrating how things work with the new preprocessor?
+ blackburn	sonney2k: binary/MC is pain in the ass thing
+@sonney2k	?
+ blackburn	sonney2k: we have to keep back-compatibility I guess
+ wiking	sonney2k: not yet... made a lil example locally... i'll clean it up and add it to the examples.
+@sonney2k	blackburn, not sure what you mean?
+ blackburn	sonney2k: all the python/octave/... should be changed?
+@sonney2k	wiking, thanks - much appreciated
+ wiking	sonney2k: nw
+ blackburn	sonney2k: btw he did very nice thing
+@sonney2k	blackburn, no for the static interfaces it won't change a thing
+ blackburn	you should try it
+ blackburn	sonney2k:  but for modular
+@sonney2k	for the modular ones it would though
+ wiking	btw i've found shogun the first ML framework that i can actually work with normally and even add new code... so it's cool what you've guys done till now
+@sonney2k	time to try out heikos migrations even :)
+ blackburn	wiking: thanks, I hope you will collaborate more :)
+ wiking	hehehe trying my best over here ;P
+@sonney2k	wiking, any contributions are highly welcome - so keep it going!
+ blackburn	sonney2k: is there any alternative to alex-binder
+ blackburn	ehm
+ blackburn	alex binder
+ blackburn	:D
+ blackburn	for latent
+@sonney2k	why?
+ blackburn	svms
+ wiking	ah yeah
+ blackburn	hmm sorry I guess I mixed things
+@sonney2k	he still wanted to mentor this IIRC
+ blackburn	who was potential mentor for latent SVMs?
+ wiking	latent-ssvm i'd really like to get in
+ blackburn	sonney2k: is he?
+@sonney2k	blackburn, wasn't it in the updated list I did?
+ blackburn	lemme check
+@sonney2k	btw please polish / xxx
+ blackburn	yes I will do soon
+@sonney2k	I have to leave the train - cu
+ blackburn	see you
+ wiking	blackburn: u r up for l-ssvm?
+ wiking	cya
+ blackburn	wiking: what do you mean?
+ wiking	implementing it...
+ blackburn	no, I care about you ;)
+ wiking	hahaha cheers
+ wiking	please find me somebody
+ wiking	who can help me out if i have questions
+ blackburn	you are strange candidate indeed
+ blackburn	strange?
+ blackburn	I said strange?
+ blackburn	:D
+ wiking	strange? :)
+ blackburn	strong
+ wiking	hahaha
+ wiking	cheers
+ blackburn	sorry haha
+ wiking	nw
+ wiking	anyhow u have my email from the commit
+ wiking	log
+ wiking	so if u find somebody and he is not coming around on irc
+ wiking	just give him that addr
+ blackburn	I think you should contact :)
+ wiking	ah ok
+ wiking	gimme email
+ wiking	;)
+ blackburn	you may do it just now
+ blackburn	wait a min
+ wiking	okkey
+ blackburn	http://www.ml.tu-berlin.de/menue/mitglieder/alexander_binder/
+ blackburn	wiking: please contact him then :)
+ wiking	okeeey
+ blackburn	idea is not in the updated list but ask him whether he wants to mentor it
+ wiking	i'll say that you've given me the contact
+ blackburn	he doesn't know me :D
+ wiking	ok
+ wiking	so here's the last fix for HKM
+ wiking	there you go
+ wiking	HKM should be complete for now
+ blackburn	one more thing
+ blackburn	could you please add some (at least dummy) doc for methods
+ wiking	which ones?
+ blackburn	to avoid warnings
+ wiking	i've tried for the constructors :P
+ blackburn	get/set
+ wiking	ah ok
+ wiking	i'll do it then ... :>
+ wiking	but maybe not now
+ blackburn	thanks!
+ wiking	i want to test some new stuff
+ wiking	i had some ideas
+ blackburn	hmm
+ blackburn	I can
+ blackburn	:)
+ wiking	but i wanted to fix HKM ASAP
+ wiking	so i've tossed everything aside
+ blackburn	sure
+ blackburn	I'll add doc
+ wiking	cheers
+ wiking	emailsent
+ wiking	mean i'm now waiting for a paper notification for almost about a week
+ wiking	fuckers
+ blackburn	which email?
+ blackburn	wiking: you are a joker, used uint64 for order ;)
+ wiking	what's the problem
+ wiking	?
+ blackburn	not a problem ;)
+ wiking	i know
+ blackburn	just joking about size
+ wiking	well if they have enough memory ;)
+ blackburn	I mean 210430240324034023 would be pretty good approximation
+ blackburn	:D
+ wiking	heheh yeah
+ CIA-18	shogun: Viktor Gal master * rc9ab1fb / (2 files):
+ CIA-18	shogun: HKM: fix variable init in case of setter calls
+ CIA-18	shogun: And trying to comply with shogun's coding style - http://git.io/2xul9g
+ CIA-18	shogun: Sergey Lisitsyn master * re4b8a73 / (2 files): Merge branch 'master' of https://github.com/vigsterkr/shogun - http://git.io/VGjeDw
+ CIA-18	shogun: Sergey Lisitsyn master * rf7e33a8 / src/shogun/preprocessor/HomogeneousKernelMap.h : Added some doc for #376 - http://git.io/faPw0A
+ blackburn	here you are
+ blackburn	wiking: should vectors be normalized after HKM?
+ wiking	i don't think so
+ wiking	but try :D
+ blackburn	167m already
+ blackburn	LibSVM linear
+ blackburn	okay in next two days I shall finish liblinear mc things
+ wiking	:>>
+ wiking	great
+ blackburn	bioinformatics legacy
+ blackburn	only two classes everywhere
+ wiking	hahahhaha
+ wiking	one more thing
+ wiking	lemme find the code
+ wiking	as we were talking here about fast svm
+ wiking	sgd based SVM?
+ blackburn	hmm yes there are some
+ wiking	they are really fast and
+ wiking	performs very well
+ blackburn	but no multiclass
+ wiking	ah yeah
+ wiking	so do you know this
+ blackburn	okay I guess it is time to write some generic multiclass thing
+ wiking	http://leon.bottou.org/projects/sgd
+ blackburn	wiking: yes it is integrated
+ wiking	really? :)
+ wiking	wow i love shogun
+ wiking	i mean both?
+ wiking	asgd and sgd?
+ wiking	and which is the class
+ blackburn	wiking: I am afraid only second
+ blackburn	SVMSGD
+ wiking	and why doesn't it do multi class then? :)
+ blackburn	does it support MC?
+ wiking	well the original one yes
+ wiking	i mean they do benchmarking
+ wiking	on
+ wiking	RCV1
+ wiking	that is a multi class problem afaik
+ blackburn	maybe just OvR ensemble
+ wiking	and even
+ wiking	do benchmarking on PASCAL dataset
+ wiking	so it should most def be multiclass
+@sonney2k	wiking, nope it doesn't
+ wiking	i mean the original implementation
+@sonney2k	yes
+@sonney2k	it doesn't
+ wiking	really?
+@sonney2k	yes
+@sonney2k	believe me
+ wiking	my bad i mean sure i believe
+ wiking	but i though that they are benchmarking on multclass dataset
+ wiking	that they support multi class categorization
+@sonney2k	they all do ovr
+ blackburn	sonney2k: we need design decision on MC things
+ blackburn	I have design catatonia
+ blackburn	:D
+ wiking	ahhahaha: "A word of advice to research asst job applicants in the sciences: don't use the words "rat murderer" in your cover letter. Wow"
+@sonney2k	blackburn, what design decision?
+@sonney2k	1) do binary/multiclass label
+@sonney2k	than multiclassmachine
+@sonney2k	and linearmulticlassmachine
+ blackburn	stoop
+ blackburn	sonney2k: okay imagine you want to use OvR SGD
+ blackburn	what is python code you would probably write?
+@sonney2k	m=OneVSRestMultiClassMachine(SGD)
+@sonney2k	m.train(feats)
+@sonney2k	or MulticlassMachine(OVR, SGD)
+ blackburn	MulticlassMachine(OVR,SVMSGD())
+ blackburn	?
+ blackburn	the problem is:
+ blackburn	which class should be base for LaRank ?
+ blackburn	GMNPSVM?
+@sonney2k	blackburn, these are both doing OVR
+ blackburn	but training is not OvR
+@sonney2k	no but it is overloaded
+@sonney2k	so no problem
+ blackburn	not really
+ blackburn	we should have some thing
+ blackburn	indicating if it supports MC training
+@sonney2k	I would say basically move MultiClassSVM into MultiClassMachine
+ blackburn	yes
+ blackburn	generally yes
+ blackburn	okay clearer now
+ blackburn	sonney2k: what do you prefer
+ blackburn	MulticlassMachine(OVR,SGD)
+ blackburn	or SGD()?
+@sonney2k	MulticlassMachine(OVR, SGD())
+ blackburn	sonney2k: then we need clone :D
+ blackburn	moving to java
+ blackburn	hah
+@sonney2k	clone?
+ blackburn	sonney2k: yes, we would need K SGD()s?
+@sonney2k	no just one
+@sonney2k	we set features / labels + train
+@sonney2k	store w
+@sonney2k	done
+ blackburn	linear case ok
+ blackburn	but kernel?
+@sonney2k	same thing - store alphas (look at MultiClassSVM - it is doing that already)
+ blackburn	hmm yes agree
+ blackburn	not very flexible though
+ blackburn	but okay
+@sonney2k	why not?
+@sonney2k	it is the same like Machine / KernelMachine / LinearMachine
+ blackburn	not flexible cause can't set different Cs
+ blackburn	or etc
+@sonney2k	MultiClassMachine/MulticlassKernelMachine/MultiClassLInearMachine
+@sonney2k	we could but this is hardly feasible anyway when you have many classes
+ blackburn	sonney2k: btw scikits have examples weighting
+ blackburn	do you know how it is done?
+@sonney2k	we have that too for svms
+ blackburn	really? how to use it?
+@sonney2k	yeah differnt C for each example
+ blackburn	hmm I see
+@sonney2k	doesn't really help in practise
+ blackburn	is it a common way to do weighting?
+ blackburn	really?
+ blackburn	hmm I thought it would be useful
+ blackburn	but didn't try
+@sonney2k	as always there might be some cases where it helps a lot
+@sonney2k	I have yet to see a case where setting different Cs helps at all
+ blackburn	sonney2k: btw do you use hog now? I just recalled it can be calculated as integral image
+ blackburn	do you know?
+@sonney2k	no idea
+ blackburn	no idea about?
+ blackburn	I mean it is useful thing :)
+ blackburn	sonney2k: about alex binder, his task is not in updated list
+ blackburn	why?
+ blackburn	I suggested wiking to write to him
+ wiking	i've sent him an email already
+@sonney2k	wiking, very good
+@sonney2k	did alex reply?
+ blackburn	I guess 30m wouldn't be enough for reply
+ blackburn	;)
+ blackburn	sonney2k: will vojtech's task be related to integration of kozinec/mdm/etc stuff?
+@sonney2k	he is usually very fast - might not be only now though
+@sonney2k	no it is about his libqp / shogun integration
+@sonney2k	basically developing /integrating qp solvers that we have in shogun in libqp under a general framework and exposing this general framework in shogun
+ blackburn	hmm looks like hard task
+@sonney2k	so one could solve general problems and make use of the qp solvers in SG's algorithms
+@sonney2k	wouldn't say so
+@sonney2k	things are mostly there
+@sonney2k	and vojtech is optimization guru
+@sonney2k	so he will help
+ wiking	sonney2k: not yet
+ blackburn	I wish I had some discussion with vojtech about multiclass thing :D
+ blackburn	I just wonder why his way of solving (like in GMNPSVM) is not widely known?
+ blackburn	sonney2k: are you any familiar with ECOC?
+ blackburn	I need some advice
+ wiking	damn i need gmm clusterer in mahout...
+ wiking	shogun just cannot handle... i mean memory cannot handle it :(
+ blackburn	wiking: we would die trying to compete with mahout :)
+ wiking	ahahha
+ wiking	it's ok
+ wiking	on the end part when i do classification
+ wiking	it's a quite small problem...
+ wiking	so shogun can handle it
+ wiking	but preprocessing...
+ wiking	anybody read this/opinion: An Ensemble of Deep Support Vector Machines for Image Categorization
+ blackburn	no, I didn't
+ wiking	hahah github is being ddos-ed
+ blackburn	works for me
+ blackburn	who would ever ddos github?
+ blackburn	we have a lot of DDoS here in *.ru zone btw :D
+ wiking	heheh
+ blackburn	pro-government bitches do some virtual war with any opposition
+ wiking	i mean mahout is funny... i've found a major stupid bug in their TFIDF vectorizer and even sent the patch for fixing it... that was like 2 weeks ago..
+ wiking	still waiting for getting it applied..
+ blackburn	do they like to do it slow?
+ wiking	seems
+ blackburn	we (2 busy developers) manage to do it faster haha
+ blackburn	how many mahout has?
+ wiking	a lot
+ wiking	at least 5-7 commiters for sure
+ blackburn	and one russian too heh
+ wiking	ok
+ wiking	i've found a cuda based gmm
+ wiking	and i have access to a tesla
+ wiking	:D
+ wiking	let's see how this will work out
+ blackburn	337m
+ wiking	mmm this is cool: long __builtin_expect (long exp, long c)
+ wiking	this is a must have function :>
+ blackburn	what is it?
+ wiking	a gcc function
+ blackburn	no idea what it does
+ wiking	"You may use __builtin_expect to provide the compiler with branch prediction information"
+ blackburn	hmm
+ wiking	. The semantics of the built-in are that it is expected that exp == c. For example:
+ wiking	          if (__builtin_expect (x, 0))
+ wiking	            foo ();
+ wiking	     
+ wiking	would indicate that we do not expect to call foo, since we expect x to be zero
+ blackburn	hmm
+ blackburn	well do you care so much about branch mispredictions?
+ wiking	sometimes yes
+ wiking	sometimes it's really annoying to see an if branch in a loop
+ wiking	that u know that will be missed most of the time..
+ blackburn	the worst misprediction I got was
+ blackburn	matrix[i*N+j] = ...
+ blackburn	matrix[j*N+i] = ...
+ blackburn	have you ever noticed how slow it is?
+ wiking	lol
+ blackburn	not branch but cache
+ wiking	yep
+ blackburn	miss
+ wiking	sure
+ wiking	i mean it's jumping around the memory
+ wiking	so caching would be hard
+ blackburn	yeah may be 2-3x times slower
+-!- blackburn [~qdrgsm@109.226.88.39] has quit [Quit: Leaving.]
+--- Log closed Sat Feb 18 00:00:19 2012

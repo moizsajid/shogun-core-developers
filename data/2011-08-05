@@ -1,0 +1,116 @@
+--- Log opened Fri Aug 05 00:00:55 2011
+-!- blackburn [~blackburn@188.122.237.5] has quit [Quit: Leaving.]
+-!- f-x [~user@117.192.213.221] has joined #shogun
+-!- f-x [~user@117.192.213.221] has quit [Read error: Connection reset by peer]
+-!- f-x [~user@117.192.213.221] has joined #shogun
+-!- heiko [~heiko@134.91.54.86] has joined #shogun
+ CIA-87	shogun: Soeren Sonnenburg master * r4e8838e / (4 files in 2 dirs):
+ CIA-87	shogun: Merge pull request #264 from karlnapf/master
+ CIA-87	shogun: SGVector replacements (+5 more commits...) - http://bit.ly/mXwnFJ
+-!- blackburn [~blackburn@188.122.237.5] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+ blackburn	dsygvx!
+ CIA-87	shogun: Heiko Strathmann master * ra06ede4 / examples/undocumented/libshogun/features_subset_sparse_features.cpp : applied get_spare_vector() changes - http://bit.ly/pXsfw0
+ CIA-87	shogun: Heiko Strathmann master * redab68c / (3 files): made copy_subset() non-const - http://bit.ly/p9bGcM
+ CIA-87	shogun: Soeren Sonnenburg master * rf778cbe / (4 files in 2 dirs):
+ CIA-87	shogun: Merge pull request #265 from karlnapf/master
+ CIA-87	shogun: example corrections and made get_num_preprocessors() const - http://bit.ly/mQXItK
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+ CIA-87	shogun: Soeren Sonnenburg master * r2be3008 / (4 files in 3 dirs):
+ CIA-87	shogun: Merge pull request #266 from karlnapf/master
+ CIA-87	shogun: fixes for DataType.h - http://bit.ly/qnS9Ai
+ CIA-87	shogun: Soeren Sonnenburg master * r4aeadde / (src/shogun/io/InputParser.h src/shogun/io/ParseBuffer.h):
+ CIA-87	shogun: Merge pull request #263 from frx/streaming_vw
+ CIA-87	shogun: Modified parse ring and parser to avoid race conditions, and for speedup. - http://bit.ly/pjTNhC
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+ heiko	sonney2k, are you there?
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+ heiko	i have a suggestion for the lists in shogun
+ heiko	currently there is this CList class
+ heiko	which is for CSGObjects
+ heiko	but i need a list for different types
+ heiko	so my suggestion:
+ heiko	build a base class CList, which just implements a list for any type without any SG_REF stuff
+ heiko	then inherit from this class CObjectList, which does the same as the current CList (SG_REF stuff and only SGObjects)
+ heiko	and then: (what I actually need): inherit from this class to have a sorted list for any type
+ heiko	even, there could be an abstract class serving as interface collection for lists, like this is done in java
+ heiko	the alternatic to this (quite a lot of work) is to implement CSortedList directly without touching everything else. most methods (inserting etc) have to be overwritten anyways so only the get methods are redundant to the current CList
+ heiko	then on top of the CSortedList, I want to implement the map
+ heiko	or even simpler:
+ heiko	directly implement the map
+ heiko	use a DynArray internally and sort on the fly
+ heiko	and put structs with old and new name in this DynArray
+ heiko	will go for lunch now, tell me what you think :)
+-!- in3xes_ is now known as in3xes
+@sonney2k	heiko, yes use a dynarray - that is waht I would have suggested anyways :)
+ blackburn	sonney2k: I'm still worried if ACML things in lapack.cpp are not working, how can we test it
+ blackburn	?
+@sonney2k	blackburn, I don't know - someone contributed these - isn't he mentioned in the credits?
+ blackburn	ain't you?
+ blackburn	I did it too in new wrappers
+ blackburn	I just don't sure it will be working in the right way
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ is now known as in3xes
+ blackburn	yup!
+ blackburn	laplacian eigenmaps is almost ready
+-!- in3xes [~in3xes@180.149.49.227] has quit [Quit: Leaving]
+ heiko	sonney2k, around?
+ CIA-87	shogun: Sergey Lisitsyn master * r93dcc58 / (2 files): Added DSYGVX routine wrapper - http://bit.ly/o58Qu1
+ CIA-87	shogun: Sergey Lisitsyn master * rb683aa0 / (4 files in 2 dirs): Added generalized eigenproblem support to ARPACK wrapper and adapted LLE and MDS - http://bit.ly/pEb4f0
+ CIA-87	shogun: Sergey Lisitsyn master * r0ed492d / src/shogun/preprocessor/Isomap.h : Removed Isomap type with only K-Isomap remain - http://bit.ly/nNbjQD
+ CIA-87	shogun: Sergey Lisitsyn master * rb3d5d69 / (6 files in 3 dirs): Introduced Laplacian Eigenmaps preprocessor - http://bit.ly/pB8DwT
+ blackburn	uh here it is
+ blackburn	sonney2k: ich habe fertig ;)
+-!- heiko [~heiko@134.91.54.86] has quit [Ping timeout: 258 seconds]
+-!- heiko [~heiko@134.91.54.86] has joined #shogun
+-!- heiko [~heiko@134.91.54.86] has quit [Client Quit]
+-!- blackburn [~blackburn@188.122.237.5] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.122.237.5] has joined #shogun
+@sonney2k	blackburn, you mean all you did plan for GSoC?
+ blackburn	sonney2k: yeah seems so
+@sonney2k	blackburn, code wise you mean right? or did you do documentation / examples too?
+ blackburn	sonney2k: english/russian doc to go
+@sonney2k	not a lot - great. I hope you have some time to do java then
+@sonney2k	btw
+@sonney2k	I got an answer on the swig mailinglist
+ blackburn	bout?
+@sonney2k	I now know how to derive swig wrapped classes from Serializable
+ blackburn	nice
+@sonney2k	blackburn, and look how simple this is
+@sonney2k	%typemap(javainterfaces)       SWIGTYPE "Serializable"
+ blackburn	heh
+@sonney2k	blackburn, to you recall what functions need to be implemented in java for this to implement the Serializable interface?
+ blackburn	writeObject and readObject IIRC
+ blackburn	well Serializable is not a interface with methods
+ blackburn	but we need to implement write and read
+@sonney2k	private void writeObject(java.io.ObjectOutputStream out)
+@sonney2k	     throws IOException
+@sonney2k	 private void readObject(java.io.ObjectInputStream in)
+@sonney2k	     throws IOException, ClassNotFoundException;
+@sonney2k	yeah
+ blackburn	it is used automagically then we are e.g. using ObjectOutputStream
+ blackburn	SHOGUN is mainly developed by
+ blackburn	\li Soeren Sonnenburg <Soeren.Sonnenburg@tuebingen.mpg.de>
+ blackburn	\li Gunnar Raetsch <Gunnar.Raetsch@tuebingen.mpg.de>
+ blackburn	\li Sebastian Henschel <shogun@kodeaffe.de>
+ blackburn	sonney2k: ^ not actual, right?
+@sonney2k	no
+@sonney2k	but these 3 did a lot of work :)
+@bettyboo	:>
+@sonney2k	(at some point at least)
+ blackburn	hmhmh
+ blackburn	I have absolutely no idea about what to do in doc..
+@sonney2k	blackburn, just translate it - or?
+ blackburn	english one is pretty outdated
+@sonney2k	not that much I would say
+@sonney2k	so if you find outdated stuff fix it please
+@sonney2k	you really are best suited for this because you are carefully reading the doc
+ blackburn	yes I'm trying to get comprehension what to fix
+-!- f-x [~user@117.192.213.221] has quit [Remote host closed the connection]
+-!- f-x [~user@117.192.213.221] has joined #shogun
+-!- f-x [~user@117.192.213.221] has quit [Remote host closed the connection]
+--- Log closed Sat Aug 06 00:00:09 2011

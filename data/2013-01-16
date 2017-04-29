@@ -1,0 +1,101 @@
+--- Log opened Wed Jan 16 00:00:38 2013
+-!- FSCV_ [~FSCV@187.210.54.162] has quit [Quit: Leaving]
+-!- aamir [~quassel@aws.aamirkhan.co.in] has joined #shogun
+-!- aamir is now known as syst3mw0rm
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- blackburn [~blackburn@37.61.179.191] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 276 seconds]
+-!- blackburn [~blackburn@37.61.179.191] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 240 seconds]
+-!- blackburn [d42ef61e@gateway/web/freenode/ip.212.46.246.30] has joined #shogun
+-!- FSCV [~FSCV@187.210.54.162] has joined #shogun
+-!- blackburn [d42ef61e@gateway/web/freenode/ip.212.46.246.30] has quit [Quit: Page closed]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@188.168.2.27] has joined #shogun
+@sonney2k	wiking, any ideas about how we can fix travis?
+ wiking	mmm what's happening with it?
+ blackburn	wiking: have 5 mins?
+ blackburn	need mac os testing :D
+-shogungit:#shogun- [shogun] lisitsyn pushed 12 new commits to master: https://github.com/shogun-toolbox/shogun/compare/5ee214841afc...7b337e4cf671
+-shogungit:#shogun- shogun/master ca6b409 Sergey Lisitsyn: Integrated the tapkee library
+-shogungit:#shogun- shogun/master ae754ef Sergey Lisitsyn: Another missed step of tapkee integration
+-shogungit:#shogun- shogun/master d7b626a Sergey Lisitsyn: Disabled superlu by default
+ blackburn	kaboom
+-!- travis-ci [~travis-ci@ec2-107-20-16-144.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/4195879
+-!- travis-ci [~travis-ci@ec2-107-20-16-144.compute-1.amazonaws.com] has left #shogun []
+ wiking	blackburn: giveme
+ blackburn	wiking:
+ wiking	blackburn: what i need to test/do
+ blackburn	git clone git://github.com/lisitsyn/tapkee.git
+ blackburn	cd tapkee
+ wiking	make it?
+ blackburn	mkdir build
+ blackburn	cd build
+ blackburn	cmake ..
+ blackburn	make
+ wiking	ok
+ wiking	i'll do the test asap
+ wiking	and get back to you
+ wiking	but give me half a day
+ blackburn	wiking: haha
+ blackburn	wiking: yeah that takes a month actually
+ blackburn	wiking: my prays it will work with no changes
+ wiking	being sarcastic? :)
+ blackburn	wiking: I thought you were :)
+ blackburn	if you need half a day for real it is not a problem :) I am not in rush at all
+ wiking	ld: library not found for -larpack
+ wiking	clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ wiking	make[2]: *** [tapkee] Error 1
+ wiking	make[1]: *** [CMakeFiles/tapkee.dir/all] Error 2
+ wiking	make: *** [all] Error 2
+ wiking	ok
+ wiking	i think the autodetection of lapack is broken for osx
+ blackburn	oh uh
+ blackburn	wiking: but you have arpack right?
+ blackburn	okay I need a fallback may be
+-!- cwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+ wiking	lolface
+ wiking	i dont have arpack installed
+ wiking	now it's insalled
+ blackburn	works?
+ wiking	ok now it found it
+ blackburn	I pray to justin bieber
+ wiking	i mean cmake
+ blackburn	hooray
+ wiking	i wonder why cmake wasn't complaining about not finding arpack
+ blackburn	me too
+ blackburn	finder script is fucked may be
+ wiking	this is interesting
+ wiking	Linking CXX executable tapkee
+ wiking	ld: library not found for -larpack
+ wiking	clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ wiking	make[2]: *** [tapkee] Error 1
+ wiking	make[1]: *** [CMakeFiles/tapkee.dir/all] Error 2
+ wiking	make: *** [all] Error 2
+ blackburn	hmm
+ blackburn	may be I need to add linker path
+ wiking	-- Found Eigen3: /opt/local/include/eigen3 (Required is at least version "2.91.0")
+ wiking	-- Found Arpack : /opt/local/lib/libparpack.dylib
+ wiking	so it found it
+ wiking	but then
+ wiking	ah ok
+ wiking	cmake fucks it up in some way
+ wiking	/usr/bin/c++    -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/tapkee.dir/src/main.cpp.o  -o tapkee  -larpack
+ wiking	this is in
+ wiking	CMakeFiles/tapkee.dir/link.txt
+ blackburn	hmm
+ wiking	so somehow you have to tell cmake that it adds the link path, -L
+ wiking	since it knows/finds where it is
+ blackburn	wiking: yeah thanks
+ blackburn	let me try to find that
+ wiking	no worries
+ wiking	let me know when u need a 2nd test
+ blackburn	wiking: can you please pull and try
+-!- FSCV_ [~FSCV@204.45.110.163] has joined #shogun
+-!- FSCV [~FSCV@187.210.54.162] has quit [Ping timeout: 256 seconds]
+-!- SCV__ [~FSCV@187.210.54.162] has joined #shogun
+-!- FSCV_ [~FSCV@204.45.110.163] has quit [Ping timeout: 252 seconds]
+--- Log closed Thu Jan 17 00:00:38 2013

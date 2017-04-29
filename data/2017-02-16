@@ -1,174 +1,174 @@
 --- Log opened Thu Feb 16 00:00:27 2017
-@wiking	lisitsyn, you see, JIT https://haosdent.gitbooks.io/tensorflow-document/content/resources/xla_prerelease.html :)	01:07
-@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608	02:04
-@sukey	Pull Request #3620 "Add time comparison for KNN_KDTREE"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3620	04:18
--!- remote [~remote@portemanteau.ca] has left #shogun []	04:26
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Remote host closed the connection]	04:59
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	05:00
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]	05:05
--!- Guest85308 [~hazzard@142.54.173.74] has joined #shogun	06:01
--!- Guest85308 [~hazzard@142.54.173.74] has quit [K-Lined]	06:01
-@sukey	Pull Request #3620 "Add time comparison for KNN_KDTREE"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3620	06:02
--!- Guest78383 [~haha@223.13.66.34] has joined #shogun	08:09
--!- Guest78383 [~haha@223.13.66.34] has quit [Ping timeout: 258 seconds]	08:18
--!- Guest23603 [~ff@223.13.66.34] has joined #shogun	09:35
--!- Guest23603 [~ff@223.13.66.34] has left #shogun []	09:38
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	09:44
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]	09:49
--!- abhinav_ [~abhinav@202.173.126.154] has joined #shogun	10:09
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	10:15
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]	10:20
--!- abhinav_ [~abhinav@202.173.126.154] has quit [Ping timeout: 260 seconds]	10:34
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	10:46
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]	10:51
--!- abhinav_ [~abhinav@202.173.126.154] has joined #shogun	10:55
--!- abhinav_ [~abhinav@202.173.126.154] has quit [Quit: Leaving]	11:10
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	11:18
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]	11:23
--!- ShellcatZero [~ShellcatZ@cpe-76-93-136-67.san.res.rr.com] has quit [Ping timeout: 264 seconds]	12:13
--!- ShellcatZero [~ShellcatZ@cpe-76-93-136-67.san.res.rr.com] has joined #shogun	12:16
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun	13:11
--!- mode/#shogun [+o HeikoS] by ChanServ	13:11
-@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608	13:12
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	13:19
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]	13:23
-@sukey	Wiki page: Google-Summer-of-Code-2017-Projects edited on shogun-toolbox/shogun by karlnapf	13:24
-@sukey	Wiki page: Google-Summer-of-Code-2017-Projects edited on shogun-toolbox/shogun by karlnapf	13:24
-CaBa	HeikoS: heya	13:26
-CaBa	HeikoS: have a minute?	13:27
-@sukey	Issue #3629 "Polish class API documentation" opened by karlnapf - https://github.com/shogun-toolbox/shogun/issues/3629	13:28
-@sukey	Issue #3629 "Polish class API documentation" karlnapf added label: "entrance" - https://github.com/shogun-toolbox/shogun/issues/3629	13:28
-@sukey	Issue #3629 "Polish class API documentation" karlnapf added label: "Documentation" - https://github.com/shogun-toolbox/shogun/issues/3629	13:28
-CaBa	HeikoS: i'm writing that quick and dirty version of the customkernel that we were talking about the other day right now ;)	13:28
-@sukey	Wiki page: GSoC_2017_low_hanging_fruit edited on shogun-toolbox/shogun by karlnapf	13:28
-@HeikoS	CaBa: hi	13:29
-@HeikoS	yes	13:29
-CaBa	HeikoS: and i guess i'm running into problems that already came up with CustomKernel, so i thought to ask l)	13:29
-CaBa	HeikoS: for one, what is the scenario where lhs != rhs in a kernel? i guess that cannot be covered with precalculated kernels, right?	13:30
-@HeikoS	yes	13:30
-@HeikoS	this is when you want to apply the method to a new datapoint	13:30
-@HeikoS	i.e. you trained on X and then want to apply to Y that you havent seen when computing the kernel matrix for X	13:30
-@HeikoS	so in that case you need to precompute the kernel between X and Y before you can predict	13:31
-CaBa	HeikoS: so how's that handled in the case of CCustomKernel? I saw some C++ code where ->set_kernel() was called with the testing precalc matrix...	13:31
-@HeikoS	you need to provide the kernel if you want to predict on new data	13:31
-@HeikoS	as f(x) = \sum_i alpha_i k(x_new, x_i)	13:32
-@HeikoS	wiking: jo around?	13:32
-@HeikoS	I got back from gunnar! finally :)	13:33
-@wiking	HeikoS, yes	13:33
-@wiking	sup?	13:33
-@HeikoS	- Feb 21, 2 or 3pm- Feb 22, 10 or 11am	13:33
-@HeikoS	whats better=?	13:33
-@HeikoS	the 11am I guess?	13:33
-@wiking	11 yes	13:33
-@HeikoS	cool	13:33
-@HeikoS	let me reply	13:33
-@wiking	but i can do 3 if need be	13:33
-@HeikoS	10 is better?	13:33
-@HeikoS	because it is 10 or 11	13:33
-@wiking	either is fine	13:34
-@HeikoS	ok then 11 better for me	13:34
-@HeikoS	wiking: cool	13:35
-@HeikoS	Ill write a little plan until then so we can present concrete things to gunnar and he just has to yes/no them	13:35
-@HeikoS	wiking: saw this https://github.com/shogun-toolbox/shogun/pull/3534#issuecomment-280154766	13:35
-@HeikoS	is that the one you warn about in cmake?	13:36
-@HeikoS	could do that as well and disable the test for that version?	13:36
-@wiking	dunno yet	13:36
-@wiking	i have to finish somethng	13:36
-@HeikoS	kk	13:36
-CaBa	HeikoS: https://github.com/shogun-toolbox/shogun/blob/develop/examples/undocumented/libshogun/classifier_svmlight_string_features_precomputed_kernel.cpp#L110	13:39
-CaBa	HeikoS: so that's the training / testing scheme for custom kernel?	13:39
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	13:39
-@sukey	New Commit "remove message about unused variable warnings as they will just confuse users" to shogun-toolbox/shogun by karlnapf: https://github.com/shogun-toolbox/shogun/commit/6599b893c731e246e54bd140b4f6a8d858eb864f	13:40
-@HeikoS	CaBa: kind of	13:41
-@HeikoS	just here all data is known at training time	13:41
-@HeikoS	do you can precompute the test kernel matri xas well	13:41
-@HeikoS	but yeah	13:41
-@HeikoS	you see below that the precomputed test kernel matrices are passed	13:41
-@HeikoS	so it is that	13:42
-CaBa	ah, so one approach is to concat training + testing data, then subset for training and subset for testing?	13:42
-@HeikoS	no	13:44
-@HeikoS	that is just one way to do it	13:44
-@HeikoS	but you could also imagine	13:44
-@HeikoS	you traing your model on all data	13:44
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]	13:44
-@HeikoS	and then, afterwards, you get new test data	13:44
-@HeikoS	and then you compute the kernel between train and test (no subsetting)	13:44
-@HeikoS	and then prediuct	13:44
-@HeikoS	here it is done with the subsetting since all data is known from the start	13:44
-CaBa	yes. which will be the case for my usecase, too. sure, generally it is desirable to be able to work with new data at a later time	13:48
-CaBa	HeikoS: is there a code snippet for "solution 1" somewhere?	13:49
-@HeikoS	CaBa: no dont think so	13:49
-@HeikoS	but it is easy	13:49
-@HeikoS	you just need to create the km_test matrix in your snippet above manually	13:50
-@HeikoS	without subsetting	13:50
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	14:11
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]	14:16
--!- travis-ci [~travis-ci@ec2-54-158-130-127.compute-1.amazonaws.com] has joined #shogun	14:28
-travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/201982436	14:28
--!- travis-ci [~travis-ci@ec2-54-158-130-127.compute-1.amazonaws.com] has left #shogun []	14:28
--!- mikeling [uid89706@gateway/web/irccloud.com/x-heyxhvoscogkbdtr] has joined #shogun	14:33
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	14:43
-@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608	14:46
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]	14:47
--!- travis-ci [~travis-ci@ec2-54-158-130-127.compute-1.amazonaws.com] has joined #shogun	15:25
-travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/202230853	15:25
--!- travis-ci [~travis-ci@ec2-54-158-130-127.compute-1.amazonaws.com] has left #shogun []	15:25
--!- suhas2go [uid201652@gateway/web/irccloud.com/x-dozyivljzebrwbwh] has joined #shogun	15:44
-CaBa	HeikoS: when CCustomKernel is initialized with a matrix, it creates CIndexFeatures somewhere internally?	16:09
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	16:20
-mikeling	hi HeikoS: I found there are several sub-projects for Shogun detox 2, is that mean I need to pick some sub-projects from them if I want to work on Shogun detox 2 as GSoC project?	16:24
-@HeikoS	CaBa: I think so	16:25
-@HeikoS	mikeling: hi!	16:25
-CaBa	HeikoS: i can't find that anywhere...	16:25
-@HeikoS	mikeling: yeah we will probably not be able to do them all	16:25
-@HeikoS	mikeling: this list will need to be made much more concrete	16:25
-mikeling	Sp, is Shogun detox 2 an independent project ? is that possible more than one students work on it?	16:26
-@HeikoS	mikeling: it also depends on how much of the last years projects we manage to fully integrate until gsoc 2016 starts	16:26
-@HeikoS	mikeling: I think it will be independent, but maybe a small subproject will be soved by another student, like the efficiency one or others	16:26
-@HeikoS	CaBa: why?	16:26
-CaBa	HeikoS: well i'm currently using 1-dimensional CDenseFeatures<uint32_t> for my own custom kernel hack, was wondering if CIndexFeatures would be more straight forward to use. so i was looking whether i can see them in action somewher	16:28
-@HeikoS	CaBa: I currently dont have a good idea in my head what the IndexFeatures do, but I did not write that stuff initially	16:29
-CaBa	^^	16:29
-mikeling	HeikoS: great! Thank you for your kindly explanation :)	16:30
-CaBa	HeikoS: https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/kernel/CustomKernel.cpp#L105	16:30
-@HeikoS	mikeling: no worries, looking forward to your application	16:30
-CaBa	HeikoS: looks as if CDummyFeatures are used and not CIndexFeatures	16:30
-@HeikoS	mikeling: definitely have a look at the cereal / tags / linalg branch from last years gsoc	16:30
-mikeling	HeikoS: great! Thank you for your kindly explanation :)	16:31
-CaBa	HeikoS: whereas i don't understand why this is initialized with 2 dummy features, one for kmatrix rows and one for cols... it should reflect the number of feature vectors, right? O.o	16:33
-@sukey	Pull Request #3608 "Clean up KNN"  merged by vigsterkr - https://github.com/shogun-toolbox/shogun/pull/3608	16:50
-@sukey	New Commit "Merge pull request #3608 from MikeLing/clean_up_KNN	16:50
-@sukey	Clean up KNN" to shogun-toolbox/shogun by vigsterkr: https://github.com/shogun-toolbox/shogun/commit/988fe1e4c3a39e1ca32f91d4a1933661bdbe2f07	16:50
-@wiking	ok this was a big one	16:50
-@wiking	:)	16:50
-CaBa	subsetting... is that a kernel thing or a feature thing?	16:57
-CaBa	feature it seems. and seems like dummyfeatures don't really support it but indexfeatures do. in a rather expensive fashion O.o	16:59
--!- travis-ci [~travis-ci@ec2-54-147-160-215.compute-1.amazonaws.com] has joined #shogun	17:43
-travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/202296292	17:43
--!- travis-ci [~travis-ci@ec2-54-147-160-215.compute-1.amazonaws.com] has left #shogun []	17:43
-@sukey	Issue #3630 "Shogun error in compilation at 68% " opened by ahmedmazari - https://github.com/shogun-toolbox/shogun/issues/3630	17:50
-@sukey	Issue #3630 "Shogun error in compilation at 68% "- https://github.com/shogun-toolbox/shogun/issues/3630	18:13
-@sukey	Issue #3630 "Shogun error in compilation at 68% "- https://github.com/shogun-toolbox/shogun/issues/3630	18:13
--!- mikeling [uid89706@gateway/web/irccloud.com/x-heyxhvoscogkbdtr] has quit [Quit: Connection closed for inactivity]	18:39
-@HeikoS	CaBa: well both!	18:59
-@HeikoS	CaBa: we are always happy to take patches :)	19:08
-CaBa	HeikoS: hm, i know. and i'm sure you don't want what i'm cooking right now :D	19:08
-@HeikoS	hehe ok	19:08
-@sukey	Pull Request #3617 "Port sgd svm example to meta"  closed by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3617	19:10
-lisitsyn	HeikoS: I'm trying to rebase feature/tags now	19:33
-lisitsyn	on top of develop	19:33
-lisitsyn	uhm	19:35
-lisitsyn	why	19:35
-lisitsyn	hahah	19:35
-lisitsyn	I totally forgot we merged it in	19:36
-lisitsyn	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/loss/SmoothHingeLoss.h#L9	19:39
-lisitsyn	TechnosmoothHingey	19:39
-lisitsyn	O_o	19:40
--!- abhinav [~abhinav@103.211.19.116] has joined #shogun	19:49
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 240 seconds]	20:06
-@sukey	Pull Request #3597 "Add Scala Interface"  synchronized by abhinavrai44 - https://github.com/shogun-toolbox/shogun/pull/3597	20:12
-@sukey	Issue #3459 "Compilation error with g++ 6.1" closed by vigsterkr - https://github.com/shogun-toolbox/shogun/issues/3459	20:23
-@sukey	Issue #3631 "How to import shogun in python ?" opened by ahmedmazari - https://github.com/shogun-toolbox/shogun/issues/3631	20:42
--!- abhinav [~abhinav@103.211.19.116] has quit [Ping timeout: 240 seconds]	20:45
-@sukey	Pull Request #3599 "fix invalid use of pre-declared class (#3459)"  closed by besser82 - https://github.com/shogun-toolbox/shogun/pull/3599	21:21
+@wiking	lisitsyn, you see, JIT https://haosdent.gitbooks.io/tensorflow-document/content/resources/xla_prerelease.html :)
+@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608
+@sukey	Pull Request #3620 "Add time comparison for KNN_KDTREE"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3620
+-!- remote [~remote@portemanteau.ca] has left #shogun []
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Remote host closed the connection]
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]
+-!- Guest85308 [~hazzard@142.54.173.74] has joined #shogun
+-!- Guest85308 [~hazzard@142.54.173.74] has quit [K-Lined]
+@sukey	Pull Request #3620 "Add time comparison for KNN_KDTREE"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3620
+-!- Guest78383 [~haha@223.13.66.34] has joined #shogun
+-!- Guest78383 [~haha@223.13.66.34] has quit [Ping timeout: 258 seconds]
+-!- Guest23603 [~ff@223.13.66.34] has joined #shogun
+-!- Guest23603 [~ff@223.13.66.34] has left #shogun []
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]
+-!- abhinav_ [~abhinav@202.173.126.154] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]
+-!- abhinav_ [~abhinav@202.173.126.154] has quit [Ping timeout: 260 seconds]
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]
+-!- abhinav_ [~abhinav@202.173.126.154] has joined #shogun
+-!- abhinav_ [~abhinav@202.173.126.154] has quit [Quit: Leaving]
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]
+-!- ShellcatZero [~ShellcatZ@cpe-76-93-136-67.san.res.rr.com] has quit [Ping timeout: 264 seconds]
+-!- ShellcatZero [~ShellcatZ@cpe-76-93-136-67.san.res.rr.com] has joined #shogun
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]
+@sukey	Wiki page: Google-Summer-of-Code-2017-Projects edited on shogun-toolbox/shogun by karlnapf
+@sukey	Wiki page: Google-Summer-of-Code-2017-Projects edited on shogun-toolbox/shogun by karlnapf
+ CaBa	HeikoS: heya
+ CaBa	HeikoS: have a minute?
+@sukey	Issue #3629 "Polish class API documentation" opened by karlnapf - https://github.com/shogun-toolbox/shogun/issues/3629
+@sukey	Issue #3629 "Polish class API documentation" karlnapf added label: "entrance" - https://github.com/shogun-toolbox/shogun/issues/3629
+@sukey	Issue #3629 "Polish class API documentation" karlnapf added label: "Documentation" - https://github.com/shogun-toolbox/shogun/issues/3629
+ CaBa	HeikoS: i'm writing that quick and dirty version of the customkernel that we were talking about the other day right now ;)
+@sukey	Wiki page: GSoC_2017_low_hanging_fruit edited on shogun-toolbox/shogun by karlnapf
+@HeikoS	CaBa: hi
+@HeikoS	yes
+ CaBa	HeikoS: and i guess i'm running into problems that already came up with CustomKernel, so i thought to ask l)
+ CaBa	HeikoS: for one, what is the scenario where lhs != rhs in a kernel? i guess that cannot be covered with precalculated kernels, right?
+@HeikoS	yes
+@HeikoS	this is when you want to apply the method to a new datapoint
+@HeikoS	i.e. you trained on X and then want to apply to Y that you havent seen when computing the kernel matrix for X
+@HeikoS	so in that case you need to precompute the kernel between X and Y before you can predict
+ CaBa	HeikoS: so how's that handled in the case of CCustomKernel? I saw some C++ code where ->set_kernel() was called with the testing precalc matrix...
+@HeikoS	you need to provide the kernel if you want to predict on new data
+@HeikoS	as f(x) = \sum_i alpha_i k(x_new, x_i)
+@HeikoS	wiking: jo around?
+@HeikoS	I got back from gunnar! finally :)
+@wiking	HeikoS, yes
+@wiking	sup?
+@HeikoS	- Feb 21, 2 or 3pm- Feb 22, 10 or 11am
+@HeikoS	whats better=?
+@HeikoS	the 11am I guess?
+@wiking	11 yes
+@HeikoS	cool
+@HeikoS	let me reply
+@wiking	but i can do 3 if need be
+@HeikoS	10 is better?
+@HeikoS	because it is 10 or 11
+@wiking	either is fine
+@HeikoS	ok then 11 better for me
+@HeikoS	wiking: cool
+@HeikoS	Ill write a little plan until then so we can present concrete things to gunnar and he just has to yes/no them
+@HeikoS	wiking: saw this https://github.com/shogun-toolbox/shogun/pull/3534#issuecomment-280154766
+@HeikoS	is that the one you warn about in cmake?
+@HeikoS	could do that as well and disable the test for that version?
+@wiking	dunno yet
+@wiking	i have to finish somethng
+@HeikoS	kk
+ CaBa	HeikoS: https://github.com/shogun-toolbox/shogun/blob/develop/examples/undocumented/libshogun/classifier_svmlight_string_features_precomputed_kernel.cpp#L110
+ CaBa	HeikoS: so that's the training / testing scheme for custom kernel?
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+@sukey	New Commit "remove message about unused variable warnings as they will just confuse users" to shogun-toolbox/shogun by karlnapf: https://github.com/shogun-toolbox/shogun/commit/6599b893c731e246e54bd140b4f6a8d858eb864f
+@HeikoS	CaBa: kind of
+@HeikoS	just here all data is known at training time
+@HeikoS	do you can precompute the test kernel matri xas well
+@HeikoS	but yeah
+@HeikoS	you see below that the precomputed test kernel matrices are passed
+@HeikoS	so it is that
+ CaBa	ah, so one approach is to concat training + testing data, then subset for training and subset for testing?
+@HeikoS	no
+@HeikoS	that is just one way to do it
+@HeikoS	but you could also imagine
+@HeikoS	you traing your model on all data
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]
+@HeikoS	and then, afterwards, you get new test data
+@HeikoS	and then you compute the kernel between train and test (no subsetting)
+@HeikoS	and then prediuct
+@HeikoS	here it is done with the subsetting since all data is known from the start
+ CaBa	yes. which will be the case for my usecase, too. sure, generally it is desirable to be able to work with new data at a later time
+ CaBa	HeikoS: is there a code snippet for "solution 1" somewhere?
+@HeikoS	CaBa: no dont think so
+@HeikoS	but it is easy
+@HeikoS	you just need to create the km_test matrix in your snippet above manually
+@HeikoS	without subsetting
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]
+-!- travis-ci [~travis-ci@ec2-54-158-130-127.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/201982436
+-!- travis-ci [~travis-ci@ec2-54-158-130-127.compute-1.amazonaws.com] has left #shogun []
+-!- mikeling [uid89706@gateway/web/irccloud.com/x-heyxhvoscogkbdtr] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]
+-!- travis-ci [~travis-ci@ec2-54-158-130-127.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/202230853
+-!- travis-ci [~travis-ci@ec2-54-158-130-127.compute-1.amazonaws.com] has left #shogun []
+-!- suhas2go [uid201652@gateway/web/irccloud.com/x-dozyivljzebrwbwh] has joined #shogun
+ CaBa	HeikoS: when CCustomKernel is initialized with a matrix, it creates CIndexFeatures somewhere internally?
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+ mikeling	hi HeikoS: I found there are several sub-projects for Shogun detox 2, is that mean I need to pick some sub-projects from them if I want to work on Shogun detox 2 as GSoC project?
+@HeikoS	CaBa: I think so
+@HeikoS	mikeling: hi!
+ CaBa	HeikoS: i can't find that anywhere...
+@HeikoS	mikeling: yeah we will probably not be able to do them all
+@HeikoS	mikeling: this list will need to be made much more concrete
+ mikeling	Sp, is Shogun detox 2 an independent project ? is that possible more than one students work on it?
+@HeikoS	mikeling: it also depends on how much of the last years projects we manage to fully integrate until gsoc 2016 starts
+@HeikoS	mikeling: I think it will be independent, but maybe a small subproject will be soved by another student, like the efficiency one or others
+@HeikoS	CaBa: why?
+ CaBa	HeikoS: well i'm currently using 1-dimensional CDenseFeatures<uint32_t> for my own custom kernel hack, was wondering if CIndexFeatures would be more straight forward to use. so i was looking whether i can see them in action somewher
+@HeikoS	CaBa: I currently dont have a good idea in my head what the IndexFeatures do, but I did not write that stuff initially
+ CaBa	^^
+ mikeling	HeikoS: great! Thank you for your kindly explanation :)
+ CaBa	HeikoS: https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/kernel/CustomKernel.cpp#L105
+@HeikoS	mikeling: no worries, looking forward to your application
+ CaBa	HeikoS: looks as if CDummyFeatures are used and not CIndexFeatures
+@HeikoS	mikeling: definitely have a look at the cereal / tags / linalg branch from last years gsoc
+ mikeling	HeikoS: great! Thank you for your kindly explanation :)
+ CaBa	HeikoS: whereas i don't understand why this is initialized with 2 dummy features, one for kmatrix rows and one for cols... it should reflect the number of feature vectors, right? O.o
+@sukey	Pull Request #3608 "Clean up KNN"  merged by vigsterkr - https://github.com/shogun-toolbox/shogun/pull/3608
+@sukey	New Commit "Merge pull request #3608 from MikeLing/clean_up_KNN
+@sukey	Clean up KNN" to shogun-toolbox/shogun by vigsterkr: https://github.com/shogun-toolbox/shogun/commit/988fe1e4c3a39e1ca32f91d4a1933661bdbe2f07
+@wiking	ok this was a big one
+@wiking	:)
+ CaBa	subsetting... is that a kernel thing or a feature thing?
+ CaBa	feature it seems. and seems like dummyfeatures don't really support it but indexfeatures do. in a rather expensive fashion O.o
+-!- travis-ci [~travis-ci@ec2-54-147-160-215.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/202296292
+-!- travis-ci [~travis-ci@ec2-54-147-160-215.compute-1.amazonaws.com] has left #shogun []
+@sukey	Issue #3630 "Shogun error in compilation at 68% " opened by ahmedmazari - https://github.com/shogun-toolbox/shogun/issues/3630
+@sukey	Issue #3630 "Shogun error in compilation at 68% "- https://github.com/shogun-toolbox/shogun/issues/3630
+@sukey	Issue #3630 "Shogun error in compilation at 68% "- https://github.com/shogun-toolbox/shogun/issues/3630
+-!- mikeling [uid89706@gateway/web/irccloud.com/x-heyxhvoscogkbdtr] has quit [Quit: Connection closed for inactivity]
+@HeikoS	CaBa: well both!
+@HeikoS	CaBa: we are always happy to take patches :)
+ CaBa	HeikoS: hm, i know. and i'm sure you don't want what i'm cooking right now :D
+@HeikoS	hehe ok
+@sukey	Pull Request #3617 "Port sgd svm example to meta"  closed by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3617
+ lisitsyn	HeikoS: I'm trying to rebase feature/tags now
+ lisitsyn	on top of develop
+ lisitsyn	uhm
+ lisitsyn	why
+ lisitsyn	hahah
+ lisitsyn	I totally forgot we merged it in
+ lisitsyn	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/loss/SmoothHingeLoss.h#L9
+ lisitsyn	TechnosmoothHingey
+ lisitsyn	O_o
+-!- abhinav [~abhinav@103.211.19.116] has joined #shogun
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 240 seconds]
+@sukey	Pull Request #3597 "Add Scala Interface"  synchronized by abhinavrai44 - https://github.com/shogun-toolbox/shogun/pull/3597
+@sukey	Issue #3459 "Compilation error with g++ 6.1" closed by vigsterkr - https://github.com/shogun-toolbox/shogun/issues/3459
+@sukey	Issue #3631 "How to import shogun in python ?" opened by ahmedmazari - https://github.com/shogun-toolbox/shogun/issues/3631
+-!- abhinav [~abhinav@103.211.19.116] has quit [Ping timeout: 240 seconds]
+@sukey	Pull Request #3599 "fix invalid use of pre-declared class (#3459)"  closed by besser82 - https://github.com/shogun-toolbox/shogun/pull/3599
 --- Log closed Fri Feb 17 00:00:28 2017

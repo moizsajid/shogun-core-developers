@@ -1,0 +1,1639 @@
+--- Log opened Tue Jul 23 00:00:43 2013
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- Netsplit *.net <-> *.split quits: shogun-notifier-
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Ping timeout: 240 seconds]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+-!- nube [~rho@49.244.18.229] has quit [Ping timeout: 246 seconds]
+ shogun-buildbot	build #401 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/401
+-!- Yanglittle [b74040fc@gateway/web/freenode/ip.183.64.64.252] has quit [Quit: Page closed]
+ shogun-buildbot	build #466 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/466
+-!- zxtx [~zv@rrcs-76-79-81-162.west.biz.rr.com] has quit [Ping timeout: 256 seconds]
+-!- nube [~rho@116.90.239.13] has joined #shogun
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Quit: WeeChat 0.3.7]
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has joined #shogun
+ gsomix	good morning
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- foulwall [~user@2001:da8:215:503:181f:cc72:682:e173] has joined #shogun
+-!- foulwall` [~user@2001:da8:215:503:e925:be30:a892:cbf3] has joined #shogun
+-!- foulwall [~user@2001:da8:215:503:181f:cc72:682:e173] has quit [Ping timeout: 264 seconds]
+ gsomix	sonney2k, can we try merge my code part by part? first small part is on github now.
+-!- foulwall` [~user@2001:da8:215:503:e925:be30:a892:cbf3] has quit [Ping timeout: 245 seconds]
+-!- foulwall` [~user@2001:da8:215:503:6871:a4b:3479:3809] has joined #shogun
+-!- gsomix_ [~gsomix@80.234.25.58] has joined #shogun
+-!- gsomix [~gsomix@88.200.188.178] has quit [Ping timeout: 245 seconds]
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 264 seconds]
+-!- gsomix_ is now known as gsomix
+-!- gsomix [~gsomix@80.234.25.58] has quit [Remote host closed the connection]
+-!- lambday [67157f4d@gateway/web/freenode/ip.103.21.127.77] has joined #shogun
+@iglesiasg	good morning
+-!- nube [~rho@116.90.239.13] has quit [Quit: Leaving.]
+-!- nube [~rho@116.90.239.13] has joined #shogun
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- lambday [67157f4d@gateway/web/freenode/ip.103.21.127.77] has quit [Ping timeout: 250 seconds]
+-!- foulwall` [~user@2001:da8:215:503:6871:a4b:3479:3809] has quit [Read error: Connection reset by peer]
+-!- foulwall` [~user@2001:da8:215:503:6871:a4b:3479:3809] has joined #shogun
+ thoralf	sonney2k: clang 3.2, but never used.  Why?
+@iglesiasg	thoralf: I think it was to try out that it compiles fine with the last changes in the compile flags for c++11
+ thoralf	iglesiasg: Thanks, I see.
+ thoralf	iglesiasg: About your comment on #1224
+ thoralf	iglesiasg: I think the difference is between o->method(&object_from_stack) and o->method(object_from_stack)
+ thoralf	iglesiasg: The latter one does not have "my" problem.  Only the first one: When getting the reference to this object, the reference counts won't be maintained.
+@iglesiasg	thoralf: I see
+@iglesiasg	thoralf: so objec_from_stack->method() is fine as well
+ thoralf	iglesiasg: you probably mean objec_from_stack.method()
+ thoralf	iglesiasg: Otherwise it's on the heap.
+@iglesiasg	thoralf: indeed :)
+ thoralf	:)
+@iglesiasg	with . not ->
+@iglesiasg	thoralf: then it is fine to use it as in Hushell's pR
+ thoralf	iglesiasg: I think you can do everything with objects on heap/stack.  Only giving away the reference for stack-objects is problematic.
+ thoralf	iglesiasg: Yes, I think so.
+@iglesiasg	thoralf: all right, thank you!
+-!- van51 [~van51@athedsl-399972.home.otenet.gr] has joined #shogun
+-!- HeikoS [~heiko@nat-179-227.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	iglesiasg: around?
+@iglesiasg	HeikoS: yeah
+-!- lambday [67157d36@gateway/web/freenode/ip.103.21.125.54] has joined #shogun
+ lambday	HeikoS: hi
+@HeikoS	lambday:  hi!
+ lambday	HeikoS: I coded up COCG_M, now writing tests
+ lambday	HeikoS: but I have a big doubt
+@HeikoS	lambday: yes?
+ lambday	HeikoS: in the iteration, they apply real linear operator A to vector p, and then compute p'Ap
+@HeikoS	ok?
+ lambday	so, if p and A are real, then how does it make a difference whether we use p.dot(Ap) or p.transpose()*Ap
+@HeikoS	lambday: linear algebra, dont know try it with an example ;)
+ lambday	HeikoS: well, for complex, it does! I checked! but for real I think they are same :-/
+ lambday	because for dot, they have to take the conjugate of p or something like that
+@HeikoS	lambday: what are the consequences?
+ lambday	HeikoS: consequence is, if for this case (real linear operator with real vector but complex shift) dot is same as the other one, then we won't have to call it COCG_M.. it will become just CG_M
+ lambday	I'll check whether they give same results for both of these
+@HeikoS	lambday: ahh I see
+@HeikoS	yeah better check this :)
+ lambday	HeikoS: oh and the meeting is tonight, right? 19:00 GMT?
+@HeikoS	lambday: yes tonight
+ lambday	HeikoS: what will be the topic? you said its really crucial for us to pass the mid-term
+@HeikoS	lambday: organisational
+@HeikoS	is everyone on track? problems? progress?
+@HeikoS	what does the mid-term mean?
+@HeikoS	how are the example ideas going?
+@HeikoS	ipython notebook examples
+-!- gsomix [~Miranda@80.234.25.58] has joined #shogun
+ gsomix	hey guys
+ lambday	HeikoS: ipython notebook example?
+ lambday	gsomix: hi :)
+@HeikoS	lambday: yes, we want all students to write one :)
+@HeikoS	http://nbviewer.ipython.org/5982623
+ lambday	HeikoS: okay...
+@HeikoS	lambday: remember everyone should do a big example?
+@HeikoS	in addition to small illustrating ones? the big one should be in the form of such a notebook
+@HeikoS	like a report for gsoc
+ lambday	HeikoS: yes... ours will be on the huge sparse matrix
+ lambday	HeikoS: alright... gotcha
+ gsomix	can I help with get_name methods in classes? it breaks many unit-tests.
+ lambday	gsomix: I fixed another one... will add in the next PR
+@HeikoS	gsomix: I will check the unit tests now, it might be that I need help :)
+@HeikoS	lambday:  did you do any recent changes to sparse features?
+@HeikoS	unit test fails, but did not before
+ lambday	HeikoS: I added complex
+ lambday	HeikoS: which one fails?
+@HeikoS	lambday: what do the unit tests on your machine do=?
+@HeikoS	SparseFeaturesTest.subset_get_full_feature_matrix_smaller
+ lambday	HeikoS: I'm checking
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ lambday	HeikoS: mine gives segfaults in ProductKernelTest.test_array_operations and does not progress any further :(
+@HeikoS	lambday: do you have the latest gut
+@HeikoS	giut
+@HeikoS	git
+@HeikoS	and make clean in tests before?
+ lambday	yes just did a git pull
+ lambday	checking again
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+ lambday	HeikoS: yes.. it gives segfaults..
+@HeikoS	ok
+@HeikoS	will try to fix it
+ lambday	HeikoS: but I added that before the clone unit-tests
+ lambday	it didn't give this fault that time :(
+@sonney2k	foulwall`, ping
+@HeikoS	lambday: I know I wrote these tests 2 weeks ago and they worked
+@HeikoS	ah I should not have let the unit tests fail for so long :(
+@HeikoS	now its hard to detect where this came from
+ lambday	:(
+ lambday	when I added complex for sparse features, these all were still good
+ lambday	I didn't change anything in past 1 week in that I guess
+@HeikoS	ok
+@HeikoS	thanks for checking
+ lambday	HeikoS: no problem.. let me know if I can do anything :(
+@HeikoS	foun dit
+ lambday	what was it?
+@HeikoS	changes in sparse features
+@HeikoS	there are more problems
+@HeikoS	good that we have some tests
+@sonney2k	HeikoS, hey...
+@HeikoS	sonney2k: hi
+@HeikoS	sonney2k: oh man, I will fix the tests asap now
+@HeikoS	some things already slipped through
+@sonney2k	van51, maybe having some shared thing similar to the tokenizers could help doing linear -> quadratic
+@HeikoS	sonney2k: maybe we should disable the equals tests for now
+@HeikoS	until they work
+@sonney2k	HeikoS, the other options is disable
+@sonney2k	yes
+@HeikoS	sonney2k: yeah maybe thats a good idea
+@HeikoS	sonney2k: do you know how to do that?
+@sonney2k	HeikoS, well I if you tell me what fails I just put the classes in some blacklist
+@HeikoS	sonney2k: no thats not the way to go
+@HeikoS	just disable the automated ones
+@HeikoS	should be fine
+@HeikoS	thunderstorm!
+@sonney2k	HeikoS, no it is the way to go so... we then know the failing tests
+@sonney2k	and can one by one fix them
+@sonney2k	HeikoS, good luck
+@sonney2k	I have yet to see a cloud here
+@HeikoS	haha :)
+@HeikoS	sonney2k: no its better to work on the equals tests at once
+@HeikoS	they are not stable yet
+ van51	sonney2k: hmm like a combiner?
+@HeikoS	disable all of them and try to fix before acitvating
+@sonney2k	gsomix, thanks a lot! much easier to digest
+ van51	sonney2k: are you referring to the case Benoit mentioned or in general?
+@HeikoS	wiking: around?
+@sonney2k	van51, like a CPreprocessor
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Evgeniy Andreev :develop * 865c0ea / / (3 files): https://github.com/shogun-toolbox/shogun/commit/865c0ea55e8d94144adae9ff4bb350a0c9eb06e6
+ shogun-notifier-	shogun: added convert_to_matrix method in SGVector
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 68cbe6a / / (3 files): https://github.com/shogun-toolbox/shogun/commit/68cbe6aa8ebb7e84a6b1a0d17b51c1b226c5a837
+ shogun-notifier-	shogun: Merge pull request #1271 from gsomix/feature/linereader
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: SGVector: convert_to_matrix method
+ gsomix	sonney2k: ok. next part will be little later.
+ gsomix	sonney2k: I'm so sorry for this. =___=
+@sonney2k	van51, no benoit's speedup is excellent
+@sonney2k	van51, apart from that it is exactly like you do it
+ van51	sonney2k: yeah I think it could be done in a CPreprocessor
+ van51	sonney2k: it is very costly though in dense features..
+@sonney2k	van51, I am just thinking of a framework that we can add to DotFeatures to compute other stuff
+@sonney2k	like quadratic features or the normalization you did
+ van51	sonney2k: yea sure I'm all for that
+@sonney2k	van51, anyway for now do the quadratic features as you do them
+ van51	sonney2k: I've got a question
+@sonney2k	van51, shoot
+ van51	sonney2k: you suggested yesterday to compare the results to  PolyKernel
+ van51	and that's what I tried to do in the example
+ van51	sonney2k: I think I also computed the terms like you said
+ gsomix	sonney2k: HeikoS is meeting today?
+@HeikoS	gsomix: yes
+@sonney2k	van51, and?
+ gsomix	HeikoS: UTC?
+ van51	sonney2k: the quadratic version is much slower
+ van51	especially in high dimensional data
+@HeikoS	gsomix: see email
+ van51	but that's expected I guess
+ gsomix	ah, thanks
+@HeikoS	gsomix: sorry dont know it by heart
+ van51	for how well they do now
+@HeikoS	evening
+ van51	should I test them on the same machine, with the same settings?
+@sonney2k	HeikoS, yay! http://www.heise.de/newsticker/meldung/Hoster-OVH-gehackt-Wir-waren-nicht-paranoid-genug-1921721.html
+@sonney2k	that's ours
+ van51	sonney2k: what I did was to use a linear machine again, svmocas, but it depends on the settings
+@HeikoS	sonney2k: our webserver?
+@HeikoS	nice!
+@HeikoS	good luck we are open-source
+@sonney2k	van51, ahh no do it differently
+@sonney2k	van51, create a very small example with 3 features / 2 examples
+@sonney2k	van51, then compute the PolyKernel (get_kernel_matrix())
+@sonney2k	van51, but don't use any normalization
+@sonney2k	van51, this polykernel has degree 2
+ shogun-buildbot	build #1497 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1497  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	van51, then use the dotfeatures and also compute the polykernel w/o normalization for degree=1 !
+@sonney2k	van51, elements of the two matrices should be the same then
+@sonney2k	lambday, I have an issue - with c++11 the diag[i].imag()-=0.75 in the test no longer works - do you know what the syntax for c++11 is?
+ van51	sonney2k: ok got it :)
+ shogun-buildbot	build #1496 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1496  blamelist: Evgeniy Andreev <gsomix@gmail.com>
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:5d1b:df57:7823:9146] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ gsomix	shogun-buildbot: leave me alone! :3
+-!- travis-ci [~travis-ci@ec2-23-22-213-64.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9388323
+-!- travis-ci [~travis-ci@ec2-23-22-213-64.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	HeikoS, I cannot sense any luck here...
+@HeikoS	sonney2k: ?
+@HeikoS	sonney2k: just fixed another 5 bugs
+@HeikoS	getting there
+@HeikoS	but its a lot of work alone
+@HeikoS	sonney2k: is multiclass svm abstract?
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 36595b2 / tests/unit/mathematics/logdet/DenseMatrixOperator_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/36595b23bac2332fcf188d8708cb3aafd376ca29
+@sonney2k	HeikoS, please push them!
+ shogun-notifier-	shogun: fix c++11 compile error
+@HeikoS	lambday: around?
+@HeikoS	lambday: please have a look into sparse features how the feature matrix is registered as a parameter
+@HeikoS	this work
+@HeikoS	the way in SparseMatrixOperator does not
+@HeikoS	I will fix it
+ thoralf	When I'm running "make -C shogun check-examples-r_static" in src, it recompiles everything, even if I just did a fresh build.
+ thoralf	Anyone knows why?
+ thoralf	Is there a special reason?
+@sonney2k	thoralf, it recompiles the examples always yes
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 1db31c8 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/1db31c8a6bbb38591459d3ab889f6bb630fbf593
+ shogun-notifier-	shogun: fixed some crashes in sparse features unit tests
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 97eb3ac / src/shogun/base/Parameter.cpp: https://github.com/shogun-toolbox/shogun/commit/97eb3acce2fdf852c19a1c89d389d68c3a6ce1b6
+ shogun-notifier-	shogun: fixed a memory issue related to uninitialised memory which should be NULL
+ shogun-notifier-	shogun: Heiko Strathmann :develop * e5f8b63 / src/shogun/mathematics/logdet/SparseMatrixOperator.cpp: https://github.com/shogun-toolbox/shogun/commit/e5f8b63e7e479fca83d760c6c9552cafe251675a
+ shogun-notifier-	shogun: changed sparse matrix parameter registering
+ shogun-notifier-	shogun: Heiko Strathmann :develop * d3697bf / / (4 files): https://github.com/shogun-toolbox/shogun/commit/d3697bf41307c13f6e1e44f391ee2e84eac232b3
+ shogun-notifier-	shogun: Merge pull request #1274 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix segfaults in unit tests
+ thoralf	sonney2k: No, not only the examples.  Even the library.
+@sonney2k	no way
+@sonney2k	thoralf, only if you git pull inbetween
+ thoralf	sonney2k: Even if I'm calling "make -C shogun check-examples-r_static" two times consecutively, it re-builds the library on the second call.
+ thoralf	sonney2k: No git operation in between.
+ shogun-buildbot	build #1499 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1499  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1500 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1500  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1498 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1498  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ thoralf	sonney2k: Okay, autosave touched the timestamp of the Makefile.
+@sonney2k	thoralf, hah!
+@sonney2k	HeikoS, I don't understand why tests fail just now? The sparse change is from June 11 ...
+-!- gsomix [~Miranda@80.234.25.58] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+@HeikoS	sonney2k: I hav eno idea
+@HeikoS	sonney2k: but that caused it
+@HeikoS	sonney2k:  fixed it anyways
+@HeikoS	I am confident currently
+@HeikoS	not many more fial
+@HeikoS	fail
+@HeikoS	none crashes
+@sonney2k	stuff still crashes here
+@sonney2k	foulwall`, please don't allow uploading of images... some fixed examples are sufficient
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:5d1b:df57:7823:9146] has quit [Ping timeout: 245 seconds]
+@HeikoS	sonney2k: /home/heiko/Desktop/shogun/shogun/src/shogun/../shogun/lib/Set.h:73: undefined reference to `void shogun::CSGObject::set_generic<shogun::CFeatures*>()'
+@HeikoS	collect2: error: ld returned 1 exit status
+@HeikoS	sonney2k: how to handle this?
+ shogun-notifier-	shogun: van51 :develop * 58c758e / src/shogun/features/ (9 files): https://github.com/shogun-toolbox/shogun/commit/58c758ec2acc8824803f0c779a3c8651033f3dc2
+ shogun-notifier-	shogun: Fixed implicit conversion to NULL warnings
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 78303d0 / src/shogun/features/ (9 files): https://github.com/shogun-toolbox/shogun/commit/78303d0164dfbdfff2471118dfd34df1bec3c209
+ shogun-notifier-	shogun: Merge pull request #1272 from van51/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed travis warnings for implicit conversion from NULL to bool
+@sonney2k	HeikoS, where does this happen?
+@HeikoS	sonney2k:
+@HeikoS	set_generic for Set.h is not called
+@HeikoS	this is what I get when I try to add the call
+ shogun-buildbot	build #1501 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1501  blamelist: van51 <vangelis_51@hotmail.com>
+@sonney2k	HeikoS, the only fix is to add to shogun/base/SGObject.cpp
+@sonney2k	template<> void CSGObject::set_generic<CFeatures*>()
+@HeikoS	sonney2k: this is ridiculus
+@HeikoS	we cannot add this for all classes
+@sonney2k	HeikoS, maybe template<> void CSGObject::set_generic<CSGObject*>() will work
+-!- iglesiasg [~iglesias@2001:6b0:1:1041:d38:c6f9:14dc:bce8] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@sonney2k	HeikoS, does it?
+@HeikoS	sonney2k: fixing other things
+@HeikoS	man the eternal stream of bugs
+@sonney2k	HeikoS, ok committing that then
+ shogun-buildbot	build #1502 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1502  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ lambday	sonney2k HeikoS sorry I was away
+ lambday	sonney2k: I remember when I added that I used c+11 syntax and it gave error
+ lambday	sonney2k: I guess it was something like num.imag(val); for c++11
+ lambday	HeikoS: does it create problem? I added param reg for SGSparseMatrix that's why I did it that way in CSparseMatrixOperator :(
+@sonney2k	lambday, look at what I did... we have some C++11 for some stuff now (optional...) so the old syntax was causing issues
+ lambday	sonney2k: okay I am checking
+ van51	sonney2k: the quadratic features I m working on now, are for hashed dense features, so the resulting dot product is from the hashed representations and it's different
+ lambday	sonney2k: its awesome
+@sonney2k	lambday, ??
+ lambday	sonney2k: so we can use c++11 specific things? I heard that they have all those map lambda things too
+@sonney2k	van51, what do you get? what are the examples?
+@sonney2k	lambday, well you have to ifdef HAVE_CXX11 though and we might need to add a particular test to configure for the feature you are trying to use?
+ van51	https://gist.github.com/van51/6061917
+ van51	sonney2k: ^
+ lambday	sonney2k: as of now I am not using anything specific... but good to have that test if we can use some.. I'll try something
+@sonney2k	lambday, I use that only to have no overhead in SGReferencedData (atomic<int> for refcount is just 4 bytes)
+-!- nube [~rho@116.90.239.13] has quit [Ping timeout: 276 seconds]
+@sonney2k	van51, that all doesn't make sense look at http://www.shogun-toolbox.org/doc/en/current/classshogun_1_1CPolyKernel.html
+@sonney2k	it should be (5+1+1)**2 == 49 for the first element
+@sonney2k	sry
+@sonney2k	(5*5 + 1*1 + 1*1)**2 = 729
+@sonney2k	so kernel matrix is correct
+ lambday	sonney2k: just checked.. I am not sure what atomic does.. some sync/mutex stuffs?
+@sonney2k	van51, I see the bug
+@sonney2k	van51, let me comment it
+-!- nube [~rho@116.90.239.3] has joined #shogun
+@sonney2k	lambday, yes it is guaranteed that when >1 thread do +=1 the result will be correct
+@sonney2k	lambday, otherwise we get crashes/leaks
+@sonney2k	iglesiasg, cool you have a customer now :)
+@iglesiasg	sonney2k, yeah! haha
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 6681582 / src/shogun/base/SGObject.cpp: https://github.com/shogun-toolbox/shogun/commit/6681582dd33849c6c2d87cb6d4af3178efe57d20
+ shogun-notifier-	shogun: add CSGObject as supported serialization PT
+ van51	sonney2k: I get why you say that there, but that's just the seed
+@iglesiasg	sonney2k, let see if we get someone apart from me to do something with the structured framework
+ van51	sonney2k:  I mean the value is still hashed and discretized so the kernel matrices will still be different
+@sonney2k	van51, errm the value should not be hashed but the index!
+@sonney2k	sry misread that
+@sonney2k	van51, we want to hash the index - the value stays v[i]*v[j]
+ van51	sonney2k: so you don't keep a counter anymore
+-!- nube [~rho@116.90.239.3] has quit [Quit: Leaving.]
+ van51	sonney2k: the index is hashed for a new index and the value is added there?
+-!- travis-ci [~travis-ci@ec2-23-22-213-64.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9389241
+-!- travis-ci [~travis-ci@ec2-23-22-213-64.compute-1.amazonaws.com] has left #shogun []
+@iglesiasg	sonney2k, I actually had come across some work by Sebastien (who asked the question) a few months ago
+@iglesiasg	the errata list of a book
+@sonney2k	van51, yes exactly
+@sonney2k	van51, clear or not?
+ van51	sonney2k: i get what you mean, it's just different from what I had understood in the beginning
+@sonney2k	van51, ok - when we explode feature spaces and compress them with hashing we do this only on the indices. so quadratic is just that
+@sonney2k	anyway I guess now you know what to do
+ shogun-buildbot	build #1503 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1503  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ van51	sonney2k: ok so my question is this: this addition of the value to the hashed index is also for numerical features w/o quadratic or just when you want the index of quadratic features?
+ van51	sonney2k: I mean should the default behavior of hasheddensefeatures for ints w/o quadratic be to add the value to the hashed index, or  keep a counter like it does now?
+-!- gsomix [~gsomix@80.234.25.58] has joined #shogun
+ gsomix	privet :P
+ thoralf	privet :)
+ gsomix	sonney2k, around?
+@sonney2k	gsomix, what's up?
+ gsomix	sonney2k, another part
+ gsomix	just a moment
+-!- travis-ci [~travis-ci@ec2-23-22-213-64.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9389778
+-!- travis-ci [~travis-ci@ec2-23-22-213-64.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	van51, I couldn't parse the sentence sorry - for quadratic features it is *always* like v[i]*v[j] + hash(i*size +j)
+@sonney2k	van51, does that explain it?
+ gsomix	sonney2k, https://github.com/shogun-toolbox/shogun/pull/1275 ~500 lines :(
+ van51	sonney2k: yes I think I'm clear on quadratic features
+ van51	sonney2k: apart from them, on the simple case of using hashing on dense features of ints
+ van51	sonney2k: when you get the hashed index, you add the value of the current dimension or do you +1?
+ van51	sonney2k: from what you're saying about the quadratic features it follows to do the first
+ van51	sonney2k: but I remember asking Olivier and telling me the second
+@sonney2k	van51, you are thinking in terms of hashedDocFeatures now
+@sonney2k	van51, there v[i] = 1 for all i
+@sonney2k	van51, except when you normalize then it is some other constant
+ van51	sonney2k: so the current behavior of hasheddense is incorrect
+@sonney2k	van51, so v[i]*v[j] should be c**2
+@sonney2k	van51, did you fix it now?
+@sonney2k	s/now/already?
+ van51	sonney2k: not yet
+@sonney2k	then not :)
+ foulwall`	sonney2k: gotcha. that's easy to do without image uploading, but if the demo converts the image to matrices and downsample in the client side and just do json exchange with server, not real file upload. Can I do it in that way?
+ van51	sonney2k: I will close this PR to fix this first
+@sonney2k	van51, I then don't understand your question
+@sonney2k	foulwall`, you mean you still upload images to the server? what I don't like about it is that you have to think *HARD* about security
+ van51	sonney2k: heh
+ van51	sonney2k: I'll comment on my PR
+ van51	sonney2k: maybe on the code it will be easier to express what I mean
+ foulwall`	not the file but a json with the matrix, the convert can be done in client.
+@sonney2k	foulwall`, you mean a byte matrix that you check for sizes etc on the server?
+-!- travis-ci [~travis-ci@ec2-23-22-213-64.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9390787
+-!- travis-ci [~travis-ci@ec2-23-22-213-64.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	foulwall`, I have seen people exploiting bugs like too long string in the browser url gives you a shell on the client
+ lisitsyn	just give user a choice what dataset to embed
+ lisitsyn	I think that's all
+ lisitsyn	and some parameters
+ thoralf	lisitsyn, sonney2k: Yes, that should be enough.
+ thoralf	Have spent enough time exploiting web applications for this ;)
+ foulwall`	argh, I see.
+ foulwall`	thanks thoralf lisitsyn sonney2k , I'll make a simple one now
+ foulwall`	:)
+@sonney2k	gsomix, what do you need CReader for?
+ gsomix	sonney2k, interface for readers. I have one more - StringReader where source for reading is SGVector<char>.
+@sonney2k	gsomix, I don't see the relation to CFile?
+@sonney2k	I am just worried that CFile is already doing sth like that
+ gsomix	sonney2k, there is no relation to CFile. CFile for access to file format classes, CReader for reading ascii data from sources.
+ gsomix	*err CFile for access to file formats
+ gsomix	sonney2k, CFile reads and writes whole vectors, matrices, lists.
+-!- HeikoS [~heiko@nat-179-227.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+@sonney2k	gsomix, when you have an SGMatrix now and want to load it from a .csv
+@sonney2k	gsomix, how is it done then?
+-!- HeikoS [~heiko@nat-179-227.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@sonney2k	gsomix, I just don't get how it works
+ gsomix	sonney2k, I just should create CCSVFile object.
+ gsomix	it's in a third part of big pack
+ gsomix	^___^
+@sonney2k	and then you get it as result of CCSVFile or is that CCSVFile deriving from CFile?
+ gsomix	CCSVFile is inheritor of CFile
+ gsomix	and have methods for reading vectors, matrices, string lists
+ gsomix	LineReader is inheritor of CReader
+ gsomix	and have methods for reading substings and data types from file stream
+ gsomix	and CCSVFile uses CFileReader
+ gsomix	err, FileReader is inheritor of CReader
+@sonney2k	van51, yes no extra treatment for wrong collisions
+@sonney2k	van51, for your hasheddocfeatures you might have the same n-gram appear twice - then you would need sth like this.
+@sonney2k	gsomix, it is confusing to have CFile CFileReader and CReader :/
+ gsomix	sonney2k, hm, I can rename it. :)
+@sonney2k	gsomix, this CReader will only read primitive types right? Also only ascii or other data later?
+ gsomix	sonney2k, only primitive types, yes. not only, we can write Reader for binary data, or for reading from net...
+@sonney2k	gsomix, I mean it is kind of CFile but just for scalar values?
+ gsomix	sonney2k, yep
+ gsomix	I'm also implementing CWriter
+ gsomix	for writing stuff
+ gsomix	so, there will be CReader, CWriter and complex CFile, that can use last two.
+@sonney2k	gsomix so you would refactor CFile to have a Reader and a Writer?
+ gsomix	sonney2k, I don't think. I mean that some of objects from CFile's class can use reader and writers.
+ gsomix	so, CFile it's just interface + FILE*
+ gsomix	I hope it's not too complex architecture :/
+ gsomix	java style
+@sonney2k	well I am still confused :/
+ gsomix	sonney2k, :C
+ gsomix	sonney2k, what's not clear?
+@sonney2k	gsomix, I don't understand the benefit of these readers
+@sonney2k	I would have expected these scalar read to be in some class derived from CFile
+@sonney2k	and maybe on top of this some helpers
+ gsomix	sonney2k, it is convenient. look, I have FileReader (for reading lines from csv) and StringReader (for reading/tokenizing primitive types from these lines) in CCSVFile
+ gsomix	both FileReader and StringReader have CTokenize inside for tokenizing
+ gsomix	result -> not many code, clear
+-!- foulwall` [~user@2001:da8:215:503:6871:a4b:3479:3809] has quit [Ping timeout: 245 seconds]
+@sonney2k	gsomix, maybe an example helps
+@sonney2k	gsomix, you do csv parsing by
+@sonney2k	reading line by line right
+@sonney2k	then you read the individual elements (scalar values)
+@sonney2k	gsomix, who does what now?
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 2809328 / src/shogun/ (31 files): https://github.com/shogun-toolbox/shogun/commit/28093287e955c0b4822dcc75079f40d90f9f6a68
+ shogun-notifier-	shogun: fixed many more unit test segfaults and non-passes. Mostly uninitialised memory, wrong get_name, wrong generic type
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 496e0aa / src/shogun/ (31 files): https://github.com/shogun-toolbox/shogun/commit/496e0aacf1bc6cc7cd0e7c76bf5ac9eaa98f5178
+ shogun-notifier-	shogun: Merge pull request #1276 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fixed many more unit test segfaults and non-passes.
+ gsomix	sonney2k, http://pastebin.com/pSbeTx75
+ gsomix	line_reader is CFileReader object
+ gsomix	reader is CStringReader object
+ gsomix	so, reading line by line it's work for line_reader
+ gsomix	reading of individual elements is work for reader
+ gsomix	this code is part of get_vector method
+ gsomix	in CCSVFile
+@sonney2k	gsomix, but CFileReader also reads int / bool etc?
+@sonney2k	so it is doing both? reading lines and parsing? or what is this for?
+@sonney2k	I mean I understand that you need a line reader and some parser of a line that you have read
+ gsomix	sonney2k, yep, CFileReader can read data types
+ gsomix	maybe it will be useful some day
+@HeikoS	sonney2k: I added set_generic_sgobject()
+@HeikoS	to CSGObject
+@HeikoS	sonney2k: but we totally should forbid T=SG*
+@HeikoS	thats evil
+ gsomix	sonney2k, reading lines it's just reading substring with '\n' delimiter
+ gsomix	*err, is
+@sonney2k	HeikoS, does     template<> void CSGObject::set_generic<CSGObject*>() work?
+@HeikoS	sonney2k: no
+ gsomix	sonney2k, parsing is just reading line and atoi/strtol
+@HeikoS	only classname itself
+@sonney2k	HeikoS, you mean it needs the real class in there?
+@HeikoS	yes
+@sonney2k	HeikoS, interesting. Didn't know that
+@HeikoS	sonney2k: ah one issu
+@HeikoS	using set_generic_sgobject is not good I just realise
+@HeikoS	since its only possible to use CSGObject classes as template argument then
+@sonney2k	gsomix, maybe it is better to have a LineReader class that really just reads line by line and then a ParseLine class with your Reader Interface
+@HeikoS	sonney2k: so maybe add all cases we need with the above way then?
+@sonney2k	HeikoS, wait I mean we only want to support uint8_t ... complex* and CSGObject* right?
+@HeikoS	yes
+@HeikoS	ah shit
+@HeikoS	so we have to do the one by one thing
+@sonney2k	HeikoS, ???
+@HeikoS	sonney2k: we have to do template<> void CSGObject::set_generic<CFeatures*>()
+ shogun-buildbot	build #1504 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1504  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	for each class
+@sonney2k	HeikoS, why that?
+@HeikoS	sonney2k: what other way?
+@HeikoS	is there?
+@sonney2k	HeikoS, what is wrong with your set_generic_sgobject?
+@sonney2k	or *_object
+@HeikoS	sonney2k: imagine CSet
+@HeikoS	you want to use that on PT_BOOL
+@HeikoS	and also on PT_SGOBJECT
+@sonney2k	all it does is just set         m_generic = PT_SGOBJECT;
+@HeikoS	if I just call set_generic<T>() I get a problem with SGOBJECT
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+@sonney2k	HeikoS, not in the same CSet though
+@HeikoS	if I call set_generic_sgobject() I get a problem with PT_BOOL
+ gsomix	sonney2k, why? then LineReader is just FileReader w/o read_int, read_readl, etc methods.
+@sonney2k	I see
+@HeikoS	sonney2k: I have to call it in the constructor right?
+ gsomix	I just can rename it to StreamReader, for example
+@sonney2k	you don't know the type is what you mean
+@HeikoS	where I dont know whether T is a class or a primitive type
+ gsomix	not so confusing
+@HeikoS	sonney2k: yes
+@sonney2k	HeikoS, argh!
+* gsomix afk
+@HeikoS	but we did this in the CDynamicObjectArray
+@HeikoS	sonney2k: there we said that T has to be a subclass ob CSGOBject
+@HeikoS	that is how it should be done in my eyes
+@sonney2k	gsomix, but then just drop the CFileReader and keep the parser I mean why do you need the CFileReader then?
+@HeikoS	or add one by one
+@HeikoS	sonney2k: what do you think?
+@sonney2k	HeikoS, true true
+@sonney2k	that is why we did it that way for DynamicObjectArray
+@sonney2k	so we would need CSet and CObjectSet *shrug*
+@HeikoS	sonney2k: yep
+@sonney2k	etc
+ shogun-buildbot	build #1505 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1505  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	there are three classes
+@HeikoS	that currently fail the tests here
+@HeikoS	which are cause by this problem
+@sonney2k	HeikoS, actually if CSet etc is calling SG_REF it should be named like it right?
+@sonney2k	same for map etc
+@HeikoS	sonney2k: does it do that?
+@sonney2k	lets see
+@sonney2k	no
+@sonney2k	so it would leak memory with CSGObject types anyways
+@HeikoS	sonney2k: ouch
+@HeikoS	no it does not
+@HeikoS	and it hashes the objects
+@HeikoS	so it hashes pointers to SGObjects
+@sonney2k	HeikoS, yeah but just consider someone putting in objects
+@sonney2k	these might be gone
+@sonney2k	if not manually REF'd
+@HeikoS	sonney2k: so no SGObject for CSet
+@sonney2k	exactly
+@sonney2k	same for CMap
+@HeikoS	ok then
+@HeikoS	argh
+@HeikoS	so much stuff
+@HeikoS	sonney2k: dynamicobject array is not even generic
+@HeikoS	sonney2k: so can you de-activate a few examples for me?
+@HeikoS	sonney2k: Set, ParseBuffer, TreeMachine
+ shogun-notifier-	shogun: Heiko Strathmann :develop * d53e415 / src/shogun/io/MemoryMappedFile.h,src/shogun/io/SimpleFile.h: https://github.com/shogun-toolbox/shogun/commit/d53e4151e553a7d786382d31ab08132f496facca
+ shogun-notifier-	shogun: fixed generics to pass unit-tests
+ shogun-notifier-	shogun: Heiko Strathmann :develop * c48a483 / src/shogun/io/MemoryMappedFile.h,src/shogun/io/SimpleFile.h: https://github.com/shogun-toolbox/shogun/commit/c48a4836a16a5c5ba991ca81bbd87e99dc1f6544
+ shogun-notifier-	shogun: Merge pull request #1277 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fixed generics to pass unit-tests
+ van51	sonney2k: when you have time can you check this : https://github.com/van51/shogun/commit/a46a05f62d0bc6779b20c87e6c41e22819ad92a5 ?
+@HeikoS	sonney2k: all other unit tests work now
+@HeikoS	just those three classes are failing due to the above issues
+-!- foulwall` [~user@2001:da8:215:c252:2d09:69b3:4be7:def2] has joined #shogun
+@sonney2k	HeikoS, you mean in the autgenerated tests right?
+@sonney2k	sry gtg
+@sonney2k	hike time
+ gsomix	sonney2k, for the future. I mean one time we will need reading data types directly from file stream
+ shogun-buildbot	build #1506 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1506  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ lambday	HeikoS: sending a PR for CG_M
+ thoralf	HeikoS: Is there a way of checking how many references are still alive in shogun?
+ thoralf	HeikoS: I'd like to add an assertion in one of my tests... ;)
+ shogun-buildbot	build #1507 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1507  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+-!- nube [~rho@36.252.254.22] has joined #shogun
+-!- nube [~rho@36.252.254.22] has quit [Read error: Connection reset by peer]
+-!- nube [~rho@49.126.160.86] has joined #shogun
+@HeikoS	lisitsyn:  around?
+@HeikoS	lambday: checking :)
+@HeikoS	thoralf: that is hard to to, but you can enable trace memory allocation to do this. It is not always stable though
+@HeikoS	thoralf: please dont add assertions to your tests
+@HeikoS	thoralf: we rather want to valgrind them at some point
+@iglesiasg	sonney2k, wiking, lisitsyn, HeikoS: I have an old version of SWIG and SWIG 2. something in a machine, but the configure script detects the old one and fails
+ thoralf	HeikoS: No worries.  Its just for personal use.
+@iglesiasg	any way of telling it I want to use swig2.0?
+@iglesiasg	from the command line I can do without problems swig and swig2.0
+@iglesiasg	versions 1.3.29 and 2.0.4, respectively
+@HeikoS	iglesiasg: no idea
+@HeikoS	thoralf: so configure with --enable-trace-mallocs
+@HeikoS	then shogun_exit() will tell you how many objects there are and where
+@HeikoS	thoralf: its probably possible to call this function alone
+ thoralf	HeikoS: That's great.  Thanks.
+ lambday	HeikoS: travis build didn't start yet :-/
+-!- nube [~rho@49.126.160.86] has quit [Ping timeout: 268 seconds]
+ lambday	HeikoS: let me know if you agree to the additional interface I added to fit cg_m into CLinearSolver
+ lambday	HeikoS: the problem was, current template structure allowed to return only real vector for solve method if we give it real operator and real vector..
+ lambday	HeikoS: but we have additional complex shifts/weights which makes the solution vector complex...
+ lambday	HeikoS: now converting the operator to complex each time would have been bad I think
+@iglesiasg	HeikoS, it was just --swig=swig2.0 finally
+@HeikoS	iglesiasg: I see :)
+ lambday	HeikoS: so this new interface is flexible, as in, it returns complex solution, if we give it real operator, real vector but complex shifts
+-!- nube [~rho@36.252.236.22] has joined #shogun
+@HeikoS	lambday: btw I just realised these double generics will cause problems
+ lambday	HeikoS: problem with?
+@iglesiasg	HeikoS, I was creating an alias and putting it in .bashrc and at the end I just grep the configure file to see how the swig check is done and saw the option by chance :D
+@HeikoS	serialisation, clone etc will not be possible
+@HeikoS	lambday: this set_generic stuff
+ lambday	HeikoS: but for class member vars, it only uses one generic for whatever I have added
+@HeikoS	lambday: ah I see
+ lambday	HeikoS: other type is for methods.. that doesn't store anything
+ lambday	so set_generic can work, right?
+@HeikoS	but the instances themselves?
+@HeikoS	also how about python, will they be accessible form outside
+@HeikoS	since for python, one has to manually fix the template parameters
+-!- Cheng [~yaaic@ip-109-45-0-78.web.vodafone.de] has joined #shogun
+ lambday	HeikoS: which classes will we expose to python modular interface??
+ lambday	HeikoS: most of the things are internal
+@HeikoS	lambday: we can choose
+@HeikoS	lambday: ok then
+@HeikoS	then everything is fine :)
+ lambday	HeikoS: I am not sure :( we'll have to see :(
+ Cheng	Just checking that I can log in. Will be back later.
+-!- Cheng [~yaaic@ip-109-45-0-78.web.vodafone.de] has quit [Client Quit]
+@HeikoS	Cheng: :)
+ lambday	HeikoS: but since class members are of same type, I don't think we'd face problem if we set generic with that type, no?
+@HeikoS	lambday: what do you mean?
+ shogun-notifier-	shogun: root :develop * 5fc0bd0 / / (18 files): https://github.com/shogun-toolbox/shogun/commit/5fc0bd08aca6b9e4a253dc704b8e0f8c5706e1de
+ shogun-notifier-	shogun: cg_m added, template structure changed for linear solver
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 0767425 / / (18 files): https://github.com/shogun-toolbox/shogun/commit/0767425659ae6ef698efc2322c60ad23ef9e1a32
+ shogun-notifier-	shogun: Merge pull request #1278 from lambday/feature/log_determinant
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: cg_m added, template structure changed for linear solver
+ lambday	and mostly generics are abstract... final subclasses are mostly non-generic
+ lambday	HeikoS: say, I used template<class T, class ST=T> class A... but its members all use T, one of its methods takes an argument may be which s ST
+ lambday	and also, ST default is T
+ lambday	HeikoS: will that solve the problem with python?
+ foulwall`	Cheng, got your email and replying.
+ lambday	by "members all use T" I meant attributes...
+@HeikoS	lambday: sorry re
+@HeikoS	lambday: I see
+@HeikoS	so why have this double template if you dont use it
+ lambday	HeikoS: say, CIterativeLinearSolver is double template.. which has abstract solve(CLinearOperator<T>, SGVector<ST>), return type is SGVector<T>
+@HeikoS	lambday: ok
+ lambday	HeikoS: now, one of its subclass, CConjugateGradientSolver uses T=ST=float64_t
+@HeikoS	so this class can never be serialised nor visible to python
+@HeikoS	lambday: but it is abstract right?
+ lambday	HeikoS: and another subclass CConjugateOrthogonalCG uses T=complex64_t, ST=float64_t
+@HeikoS	so the subclass is not even generic
+ lambday	yes
+@HeikoS	lambday: great
+@HeikoS	lambday: great job
+@HeikoS	great latest patch also btw
+ lambday	HeikoS: is it the right way to do it?
+ lambday	thanks :)
+@HeikoS	lambday: could you pls run the unit tests locally and tell me what happens?
+ lambday	HeikoS: the only place the final child classes are double generic is CLinearOperator
+ shogun-buildbot	build #1508 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1508  blamelist: root <root@cfdvs4-2.cfdvs.iitb.ac.in>
+ lambday	HeikoS: all of them?
+@HeikoS	lambday: yes
+@HeikoS	lambday: the linear operator is a class member though right?
+ lambday	HeikoS: alright... checking
+ lambday	HeikoS: yes.. but there also the matrix is of T type, so set generic uses T, but apply is like SGVector<T> CLinearOperator<T>::apply(SGVector<ST> vector);
+-!- van51 [~van51@athedsl-399972.home.otenet.gr] has quit [Quit: Leaving.]
+ lambday	HeikoS: I should do a git pull again before running the tests
+@HeikoS	yes do
+@HeikoS	lambday: I didnt get that
+ shogun-buildbot	build #1509 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1509  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ lambday	HeikoS: https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/mathematics/logdet/DenseMatrixOperator.cpp
+ lambday	this is what I used
+ lambday	its a double template class, but set generic sets T as the type
+ lambday	just its apply method, which is no more abstract, takes a vector of type ST as an argument, and returns another vector of type T as an argument
+ lambday	oops
+@HeikoS	what does template class CDenseMatrixOperator<complex64_t>; create?
+ lambday	ignore the last "as an argument"
+ lambday	HeikoS: T=ST=complex64_t
+@HeikoS	okay, those should be fine if set_generic<T>() was called
+ lambday	since default for ST is T
+@HeikoS	but what about template class CDenseMatrixOperator<complex64_t, float64_t>;
+ lambday	that calls set_generic<complex64_t> (since the matrix inside it is of complex type)
+@HeikoS	lambday: so it should not cause any problems
+@HeikoS	wow, thats actually quite nice
+ lambday	but apply can take a real vector and that complex operator can be applied and returns a complex vector
+@HeikoS	yep I get it
+@HeikoS	cool
+@HeikoS	very nice
+ lambday	thanks :)
+ lambday	HeikoS: CG_M unit-tests show similar performance with normal CG for those small unit-tests
+@HeikoS	lambday: I mean at the end, people will not necessarily use all those internals but just the logdet approx class which has some default settings
+@HeikoS	lambday: ok good!
+ lambday	HeikoS: yes that's what I thought
+@HeikoS	lambday: how about the unit tests?
+ lambday	HeikoS: well, since these CG solvers of ours can work with dense matrix too.. so I thought of checking its performance before I move on to Lanczos
+ lambday	HeikoS: oh checking :D
+-!- travis-ci [~travis-ci@ec2-54-224-203-225.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9395154
+-!- travis-ci [~travis-ci@ec2-54-224-203-225.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	lambday: ok
+ lambday	HeikoS: do you think it would be okay to use eigen3 objects as parameters of protected methods for a "C" class?
+@HeikoS	protected is fine yet
+@HeikoS	yes
+ lambday	HeikoS: I was afraid and used SGVectors everywhere
+@HeikoS	lambday: not optimal, but if that avoids re-computing sparse matrices, then yes do it
+ lambday	HeikoS: no its just the vectors, I don't think SGVector instead of eigen3::Vector will slow things down that much
+ lambday	HeikoS: the places I used didn't even need dot products or anything vector-specific - just accessing elements one by one.. so SG is fine I guess
+ lambday	HeikoS: non-technical question - you play base guitar? :D
+ lambday	HeikoS: btw unit-tests give segfaults for clone_equals_LineReader and stops :(
+@HeikoS	lambday:  no it wont slow things down
+ lambday	HeikoS: SGObject.clone_equals_SNPStringKernel too fails
+@HeikoS	lambday: not much overhead
+@HeikoS	I hope at least
+@HeikoS	lambday: no, but normal guitar
+ lambday	phew!
+@HeikoS	just a bit of base guitar
+@HeikoS	lambday: it depends how often this stuff is called, but we do not have to allocate new memory (which is slow)
+ lisitsyn	HeikoS: just got back
+@HeikoS	lisitsyn: could you disable automagic unit tests for  Set, ParseBuffer, TreeMachine
+ lambday	HeikoS: yes.. for CG_M things, I used same memory whenever I could.. krylstat used unnecessary vectors at a few places, I didn't use them
+@HeikoS	lisitsyn:  these are highly non-trivial to fix
+@HeikoS	lambday: good! then we will be even faster :)
+@HeikoS	(and more stable, tested etc)
+@HeikoS	and interfaces
+@HeikoS	=world dominance
+ lambday	lol :D
+ lambday	but I am scared to see CG_M performing on that huge matrix :-s
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 8180b78 / src/shogun/features/PolyFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/8180b78d2d64521c75a15b27be9d8f5561b6085e
+ shogun-notifier-	shogun: fixed an uninitialised memory issue
+ shogun-notifier-	shogun: Heiko Strathmann :develop * a5e9b55 / src/shogun/io/LineReader.cpp: https://github.com/shogun-toolbox/shogun/commit/a5e9b55fd08b5b04540841fa93ee7b9a17a43d9b
+ shogun-notifier-	shogun: fixed an uninitialised memory error
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 3d97b4d / src/shogun/features/PolyFeatures.cpp,src/shogun/io/LineReader.cpp: https://github.com/shogun-toolbox/shogun/commit/3d97b4d82220493dfe84ac504f16ff4262beb564
+ shogun-notifier-	shogun: Merge pull request #1279 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: more bugfixes
+@HeikoS	lambday: could you pull and run again? unit tests I mean
+ lambday	checking...
+@HeikoS	lambday: second half of GSoC will be tuning :)
+@HeikoS	compiling shogun melts my computer
+ lisitsyn	HeikoS: let me try
+@HeikoS	Physical id 0:  +97.0 C  (high = +86.0 C, crit = +100.0 C)
+@HeikoS	Core 0:         +96.0 C  (high = +86.0 C, crit = +100.0 C)
+@HeikoS	Core 1:         +97.0 C  (high = +86.0 C, crit = +100.0 C)
+ lambday	whoa! :-o
+@HeikoS	lisitsyn: thanks!
+ lambday	HeikoS: that's why I use insti's stuffs :D
+@HeikoS	lisitsyn: that should hopefully then make unit tests green again
+ lisitsyn	HeikoS: I think we just have to patch line 22 here
+ lisitsyn	https://github.com/shogun-toolbox/shogun/blob/develop/tests/unit/base/clone_unittest.cc.py
+@iglesiasg	see you later during the meeting guys
+ lambday	iglesiasg: see you man :)
+@HeikoS	lisitsyn: yes, cool, could you do that?
+-!- iglesiasg [~iglesias@2001:6b0:1:1041:d38:c6f9:14dc:bce8] has quit [Quit: Ex-Chat]
+@HeikoS	iglesiasg: see you!
+ lambday	HeikoS: we gotta think a bit about that tridiagonal solver and then coloring.. :-/
+ lambday	HeikoS: krylstat uses colpack
+ lambday	brb
+@HeikoS	lambday: yes indeed
+ shogun-buildbot	build #1510 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1510  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- nube1 [~rho@36.252.202.109] has joined #shogun
+-!- nube [~rho@36.252.236.22] has quit [Ping timeout: 248 seconds]
+ lambday	HeikoS: doesn't give segfaults now
+ lambday	many tests fail but that's okay I guess?
+@HeikoS	lambday: nice finally
+@HeikoS	lambday: should be only three
+@HeikoS	three groups
+ lambday	HeikoS: yes three groups
+ lambday	HeikoS: well, 4
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * b60493b / tests/unit/base/clone_unittest.cc.py: https://github.com/shogun-toolbox/shogun/commit/b60493bf56223c61fb15d0cf89300ddd79f5f71d
+ shogun-notifier-	shogun: Added clone test ignores
+ lambday	Set, SNPStringKernel, ParseBuffer and TreeMachine
+ lisitsyn	HeikoS: this should work
+ lisitsyn	ouh
+ lisitsyn	SNPStringKernel too?
+ lambday	checking again
+ shogun-notifier-	shogun: Heiko Strathmann :develop * b92a873 / src/shogun/ui/ (6 files): https://github.com/shogun-toolbox/shogun/commit/b92a873adefaf9743fba785fba25465201122608
+ shogun-notifier-	shogun: Revert "fixed uninitialised memory bugs"
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: This reverts commit ab0d3977de71d7f031dfc8026580c7e7a39707df.
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 56ed507 / src/shogun/ (11 files): https://github.com/shogun-toolbox/shogun/commit/56ed507d202e7e7b1fcfee2c9d2c29586fd81e4f
+ shogun-notifier-	shogun: Revert "more uninitialised memory fixed"
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: This reverts commit 783aa89bf8711c67a125218834c135e834178de0.
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 9974ffe / src/shogun/ (17 files): https://github.com/shogun-toolbox/shogun/commit/9974ffe9e6433059f583f679b4e2d3eaa5551b38
+ shogun-notifier-	shogun: Merge pull request #1280 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: undo changes to static interfaces
+@HeikoS	this should also fix the static examples
+ lambday	my logdet dir is getting huge and huge :D
+ lambday	may be I should separate things into separate folders, later :-/
+-!- nube [~rho@36.253.81.248] has joined #shogun
+-!- nube1 [~rho@36.252.202.109] has quit [Read error: Connection reset by peer]
+ lisitsyn	HeikoS: lambday: just put failing tests to that list
+ lambday	lisitsyn: NameError: global name 'true' is not defined
+ lisitsyn	ahaa
+ lisitsyn	ooh sorry :D
+ lambday	:D
+ lisitsyn	that was blind fix
+ lisitsyn	fixing
+ lambday	True :-/
+ lisitsyn	lambday: indeed
+ lisitsyn	lambday: so what about
+ lisitsyn	SNP think
+ lisitsyn	should it be here too?
+ lambday	SNP too failed but just one of them... I
+ shogun-buildbot	build #1512 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1512  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 2c3da22 / tests/unit/base/clone_unittest.cc.py: https://github.com/shogun-toolbox/shogun/commit/2c3da22acf83b675d665fb9dde3878db1fa4cce7
+ shogun-notifier-	shogun: Update clone_unittest.cc.py
+ lambday	I forgot which one :-/
+ lisitsyn	ok just put it there
+@HeikoS	lisitsyn, lambday let me know what the unit tests do on your system now
+ lambday	HeikoS: lisitsyn alright I am checking
+ shogun-buildbot	build #1513 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1513  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ lisitsyn	haha
+ lisitsyn	ok next build please
+ lambday	it blames and blames and never stops :(
+-!- pickle27 [~Kevin@67.193.243.174] has joined #shogun
+ shogun-buildbot	build #1514 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1514  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ lambday	HeikoS: :(
+ lambday	HeikoS: segfault again SGObject.clone_equals_LatentSOSVM
+@HeikoS	lambday: really?
+@HeikoS	weird I solved that
+ shogun-buildbot	build #1511 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1511  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ lisitsyn	python2.7 command not found
+ lisitsyn	what
+ lisitsyn	:D
+@HeikoS	lambday:  did you really pull?
+@HeikoS	lisitsyn: yes I had that before
+ lambday	HeikoS: yep
+@HeikoS	weiiiird
+@HeikoS	shogun takes so long to compile now
+ lambday	I'm checking again
+ lisitsyn	HeikoS: it just happened on the buildbot btw
+ lisitsyn	I mean latent so svm crash
+@HeikoS	lisitsyn: ah I see
+@HeikoS	so thats fine since I reverted some patches
+@HeikoS	next step will solve it
+ lambday	HeikoS: same result
+ lambday	HeikoS: lisitsyn: I'll be back in an hour.. going for dinner.... see you guys :)
+@HeikoS	lambday: meaning?
+ lisitsyn	see you
+ lambday	HeikoS: segfault :(
+@HeikoS	enjoy!
+-!- lambday [67157d36@gateway/web/freenode/ip.103.21.125.54] has quit []
+@HeikoS	lisitsyn: did not work
+ lisitsyn	HeikoS: ignore?
+@HeikoS	the three tests are still in there
+ lisitsyn	damn
+@HeikoS	lisitsyn: yes, could you not cold fix that ;) takes ages to re-compile here
+ lisitsyn	I was sure it is enough
+@HeikoS	lisitsyn: 1170 tests pretty good
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+ lisitsyn	hey votjakovr how are you
+ lisitsyn	HeikoS: I can see it should not go through - weird
+ votjakovr	lisitsyn: hi! i'm not so good, but never mind. And you?
+ lisitsyn	votjakovr: what's happening?
+ lisitsyn	I am ok
+ votjakovr	lisitsyn: good :) sorry, can't talk about that (too many problems falling on my head, but i'll fight them)
+ lisitsyn	oh that's ok hope you will be good soon
+ votjakovr	lisitsyn: thanks
+ thoralf	Did anyone break develop?
+ thoralf	perl_modular and r_modular took ages to compile, but failed in the end.
+ thoralf	Haven't tried a clean checkout yet.
+ lisitsyn	thoralf: what's the error?
+ thoralf	src/interfaces/r_modular/sg_print_functions.cpp:36: undefined reference to `Rprintf'
+ thoralf	Many errors, but that's the last one.
+ pickle27	thoralf: I had the same problem
+ pickle27	thoralf: never got it fixed
+ pickle27	was hoping it would resolve itself on its own soon
+ thoralf	pickle27: Oh, I'm not alone.  Good.
+ pickle27	:)
+ pickle27	lisitsyn: I just sent a mail regarding the bug in Jade
+ lisitsyn	pickle27: yeah looking into it
+-!- nube1 [~rho@36.253.102.30] has joined #shogun
+-!- nube [~rho@36.253.81.248] has quit [Ping timeout: 264 seconds]
+ votjakovr	HeikoS: hi! i've received your email, i'll do that! Just a questions: Am i right that you want to sample from posterior approximation q(f | X, y) = N(f^, (K^(-1)+W )^(-1)) and need to evaluate mean (f^) and covariance ((K^(-1)+W )^(-1)) for that?
+ lisitsyn	pickle27: so sign problem is here still?
+ pickle27	yeah but its weirder than I thought yesterday
+ pickle27	its only when I build it as part of shogun
+ pickle27	my standalone working file works...
+-!- travis-ci [~travis-ci@ec2-23-20-210-220.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9397270
+-!- travis-ci [~travis-ci@ec2-23-20-210-220.compute-1.amazonaws.com] has left #shogun []
+ lisitsyn	pickle27: haha cool
+ lisitsyn	pickle27: the same code?
+ pickle27	yup
+ pickle27	only difference is that the in shogun the function takes densefeatures and then i get the matrix
+ lisitsyn	pickle27: can't say much about that - you've got to ensure the data is the same probably
+ pickle27	it essentially is, thats what I spent all of yesterday doing
+ pickle27	you can see by the cov matrix which is virtually the same
+ pickle27	now in that particular case it isn't the exact data just data generated using the same code
+ pickle27	but I have checked with the exact data and its the same problem
+@HeikoS	votjakovr: hey!
+@HeikoS	votjakovr: good to see you  finally :)
+@HeikoS	votjakovr: yes exactly this is what I want to do, but I would like to keep it in a general form so that we can easily extend it for the EP
+@HeikoS	votjakovr: also for the covariance, we should use the matrix inversion lemma form where we do only have to invert B, which is already available in the implementation
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- nube [~rho@36.253.205.226] has joined #shogun
+-!- nube1 [~rho@36.253.102.30] has quit [Ping timeout: 246 seconds]
+ votjakovr	HeikoS: Ok, i'll do it.
+-!- nube1 [~rho@49.244.72.22] has joined #shogun
+ gsomix	HeikoS, just got your mail. I'll fix it. Thanks!
+@HeikoS	gsomix: cool thanks! I already fixed some uninitialised variable bugs
+-!- nube [~rho@36.253.205.226] has quit [Ping timeout: 240 seconds]
+@HeikoS	votjakovr: so something like get_posterior_approximation_mean/cov which returns a vector and covariance matrix
+@HeikoS	and this as an optional method of CINferenceMethod which is then overloaded in LaplacianInference and EPInference
+@HeikoS	votjakovr: if you could do that next, this would be extremely useful
+@HeikoS	since I currently need it for my research :D
+@HeikoS	and my python code is so low
+@HeikoS	and next thing should be I think getting the logit classifier to work
+ votjakovr	HeikoS: ok, i'll do it :)
+@HeikoS	votjakovr: nice :) let me know how it goes
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 3b1cddc / src/shogun/latent/LatentSOSVM.cpp: https://github.com/shogun-toolbox/shogun/commit/3b1cddc50f472498bbefb328a70bd60371c9b5c7
+ shogun-notifier-	shogun: fix uninitialised memory
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 1b8ed95 / tests/unit/base/clone_unittest.cc.py: https://github.com/shogun-toolbox/shogun/commit/1b8ed9502778090c0180aa0803b2bec4e41e2a43
+ shogun-notifier-	shogun: classlist does not return class names starting with C
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 025a9a4 / src/shogun/latent/LatentSOSVM.cpp,tests/unit/base/clone_unittest.cc.py: https://github.com/shogun-toolbox/shogun/commit/025a9a48545b6726f7624af892d230079afc895d
+ shogun-notifier-	shogun: Merge pull request #1281 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: unit tests green again
+ shogun-buildbot	build #1516 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1516  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ votjakovr	btw i'd like to ask another question: i evaluate integral simultaneously on few intervals, i have a method: evaluate_quadgk which should return approximate value of integral and error for each interval, both of them are vectors. How best to do it? I mean return two vectors. Create class (structure) for it, or something else? This method is private.
+ votjakovr	HeikoS: ^
+-!- travis-ci [~travis-ci@ec2-54-224-203-225.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9398719
+-!- travis-ci [~travis-ci@ec2-54-224-203-225.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	whaaaat?
+@HeikoS	stupid unit tests
+@HeikoS	votjakovr: let me think
+@HeikoS	votjakovr: I think the best way would be to pass pre-allocated vectors as references
+ shogun-buildbot	build #1515 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1515  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	sonney2k: unit tests are green on my machine
+@HeikoS	sonney2k: buildbot says: Generating base/clone_unittest.cc make[1]: python2.7: Command not found
+ votjakovr	HeikoS: Ok, like void evaluate_quadgk(SGVector<float64_t> &vals, SGVector<float64_t> &errs, ...) ?
+@HeikoS	votjakovr: yes exactly
+@HeikoS	votjakovr: with assertions that the vectors are either empty (then they are allocated by the method) or have the correct size
+ votjakovr	HeikoS: Ok, i'll do so
+-!- lisitsyn [~lisitsyn@213.87.128.75] has joined #shogun
+@HeikoS	lisitsyn: could you check the unit tests on your machine?
+@HeikoS	lisitsyn: I think they are green now, I removed the "C" in the class name to make things work in the python script
+ lisitsyn	HeikoS: now yes
+ pickle27	meeting is in 1 hour yes?
+@HeikoS	pickle27: yes
+ pickle27	cool cool
+ pickle27	be back then!
+-!- pickle27 [~Kevin@67.193.243.174] has quit [Quit: Leaving]
+ lisitsyn	HeikoS: ooooohhhhh I thought they are with C here
+-!- az_de [57a25d66@gateway/web/freenode/ip.87.162.93.102] has joined #shogun
+-!- lisitsyn [~lisitsyn@213.87.128.75] has quit [Ping timeout: 256 seconds]
+-!- az_de [57a25d66@gateway/web/freenode/ip.87.162.93.102] has quit [Quit: I'll be back for the meeting]
+-!- lisitsyn [~lisitsyn@213.87.128.75] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-224-203-225.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9398938
+-!- travis-ci [~travis-ci@ec2-54-224-203-225.compute-1.amazonaws.com] has left #shogun []
+-!- van51 [~van51@athedsl-399972.home.otenet.gr] has joined #shogun
+-!- pickle27 [~Kevin@130.15.32.52] has joined #shogun
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	greetings
+ pickle27	hey!
+@sonney2k	HeikoS, so what is the state?
+ lisitsyn	the state of the art
+@HeikoS	sonney2k: state on what?
+@sonney2k	buildbot/travis
+@HeikoS	sonney2k: unit tests green on my machine
+@HeikoS	fixed 100000000000 bugs
+@HeikoS	and now we have automated detection of many problems
+@HeikoS	also, we have a crude test of clone and equals
+@HeikoS	(works)
+@HeikoS	sonney2k: one thing I still would like to do is to do these tests on some data
+@HeikoS	currently, empty class instances do not contain any data
+@HeikoS	you know, fill the matrices etc
+ gsomix	HeikoS, you're strong, man. :)
+@sonney2k	HeikoS, for what exactly? I mean you need a complete example for that to work?!
+@sonney2k	HeikoS, you will lead today right?
+@HeikoS	sonney2k: yes
+@HeikoS	lets discuss afterwards,
+@sonney2k	HeikoS, indeed unit tests work now
+@iglesiasg	HeikoS: you are the hero!
+@sonney2k	HeikoS, congrats you are the hero of today!
+* sonney2k sends over an ale!
+@HeikoS	yeah! :)
+ thoralf	sonney2k: Hero? Even if he broke it? ;)
+ thoralf	HeikoS: Sorry. ;)
+@sonney2k	thoralf, about your memleak was this for SGObjects or other memory?
+@sonney2k	I mean obj->refcount() gets you the count...
+@sonney2k	thoralf, and hey he fixed much more than he broke :D
+ lisitsyn	I am the one who broke more than fixed
+@sonney2k	lisitsyn, true or should I say True :P
+ lisitsyn	sonney2k: I don't feel the difference you know
+@sonney2k	tRuE tRUE TrUE!
+ thoralf	sonney2k: I wanted to see if *all* objects got freed.  (Guessing that you're referring to "Is there a way of checking how many references are still alive in shogun?")
+@iglesiasg	what is this story about true?
+ thoralf	sonney2k: But HeikoS already told me how to do. :)
+ pickle27	haha yeah I want to hear this lol
+@iglesiasg	thoralf: enable-ref-count when you configure helps I think
+-!- nube [~rho@36.253.139.165] has joined #shogun
+-!- az_de [57a25d66@gateway/web/freenode/ip.87.162.93.102] has joined #shogun
+ lisitsyn	iglesiasg: I am true-blind
+@sonney2k	thoralf, yeah --trace-mallocs is your friend
+@iglesiasg	or something like that
+@sonney2k	thoralf, you can at any time do a memory print
+ thoralf	Yes.  Thank you all!!one! :)
+@sonney2k	iglesiasg, that is always on
+ lisitsyn	iglesiasg: some people are color-blind I am true-blind
+@iglesiasg	sonney2k: ah! ok, sorry
+ thoralf	sonney2k: Memory print?  That one is new... elaborate please?
+@sonney2k	thoralf, gsomix, and me did spend quite some time on this
+@iglesiasg	lisitsyn: hehe but what happened?
+ lisitsyn	iglesiasg: I mixed up true and True
+@HeikoS	who is still missing?
+@sonney2k	thoralf, list_memory_allocs()
+@iglesiasg	lisitsyn: python or so?
+ lisitsyn	iglesiasg: yes
+@HeikoS	lamday
+ lisitsyn	HeikoS: I am compiling stuff I'll report tomorrow ;)
+ thoralf	sonney2k: Ah, already saw this one.  It's related to trace-mallocs as well, right?
+ lisitsyn	we should do something with this
+@iglesiasg	HeikoS: lambday is around?
+@HeikoS	not yet
+@HeikoS	I know georg wont make it
+@iglesiasg	I don't see anyone else missing apart from him
+@iglesiasg	no, I don't think so either
+ thoralf	sonney2k: It's what exit_shogun() does, I guess.
+@HeikoS	patrick also wont make it
+-!- nube1 [~rho@49.244.72.22] has quit [Ping timeout: 248 seconds]
+@sonney2k	van51, will olivier/benoit make it?
+@HeikoS	hushell, lambday
+ van51	sonney2k: I don't know tbh
+@sonney2k	or quoc? I guess not
+ lisitsyn	thoralf: yes exit_shogun does it
+ lisitsyn	thoralf: so you will see hanging refs
+@HeikoS	ok lets wait 2 more minutes
+@iglesiasg	I spoke with Georg this morning anyway, so we are up to date. He also mentioned he will surely make the mid-term form
+@HeikoS	otherwise they can use logs
+-!- lambday [67157d36@gateway/web/freenode/ip.103.21.125.54] has joined #shogun
+ lambday	hi all
+ lisitsyn	haha cool
+ lisitsyn	we have hardcoded
+ lisitsyn	631
+@iglesiasg	hello hello
+ lisitsyn	in base/init.h:61
+@HeikoS	lambday: hi
+ lisitsyn	that's the number of classes
+ lambday	sorry I am a bit late :(
+@HeikoS	dont worry
+-!- foulwall` [~user@2001:da8:215:c252:2d09:69b3:4be7:def2] has quit [Remote host closed the connection]
+-!- foulwall [~user@2001:da8:215:c252:2d09:69b3:4be7:def2] has joined #shogun
+ thoralf	lisitsyn: Ugh. ;)
+ lisitsyn	thoralf: madskillz I guessed the meaning of 631
+ thoralf	lisitsyn: I wish you weren't right. ;)
+ lambday	HeikoS: just checked your mail.. this is for all of our CG solver for a high default condition for convergence
+@HeikoS	lambday: I see, should be remove then
+@HeikoS	ok lets start
+@HeikoS	the rest can read logs
+@HeikoS	Welcome all to the our GSoC meeting before mid-term.
+@HeikoS	The plan for today is:
+@HeikoS	1.) Tell mentors/students what to do for mid-term
+@HeikoS	2.) Hear about the general progress over every group
+@HeikoS	3.) Talk about the "big" examples
+@HeikoS	Any other points that I missed? Please shout!
+@HeikoS	So let's start with mid-term
+@HeikoS	The evaluation forms open at July, 29
+@HeikoS	Every mentor and every student has to fill one. You can the forms them through your google melange page, http://www.google-melange.com/
+@HeikoS	Filling the form takes about 15 minutes, so not a big deal.
+@HeikoS	Mentors have to make students succeed/fail.
+@HeikoS	(Mentors: if you are thinking of failing you student, please talk to me, sonney2k, or lisitsyn. But please let us try to avoid that)
+@HeikoS	Students have to give some information on how much work they invested yet etc
+@HeikoS	Hard deadline is on August 2. Please do not postpone this, fill them as soon as possible - this makes us more relaxed :)
+@HeikoS	Students: Push your mentors to fill in the form, you won't get money otherwise.
+@HeikoS	Questions?
+@HeikoS	sonney2k, lisitsyn comments?
+ lisitsyn	no that's ok
+@HeikoS	van51, pickle27, iglesiasg so push your mentors once its july29 :)
+@sonney2k	yes do it ASAP lets say hard deadline july30
+ pickle27	okay!
+@sonney2k	so we can hotfix stuff if
+ pickle27	so does az_de send mine in or lisitsyn ?
+@HeikoS	yes no pracastination
+@HeikoS	main mentor
+@sonney2k	pickle27, az_de should do it
+ pickle27	kk
+ lisitsyn	pickle27: az_de
+@sonney2k	the main mentor
+ az_de	I'll do it
+@iglesiasg	HeikoS: will do, thanks for the suggestion
+ van51	HeikoS: sonney2k: so who do I push?
+@sonney2k	if not possible let us know
+@sonney2k	and we will do it
+ pickle27	az_de, thanks!
+ van51	Olivier?
+@sonney2k	van51, as you wish :D
+@sonney2k	it takes 1 minute so I don't care
+ lisitsyn	yeah 15 minutes is a bit overestimate
+@HeikoS	yes
+@sonney2k	or /mind
+ foulwall	Who will I push, sonney2k or cheng?
+ lisitsyn	foulwall: sonney2k
+@sonney2k	foulwall, yeah me
+ foulwall	ok sonney2k
+@HeikoS	I will push sonney2k too :)
+@HeikoS	and myself  ;)
+ lisitsyn	we all push sonney2k all the time
+@sonney2k	I start to feel even smaller now
+ gsomix	sonney2k, push? hugs!
+@HeikoS	Ok then, lets continue?
+@HeikoS	Could every group give a short (!) summary of recent work and future plans?
+@HeikoS	Who wants to start?
+ lisitsyn	sonney2k: we will pop you once
+@sonney2k	HeikoS, yeah please continue before we start a hug-fest
+@HeikoS	ok then, van51 would you like to start?
+ van51	ok
+@HeikoS	other, pls prepare some text already to make this faster
+ van51	well, support for hashing has been added for text collections
+ van51	and also for the dense and sparse features
+ van51	and also a nice comparison has been done in a webspam dataset that shows the nice speedup gained and that robustness was maintained
+-!- Cheng [~yaaic@ip-109-45-0-25.web.vodafone.de] has joined #shogun
+@HeikoS	van51: nice, is this available?
+ van51	on that project what remains is mostly to add support for quadratic features
+ van51	HeikoS: I will make it available somewhere
+@HeikoS	cool, maybe this fits into the last point today
+ van51	HeikoS: right now the results are on some output files, I plan on combining them to make it more informatory
+@HeikoS	van51: finished?
+@HeikoS	who wants next?
+@iglesiasg	I can go next!
+@HeikoS	iglesiasg: please go ahead
+@iglesiasg	The implementation of LMNN is finished now.
+-!- nube [~rho@36.253.139.165] has quit [Ping timeout: 246 seconds]
+@iglesiasg	This is useful to find automatically a distance that maximizes the accuracy of multiclass classification, instead of using a particular given distance (typically Euclidean).
+@iglesiasg	There are nonetheless (many) things to improve and possible extensions; for instance I am currently improving some parts that are rather slow.
+-!- nube [~rho@36.252.193.54] has joined #shogun
+@HeikoS	iglesiasg: what are you comparing against?
+ lisitsyn	I just wonder (sorry to interrupt) - can that be used to estimate what distance is the best?
+@HeikoS	lisitsyn: lets do that afterwards
+@iglesiasg	lisitsyn: it finds the best distance
+ lisitsyn	HeikoS: do what?
+@HeikoS	discuss :)
+ lisitsyn	ahh well ok
+@HeikoS	iglesiasg: next steps?
+@iglesiasg	HeikoS: against the original implementation by LMNN's author
+@iglesiasg	HeikoS: it is in Matlab, my implementation is slow because they use some heuristics
+@iglesiasg	We want also to compare the performance of LMNN with other multiclass classification techniques implemented in Shogun. At first we are going to use the MNIST dataset, and afterwards some metagenomics datasets Georg is gathering.
+@iglesiasg	HeikoS: short-time, make these comparisons with other multiclass classification, and benchmark agains the original implementation once mine gets faster
+@iglesiasg	HeikoS: after, add some extensions. For instance, use LMNN for dimension reduction, enforce some constraints in the metric learnt, etc
+@HeikoS	iglesiasg: ah nice, useful, maybe also good to keep the codes for illustration/examples later
+@HeikoS	ok cool, gsomix would you like to continue?
+ gsomix	HeikoS, yep
+@HeikoS	thanks iglesiasg
+ gsomix	ok, some simple I/O system for SHOGUN is almost done. there are reading and writing tools and preliminary versions of classes that works with csv and libsvm files.
+@iglesiasg	HeikoS: good idea
+ gsomix	there are needed some cool features for csv, for example
+ gsomix	I'm discussing some architecture aspects with Soeren. so, before mid-term it will be available for all - we should merge my big messy code. :3
+@HeikoS	gsomix: nice, I will probably use the csv stuff! and after mid-term?
+ pickle27	me too!
+ gsomix	HeikoS, yep. it will be completely done
+ gsomix	next we plan work with protobuf format, matlab's m-files and so on what contains in my proposal
+ gsomix	I think sonney2k will correct me. right?
+ gsomix	hehe
+@HeikoS	gsomix: awesome matlab files!
+@HeikoS	alright, thanks gsomix
+@HeikoS	pickle27: could you be next?
+ pickle27	sure!
+ pickle27	First of all
+@iglesiasg	reading matlab files from C++ easily will be awesome
+ pickle27	all of the Aproximate Joint Diagonalization (AJD) techniques from the R package have been ported to c++
+ pickle27	the last 2 still need to be push to shogun though
+ pickle27	I've also code 3 ICA techniques SOBI, JADE and FFSep
+ pickle27	Im chasing down a strange bug in Jade but its pretty close
+ pickle27	the other 2 techniques seem to work well, FFSep still needs to be pushed
+ pickle27	I have a nice signal example for python and one for matlab as well that I need to push shortly
+@HeikoS	pickle27: nice, looking forward to look at that
+ pickle27	I'd also like to do a R example but I can't get the interface to build
+ pickle27	whats next for me
+ pickle27	is the audio example which Im starting on this week!
+@sonney2k	pickle27, tell me what does not work later it builds fine here and on the buildbots
+ pickle27	will do!
+ pickle27	thoralf, was having the same problem with the R interface
+@HeikoS	pickle27: cool, audio example is something we dont have yet :)
+@sonney2k	HeikoS, as notebook!
+ lisitsyn	ha
+ lisitsyn	btw why not
+@HeikoS	R interface - we really should get a hacker to solve the modular one
+ lisitsyn	pickle27: what about doing it with ipython notebook?
+@HeikoS	sonney2k: I was going to says that, notebooks support audio
+ pickle27	sorry what is notebook
+@HeikoS	lisitsyn, pickle27 everyone should do an ipython notebook
+ pickle27	I was going to do it in python though
+@HeikoS	pickle27: I will explain later
+@HeikoS	last point for today
+ thoralf	pickle27, HeikoS: Yeah.
+@HeikoS	but first summaries
+@HeikoS	pickle27: thanks,
+@HeikoS	votjakovr: you want to be next?
+ lisitsyn	pickle27: http://nbviewer.ipython.org/url/jakevdp.github.com/downloads/notebooks/XKCD_plots.ipynb like that
+ lisitsyn	HeikoS: sorry was it decided already?
+ votjakovr	HeikoS: ok
+ lisitsyn	about notebooks
+ votjakovr	i've finished probit classifier, numerical integration stuff, logit and expectation propagation (EP) classifiers will be avaliable before mid-term. Next i'd like to review/debug model selection framework, because it's one of key part of GPs
+@HeikoS	lisitsyn: yeah, every gsoc project will have to do one, but more on that later
+ lisitsyn	HeikoS: oops I missed that
+-!- travis-ci [~travis-ci@ec2-54-224-203-225.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9398968
+-!- travis-ci [~travis-ci@ec2-54-224-203-225.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	votjakovr: true  that wil be the next step after
+@HeikoS	votjakovr: so the other stuff is almost done?
+ votjakovr	And after that, i'll plan to work on multiclass classification
+@sonney2k	lisitsyn, well you chickened out
+@HeikoS	votjakovr: cool, thanks!
+@HeikoS	hushell is not here
+@HeikoS	so lambday is next :)
+ lisitsyn	sonney2k: buck buck buck
+@HeikoS	lisitsyn:  tztztz chatty as before ;)
+ lambday	HeikoS: alright
+ lambday	The main goal of our project is to estimate log determinant of a huge sparse matrix that arises from log-likelihood estimate expression of a huge GMRF, computing which directly is not possible using traditional techniques due to computational overloads...
+ lambday	the technique that we're using for our purpose is to approximate matrix function (matrix logarithm to be specific) using techniques from numerical linear algebra and complex analysis..
+ lambday	which results in a shifted family of linear systems that are to be solved, involving complex shifts...
+ lambday	as of now, using dense matrix linear operator and direct solving techniques, we have a working log-det estimator using this technique which gives a pretty good accuracy using Gaussian samples..
+ lambday	in order to achieve this, we have developed a computation framework that forms several individual computation jobs which can be solved in parallel...
+ lambday	we have designed a sequential version of a computation engine which solves these jobs one by one..
+ lambday	this framework can be really useful for other future purpose as well as we believe..
+ lambday	we also have added iterative solve techniques that are particularly suitable for large sparse linear operators... various methods that follows conjugate gradient (CG) technique for solving for each of these shifts individually/simultaneously have been added...
+ lambday	future work involves implementing an iterative eigen solver for these huge sparse matrix (that requires Lanczos algorithm to be implemented).. this is needed for computing the shifts in the shifted system... (we used a direct eigen solver for dense systems in order to make sure the framework works properly)
+ lambday	we also have to use greedy graph coloring strategy to color the sparse matrix graph to obtain a set of vectors that are to be used instead of Gaussian vectors...
+ lambday	we may also have to use preconditioned CG solvers for each of the shifts in the systems in case we notice poor convergence behavior for our shifted family solver that solves for all the shifts at once..
+ lambday	if time permits, we'll move towards a parallel implementation of our computation engine which will surely provide us a powerful mean of computation...
+@HeikoS	btw the parallel framework can be used by everyone
+@HeikoS	once it works
+ lambday	yes
+@HeikoS	for independent jobs that need to be solved at once
+ lisitsyn	HeikoS: we should put everything on these rails
+ lisitsyn	(I believe so!)
+@HeikoS	lisitsyn: yes I agree, or at least new stuff
+@HeikoS	since a lot of work
+@HeikoS	lisitsyn, lambday thats something to discuss once GSoC is more towards its end
+@HeikoS	but lots of possibilities, we had a long dicussion on the workshop
+@HeikoS	lambday: thanks!
+ lambday	HeikoS: alright.. I am really excited :)
+@HeikoS	so last but not least, foulwall, could you close the summaries?
+ foulwall	ok HeikoS , here I am
+ foulwall	I turned the shogun-demo site into a framework, and currently we can use the framework to make classification, regression, clustering demos. When creating a demo, the framework only needs a python dict to specify the style of web ui, and several decades of backend code to tell what algorithm to use. After that, the framework will generate the javascripts/htmls/css for the ui and connect the user input to the algorithm.
+ foulwall	I made a demo for kernel matrix heatmap visualization.
+@HeikoS	foulwall: cool! I like heatmaps
+ foulwall	I made a modular toy-data generator and importer, The generator can generate random sine data, though it only generate sine, but new function and arguments are easy to add to the module. The importer can import features and label from hdf5 files, and the demo can plot the data on the coordinate system, All the demos can use the data fed back from the generator and importer.
+-!- nube [~rho@36.252.193.54] has quit [Ping timeout: 264 seconds]
+ foulwall	I made a digit recogniser as http://shogun-toolbox.org/static/media/ocr.swf , now it works well.
+@HeikoS	foulwall: oh, maybe also have a look into the DataGenerator class then, MeanShiftDataGenerator for example. If you coded up your generators in C, they would be available from all interfaces
+ foulwall	Now I'm working for some static dimension reduction demo, based on existing demo on http://tapkee.lisitsyn.me, thanks lisitsyn.
+ foulwall	HeikoS: I'll use python interface for that.
+@HeikoS	foulwall: maybe lets discuss at some point, Ill write an email
+@sonney2k	HeikoS, yeah that was the idea to later switch to data generators
+@sonney2k	HeikoS, so we can have stand-a-lone demos to be the same as the web based one
+@HeikoS	foulwall: cool stuff, this will impress people, maybe talk to other GSoC students on demos on their projects (this could be one of your big examples)
+@HeikoS	nice
+ foulwall	I'll boost up to finish all the idea under "Develop interactive machine learning demos"
+ pickle27	yes I want to make my audio example on the web
+@sonney2k	foulwall, please give us a long README showing us how to do it for some algorithm
+@sonney2k	pickle27, wait for heiko's step 3)
+@HeikoS	foulwall, thanks!
+@HeikoS	ok then that were all students, any remarks?
+ foulwall	ok sonney2k . I'll make it
+@HeikoS	If not, last point for today:
+@HeikoS	As said, we expect examples how to use your code: C++ and python modular at least. These examples should be small and illustrate how to use classes etc.
+-!- nube [~rho@36.253.161.210] has joined #shogun
+@HeikoS	In addition, we would like every student to create a bigger example with a real-life dataset. This example should go a bit more into depth, explain the method more, play a bit around with it, visualise it.
+@HeikoS	We would like you to do those as an IPython notebook.
+@HeikoS	These allow to combine text/code/plots/latex in one file.
+@HeikoS	We are currently working on a way to automatically generate website pages from those.
+@HeikoS	These will look like the ones I presented at the workshop (but should be more detailed, explain more):
+@HeikoS	http://nbviewer.ipython.org/5982625
+@HeikoS	http://nbviewer.ipython.org/5982623
+@HeikoS	http://nbviewer.ipython.org/5982626
+@HeikoS	There are more examples on the web, they can also embed sound
+@HeikoS	with html sound player
+ pickle27	sounds very cool
+@HeikoS	http://nbviewer.ipython.org/urls/raw.github.com/Carreau/posts/master/07-the-sound-of-hydrogen.ipynb
+ foulwall	cool
+@HeikoS	The goal is the properly document your GSoC project using a notebook.
+@HeikoS	The examples are also a requirement to pass GSoC. We think this is a very cool oportunity to tell the world how cool your project is.
+@HeikoS	Questions?
+@sonney2k	HeikoS, how do we get them from our notebook folder to be on the web?
+ pickle27	sounds great I like the notebooks idea
+@HeikoS	sonney2k: wiking and me are working on it
+@sonney2k	HeikoS, I added the gausskernel svm thingy to git but hmm..
+@HeikoS	sonney2k: we will generate the full output automatically, store it and produce a link to the viwer
+@HeikoS	viewer
+@sonney2k	HeikoS, and we somehow need to connect this with the demos foulwall is doing - bidirectional
+@HeikoS	also, this detects api changes to notebook build will fail
+@sonney2k	so people can try interactively and also get more details
+@sonney2k	in the notebook
+@HeikoS	the notebooks are python code and can be downloaded /executed locally/interactively
+ Cheng	https://notebookcloud.appspot.com/docs
+@HeikoS	connecting them with the web demo would be awesome, but havent thougth about this yet
+ Cheng	something that may help
+@HeikoS	Cheng: thats a nice tool!
+@sonney2k	HeikoS, but we should. Everything we have as notebook should have a webdemo too
+@HeikoS	ok, I would agree
+@HeikoS	So every student, please start playing with the notebooks and start creating one, we want them to be ready before GSoC is over to give feedback. In particular, students can give suggestions to each other when something is unclear.
+@HeikoS	Ok, that was it from my side
+ pickle27	awesome, I'll build my audio demo and notebook side by side!
+@HeikoS	anyone has some remarks?
+@iglesiasg	HeikoS: that is a good idea, students giving feedback to each other
+@HeikoS	iglesiasg: yes, we will talk about this in another meeting after mid-term
+@HeikoS	ok, then the meeting is over
+ pickle27	yeah it will help us really understand what everyones been doing!
+@iglesiasg	I would like to understand better the techniques in some other projects, this looks like a nice way of achieving that
+ pickle27	az_de, lisitsyn can we discuss in a new channel for a sec?
+@HeikoS	Feel free to discuss ideas :)
+ lisitsyn	pickle27: yes sure
+@HeikoS	I have to rush off
+ pickle27	shogun_bss
+@HeikoS	sonney2k: you have the lead now
+@iglesiasg	all right, thanks HeikoS!
+ lisitsyn	iglesiasg: what I wanted to ask you
+ lisitsyn	iglesiasg: can we like
+@iglesiasg	lisitsyn: tell me
+-!- HeikoS [~heiko@nat-179-227.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+ lisitsyn	estimate what is the best distance (among say euclidean, chi2 whatever)
+ lisitsyn	according to LMNN distance matrix
+@iglesiasg	lisitsyn: before I said if finds the best distance, I must add something in there however
+ lisitsyn	iglesiasg: no it finds the best mahalanobis distance right?
+@iglesiasg	lisitsyn: exactly
+ lisitsyn	I mean can we say what is the best 'default' distance
+ lisitsyn	like select
+@iglesiasg	lisitsyn: D(x_i,x_j)=(x_i - x_j) M (x_i - x_j)
+@iglesiasg	lisitsyn: the best M in ^
+@iglesiasg	lisitsyn: I am missing a transpose in the second difference of feature vectors
+ lisitsyn	iglesiasg: I mean in MKL we select the best distance
+ lisitsyn	err
+ lisitsyn	kernel
+ lisitsyn	with weighting
+ lisitsyn	can we do the same - find what distance reproduces the distance computed by LMNN mostly?
+ Cheng	there was a paper by Eric Xing about this
+ lisitsyn	Cheng: haha you know everything
+@iglesiasg	lisitsyn: I am thinking.. not sure if I see it
+ gsomix	sonney2k, hey
+ lisitsyn	iglesiasg: we have a dataset
+ lisitsyn	we compute LMNN thing
+ lisitsyn	and see - oh that's mostly euclidean
+ lisitsyn	I'll use that
+@iglesiasg	lisitsyn: ok
+ lisitsyn	but then we take other dataset
+ lisitsyn	and notice that LMNN computed something
+ gsomix	sonney2k, so, what we plan to do with readers?
+ lisitsyn	very similar to say inverse gaussian distance
+ lisitsyn	iglesiasg: got it?
+@iglesiasg	lisitsyn: yes
+@iglesiasg	lisitsyn: then what you were saying would be if these two datasets are together
+ foulwall	have to sleep now, cu guys.
+@iglesiasg	lisitsyn: if we can weight between these two distances?
+-!- nube1 [~rho@36.252.126.80] has joined #shogun
+@iglesiasg	foulwall: bye bye!
+ lisitsyn	iglesiasg: well weighting is other thing
+ lisitsyn	but just find a distance that corresponds to the thing found by LMNN
+-!- nube [~rho@36.253.161.210] has quit [Ping timeout: 276 seconds]
+ lisitsyn	among some out of box distances we have
+@iglesiasg	lisitsyn: so you mean going beyond the family of Mahalanobis distances?
+@iglesiasg	lisitsyn: using the idea of LMNN but searching in other set of distances
+ lisitsyn	iglesiasg: no just find the distance that is very similar to the best mahalanobis distance
+ lisitsyn	it could be great performance wise
+@sonney2k	gsomix, yeah I still consider the linear reader + parser design more easy to understand.
+@iglesiasg	lisitsyn: I am sorry, but I am not following :S
+ lisitsyn	iglesiasg: once we perform LMNN
+@sonney2k	foulwall, nite and please continue your work!
+ lisitsyn	we have d_1: X \times X -> R
+ lisitsyn	that's the best mahalanobis distance
+@iglesiasg	lisitsyn: ok
+ lisitsyn	say we have {d_2, .... , d_N} - a set of distances
+ gsomix	sonney2k, what to do with writing? I plan to add CWriter, CFileWriter and CStringWriter.
+ lisitsyn	like euclidean etc
+@iglesiasg	lisitsyn: ok
+ lisitsyn	iglesiasg: can we found some distance among {d_2, ... , d_N}
+ lisitsyn	that reproduces d_1 the best way
+@iglesiasg	lisitsyn: ok, I understand now the problem :)
+-!- foulwall [~user@2001:da8:215:c252:2d09:69b3:4be7:def2] has quit [Ping timeout: 245 seconds]
+ lisitsyn	iglesiasg: I don't know any good criteria for that
+ lisitsyn	but as Cheng said there is a paper
+ lisitsyn	;)
+@iglesiasg	lisitsyn: well, there can be several
+ Cheng	http://www.cs.cmu.edu/~liuy/distlearn.htm
+@iglesiasg	lisitsyn: if you are representing your distances as all of them Mahalanobis, then you could define a distance measure between matrices
+@sonney2k	gsomix, not sure what you need there - I mean you could use CFile's functions directly
+ lisitsyn	iglesiasg: no my point was to find some simpler distance
+ lisitsyn	because mahalanobis is a bit slow
+ lisitsyn	Cheng: thanks!
+ gsomix	sonney2k, but line reader now is not only for lines with '\n' at end. because we have Tokenizer inside. why not allow line reader be more cool and read primitive types?
+@sonney2k	lisitsyn, do you know why SNP kernel still fails on the buildbot?
+ gsomix	sonney2k, what functions do you mean?
+@sonney2k	gsomix, I mean for writing
+ lisitsyn	sonney2k: hmmactually I just ran tests
+@sonney2k	lisitsyn, yeah me too
+ lisitsyn	and it failed on SGVectorTest.complex64_tests
+@sonney2k	errm no all worked here
+ lisitsyn	may be some old binaries
+ lisitsyn	let me check again
+@iglesiasg	lisitsyn: so how are you thinking these {d_2, ... , d_N } distances would be specified?
+@sonney2k	gsomix, for reading I can see the benefit of having a line reader and a separate parser to support other ascii line based formats
+ lisitsyn	iglesiasg: by their distance matrices
+ lisitsyn	Cheng: btw we had issue with our vspaces :D
+@iglesiasg	lisitsyn: aham, so you would find the distance that reproduces d_1 the best way *given* a particular dataset
+ lisitsyn	Cheng: you may noticed we had really dense things out there in paper
+ lisitsyn	iglesiasg: yes exactly sorry I missed that point
+-!- pickle27 [~Kevin@130.15.32.52] has quit [Quit: Leaving]
+-!- az_de [57a25d66@gateway/web/freenode/ip.87.162.93.102] has quit []
+@iglesiasg	lisitsyn: then I think somewhat the same idea as before applies. You define a measure between matrices
+ van51	sonney2k: are you leaving soon?
+ lisitsyn	iglesiasg: natural measure is norm but I find it a bit worse
+ lisitsyn	than something fance you can use
+ lisitsyn	fancy*
+@sonney2k	van51, why?
+@iglesiasg	lisitsyn: something fancy like?
+ lisitsyn	iglesiasg: say accuracy
+@sonney2k	van51, did you get the same result like the kernel one?
+ van51	sonney2k: I wanted to ask you a bit about the hashing features again :)
+ Cheng	lisitsyn: no hacking latex
+ lisitsyn	Cheng: yeah we had to remove it
+ Cheng	I might be off soon
+ gsomix	sonney2k, ok. but I'm still need class for buffered writing.
+@sonney2k	van51, just ask never ask to ask
+ lisitsyn	and cut down some text
+ van51	sonney2k: it could wait till tomorrow
+ van51	sonney2k: anyway, first of all I didn't really get your email
+@iglesiasg	Cheng: thanks for the pointers to ipython and metric learning!
+ van51	sonney2k: I get that if the targer and the original dimensions are the same, then the hashing could be avoided
+@sonney2k	gsomix, I don't understand what for... if you use CFile you would just override set_matrix and done
+@sonney2k	van51, if I am not around I will reply when I read the logs so just ask :)
+ gsomix	sonney2k, what functions I should use for writing?
+@iglesiasg	lisitsyn: sure. I think many different ideas can make sense to measure similarity between distance matrices
+ van51	sonney2k: ok :)
+@sonney2k	gsomix, the set_* ones
+@sonney2k	gsomix, the get_* ones are for reading
+ gsomix	sonney2k, no, inside set_*
+ gsomix	in realisation
+@sonney2k	gsomix, and set_* ones for writing
+ van51	sonney2k: I just had a quick discussion with Benoit and he told me that the way I wrote the pseudocode in the email is the way to go for numerical features
+@sonney2k	gsomix, we are talking csv here right? so fprintf("%s," ...)
+ gsomix	I need some tools for writing
+ lisitsyn	iglesiasg: it might be that it is not worth implementing in C++ but it could be in notebook
+ van51	sonney2k: so I will send a PR fixing what I was doing
+ gsomix	sonney2k, is it fast for big data?
+ van51	sonney2k: but I would like you to elaborate a bit on your email, what did you mean by inc step?
+ lisitsyn	iglesiasg: like 'see, we can see the learned distance is very similar to D so we can use D'
+@sonney2k	van51, the thing you do in the first pseudo code
+@sonney2k	gsomix, file i/o is slower anyways and it is already buffered underneath
+@iglesiasg	lisitsyn: yep, but I guess that LMNN gets more powerful when you don't easily know distances that are similar to LMNN's solution
+ lisitsyn	iglesiasg: indeed but sometimes you need performance but don't know what distance to use
+ lisitsyn	lmnn might guide you here
+@iglesiasg	lisitsyn:  but I think I understand your idea for the notebook, as a way to illustrate what LMNN achieves
+@sonney2k	van51, which of the pseudocodes did benoit mean? I don't have the email here (please use my shogun-toolbox.org email address for that)
+ van51	sonney2k: ah sorry about that
+-!- travis-ci [~travis-ci@ec2-50-16-34-49.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9399184
+-!- travis-ci [~travis-ci@ec2-50-16-34-49.compute-1.amazonaws.com] has left #shogun []
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has joined #shogun
+ van51	sonney2k: the second one we discussed
+ gsomix	sonney2k, I don't understand. we use own buffering for reading. because reading is slow.
+ van51	sonney2k: do you want me to forward it to you?
+@sonney2k	van51, so does my reply make sense now?
+@iglesiasg	all right, I think I am off to make dinner now. Will be back afterwards!
+ van51	sonney2k: well you could still have index clashes for dense features
+@sonney2k	gsomix, yes reading huge blocks helps a lot
+ van51	sonney2k: since you may map to a dimension lower than the original
+@sonney2k	gsomix, ok do some benchmark for some big file and then we will decide
+ gsomix	sonney2k, ok
+-!- Cheng [~yaaic@ip-109-45-0-25.web.vodafone.de] has quit [Ping timeout: 264 seconds]
+@sonney2k	gsomix, if it is necessary then we could have a similar thing to the reader for writing
+@sonney2k	gsomix, writing full lines or even 1MB chunks
+@sonney2k	van51, yes you can have clashes - actually always due to hashing
+ van51	sonney2k: yes
+@sonney2k	van51, but that is not the issue here
+@sonney2k	van51, you know the indices for dense features
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+@sonney2k	van51, so you know which to multiply with which
+ van51	sonney2k: are you referring to quadratic coupling now?
+@sonney2k	van51, if there is a collision you don't want to increase its effect by multiplying with it
+@sonney2k	van51, yes - I thought that is what we are talking about?
+ van51	sonney2k: no :)
+ van51	sonney2k: actually we would get to that
+@sonney2k	van51, then please start fromt he beginning
+ van51	sonney2k: so I had in my mind that hashing for dense features
+ van51	sonney2k: w/o the quadratic coupling
+@sonney2k	ahh ok
+ van51	sonney2k: would result in something like a discretization process
+@sonney2k	errm
+@sonney2k	what?
+ van51	sonney2k: and I had treated the values of the new hashed representation as a counter -- similar to what I was doing in the doc features
+@sonney2k	van51, ok so same mistake then
+ van51	sonney2k: I have a commit ready that fixes that
+ van51	sonney2k: I just have to fix the unit tests
+@sonney2k	van51, very good
+ van51	sonney2k: I will make a PR again now then and review it when you can
+ van51	sonney2k: to make sure I didn't miss something again
+ van51	sonney2k: Benoit told me would also have a look tonight
+@sonney2k	van51, you can again compare it with a polynomial kernel of degree 1 - once done on the hashed and on the non-hashed
+ van51	sonney2k: tonight there that is :p
+@sonney2k	van51, did you understand what I wrote in my email in this context?
+@sonney2k	van51, I mean with the indices are given / we want to hash indices?
+ van51	sonney2k: not really sorry :)
+@sonney2k	for me this is probably too obvious - I have been doing this for too long and I realize I suck explaining
+@sonney2k	van51, let me try again
+ van51	sonney2k: isn't it just a new feature? I mean you hash its index and add there the combined value
+@sonney2k	van51, when you have dense features of dim D you know you have dims 1...D
+@sonney2k	van51, OK?
+ van51	ok
+@sonney2k	van51, now with hashing you compress it down to sth like 2**<nbits>
+ van51	yea
+@sonney2k	I mean D -> 2**nbits
+@sonney2k	so you hash(i) i=1...D
+@sonney2k	in some for loop
+@sonney2k	and the dimensions you iterate over (1..D) are known upfront
+@sonney2k	van51, OK?
+ van51	yeap
+@sonney2k	with the hasheddocfeatures it is totally different
+@sonney2k	you have strings as input
+@sonney2k	and you use n-grams
+@sonney2k	OK so far?
+@sonney2k	so you don't even have any dimensions
+ van51	sonney2k: I wasn't referring to ngrams/tokens in that last pseudocode
+ van51	sonney2k: but carry on
+@sonney2k	van51, what then? it was code from vw no?
+ van51	sonney2k: no not yet, I was just trying to make sure that I had got right what the quadratic features for the dense would be
+@sonney2k	van51, please send me the email again
+ van51	sonney2k: on it
+@sonney2k	I don't know what pseudocode we are talking about
+ van51	sonney2k: hehe it's a bit vague this discussion :)
+@sonney2k	yeah well I told you I never have access to your email on my laptop
+ van51	sonney2k: I just hit reply all on an old email
+@sonney2k	van51, and we name these 3 pseudocodes a,b,c so I know what you are talking about
+ van51	sonney2k: didn't think about the address :/
+ van51	ok
+@sonney2k	nothing there yet...
+@sonney2k	van51, maybe just paste it somewhere
+ van51	sonney2k: I've sent it, to your shogun address
+@sonney2k	dpaste etc
+ van51	sonney2k: ok wait
+ van51	http://pastebin.com/0GnacfQ5
+ van51	sonney2k: ^
+@sonney2k	van51, so which algorithm did you mean?
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@sonney2k	I thought you meant a)
+ van51	sonney2k: a) is for the hashed doc features
+ van51	sonney2k: c) would be quadratic for dense, right?
+@sonney2k	yeah that is what I was referring to
+@sonney2k	you need to compute the hash for some n-gram to get an index
+ gsomix	good night people
+@sonney2k	gsomix, good night!
+@sonney2k	van51, you don't have an index like you have with dense
+@sonney2k	van51, agreed?
+ van51	sonney2k: yes
+@sonney2k	van51, this doesn't make a difference for linear features
+ van51	sonney2k: I think for tokens, vw concatenates them and hashes that
+@sonney2k	van51, because when you do a) and get the same h_idx multiple times you just add 1 to the value each time
+@sonney2k	OK?
+-!- lambday [67157d36@gateway/web/freenode/ip.103.21.125.54] has quit [Ping timeout: 250 seconds]
+ van51	yeap
+@sonney2k	if you go quadratic features though
+@sonney2k	you would need to know how often h_idx is the same
+@sonney2k	because you would do count[h_idx_1] * count[h_idx_2]
+@sonney2k	that is pretty annoying
+@sonney2k	van51, agree?
+ van51	sonney2k: yes
+ van51	sonney2k: I see that issue now
+@sonney2k	van51, you don't need that with dense
+@sonney2k	that is what I wanted to say
+ van51	sonney2k: ok then :)
+@sonney2k	with dense you have the value and the index
+ van51	sonney2k: well the answer for that is in vw, so I will read the code that Benoit suggested and see what I can do
+ van51	sonney2k: yes idd
+-!- FSCV [~FSCV@50.7.50.60] has joined #shogun
+ van51	sonney2k: ok, so coming up : a PR to fix what I was doing wrong
+ van51	sonney2k: and a PR for quadratic on dense
+ van51	actually an update on thath
+@sonney2k	van51, I only see 2 solutions currently - keep all the h_idx around, sort them and then go over them or use some hashmap on them and then iterate over the values
+@sonney2k	van51, yeah does quadratic work now?
+ van51	sonney2k: I had rolled back my code to fix that
+ van51	sonney2k: so I will do it again now
+@sonney2k	fix what?
+ van51	sonney2k: I'm confident that it'll be working though
+ van51	sonney2k: what I was doing wrong in hashed dense
+ van51	sonney2k: if you want to browse a bit through the commit now to understand what I mean, it's here : https://github.com/van51/shogun/commit/a46a05f62d0bc6779b20c87e6c41e22819ad92a5
+@sonney2k	van51, are we talking linear or quadratic now?
+ van51	sonney2k: linear
+@sonney2k	b'coz I was talking quadratic :D
+@sonney2k	van51, but nevertheless comparing it to a linear kernel is an excellent test
+ van51	sonney2k: ok. I know what to do now :)
+@sonney2k	or polykenrel degree=1 - which is the same as linear w/o
+-!- lisitsyn1 [~lisitsyn@213.87.139.248] has joined #shogun
+@sonney2k	normalization
+-!- lisitsyn [~lisitsyn@213.87.128.75] has quit [Ping timeout: 268 seconds]
+ van51	sonney2k: yes yes
+@sonney2k	van51, is sparse* working or does this also need a fix?
+ van51	sonney2k: the fix is in the same commit
+ van51	for that
+@sonney2k	van51, that would also be a good test btw comparing dense and sparse - result should be 100% the same
+ van51	sonney2k: idd it can be in an exampe to demonstrate the classes
+@sonney2k	van51, actually you do it exactly the way you need to do it for hasheddocfeatures there - computing the hashes first store in some list
+@sonney2k	van51, do a qsort
+@sonney2k	then count etc
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has quit [Quit: Leaving]
+@sonney2k	van51, so quadratic would work then with hasheddoc
+@sonney2k	van51, and I immediately have a feature request to work with sign(count) for the hasheddocfeatures
+@sonney2k	van51, so it would be 1 if a thing appears and not the real count
+@sonney2k	this was more stable in some apps I had
+ van51	sonney2k: ok I will note that to add it
+ van51	sonney2k: about the quadratic support
+ van51	sonney2k: maybe I should start it from now as a preprocessor?
+@sonney2k	van51, it has to be some totally new framework I am afraid ... preprocessors are *very* old (written 2000)
+-!- lisitsyn1 [~lisitsyn@213.87.139.248] has quit [Read error: Connection reset by peer]
+ van51	sonney2k: ah I see
+@sonney2k	so they might need some polish and I am not sure they can handle Dot*
+ van51	sonney2k: it can go under future work then :)
+@sonney2k	I mean what do we want
+@sonney2k	compress indices with hashing
+@sonney2k	and then maybe change values
+@sonney2k	with normalization
+@sonney2k	so this would have to hook into the add_to_dense_vec etc functions
+@sonney2k	not sure how
+@sonney2k	otherwise it would not be fast
+ van51	sonney2k: true
+@sonney2k	van51, the preprocessor stuff currently takes a vector, changes it and returns it
+@sonney2k	changes == new vector but processed
+@sonney2k	so that would defeat the purpose of dotfeatures
+ van51	sonney2k: ok I see
+ van51	sonney2k: well I have a clear plan now again at least and I'm happy :D
+@sonney2k	van51, sorry for not looking in detail in the first place
+@sonney2k	and please keep it on :)
+ van51	sonney2k: no worries. it actually helped me looked into it more
+ van51	sonney2k: plus I also suck at explaining :P
+@sonney2k	ideal team :D
+ van51	haha
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has left #shogun ["Fallen asleep!"]
+-!- travis-ci [~travis-ci@ec2-23-20-210-220.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9401785
+-!- travis-ci [~travis-ci@ec2-23-20-210-220.compute-1.amazonaws.com] has left #shogun []
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has joined #shogun
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+--- Log closed Wed Jul 24 00:00:44 2013

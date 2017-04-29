@@ -1,0 +1,1160 @@
+--- Log opened Mon Aug 13 00:00:17 2012
+ wiking	blackburn: yes
+ wiking	ubuntu's package doesn't ship with gmock-config :(
+ wiking	so we need to do soemthing else in ./configure script to detect and add compile flags for gmock on ubuntu
+ blackburn	what is the solution? install by hand?
+ wiking	heiko solved it by installing gmock by hand
+ wiking	but as i said in the mailing list
+ wiking	that's not a really good solution ;)
+ blackburn	I think it is rather ok - we (developers) can install it and only we do need it
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+ shogun-buildbot	build #53 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/53
+-!- av3ngr [av3ngr@nat/redhat/x-xdzltetycxkppxhs] has joined #shogun
+-!- n4nd0 [~nando@126.Red-2-137-7.dynamicIP.rima-tde.net] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:7db4:863b:e25:317c] has joined #shogun
+-!- n4nd0 [~nando@126.Red-2-137-7.dynamicIP.rima-tde.net] has quit [Ping timeout: 256 seconds]
+ wiking	bu
+ wiking	busy bees everywher? :)
+-!- av3ngr [av3ngr@nat/redhat/x-xdzltetycxkppxhs] has quit [Quit: That's all folks!]
+ wiking	anybody around?
+ wiking	ahhahahahaha blackburn u've fcuked me :)
+-!- alexlovesdata [~binder@goldenezahl.ml.tu-berlin.de] has joined #shogun
+-!- blackburn1 [~blackburn@109.226.80.43] has joined #shogun
+-!- alexlovesdata [~binder@goldenezahl.ml.tu-berlin.de] has left #shogun []
+-!- alexlovesdata [~binder@goldenezahl.ml.tu-berlin.de] has joined #shogun
+ blackburn1	uricamic: hey
+ blackburn1	uricamic: can I merge your PR now?
+ uricamic	blackburn1: hi, I hope so
+ blackburn1	uricamic: I mean did you work out things Soeren pointed?
+ uricamic	yep
+ blackburn1	okay I see
+ uricamic	everything should be fixed according to comments
+ CIA-39	shogun: Sergey Lisitsyn master * r8c987fd / (18 files in 4 dirs): Merge pull request #699 from uricamic/BM_SOL_EXAMPLE (+8 more commits...) - http://git.io/_XWA-g
+ blackburn1	uricamic: btw I had a question
+ wiking	blackburn1: mergmeme :D
+ uricamic	blackburn1: go on :)
+ blackburn1	wiking: yeah will glance it over once again in 5 mins
+ blackburn1	uricamic: in risk function there is float64_t* R
+ blackburn1	is it just a pointer to one float - risk value?
+ uricamic	wiking: there is one important change in risk function you should be aware of
+ uricamic	blackburn1: yep
+ blackburn1	uricamic: actually may be we could change it not to void but float64_t return type
+ blackburn1	to reduce num of parameters
+ uricamic	you mean to directly return the value of risk from that function?
+ blackburn1	yeah
+ uricamic	yep, that sounds reasonable
+ blackburn1	uricamic: that would make director risk function easier to use
+ wiking	uricamic: ah cool then i'll wait for the merge
+ wiking	i mean your merge... so i change mine as well
+ blackburn1	now one have to do R[0] = ...
+ uricamic	blackburn1: ok, so I will change it now
+ blackburn1	heh I merged too fast
+ uricamic	ok, next PR :)
+ blackburn1	uricamic: btw how fast it is for MNIST?
+ shogun-buildbot	build #319 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/319  blamelist: Michal Uricar <uricar.michal@gmail.com>
+ shogun-buildbot	build #320 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/320
+ uricamic	well, to be honest, the risk function could be written in much better way (some precomputations), but now it is like 1s per iteration on whole MNIST database (i.e. 60k examples, feature vector dimensionality 784)
+ shogun-buildbot	build #329 of deb3 - modular_interfaces is complete: Failure [failed compile libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/329  blamelist: Michal Uricar <uricar.michal@gmail.com>
+ blackburn1	uricamic: how many iterations does it require to converge to some consistent solution?
+ uricamic	comparing with exactly same implementation in MATLAB it is like 8x faster
+ uricamic	depends on regularization constant lambda, but I think several hundreds
+ blackburn1	uricamic: hmm it sounds like it is not really slower than linear crammer-singer
+ blackburn1	interesting
+ blackburn1	I mean liblinear and libocas implementations (they take similar time on 40K examples/ 1K features dataset)
+ uricamic	blackburn1: but I think it can be made faster with better risk function, doing some clever precomputations
+ blackburn1	I see
+ shogun-buildbot	build #222 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/222  blamelist: Michal Uricar <uricar.michal@gmail.com>
+ blackburn1	wiking: so shall I wait you to rebase against uricamic changes?
+ shogun-buildbot	build #223 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/223
+ wiking	blackburn1: let me try to rebase
+ wiking	mm rebase went fine i'll try to compule
+ wiking	*compile if that works then u can just merge it straight away
+ wiking	hehe yeah no i need to fix some shit
+ blackburn1	~150 warnings left
+ blackburn1	I will kill them all soon
+ shogun-buildbot	build #330 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/330  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Michal Uricar <uricar.michal@gmail.com>
+ wiking	blackburn1: what should be done about the libocas update?
+ blackburn1	wiking: I didn't check yet
+ wiking	blackburn1: there was this thing with the multiclass svm solver of libocas... the -1 or no -1
+ wiking	i guess we shouldn't do -1 as in previous cases there was no -1 ;)
+ wiking	previous cases = previous version of libocas
+* wiking still compiling... stupid modular interface ;)
+ wiking	ohshitfuck
+ wiking	i hate this
+ uricamic	Is it possible to get PyCharm license for shogun?
+ blackburn1	I had a crack somewhere
+ blackburn1	:D
+ wiking	ok i'll redo this pull request
+ uricamic	:) but it could be possible to obtain free license for shogun developers :)
+ wiking	otherwise it'll be just a mess
+ uricamic	which I guess is cleaner solution
+ blackburn1	wiking: redo??
+ blackburn1	uricamic: yeah just apply on their site as shogun developer
+ wiking	blackburn1: do a new PR
+ wiking	blackburn1: that'll be nicer
+ blackburn1	okay
+ uricamic	blackburn1: ok, and should I apply it just for me, I mean who should be the contact person?
+ blackburn1	uricamic: I think it should be you
+ uricamic	ok, thx
+ blackburn1	Please make sure that you meet the following criteria:
+ blackburn1	You are the project lead or a committer
+ blackburn1	You have been working on your open source project for a minimum of 3 months
+ blackburn1	Your community is active. This means that you have recent activity in your newsgroups or forums
+ blackburn1	You have an updated News section on your site
+ blackburn1	You release updated builds on a regular basis
+ blackburn1	uricamic: ^
+ wiking	blackburn1: this should work https://github.com/shogun-toolbox/shogun/pull/709
+ uricamic	blackburn1: I know, I just didn't know if it should be like the leader of the project asks for license for all developers
+ blackburn1	uricamic: first point is not satisfied probably but just try
+ blackburn1	uricamic: I don't get that too
+ uricamic	ok, I will just try
+ blackburn1	if they deny lets just ask soeren
+ blackburn1	:D
+ uricamic	blackburn1: sure :)
+ blackburn1	however I am a commiter so I could try too
+ wiking	ok this compiled again
+ wiking	so all's good with that PR
+ uricamic	blackburn1: ok, I have sent it, in few days there should be some response
+ blackburn1	uricamic: I've used pycharm for a while but didn't really like it - do you like it?
+ uricamic	blackburn1: I don't know, I am a python newbie :D but so far it seems nice
+ blackburn1	uricamic: I see
+ uricamic	and one my college, who is a big fan of python likes it a lot
+ blackburn1	uricamic: what do you use to develop with C++?
+ uricamic	now I am using QtCreator
+ uricamic	since it seems to cooperate with CMake nicely
+ blackburn1	I see
+ wiking	blackburn1: :)
+ CIA-39	shogun: Sergey Lisitsyn master * rd87c378 / (13 files in 8 dirs): Fixed a few documentation warnings - http://git.io/_eBOfg
+ blackburn1	wiking: I am confused whether we should -1 in ocas
+ shogun-buildbot	build #331 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/331  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ wiking	blackburn1: just writing the unittest
+ wiking	and we'll see
+ blackburn1	this probably maps 0 to -1
+ wiking	lol shogun-unit-test(85744,0x7fff7c412180) malloc: *** error for object 0x7fb913c071b8: incorrect checksum for freed object - object was probably modified after being freed.
+ CIA-39	shogun: Sergey Lisitsyn master * r676cefa / (2 files): Fixed java modular compilation issue with BMRM - http://git.io/IbPXjQ
+ wiking	blackburn1: mmmm in multiclass labelling the labels should be: 0,1,2 etc?
+ blackburn1	yes
+ wiking	how fast multiclassocas is actually?
+ wiking	suppose to be fast for a 3 class problem
+ wiking	?
+ wiking	3 guassians, each having 25 examples and the vector dim is 2
+ wiking	mmm this doesn't work :)
+ wiking	anybody ever tested multiclassOCAS?
+ wiking	i see a python exmaple of it :)
+ blackburn1	wiking: yes it works
+ blackburn1	wiking: slower than liblinear but for your case should converge in a few milliseconds I believe
+ wiking	mmm i wonder what i do wrong
+ wiking	as it really doesn't find anything
+ wiking	i mean everything is mapped to 0.0
+ wiking	most probably my bad...
+ shogun-buildbot	build #332 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/332  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ wiking	blackburn1: ok i've fixed the (c) header... see the last patch in PR
+ blackburn1	okay
+ CIA-39	shogun: Viktor Gal master * rc87bf5e / (12 files in 4 dirs): [WIP] restructure latent solvers - http://git.io/N0miwQ
+ CIA-39	shogun: Viktor Gal master * rbbb7d9b / (23 files in 8 dirs): Various changes for latent variable learning - http://git.io/FyaCDA
+ CIA-39	shogun: Viktor Gal master * rd3e9250 / src/interfaces/modular/Latent.i : Fix author in copyright header - http://git.io/ueEpLA
+ CIA-39	shogun: Sergey Lisitsyn master * r97b8217 / (27 files in 9 dirs): Merge pull request #709 from vigsterkr/latent - http://git.io/K4r67w
+ wiking	yey
+ wiking	let's see if it fails :)
+ shogun-buildbot	build #323 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/323  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ wiking	yeeey
+ wiking	:D
+ wiking	ah i guess i know how
+ wiking	*why
+ shogun-buildbot	build #324 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/324
+ wiking	i've missed the --amend
+ wiking	blackburn1: i've tried now with only 2 labels (0/1) using multiclass ocas, basically the same data set that works for svmocas
+ wiking	and it fails
+ wiking	:S
+ blackburn1	wiking: fails like?
+ wiking	all example is classified to 0
+ wiking	so i have 2 gaussians
+ wiking	i mean samples of 2 different gaussians
+ blackburn1	how many iterations?
+ wiking	one is labeled as 0 the other as 1
+ wiking	blackburn1: haven't debugged it, just a sec i'll print it
+ CIA-39	shogun: Sergey Lisitsyn master * rdf80e5c / (15 files in 7 dirs): Removed SLEP machine and redundant L1LogisticRegression, rebased FeatureBlockLogisticRegression and fixed missed weight initialization - http://git.io/TV8FjA
+ wiking	 CMulticlassOCAS* mocas = new CMulticlassOCAS(C, train_feats, ground_truth);
+ wiking	  mocas->io->set_loglevel(MSG_DEBUG);
+ wiking	mmm doesn't really work :(
+ blackburn1	it outputs information just after training
+ blackburn1	with debug level
+ wiking	yes i know
+ wiking	but if i do this
+ wiking	and then call mocas->train()
+ wiking	it doesn't print out anything :S
+ blackburn1	then something is broken in your example :D
+ wiking	?!
+ blackburn1	I do not undrestand how can it skip debug print
+ wiking	?![DEBUG] Number of iterations [nIter] = 5
+ wiking	heheh ok i've fixed it
+ wiking	shogun wasn't init-ed in a right way
+ wiking	[DEBUG] Number of training errors [trn_err] = 25
+ wiking	:S
+ wiking	that is funny
+ wiking	:))
+ wiking	out of 50 samples :)))
+ wiking	where 25 is 0 and 25 is 1
+ wiking	:)
+ blackburn1	what is epsilon?
+ wiking	default
+ wiking	lemme check what is it
+ blackburn1	no, not really relevant
+ blackburn1	I mean if it was 1e-1 I would believe heh
+ wiking	1e-2
+ blackburn1	okay then compare
+ blackburn1	with liblinear
+ blackburn1	I am totally sure liblinear works
+ shogun-buildbot	build #333 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/333  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ wiking	optimization finished, #iter = 164
+ wiking	same error with liblienar
+ blackburn1	then something is wrong with your features and labels
+ wiking	blackburn1: but it works with SVMOcas
+ wiking	the same binary case
+ wiking	:)
+ wiking	perfectly
+ blackburn1	so you set labels to
+ blackburn1	0 and 1
+ blackburn1	right?
+ wiking	yes
+ wiking	instead of -1 and 1
+ wiking	everything is the same
+ wiking	just the labels are 0 and 1 instead of -1 and 1
+ wiking	https://github.com/shogun-toolbox/shogun/blob/master/tests/unit/classifier/svm/SVMOcas_unittest.cc
+ wiking	the only difference is
+ wiking	line 29
+ wiking	line 37
+ wiking	and line 40
+ wiking	and obviously 42
+ wiking	everything else is the same
+ wiking	even the random seed is the same
+ wiking	thus the gaussians are the same
+ blackburn1	that's strange
+ wiking	yep
+ wiking	especially that not only libocas fails
+ wiking	but liblinear
+ blackburn1	I just checked on my rsr stuff - liblinear converges to right solution
+ wiking	so i really wonder
+ blackburn1	did you change it to multiclasslabels?
+ wiking	http://pastebin.com/5VQTYtZp
+ wiking	this is the full test code
+ wiking	and yeah
+ wiking	i'm using CMulticlassLabels
+ blackburn1	interesting
+ blackburn1	wiking: I have one suspect - copy subset..
+ wiking	blackburn1: but that works in case of SVMOcas :)
+ blackburn1	yes because svmocas would work with subset
+ wiking	any fast way to divide the whole set then in another way?
+ blackburn1	I checked code and it should be ok
+ blackburn1	if (i % 2 == 0)      train_idx[j] = i;    else      test_idx[j++] = i;
+ blackburn1	is it correct?
+ shogun-buildbot	build #334 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/334  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+ blackburn1	wiking: why do you set half of labels and increase j only on test indices?
+ wiking	noup
+ wiking	as u can see j increases every 2nd time in the iter
+ wiking	as you want to divide the whole matrix
+ wiking	into 2 different sets
+ blackburn1	I don't know - that all sounds strange
+ blackburn1	I wouldn't believe something is wrong both in liblinear and ocas
+ wiking	heheh me neither
+ wiking	i guess something is wrong on my end
+ wiking	it's just weird that it works with svmocas
+ shogun-buildbot	build #335 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/335  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- uricamic [~uricamic@2001:718:2:1634:7db4:863b:e25:317c] has quit [Quit: Leaving.]
+-!- heiko [~heiko@host86-176-126-57.range86-176.btcentralplus.com] has joined #shogun
+ wiking	heiko: is there a fast way to test whether the features in a matrix are from 2 diff gauss distrib?
+ heiko	yes :)
+ heiko	t-test
+ heiko	if you are one-dimensional
+ heiko	and if not: My statistics framework :)
+ heiko	wiking, what kind of data do you got?
+ wiking	heiko: the SGMatrix that is created by that function i wrote in DataGenerator
+ heiko	Ill take a look
+ wiking	heiko: for some reason i'm having trouble using that and trying to learn a multiclass classifier with the generated data :S
+ heiko	oh :)
+ wiking	so now i'm trying to find out what could be the trouble :S
+ heiko	maybe plot it for dim=2?
+ heiko	you could also fit a Gaussian with ML
+ heiko	wiking
+ heiko	what do you want to create in the method i dont get the comments
+ wiking	heiko: create a matrix
+ heiko	what kind of gaussians should the samples come from
+ wiking	where there are m samples for each of the n gaussians
+ heiko	you only say that there are multiple ones
+ heiko	what are their parameters?
+ wiking	heiko: random
+ wiking	heiko: you mean for mu, right?
+ heiko	yeah
+ heiko	random?
+ wiking	yes that is randomly generated
+ heiko	so random mean
+ heiko	and random variance
+ wiking	variance is a diagonal
+ heiko	and from each of these a fixed number of samples?
+ wiking	eigenmatrix
+ wiking	[1,0;0,1]
+ heiko	do all of them have the same probability to generate a sample or are they weighted?
+ wiking	if dim = 2
+ heiko	so variance is not random
+ wiking	yep that's not random
+ heiko	I suggest the following: first create a method (or check whether it exists): gaussian_sample(SGVector mean, SGMatrix variance)
+ heiko	and then just call that with random means
+ wiking	heiko: well that's more or less what's happening ;0
+ wiking	:)
+ heiko	ah thats the Gaussian class right?
+ wiking	yes
+ wiking	Gaussian class generates the samples for the given gaussian
+ wiking	ok maybe the problem is not linearly separable? :)
+ heiko	btw you dont need to call this get_allocated_matrix stuff if you dont have a target matrix as parameter
+ wiking	i mean the mean is just not good
+ heiko	gaussians mixtures are per definition not linearly separable
+ heiko	you might be lucky but not in general
+ heiko	you  need a large distance  at least e*std-dev
+ wiking	heiko i guess i got lucky in case of svmocas then
+ heiko	3*stddev
+ heiko	I looked at the method
+ heiko	this mean.random()
+ heiko	breaks it
+ heiko	you need to ensure that the means are far enough apart from each other
+ wiking	yep
+ wiking	htat's what i thought now
+ wiking	any ideas
+ wiking	how can i generate good enough means if i know the dim and the number of gaussians i have
+ wiking	since i guess all of them should be equally far apart from each other
+ heiko	yeah, dont use random means
+ heiko	the samples are random anyway
+ blackburn1	one must be careful with 0.01 probability left with 3 sigmas
+ blackburn1	:D
+ heiko	or you could order them in a grid
+ heiko	thanks blackburn :)
+ blackburn1	heiko: do I remember that correctly? 0.995 is percentile or so?
+ heiko	yeah :)
+ heiko	wiking, just create hypercubes of gaussians
+ heiko	Ill send you a picture
+ wiking	heiko: great
+ blackburn1	4d cube
+ blackburn1	:D
+ wiking	heiko: so depending on the dim
+ wiking	i take the 'corners' of the hypercube?
+ wiking	i.e. if dim = 2
+ blackburn1	just generate all combinations of vector of size dim consisting +-d
+ wiking	0,0; 0,1; 1,0; 11
+ wiking	*1,1
+ wiking	?
+ blackburn1	or (-1,1) (1,1) (1,-1) (-1,-1)
+ heiko	wiking, sent
+ heiko	wiking, dont need the corners
+ heiko	just do n gaussians per dim
+ heiko	and set distance between them to a large value
+ heiko	the picture I sent is for d=2
+ wiking	ah ok
+ wiking	yeah because i was about to say what if one wants 10 gaussians but with d=2
+ wiking	ok so what do you reckon the distance should be?
+ heiko	5 should be enough
+ blackburn1	heiko: I found a way to evaluate OvR things
+ heiko	but dimension wise
+ heiko	not euclidean
+ heiko	blackburn, tell me
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+ wiking	heiko: i.e. 0,0; 0,5; 5,0; 5,5; 10,0 etc
+ wiking	right?
+ heiko	yeah for d=2
+ wiking	for d=3 5 would be good i.e. 0,0,0; 0,5,0 etc?
+ blackburn1	heiko: I am adding an options to store all scores in multiclass labels
+ heiko	dim=3 would be a 3d cube " filled with" gaussians
+ blackburn1	the multiclassovrevaluation computes things via binaryclassevaluation
+ heiko	great
+ heiko	ok
+ wiking	damn i need a grid generator code
+ heiko	blackburn1, custom fonts with python latex are a pain is the a**
+ heiko	computer modern is quite easy
+ heiko	what do you think?
+ blackburn1	heiko: python latex?
+ heiko	yeah, latex typo in pytohn plots
+ heiko	for tutorial
+ blackburn1	matplotlib?
+ heiko	yeah
+ blackburn1	I used custom fonts there
+ blackburn1	without much pain
+ heiko	could you send me a script with that?
+ blackburn1	pain is to use cyrillic
+ blackburn1	:D
+ heiko	like a small example where you use the pathpazo
+ blackburn1	you would never imagine how much pain cyrillic brings
+ heiko	lol :) ok I stop complaining
+ blackburn1	heh
+ blackburn1	okay let me find something
+ blackburn1	heiko: all you need is to put a few things into rc
+ heiko	ok
+ heiko	do you have a script?
+ blackburn1	wait a min
+ wiking	heiko: this shoudl work afaik
+ wiking	-               mean.random(0.0, 10.0);
+ wiking	+               mean.zero();
+ wiking	+               for (index_t k = 0; k < dim; ++k)
+ wiking	+                       mean[k] = i*grid_distance;
+ wiking	or?
+ wiking	where i is the i-th gaussian
+ wiking	so basically it's 0,0... 5,5... 10,10...
+ wiking	etc
+ blackburn1	heiko: https://gist.github.com/3342349
+ blackburn1	lines 83,84,85
+ heiko	wiking, plot in 2d and 3d then youll see :)
+ blackburn1	for 4d case use the force!
+ blackburn1	:D
+ wiking	heiko: display_matrix is not working :D
+ blackburn1	heiko: but show won't work
+ wiking	or it does? :)
+ heiko	it does
+ wiking	oh yeah it does i'm just looking at it on a wrong way
+ blackburn1	heiko:  show doesn't work here with latex at all
+ blackburn1	heiko: neither with custom nor default latex fonts
+ heiko	blackburn, this is all annoying
+ heiko	why isnt there an export button?
+ blackburn1	heiko: export?
+ heiko	i hate this messy stuff! argh
+ heiko	save-as you know
+ heiko	its 2012
+ blackburn1	heiko: it is in matplotlib
+ heiko	but it doesnt integrate into latex
+ heiko	It would be great to let latex do the typo
+ heiko	then everything would look much nicer
+ blackburn1	ehmm
+ blackburn1	heiko: in my script latex is used with custom font and saves to .pdf
+ blackburn1	what else do you need? :)
+ heiko	yeah this works, but is it comfortable? :)
+ heiko	thats my point
+ heiko	just complaining in general :D
+ blackburn1	comfortable in which way?
+ blackburn1	I think there is a way to make show work too
+ blackburn1	with latex
+ blackburn1	heiko: nicholas wants to normalize train and test data with preprocessor inited with train data
+ heiko	blackburn1, what does that mean?
+ blackburn1	heiko: for example you compute mean of train vectors
+ blackburn1	and subtract it both from train and test vector
+ blackburn1	s
+ blackburn1	during the process of evaluation
+ heiko	ok
+ blackburn1	got it?
+ heiko	so he wants no normalise training data for each fold?
+ blackburn1	yes
+ heiko	puh
+ blackburn1	heiko: it is next on my list
+ heiko	preprocessors cannot do that?
+ heiko	ah ok
+ blackburn1	heiko: they can
+ blackburn1	but we do not handle it
+ blackburn1	heiko: we should call init in cross validation I think
+ blackburn1	before training
+ heiko	yeah
+ heiko	I forgot that
+ heiko	before
+ heiko	its very important for some kernels
+ blackburn1	you could do that too if you have time
+ heiko	maybe
+ blackburn1	while I am messing with ovr multiclass :)
+ heiko	I am currently getting organised with the rest for my gsoc
+ heiko	this sigmoid fitting still has to come
+ heiko	and mkl weights per fold output
+ blackburn1	heiko: I spent some time on pre-release stuff already btw
+ blackburn1	there are ~100 doc warnings left and I checked tests
+ heiko	nice, yeah I also fixed a few warning on the weekend
+ heiko	then there is still the migration stuff
+ heiko	and reference counts for sgvec/mat
+ blackburn1	we need to release on 1st of September
+ blackburn1	I like that date :D
+-!- zxtx [~zv@c-71-227-187-90.hsd1.wa.comcast.net] has joined #shogun
+ wiking	fucking hell how do you plot this shit in matlab fast?
+ wiking	or python
+ wiking	i have a matrix of 2 rows and n columns
+ blackburn1	from pylab import *
+ blackburn1	X = array([yourmatrix])
+ blackburn1	scatter(X[0,:],X[1,:])
+ blackburn1	show()
+ wiking	mmm
+ wiking	wy this shit only shows 1 points :))0
+ blackburn1	I expect your X is transposed then
+ wiking	noup :)
+ wiking	i'm switching to python
+ blackburn1	print X.shape
+ wiking	i've tried scatter in matlab
+ wiking	should do the same
+ wiking	installing scipy.. forgot to reinstall it after os upgrade :X
+ wiking	i should be able to copypaste the output of display_matrix into python :S
+ wiking	heiko: SHIIITFACK
+ wiking	:)
+ wiking	why it no working:)
+ heiko	hey wiking, calm down
+ heiko	whats happening?
+ wiking	:)
+ heiko	one has to patient with plotting
+ wiking	i've plotted
+ wiking	but i think it should be ok
+ wiking	as a lot of them are actually 0,0
+ wiking	i mean for the mean =[0,0]
+ wiking	the samples are (0,0)
+ wiking	thus when i plot i don't see it that there's equal amount there
+ wiking	as around the other grid point
+ wiking	but as far as i can see from the matrix
+ wiking	it should be alright
+ wiking	still
+ wiking	it cannot separate it
+ heiko	it also has to be ok from the plot
+ heiko	matrix reading is left for keanu reeves :D
+ wiking	ok
+ wiking	this is weird
+ wiking	let me pastebin it
+ heiko	ok
+ wiking	this is the matrix
+ wiking	http://pastebin.com/1ykKNze5
+ wiking	d=2
+ wiking	and 2 gaussians
+ wiking	where mean_1=(5,5)
+ wiking	mean_2=(10,10)
+ wiking	ah no i'm sorry
+ wiking	mean_1= (15,15) and mean_2=(30,30)
+ wiking	and variance is always [1,0;0,1]
+ heiko	hey man I cant read that
+ heiko	need images
+ wiking	ok here's the image... (sending in email)
+ wiking	sent
+ heiko	I see
+ heiko	but what happened to the hypercubes?
+ wiking	?
+ wiking	it's just dim=2
+ wiking	so no hypercube
+ wiking	damn
+ wiking	i think the problem is the way i set the matrix elements
+ heiko	but in two dimension you should get this grid in the image i sent you
+ wiking	yep
+ heiko	sorry phone was ringing
+ wiking	the problem is the filling of the matrix
+ wiking	i've printed separately the generated samples
+ wiking	and it's good
+ wiking	this is with 2 gaussians with 2 dim
+ wiking	http://pastebin.com/xM2VfBKh
+ wiking	the problem is that how i fill up the matrix
+ heiko	you are adding the value to each dimension
+ heiko	thats why you get this diagonal structure
+ heiko	why not make this grid?
+ wiking	heiko: yeah i get that diagonal struct
+ wiking	but mainly that's not the problem
+ wiking	i mean it should work with this diag struct as well
+ wiking	or?
+ wiking	but the problem is that how i fill up the matrix with these vectors
+ wiking	i think it was a miracle that it was working with SVMOcas at the first place
+ heiko	yes it should work
+ heiko	really, oh no :)
+ wiking	yeah
+ heiko	isnt there a reference dataset that you could use?
+ wiking	ok
+ wiking	i have data!
+ wiking	and it actually looks good
+ wiking	although multiclass couldn't separate it still
+ wiking	heiko: sent u an email
+ wiking	with a graph where the means of the gaussians: 15,15 and 30,30
+ heiko	wiking these should be fine
+ wiking	multiclass cannot separate it
+ wiking	 :D
+ wiking	neither multiclass liblinear
+ wiking	nor multiclass ocas
+ heiko	are you sure you did not switch dimensions or something?
+ wiking	well now i'm going to print out the matrices separately
+ wiking	after i devide this big matrix of samples
+ wiking	into train and test dataset
+ CIA-39	shogun: Sergey Lisitsyn master * rc49b8cf / (8 files in 5 dirs): Added multiclass OVR evaluation - http://git.io/KzIHsw
+ wiking	the plot is very similar obviously
+ wiking	:)))
+ wiking	i'll print out the labeling as well next to the vector values
+ wiking	as i really cannot see wtf is happening
+ heiko	blackburn, matplotlib is so bad I can't believe it
+ heiko	Now 1h trying to get along with these plots
+ blackburn1	heiko: what's up?
+ blackburn1	what is so wrong with it?
+ heiko	everything is so complicated
+ wiking	hah
+ wiking	i'm right
+ blackburn1	heiko: yes it is very flexible so complex
+ wiking	heiko: http://pastebin.com/MM4pzW11
+ wiking	this is the train set
+ wiking	and the test set is very similar
+ heiko	blackburn, how to change the image size
+ heiko	I fail to do so
+ heiko	wiking, and?
+ wiking	heiko: and everything is classified after the training as 0
+ blackburn1	heiko: image size?
+ blackburn1	size of what exactly?
+ wiking	or no sorry
+ wiking	no everything is classified as 1
+ heiko	blackburn, something in order to have a latex compatible size
+ blackburn1	heiko: why to do that?
+ heiko	because scaling looks bad
+ wiking	heiko: and basically what it does according to the debug that it takes the 0 examples as training errors
+ heiko	thats why I want to produce plots that fit without scaling
+ blackburn1	heiko: scaling of fonts?
+ heiko	blackburn1, yes
+ heiko	wiking, so theres an error in multiclass?
+ blackburn1	heiko: okay I'd suggest to tune fontsize
+ wiking	heiko: i have no idea... neither multiclassocas nor multiclassliblinear can separate this problem
+ heiko	blackburn, no Just figure size, I set the font size in the figure to the same as in tutorial, which is 11
+ heiko	wiking, try libsvm
+ blackburn1	heiko: http://stackoverflow.com/questions/332289/how-do-you-change-the-size-of-figures-drawn-with-matplotlib
+ heiko	without multiclass
+ wiking	heiko: svmocas works smoothly
+ heiko	blackburn you joker, I have tried the first 10 google entries
+ blackburn1	heiko: and?
+ heiko	they dont work thats the problem
+ blackburn1	no way, why?
+ wiking	heiko: w/o any missclassification
+ wiking	heiko: w/o any missclassification
+ wiking	sorry
+ wiking	wrong window
+ wiking	:)
+ heiko	blackburn, and I refuse to type in more that 10 lines for that problem btw ::D
+ blackburn1	heiko: so rc('figure', figsize=(5, 10)) doesn't work?
+ heiko	it looks like, but then when I save, things are discarded
+ heiko	and when I call savefig
+ heiko	the resulting pdf is empty
+ heiko	and thats when I started complaining :)
+ blackburn1	hmm it doesn't work okay
+ wiking	i've used not liblinear instead of libsvm
+ wiking	WARN] reaching max number of iterations
+ wiking	Using -s 2 may be faster(also see liblinear FAQ)
+ blackburn1	heiko:
+ blackburn1	figure(figsize=(size in inches, size in inches))
+ blackburn1	just do that
+ blackburn1	it works here
+ wiking	comeeooon wtf is with this :)
+-!- blackburn1 [~blackburn@109.226.80.43] has left #shogun []
+* wiking doesnt get it!
+ heiko	wiking
+ heiko	you get this warning when you should optimise primal instead of dual
+ heiko	try libsvm
+-!- blackburn1 [~blackburn@109.226.80.43] has joined #shogun
+ heiko	blackburn, I just figured out the problem
+ wiking	heiko: with linear kernel?
+ heiko	wiking yes
+ heiko	and not multiclass
+ blackburn1	arghh I got why I have headache
+ blackburn1	I forgot to eat today
+ blackburn1	heiko: so now it works?
+ heiko	blackburn, not really, still looks horrible, this causes me a headache
+ heiko	font size is wrong and stuff
+ heiko	since this scales things
+ shogun-buildbot	build #336 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/336  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ heiko	its so stupid, since it is an easy problem that every scientist has to approach
+ blackburn1	heiko: font size of what?
+ blackburn1	axes?
+ heiko	I dont get why there are no good solutions
+ heiko	no all
+ blackburn1	wait but is size of plot correct?
+ wiking	heiko: works just fine
+ wiking	heiko: as with liblinear and svmocas
+ wiking	when it's binary
+ CIA-39	shogun: Sergey Lisitsyn master * ra6cdaf5 / src/shogun/evaluation/CrossValidation.cpp : Added preprocessor init calls in crossvalidation - http://git.io/gzmNOw
+ wiking	binary classification just works fine
+ wiking	heiko: i've tried changing dimension
+ wiking	but that did not confuse at all the binary classifiers
+ heiko	then there is a bug somewhere
+ wiking	heiko: in case of multiclass if i put higher dimension
+ wiking	then the error gets smaller
+ wiking	but still nothing near to the binary case
+ wiking	i just need a confirmation
+ wiking	ok i'm gonna feed this train/test pair
+ wiking	directly to liblinear
+ wiking	just to see wtf
+ heiko	wiking I dont know
+ heiko	it should give the same answer when you hand in the same (easy) data
+ wiking	heiko: heheh let's see i'm very very curious now
+ wiking	Accuracy = 36% (27/75)
+ wiking	:)
+ wiking	if i give the train set as a test set
+ shogun-buildbot	build #337 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/337  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ wiking	hehe
+ wiking	ok this si just not separable
+ wiking	:)))
+ wiking	heiko: any ideas how we could solve this that there's a datagenerator function that creates a dataset that is separable in a way that i can do a unittest for it?
+ heiko	do the unit test on a dataset that is definately lin. separable
+ heiko	you could use the mean dataset
+ heiko	but actually
+ heiko	I would use a fixed one
+ heiko	so that you can assert outputs
+ wiking	heiko: heheh so add a header file that has the dataset?
+ heiko	no
+ wiking	and one could include it when he wants to test a classifier?
+ heiko	just produce it in your code
+ wiking	heiko: ok how ?:)
+ wiking	as the gaussian doesn't work
+ wiking	:)
+ heiko	wiking, just via signs or so
+ wiking	:D
+-!- n4nd0 [~nando@56.Red-81-33-212.dynamicIP.rima-tde.net] has joined #shogun
+ n4nd0	blackburn1: hey!
+ blackburn1	n4nd0: hey there
+ n4nd0	blackburn1: how are you?
+ wiking	!@#$ :)
+ blackburn1	n4nd0: fine, watching wiking playing around with gaussians :D
+ n4nd0	haha
+ n4nd0	wiking: how is it going with them?
+ n4nd0	hehe
+ wiking	n4nd0: shitfuck
+ wiking	wasted half a day
+ wiking	and it's not working at all
+ heiko	blackburn, I got it finally with the plots
+ n4nd0	hehe
+ n4nd0	wiking: I wish you luck!
+ heiko	n4nd0, you were also interested in that right?
+ n4nd0	blackburn1: I am going to rebase the branch now
+ n4nd0	heiko: yes
+ n4nd0	blackburn1: does that mean that we'll be ready to merge afterwards??
+ n4nd0	I am really looking forward to it!
+ blackburn1	heiko: yeah I think so
+ n4nd0	blackburn1: was that last message regarding my branch?
+ blackburn1	about rebase? yeah
+ blackburn1	wow wiking you did weekly report in time :)
+ wiking	:D
+ wiking	it was already in draft
+ wiking	but the the hell with the multiclassocas unittesting
+ n4nd0	wiking: was the change CStructuredData -> CData finally merged?
+ n4nd0	I took a look to your latent branch but didn't see it
+ wiking	n4nd0: i haven't changed your code
+ wiking	n4nd0: just did the latent part
+ wiking	n4nd0: and introduced lib/CData...
+@sonney2k	heiko, did you discuss the 'e.V.' issue?
+ blackburn1	master sonney2k in da hous
+ blackburn1	e
+@sonney2k	heiko, about now we have to start to organize formalities w/ google
+ heiko	sonney2k, not really, but I got a friend who studies law visiting, he hinted me some reference to check stuff out, Ill do it later this week
+@sonney2k	blackburn1, bow before the leader ;-)
+ heiko	busy with plotting currently
+ heiko	hope to sort that out soon
+@sonney2k	heiko, ok - it is starting to be a bit pressing though
+ heiko	yeah, sorry that this took so long
+@sonney2k	wiking, n4nd0 what is CData?
+ blackburn1	we need an offshore to keep money we get from stealing people and oil
+@sonney2k	wiking, n4nd0 it sounds like a very generic name doing what CFeatures was invented for - no?
+ alexlovesdata	why not an island close to the pacific trash vortex??
+* sonney2k also prefers an island
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Ping timeout: 245 seconds]
+ blackburn1	well cyprus is an island I heard it is ok to keep stolen money
+ n4nd0	sonney2k: it is what I called CStructuredData
+ n4nd0	wiking prefers to use CData for that
+ n4nd0	to be honest, I am ok with any of them...
+@sonney2k	n4nd0, structured data is CFeatures + CLabels right?
+ n4nd0	sonney2k: no
+ wiking	heiko: !!!!
+ wiking	heiko: i think i did it
+ n4nd0	CStructuredData is the building block of CStructuredLabels
+ n4nd0	CStructuredLabels is a DynamicObjectArray of CStructuredData
+ heiko	blawiking, what happened? :)
+ CIA-39	shogun: Heiko Strathmann master * rbe9da8e / (5 files): Merge pull request #710 from karlnapf/master - http://git.io/ID4pQw
+ CIA-39	shogun: Heiko Strathmann master * rdaabd3f / (2 files): updated graphical examples - http://git.io/6-7Eig
+ CIA-39	shogun: Heiko Strathmann master * r15cb24b / (2 files): renamed file - http://git.io/RCmIbA
+ CIA-39	shogun: Heiko Strathmann master * ra99f6fe / examples/undocumented/python_modular/graphical/latex_plot_inits.py : added import to make matlibplot plots look nice - http://git.io/As19Hg
+ CIA-39	shogun: Heiko Strathmann master * r9b66a85 / (2 files): minor updates - http://git.io/NTy-tA
+ blackburn1	blawiking? my hamming based reception thought you are calling me and then kaboom
+ n4nd0	sonney2k: CStructuredData can be e.g. a sequence (for HM-SVM), a real number (for the multiclass example) a tree, etc
+ heiko	n4nd0, blackburn, sonney2k, check out nice looking plots in tutorial!
+ n4nd0	heiko: let's see :)
+@sonney2k	n4nd0, ok then the name is a bit misleading maybe ... in fact it is a part of the label
+ n4nd0	sonney2k: yeah, it could be
+ n4nd0	sonney2k, wiking: what name would you like to have instead?
+@sonney2k	heiko, nice figures :D
+ heiko	sonney2k, thanks :) they depict the tests very nice, take them for the new webpage
+ blackburn1	heiko: what the heck is plotted?
+ blackburn1	:D
+ n4nd0	heiko: I am checking shogun-tutorial/fig/statistical-learning, is that the correct place?
+ heiko	yeah, but better look at the compiled pdf to the how the fit in
+ heiko	blackburn, read the tutorial :D
+ blackburn1	heiko: I sneeze when I read statistics
+ blackburn1	all the time
+ n4nd0	heiko: nice!
+@sonney2k	btw heiko this reminds me I haven't received any figures (apart the ones from you)
+ n4nd0	sonney2k: I won't be able to make it for the meeting this time :(
+ wiking	heiko: here?
+@sonney2k	n4nd0, well you have been around last time - btw nico should be back so update him :D
+ heiko	wiking, yes
+ wiking	heiko: https://github.com/shogun-toolbox/shogun/pull/711
+ n4nd0	sonney2k: yeah he sent us a mail, I am writing back to him now
+ wiking	heiko: it works :)))
+ wiking	heiko: both multiclass and binary
+ heiko	wiking, well done :)!
+ CIA-39	shogun: Heiko Strathmann master * rf1dc712 / (4 files in 4 dirs): Merge pull request #711 from vigsterkr/utest - http://git.io/s7B6jg
+ CIA-39	shogun: Viktor Gal master * r6cbc4ee / (4 files in 4 dirs): Fix gaussian_generator in DataGenertor - http://git.io/OYYwzg
+ heiko	wiking, gmock is still not workin ghere
+ heiko	thats my plan for this weelk
+ heiko	week
+ n4nd0	sonney2k: btw, I am spending quite a bit of time lately reading about speech recognition. I'd like to apply our HM-SVM to some problems in this area. What do you think about it?
+ heiko	sonney2, should we write an email about the figures?
+ wiking	n4nd0 sonney2k anything is good for me :) but since it's we use the same concept in latentdata and structureddata... i thoguth that it would be nice to have only one class like that
+@sonney2k	heiko, yes
+@sonney2k	heiko, please do
+ heiko	sonney2k, which time is the meeting again?
+ heiko	sonney2k, Ill do
+ wiking	heiko blackburn1 now i can use this unit test to see what happens with the update of libocas to 0.96 \o/
+ heiko	sonney2k, sorry for the question just saw your mail
+ blackburn1	nice
+ shogun-buildbot	build #338 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/338  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ wiking	FAILURE I AM? :)
+ heiko	ehm
+ heiko	these errors are strange
+ heiko	wiking no not you
+ heiko	and not me
+ wiking	hah fuck just a sec i need to send in a quickfix
+ wiking	good that bots are not running automatically make unit-tests :D
+ heiko	ah so thats whats happening?
+ wiking	nono
+ heiko	I gotta go, wiking Ill  merge tomorrow
+-!- heiko [~heiko@host86-176-126-57.range86-176.btcentralplus.com] has quit [Quit: Leaving.]
+ CIA-39	shogun: Sergey Lisitsyn master * r5df0dcd / src/interfaces/modular/modshogun_ignores.i : Ignored bmrm stuff in modular - http://git.io/wI1WIQ
+ n4nd0	sonney2k, blackburn1: I have just rebased a few moments ago
+ blackburn1	sonney2k: are you ok to merge?
+@sonney2k	blackburn1, sec
+@sonney2k	n4nd0, is you PR updated - so show I re-review it?
+ n4nd0	sonney2k: I did the changes you told me in your last revision
+ n4nd0	and now I have just rebased solving a couple of minor conflicts
+@sonney2k	n4nd0, ok then let me have a quick look
+@sonney2k	n4nd0, what I still don't understand is why you didn't replace the constructor
+@sonney2k	SGMatrix< ST >* feats, int32_t num_vecs, int32_t num_feats
+@sonney2k	with the SGMatrixStringList<ST> one
+@sonney2k	then we could create typemaps for that type
+@sonney2k	n4nd0, also I think the SGMatrix< ST > feats, int32_t feat_length, int32_t num_vecs constructor
+ shogun-buildbot	build #339 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/339  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@sonney2k	should rather be one that takes an SGNDArray as input
+ n4nd0	sonney2k: ok with the first thing about introducing SGMatrixList
+ n4nd0	sonney2k: but the second change, it is another different constructor
+@sonney2k	n4nd0, please explain - what it is supposed to do then
+ n4nd0	sonney2k: have you seen the explanation in the header file?
+ wiking	blackburn1: can u merge this: https://github.com/shogun-toolbox/shogun/pull/712
+ CIA-39	shogun: Sergey Lisitsyn master * r60278ef / (2 files): Merge pull request #712 from vigsterkr/utest - http://git.io/X4t3iA
+ CIA-39	shogun: Viktor Gal master * r2e361a5 / (2 files): Fix unit testing of LatentSVM - http://git.io/qeJ2nA
+ wiking	thnx
+@sonney2k	n4nd0, it is the one where I get *parse error*
+ n4nd0	sonney2k: hehe where?
+ n4nd0	so you construct a MatrixFeatures (a list of matrices)
+ n4nd0	from a big matrix
+ n4nd0	you give it a matrix [ ........ ]
+@sonney2k	n4nd0, yeah but why not use SGNDArray then? you can have a tensor that is NxMxL big
+@sonney2k	where L is the number of matrices
+@sonney2k	and NxM the matrix size
+ n4nd0	and partition it in a list of [...][...][...]
+ n4nd0	sonney2k: ok, but why not to have also one constructor like this?
+ n4nd0	I mean, it can be useful to do it from a matrix
+ n4nd0	I just did it to use it from CTwoStateModel::simulate_data
+ n4nd0	I ported a function from the hmsvm toolbox that simulates two data and stores it in a matrix
+@sonney2k	n4nd0, I understand that constructor now though I don't like it - it is probably the same as having an SGVector as input for a constructor of SGMatrix
+ n4nd0	sonney2k: yes
+@sonney2k	anyways this one certainly is not a showstopper
+ n4nd0	I can modify the simulate data function so this constructor is not required though
+ n4nd0	in any case I don't like the idea of getting rid of this constructor ...
+ n4nd0	I can use data generated from the hmsvm toolbox in matlab from python scripts thanks to it
+ n4nd0	see examples python_modular/structure_hmsvm_mosek.py
+@sonney2k	n4nd0, well you could easily do one reshape to get this to work then
+ n4nd0	sonney2k: ok :)
+ n4nd0	sonney2k: should I change the other constructor now and ammend?
+@sonney2k	n4nd0, yes do that now and then let blackburn1 or so merge :D
+ n4nd0	I will stay here to feel guilty if a disaster happens :-O
+ shogun-buildbot	build #340 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/340  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+ wiking	hahaha!!!
+ n4nd0	I'll not be the only one in the blamelist at least :D
+ wiking	 RUN      ] MulticlassOCASTest.train
+ wiking	make: *** [build] Segmentation fault: 11
+ wiking	\o/
+ blackburn1	wiking: -1?
+ wiking	not exactly the way i've imagined buuuut it indicates that it doesn't work!
+ wiking	blackburn1: hehe yes
+ wiking	ok i'm sending in the patch
+ wiking	for that pr
+-!- alexlovesdata [~binder@goldenezahl.ml.tu-berlin.de] has left #shogun []
+ wiking	blackburn1: done
+ wiking	blackburn1: https://github.com/shogun-toolbox/shogun/pull/697
+ wiking	the unit tests for svmocas and multiclassocas runs as expected
+ CIA-39	shogun: Viktor Gal master * r11c1730 / src/shogun/lib/external/libocas.cpp : Add minor fixes for libocas 0.96 update - http://git.io/sQMkAQ
+ CIA-39	shogun: Viktor Gal master * r3548686 / src/shogun/lib/external/libocas.cpp : Fix labeling in msvm_ocas_solver - http://git.io/FnrIjA
+ CIA-39	shogun: Sergey Lisitsyn master * r892a159 / (2 files): Merge pull request #697 from vigsterkr/master - http://git.io/K2-kBg
+ CIA-39	shogun: Viktor Gal master * r0ffe237 / (2 files): Update libocas to version 0.96 - http://git.io/rzXUgw
+ wiking	so now we'll only need to create a wrapper for svm_ocas_solver_nnw ;)
+ blackburn1	wiking: why to use it?
+ wiking	hahah good question... but if anybody who would need it...
+ wiking	anyhow i guess after this doing train unittests for other classifiers should be straightforward ;P
+ blackburn1	vojta said it was developed for some computer vision guys
+ blackburn1	I am curious what is the case to require positive weights
+ blackburn1	with only positive alphas we get better understanding of class representatives
+ blackburn1	but what do we get with positive weights?
+ shogun-buildbot	build #341 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/341  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+ wiking	hah i have to do there something
+ wiking	as it's my code that breaks java
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ blackburn1	wiking: why do you inherit from dense labels?
+ blackburn1	KMcQuisten: hey there, what is the issue today? ;)
+ wiking	that i have to redesign now
+ KMcQuisten	Not so much an issue.
+ KMcQuisten	I just want to take a chainsaw to part of your object model.  Specifically, the machine evaluation code as well as the result code.
+@sonney2k	KMcQuisten, I would very much prefer if you do these things publicly on the mailinglist
+ KMcQuisten	That's fine, sonney.  I can certainly do that.  I was just hoping to have a conversation first.
+ KMcQuisten	I don't have any bugs to report.  everything seems to be working as it should
+ wiking	hahah cache and pipelining kicked in in my cpu
+ blackburn1	sonney2k: we failed to discuss some issues at mailing list :)
+ wiking	compiling is getting faster and faster :)
+ blackburn1	KMcQuisten: what do you mean?
+ wiking	blackburn1: i guess he means that all's good ;)
+ blackburn1	no about chainsaw and code
+ blackburn1	sounds scary
+ KMcQuisten	Hehehe.  Not so much scary
+ blackburn1	anyway please elaborate
+ KMcQuisten	Here's my take:  When constructing cross-validation, you must pass the evaluationCriterion object to the crossValidation object, which calculates the statistics, averages them, and then passes them to the EvaluationResult object.
+ blackburn1	rigggght
+ blackburn1	so?
+ KMcQuisten	I think thats backwards.  The crossValidation object should pass the observed/predicted pairs to the evaluationResult object, and the evaluationCriterion object should be passed to the evaluationResult using a method.  This way one run of crossvalidation could be used, and then multiple evaluationCriterion could be thrown at it to look at CV results in multiple ways without having to rerun a full CV for each evaluationcriterion on
+ KMcQuisten	As it stands, It's impossible for me to actually look at the obs/pred pairs generated by the builting cv, so I can't do more in depth analysis of my CV results if I use the builtin methods
+ KMcQuisten	I'd like the opportunity to refactor the code to make it more flexible
+ KMcQuisten	If there's a formal proposal process for such things I'd like to follow it, of course.
+ blackburn1	if you want to improve anything just do and sent a PR
+ blackburn1	(pull request)
+ KMcQuisten	Yep Yep.
+ KMcQuisten	I know that.  I have my own branch forked off.
+ KMcQuisten	I'd rather tell folks what i'm planning to do first.  Common courtesy and all, since it would involve some big changes.
+ KMcQuisten	sonney, would you like me to write something up for the mailing list before I get started?
+ blackburn1	sonney2k: ^
+ blackburn1	KMcQuisten: so you want to use multiple
+ blackburn1	evaluations
+@sonney2k	http://web.mit.edu/newsoffice/2012/autonomous-robotic-plane-flies-indoors-0810.html
+@sonney2k	blackburn1, any idea where gsomix is
+ blackburn1	sonney2k: will appear soon
+ blackburn1	sonney2k: I am surprised to see kind of machine leraning here
+-!- gsomix [~gsomix@80.234.28.229] has joined #shogun
+ gsomix	good evening
+ KMcQuisten	Yes.  Without having to completely rerun CV for each criterion.  Assuming the splitting criterion doesn't change, each time CV is run on a dataset with a fixed set of parameters, it would produce the same observed/predicted label pairs, so why generate them over and over for different evaluations?
+ blackburn1	KMcQuisten: but you optimize only one criterion right?
+ KMcQuisten	This would also allow output for evaluations to return different types, and return them as values to wrapped languages, instead of having to rely only on stdout
+@sonney2k	KMcQuisten, I understand this desire - but what do you do if you have test data sets? then you would need to store all outputs for all evaluations in memory right?
+@sonney2k	gsomix, hey - so what's going on? did you manage to do the example fixes?
+ blackburn1	KMcQuisten: but why no to refactor modelselectionoutput a little to store things?
+@sonney2k	gsomix, (or did I miss anything?)
+ blackburn1	not to print but to store I mean
+ blackburn1	it already receives all you need
+ blackburn1	and it supports custom additional evaluations too
+ KMcQuisten	See, this is why I wanted to talk about this before I did anything :) .   I'm still familiarizing myself with the modelselection code, so I am unsure.  Does it allow for the comparison of arbitrary sets of features and kernels, or must those be fixed and only the parameters varied?
+ gsomix	sonney2k, hey. what do you mean? I plan to debug my DirectorDotFeatures example and solve problem with SGVector in directors. But little later. At now I'm working on zero-copying mechanism. At next week plan to start work on new typemaps for modelselection (it seems, that it's little easy that sg in director or zero-copy).
+ blackburn1	KMcQuisten: why to do that?
+ gsomix	ah, and I forgot about examples for Labels.
+ gsomix	too bad
+ blackburn1	I am a bit lost, comparison of what?
+@sonney2k	gsomix, that is quite a bit of work - not sure how you want to do that within 2 weeks...
+ blackburn1	sonney2k: why to +1?
+ shogun-buildbot	build #342 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/342  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@sonney2k	blackburn1, if I understand correctly ocas uses labels 1... <nr_classes>
+@sonney2k	in shogun we use 0...<nr_classes-1>
+ blackburn1	sonney2k: there is no +1 in multiclass ocas we had before
+@sonney2k	so we should +1 shogun's labels for ocas to work
+ gsomix	sonney2k, 2 weeks? when is the release of new version?
+@sonney2k	hopefully 1st of september
+ gsomix	oops
+ KMcQuisten	Comparison of the CV accuracies for SVMs applied to my data under various choices of feature expression, kernel selection, and kernel parameter.
+ KMcQuisten	blackburn1: ^
+ gsomix	ok
+@sonney2k	but we need at least 1 week to just do testing / bugfixing / documentation an no more feature additions
+ blackburn1	KMcQuisten: okay lets specify things here
+ gsomix	zero-copying mechanism - 4-5 hours
+@sonney2k	I would actually say 2 weeks ...
+ gsomix	solve problem with SGVector  - 1-2 day
+@sonney2k	gsomix, well do what you can...
+ KMcQuisten	blackburn1: Yes, let's.
+@sonney2k	gsomix, what is the new SGVector problem?
+@sonney2k	gsomix, I thought you resolved it?
+ gsomix	sonney2k, nope.
+ blackburn1	KMcQuisten: cross validation splits to train/test subsets
+ KMcQuisten	Yes
+ blackburn1	you need these indices, right?
+ blackburn1	when you construct parameter tree you may specify everything you want to vary
+ KMcQuisten	blackburn1:  No, I don't .  I don't want to change anything about how the CV code does splitting, training, or testing of the untrained portion of the data.  All that's fine, and I don't want to reinvent the wheel.
+ gsomix	sonney2k, LibLinear's train in my example says that 'not a numpy or... bla-bla'. I need to debug it.
+ wiking	sonney2k blackburn1 it's now good at is... ;)
+ gsomix	not many time, I think
+ blackburn1	KMcQuisten: okay
+ blackburn1	KMcQuisten: so you need a few more evaluation to see
+ blackburn1	evaluations*
+ blackburn1	are you ok with optimizing by only one evaluation parameter?
+-!- sr___ [u5548@gateway/web/irccloud.com/x-abthilurbjnvpfrb] has joined #shogun
+ n4nd0	3
+ n4nd0	wrong tab...
+@sonney2k	blackburn1, wiking I think the best thing to do would be to compare mc ocas output (of stand alone ocas) against shogun once
+@sonney2k	and then feel better
+ wiking	sonney2k: :DDDD
+ wiking	sonney2k: i've compared libocas v0.95 and how that was ported in shogun
+ KMcQuisten	Yes.  I don't want to pass multiple evaluation criterion to the crossvalidation object.  My point is that structurally I don't think the evaluationcriterion belongs in the CV code.  The CV code should just spit out obs/pred pairs to the result object, and the evaluationCriterions can be passed to the result object.
+ wiking	sonney2k: and there the -1 was removed basically
+@sonney2k	gsomix, well then do 0-copy now ...
+ gsomix	aha
+ KMcQuisten	The question is, as sonney said, how that will work for very very large datasets
+@sonney2k	KMcQuisten, make it optional...
+@sonney2k	then it is ok
+ blackburn1	KMcQuisten: but why not to use modelselectionoutput?
+@sonney2k	wiking, what where the class labels you used?
+@sonney2k	0...2?
+ blackburn1	I don't get that point yet
+ KMcQuisten	I have to look more into the modelselection code before I can give you a good answer to that.
+-!- n4nd0 [~nando@56.Red-81-33-212.dynamicIP.rima-tde.net] has quit [Ping timeout: 244 seconds]
+ blackburn1	KMcQuisten: you may add a few more evaluation instances to modelselectionoutput
+ blackburn1	and it will be printed
+ KMcQuisten	If that's a way I can get what I want without messing with code, then it's fine,
+ wiking	sonney2k: yeps
+ blackburn1	if you want to make it not printed but stored - we can do that
+ KMcQuisten	Aha.  That's the other problem.  I'd rather just get that value and keep in internally rather than having to scrape from stdout
+@sonney2k	blackburn1, would that enable us to also store trained models?
+ KMcQuisten	But I can conceive of eval criteria that aren't simple floats, but rather arrays of floats, i.e. a list of binned accuracies across the entire prediction range of a regression problem
+ blackburn1	sonney2k: it prints trained model right now
+-!- n4nd0 [~nando@56.Red-81-33-212.dynamicIP.rima-tde.net] has joined #shogun
+@sonney2k	wiking, I would suggest to email vojtech (after reaing ocas doc)
+ blackburn1	if you pass model selection output to the instance
+@sonney2k	blackburn1, *store*
+ blackburn1	sonney2k: yes, if we change print to store - it would enable to do that
+ blackburn1	but I planned to do that optionally of course
+@sonney2k	wiking, I am pretty sure he uses labels 1...nr_class
+@sonney2k	makes sense
+ blackburn1	KMcQuisten:
+ blackburn1	so now you may put
+ blackburn1	ModelSelectionOutput instance
+ blackburn1	to ModelSelection instance
+ blackburn1	and it will print stuff you need
+ blackburn1	you may add anything to ModelSelectionOutput
+ blackburn1	like more evaluations
+ blackburn1	if you add some new complex evaluation I'd suggest to add its handling to the ModelSelectionOutput
+ blackburn1	I will change it to store things today/tomorrow
+ KMcQuisten	That sounds fine to me.  I will take a look and see what I can do.
+ shogun-buildbot	build #343 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/343  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+ blackburn1	KMcQuisten: I just have to think how can we add this kind of storage here
+ KMcQuisten	Well, hold up on that.  It might not need to be stored if it can just be calculated and returned
+@sonney2k	KMcQuisten, well it can take quite a while...
+* sonney2k Zzzz...
+ blackburn1	KMcQuisten: I hardly have an API in mind for that
+ KMcQuisten	blackburn1:  Ok, cool.  I'll familiarize myself a bit more with the modelselection code and hopefully I will be able to see how it can help me.
+ blackburn1	KMcQuisten: remind me please - are you using python?
+ KMcQuisten	Yes
+ blackburn1	the problem is that storage should be quite generic
+ KMcQuisten	Yes.
+ KMcQuisten	with the SO machines and all being put together it has to work for them too
+ KMcQuisten	not everyon'es outputs are nice floats. :)
+ blackburn1	well evaluation is always float - a score
+ KMcQuisten	Yes, I know, but they predictions that the machines make are not always nice floats
+ n4nd0	sonney2k, blackburn1: I updated the branch with the new constructor
+ KMcQuisten	and I can think of ways that the score is actualyl an array of scores, as opposedto a single float, so even that assumption isn't quite right wither
+ KMcQuisten	either
+ blackburn1	KMcQuisten: would be nice to have map: ParameterCombination -> some bunch of results
+ blackburn1	but it is very inconvenient for user
+ KMcQuisten	Perhaps.  I'm not entirely sure we're talking about the same thing here.
+ KMcQuisten	I want to dig into the modelselection code before we discuss this further.
+ blackburn1	KMcQuisten: okay
+ blackburn1	you are not the only user that wants that stuff btw
+ blackburn1	second one already :)
+ n4nd0	blackburn1: should we merge or do you prefer to wait for Soeren until tom?
+ KMcQuisten	RIghto
+ blackburn1	n4nd0: did you have to include .cpp?
+ blackburn1	that sounds to be a blocker for you lets just merge
+ n4nd0	yes, it looks like this now
+ n4nd0	from SGMatrixList.h it is included SGMatrix.h
+ blackburn1	however I do not like that that much
+ blackburn1	ah
+ blackburn1	is .cpp included?
+ blackburn1	n4nd0: do you mind to make it static method of sgmatrixlist?
+ n4nd0	in SGMatrix.h it is SGMatrixList forward declared
+ n4nd0	and from SGMatrix.cpp, SGMatrixList.cpp is included
+ n4nd0	blackburn1: yeah, but I can tell you why it is done like that
+ n4nd0	blackburn1: ok
+ blackburn1	n4nd0: including .cpp could be bad
+ n4nd0	blackburn1: it is just because of the style in which templated classes are defined in SHOGUN
+ n4nd0	blackburn1: because it is in the .cpp where the types are specified
+ blackburn1	yeah
+ blackburn1	i see
+ blackburn1	n4nd0: anyway .cpp should not be included - it can become a mystery problem later
+ n4nd0	I agree
+ n4nd0	I am changing it to static right now :)
+ blackburn1	KMcQuisten: there are now 3 guys wanting to check xval results in a fancy way
+ KMcQuisten	Hehe.  Fancy
+ KMcQuisten	I feel like i need a parasol now LOL
+* blackburn1 never knew what is parasol
+ KMcQuisten	fancy umbrella for protecting fair-skinned ladies form the sun
+ KMcQuisten	from
+ blackburn1	yeah I googled
+ KMcQuisten	Ah yes
+ KMcQuisten	SHould have known ;)
+ blackburn1	the only word for that I knew is umbrella
+ blackburn1	:)
+ blackburn1	but there are quite a few like rainshade and others
+ blackburn1	parapluie
+ blackburn1	wtf
+ blackburn1	:D
+ KMcQuisten	Hahaha!  I'd not hear that one
+ KMcQuisten	Ok, i'm going to study modelselection, and then I'll know better what can and cannot be easily fiddled with :)
+ KMcQuisten	thanks for your help again
+ blackburn1	welcome
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+ n4nd0	blackburn1: you know, parasol is a funny word
+ blackburn1	yeah sounds funny at least
+ n4nd0	we use it in Spanish too
+ n4nd0	it means like this
+ n4nd0	para = stop
+ n4nd0	sol = sun
+ n4nd0	:D
+ blackburn1	heh
+ blackburn1	I remember song or so
+ blackburn1	dia de sol
+ n4nd0	which one?
+ blackburn1	sunny day?
+ n4nd0	yeah
+ blackburn1	huh I know spanish hurray
+ blackburn1	:D
+ blackburn1	I am watching participants list in your PR
+ blackburn1	two are normal guys
+ blackburn1	and only I am a cat
+ blackburn1	that cat is so damn awesome you shall not resist
+ n4nd0	haha
+ CIA-39	shogun: Sergey Lisitsyn master * r31528b4 / (2 files in 2 dirs): A few more warnings fixes - http://git.io/xN9S4A
+* wiking cannot keep up with rebasing :)
+ wiking	lol
+ wiking	blackburn1: here? have u managed to get unit testing working? :)
+-!- n4nd0 [~nando@56.Red-81-33-212.dynamicIP.rima-tde.net] has quit [Ping timeout: 248 seconds]
+ blackburn1	wiking: no I didn't try :)
+ wiking	i've just made a simple pre-commit hook for git
+ wiking	and it works great with the unit testing
+ wiking	if it fails, it does not let you commit :)
+-!- n4nd0 [~nando@56.Red-81-33-212.dynamicIP.rima-tde.net] has joined #shogun
+ wiking	blackburn1: should i add that into README.developer?
+ blackburn1	I am not a big fan of that solution to be honest
+ wiking	blackburn1: ok i'll add it to the README.developer to kindly ask developers to add that to their pre-commit hook
+ wiking	but of course we cannot force it
+ blackburn1	yeah sure
+ wiking	so it'll be just a suggestion in a way
+ shogun-buildbot	build #344 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/344  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ blackburn1	wiking: can you change base of latentlabels?
+ wiking	blackburn1: yep i'll change now
+ wiking	just a sec
+ n4nd0	blackburn1, wiking: hey guys
+ blackburn1	yes?
+ n4nd0	something I don't really understand entered in a commit
+-!- blackburn1 is now known as blackburn
+ blackburn	uh finally I got that back
+ n4nd0	it is related to the data submodule
+ n4nd0	take a look here please https://github.com/shogun-toolbox/shogun/pull/684/files
+ n4nd0	I ignore whether this is or not relevant
+ n4nd0	did you get my messages about the problem ^?
+ n4nd0	my connection sucks...
+ blackburn	n4nd0: no please remove that
+ blackburn	your data can be outdated and you trying to restore it to your state
+ blackburn	if it appears in your changes just update data folder , i.e. enter to shogun/data and git pull origin master
+ wiking	or git submodule update
+ blackburn	yeah
+ wiking	blackburn: https://github.com/shogun-toolbox/shogun/pull/713
+ CIA-39	shogun: Viktor Gal master * rdabe375 / src/README.developer : Add unit testing description to README.developer - http://git.io/z7hRqA
+ wiking	blackburn: deep enough description?
+ CIA-39	shogun: Sergey Lisitsyn master * r2250325 / src/README.developer : Merge pull request #713 from vigsterkr/latent - http://git.io/gICzfA
+ blackburn	may be I should read it before
+ blackburn	:D
+ wiking	hahahahah
+ wiking	yeah
+ blackburn	yeah deep enough
+ wiking	ok let's see that label thingy
+ wiking	as a quickfix
+ n4nd0	blackburn: I do not manage to take out that change from the past commit though
+ blackburn	n4nd0: which change?
+--- Log closed Tue Aug 14 00:00:14 2012

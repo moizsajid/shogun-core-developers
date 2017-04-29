@@ -1,0 +1,303 @@
+--- Log opened Mon Mar 05 00:00:19 2012
+ n4nd0	in high school people that go into letters may study Latin and/or Greek
+ blackburn	I knew about 200-300 words I guess
+ blackburn	it impacts sometimes when you understand a word you have never seen because it is similar to some latin
+ n4nd0	yeah
+ n4nd0	I had a teacher in Swedish who had some knowledge in Spanish and Italian
+ n4nd0	not enough for a fluent conversation but he could read quite a bit
+ n4nd0	he claimed that he never studied those, just Latin
+ n4nd0	really curious!
+ blackburn	like meta-language
+ blackburn	:)
+ blackburn	uh 3 am
+ blackburn	I guess I have to sleep a little :)
+ n4nd0	oh that's late
+ n4nd0	"just" 12 here
+ n4nd0	good night then
+ blackburn	I wish it was 12 here
+ blackburn	:)
+ blackburn	good night
+-!- blackburn [~qdrgsm@31.28.32.139] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 276 seconds]
+-!- axitkhurana [~akshit@14.98.227.233] has joined #shogun
+-!- axitkhurana [~akshit@14.98.227.233] has left #shogun []
+-!- vikram360 [~vikram360@117.192.171.117] has quit [Read error: Connection reset by peer]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ CIA-64	shogun: Soeren Sonnenburg master * rd3f6438 / (4 files in 2 dirs):
+ CIA-64	shogun: Mahalanobis distance fixes
+ CIA-64	shogun: - use mean of all examples
+ CIA-64	shogun: - improve documentation
+ CIA-64	shogun: - serialization support - http://git.io/0kJS3w
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+ sonne|work	n4nd0: please have a look at my mahalanobis commit
+ sonne|work	this is what I meant - but I didn't have time to check it thoroughly would be great if you could do it
+ sonne|work	thanks!
+ n4nd0	sonne|work: sure I will check it, give me some minutes
+ sonne|work	n4nd0: you basically did it like I had in mind but missed to compute the mean over both lhs/rhs and some minor issues (serialization / documentation)
+ n4nd0	sonne|work: I will take it a look so I can do it better next time
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ sonne|work	n4nd0: keep in mind that not everything I do is correct so have a critical eye on it - I am open for discussion :)
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 260 seconds]
+ n4nd0	sonne|work: ups! is the current build working good? I just pulled and compiled but the linker is complaining in lot of points
+ n4nd0	multiple definition of lot of methods in shogun::MulticlassMachine
+ sonne|work	n4nd0: yes - do a git clean -dfx  to erase all files not in the repository (warning...)
+ n4nd0	I deleted .o files in multiclass and it worked
+ n4nd0	thank you :)
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ n4nd0	sonne|work: so one thing in your commit is the use of (l == r)
+ sonne|work	n4nd0: yeah that's sufficient
+ n4nd0	sonne|work: that makes that they are considered different even if they have the same values but MahalanobisDistance is instantiated with different CSimpleFeatures
+ n4nd0	sonne|work: ah ok, no problem then
+ blackburn	sonne|work: I answered ;)
+ blackburn	sonne|work: about ocas - it is working
+ sonne|work	you fixed it?
+ sonne|work	blackburn: ^
+ blackburn	nope, but for simple examples it was ok
+ blackburn	I have to check my code
+ blackburn	sonne|work: well test we have says it is ok
+ blackburn	from tester_all I mean
+ sonne|work	I had another report from sb else who also complained that it didn't work
+ sonne|work	blackburn: our oversight then
+ blackburn	probably, I'll check later
+ blackburn	sonne|work: about mc-liblinear - yes it works
+ blackburn	I even got better results on my data over simple OvR liblinear
+ sonne|work	so 97 again now?
+ blackburn	sonne|work: 96.8 but I didn't do model selection very well :)
+ blackburn	pretty good anyway
+ blackburn	such exact homogeneous map works well and I like it pretty much :) much better to use linear spaces
+ n4nd0	sonne|work: I tested the results, they are right
+ n4nd0	sonne|work: it actually makes sense using the whole data when l != r and take the mean over both distributions, sorry I didn't get you :S
+ sonne|work	blackburn: yeah it is really fast later on!
+ sonne|work	n4nd0: yeah - I thought it is the same like cov / one should use lhs and rhs if available for mean too
+ blackburn	sonne|work: btw, I've added rejection strategies class
+ blackburn	I can't mind any not threshold based rejection strategy but it is ok to keep it modular I think
+ sonne|work	add an example to show how it works...
+ blackburn	yeah gradually I'll do, just some rush
+ blackburn	sonne|work: rejects are particularly important for me (e.g. actual accuracy can be measured w/o rejects and it should be ~1.0)
+ blackburn	I have seen some SVMs that trains with reject option, but it would take time to implement it..
+ sonne|work	it is unclear though if you can gain a lot using this. I would suspect your simple thresholding works good enough for most cases :)
+ blackburn	sonne|work: maybe some assumption that trainset should have rejected vectors that should not turn hyperplane round ;)
+ sonne|work	yeah but you can control that already by giving different Cs to examples
+ blackburn	true
+ sonne|work	of course you would need to know which examples could be problematic
+ sonne|work	probably the ones misclassified in a previous run :D
+ blackburn	sonne|work: I had some idea (unrelated to classification) - can you imagine some python object that delegates some ops to lambdas?
+ blackburn	some example:
+ blackburn	PythonFeatures with get_feature_vector implemented in python
+ blackburn	I did not get *any* idea how to get it done..
+ sonne|work	?
+ blackburn	sonne|work: imagine Features instance with set get_feature_vector/get_dim_feature_space/etc to lambda
+ blackburn	I think it is impossible..
+ blackburn	I mean it could be custom then
+ sonne|work	to lambda?
+ blackburn	yeah to functions
+ sonne|work	I don't understand what you want to say?
+ blackburn	e.g. get_feature_vector = lambda x: some-sql-select
+ sonne|work	autogenerated features?
+ blackburn	not, custom
+ sonne|work	formulas
+ blackburn	where you can set operations
+ sonne|work	custom!?!
+ sonne|work	like you provide some python script?
+ blackburn	yes-yes
+ sonne|work	that's easy
+ blackburn	how?
+ sonne|work	just overload the get_feature_vector functions etc
+ sonne|work	(from python)
+ blackburn	really?
+ blackburn	will it work??
+ sonne|work	for this to work you have to enable directors for swig though
+ blackburn	do you find it useful? I do..
+ sonne|work	well I accidentally did that in the first swig based releases
+ sonne|work	things become very slow then
+ blackburn	that's bad
+ sonne|work	so I would rather want a separate class just for that
+ sonne|work	then only this class gets director functionality
+ sonne|work	and get/set * can be overriden from $LANG
+ blackburn	damn I thought it is impossible
+ sonne|work	welcome to  swig
+ blackburn	sonne|work: another issue (have you 2 mins more?)
+ sonne|work	you can overload a C++ method from $LANG
+ sonne|work	no
+ blackburn	bad, ok then later
+ blackburn	hmm nevermind, useless suggestion (I thought of integrating lapack to shogun code)
+ n4nd0	blackburn: hey there! hope you are not too angry after the results in the elections
+ n4nd0	blackburn: I wanted to ask you one thing about QDA
+ n4nd0	blackburn: LDA is shogun is implemented regularized so I suppose that we are interested in regularized QDA right?
+ blackburn	n4nd0: not angry at all - let this people live with this guy ;)
+ blackburn	n4nd0: is regularization there some X+delta I?
+ n4nd0	blackburn: do you mean in QDA or LDA?
+ blackburn	both? :)
+ blackburn	I just don't know what is the regularization there
+ blackburn	as for your question - I just meant that it would possibly be pretty easy to make it regularized
+ blackburn	or not?
+ n4nd0	I am not really sure right now
+ n4nd0	I am still reading documentation about it
+ n4nd0	but it seems to me that the method changes more than just a little when regularization is used
+ blackburn	really?
+ blackburn	n4nd0: I think the easiest way is to implement it just as it is in scikits ;)
+ n4nd0	blackburn: haha ok
+ n4nd0	I took a look there
+ n4nd0	but I didn't find documentation about how they do it
+ n4nd0	there is an example showing a couple of plots, and the code of course
+ blackburn	looks pretty straightforward..
+ blackburn	what makes you unhappy? ;)
+ n4nd0	nothing :P
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Ping timeout: 276 seconds]
+ blackburn	oh we lost colonel sonnenburg
+ blackburn	:D
+ blackburn	n4nd0: http://s1-05.twitpicproxy.com/photos/large/531249569.png?key=890213
+ blackburn	it is for real ;)
+ n4nd0	oh
+ n4nd0	I saw some percentages but they were not that high
+ n4nd0	I saw something like 60 something for Putin over 70 total votations
+ blackburn	ah it is in chechnya
+ blackburn	local region
+ n4nd0	haha it is big local region
+ n4nd0	it could almost be capital in Sweden in terms of population
+ blackburn	small republic
+ n4nd0	I am guessing those numbers in black are # voters
+ blackburn	yes
+ n4nd0	ah fuck I did't recognize the name at first sight
+ n4nd0	I recognize it as "Chechenia"
+ n4nd0	it is how we pronounce it in Spanish
+ blackburn	there was a war as you may probably know :)
+ n4nd0	yeah, that's why I remember the name
+ n4nd0	it appeared a lot in the news
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- vikram360 [~vikram360@117.192.190.106] has joined #shogun
+ vikram360	blackburn : and putin wins
+ blackburn	surprise?
+ blackburn	:)
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 252 seconds]
+ vikram360	nope.. but the media seems to be having a field day. 3000 official complaints with the voting.
+ sonne|work	blackburn: isn't QDA the same as LDA but just on quadratic features?
+ blackburn	sonne|work: what is quadratic features?
+ sonne|work	all monomials of degree 2
+ blackburn	you probably know better? ;)
+ sonne|work	x_1*x_2 x_1^2 x_2^2
+ sonne|work	for 2d input vectors
+ blackburn	sonne|work: well we have no such features?
+ sonne|work	polynomialdotfeatures?
+ sonne|work	or sth?
+ sonne|work	PolyFeatures
+ blackburn	ah
+ blackburn	sonne|work: well I don't know then, do you think QDA is useless?
+ sonne|work	anyway it makes sense to make things explicit, i.e., if it is the same use LDA on simplefeatures?
+ sonne|work	err imple QDA on simplefeatures by using PolyFeatures internally
+ blackburn	yeah i got it
+-!- vikram360 [~vikram360@117.192.190.106] has quit [Read error: Connection reset by peer]
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Ping timeout: 276 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+ blackburn	sonne|work: it took one year for me to finally understand how features are working here in shogun hahahah
+ sonne|work	blackburn: anyway better check that LDA on squared features is QDA - could be that there is sth else to it :)
+ blackburn	sonne|work: n4ndo will do probably ;)
+ blackburn	sonne|work: I have seen interesting thing in your talk
+ blackburn	optimizing svm with auprc
+ blackburn	did you try to train svm this way?
+ sonne|work	blackburn: doesn't help look at t joachims paper (best paper award ICML) - gives you like 0.00000001% :)
+ sonne|work	blackburn: which talk?
+ blackburn	sonne|work: http://sonnenburgs.de/soeren/talks/2006-05-02-perf-measures.pdf
+ sonne|work	ohh that crap
+ sonne|work	probably all wrong
+ blackburn	ah I see
+ blackburn	:D
+ sonne|work	I guess best is to look at this one page in my thesis - there are all the perf measures I know of (and in shogun) in there
+ blackburn	I was interested in svm on last page
+ blackburn	sonne|work: I can't understand why in mc svms there are (<w_n,x>+b_n) - (<w_m,x>+b_m) < 1 - \xi_m
+ sonne|work	yeah it is some paper by Thorsten Joachims doing that fast but it doesn't help
+ blackburn	why 1? :)
+ sonne|work	margin fixed to 1
+ sonne|work	like in svm
+ blackburn	I am thinking about ECOC training of svm
+ sonne|work	like in mc-svm like in structured output leraning
+ blackburn	and don't know how to formulate this boundary
+ blackburn	something makes me think there won't be 1 :)
+ sonne|work	in words: f(good_x) - f(other_x) > 1- sth
+ sonne|work	anyway back to work
+ blackburn	it looks like you work in iron mine
+ blackburn	:)
+-!- faktotum [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+ faktotum	Hello!
+ blackburn	hi
+ faktotum	is there the possibility to set a custom sparse kernel?
+ faktotum	i know there are sparse kernels and that you can set custom kernels. but how do you set custom sparse kernels?
+ faktotum	i'm using python module if that is of interest
+ blackburn	I see.. I guess it is not yet implemented
+ blackburn	but I think it is pretty straightforward to implement
+ faktotum	my current workaround is to do a cholasky K = LL* decomposition and then use L as a sparse feature vector but that is not tractable with bigger matrices
+ blackburn	I am not sure I understood why do you do cholesky
+ sonne|work	faktotum: sounds like an easy task to add - patches welcome :)
+ faktotum	i will try it tonight
+ faktotum	blackburn: if i have K = LL* i can set my sparse features to L and then use a linear kernel. then i would end up with K as a custom sparse kernel
+ blackburn	whoa I see
+ sonne|work	faktotum: depending on how sparse things are you could just use SGSparseMatrix
+ sonne|work	but it is not fast enough I guess..
+ faktotum	oh that was my idea, why is it not fast enough?
+ blackburn	faktotum: probably it would be slow in means of checking if k_i,j is zero
+ faktotum	ok, but doesn't the kernel created from sparse real features have the same problem?
+ blackburn	it has as well..
+ blackburn	I guess some hash map should be here
+ blackburn	faktotum: anyway cholesky of some say 4000x4000 matrix is pretty slow ;)
+ faktotum	ha! don't try 15k x 15k!
+ blackburn	15k x 15k?!
+ blackburn	that probably takes a lot of memory :)
+ faktotum	chompack has a sparse cholesky decomposition implemented
+ blackburn	ah
+ blackburn	I guess dense 15K would never finish
+-!- vikram360 [~vikram360@117.192.190.106] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+ sonne|work	faktotum: maybe it is good enough: basically finding the kernel row is fast but not finding the column
+ sonne|work	if it is really sparse some kind of hasmap of tuples or whatever could be faster...
+ sonne|work	but a lot of overhead then
+ sonne|work	faktotum: so please go ahead with the sparse matrix idea - should do the job
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- cronor [~cronor@141.23.80.206] has joined #shogun
+-!- faktotum [~cronor@fb.ml.tu-berlin.de] has quit [Ping timeout: 260 seconds]
+-!- cronor [~cronor@141.23.80.206] has quit [Remote host closed the connection]
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Quit: cronor]
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Quit: Leaving]
+-!- cronor_ [~cronor@141.23.80.206] has joined #shogun
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Ping timeout: 260 seconds]
+-!- cronor_ is now known as cronor
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ vikram360	I know this is probably a n00b question but there seems to be very little information about it: In what way is the C5.0 algorithm better than the C4.5?
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 244 seconds]
+-!- wiking_ is now known as wiking
+-!- cronor [~cronor@141.23.80.206] has quit [Quit: cronor]
+-!- axitkhurana [~akshit@14.98.55.250] has joined #shogun
+-!- axitkhurana [~akshit@14.98.55.250] has left #shogun []
+-!- blackburn [~qdrgsm@188.168.4.3] has joined #shogun
+-!- blackburn [~qdrgsm@188.168.4.3] has quit [Quit: Leaving.]
+@sonney2k	vikram360, it is not clear to me either - all I know is that there were papers showing that it is better...
+@sonney2k	there just was no open source impl. of c5.0 around
+@sonney2k	and for c4.5 only some free for acadamic use thingy
+@sonney2k	so people tried c4.5 if they could but that's it
+@sonney2k	ahh btw weka has a java version of c4.5 (iirc called j45) that has probably much more clean code
+ n4nd0	sonney2k: hey! I read before you talked with blackburn about QDA
+ n4nd0	sonney2k: I have been reading into it so I could implement it in shogun
+ n4nd0	sonney2k: but I am not really sure if I relate what I have read about it what with that you said before
+ n4nd0	sonney2k: so it seems that QDA and LDA are similar in that they assume that the feature vectors follow a normal distribution, but LDA assumes that the distributions for all the classes have the same covariances while QDA doesn't make that assumption
+ n4nd0	sonney2k: is that right this far?
+@sonney2k	I guess so - at least LDA when cov matrices are considered the same the problem becomes linear
+ n4nd0	sonney2k: ok, so I understand that
+ n4nd0	sonney2k: but is it then equivalent to use LDA using polynomial features?
+ n4nd0	I mean, can we just make polynomial features from the original ones (e.g. if we have at the beginning x1 and x2, we expand the feature vectors so they also contain x1?, x2? and x1?x2)
+ n4nd0	would solving that with LDA be equivalent to QDA?
+@sonney2k	n4nd0, it must very close but I am not sure if it is exactly the same
+@sonney2k	best description about LDA/QDA I found is https://onlinecourses.science.psu.edu/stat857/book/export/html/17
+ n4nd0	sonney2k: cool, thank you very much, I was using this reference http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-4389.pdf
+ n4nd0	I have some trouble when it gets into the regularization part
+@sonney2k	hmmh, seems like QDA / LDA results on quad features differ but it is always mentioned that one can use it to get quadratic classifier ...
+ n4nd0	so do you think it would be interesting to add QDA in shogun? and if so how?
+ n4nd0	something similar to LDA that is already implemented using regularization?
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+--- Log closed Tue Mar 06 00:00:19 2012

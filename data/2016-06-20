@@ -1,0 +1,268 @@
+--- Log opened Mon Jun 20 00:00:47 2016
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Ping timeout: 250 seconds]
+-!- HeikoS_mobile [~Mutter@host-92-0-162-192.as43234.net] has joined #shogun
+ HeikoS_mobile	lisitsyn: invite me :)
+-!- HeikoS_mobile [~Mutter@host-92-0-162-192.as43234.net] has quit [Remote host closed the connection]
+-!- GandalfTheWizard [~Eva@112.10.171.169] has joined #shogun
+-!- sonne|osx [~sonne@x4db35f75.dyn.telefonica.de] has joined #shogun
+-!- Saurabh7 [Saurabh7@gateway/shell/panicbnc/x-nhgboshmvjngqjid] has left #shogun []
+-!- sonne|osx_ [~sonne@x4db412db.dyn.telefonica.de] has joined #shogun
+-!- sonne|osx [~sonne@x4db35f75.dyn.telefonica.de] has quit [Ping timeout: 264 seconds]
+-!- sonne|osx_ is now known as sonne|osx
+ shogun-buildbot	build #24 of memleak - valgrind is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/memleak%20-%20valgrind/builds/24  blamelist: Esben Sorig <esben@sorig.eu>, Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- Saurabh7_ [~Saurabh7@1.39.13.127] has joined #shogun
+ shogun-buildbot	build #1025 of nightly_none is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_none/builds/1025  blamelist: Esben Sorig <esben@sorig.eu>, Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1155 of nightly_default is complete: Failure [failed test test_1 notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1155  blamelist: Esben Sorig <esben@sorig.eu>, Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- sonne|osx [~sonne@x4db412db.dyn.telefonica.de] has quit [Quit: sonne|osx]
+-!- sanuj [~sanuj@61.0.30.117] has joined #shogun
+-!- Saurabh7_ [~Saurabh7@1.39.13.127] has quit [Quit: Leaving]
+-!- GandalfTheWizard [~Eva@112.10.171.169] has quit [Quit: Leaving.]
+-!- Saurabh7 [~Saurabh7@1.39.12.41] has joined #shogun
+ sanuj	lisitsyn, yo
+ sanuj	lisitsyn, i think we should hide any from swig
+ lisitsyn	sanuj: hey
+ lisitsyn	why?
+ sanuj	lisitsyn, we don't need as<> in python
+ sanuj	or anything else from any
+ sanuj	and i am getting these infinite warnings
+ sanuj	SGBase.i:570: Warning 503: Can't wrap '_as< int >' unless renamed to a valid identifier.
+ lisitsyn	uhmm okay we don't use it (yet)
+ lisitsyn	ahh ok
+ lisitsyn	just ignore it ok
+ sanuj	lisitsyn, and SGBase.i:678: Warning 314: 'as' is a python keyword, renaming to '_as'
+ sanuj	lisitsyn, %template(as ## name) Any::as<type>;
+ sanuj	shall i remove this or keep it? ^
+ lisitsyn	sanuj: well you're removing Any :)
+ sanuj	lisitsyn, okay so shall i remove any in SGBase.i?
+ lisitsyn	yeah yeah
+ lisitsyn	just remove it
+ sanuj	cool
+ sanuj	lisitsyn, we need to solve template issue in swig
+ lisitsyn	sanuj: yes and a few more things
+ sanuj	lisitsyn, an example using swig interface https://gist.github.com/sanuj/e24d003b5af990fee1b772129ace75fa
+ sanuj	lisitsyn, we are really lagging behind our timeline
+ lisitsyn	sanuj: yeah no worries
+ lisitsyn	it is rather underestimation
+ lisitsyn	than underperformance :)
+ sanuj	okay :D
+ sanuj	lisitsyn, you were going to send me a mail for what else is needed before we merge tags
+ lisitsyn	mehh yeah I am out of schedule as well
+ lisitsyn	ok actually there is a thing you can try to implement now
+ sanuj	okay :)
+ sanuj	tell me
+ lisitsyn	have you seen class_list.cpp?
+ sanuj	yes
+ sanuj	that huge thing
+ lisitsyn	sanuj: basically it stores string -> object ctor
+ lisitsyn	mapping
+ sanuj	okay
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+ lisitsyn	sanuj: it enables us to do similar thing as we did with setSomething
+ lisitsyn	newKernel, newFeatures, blabla
+ sanuj	okay
+ lisitsyn	you can implement it on top of new_sgserializable quite easily
+ sanuj	why do we need it though
+ sanuj	new_sgserializable?
+ lisitsyn	sanuj: this is how our plugins interface would look like
+ lisitsyn	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/base/class_list.cpp.templ#L39
+-!- Saurabh7 [~Saurabh7@1.39.12.41] has quit [Ping timeout: 272 seconds]
+ lisitsyn	sanuj: as for tags PR
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ sanuj	lisitsyn, what is this exactly
+ lisitsyn	I have to check what's missing
+ lisitsyn	probably we miss some examples
+ sanuj	how is new_sgserializable related to plugins/tags
+ lisitsyn	sanuj: well that's the thing to be replaced, we can start with implementing some interface to create instances by their name
+ lisitsyn	this would let us to start working on plugins under the hood
+ lisitsyn	without any change in interface
+ sanuj	oh so this is for plugins
+ sanuj	and not tags
+ lisitsyn	yeah it is rather plugins than tags
+ sanuj	lisitsyn, but i don't understand what changes do i have to make in cpp_list
+ sanuj	class_list*
+ sanuj	and class_list on my local is huge
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Ping timeout: 260 seconds]
+ lisitsyn	sanuj: you don't have to change class_list.cpp
+ lisitsyn	but its template
+ sanuj	okay
+ lisitsyn	sanuj: we need methods like createKernel("name")
+ lisitsyn	create* for all base classes
+ sanuj	ohkay
+ lisitsyn	I think template + swig renames are way to go
+ sanuj	lisitsyn, so createKernel("gaussian") returns an instance of GaussianKernel
+ sanuj	?
+-!- [Chris] [~Chris]@deadtime.informatik.uni-tuebingen.de] has joined #shogun
+ lisitsyn	no
+ lisitsyn	CKernel*
+-!- Saurabh7 [~Saurabh7@59.95.6.201] has joined #shogun
+ sanuj	okay
+ sanuj	lisitsyn, how methods like createKernel("name") related to plugin architecture?
+ lisitsyn	sanuj: in plugins we have to stick to strings
+ sanuj	lisitsyn, only string parameters?
+ lisitsyn	we won't have classes like GaussianKernel visible once we convert to plugins
+ lisitsyn	we can only retrieve some CKernel that is named gaussian
+ sanuj	i see
+ lisitsyn	sanuj: so once you call
+ lisitsyn	createKernel("gaussian")
+ lisitsyn	it checks whether there is such plugin
+ lisitsyn	loads it if needed
+ lisitsyn	and then calls corresponding stuff in the plugin to create this kernel for you
+ [Chris]	Hi, is it possible to use random forests with BinaryLabels ? I get the following error when calling rand_forests.train(train_feats): src/shogun/multiclass/tree/CARTree.cpp line 77: label type supplied is not supported
+ lisitsyn	[Chris]: probably no but why do you want to?
+ sanuj	lisitsyn, so createKernel is in base shogun
+ sanuj	and plugin is for gaussian kernel?
+ lisitsyn	sanuj: yes
+ sanuj	i see
+ sanuj	lisitsyn, we are going to enable functions like createKernel via changes in class_list?
+ lisitsyn	sanuj: I think you'd need template <class T> T* create(string)
+ lisitsyn	and then rename them just like you did with set get
+ sanuj	lisitsyn, so only the renaming part will happen in class_list
+ sanuj	where to put "template <class T> T* create(string)"?
+ lisitsyn	sanuj: class_list.cpp.templ would work I think
+ sanuj	 so all the base methods in plugin arch will go in  class_list.cpp.templ
+ sanuj	lisitsyn, are you away?
+ sanuj	:P
+-!- Saurabh7 [~Saurabh7@59.95.6.201] has quit [Ping timeout: 246 seconds]
+ sanuj	even i need to have lunch
+ sanuj	talk to you later
+ [Chris]	lisitsyn because I have binary labels ;)
+-!- sanuj [~sanuj@61.0.30.117] has quit [Ping timeout: 272 seconds]
+-!- Saurabh7 [~Saurabh7@59.95.7.7] has joined #shogun
+-!- Saurabh7 [~Saurabh7@59.95.7.7] has quit [Quit: Leaving]
+-!- Saurabh7 [~Saurabh7@1.39.12.41] has joined #shogun
+-!- vortex_ape [~vortex_ap@180.151.74.34] has joined #shogun
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+ [Chris]	I have another question regarding combined kernels and cross validation. Anyone here who could help me or should I rather use the mailing list ?
+-!- sanuj [~sanuj@117.203.20.56] has joined #shogun
+ sanuj	lisitsyn, there?
+ Saurabh7	aaargh AttributeError: 'dict' object has no attribute 'iteritems'
+@wiking	argh
+ lisitsyn	sanuj: whats up
+ sanuj	wiking, did you receive my monday report?
+ sanuj	lisitsyn, so you were saying ....
+@wiking	mmm lemme check
+@wiking	sorry today is slow for me
+ sanuj	no, i just wanted to confirm
+ sanuj	because i don't see it on gmane
+@wiking	Saurabh7 OXPHOS arianepaola weekly updates plz
+@wiking	sanuj: it's in my box
+@wiking	so it's cool thxn
+ sanuj	okay :D
+-!- vortex_ape [~vortex_ap@180.151.74.34] has quit [Quit: Leaving]
+ sanuj	vortex_ape :O
+ Saurabh7	:D
+ Saurabh7	wiking, hey
+@wiking	ho
+ Saurabh7	wiking, I have updated most intensive routines of cart
+ Saurabh7	so its pretty compettive now
+ Saurabh7	but cant find anything else I can change performance wise
+ Saurabh7	wiking, any ideas what else should be touched there in general
+@wiking	lemme see
+-!- HeikoS [~heiko@nat-219-54.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Saurabh7 :develop * b0c279b / examples/meta/generator/translate.py: https://github.com/shogun-toolbox/shogun/commit/b0c279b3796b1e87d12495c9ba04ef438d2ec758
+ shogun-notifier-	shogun: fix dict iter for python3
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 2230399 / examples/meta/generator/translate.py: https://github.com/shogun-toolbox/shogun/commit/2230399b10aa5dbf59d8f490ad6177b97d87d62b
+ shogun-notifier-	shogun: Merge pull request #3302 from Saurabh7/genfix
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fix meta generator for python3
+ shogun-buildbot	build #732 of trusty - libshogun - viennacl is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/732  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+-!- sanuj [~sanuj@117.203.20.56] has quit [Ping timeout: 252 seconds]
+ shogun-notifier-	shogun-data: OXPHOS :master * ab9ae9d / testsuite/meta/classifier/shareboost.dat: https://github.com/shogun-toolbox/shogun-data/commit/ab9ae9d44e2a4b1cf77221b4383dd8e19f5c07fe
+ shogun-notifier-	shogun-data: shareboost dataset
+ shogun-notifier-	shogun-data: Heiko Strathmann :master * f098a14 / testsuite/meta/classifier/shareboost.dat: https://github.com/shogun-toolbox/shogun-data/commit/f098a144194b74ccb925bd0408750a3bfc538c58
+ shogun-notifier-	shogun-data: Merge pull request #103 from OXPHOS/master
+ shogun-notifier-	shogun-data:
+ shogun-notifier-	shogun-data: shareboost integration dataset
+ Saurabh7	HeikoS, hi
+@HeikoS	Saurabh7: hi there=
+@HeikoS	Saurabh7: how are things?
+@HeikoS	just going through patches here
+ Saurabh7	HeikoS, us finished ixing things for cart regression
+ Saurabh7	so that shld be working now
+ Saurabh7	wokring to make those changes work for randomCART
+ Saurabh7	so that it will reflect in random forest performance
+@HeikoS	ah yeah
+@HeikoS	Saurabh7: you compared a bit against sklearn implementation?
+@HeikoS	any big differences?
+ Saurabh7	for random forest ?
+@HeikoS	both
+ Saurabh7	not yet need to make this radnomcart work
+@HeikoS	ok
+@HeikoS	how are we doing timewise?
+ Saurabh7	cart performance is same now
+@HeikoS	ah cool
+@HeikoS	that is very good
+ Saurabh7	I shared it
+@HeikoS	we should be faster
+@HeikoS	I know, hard to remoember all the times.
+@HeikoS	:)
+ Saurabh7	okie :)
+ Saurabh7	I wil finish this randomcart then compare random forest
+@HeikoS	Saurabh7: I think in RF, Shogun should be quite a bit faster than python
+@HeikoS	since not so much linear algebra operations
+ Saurabh7	its need refactoring tho
+@HeikoS	but different
+ Saurabh7	almost 300 line code is same from cart
+@HeikoS	ok cool
+@HeikoS	Saurabh7: shall we have different patches for the different files?
+@HeikoS	then I can already merge some parts
+@HeikoS	easier to review
+ Saurabh7	HeikoS, ok sure
+@HeikoS	Saurabh7: is our RF multithreaded yet?
+ Saurabh7	HeikoS, no
+@HeikoS	Saurabh7: ok, that will be a good thing to do :)
+@HeikoS	but later
+ Saurabh7	subsets are heavliy used in here too
+@HeikoS	yeah
+@HeikoS	Saurabh7: I think once you have done the first set of changes
+@HeikoS	we can do the read only features
+@HeikoS	with subsets
+ Saurabh7	so they need to be absoulety thread safe
+@HeikoS	yep
+@HeikoS	but are they read only?
+@HeikoS	or are they written?
+ Saurabh7	used on labels too
+@HeikoS	yep
+ Saurabh7	its read only
+@HeikoS	once we change all this to read only
+@HeikoS	we can also update the xvalidation
+ Saurabh7	ok
+ Saurabh7	i will try to finish this random cart, somethings fishy here
+ Saurabh7	samples are picked randomly but labels used are same:D
+ Saurabh7	need to double check
+@HeikoS	hehe
+@HeikoS	that is fishy indeed :I
+@HeikoS	ok cool, let me know if you need help
+@HeikoS	I will be out of country from Wednesday btw
+@HeikoS	 I will take my laptop with me
+@HeikoS	but irc is limited
+@HeikoS	back monday
+@HeikoS	so email is better from mid week
+ Saurabh7	okie , let u know
+-!- HeikoS [~heiko@nat-219-54.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 260 seconds]
+-!- HeikoS [~heiko@nat-219-54.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+ c4goldsw	Earth to wiking
+ arianepaola	hello everyone
+ c4goldsw	arianepaola hello
+ arianepaola	hi c4goldsw
+ c4goldsw	HeikoS ping
+-!- sanuj [~sanuj@117.203.20.56] has joined #shogun
+ sanuj	lisitsyn, hey
+ c4goldsw	HeikoS wiking never mind.
+@HeikoS	hi
+ Saurabh7	HeikoS, ok I have done quick changes for RandomCart too, will do a benchmark for RF next
+ sanuj	HeikoS, about %newobject
+ c4goldsw	and hello
+ sanuj	it works and is needed
+ sanuj	but not sure about memleaks
+-!- HeikoS [~heiko@nat-219-54.internal.eduroam.ucl.ac.uk] has quit [Remote host closed the connection]
+-!- HeikoS [~heiko@nat-219-54.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	HeikoS: gs

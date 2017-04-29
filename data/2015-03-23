@@ -1,0 +1,151 @@
+--- Log opened Mon Mar 23 00:00:11 2015
+-!- HeikoS [~heiko@0543fcaf.skybroadband.com] has quit [Quit: Leaving.]
+-!- curiousguy13 [~curiousgu@59.177.204.193] has quit [Ping timeout: 244 seconds]
+-!- curiousguy13 [~curiousgu@59.177.192.72] has joined #shogun
+-!- HeikoS [~heiko@0543fcaf.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- PirosB3_ [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has quit [Quit: PirosB3_]
+@HeikoS	lisitsyn: pushed something
+@HeikoS	lisitsyn: let me know how it goes tomorrow
+-!- HeikoS [~heiko@0543fcaf.skybroadband.com] has quit [Quit: Leaving.]
+ shogun-buildbot	build #868 of nightly_none is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_none/builds/868  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, jiaolong_cvc228 <jiaolongxu@gmail.com>
+-!- curiousguy13 [~curiousgu@59.177.192.72] has quit [Ping timeout: 272 seconds]
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- vortex_ape [~vortex_ap@120.59.76.163] has joined #shogun
+ shogun-buildbot	build #986 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/986  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, jiaolong_cvc228 <jiaolongxu@gmail.com>
+-!- vortex_ape [~vortex_ap@120.59.76.163] has quit [Ping timeout: 256 seconds]
+-!- vortex_ape [~vortex_ap@120.57.192.184] has joined #shogun
+-!- vortex_ape [~vortex_ap@120.57.192.184] has quit [Ping timeout: 250 seconds]
+-!- vortex_ape [~vortex_ap@120.59.79.25] has joined #shogun
+-!- vortex_ape [~vortex_ap@120.59.79.25] has quit [Ping timeout: 264 seconds]
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 255 seconds]
+-!- PirosB3_ [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has joined #shogun
+-!- HeikoS [~heiko@0543fcaf.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@lisitsyn	HeikoS: hey
+@lisitsyn	need explanation
+@HeikoS	lisitsyn:
+@HeikoS	hi
+@HeikoS	lisitsyn: shoot
+@lisitsyn	HeikoS: why do you think we don't need custom html?
+@lisitsyn	I didn't see alternatives want to know
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has quit [Ping timeout: 246 seconds]
+@HeikoS	lisitsyn:
+@HeikoS	lisitsyn: because docutils should contain a node type for simple <div> container, ?
+@HeikoS	we then just have to nest them?
+@HeikoS	have a look at the page.html layout
+@HeikoS	its all just dics
+@HeikoS	divs
+@lisitsyn	hmm
+@lisitsyn	HeikoS: how to set up classes?
+@HeikoS	check the file
+@HeikoS	nodes.py
+@HeikoS	of docutils
+@HeikoS	there is a function called container_wrapper
+@HeikoS	or so
+@HeikoS	there they do something similar
+@HeikoS	one can set the class of the div
+@HeikoS	but I couldnt figure it out
+@HeikoS	so maybe custom html is better
+@HeikoS	any idea how to do it?
+@lisitsyn	HeikoS: not yet
+-!- curiousguy13 [~curiousgu@59.177.201.71] has joined #shogun
+@HeikoS	ok let me know
+@HeikoS	we are close, lisitsyn :)
+@lisitsyn	HeikoS: sorry I am randomly distracted
+@HeikoS	then we can do some templating of the .rst files
+@lisitsyn	HeikoS: where is that nodes.py?
+@HeikoS	locate nodes.py | grep docutils
+@lisitsyn	haha ok
+@HeikoS	lisitsyn: see the function?
+@lisitsyn	HeikoS: I have no container_wrapper
+@lisitsyn	there is class container
+@lisitsyn	I tried that
+@lisitsyn	it adds <div> around this stuff
+@lisitsyn	but class if 'container'
+@HeikoS	container should do it?
+@HeikoS	sorry
+@HeikoS	thats the one I meant
+@HeikoS	the function is in
+@HeikoS	/usr/local/lib/python2.7/dist-packages/sphinx/directives/code.py
+@HeikoS	container_wrapper
+@HeikoS	it creates a docutils.nodes.container, and wraps the given node in it
+@HeikoS	lisitsyn: see?
+@lisitsyn	HeikoS: oh
+@lisitsyn	let me try that just now
+@lisitsyn	HeikoS: we should do similar thing
+@HeikoS	lisitsyn: yep
+@HeikoS	lisitsyn: I tried to adapt but I think there is a problem with this hack of modifying the current node
+@HeikoS	name clashes or so
+@lisitsyn	HeikoS: ok I managed to add a class
+@HeikoS	lisitsyn: cool
+@HeikoS	push
+@HeikoS	lisitsyn: with this, we can just nest them and add the tabs this way
+@HeikoS	see page.html
+@HeikoS	just need to mimic that
+@HeikoS	just leave the tab definitions in page.html for now so that they are for the whole page
+@lisitsyn	HeikoS: we need to add 'role'
+@lisitsyn	HeikoS: ok pushed
+@lisitsyn	but we still need 'role' attribute
+@HeikoS	<div class="tab-content">
+@HeikoS	    <div role="tabpanel" class="tab-pane active" id="python">
+@HeikoS	      <div class="contents">
+@HeikoS	      {{ body }}
+@HeikoS	      </div>
+@HeikoS	    </div>
+@HeikoS	yep
+@lisitsyn	class="tab-content container"
+@lisitsyn	HeikoS: ^ that's how outer div looks like
+@HeikoS	yep
+@HeikoS	ok
+@HeikoS	lisitsyn: I am currently busy, will check later
+@lisitsyn	HeikoS: ok
+@HeikoS	lisitsyn: but should not be too hard to add attributes to containers?
+@lisitsyn	HeikoS: I am trying to find how
+@HeikoS	lisitsyn: great!
+@HeikoS	lisitsyn: almost there!
+@lisitsyn	http://stackoverflow.com/questions/13168702/how-to-add-rel-attribute-to-docutils-sphinx-reference-in-html-output
+@lisitsyn	HeikoS: ^
+@lisitsyn	we need to override visit thing I guess
+-!- HeikoS [~heiko@0543fcaf.skybroadband.com] has quit [Ping timeout: 272 seconds]
+-!- curiousguy13 [~curiousgu@59.177.201.71] has quit [Ping timeout: 256 seconds]
+-!- curiousguy13 [~curiousgu@120.59.103.43] has joined #shogun
+-!- HeikoS [~heiko@laptop-net.gatsby.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@laptop-net.gatsby.ucl.ac.uk] has quit [Client Quit]
+-!- vortex_ape [~vortex_ap@59.177.133.180] has joined #shogun
+-!- HeikoS [~heiko@laptop-net.gatsby.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@laptop-net.gatsby.ucl.ac.uk] has quit [Ping timeout: 256 seconds]
+-!- PirosB3_ [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has quit [Quit: PirosB3_]
+-!- kshitijk [~kshitijk@202.78.169.243] has joined #shogun
+-!- kshitijk [~kshitijk@202.78.169.243] has quit [Ping timeout: 256 seconds]
+-!- xAndreLopesx [ThrashIRC@186.231.128.39] has joined #shogun
+-!- xAndreLopesx [ThrashIRC@186.231.128.39] has left #shogun []
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has joined #shogun
+-!- xAndreLopesx [ThrashIRC@186.231.128.39] has joined #shogun
+-!- xAndreLopesx [ThrashIRC@186.231.128.39] has left #shogun []
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 256 seconds]
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 246 seconds]
+-!- vortex_ape [~vortex_ap@59.177.133.180] has quit [Ping timeout: 264 seconds]
+-!- hargup [uid10222@gateway/web/irccloud.com/x-rvoijlwgdgecsljg] has joined #shogun
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- iglesiasg [~iglesias@524B8E0B.cm-4-4c.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	Hello, guys
+@iglesiasg	hi nileshK
+@iglesiasg	I guess you are Nilesh Kulkarni, is that right?
+-!- curiousguy13 [~curiousgu@120.59.103.43] has quit [Ping timeout: 252 seconds]
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 256 seconds]
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- curiousguy13 [~curiousgu@120.59.235.32] has joined #shogun
+-!- iglesiasg [~iglesias@524B8E0B.cm-4-4c.dynamic.ziggo.nl] has quit [Quit: leaving]
+-!- PirosB3_ [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3_ [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has quit [Quit: PirosB3_]
+ nileshK	Hi
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 264 seconds]
+-!- PirosB3_ [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has joined #shogun
+--- Log closed Tue Mar 24 00:00:12 2015

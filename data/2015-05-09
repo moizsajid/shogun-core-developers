@@ -1,0 +1,118 @@
+--- Log opened Sat May 09 00:00:17 2015
+-!- txomon|home [~txomon@unaffiliated/txomon] has quit [Ping timeout: 265 seconds]
+-!- txomon|home [~txomon@unaffiliated/txomon] has joined #shogun
+-!- txomon|home [~txomon@unaffiliated/txomon] has quit [Ping timeout: 240 seconds]
+-!- txomon|home [~txomon@unaffiliated/txomon] has joined #shogun
+-!- txomon|home [~txomon@unaffiliated/txomon] has quit [Ping timeout: 245 seconds]
+-!- lambday [6a33f00b@gateway/web/freenode/ip.106.51.240.11] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+@lambday	lisitsyn: hey!
+ lisitsyn	lambday: hey
+@lambday	lisitsyn: how are things?
+ lisitsyn	ah fine what about you?
+@lambday	lisitsyn: just got your comment on that
+@lambday	lisitsyn: didn't get what you meant by "Actually you don't need rewriting operators for basic types - just operators of Parameter and float/int so that any multiplication/addition/etc goes inside your object that represents expression."
+ lisitsyn	ok let me explain
+ lisitsyn	you have say
+ lisitsyn	2*Parameter(blabla)
+@lambday	ok
+ lisitsyn	you need operator*(float, Parameter)
+@lambday	yes
+ lisitsyn	and operator*(Parameter, Parameter)
+@lambday	but say I have a non-parametric thing in my expression..
+ lisitsyn	you don't need custom operator*(float, float)
+@lambday	like -2*sin(98235)
+ lisitsyn	that sounds like a constant
+ lisitsyn	that can be precomputed
+@lambday	hmm yes that can be done
+@lambday	ok I got it
+ lisitsyn	lambday: I wouldn't bother that much :)
+ lisitsyn	format is good already I think
+@lambday	lisitsyn: yeah this one looks neat as well
+@lambday	lisitsyn: sending PR with that one then
+@lambday	lisitsyn: one interesting thing is that, I tried viennacl/opencl with both cpu and gpu
+@lambday	lisitsyn: and in my machine it turned out that cpu is even faster
+ lisitsyn	notebook?
+@lambday	my graphics card is intel ivybridge integrated one
+ lisitsyn	ah
+ lisitsyn	could happen I guess
+@lambday	Intel(R) HD Graphics IvyBridge M GT2
+@lambday	ya but why is that?
+@lambday	lisitsyn: for the cpu one I am using intel's sdk for opencl... and for the gpu I am using beignet
+ lisitsyn	I don't know, it could be driver or something
+ lisitsyn	I wouldn't expect good performance on such card
+ lisitsyn	nowhere near to these things like tesla
+@wiking	booon
+-!- lambday [6a33f00b@gateway/web/freenode/ip.106.51.240.11] has quit [Ping timeout: 246 seconds]
+-!- HeikoS [~heiko@0544f0d5.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has joined #shogun
+@wiking	yozon
+@wiking	HeikoS: so basically we made another step towards nightly packages
+@wiking	last week
+@HeikoS	wiking: yoyo
+@wiking	but dunno what's the status of besser about getting some more stuff running
+@HeikoS	wiking: whats the step?
+@wiking	but i'll see it on monday the latest
+@wiking	HeikoS: well now finally we have only config.h + swig_config.h
+@wiking	no more -D compiler flags
+@HeikoS	not sure whether I understand what that means
+@wiking	which will allow us basically to build a modular interface without building actually the c++ library
+@wiking	if you have a preexisting shogun installation
+@wiking	that is required for being able to build
+@wiking	modular interfaces standalone
+@wiking	without building the library itself
+@wiking	well previously shogun defined all sorts of compile flags
+@HeikoS	I see
+@HeikoS	thats great then
+@wiking	-DHAVE_WHATEVER -DLALLAA
+@wiking	now we dont have this anymore
+@wiking	we purely rely on config.h
+@wiking	this has a good sideeffect of ccache finally being really effective
+@wiking	so now if u use ccache the recompilation of the library will be really fast
+@wiking	because the problem was of couse
+@wiking	*course that ccache was not hitting any cache
+@HeikoS	ah great
+@HeikoS	thats really good news then
+@wiking	because of a slight change of the compiler flags
+@wiking	which might have only effected 2-3 srcs
+@HeikoS	wiking: macos also seems to work better these days right?
+@HeikoS	so we can have nighly ubuntu, nightly mac, and nightly cloud?
+@wiking	but since ccache is sensitive for compiler flags... basically it never hit a cache
+@wiking	yeah we could
+@wiking	but we still need to fix this separation
+@wiking	being able to build a modular interface
+@wiking	based on a preexisting shogun installation
+@HeikoS	okok
+@HeikoS	could we use this in travis to reduce time?
+@wiking	but yeah another problem now is c# modular interface
+@wiking	mmmm we could although that's quite tricky
+@wiking	if we could like distribute and persist somewhere the ccache
+@wiking	then we actually could save compilation time ;)
+@wiking	now travis offers something like a docker based build
+@HeikoS	wiking: well just a thought
+@HeikoS	I think a better way would be to split shogun into modules
+@HeikoS	but later
+@wiking	but that is still shitty atm
+@HeikoS	whats the problem with c#?
+@wiking	well mono 3.x or later
+@wiking	is just not compatible with the current swig setup
+@wiking	so we need to fix some typedefs
+@HeikoS	wiking: ah crap
+@HeikoS	wiking: maybe thats a good point for someone to dive into those typemaps
+@HeikoS	wiking: and then do the matlab ones on the fly ;)
+@wiking	hehehe
+-!- txomon|home [~txomon@unaffiliated/txomon] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- HeikoS [~heiko@0544f0d5.skybroadband.com] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@0544f0d5.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	HeikoS: so
+@wiking	what's the plan of the world domination
+@wiking	?
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has quit [Quit: Textual IRC Client: www.textualapp.com]
+@HeikoS	wiking: what? :D
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 256 seconds]
+-!- HeikoS [~heiko@0544f0d5.skybroadband.com] has quit [Quit: Leaving.]
+--- Log closed Sun May 10 00:00:19 2015

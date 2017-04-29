@@ -1,0 +1,939 @@
+--- Log opened Wed May 09 00:00:37 2012
+ wiking	lol
+ wiking	i've just checked the git blame classifier_qda.cpp
+ wiking	how it morphed into this non-working code :)))
+ wiking	https://github.com/shogun-toolbox/shogun/pull/513
+ blackburn	arrghh
+ CIA-113	shogun: Viktor Gal master * r7dfdcba / examples/undocumented/libshogun/classifier_qda.cpp : Fix classifier_qda example - http://git.io/Ep7fDw
+ wiking	mkl is still a magic for me
+ CIA-113	shogun: Sergey Lisitsyn master * r585ebed / src/shogun/converter/Isomap.cpp : Fix crasher in Isomap - http://git.io/RrIpuA
+-!- sonney2k_ [~shogun@7nn.de] has quit [Ping timeout: 260 seconds]
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Ping timeout: 255 seconds]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ blackburn	wiking: still there?
+ wiking	y
+-!- PhilTillet [~Philippe@157.159.42.46] has quit [Quit: Leaving]
+ blackburn	wiking: you made me recall one anecdote about putin
+ blackburn	hmm let me try to tell it :D
+ blackburn	moscow, traffic jam, a lot of cars
+ blackburn	one guy is running and shout - putin is captured by aliens
+ blackburn	"they threaten to pour him with gasoline and set on fire!"
+ blackburn	"and they ask money"
+ blackburn	he comes to one car and driver says 'how much do you need?' - that guys says 'how much you can' - and driver answers - 'i can give you 5 liters'
+ blackburn	:D
+ wiking	:DDDD
+ CIA-113	shogun: Sergey Lisitsyn master * r276fa54 / (4 files): Fixed crashers in PRC/ROC - http://git.io/L9NjOQ
+-!- cronor [~cronor@g231219248.adsl.alicedsl.de] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.222] has quit [Quit: Leaving.]
+ CIA-113	shogun: Sergey Lisitsyn master * ra2c0e99 / (2 files): Fixed sizes of ROC and PRC graphs - http://git.io/8sLYSw
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Client Quit]
+-!- av3ngr [av3ngr@nat/redhat/x-esiwbjbcmoextztr] has joined #shogun
+-!- vikram360 [~vikram360@117.192.173.175] has joined #shogun
+-!- cronor [~cronor@g231219248.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- vikram360 [~vikram360@117.192.173.175] has quit [Ping timeout: 240 seconds]
+-!- cronor [~cronor@g231219248.adsl.alicedsl.de] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- vikram360 [~vikram360@117.192.181.205] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- gsomix [~gsomix@178.45.78.190] has joined #shogun
+-!- vikram360 [~vikram360@117.192.181.205] has quit [Ping timeout: 265 seconds]
+-!- gsomix [~gsomix@178.45.78.190] has quit [Quit: Ex-Chat]
+-!- gsomix [~gsomix@178.45.78.190] has joined #shogun
+ gsomix	morning
+ wiking	heheey
+-!- gsomix [~gsomix@178.45.78.190] has quit [Remote host closed the connection]
+-!- gsomix [~gsomix@178.45.78.190] has joined #shogun
+ wiking	gsomix: what'sup?
+ wiking	actually how's that little task going that we've talked some weeks before?
+ gsomix	wiking, in progress. ^__^''
+ wiking	yeey
+ wiking	lol man
+ wiking	"Yahoo Board Member Out Over CEO's Bogus R?sum?"
+ wiking	i wonder how can u mix up your degree by mistake :D
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	good morning!
+ n4nd0	from Sweden finally :)
+@sonney2k	wiking, yeah indeed I am not happy about std:: crap in pluskids patch
+@sonney2k	since we have alternatives it is not needed
+@sonney2k	gsomix, btw please bring back CSet!
+ wiking	sonney2k: heheheh yeah i guessed...
+-!- vikram360 [~vikram360@117.192.181.205] has joined #shogun
+ wiking	sonney2k: so u would go with CMap and CSet i guess, right?
+ wiking	as soon as we have CSet as well
+@sonney2k	wiking, we had CSet - no idea why gsomix removed it...
+ wiking	sonney2k: yeah i saw it has morphed into CMap
+@sonney2k	wiking, hmmhh I am wondering if 20 byte overhead for a sparse feature vector / string are ok
+ wiking	sonney2k: hahahah really? :)))
+@sonney2k	wiking, you don't?
+ wiking	well 20 bytes
+ wiking	it's really about 5 pointers :)
+@sonney2k	ptr is 8 byte
+@sonney2k	2 ptrs + one int
+@sonney2k	something is weird with multiclasssvms
+@sonney2k	I cannot call apply() w/o getting an error
+@sonney2k	wiking, for sgvectors we internally do't have a list of vectors
+@sonney2k	but just a double* aka SGMatrix
+@sonney2k	so that doesn't matter
+@sonney2k	but for SGSparseMatrix we wouldh ave a list of SGSparseVector....
+ wiking	sonney2k: on 64bits...
+ wiking	otherwise it's 4 bytes
+@sonney2k	it is nice that one can share it
+@sonney2k	but bad memory wise...
+@sonney2k	thinking of that I trained on 50 million strings
+@sonney2k	that would mean 1G overhead
+@sonney2k	ok got to leave train
+@sonney2k	brb
+ gsomix	oh, added
+ gsomix	but I will commit in car
+ gsomix	going to Samara
+ wiking	:)))))
+ wiking	commit in car :>
+ sonne|work	gsomix: push please :)
+ wiking	sonne|work: arrived to work? :)
+ sonne|work	yeah
+-!- gsomix [~gsomix@178.45.78.190] has quit [Ping timeout: 265 seconds]
+ wiking	seems gsomix is in the car commiting
+ wiking	mmmm
+ wiking	kernel_matrix = 0x0,
+ wiking	  lhs = 0x0,
+ wiking	  rhs = 0x0,
+ wiking	on a supposedly trained kernel
+* wiking wonders
+ wiking	oooh yeah
+ sonne|work	?
+-!- uricamic [~uricamic@2001:718:2:1634:f2de:f1ff:fecf:a6a5] has joined #shogun
+ wiking	i guess we are missing a kernel.init () in classifier_mklmulticlass.cpp
+ wiking	that's why both lhs and rhs is NULL
+ wiking	and that's why it dies with an assertion failure
+ sonne|work	wiking: I was looking at that example but there is more that is missing it seems
+ sonne|work	needs to be debugged...
+ sonne|work	but had to leave train before finishing
+ wiking	index_t is unsigned
+ wiking	right?
+ wiking	mmm not :)
+ wiking	why not: shogun/lib/DataType.h:typedef int32_t index_t; ?
+ sonne|work	?
+ sonne|work	yes int32_t
+ sonne|work	wiking: just because you need quite a bit of extra care when dealing with it
+ wiking	but why is an index type is signed?
+ sonne|work	when you do things like idx - 100
+ wiking	i mean for sure there's a reason
+ wiking	i just wonder why
+ sonne|work	you cannot check < 0
+ sonne|work	err >=0
+ wiking	yes but you can check idx < 100
+ wiking	;)
+ sonne|work	sure
+ wiking	it's essentially the same amount of branching
+ sonne|work	but it needs extra care
+ wiking	either this or that way it'll point u to a bad memory if u don't do a check
+ wiking	i.e. something[idx-100] where idx < 100
+ wiking	it's the same in case of a signed and an unsigned integer...
+ wiking	just the bad memory is pointed into a different place :)
+ sonne|work	no
+ sonne|work	if any operation happens to idx
+ sonne|work	checking idx will not rescue
+ sonne|work	you
+ wiking	i'm just saying since a) essential negative index has no meaning b) u get an extra bit :)
+ sonne|work	give me an example where we need the extra bit
+ wiking	i mean that's 2* amount of indexable
+ sonne|work	I know
+ wiking	and since you were talking here about a 20byte overhead
+ wiking	and a huge dataset
+ wiking	if we really want to support those size
+ sonne|work	50 million << 2**31
+ wiking	that 2* will count
+ sonne|work	no problem
+ wiking	yes i know
+ sonne|work	I would need 2 billion
+ sonne|work	and that is still orders of magnitude bigger
+ wiking	mmm
+ sonne|work	and I would rather switch to using int64_t if we have to switch
+ wiking	ok i think i cannot have right
+ wiking	so i give up
+ wiking	fine then just let's try to use the same type, i.e. index_t for the variable that is actually doing the indexing
+ wiking	so if one day index_t is actually going to become int64_t then there's not problem
+ sonne|work	wiking: yeah - problem is that this would need a review of *all* code
+ sonne|work	I suspect 1% uses index_t
+ wiking	sonne|work: yeah sure i know
+ wiking	but still we can take care of the ones that are pull requested from now on
+ sonne|work	who wants to do that just for fun?
+ sonne|work	yeah
+ sonne|work	that makes sense
+ sonne|work	index_t is a bit confusing though
+ sonne|work	as it is not what we use in SG MALLOC etc
+ sonne|work	there we of course use 64bit...
+ wiking	well yeah size_t
+ wiking	git grep vlen|grep for|wc -l
+ wiking	95
+ wiking	:D
+ wiking	ahhaha this is heavy shit: shogun/lib/SGVector.h:for (int32_t i=0; i<vlen; i++)
+ wiking	:>
+ wiking	mmm and even the api is defined
+ wiking	as len is int32_T
+ wiking	yeah u are right it'll take some time
+-!- cronor [~cronor@g231219248.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+ sonne|work	wiking: you have to know that we didn't (and still don't) even use SGVector that much
+ sonne|work	lots of stuff operates on double*
+ wiking	sonne|work: yeah i can see
+ sonne|work	and some len
+ sonne|work	I hope that will change now
+ wiking	i mean 95 lines is not so much compared to the whole LoC of shogun
+ sonne|work	but still it is a looong way
+ sonne|work	alright work!@
+-!- cronor [~cronor@g231219248.adsl.alicedsl.de] has joined #shogun
+-!- gsomix [~gsomix@85.26.235.21] has joined #shogun
+ gsomix	hehe
+ gsomix	Programming in car is bad idea
+ sonne|work	gsomix: don't drive and code
+ sonne|work	there are not enough traffic jams I guess :)
+ gsomix	aha
+ gsomix	I will come to Samara in an hour
+ gsomix	113km from home
+-!- av3ngr [av3ngr@nat/redhat/x-esiwbjbcmoextztr] has quit [Quit: That's all folks!]
+-!- gsomix [~gsomix@85.26.235.21] has quit [Read error: Connection reset by peer]
+-!- gsomix [~gsomix@85.26.235.21] has joined #shogun
+ gsomix	113km from home
+ gsomix	bad internet :)
+-!- gsomix [~gsomix@85.26.235.21] has quit [Ping timeout: 256 seconds]
+-!- cronor [~cronor@g231219248.adsl.alicedsl.de] has quit [Quit: cronor]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ CIA-113	shogun: Soeren Sonnenburg master * r2c888f8 / (3 files in 2 dirs):
+ CIA-113	shogun: Merge pull request #509 from pluskid/kernelmc-store-model
+ CIA-113	shogun:  (+5 more commits...) - http://git.io/Gm3g3g
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+-!- wiking [~wiking@we02c096.ugent.be] has joined #shogun
+-!- wiking [~wiking@we02c096.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.222] has joined #shogun
+-!- gsomix [~gsomix@188.168.4.56] has joined #shogun
+ gsomix	ok, I'm in Samara
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Ping timeout: 252 seconds]
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+ blackburn	gsomix: is it you knock-knock? :)
+ gsomix	blackburn, aha
+ blackburn	I had been kind of sleeping yet this time
+ blackburn	@egorov I'm at Reichstag w/ @kantaria and 81,034 others
+ blackburn	:D
+ blackburn	sonne|work: hmm I have no clang complete
+ blackburn	do you use it?
+-!- vikram360 [~vikram360@117.192.181.205] has quit [Ping timeout: 260 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 245 seconds]
+ wiking	nyipp this clang_complete seems sweet
+ blackburn	wiking: how to use it?
+ blackburn	:D
+ wiking	blackburn: do u use vim or any derivative of vim like gvim?
+ blackburn	vim
+ wiking	https://github.com/Rip-Rip/clang_complete
+ wiking	use it
+ blackburn	yeah already
+ wiking	or of course here's the http://www.vim.org/scripts/script.php?script_id=3302
+ blackburn	how to generate that ctags file? :D
+ wiking	quote: "You don't need any ctags for it to work! Only clang is needed."
+ blackburn	wiking: okay so how to ask him for completion ? :D
+ wiking	have u actually read this:  http://www.vim.org/scripts/script.php?script_id=3302
+ wiking	 After a . , -> and :: it is automatically trying to complete the code. If you want to "force" the completion, use <C-X><C-U> which is the mapping for user defined completion.
+ blackburn	no :D
+ blackburn	okay thanks
+ blackburn	cool1
+ wiking	and here's some stuff about what to put into .clang_complete
+ wiking	http://vim.wikia.com/wiki/Script:3302
+ wiking	if u are having problemoooos
+ blackburn	wiking: hmm nicht problemos
+ blackburn	works like a charm
+ wiking	;)
+ blackburn	cool
+ wiking	yeah it is
+ blackburn	did you know about it?
+ wiking	no
+ wiking	first time i'veheard now there on
+ wiking	pull request
+ wiking	pluskid should share more funky shit :)
+ blackburn	yeah I guess he knows something we do not
+ wiking	:>>>
+ blackburn	may be he even has script for shogun development
+ blackburn	I admit it takes some time :D
+ wiking	heheheheh
+ wiking	yeah this way doing coding is much faster
+ wiking	i mean for me a lot of times i had to do git grep functioncall
+ wiking	so that i know what the fuck is the return value and the argu
+ wiking	e
+ blackburn	no I mean may be even some make-painful-sgvector-transition commands
+ blackburn	:D
+ blackburn	wiking: how does it work??
+ wiking	what?
+ blackburn	wiking: how can it be so fast :D
+ wiking	libclang
+ blackburn	some C plugin for vim I had had for a while is much more slower
+ blackburn	but it was a bunch of templates only
+ wiking	nonono
+ wiking	this is because of libclang
+ wiking	i'm not 100% sure
+ wiking	but afaik they do a binary based indexing as well
+ wiking	the story is of course here that apple had a very shitty autocomplete mechanism for c/c++
+ wiking	in xcode
+ wiking	and now they did it within clang
+ wiking	since they dropped gcc because of gplv3
+ blackburn	wiking: does frame on top close after completion?
+ blackburn	it stays here :(
+ wiking	mmm
+ wiking	weird
+-!- pluskid [~pluskid@li400-235.members.linode.com] has joined #shogun
+-!- n4nd0 [~nando@n173-p203.kthopen.kth.se] has joined #shogun
+-!- n4nd0 [~nando@n173-p203.kthopen.kth.se] has quit [Client Quit]
+ CIA-113	shogun: Chiyuan Zhang master * r2e99d05 / src/shogun/machine/KernelMulticlassMachine.cpp : Use index_t instead of int32_t for index type. - http://git.io/3j6kVg
+ CIA-113	shogun: Soeren Sonnenburg master * rf91c456 / src/shogun/machine/KernelMulticlassMachine.cpp :
+ CIA-113	shogun: Merge pull request #514 from pluskid/kernelmc-store-model
+ CIA-113	shogun:  - http://git.io/ygXRvg
+ sonne|work	blackburn: I had a look at SGString/SparseVector
+ sonne|work	IMHO the overhead of 20 bytes for each is too much...
+ sonne|work	because we store stringlist/sparsematrix as list of sgstring/sparse vector
+ sonne|work	for SGVector itself things are not soo bad
+ sonne|work	because we really rarely needed this
+ sonne|work	for very small vecs
+ sonne|work	pluskid: ahh you around!
+ sonne|work	pluskid: I wanted to ask one thing - in current sgvector we have this refcount ptr
+ sonne|work	now all incref'ing is done automagically
+ blackburn	sonne|work: then sparse matrix should be sparse in a different way!
+ sonne|work	blackburn: ?
+ blackburn	not as collection of sparse vectors
+ pluskid	automagically :D, good word
+ sonne|work	blackburn: why that?
+ blackburn	sonne|work: but that will enable us to do refcounted matrix..
+ sonne|work	pluskid: and unrefing too except that maybe someone wants to *manually* unref
+ sonne|work	blackburn: SGSparseMatrix will always work
+-!- vikram360 [~vikram360@117.192.181.205] has joined #shogun
+ blackburn	yes but not with that overhead
+ sonne|work	pluskid: so in this case it may happen that someone calls x.unref()
+ sonne|work	pluskid: more than once
+ sonne|work	pluskid: so what I do is set all the ptrs to the data to NULL
+ sonne|work	pluskid: so that works ... but now the problem is when someone wants to do x.ref(); x.ref(); multiple times
+ sonne|work	then he cannot unref() it twice
+ sonne|work	so I made ref() protected
+ pluskid	sonne|work: you mean, on a single unref() call, you reset all ref-counters?
+ pluskid	for example, ref-count is 5 currently, when user *manually* call unref, you set it to 0?
+ sonne|work	pluskid: it is not needed anyway but somehow not my intuition
+ sonne|work	pluskid: no
+ sonne|work	pluskid: I set the ptr pointing to ref count to NULL
+ pluskid	ah, then when will the data be free-ed?
+ wiking	pluskid: awessoooome! again!
+ pluskid	it looks strange
+ pluskid	wiking: ??
+ sonne|work	pluskid: when the last object's refcount gets 0
+ wiking	pluskid: your pull req! i really needed that
+ sonne|work	blackburn: well if we keep SGSparseVector as is there is no problem
+ pluskid	sonne|work: oh, I see, you set the ref-count pointer of the current object to NULL
+ sonne|work	wiking: waiting for your patch to introduce index_t in SG* :)
+ blackburn	sonne|work: why not to change sgsparsematrix?
+ sonne|work	pluskid: exactly
+ wiking	sonne|work: you mean the replacement of the bad indexing variables?
+ sonne|work	blackburn: I said not change sparse vector - not sparse matrix
+ pluskid	sonne|work: do you decrease ref_count before reseting the pointer to NULL?
+ sonne|work	wiking: int32_t -> index_t
+ sonne|work	pluskid: of course
+ blackburn	sonne|work: ??
+ wiking	sonne|work: yep yep that one
+ sonne|work	pluskid: I just wanted your opinion on that
+ pluskid	sonne|work: a bit strange, let me think for 2 min :D
+ sonne|work	pluskid: it cannot leak memory - that is the good thing
+ sonne|work	pluskid: only problem is that ref() can never be called explicitly
+ sonne|work	blackburn: we have sparse *vectors* and sparse *matrices
+ pluskid	sonne|work: if ref() is not call explicitly, why unref() will be called explicitly?
+ pluskid	people should call ref() and unref() in pairs, or else it is a bug
+ sonne|work	blackburn: I am saying exploding sparse vectors is not good because we use them in sparse matrix
+ blackburn	sonne|work: obvious - why not to make sparse matrix independant from vector?
+ sonne|work	pluskid: argh
+ blackburn	there are other ways to store sparse matrices
+ pluskid	sonne|work: ?
+ sonne|work	pluskid: no one ever needs to call unref() if he can live with the object being automagically destroyed at some point
+ sonne|work	pluskid: however sometimes you want to get rid of the old object
+ sonne|work	*now*
+ pluskid	sonne|work: then just re-assign it to an empty one
+ pluskid	the operator= will call unref()
+ sonne|work	pluskid: or call unref
+ blackburn	why to unref anything?
+ pluskid	sonne|work: calling unref() is strange here, the object still exist but becomes invalid
+ pluskid	sg_vec = SGVector(length=0) will do, that's the standard way
+ blackburn	second
+ pluskid	and this will solve your headache of ref/unref
+ sonne|work	pluskid: so you would make ref/unref private
+ pluskid	sonne|work: yes, as private as possible
+ sonne|work	and instead of writing sg_vec.unref() do sg_vec=SGVector<float64>()
+ pluskid	unless you have to interactive with some legacy code or some other lang (SWIG? maybe I don't know)
+ pluskid	sonney2k: yes
+ pluskid	sonne|work: btw, STL vector has a clear() method :p
+ sonne|work	pluskid: no swig will only ref/unref SGOBjects
+ sonne|work	not data types
+ sonne|work	pluskid: what does it do?
+ pluskid	OK
+ pluskid	sonne|work:  it virtually do vec = std::vector()
+ sonne|work	STL vector is not even guaranteed to be contiguous in memory
+ pluskid	sonne|work: no, it is
+ pluskid	vector should be continguous
+ sonne|work	it is but not in the standard
+ pluskid	really?
+ pluskid	I don't think so
+ sonne|work	at least when I considered it 10 years ago
+ pluskid	vector iterator is random-access iterators
+ sonne|work	>10 years ago
+* sonne|work is old
+ pluskid	for a random-access iterators to work, it should guarantee contiguous memory
+ wiking	"From the C++03 standard (23.2.4.1):
+ wiking	The elements of a vector are stored contiguously, meaning that if v is a vector where T is some type other than bool, then it obeys the identity &v[n] == &v[0] + n for all 0 <= n < v.size().
+ wiking	"
+ pluskid	sonne|work: maybe time to re-consider STL and become young again :p
+ sonne|work	never
+ sonne|work	:D
+ blackburn	sonne|work: just imagine you are 20 again
+ blackburn	:D
+ blackburn	you should accept our suggestion!
+ sonne|work	hah I just learned: C++98 standard didn't completely guarantee contiguity, the C++03 standard was amended to explicitly add the guarantee.
+ sonne|work	of contiguous memory
+ pluskid	considering refactoring of CLabels, I start to prefer not doing it right now
+ sonne|work	pluskid: what is the issue?
+ pluskid	Because the current class works fine with regression, binary and mc
+ pluskid	refactoring won't change much
+ pluskid	I'm the current CLabels is just good enough, if we don't consider SO
+ pluskid	I'm expecting huge changes to our Label system when more SO learning is involved
+ blackburn	my suggestion is
+ blackburn	to develop SOLabels standalone for now
+ blackburn	and machine too
+ blackburn	we can always merge that kind of baselines
+ blackburn	and this would enable n4ndo to work on that
+ blackburn	not requiring waiting for the changes
+ pluskid	I mean, if we ignore SO, CLabels work fine, so it is not urge to refactor CLabels; if we consider SO, then they will also need to refactor CLabels, our refactoring needs to be compatible with theirs, and since ours are rather small, we'd better follow the SO's side: what kind of class hierarchy they need, etc.
+ sonne|work	pluskid: I don't see what SO and regression/binary/mc labels could change except get_num_labels() and is_valid()
+ blackburn	I still think template labels could be cool there
+ pluskid	sonne|work: float64_t get_label(int32_t) will be meaningless in SOLabels, they should return a more complex object I think
+ sonne|work	pluskid: that is why this function is not in the shared baseclass
+ sonne|work	blackburn: I don't
+ blackburn	sonne|work: why?
+ sonne|work	blackburn: what do you think you gain by templates?
+ pluskid	sonne|work: so the shared baseclass becomes almost empty, only have functions like get_num_labels()
+ blackburn	sonne|work: generality
+ sonne|work	pluskid: yes
+ blackburn	sonne|work: even SO can be done with template
+ sonne|work	but then the template needs to be of a certain class type
+ sonne|work	not int / double etc
+ pluskid	sonne|work: that's OK, only a little painful because have to do cast almost everywhere
+ blackburn	sonne|work: why?
+ sonne|work	horrible
+ sonne|work	blackburn: how do you implement 'is_valid' ?
+ blackburn	sonne|work: specialize
+ sonne|work	how
+ blackburn	I am sorry i can't see problem there - what is ?
+ sonne|work	blackburn: give a more concrete example how you think it works
+ blackburn	Labels<int32_t>
+ blackburn	is multiclass labels
+ pluskid	sonne|work: if we use template, then we'll not use a shared base class for various kind of labels
+ blackburn	the only problem is that machine contains pointer to labels
+ blackburn	we can mimic boost::any here somehow
+ blackburn	pluskid: do you agree?
+ pluskid	blackburn: I'd rather prefer we use only MCLabels in MCClass, SOLabels in SOClass, no base class
+ blackburn	no base class at all?
+ pluskid	blackburn: yes
+ sonne|work	pluskid: we need a base class
+ blackburn	sonne|work: why do we?
+ sonne|work	for machines returning labels
+ pluskid	sonne|work: only because we have a generic CMachine, that is almost empty
+ sonne|work	apply()
+ blackburn	sonne|work: right
+ sonne|work	yes
+ pluskid	sonne|work: we can split
+ pluskid	sonne|work: MCMachine.apply() returns MCLabels
+ pluskid	SOMachine.apply() returns SOLabels
+ blackburn	pluskid: we will lost CMachine interface then
+ pluskid	etc
+ sonne|work	yeah - I prefer having the interface
+ sonne|work	it is like apply(CFeatures*)
+ pluskid	blackburn: why do we need a generic apply()?
+ sonne|work	and train(CFeatures*)
+ sonne|work	pluskid: it is the interface of all machines
+ blackburn	pluskid: to make all machines similar
+ blackburn	in some kind
+ pluskid	sonne|work: but they are actually not similar, MC machine apply to MClabels, SO machine applys to MCClass
+ blackburn	having general interface seems to be cool anyway
+ sonne|work	pluskid: they are - they all work on features and labels
+ blackburn	all features are features
+ blackburn	and all labels are labels
+ blackburn	concept stays
+ pluskid	CMachine can become empty, just like the base class CLabels can become empty
+ blackburn	pluskid: yes interface fate of that classes  :D
+ pluskid	blackburn: one option is to make CMachine empty; another option is to make CLabels empty
+ blackburn	why empty?
+ pluskid	almost empty
+ sonne|work	pluskid: you have the same problem with kernels
+ blackburn	apply is here
+ sonne|work	and kernel machines
+ sonne|work	they have an apply() method
+ sonne|work	and can work with *any* kind of features
+ sonne|work	that fit the kernel
+ pluskid	hmm, seems we have discussed about this before
+ pluskid	anyway, I'm OK with either solution
+ pluskid	brb
+ blackburn	sonne|work: clang seems to be *very* cool
+ blackburn	complete*
+ blackburn	however there is a bug I'll try to resolve
+ blackburn	ah not a bug option
+-!- blackburn [~qdrgsm@83.234.54.222] has left #shogun []
+-!- blackburn [~qdrgsm@83.234.54.222] has joined #shogun
+ blackburn	oops
+ blackburn	wiking: g:clang_complete_auto = 1
+ blackburn	nooooo
+ blackburn	 g:clang_close_preview = 1
+ blackburn	I want to make preview display doc
+ blackburn	pluskid: we want you to share more funky stuff :)
+ pluskid	blackburn: pathogen neocomplcache?
+ blackburn	pluskid: sounds like an illness name
+ blackburn	:D
+ pluskid	pathogen is an elegent way of managing vim plugins
+ pluskid	neocomplcache is a plugin that's cool I think
+ pluskid	no perfect plugins, but many are cool, clang_complete is one with promising future
+ blackburn	pluskid: do you use clang complete + neocomplcache?
+ blackburn	I am really excited with clang complete
+ pluskid	yes I use the two
+ blackburn	okay I'll try it now
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric_	hi all
+ wiking	eric_: try multi class now
+ wiking	i mean multi class xval
+ eric_	wiking: I saw it in the logs, thx :p
+ eric_	wiking: one question about it: I get one error : "MulticlassLibSVM does not support locking"
+ wiking	eric_: mmm have u checked the example?
+ wiking	evaluation_cross_validation_multiclass.cpp
+ eric_	wiking: what's locking ? Is it possible to run multiclass Xval with MulticlassLibSVM or MKLmulticlass ?
+ blackburn	pluskid: did you configure neocomplcache?
+ eric_	wiking: sure
+ pluskid	blackburn: yes, a bit
+ wiking	eric_: u should be able to run multiclasslibsvm
+ blackburn	pluskid: can you share a config?
+ wiking	in xval
+ pluskid	blackburn: a min
+ gsomix	sonne|work, CSet is on github now.
+ wiking	just replace basically CMulticlassLibLinear -> CMulticlassLibSVM
+ wiking	a
+ wiking	n
+ wiking	d
+ wiking	use
+ wiking	 
+ wiking	kernel of course
+ wiking	fucking hell what's with this irc client
+ wiking	i've tested yesterday and workedforme
+ pluskid	blackburn: https://gist.github.com/2644215
+ CIA-113	shogun: Soeren Sonnenburg master * r98c94f9 / (6 files in 2 dirs):
+ CIA-113	shogun: Merge pull request #515 from gsomix/CSet
+ CIA-113	shogun:  (+5 more commits...) - http://git.io/t4nN6A
+ eric_	wiking: that's exaclty what I have done, it returns "MulticlassLibSVM does not support locking. Autolocking is skipped. Set autolock flag to false to get rid of warning."
+ blackburn	pluskid: cool! thanks
+ gsomix	sonne|work, wow, so fast. tnx.
+ pluskid	blackburn: ur wel~ :) hope you find interesting thing
+ gsomix	unfortunately I have to study the methods for solving the eikonal equation
+ blackburn	pluskid: yes - is git status a some plugin?
+ gsomix	cu later
+ wiking	eric_: ok, then add this: cross->set_autolock (false); to line 123 in evaluation_cross_validation_multiclass.cpp
+ wiking	i'm trying here as well
+ pluskid	blackburn: let me find
+ wiking	but i still need to recompile shogun
+ pluskid	blackburn: vim-powerline
+ pluskid	blackburn: actually, you might find many useful plugin here: https://github.com/spf13/spf13-vim
+ pluskid	blackburn: vim-fugitive is also needed for the git status line to work I think
+ eric_	wiking: warning disappear but got seg fault
+ wiking	pluskid: i've just used janus till now
+ wiking	eric_: i'll try it myself as well
+ blackburn	wow cool thanks, pluskid
+ wiking	still waiting for the compilation
+ blackburn	wiking: do you use ccache?
+ wiking	blackburn: y
+ blackburn	ok :)
+ pluskid	wiking: I use spf13 until this morning. Crazy by various mysterious behaviors and not being able to find where they are configured, I re-write my own vimrc today
+ pluskid	that's what blackburn saw just now :D
+ pluskid	btw: clang+ccache is cool
+ wiking	wooohooo
+ wiking	Program received signal EXC_ARITHMETIC, Arithmetic exception.
+ wiking	0x000000010023294d in shogun::CMap<int, int>::hash (this=0x7fff5fbfdfa0, key=<value temporarily unavailable, due to optimizations>) at Map.h:249
+ wiking	eric_: sorry i have tested it with the version where still std::map was used ;)
+ blackburn	pluskid: did you patch your fonts for powerline?
+ pluskid	blackburn: no, it's fine
+ blackburn	hmm droid?
+ pluskid	yeah
+ blackburn	I have troubles with liberation fonts, will try droid
+ pluskid	Droid sans mono
+ blackburn	hehe looks like a crap still
+ pluskid	overlapping?
+ blackburn	pluskid: no colors, some crazy chars
+ pluskid	hmm... no idea, just works here
+ blackburn	I am using guake here
+ pluskid	KDE fan here
+ pluskid	brb
+ wiking	ooooh loool stupid IDE handled % hash_size as comment
+ wiking	wtf?!
+ eric_	wiking: I got "Floating point exception" error
+ wiking	eric_: no worries i think i know what's the problem
+ wiking	there's a modulo 0
+ wiking	gsomix: here?
+ gsomix	wiking, yep.
+ wiking	gsomix: u wrote Map.h right?
+ gsomix	yep =___= what's wrong?
+ wiking	gsomix: return CHash::MurmurHash2((uint8_t*)(&key), sizeof(key), 0xDEADBEEF) % hash_size;
+ wiking	Map.h:249
+ wiking	it can actually happen that hash_size = 0
+ wiking	:S
+ gsomix	wiking, show me code.
+ wiking	check line 249 in Map.h
+ wiking	and then if the map is constructed like this: CMap<int32_t, int32_t> all_sv;
+ wiking	then basically hash_size = 0
+ wiking	=> arithmetic error
+ gsomix	ah, I got it.
+ wiking	BOOOM
+ gsomix	thanks
+ wiking	everything booooms
+ wiking	so i guess
+ wiking	in void add(const K& key, const T& data)
+ wiking	you should do something with hash_size or something :)
+ gsomix	wiking, I'll fix it. please, use custom constructor
+ gsomix	at now
+ wiking	^^ pluskid
+ pluskid	oops, forgot to recommend ctrlp and a.vim -- the two best vim plugin in my knowledge :D
+ blackburn	pluskid: I use A
+ blackburn	pluskid: I have problem with clang complete and necompl
+ blackburn	neocompl
+ pluskid	blackburn: what's that?
+ blackburn	pluskid: it fails because they both define completeFunc function
+ pluskid	hmm? I didn't get any error
+ gsomix	wiking, fixed.
+ gsomix	I think I need to introduce rehash method for increase hash_size.
+ blackburn	pluskid: hmm interesting - it fails only after :A
+ pluskid	blackburn: ah, I see, also failing here
+-!- n4nd0 [~nando@n173-p203.kthopen.kth.se] has joined #shogun
+ CIA-113	shogun: Evgeniy Andreev master * rbb6c2a7 / (src/shogun/lib/Map.h src/shogun/lib/Set.h): fixes in default constructors - http://git.io/gVXHyA
+ CIA-113	shogun: Evgeniy Andreev master * rf416fe9 / (src/shogun/lib/Map.h src/shogun/lib/Set.h): another fixes in default constructors - http://git.io/sSDK0g
+ CIA-113	shogun: Soeren Sonnenburg master * r191a0b1 / (src/shogun/lib/Map.h src/shogun/lib/Set.h):
+ CIA-113	shogun: Merge pull request #516 from gsomix/CSet
+ CIA-113	shogun:  - http://git.io/HLuaeQ
+ wiking	gsomix: testing
+-!- nicococo [~nico@lacedcoffee.ml.tu-berlin.de] has joined #shogun
+ blackburn	http://img151.imageshack.us/img151/3855/vlcsnap2012050916h57m10.jpg
+ wiking	eric_: should work now
+ wiking	even without calling set_autolock(false)
+ eric_	wiking: I pull, test, and come back.
+ blackburn	pluskid: how to get these colors like in powerline screenshots?
+ blackburn	I have no colors here at all
+ blackburn	do you have?
+ eric_	ahah improving your vimrc config ?
+ eric_	about that: does any1 get autocompletion with boost lib ?
+ eric_	I never succeed in having completion working with "template" library
+ blackburn	eric_: yeah we solved this issue with using no boost :D
+ pluskid	blackburn: http://imageshack.us/photo/my-images/194/gvim.png
+ pluskid	I changed nothing
+ blackburn	pluskid: I see - some bug here :(
+ blackburn	in my config may be
+ eric_	do you have a common config ?
+ eric_	wiking: mmhh I got a seg fault. I will check my code again.
+ wiking	eric_: i've just changed that example code to use gaussian with multiclasslibsvm
+ wiking	and it ran w/o any errors
+ gsomix	wiking, works?
+ wiking	gsomix: yep like a charm thnx
+* gsomix breathed out
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@we02c096.ugent.be] has joined #shogun
+-!- wiking [~wiking@we02c096.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Ping timeout: 250 seconds]
+ eric_	wiking: still got seg fault
+ eric_	wiking: [0.096233,0.099767] with alpha=0.400000, mean=0.098000 Segmentation fault
+ eric_	wiking: ok solved. my fault.
+ blackburn	pluskid: export TERM="xterm-256color" solved it!
+ blackburn	yay
+ pluskid	cool
+ eric_	wiking: SG_UNREF(cross) is the issue
+ eric_	wiking: because it control unref of labels etc ..
+ wiking	eric_: great, now you can xval :D
+ wiking	have fun
+ eric_	wiking: thx again!
+ wiking	eric_: thanx to pluskid
+ eric_	pluskid: +1
+ blackburn	time to shogun!
+ blackburn	vim is moar awesome now
+ blackburn	:D
+ wiking	gunsho
+ pluskid	u r wel! though I'm not sure what's happening here :p
+ pluskid	blackburn: solved clang_complete vs. neocomplcache conflict?
+ blackburn	pluskid: no just dropped neocomplcache
+ blackburn	for now
+ pluskid	blackburn: considering that, too
+ wiking	gunshow: say it fast repeatedly
+ pluskid	though it's very nice for completing header file path etc.
+ wiking	blackburn: SAY IT
+ blackburn	gunshow?
+ wiking	yeah fast
+ wiking	and repeatedly
+ blackburn	soo?
+ wiking	shogun
+ wiking	:>
+ wiking	if u know what i mean? :)
+ blackburn	ah :D
+ pluskid	blackburn: btw, maybe this could help: https://github.com/osyo-manga/neocomplcache-clang_complete
+ blackburn	I start to think most of github projects are vim plugins :D
+ blackburn	pluskid: pathogen is simply awesome
+ blackburn	I am curious whether sonne|work would accept it :D
+ sonne|work	what?
+ sonne|work	vim plugin sure
+ pluskid	blackburn: it seems someone has mirrored *every* script in the official vim-script site to github
+ blackburn	sonne|work: try pathogen - installs plugins automagically
+ blackburn	and clang complete + neocomplcache is awesome too
+ blackburn	pluskid: aren't these guys authors?
+ pluskid	blackburn: https://github.com/Rip-Rip/clang_complete/issues/60
+ pluskid	blackburn: no, see this user: https://github.com/vim-scripts
+ pluskid	he has 3,972 github repos
+ pluskid	all are vim-scripts
+ blackburn	ah
+ blackburn	pluskid: that's nice nevertheless
+ gsomix	vimers, vimers everywhere
+ pluskid	I was a Emacser
+ sonne|work	pluskid: poor guy
+ sonne|work	but it is good that you converted from the dark side :-)
+ pluskid	I love emacs-lisp, I wrote a Emacs plugin that is quite popular (http://code.google.com/p/yasnippet/). Though I use vim nowadays, I never managed to understand the crappy vimscript syntax...
+ pluskid	blackburn: it seems installing this plugin can solve the conflict: https://github.com/osyo-manga/neocomplcache-clang_complete
+ pluskid	I haven't tested much, but at least the errors seems to be gone
+ blackburn	pluskid: yes errors are gon
+ blackburn	e
+ gsomix	http://farm2.static.flickr.com/1070/4723428183_f9f1aa7f90.jpg
+ blackburn	pluskid: what system do you use btw?
+ pluskid	blackburn: Arch Linux
+ blackburn	heh cool we cover a lot of distribs in our dev team
+ pluskid	what do we have?
+ blackburn	I use ubuntu (yet?), sonne|work uses debian, my mentor chris uses opensuse
+ blackburn	wiking uses macos
+ pluskid	that's a good coverage
+ blackburn	yes, no windows but
+ blackburn	who needs windows :D
+ sonne|work	but shogun doesn't run under windows anywya
+ pluskid	cygwin?
+ wiking	:D
+ blackburn	yes only cygwin
+-!- n4nd0 [~nando@n173-p203.kthopen.kth.se] has quit [Read error: Connection reset by peer]
+ wiking	i recall somebody struggling with shogun under cygwin
+ wiking	but then he never came back
+ wiking	:)
+ blackburn	yes it can happen if you try to compile shogun under cygwin
+* wiking wonders whether that is a sign for success or failure
+-!- n4nd0 [~nando@n173-p203.kthopen.kth.se] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ sonne|work	blackburn: he submitted many patches
+ sonne|work	and fixed many bugs tough
+ sonne|work	though
+ blackburn	sonne|work: about guy with cygwin?
+ eric_	sonne|work: any advice ? MulticlassLibSVM::load_serializable(): File contains no parameter version. Seems like your file is from the days before this was introduced.
+ eric_	sonne|work: what type of file should I choose to save/load svm machine trained
+ eric_	I use currently CSerializableAsciiFile
+ blackburn	eric_: did you save it with exactly that version?
+ blackburn	pluskid: cool!
+ eric_	yes I rerun the trainind step
+ blackburn	it is a bug then
+ pluskid	nite boys
+ blackburn	sonne|work: I am ok with pluskid's patch - sounds very reasonable for me
+ blackburn	pluskid: good night
+ pluskid	blackburn: maybe he is sonney2k now (on the train), :D
+-!- pluskid [~pluskid@li400-235.members.linode.com] has quit [Quit: Leaving]
+ blackburn	yes should be sonne|train
+ n4nd0	haha
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ blackburn	n4nd0: check last pull request
+ blackburn	I believe it can be the acceptable solution
+ n4nd0	oh labels, interesting
+ eric_	wiking: remarq = in your Xvalid c++ example, when you apply the trained svm on the same features, the training error your print is actually the accuracy.
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+ n4nd0	blackburn: I am not sure if I understand the functionality of LabelsImpl
+ blackburn	n4nd0: just storing/returning/etc
+ blackburn	n4nd0: generalize all the stuff
+ n4nd0	ok
+ n4nd0	what can be used as a CLabel but not as a CLabelImpl?
+ blackburn	n4nd0: hmm machines have labels
+ blackburn	not labelimpl because it is *any* templated
+ n4nd0	ahm I see
+ n4nd0	it looks nice to me
+ n4nd0	I have to go now
+ n4nd0	see you later!
+ blackburn	ok
+ blackburn	see you
+-!- n4nd0 [~nando@n173-p203.kthopen.kth.se] has quit [Quit: leaving]
+-!- gsomix [~gsomix@188.168.4.56] has quit [Quit: Ex-Chat]
+ CIA-113	shogun: Sergey Lisitsyn master * r608f708 / src/shogun/regression/KernelRidgeRegression.cpp : Fixed KRR crasher - http://git.io/AtDzcw
+-!- uricamic [~uricamic@2001:718:2:1634:f2de:f1ff:fecf:a6a5] has quit [Quit: Leaving.]
+-!- vikram360 [~vikram360@117.192.181.205] has quit [Ping timeout: 240 seconds]
+-!- Marty28 [~marty@cable-158-181-77-81.cust.telecolumbus.net] has joined #shogun
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- Marty28 [~marty@cable-158-181-77-81.cust.telecolumbus.net] has quit [Quit: Colloquy for iPad - http://colloquy.mobi]
+ blackburn	sonney2k: you should try these cool plugins pluskid referenced!
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ puffin444	What are these plugins?
+ blackburn	puffin444: ctags_complete
+ blackburn	fugitive
+ blackburn	powerline
+ CIA-113	shogun: Soeren Sonnenburg master * r49462e7 / (15 files in 9 dirs): make unref() protected - http://git.io/2NUNCQ
+ blackburn	sonney2k: fixing plifs (fyi)
+ CIA-113	shogun: Sergey Lisitsyn master * rad0868b / (3 files): Fixed Plif and PlifMatrix SGVectors handling routines - http://git.io/z5igmQ
+-!- blackburn [~qdrgsm@83.234.54.222] has quit [Quit: Leaving.]
+-!- PhilTillet [~philippe@157.159.42.73] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.222] has joined #shogun
+-!- ckwidmer [~chris@HSI-KBW-046-005-237-106.hsi8.kabel-badenwuerttemberg.de] has joined #shogun
+-!- PhilTillet [~philippe@157.159.42.73] has quit [Read error: Operation timed out]
+-!- gsomix [~gsomix@188.168.4.80] has joined #shogun
+ gsomix	crazy day
+ gsomix	too many people in Samara
+ blackburn	yeah fire and gas can help there I think
+ gsomix	blackburn, hehe
+* gsomix have returned from dance floor
+@sonney2k	blackburn, I have some general ML question
+ blackburn	for me?
+@sonney2k	do you have any idea how one can compare two distributions
+@sonney2k	I have some very simple ratios
+@sonney2k	x,y  x+y=1
+@sonney2k	and I know what values x & y should have
+@sonney2k	but at some point they start to deviate
+@sonney2k	how can I measure deviation
+@sonney2k	blackburn, yes
+-!- vikram360 [~vikram360@117.192.181.205] has joined #shogun
+ blackburn	hmm?
+@sonney2k	I thought about sth like relative entropy
+@sonney2k	aka kullback leiber divergence
+@sonney2k	KL div
+ blackburn	yeah know that
+@sonney2k	not so sure if that is the best chocie thoug
+ ckwidmer	sonney2k, what do you think the downside is?
+@sonney2k	ckwidmer, no idea
+@sonney2k	I haven't tried it yet
+ blackburn	well KL is a kind of standard metric between distributions afaik?
+ ckwidmer	I used it once in a very simple setting, worked ok for what I was doing (checking how different distributions for different tasks are)
+ blackburn	sonney2k: do you want ->R function? or to find out whether they deviate?
+@sonney2k	ckwidmer, ok - that sounds pretty similar to my problem
+ blackburn	in the second case kolmogorov test would work
+@sonney2k	blackburn, yeah some score telling how much they deviate
+@sonney2k	so not just 'deviates'
+ ckwidmer	some people here in tuebingen use MMD (maximum mean discrepancy) for two sample problems
+ ckwidmer	http://people.kyb.tuebingen.mpg.de/arthur/mmd.htm
+ blackburn	haha
+ blackburn	sonney2k: yeah heiko should be expert there
+@sonney2k	heiko is not here :(
+ blackburn	ckwidmer: we have gsoc project about that ;)
+ ckwidmer	:)
+@sonney2k	heiko is implementing arthurs code in shogun...
+ ckwidmer	I see
+ ckwidmer	anyway
+ ckwidmer	one thing to consider with KL
+ blackburn	ckwidmer: I am interested in that too btw
+ ckwidmer	is that it's not symmetric
+@sonney2k	ckwidmer, I know
+@sonney2k	but that's ok
+ ckwidmer	ok
+ blackburn	sonney2k: JS btw
+ blackburn	it is symmetric
+ blackburn	I do think you can even use JS kernel from shogun to measure it
+ ckwidmer	you could also do something like KL(X,Y) + KL(Y,X)
+ blackburn	1/2
+ ckwidmer	optional :)
+ blackburn	ckwidmer: I said that already :)
+ blackburn	ckwidmer: JS it is
+ ckwidmer	guess sometimes, you have to spell it out for clarity
+@sonney2k	funny thing is that this is very close to JS
+ blackburn	ckwidmer: :) jensen shannon
+ blackburn	if I understand you right
+@sonney2k	ckwidmer, what you wrote
+@sonney2k	JS is KL(X, X+Y) + KL(Y, X+Y)
+ blackburn	???
+@sonney2k	and a couple of 0.5's
+ ckwidmer	yep
+@sonney2k	blackburn, https://en.wikipedia.org/wiki/Jensen%E2%80%93Shannon_divergence
+ blackburn	oh okay sorry :D
+ gsomix	good night guys
+@sonney2k	gsomix, let me guess your android phone?
+@sonney2k	gsomix, any progress on the array stuff btw?
+ gsomix	sonney2k, aha, phone gone crazy :)
+ gsomix	sonney2k, a little, just added methods in DynamicArray. now I need to replace all Array# in the code by DynamicArray.
+@sonney2k	gsomix, very good - so thanks for the update and have a nice sleep!
+-!- PhilTillet [~philippe@157.159.47.10] has joined #shogun
+ gsomix	sonney2k, May celebrations have ended -> more time to shogun
+ gsomix	nite
+@sonney2k	blackburn where are we SGMatrix transition wise
+@sonney2k	are examples back to normal?
+ blackburn	sonney2k: in big black ass :D
+@sonney2k	or do we still have a few crashers?
+ blackburn	only a few
+@sonney2k	valgrind errors...
+@sonney2k	blackburn, ahh btw we didn't end the discussion about sparse matrix / sparse vector
+@sonney2k	what I was saying is that the current SGSparseVector should either be kept or renamed to sth else
+@sonney2k	if we want to save 20 bytes / vector
+@sonney2k	same with SGString btw
+@sonney2k	if we decide not to save these 20 bytes
+@sonney2k	we can do crazy things like replacing / fetching vectors
+@sonney2k	and sharing them
+ blackburn	sonney2k: do you know boost matrix
+ blackburn	has
+ blackburn	m(i,j) = x
+ blackburn	?
+ blackburn	ehm.. we have too??
+-!- cronor [~cronor@e178181022.adsl.alicedsl.de] has joined #shogun
+-!- ckwidmer [~chris@HSI-KBW-046-005-237-106.hsi8.kabel-badenwuerttemberg.de] has quit [Remote host closed the connection]
+ blackburn	sonney2k: about sgsparsematrix?
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has left #shogun []
+ blackburn	fugitive should be illegal
+ blackburn	:D
+ blackburn	cool
+ CIA-113	shogun: Sergey Lisitsyn master * r34da81e / src/shogun/converter/MultidimensionalScaling.cpp : Used () matrix element access in the MDS - http://git.io/-CYQ9A
+-!- gsomix [~gsomix@188.168.4.80] has quit [Read error: Operation timed out]
+ blackburn	time to merge some code
+ shogun-buildbot	build #904 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/904  blamelist: blackburn91@gmail.com
+ blackburn	really?
+-!- Netsplit *.net <-> *.split quits: PhilTillet
+ CIA-113	shogun: Sergey Lisitsyn master * rc1bcbbb / src/shogun/converter/MultidimensionalScaling.cpp : Fixed bug in last commit - http://git.io/JY1KHA
+ blackburn	shogun-buildbot: forgive me I was wrong it will never happen again
+ blackburn	please
+ wiking	hehehe it's cool actually
+ blackburn	wiking: what is?
+ wiking	we can make buildbot say anything
+ wiking	:)))))
+ blackburn	:D
+ blackburn	wiking: last year we had one bot here
+* wiking already knows what's his next commit log will look like
+ blackburn	he was answering with phrases he catched there
+ blackburn	it was funny actually
+ shogun-buildbot	build #905 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/905
+ blackburn	@sonney2kbettyboo, are you always smiling?10:58
+ blackburn	@bettyboosonney2k: but you are interested in shogun?10:58
+ blackburn	@sonney2kbettyboo, yes of course - now I understand the reason why you are smiling.10:59
+ blackburn	@bettyboosonney2k: input set of strings, output n-dimensional representation
+ blackburn	wiking: ^
+ wiking	:>>>
+ blackburn	wiking: I'll make a 10k LoC commit in ten mins :D
+ blackburn	(I renamed everything to blackburn instead of shogun)
+ wiking	:DDDDDD
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ blackburn	hmm got another idea for cool commit
+ blackburn	n4nd0: hey did you make any progress?
+-!- Netsplit over, joins: PhilTillet
+-!- PhilTillet [~philippe@157.159.47.10] has quit [Ping timeout: 245 seconds]
+ blackburn	have somebody ever grep for FUCK word in shogun git index?
+ blackburn	:D
+ CIA-113	shogun: Sergey Lisitsyn master * r3df8a13 / (25 files in 7 dirs):
+ CIA-113	shogun: Integrated SLEP (SparseLEarningPackage) core code
+ CIA-113	shogun:  - http://git.io/iB5IFg
+ blackburn	bam
+-!- cronor_ [~cronor@g231216163.adsl.alicedsl.de] has joined #shogun
+-!- cronor [~cronor@e178181022.adsl.alicedsl.de] has quit [Ping timeout: 256 seconds]
+-!- cronor_ is now known as cronor
+--- Log closed Thu May 10 00:00:37 2012

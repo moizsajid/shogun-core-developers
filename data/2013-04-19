@@ -1,0 +1,914 @@
+--- Log opened Fri Apr 19 00:00:28 2013
+ wiking	trying
+-!- utsavjain [~tiripS@14.139.82.6] has left #shogun []
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- vikram360 [~vikram360@117.192.184.107] has joined #shogun
+-!- gsomix [~Miranda@46.20.65.215] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+-!- Shell_ [80c1080c@gateway/web/freenode/ip.128.193.8.12] has joined #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+ foulwall	sonney2k: sonne|work: which version of python do we use? I use a importlib in the PR, and need python version>=2.7
+-!- Shell_ [80c1080c@gateway/web/freenode/ip.128.193.8.12] has quit [Ping timeout: 245 seconds]
+-!- hoijui [~hoijui@dslb-088-074-124-102.pools.arcor-ip.net] has joined #shogun
+ foulwall	sonney2k: I came up with an idea if I'm at leisure I can do some Chinese translation for shogun-web and make docs a Chinese version
+-!- travis-ci [~travis-ci@ec2-23-22-22-174.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6410096
+-!- travis-ci [~travis-ci@ec2-23-22-22-174.compute-1.amazonaws.com] has left #shogun []
+-!- travis-ci [~travis-ci@ec2-23-22-22-174.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6415457
+-!- travis-ci [~travis-ci@ec2-23-22-22-174.compute-1.amazonaws.com] has left #shogun []
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Read error: Connection reset by peer]
+-!- gzhd79 [~zeller@embln.embl.de] has joined #shogun
+-!- vikram360 [~vikram360@117.192.184.107] has quit [Ping timeout: 256 seconds]
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Ping timeout: 272 seconds]
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- foulwall` [~user@li379-21.members.linode.com] has joined #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Remote host closed the connection]
+-!- foulwall` [~user@li379-21.members.linode.com] has left #shogun []
+-!- foulwall [~user@li379-21.members.linode.com] has joined #shogun
+-!- foulwall [~user@li379-21.members.linode.com] has quit [Remote host closed the connection]
+-!- foulwall [~user@li379-21.members.linode.com] has joined #shogun
+ foulwall	sonney2k: Hey there?
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ sonne|work	foulwall: hey!
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+ foulwall	sonne|work: I've mentioned in the email. we need a module named importlib, just pip it on the server.
+ sonne|work	foulwall: why do we need it?
+ foulwall	sonne|work: since we need to import the function at runtime, and the old __import__ is messy.
+ foulwall	sonne|work: importlib is just a wrapper of __import__
+ sonne|work	foulwall: I don't understand why you need it though? Couldn't you just import everything statically?
+ foulwall	sonne|work: for the extensibility. when a new demo is written, there's no need to modify the views.py, just put them in the demos' directory and they'll work.
+ sonne|work	foulwall: ok I understand but for that you need to add checks that it doesn't import some random stuff
+ sonne|work	otherwise this introduces security issues
+ foulwall	it just import the modules with the prefix 'demos.'
+ foulwall	when import something that is not exist, it respond with a 404
+-!- iglesiasg [~nando@dyna218-117.csc.kth.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ sonne|work	ok that should work
+ foulwall	Wait I'll pull another request
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+ foulwall	hide the funtion in the modules that is not permitted to invoke by user.
+ sonne|work	foulwall: you basically have to make sure that no user input can harm the system
+ sonne|work	so try to avoid imports based on user import
+ sonne|work	function calls based on user input
+ sonne|work	always only call hardcoded stuff when you see certain input
+ sonne|work	iglesiasg: please announce the workshop on twitter
+@iglesiasg	sonne|work: ok
+* wiking is writing the unit tester for rocevaluation
+ foulwall	sonne|work: ok
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+@iglesiasg	sonne|work: done!
+@iglesiasg	retweet it people!
+ vgorbati	hi guys, I am trying to write a unit test according to https://github.com/shogun-toolbox/shogun/issues/882, but when I run 'make' in shogun/tests/unit it runs 40 tests, without my newly added unit test (some other tests are missing too). However, the obj file is generated. Can anyone help me?
+ foulwall	iglesiasg: retweeted and followed you
+ wiking	wtf: mathematics/Statistics_unittest.cc:85:29: error: variable length array of non-POD element type 'SGSparseVector<float64_t>'
+ wiking	who wrote this?!
+ wiking	and who merged it?!
+@iglesiasg	foulwall: nice, thank you!
+ wiking	ok i know who wrote it....
+ wiking	heiko i will kill u
+ wiking	:)
+@iglesiasg	haha
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+ wiking	oh motherfucker
+ wiking	why is this not possible
+ wiking	to not to fucking commit broken code into the repo
+-!- gzhd79 [~zeller@embln.embl.de] has quit [Quit: gzhd79]
+@iglesiasg	wiking: you ok man? :D
+ wiking	no because apparently whatever i try to make shogun work
+ wiking	it's fucking broken
+ wiking	ok here's a very funny unit test that fails
+ wiking	oh even better
+ wiking	i have a segfault
+ wiking	ok
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :develop * ee8ab82 / tests/unit/evaluation/ROCEvaluation_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/ee8ab823011b611244c5ced763befa1f8eeb89fb
+ shogun-notifier-	shogun: Add unit test for ROCEvaluation
+ shogun-notifier-	shogun: as currently this little example fails
+ wiking	can anybody tell me why this unittest fails?
+@iglesiasg	wiking: what does it say when it crashes?
+ wiking	iglesiasg: [ERROR] assertion m_current_values.vector && idx<get_num_labels() failed in file labels/Labels.cpp line 57
+ wiking	unknown file: Failure
+ wiking	Unknown C++ exception thrown in the test body.
+ wiking	if i do the set_labels(vector)
+ wiking	it's even worse
+ wiking	it just segfaults
+@iglesiasg	wiking: mm I don't see what is wrong either
+-!- abinash [75ef5e6b@gateway/web/freenode/ip.117.239.94.107] has joined #shogun
+@iglesiasg	wiking: I think it will work if you creat an SGVector<int32_t> with the labels and you give this to the CBinaryLabels constructor
+ wiking	iglesiasg: i've tried almost the same
+@iglesiasg	but what you are doing you work too idd
+ wiking	instead of giving it to the constructor
+ wiking	use label->set_labels(vector)
+ wiking	that segfaults
+ wiking	:)
+@iglesiasg	yeah.. but try using it in the constructor
+@iglesiasg	I bet that will work
+ wiking	but what is the difference?!
+ wiking	i mean come on!
+@iglesiasg	I am checking Labels code
+ wiking	that *must* work
+@iglesiasg	yeah, but I see something that might be weird
+ wiking	yes for sure
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+@iglesiasg	wiking: does it work fine using the SGVector in the constructor?
+ sonne|work	wiking: labels are copied with one
+ sonne|work	(in constructor)
+ foulwall	sonne|work: hi sonne.
+ sonne|work	not with the set_labels()
+ sonne|work	foulwall: hi!
+ wiking	sonne|work: should we remove set_labels?
+ abinash	Hello I want to submit a code for the issue Probabilities for SVMs. What is the workflow for code submission
+ sonne|work	wiking: no
+ sonne|work	wiking: it should work
+ foulwall	sonne|work: Excuse me. and I've changed the demoHandler into a more security one.
+ wiking	ctor version works
+@iglesiasg	sonne|work, wiking : I think it might be something related to m_current_values and m_labels
+ wiking	sonne|work iglesiasg [ERROR] assertion m_current_values.vector && idx<get_num_labels() failed in file labels/Labels.cpp line 57
+ wiking	with set_labels(vector)
+@iglesiasg	set_labels and what wiking was using does not set m_current_values I think
+ foulwall	sonne|work: but it's a bit messy
+ sonne|work	foulwall: btw please dont' do things like import * but just import what you need
+ foulwall	sonne|work: I've changed that.
+ foulwall	sonne|work: and i'll never do that.
+ sonne|work	iglesiasg: ahh I see
+@iglesiasg	sonne|work: maybe it is a bug, I am not sure though
+ wiking	iglesiasg: well for sure it's a bug :)
+ sonne|work	wiking: no
+ sonne|work	we have 2 functions
+ sonne|work	set_labels
+ sonne|work	and set_values
+ sonne|work	they don't set both
+ wiking	sonne|work: set_label(idx, value)
+ wiking	?
+ sonne|work	only constructor does
+ wiking	sonne|work: using set_labels(vector) and set_label(idx, value)
+ sonne|work	that's not nice though - but no idea (currenlty) how to do it better
+ wiking	will not work with ROC
+ wiking	and this is a bug
+ wiking	as we let this happen
+ sonne|work	wiking: so do we ever want to be able to set these arrays *separately*
+ sonne|work	iglesiasg: could you please help abinash?
+ wiking	sonne|work: currently i have a usecase where yes i would like to
+ sonne|work	iglesiasg: thanks for twittering...
+@iglesiasg	sonne|work: but what do m_labels and m_current_values represent? There must be a difference
+@iglesiasg	sonne|work: no problem
+@iglesiasg	hey abinash
+@iglesiasg	abinash: we have recently started using git flow in our development workflow
+ sonne|work	wiking, iglesiasg - yes sure there is a difference: consider e.g. binary labels. m_labels would then just be -1/+1 values
+ wiking	and what the hell is set_values anyways?
+-!- travis-ci [~travis-ci@ec2-23-23-3-13.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6467279
+-!- travis-ci [~travis-ci@ec2-23-23-3-13.compute-1.amazonaws.com] has left #shogun []
+@iglesiasg	abinash: see this mail on the mailing list for more info: http://article.gmane.org/gmane.comp.ai.machine-learning.shogun/3342
+ sonne|work	wiking: the confidence values
+ wiking	sonne|work: and then set_labels ?
+@iglesiasg	sonne|work: so m_labels would be the -1/+1 got it, but m_current_values?
+ sonne|work	iglesiasg: indeed no idea
+ sonne|work	I guess some subset stuff?
+@iglesiasg	I thought so
+@iglesiasg	some of Heiko's magic for x-val
+ wiking	mmm we need to enable unit testing on travis
+@iglesiasg	wiking, sonne|work: even if it is not a bug, I think it is a bit confusing
+ sonne|work	it is totally
+ sonne|work	I don't understand it
+@iglesiasg	I wouldn't understand why the test didn't work without digging into Labels stuff
+ wiking	sonne|work: so now my answer for yesterday: shogun auROC: 0.900061 vs weka auroc: 0.955
+ sonne|work	we have to ask hypergenious heiko to parse that I guess
+@iglesiasg	maybe we should rename so stuff
+@iglesiasg	sonne|work: sure, let's see what he tells
+@iglesiasg	us
+ wiking	sonne|work: so we are still off by a lot
+-!- abinash [75ef5e6b@gateway/web/freenode/ip.117.239.94.107] has quit [Ping timeout: 245 seconds]
+ sonne|work	wiking: yeah so now tell us what you do
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ wiking	sonne|work: so now what's happening is that i use PolyKernel with 2.0 exponent
+ wiking	sonne|work: + normalize the input with p=2.0
+ wiking	i.e. euclidean distance
+ wiking	and use libsvm with C=1.0
+ wiking	bias enabled
+ wiking	epsilon set to 1E-12
+ wiking	same settings in weka, using their smo
+ wiking	and of course run it on the same train/test set
+ wiking	i can right away try different kernels if u want me to, as i suspected that it should be better with other kernels
+ wiking	and using kernel normalization does not change the auroc
+ sonne|work	wiking: so with weka you use poly kernel
+ wiking	sonne|work: yes
+ sonne|work	in-homogeneous ?
+ wiking	sonne|work: the non-normalized polykernel
+ sonne|work	then dont' normalize data in shogun either
+ wiking	yeah i've just tried both
+ sonne|work	by default the poly kernel does
+ sonne|work	set the identity kernel normalizer
+ wiking	ok
+-!- HeikoS [~heiko@nat-172-14.internal.eduroam.ucl.ac.uk] has joined #shogun
+ wiking	HeikoS: ARGH
+ wiking	HeikoS: get to work ! :)
+ HeikoS	wiking: ? :)
+ wiking	HeikoS: today you have a lot of task :)))
+ HeikoS	what
+ wiking	HeikoS: well first of all u merged code that breaks unit testing
+ HeikoS	just arrived at werk :D
+ HeikoS	work
+ HeikoS	oh
+ HeikoS	thats good, which ones?
+ wiking	HeikoS: second check the rocevaluator unittest
+ HeikoS	already did
+ wiking	HeikoS: as i have nooooo clue why that fails
+ HeikoS	it fails?
+ wiking	HeikoS: yeps big time :)
+* sonne|work ~~~ooo~~~~~who~~let~~~the~~~dogs~~~out~~~ooo~~~~
+ wiking	sonne|work: with identitynormalizer: 0.910194
+ HeikoS	sonne|work: ha you are alright? :)
+ HeikoS	wiking: what dies it return?
+ wiking	HeikoS: well ASSERT error
+ sonne|work	HeikoS: wiking is biting you already :)
+ wiking	HeikoS: cd tests/unit && make
+ wiking	and you'll see
+ sonne|work	wiking: then don't normalize in shogun - like you do in weka
+ wiking	sonne|work: i mean i'm normalizing the input itself
+ wiking	sonne|work: i shouldn't?
+ HeikoS	wiking:  does the buildbot fail?
+ wiking	HeikoS: afaik buildbot doesn't run on develop branch
+ wiking	or?
+ HeikoS	I see
+ HeikoS	oh thats not good
+ HeikoS	I am confused
+ HeikoS	the buildbot runs on master?
+ HeikoS	and we commit to develop?
+ HeikoS	why is that?
+ wiking	HeikoS: yes
+ wiking	HeikoS: because travis should do tit :)
+ wiking	HeikoS: and it actually does most of it :P
+ HeikoS	I see
+ sonne|work	wiking: ohh man I guess you have to start from the beginning
+ HeikoS	ehm?
+ sonne|work	wiking: you got data - you normalize than save that data
+ HeikoS	yes pls :)
+ HeikoS	wiking so when does code migrate from develop to master?
+ sonne|work	then use exactly that data in weka and shogun?
+ wiking	sonne|work: L2Norm(input) -> PolyKernel(Exp=2.0) -> LIBSVM
+ wiking	HeikoS: release
+ sonne|work	wiking: nope
+ wiking	sonne|work: that's the current pipeline for the data
+ wiking	HeikoS: hahahah you grasped the most important part of the untittest :D
+ HeikoS	wiking: I see
+ HeikoS	what I dont really get is, why dont we run the buildbot on develop?
+ wiking	HeikoS: i mean with your comment... the problem is that currently that little snippet fails
+ wiking	HeikoS: hahahahahahahah
+ wiking	HeikoS: travis not enough?
+ HeikoS	wiking: so what does it return
+ HeikoS	wiking: not all architectures
+ wiking	HeikoS: [ERROR] assertion m_current_values.vector && idx<get_num_labels() failed in file labels/Labels.cpp line 57
+ HeikoS	so if we have errors that would not be detected there we will only notice when migrating to master
+ wiking	HeikoS: ok i guess then we have to discuss this with sonne|work
+ HeikoS	wiking: I see, so this seems to be a different problem
+ HeikoS	wiking: also this warning stuff, its so nice to see them in the buildbot
+ HeikoS	wiking:  wait
+ HeikoS	I actually saw commits by lambday compiling on the buildbot
+ HeikoS	why is that?
+ wiking	HeikoS: PR
+ HeikoS	did he commit to master and I did not realise?
+ wiking	or no
+ HeikoS	explain for dumb people please ;)
+ wiking	pr is not buildboted
+ wiking	i have no idea
+ wiking	HeikoS: explain me why that code fails
+ wiking	;)
+ wiking	i'm really dumb as well in that case
+ HeikoS	wiking: ok will do
+ HeikoS	wiking: I notices some warnings in lambdays code in the build bot log
+ HeikoS	and then he fixed them and the warnings went away
+ wiking	HeikoS: https://github.com/shogun-toolbox/shogun/commits/master
+ wiking	because it was merged into master for some reason
+ wiking	;P
+ wiking	which is NONO NOOOO good
+ wiking	but i guess you did not realise
+ wiking	that he sent the PR
+ HeikoS	no I did not
+ wiking	for master branch
+ wiking	https://github.com/shogun-toolbox/shogun/commits/master
+ wiking	 Merge pull request #961 from lambday/master ...
+ wiking	dba5cb777c Browse code
+ wiking	karlnapf authored 15 days ago
+ wiking	;)
+ HeikoS	I see
+ HeikoS	okay
+ wiking	dont lie my friend, github catches u
+ wiking	;)
+ HeikoS	haha
+ HeikoS	so I have to make sure to merge into develop
+ wiking	well just check the PR
+ wiking	whether it's sent for master or develop branch
+ HeikoS	ok
+ HeikoS	good
+ HeikoS	to know
+ wiking	if it's coming for master branch
+ HeikoS	and then travis catches things
+ wiking	just drop it straight away
+ wiking	we dont accept PR for master
+ HeikoS	wiking, and then when we release we merge develop into master?
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ HeikoS	wiking: okay! I knew this but forgot the check
+ HeikoS	good that you tell me these things :)
+ wiking	HeikoS: indeed we do the merging
+ wiking	HeikoS: now it's going to be very interesting
+ HeikoS	wiking: so could you add something to travis that collects warnings?
+ wiking	HeikoS: becuase you got some stuff into master that is not in develop
+ HeikoS	also for libshogun I would even vote to allow warnings as errors
+ HeikoS	as for python
+ HeikoS	but you have to ask sonne|work and lisitsyn on this
+ wiking	HeikoS: so now we'll have to do some funky shit merging
+ HeikoS	wiking: shit, sorry for that
+ HeikoS	well, we can rebase right?
+ wiking	HeikoS: heheh that's going to be a merge
+ wiking	and not a simple rebase
+ wiking	HeikoS: anyhow
+ wiking	HeikoS: why is that unit test fails
+ wiking	now it's your turn
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+ HeikoS	wiking: I will check
+ HeikoS	lisitsyn: could you have a thought on this out-of-synch master and develop? I fucked it up :(
+ HeikoS	how to restore that all in master is also in develop
+ HeikoS	wiking:  running tests
+-!- iglesiasg [~nando@dyna218-117.csc.kth.se] has quit [Ping timeout: 264 seconds]
+ wiking	HeikoS: cool
+ HeikoS	wiking:  so which tests did I make to fail?
+ HeikoS	since only the ROC fail
+ HeikoS	s
+ wiking	HeikoS: no other fails
+ wiking	HeikoS: but that is already being taken care of ;)
+ wiking	HeikoS: dont worry about that
+ wiking	HeikoS: now it's ROC time
+ wiking	ok? :)
+ wiking	oooohooooo
+ wiking	sonne|work: another problem :)))
+-!- iglesiasg [~nando@n175-p42.kthopen.kth.se] has joined #shogun
+ wiking	sonne|work: my input is DenseFeatures<float32_t>
+ wiking	sonne|work: and lets say i want to use Chi2Kernel
+ wiking	sonne|work: Chi2Kernel.cpp:61
+ wiking	float64_t* avec= ((CDenseFeatures<float64_t>*) lhs)->get_feature_vector(idx_a, alen, afree);
+ wiking	this will lead to a segfault
+ wiking	:(
+ wiking	i mean not this line
+ wiking	but because of this
+ wiking	soooooo
+ wiking	how can we assure that no such case every can happen?
+ wiking	i.e. if the input is not CDenseFeatures<float64_t>
+ wiking	then at least it fails with an assert
+ wiking	and not a segfault
+ HeikoS	wiking:  easy explanation
+ HeikoS	ROC works on the scores
+ wiking	HeikoS: okok listening, what's the fix, is it already in?
+ HeikoS	not the integer labels
+ HeikoS	I suggest the following:
+ HeikoS	add a proper error message instead of the assert
+ HeikoS	then, change the test a bit so that value vector is set
+ HeikoS	I will do that
+ wiking	HeikoS: ok just you know that this is confusing a lot
+ wiking	right?
+ HeikoS	what?
+ HeikoS	wiking:  the test is weird anyway
+ wiking	HeikoS: well this that we have set_label and set_value
+ HeikoS	ROC on binary integers doesnt make any sense
+ HeikoS	set_value doenst work
+ HeikoS	if the value vector is not set
+ wiking	HeikoS: even if it doesn't make sense
+ HeikoS	ok
+ wiking	we should not die like this imo
+ HeikoS	wiking: true
+ HeikoS	we should have some thoughts on the label vs values vs scores design
+ HeikoS	lisitsyn: ^
+ wiking	holaaa!
+ wiking	sonne|work: ok now i've beaten weka
+ wiking	sonne|work: as i suspected ;)
+ wiking	sonne|work: but i had the segfaults because of the prev error i was mentioning
+ HeikoS	wiking, sonne|work, lisitsyn we should have better error messages: I think it would be good to include the name of the method one is in class::name(): Error message
+ HeikoS	I never know where the asserts are coming from
+ wiking	HeikoS: lisitsyn sonne|work we should have a discussion about this: we have DenseFeatures<T> but then for example in some preprocessors and kernels have DenseFeatures<float64_t> hardcoded... this will cause segfaults... :(
+ wiking	somehow it'd be great if we could do this part automatically
+ wiking	e.g. add a preprocessor to the DenseFeature and that will use the right 'version' (template paramter) of the preprocessor
+ wiking	any thoughts on this one?
+ HeikoS	wiking: the test might also fail if you have only labels from one class (might happen since random is used)
+ HeikoS	better to use odd/even for labels
+ wiking	HeikoS: heheh ok ok
+ wiking	HeikoS: i admit
+ wiking	not the most sofisticated test
+ wiking	i just wanted to push something to show that something is wrong atm
+ HeikoS	wiking: I see, thats good
+-!- vgorbati__ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+@lisitsyn	re
+@lisitsyn	vgorbati__: still having the same issue?
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+@lisitsyn	wiking: yes that's why casts are let me cite you NOO ONOONON
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ wiking	lisitsyn: :D
+ wiking	lisitsyn: "you dont love me and i know NOW!" :D
+-!- abinash [75ef5e6b@gateway/web/freenode/ip.117.239.94.107] has joined #shogun
+ wiking	lisitsyn: you mean that song? :P
+@lisitsyn	wiking: no, your "NONONO"
+@lisitsyn	:)
+-!- iglesiasg [~nando@n175-p42.kthopen.kth.se] has quit [Read error: Connection reset by peer]
+ wiking	lisitsyn: 'fuckit!'
+ wiking	tableflipp
+ wiking	:)
+-!- vgorbati__ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ abinash	Ok I got the workflow, but could someone explain how to submit code ?
+ wiking	abinash: PR
+ wiking	abinash: github pull request. make sure that it's against the develop branch
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- lambday [3ba2174d@gateway/web/freenode/ip.59.162.23.77] has joined #shogun
+ lambday	HeikoS: hi
+ HeikoS	lambday: hi!
+ lambday	should we always use SG_MALLOC while initializing SG-classes?
+ HeikoS	lambday: just a quick note: if you are doing PR's please always do them on the develop branch
+ HeikoS	lambday: the SGVector SGMatrix etc are treated differently
+ HeikoS	we have automatic reference counting for them
+ HeikoS	you *always* create them on the stack
+ HeikoS	rest is done internally
+ HeikoS	so always SGVector=SGVector(10)
+ HeikoS	never SGVector*=new SGVector(10)
+@lisitsyn	do not do SGVector a = SGVector(10);
+@lisitsyn	do SGVector a(10);
+@lisitsyn	:)
+ wiking	hahah :)
+ HeikoS	lambday: you heard the man :D
+ wiking	lambday: now u know :)
+@lisitsyn	HeikoS: it creates an object two times
+ HeikoS	lisitsyn: yes you are in fact right
+ HeikoS	lisitsyn: could you help in rebasing the develop branch against master?
+@lisitsyn	HeikoS: alright let me check
+ HeikoS	wiking: how can I see the travis for my PR?
+ HeikoS	ah found it!
+ HeikoS	lisitsyn: thanks
+-!- lambday [3ba2174d@gateway/web/freenode/ip.59.162.23.77] has quit [Ping timeout: 245 seconds]
+ HeikoS	lisitsyn: what do you think of warnings as errors for libshogun and python_modular on travis?
+-!- lambday_ [3ba2174d@gateway/web/freenode/ip.59.162.23.77] has joined #shogun
+ HeikoS	we have to remove those anyway
+ lambday_	sorry I got disconnected
+@lisitsyn	HeikoS: doc warnings?
+ HeikoS	in particular I like them for python since doxygen comments cannot be forgotten
+ lambday_	in one of my previous PR, I did something like SGSparseVector<float64_t> v[size-1];.... viktor and sonne|work pointed out that its not right
+@lisitsyn	I do not like that
+ HeikoS	lisitsyn: yes, and also libshogun gcc
+ HeikoS	why?
+@lisitsyn	I'd rather get rid of all the dummy doc we have
+@lisitsyn	it is useless
+ HeikoS	lisitsyn: yes, do not merge dummy doc
+ HeikoS	but the warning thing then helps you remembering to check
+ HeikoS	since I tend to forget
+ HeikoS	and others do to
+@lisitsyn	HeikoS: yes but it is not an error
+ HeikoS	to get rid of dummy is responsibility of PR merger
+ HeikoS	lisitsyn: okay agreed
+ HeikoS	what about gcc warnings?
+ HeikoS	my point is just: we tend to collect them
+@lisitsyn	HeikoS: I do not mind treating them as errors
+ HeikoS	since its easy to oversee
+@lisitsyn	HeikoS: we should enable -Weffc++ :D :D
+ HeikoS	whats that?
+@lisitsyn	warnings from the effective C++ book by meyers
+ HeikoS	what do they tell you?
+@lisitsyn	I expect thousands in shogun
+@lisitsyn	virtual destructor, operator=, blabla
+ HeikoS	I dont wont to be mean to people, just want to avoid piling up warnings
+ HeikoS	but I guess one can also just check the warnings
+ HeikoS	wiking: could we collect them in travis and output at the end? or make it yellow as in the buildbot?
+ wiking	HeikoS: :))) google?
+@lisitsyn	HeikoS: so we want to rebase develop on top of last commit in master/
+ HeikoS	vgorbati: hi!
+@lisitsyn	?
+-!- lambday_ [3ba2174d@gateway/web/freenode/ip.59.162.23.77] has quit [Ping timeout: 245 seconds]
+@lisitsyn	wiking: ^ ?
+ HeikoS	vgorbati: please use main channel for aksing questions, they might help others
+ wiking	lisitsyn: kindof
+ HeikoS	vgorbati: in order to make your unit test being executed, just use similar naming to the existing files
+ HeikoS	lisitsyn:  exactly
+@lisitsyn	I am curious if it would work without force push
+ wiking	lisitsyn: merge
+@lisitsyn	wiking: yeah merge is the only possible thing I see
+@lisitsyn	wait wait
+ wiking	i didnt touch anything
+@lisitsyn	wiking: but we have it already
+@lisitsyn	wiking: develop is on top of master d10e022a23a26b51e73a217c5014f3cf8d879ee6
+@lisitsyn	there is nothing to merge
+ HeikoS	sonne|work: could you explain me the problem with the sparse vector
+ HeikoS	why is SGSparseVector v[size-1]; wrong?
+@lisitsyn	HeikoS: []?
+ HeikoS	lisitsyn: ??
+@lisitsyn	SGSparseVector v[size-1];
+@lisitsyn	what does it mean?
+ foulwall	sonne|work: Hi there?
+ HeikoS	Ah
+ HeikoS	I see!
+ HeikoS	I guess he meant (size)
+ HeikoS	with round brackets?
+ HeikoS	thats how I read it
+@lisitsyn	HeikoS: yes
+@lisitsyn	HeikoS: with [] it probably means create vector v and get its size-1 element
+@lisitsyn	I'd expect a segfault there
+ HeikoS	lisitsyn: yeah
+ HeikoS	I was confused
+ HeikoS	what am I saying
+ HeikoS	I am confused ;)
+-!- iglesiasg [~nando@dyna218-117.csc.kth.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ HeikoS	wiking: travis fails complaining about not being able to read tem pfiles
+ wiking	HeikoS: link
+ HeikoS	https://travis-ci.org/shogun-toolbox/shogun/jobs/6468861
+ HeikoS	check the tests on the bottom
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 966dd6b / src/shogun/evaluation/ROCEvaluation.cpp: https://github.com/shogun-toolbox/shogun/commit/966dd6bc8d386fab2fd998641e97976fd5eaf866
+ shogun-notifier-	shogun: replaced assert by proper error message
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 65da3fd / src/shogun/labels/BinaryLabels.cpp: https://github.com/shogun-toolbox/shogun/commit/65da3fd2646dc13e2d36baaca314c5f7f2e36411
+ shogun-notifier-	shogun: added method name to error messages and re-formated
+ shogun-notifier-	shogun: Heiko Strathmann :develop * ce363f3 / src/shogun/labels/DenseLabels.cpp: https://github.com/shogun-toolbox/shogun/commit/ce363f3ca42b8fc5729e3b00eeee9f1048290170
+ shogun-notifier-	shogun: made set_cont to affect values/scores
+ shogun-notifier-	shogun: allocate value memory
+ shogun-notifier-	shogun: add values to parameters
+ shogun-notifier-	shogun: Heiko Strathmann :develop * a19166f / tests/unit/evaluation/ROCEvaluation_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/a19166f93719665d21705f032d50b3d8f2245156
+ shogun-notifier-	shogun: made unit-test work
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 53378a5 / / (4 files): https://github.com/shogun-toolbox/shogun/commit/53378a5092d298c6e9cd30d373ae11efcb23f69f
+ shogun-notifier-	shogun: Merge pull request #985 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed ROC unit test
+ HeikoS	I still feel a bit uncomfortable that the buildbot doesn't run on develop ... like being in the dark. But should be fine with travis you are right
+@iglesiasg	HeikoS, wiking, sonne|work : so it was bug in Labels at the end? :)
+ wiking	HeikoS: who creates those tmp files?
+ HeikoS	wiking: ehm, the tests?
+ wiking	HeikoS: no idea that's why i'm asking
+ sonne|work	wiking please take raw data for both
+ sonne|work	foulwall: yes
+ sonne|work	HeikoS: SGSparseVector v[size-1] creates
+ sonne|work	size-1 sparse vectors
+ sonne|work	(empty ones)
+ sonne|work	but on the stack
+ sonne|work	very dangerous thing - can make the system run out of stack
+ foulwall	sonne|work: What could I do next?
+ sonne|work	and with a dynamic parameter like size it is even a non-standard gnu extension
+@lisitsyn	sonne|work: bah I forgot about arrays, true
+ sonne|work	foulwall: eye candy?
+ sonne|work	I mean some animation
+ sonne|work	grid etc?
+ foulwall	sonne|work: ok
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- foulwall [~user@li379-21.members.linode.com] has left #shogun ["ERC Version 5.3 (IRC client for Emacs)"]
+-!- abinash [75ef5e6b@gateway/web/freenode/ip.117.239.94.107] has quit [Ping timeout: 245 seconds]
+-!- travis-ci [~travis-ci@ec2-23-22-22-174.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6469168
+-!- travis-ci [~travis-ci@ec2-23-22-22-174.compute-1.amazonaws.com] has left #shogun []
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- Marty28 [~marty@5.28.86.117] has joined #shogun
+-!- foulwall_ [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Read error: Connection reset by peer]
+-!- Marty28 [~marty@5.28.86.117] has quit [Quit: Colloquy for iPad - http://colloquy.mobi]
+ HeikoS	wiking: could you have a look at one of the travis ones? This is happeneing all the time
+ HeikoS	https://travis-ci.org/shogun-toolbox/shogun/jobs/6469528
+ shogun-notifier-	shogun: lambday :develop * a28c730 / tests/unit/mathematics/Statistics_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/a28c730a47c97b4ee8a5ba79885557e927d033e2
+ shogun-notifier-	shogun: replaced variable-length array with SG_MALLOC in log_det_test_3
+ shogun-notifier-	shogun: Heiko Strathmann :develop * a343111 / tests/unit/mathematics/Statistics_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/a343111f0b8c5512c2c0892bd88c324ff4aadbf0
+ shogun-notifier-	shogun: Merge pull request #986 from lambday/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: replaced variable-length array with SG_MALLOC in log_det_test_3
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+ wiking	HeikoS: the /tmp stuff?
+ HeikoS	wiking yes
+ wiking	HeikoS: no idea man
+ wiking	HeikoS: i'll try to google it but...
+ wiking	i'm not a travis expert ;)
+ HeikoS	wiking: ok
+ HeikoS	mmh
+ HeikoS	then lets ask somebody else :)
+ HeikoS	why does it only fail on this particular build?
+ shogun-notifier-	shogun: Heiko Strathmann :develop * ff28dd0 / examples/undocumented/libshogun/labels_binary_fit_sigmoid.cpp: https://github.com/shogun-toolbox/shogun/commit/ff28dd0306d1b59f1fd71252a9169a3372ce6811
+ shogun-notifier-	shogun: removed assertions and print probabilities
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 7f31c48 / tests/unit/labels/BinaryLabels_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/7f31c48370ed1781aabea83e951c3069206051e7
+ shogun-notifier-	shogun: added unit test for sigmoid fitting
+ shogun-notifier-	shogun: Heiko Strathmann :develop * d30f205 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/d30f20557e0282e8bd8580608b8583aa2586b1a7
+ shogun-notifier-	shogun: Merge pull request #988 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: unit test for binary label sigmoid fitting
+-!- rishabh [~rishabh@202.78.172.162] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-23-22-22-174.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6470306
+-!- travis-ci [~travis-ci@ec2-23-22-22-174.compute-1.amazonaws.com] has left #shogun []
+@lisitsyn	argh come on will they finally catch this asshole?
+ HeikoS	?
+@lisitsyn	HeikoS: watertown, usa
+@iglesiasg	lisitsyn: oh so the police killed the guy
+@lisitsyn	iglesiasg: yes one moron killed
+ HeikoS	I see
+@lisitsyn	iglesiasg: as I tweeted - these nations are troublesome for anyone - so usa should think of sheltering such animals
+@lisitsyn	they usually do the same here
+@iglesiasg	lisitsyn: to what do you refer to with these nations?
+@iglesiasg	where these guys that did it come from?
+@lisitsyn	iglesiasg: chechens, dagestanians
+@iglesiasg	I see
+@lisitsyn	iglesiasg: they came from dagestan but they are chechens
+-!- travis-ci [~travis-ci@ec2-23-22-22-174.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6470583
+-!- travis-ci [~travis-ci@ec2-23-22-22-174.compute-1.amazonaws.com] has left #shogun []
+@lisitsyn	iglesiasg: well it is adjacent regions
+@iglesiasg	I see
+-!- foulwall_ [~foulwall@li379-21.members.linode.com] has quit [Read error: Connection reset by peer]
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+ foulwall	sonne|work: some eye candy
+ foulwall	sonne|work: http://foulwall.com:8000/demo/svr/entrance
+@iglesiasg	foulwall: you are an artist! :)
+ sonne|work	foulwall: nice. it could move a bit faster
+ foulwall	lisitsyn: sonne|work thankyou
+-foulwall:#shogun- I'll add some animation on 'clear'
+ foulwall	sonne|work: I'm wondering what kind of animation can be added to the cluster demo.
+ sonne|work	foulwall: yeah would be cool
+ sonne|work	foulwall: make the diameter of the circle from 0 -> r
+@iglesiasg	foulwall: if you are using k-means, you can do a nice one
+@iglesiasg	foulwall: since this method is iterative
+ sonne|work	iglesiasg: he only has the end result
+ sonne|work	it's the shogun output
+@iglesiasg	foulwall: mmm however that would require intermediate results
+@iglesiasg	sonne|work: idd I noted that
+ foulwall	sonne|work: ok
+@iglesiasg	sonne|work: I think it is worth trying
+ sonne|work	iglesiasg: the same would work for an svm
+ sonne|work	or svr
+ sonne|work	think of it just training one iteration
+@iglesiasg	aham true
+@iglesiasg	I didn't come up with it for the svm and svr
+ HeikoS	foulwall, could you connect the lines between the points in the regression function?
+ HeikoS	when you make the kernel width very small you see the individual points
+ foulwall	HeikoS: I note that, wait me and I'll fix that
+ HeikoS	foulwall, this is really cool!
+ foulwall	HeikoS: thank you
+ HeikoS	foulwall: you could do this for the GP classifier and regression
+ HeikoS	foulwall, you know what would be even cooler?
+ HeikoS	if you could plot the underlying distribution
+ HeikoS	like a heatmap
+ HeikoS	at least for classifier
+ foulwall	HeikoS: that's what I want to do next
+ HeikoS	wow
+ HeikoS	I am amazed :D
+ HeikoS	keep on the good work!
+ sonne|work	HeikoS, foulwall that is sth daniel has done already
+ HeikoS	sonne|work, ok, I didnt see that
+ sonne|work	HeikoS: https://github.com/dvalcarce/shogun-gsoc
+ sonne|work	it is also pretty cool
+ foulwall	sonne|work: I'll go for class. later i'll fix them.
+ sonne|work	foulwall: thanks for your work
+ sonne|work	cu!
+ HeikoS	sonne|work seeing, wow that also very cool
+ thoralf	sonne|work: about text features again: i think it still makes sense to keep the preprocessing part outside shogun, but:
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Remote host closed the connection]
+ thoralf	allowing files "feat1 feat2 ..." would be the way
+ thoralf	n-grams etc. could be created outside like feat1_feat2_... feat2_feat3_... etc.
+ thoralf	All you have to to is to create TextFeature classes - and eventually something that maps them into a feature space.
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has quit [Quit: Leaving.]
+-!- Asix3 [452f9490@gateway/web/freenode/ip.69.47.148.144] has joined #shogun
+-!- lambday [0e8b614d@gateway/web/freenode/ip.14.139.97.77] has joined #shogun
+ lambday	HeikoS: hi
+-!- rishabh [~rishabh@202.78.172.162] has quit [Ping timeout: 264 seconds]
+ lambday	HeikoS: I added the sample_from_gaussian for sparse cov matrices and a unit test..
+ lambday	HeikoS: shall I send the PR and you could take a look?
+ lambday	HeikoS: also changed the array of pointers that in the log_det unit test to double pointer and used SG_MALLOC instead
+ HeikoS	lambday: I saw that, nice! already merged
+ HeikoS	send the PR!
+ HeikoS	looking forward to see it :)
+ lambday	HeikoS: okay sending :)
+ lambday	HeikoS: as of now, I used a constant diagonal matrix for sparse unit-test.. in the next unit test will add a random one
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- Asix3_ [452f9490@gateway/web/freenode/ip.69.47.148.144] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- Asix3 [452f9490@gateway/web/freenode/ip.69.47.148.144] has quit [Ping timeout: 245 seconds]
+-!- trtr3434 [~trtr3434@slb-96-33.tm.net.my] has joined #shogun
+-!- trtr3434 [~trtr3434@slb-96-33.tm.net.my] has left #shogun []
+-!- iglesiasg [~nando@dyna218-117.csc.kth.se] has quit [Quit: leaving]
+ wiking	dudeeez
+ wiking	HeikoS: mathematics/Statistics.cpp: In constructor 'shogun::CStatistics::log_det(shogun::SGSparseMatrix<double>)::EigenSimplicialLLT::EigenSimplicialLLT()':
+ wiking	mathematics/Statistics.cpp:2030:12: error: 'SimplicialCholeskyLLt' was not declared in this scope
+ wiking	make[1]:  [mathematics/Statistics.cpp.o] Error 1
+ wiking	make[1]: Leaving directory `/home/niki/Dropbox/work/workspace/shogun/src/shogun'
+ wiking	fails on ubuntu
+ wiking	make: *** [libshogun.so.14.0] Error 2
+ HeikoS	oh, then we should add this PR recently
+ HeikoS	and a buildbot on develop :)
+-!- lambday [0e8b614d@gateway/web/freenode/ip.14.139.97.77] has quit [Ping timeout: 245 seconds]
+ HeikoS	wiking: gsomix sent this PR recently to solve this problem
+-!- lambday [0e8b614d@gateway/web/freenode/ip.14.139.97.77] has joined #shogun
+ lambday	HeikoS: I think I made a mistake.. checking again
+-!- Asix3_ [452f9490@gateway/web/freenode/ip.69.47.148.144] has quit [Ping timeout: 245 seconds]
+ wiking	HeikoS: this is *master* branch
+ HeikoS	wiking: argh
+ wiking	so there should be definitely done something about this
+ HeikoS	my fault again I guess :(
+-!- rishabh [~rishabh@202.78.172.162] has joined #shogun
+ HeikoS	wiking, link
+ HeikoS	?
+ HeikoS	wiking: good chance to try the hotfix branch ;)
+ wiking	yes
+ wiking	it is a good chance for that
+ HeikoS	lambday: no worries, not merged yet
+ HeikoS	wiking: have we already rebased cev against master?
+ HeikoS	dev
+ HeikoS	since I suggest to do this before
+ HeikoS	it might get messy otherwise
+-!- juanmanpr [c2fe7d88@gateway/web/freenode/ip.194.254.125.136] has joined #shogun
+ juanmanpr	hello guys, about gsoc, what kine of profiles are you searching on the students?
+ juanmanpr	I am studying master in computer vision, and im really interested in machine learning
+ juanmanpr	i have experience in C, C++, Matlab, and a little python
+ HeikoS	juanmanpr: we are looking for motivated people than can code and have some background in the topic their project is about
+ HeikoS	juanmanpr: the best way to get involved is to start sending patches and discuss project ideas
+ HeikoS	with the mentors
+ juanmanpr	But, is there any special requirement that you are looking, for example to Interface and develop the general quadratic solver library libqp
+ juanmanpr	ok, where can I finf a list of menthors for shogun?
+ HeikoS	on our ideas page
+ juanmanpr	thanks, i'll take a look
+ HeikoS	there is no "hard" requirement, you just have to convince us of you :)
+ HeikoS	as a computer vision student, you should have the right background
+ juanmanpr	You also would like to see some code, right?
+ HeikoS	so just show us that you can code and are motivated by sending patches :) see our issues list on github for initial tasks you could do
+ HeikoS	yes, it is a requirement for your application to be considered
+ HeikoS	not only show
+ HeikoS	but actually merged to shogun codebase
+-!- lambday [0e8b614d@gateway/web/freenode/ip.14.139.97.77] has quit [Ping timeout: 245 seconds]
+ juanmanpr	I see, well, I better do something now!
+ juanmanpr	Thanks
+ HeikoS	juanmanpr: looking forward to see a pull request!
+ HeikoS	I gotta go now, bye!
+ juanmanpr	bye
+-!- juanmanpr [c2fe7d88@gateway/web/freenode/ip.194.254.125.136] has quit [Quit: Page closed]
+-!- dvalcarce [~dvalcarce@86.117.117.91.dynamic.mundo-r.com] has joined #shogun
+-!- rishabh [~rishabh@202.78.172.162] has quit [Ping timeout: 264 seconds]
+ dvalcarce	hi all
+ wiking	anybody seen this error before: /usr/local/include/shogun/lib/Signal.h:102:14: error: expected unqualified-id before 'protected'
+ wiking	ok we have a problem
+ wiking	i mean it's not our problem
+ wiking	but it's qt's fault
+ wiking	basically qmake has a #define signals
+ wiking	-> we get that error with shogun if u use a code in qmake that uses shogun (headers)
+ wiking	ok
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- foulwall [~foulwall@2001:da8:215:c252:edf7:a7fe:6f7f:ef7f] has joined #shogun
+ foulwall	Hi, dvalcarce
+ dvalcarce	foulwall: hi!
+ foulwall	dvalcarce: I am also applying for GSoC the interactive demos.
+ foulwall	dvalcarce: we can work together and make better demos.
+ dvalcarce	yeah, that's a good idea
+ dvalcarce	i was thinking the same thing
+ foulwall	dvalcarce: :-)
+ dvalcarce	i see your regression demo, it's cool
+ dvalcarce	maybe we can split server and client sides work
+ dvalcarce	i don't know what sonney2k will think about it
+ foulwall	dvalcarce: good idea.
+ foulwall	dvalcarce: and dont' know either.
+ dvalcarce	let's ask him then :P
+ dvalcarce	which part do you prefer?
+ dvalcarce	because right now i think we are doing duplicated work on django side
+ dvalcarce	i think we should define some basic interfaces
+ foulwall	both are ok, and the front end needs more creativity.
+ dvalcarce	i agree, bootstrap is beautiful but it isn't enough
+ foulwall	I've considered building a interface, but for the security reasons...
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ dvalcarce	i understand
+ dvalcarce	it would be convenient to have a list of demos so we can plan the website, too
+ thoralf	Bye.  See you monday.
+-!- thoralf [~thoralf@enki.zib.de] has left #shogun ["Konversation terminated!"]
+ foulwall	sonney2k told me it's better to limit the access.
+ vgorbati	lisitsyn, hi are you there?
+ dvalcarce	we need server communication, but we don't want a ddos
+ foulwall	dvalcarce: yes.
+ dvalcarce	some kind of authentication?
+ dvalcarce	or maybe it is too overhead because of some demos?
+ foulwall	dvalcarce: auth is easy to implement but we need somekind of elastic way to make the demo code extensibility
+ foulwall	dvalcarce: code reuse and general interface
+ foulwall	but a general interface may cause some function exposed to the bad user.
+ dvalcarce	we can implement data size or computing time limitations
+-!- rishabh [~rishabh@202.78.172.162] has joined #shogun
+-!- hoijui [~hoijui@dslb-088-074-124-102.pools.arcor-ip.net] has quit [Ping timeout: 246 seconds]
+-!- se7en7 [~babu@2001:6b0:1:1430:21e:4fff:fec0:f4e2] has quit [Remote host closed the connection]
+-!- vikram360 [~vikram360@117.216.145.131] has joined #shogun
+-!- lambday [0e8b614d@gateway/web/freenode/ip.14.139.97.77] has joined #shogun
+ lambday	HeikoS: hi.. there?
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- lambday [0e8b614d@gateway/web/freenode/ip.14.139.97.77] has quit []
+-!- foulwall [~foulwall@2001:da8:215:c252:edf7:a7fe:6f7f:ef7f] has quit [Ping timeout: 245 seconds]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- dvalcarce [~dvalcarce@86.117.117.91.dynamic.mundo-r.com] has quit [Quit: dvalcarce]
+-!- dvalcarce [~dvalcarce@86.117.117.91.dynamic.mundo-r.com] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- rishabh [~rishabh@202.78.172.162] has quit [Ping timeout: 256 seconds]
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Ping timeout: 258 seconds]
+-!- rishabh [~rishabh@202.78.172.162] has joined #shogun
+-!- HeikoS [~heiko@nat-172-14.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+ foulwall	lisitsyn: dvalcarce sonney2k: I've add another eyecandy for the clustering / svr demo.
+ foulwall	you can see that on http://foulwall.com:8000/demo/clustering/entrance http://foulwall.com:8000/demo/svr/entrance
+-!- hoijui [~hoijui@wlan-141-23-66-81.tubit.tu-berlin.de] has joined #shogun
+ foulwall	it's late in beijing, i'll go sleeping. goodnight.
+ dvalcarce	nice :)
+ dvalcarce	good night
+@lisitsyn	nite
+@lisitsyn	foulwall: and nice
+ foulwall	HeikoS: I've connected the dots into line so svr demo can work correctly when the width is small.
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Ping timeout: 258 seconds]
+-!- rishabh [~rishabh@202.78.172.162] has quit [Ping timeout: 256 seconds]
+-!- rishabh [~rishabh@202.78.172.162] has joined #shogun
+-!- dvalcarce [~dvalcarce@86.117.117.91.dynamic.mundo-r.com] has quit [Quit: dvalcarce]
+-!- sidbee [~sidbee@202.78.172.162] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- hoijui [~hoijui@wlan-141-23-66-81.tubit.tu-berlin.de] has quit [Quit: Leaving]
+@lisitsyn	vgorbati: what you may do now is to replace this 100% check with something weaker
+-!- sidbee [~sidbee@202.78.172.162] has quit []
+ vgorbati	lisitsyn: experimentally find some percentage, that will pass?
+@lisitsyn	vgorbati: kind of
+@lisitsyn	vgorbati: you may check the other thing though
+ vgorbati	lisitsyn: ?
+@lisitsyn	whether weights are preserved
+@lisitsyn	like for any vector x in initial space
+@lisitsyn	the linear combination weights are the same
+@lisitsyn	for initial space and embedded space
+ vgorbati	well, that will complicate things a little bit)
+ vgorbati	it's like doing the big part of LLE itself
+ vgorbati	lisitsyn: I guess I can't receive the neighbors weights from CLocallyLinearEmbedding somehow, can I/
+-!- n4nd0 [~fircuser@c83-251-227-64.bredband.comhem.se] has joined #shogun
+-!- n4nd0 is now known as iglesiasg
+@lisitsyn	vgorbati: yes I don't like that way too
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 252 seconds]
+ vgorbati	lisitsyn: I think I will implement the "weakening" part on Monday - is it ok?
+@lisitsyn	vgorbati: totally
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- qpalzm [~ck@78.96.110.81] has joined #shogun
+-!- lisitsyn [~blackburn@109-226-120-160.clients.tlt.100megabit.ru] has quit [Quit: Leaving.]
+-!- lisitsyn [~blackburn@109-226-120-160.clients.tlt.100megabit.ru] has joined #shogun
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- vikram360 [~vikram360@117.216.145.131] has quit [Ping timeout: 248 seconds]
+-!- gsomix [~Miranda@37.61.180.100] has joined #shogun
+ gsomix	good evening
+ iglesiasg	hello gsomix
+ iglesiasg	how is gsoc preparation going?
+ gsomix	iglesiasg: bit by bit.
+ gsomix	lisitsyn: https://dl.dropboxusercontent.com/u/19029407/uzkyIYZDWzo.jpg
+@lisitsyn	the dream city
+ gsomix	lisitsyn: I have one more https://dl.dropboxusercontent.com/u/19029407/khKJokVI0ZY.jpg
+ gsomix	huh
+@lisitsyn	anyone watching for the 18th hour of that madness?
+@lisitsyn	:D
+-!- mdragan [6d66bb92@gateway/web/freenode/ip.109.102.187.146] has joined #shogun
+-!- gsomix [~Miranda@37.61.180.100] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+-!- iglesiasg [~fircuser@c83-251-227-64.bredband.comhem.se] has quit [Ping timeout: 264 seconds]
+@lisitsyn	suspect in custody
+@lisitsyn	?
+@lisitsyn	uh
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@lisitsyn	iglesiasg: join me listening to scanner :D
+@lisitsyn	iglesiasg: I admit I am feeling bad already have been listening to it a hour or so
+@iglesiasg	lisitsyn: let me check
+@iglesiasg	I have never listened to it
+@lisitsyn	iglesiasg: http://www.ustream.tv/channel/ma-rt-9-window-cam?utm_campaign=t.co&utm_source=6807252&utm_medium=social
+@iglesiasg	lisitsyn: btw, have you seen? https://github.com/shogun-toolbox/shogun/pull/990
+@iglesiasg	nice code I think
+@lisitsyn	iglesiasg: yes sure
+@iglesiasg	lisitsyn: what is this man?
+@iglesiasg	is it like the police radio
+@lisitsyn	iglesiasg: yes
+@iglesiasg	that wouldn't make sense
+@lisitsyn	exactly
+@lisitsyn	why not?
+@iglesiasg	how is it possible we can listen to it?
+@iglesiasg	shouldn't it be secret? hehe
+-!- kaushalb09 [~kaushalb0@dhcp205-011-002.wireless.buffalo.edu] has joined #shogun
+@lisitsyn	iglesiasg: boston PD asked to not share addresses/etc but you can't control the internet you know
+@lisitsyn	iglesiasg: they are deadly tired
+@lisitsyn	19th or 20th hour already
+@iglesiasg	someone must be helping him IMHO
+@lisitsyn	iglesiasg: helping like?
+@lisitsyn	2 guys
+@iglesiasg	lisitsyn: helping like keeping him at a place
+@lisitsyn	ah they are going to fail this time
+@iglesiasg	I bet he is at somenone's place
+@lisitsyn	ahh
+@lisitsyn	yes may be
+@iglesiasg	just gut feeling
+@lisitsyn	they have scanned basically all the city already I guess
+@lisitsyn	iglesiasg: they are going to have a trouble with sunsetting
+@iglesiasg	lisitsyn: why?
+@lisitsyn	iglesiasg: if they haven't found it with daylight..
+@lisitsyn	iglesiasg: 6 streets left
+@iglesiasg	lisitsyn: are they actually going house by house?
+@iglesiasg	checking inside, I guess not
+@lisitsyn	iglesiasg: yes
+@lisitsyn	actually
+@lisitsyn	iglesiasg: not the detailed inside I guess by yes - door-by-door
+@iglesiasg	lisitsyn: but this radio thing is fucked up
+@iglesiasg	I mean I don't understand
+--- Log closed Sat Apr 20 00:00:28 2013

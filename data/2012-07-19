@@ -1,0 +1,564 @@
+--- Log opened Thu Jul 19 00:00:17 2012
+-!- heiko [~heiko@host86-177-183-33.range86-177.btcentralplus.com] has left #shogun []
+ wiking	sonney2k: noup
+ wiking	sonney2k: just got stuck with one part of the code
+-!- romi_ [~mizobe@200-232-221-127.dsl.telesp.net.br] has quit [Remote host closed the connection]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Quit: Page closed]
+ blackburn	wiking: here?
+ wiking	blackburn: yes
+ wiking	wazza?
+ blackburn	wiking: I need some kind of help with QP task
+ wiking	ok
+ wiking	listining
+ blackburn	problem is \min_s \sum_i (s_i - s*_i)
+ blackburn	s.t. \sum_i s_i = k
+ blackburn	0 <= s_i <= 1
+ wiking	u need a solver for that?
+ blackburn	I am confused
+ blackburn	is it a QP task?
+ wiking	about?
+ blackburn	argh ()^2
+ blackburn	not ()
+ wiking	ah ok
+ wiking	\min_s \sum_i (s_i - s*_i)^2
+ wiking	right?
+ blackburn	QP task is x^T H x + f x
+ blackburn	yes
+ blackburn	so what is H and f here?
+ blackburn	if it is a qp
+ wiking	u mean u wanna solve this with libqp?
+ blackburn	yeah fits perfectly exepct H part
+ blackburn	:D
+ wiking	:DDD
+ blackburn	I actually even have mosek calling code for that
+ wiking	for which?
+ blackburn	for solution of this problem
+ wiking	aaah and you wanna have it instead with libqp?
+ blackburn	okay actually it is (x-y)*I*(x-y)^T, right?
+ blackburn	yeah would be cool to avoid mosek
+ wiking	mmm
+ wiking	ok
+ wiking	only question is what is s*_i?
+ blackburn	it is given
+ wiking	ah cool
+ wiking	so you only have s as a vector
+ blackburn	everything is known
+ wiking	and another s* vector
+ blackburn	except s
+ blackburn	yeah
+ wiking	and wanna minimize your s*
+ wiking	i mean s
+ wiking	;p
+ wiking	ok get is
+ wiking	get it
+ blackburn	the other option is to use nlopt but I am confused whether it can be considered as qp
+ wiking	well
+ wiking	x = s
+ wiking	x^T = s*
+ wiking	and define Q that it creates s-s*
+ wiking	only question here with the ^2 part
+ wiking	but the problem is that in qp definition
+ wiking	you have actually xHx^t
+ wiking	so that x is the same
+ wiking	:S
+ blackburn	hmm wait
+ blackburn	what if x = s - s*
+ blackburn	then H = identity
+ wiking	yes
+ blackburn	\sum_i x_i = k - \sum_i s*_i
+ wiking	u can do that
+ wiking	H is positive semi-def in that way
+ blackburn	s*_i < x_i < 1+s*_i
+ blackburn	does it make sense to you?
+ wiking	it was 0 < s_i < 1
+ wiking	right?
+ blackburn	yeah
+ wiking	yep
+ wiking	try it
+ wiking	:)
+ blackburn	looks legit
+ blackburn	wiking: funny thing is that problem size is usually <100 here
+ blackburn	but I just don't know how to work with mosek :D
+ wiking	:P
+ wiking	i dont approve mosek
+ wiking	http://imgur.com/a/ng9XT
+ wiking	:>>>
+ blackburn	birds are like sponges for oil :D
+-!- blackburn [~blackburn@109.226.92.17] has left #shogun []
+-!- ckwidmer [45c9b18c@gateway/web/freenode/ip.69.201.177.140] has joined #shogun
+-!- ckwidmer [45c9b18c@gateway/web/freenode/ip.69.201.177.140] has quit [Client Quit]
+ shogun-buildbot	build #33 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/33
+ shogun-buildbot	build #23 of nightly_all is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/23
+-!- splade [~chatzilla@118.186.207.147] has joined #shogun
+-!- gsomix [~gsomix@188.168.3.115] has quit [Ping timeout: 248 seconds]
+-!- pluskid [~pluskid@111.120.81.118] has joined #shogun
+-!- gsomix [~gsomix@r206-10.smr.ru] has joined #shogun
+-!- splade [~chatzilla@118.186.207.147] has quit [Ping timeout: 252 seconds]
+-!- uricamic [~uricamic@2001:718:2:1634:7de6:7891:7fa4:5d68] has joined #shogun
+-!- splade [~splade@117.79.233.241] has joined #shogun
+-!- gsomix [~gsomix@r206-10.smr.ru] has quit [Read error: Connection reset by peer]
+-!- gsomix [~gsomix@r206-10.smr.ru] has joined #shogun
+ gsomix	good morning
+ gsomix	droopy, nya
+ droopy	gsomix!
+-!- gsomix_ [~gsomix@r206-10.smr.ru] has joined #shogun
+-!- gsomix [~gsomix@r206-10.smr.ru] has quit [Read error: Connection reset by peer]
+-!- gsomix_ is now known as gsomix
+-!- pluskid [~pluskid@111.120.81.118] has quit [Ping timeout: 248 seconds]
+-!- pluskid [~pluskid@202.130.113.141] has joined #shogun
+-!- pluskid [~pluskid@202.130.113.141] has quit [Ping timeout: 276 seconds]
+-!- pluskid [~pluskid@111.120.81.118] has joined #shogun
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+-!- gsomix [~gsomix@r206-10.smr.ru] has quit [Remote host closed the connection]
+ blackburn	uricamic: hey, around?
+-!- splade [~splade@117.79.233.241] has left #shogun []
+ uricamic	blackburn: yep
+ blackburn	uricamic: I have some struggles with libqp
+ uricamic	go on
+ blackburn	I am solving following problem
+ blackburn	\min_s \sum_i (s_i - s*_i)^2,      s.t.     \sum_i s_i = k,    0 <= s_i <= 1
+ blackburn	s* and k are given
+ uricamic	ok
+ blackburn	so I introduced x = s - s*
+ blackburn	then the problem became
+ blackburn	\min_x \sum_i x_i^2       s.t.     \sum_i x_i = k - \sum_i s*_i
+ blackburn	0-s*_i <= x <= 1-s*_i
+ blackburn	uricamic: does it look ok?
+ blackburn	I am unsure such thing is allowed here
+ uricamic	it seems to be ok
+ uricamic	but I have to look on it more carefully
+ blackburn	uricamic: main problem is that I got solution not in bounds with gsmo for some reason
+ uricamic	aha
+ uricamic	unfortunately Vojta is not here, so I can't ask him, but I will try to look on it more carefully
+ blackburn	it sets bounds
+ blackburn	[-0.5,0.5]
+ blackburn	argh bad example
+ blackburn	it looks like solution stays at initial point here :D
+ uricamic	:)
+ blackburn	uricamic: does it depend on initial guess?
+ uricamic	not sure, what does the return value says?
+ blackburn	1 iteration, KKT
+ blackburn	objective = 0.0
+ blackburn	so
+ blackburn	lb = -0.5
+ uricamic	I mean the exitflag
+ blackburn	ub = 0.5
+ blackburn	exitflag = 4
+ blackburn	b = 1.0
+ blackburn	but solution is x = [0,0]
+ uricamic	I see, I am not sure if that exitflag is good
+ uricamic	but I have been just using libqp_splx only so far
+ blackburn	uricamic: well it is the only non-emergency code here
+ blackburn	argh no wrong
+ blackburn	-1 is no memory available
+ blackburn	0 is max iterations code
+ blackburn	and 4 is KKT satisfied code
+ uricamic	I see, so it should be ok, but it is strange though
+ uricamic	in gsmo the exitflag cannot be 1, 2 or 3, tight?
+ uricamic	right?
+ blackburn	yeah it seems so
+ uricamic	in that case 4 should be ok
+ blackburn	I set initial x to [10,10]
+ blackburn	and it did nothing with it actually
+ blackburn	I think there is some illformed vector here
+ uricamic	I am looking on the webpage of libqp now, and it seems that your constraints are not ok for it now
+ uricamic	there is just x^T a = b
+ blackburn	yeah but what is wrong with it?
+ blackburn	I set a to ones
+ uricamic	but in your task you said that constraints are sum_i x_i = k - sum_i s^*_i
+ blackburn	but s* is given
+ uricamic	I see, ok
+ blackburn	so I just b = k - sum_i s*_i
+ uricamic	sure
+ uricamic	ok, in that case it should be ok
+ uricamic	have you tried without using initial solution?
+ blackburn	how to do that?
+ blackburn	I just tried x = [1000 , 1000] and libqp made it a solution.. strange
+ uricamic	it depends also how have you set the TolKKT parameter
+ blackburn	in doc here
+ blackburn	I set it to 1e-6
+ uricamic	and of course on the initial solution provided
+ blackburn	it is stated here that x 'must be feasible'
+ blackburn	does it mean initial solution should satisfy bound?
+ uricamic	sure, I guess
+ blackburn	should it satisfy a'x=b then?
+ uricamic	yep
+ blackburn	uh that is another optimization problem then :D
+ droopy	blackburn, ^_^
+ uricamic	:)
+ blackburn	uricamic: but seriously - how to do that initial guess
+-!- yoo [575b08cb@gateway/web/freenode/ip.87.91.8.203] has joined #shogun
+-!- yoo [575b08cb@gateway/web/freenode/ip.87.91.8.203] has quit [Client Quit]
+ blackburn	hmmm apparently upper bound would work in that case it seems
+ blackburn	anyway, thanks uricamic
+ uricamic	no problem blackburn
+ CIA-18	shogun: Sergey Lisitsyn master * r759fdb7 / (17 files in 4 dirs): Refactored MALSAR-based multitask algorithms and added clustered multitask logistic regression - http://git.io/Nk_Abw
+-!- blackburn [~blackburn@109.226.92.17] has left #shogun []
+ wiking	uricamic: here?
+ uricamic	yep
+-!- pluskid [~pluskid@111.120.81.118] has quit [Ping timeout: 248 seconds]
+-!- pluskid [~pluskid@202.130.113.141] has joined #shogun
+-!- ermutarra [55578d64@gateway/web/freenode/ip.85.87.141.100] has joined #shogun
+ ermutarra	hi
+-!- ermutarra [55578d64@gateway/web/freenode/ip.85.87.141.100] has left #shogun []
+-!- pluskid [~pluskid@202.130.113.141] has quit [Read error: Connection reset by peer]
+-!- uricamic [~uricamic@2001:718:2:1634:7de6:7891:7fa4:5d68] has quit [Quit: Leaving.]
+-!- heiko [~heiko@host86-177-183-33.range86-177.btcentralplus.com] has joined #shogun
+-!- gsomix [~gsomix@37.61.181.69] has joined #shogun
+ gsomix	good evening
+ heiko	sonney2k, are you around?
+-!- os252 [~stegle@e179243147.adsl.alicedsl.de] has joined #shogun
+-!- heiko [~heiko@host86-177-183-33.range86-177.btcentralplus.com] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+-!- blackburn [~blackburn@109.226.92.17] has quit [Quit: Leaving.]
+-!- puffin444 [a6f986d8@gateway/web/freenode/ip.166.249.134.216] has joined #shogun
+ puffin444	hello os252
+ os252	hi puffin444
+ puffin444	how are things?
+ os252	ok, still little time due to family matters. Sorry for having been difficult to reach.
+ os252	How are things on your end?
+ puffin444	that's okay
+ os252	good.
+ os252	Fortunately you are on top of everything, so I am not really needed ;-)
+ puffin444	good finally done with the gradient stuff
+ os252	Nice,so including all the ARD variants ?
+ puffin444	now working on some vis. demos and fitc
+ puffin444	yes the ard works nicely
+ os252	perfect
+ os252	its separate kernels?
+ puffin444	there are ard linear and gaussian kernels
+ os252	yeah, I guess that's all for nwo.
+ os252	I was wondering whether it's worth porting the matern kernel.
+ puffin444	the weights can be learned thtough gradient search
+ os252	It is a bit rougher and not quite as smooth as Gaussian.
+ os252	Statisticians like it...
+ os252	and has some good properties.
+ os252	But I'd put somewhere further down on the list - there are probably more exciting things than implementing exotic kernels :-).
+ puffin444	interesting. never heard of that kernel
+ os252	The periodic kernels are also sort of cool.
+ os252	If you want to get inspiration:
+ os252	http://www.gaussianprocess.org/gpml/chapters/RW4.pdf
+ os252	(4.31) is a cool kernel.
+ os252	It basically is like a squared exponential with prior knowledge that the function you are regressing is periodic.
+ os252	It\s cool to do spectral decomposition form a just a handful of points;you can optimize the hyper parameter that corresponds to the period length and read of what's happening.
+ puffin444	hmm... I was hoping to implement fitc/laplacian first if thats okay
+ os252	Could be means to get good demos - but you really decide what you like, there is infinite freedom to put some cool demos together.
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ os252	Totally. I just thought I through up some ideas for demos that illustrate what you can do with GPs and cannot easily with SVMs etc.
+ puffin444	that way adding exotic kernels/likelihoods would be an easy task
+ puffin444	yes i am looking at gpml for inspirarion for the denos
+ puffin444	demos*
+ os252	Agree - and as I already pushed for the ARD stuff, let's defer that one for later. But take a look at that stuff.
+ puffin444	demos*
+ puffin444	i am hoping to do something similar via matploylib
+ os252	What have you got so far?
+ puffin444	matplotlib
+ puffin444	frankly i dont have demos yet, been looking at fitc
+ os252	Yes, I understand - more fun to do.
+ puffin444	but i plan to have at least some simple demos by the rnd of the week
+ os252	I have some old code for sausage plots in matplotlib
+ os252	https://github.com/PMBio/pygp/blob/master/pygp/plot/gpr_plot.py
+ os252	some super simple simulation, but it's similar to things in gpml
+ os252	is here
+ os252	https://github.com/PMBio/pygp/blob/master/pygp/demo/demo_gpr.py
+ os252	As suggested before. I'd vote for simple demos now and more complex things at the end of all this.
+ os252	Have you read the unfitting sparse GP approximations paer?
+ puffin444	yes these might be quite useful
+ os252	I think it will be very helpful to get an efficient implementation of a general framework for sparse approximations (including fits).
+ os252	*fitc
+ puffin444	yes i have looked at it briefly a fee times
+ puffin444	gew*
+ puffin444	few* lol
+ os252	:-)
+ os252	It may make sense to discuss this if you like.
+ os252	The approximations are certainly non-trivial.
+ os252	and take a bit of time to get into.
+ puffin444	there was a paper i found that compared many sparse methods, but i think its safest now to look at fitc
+ os252	yes, there are several comparisons. FITc is definitely high up in the ranking.
+ puffin444	as i can compare it directly to gpml
+ os252	Yeah, it's brill that they have this all implemented :-)
+ puffin444	lots of potential math error implementing this
+ os252	But let me know if you want to discuss. The initialization of the pseudo points etc. can be a bit of a tricky business.
+ os252	Another question is how to handle the pseudo points.
+ puffin444	yes its wonderful they have it in gpml
+ os252	Effectively they are parameters like everything else in the covariance.
+ os252	The question is how to best incorporate this into your framework.
+ os252	Definitely. That's why C++ is not the best prototyping language (at least for me).
+-!- puffin444_ [a6f986d8@gateway/web/freenode/ip.166.249.134.216] has joined #shogun
+ puffin444_	yes it is something that i have been thinking about
+-!- puffin444 [a6f986d8@gateway/web/freenode/ip.166.249.134.216] has quit [Ping timeout: 245 seconds]
+ os252	B.t.w Sergey has switched shogun to Eigen, right?
+ os252	You could consider coding up the maths for this stuff in Eigen.
+ os252	It will be a lot less pain than native blas/lapack calls.
+ puffin444_	yes that would be wonderful
+ os252	I am not aware of the latest state of the play but this: http://comments.gmane.org/gmane.comp.lib.eigen/3344 suggests it's in there yet.
+ blackburn	os252: moreover I am already using it for my algorithms
+ os252	I think Eigen is superb in particular if you are porting code from matlaby/python like scripting languages. You can almost copy & paste thins.
+ os252	blackburn: are the libraries copied into shogun?
+ os252	or is there an external dependency?
+ blackburn	os252: no, we rely on dependency
+ blackburn	it can be a problem though
+ os252	is it optional or a requirement, i.e. can core code use Eigen ?
+ puffin444_	yes this might make things muxh rasier
+ blackburn	what is core?
+ os252	Well, not sure. GP support of course ;-)
+ puffin444_	well already gp only works with lapack installed
+ blackburn	I don't actually know whether we can make it mandatory
+ puffin444_	is there a performance difference with eigen
+ blackburn	yes, and performance of coding in particular
+ os252	Yeah, numerically it's bit faster than black/lapack, coding is orders of magnitude ;-)
+ blackburn	puffin444_: it uses SSE stuff if you know what it is
+ puffin444_	oh wow, so do we keep lapack just because it runs on more pkayforms?
+ os252	I think they really tackled the last bottle necks. You can even now put Intel MKL underneath to get multi-core support for large matrices (which Eigen does not have yet).
+ blackburn	puffin444_: we still have lapack code..
+ os252	but Eigen has lapak interfaces. Blackburn: have you explored whether those are sufficient for Shogun?
+ blackburn	os252: problem is that they are provided only in standalone packages
+ blackburn	so if you install it on say debian/ubuntu
+ blackburn	you get no blas/lapack headers provided
+ os252	but otherwise they work?
+ os252	If yes: I am really wondering why not copy all of Eigen into shogun and kick all the lapas/black dependencies.
+ blackburn	let me check
+ os252	Linalg is sufficiently "central" to justify to few kilobyte of third party code I guess.
+ blackburn	I am not big fan of integrating code actually
+ blackburn	eigen3 is being developed pretty fast still
+ os252	It surely is a tradeoff - I completely understand.
+ blackburn	lapack and blas haven't changed for years
+ os252	But either way: if you add stuff to shogun that depends on Eigen I see now reason why puffin444 should code up sophisticated PG linalg in lapack.
+ blackburn	no just guard it with HAVE_EIGEN3
+ blackburn	it is not a problem actually
+ os252	vgood.
+ os252	The fitc stuff is pretty complicated and it will take a lot of time to code this up in lapak otherwise.
+ os252	*lapack
+ os252	puffin444: have you used Eigen before? Keen on going down that route?
+ puffin444_	yes especially the derivatives i found out that  i have my work cut out for me
+ blackburn	os252: puffin444_: see shogun/lib/malsar folder - a few examples of eigen3 code are here
+ puffin444_	okay
+ os252	Sorry. I was not aware that it's already sorted and ok to use Eigen in shogun; otherwise would have pointed this out earlier. Surely all the linalg you need is pretty messy...
+ puffin444_	Yes but it is workable
+ os252	I'd suggest to then use Eigen for the GP stuff. You can also mix and match as you see fit.
+ puffin444_	will do
+ puffin444_	os252, anything more you would like to discuss?
+ blackburn	actually you can gain pretty much with eigen3
+ blackburn	e.g. afaik lapack has no LDL'
+ blackburn	I remember you were using cholesky somewhere
+-!- cwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+ blackburn	oh famous cwidmer is in
+ blackburn	:)
+ puffin444_	yes actually everwhere :)
+ droopy	8)
+ blackburn	puffin444_: LDLT is something more stable IIRC
+ blackburn	works for semi-definite
+ puffin444_	okay
+ os252	Yes, Eigen has LDLT which is quite nice. It's also quite fast.
+ os252	I have some basic GP code for a very applied project in Eigen; I'd be happy to just send it. You could get some inspiration of Eigen for this purpose.
+ puffin444_	sure that would be great
+ os252	I'll just put it into an email and you'll see what you can use.
+ puffin444_	okay
+ os252	sent
+ os252	ok, anything else we should discuss now?
+ os252	Definitely ping when you need input on the sparse stuff.
+ puffin444_	nothing else on my mind
+ puffin444_	will do
+ os252	Great. Then happy coding!
+ puffin444_	ok! :)
+ os252	cu
+-!- os252 [~stegle@e179243147.adsl.alicedsl.de] has left #shogun []
+-!- os252 [~stegle@e179243147.adsl.alicedsl.de] has joined #shogun
+@sonney2k	wiking, so what is the problem / where are you stuck?
+@sonney2k	gsomix, how is it going?
+ gsomix	sonney2k, working and reading numpy code.
+ wiking	sonney2k: so solver
+ wiking	sonney2k: need to do some redesigning there to be able to handle both primal mosek and the bmrm solver
+ wiking	sonney2k: had a chat today with uricamic about it, and we've agreed on some changes
+@sonney2k	wiking, but you know what to do?
+@sonney2k	ok
+ wiking	yep
+ wiking	now i'm trying it out
+@sonney2k	ok then
+@sonney2k	gsomix, still about the slicing / dictionary?
+ gsomix	sonney2k, yes, this numpy code is not well commented.
+ gsomix	so, I'm doing experiments (as physicist hehe)
+-!- emrecelikten [~emre@176.40.251.10] has joined #shogun
+-!- puffin444_ [a6f986d8@gateway/web/freenode/ip.166.249.134.216] has left #shogun []
+@sonney2k	gsomix, but can't you determine the types of the PyObjects
+@sonney2k	wiking, is your PR ready to be merged or will it break things?
+@sonney2k	I meant will it still compile and other (unrelated) stuff still work.
+ wiking	sonney2k: it compiled for me
+ wiking	so it shouldn't break anything
+@sonney2k	wiking, ok then
+ gsomix	sonney2k, I can and I know that [a:b, c:d] in my_cool_features[bla, bla] is tuple
+@sonney2k	wiking, btw could you figure out why the linking error occurs on *bsd
+ wiking	sonney2k: not yet
+@sonney2k	gsomix, and the sub-elements?
+ wiking	sonney2k: that's a really weird thing
+ wiking	sonney2k: i think i have a conflict there... since most of the .so are compiled with cc and c++ (which is 4.2.x)
+ gsomix	sonney2k, hm, at know I can say that it is not array or sequence.
+ wiking	so that's why ldd shows that libshogun.so will depend on that other libstdc++
+@sonney2k	wiking, hmmhh mixture of gcc 3.X and 4.X?
+ wiking	yeah
+ wiking	sonney2k: since we have to use 4.6 gcc on that machine because of that gcc bug
+ wiking	but maybe i'm just doing something fishy there
+@sonney2k	wiking, well can you explicitly force gcc 4.6 for the examples then?
+ gsomix	sonney2k, yes!
+@sonney2k	gsomix, yes?!
+ gsomix	sub_elements are PySlices, huh.
+ gsomix	obviously
+@sonney2k	ok then :)
+ gsomix	but little deep in python docs.
+-!- rieck [~rieck@paul.ml.tu-berlin.de] has quit [Quit: ZNC - http://znc.sourceforge.net]
+ wiking	sonney2k: retrying again something
+ wiking	gmake[3]: Leaving directory `/usr/home/wiking/shogun-buildbot/bsd1_-_libshogun/build/examples/undocumented/libshogun'
+ wiking	Error expanding embedded variable.
+-!- rieck [~rieck@134.76.96.43] has joined #shogun
+ wiking	so sonney2k
+ wiking	i don't think that this patch did the job
+ wiking	https://github.com/shogun-toolbox/shogun/commit/98f4788015fdf04e71cd0a93748707a52e52a6c3
+ wiking	it's still calling make :(
+@sonney2k	wiking, please replace the test -n with test -z in check.sh
+@sonney2k	in the make line
+ CIA-18	shogun: Soeren Sonnenburg master * r96a80ed / examples/undocumented/libshogun/check.sh : use test -z not -n to use configured make - http://git.io/7-0mjA
+ wiking	ok
+ wiking	i've did this
+ wiking	 LIBRARY_PATH="LD_LIBRARY_PATH" LIB_PATH="//usr/local/lib"         INC_PATH="//usr/local/include" LIBS="-Xlinker --no-undefined  -lshogun" LD_LIBRARY_PATH=//usr/local/lib INCLUDES="-I. -I..  -I/usr/local/include/json   -I/usr/local/include/libxml2 -I/usr/local/include   -I../libshogun -I.." MAKE="gmake" ./check.sh
+ wiking	make
+ wiking	in check.sh i did an echo $MAke
+ wiking	i mean echo $MAKE
+ wiking	and it's make and not gmake
+ wiking	which is very weird
+@sonney2k	wiking, well either git pull again or change the test -n "$MAKE" line
+@sonney2k	to test -z
+ wiking	sonney2k: i'll wait now
+ wiking	since it's building
+ wiking	:)
+ wiking	and i was using the build dir of the bot to do the tests
+ wiking	3 more mins
+ wiking	sonney2k: is there a way to do gmake -j4 ?
+ wiking	or soemthing like this
+ wiking	sonney2k: ok so the problem is now the following
+ wiking	ok let me check it for 100% before i start telling b.s.
+ wiking	huh so first of all
+ wiking	not the right c++ is used for building the libshogun examples
+@sonney2k	wiking, set MAKEFLAGS="-j4"
+ wiking	sonney2k: i mean that u should change that in the buildbot
+ wiking	since there's really free cpu there in the machine
+ wiking	so
+ wiking	CC=c++
+ wiking	in examples/undocumented/libshogun/Makefile
+ wiking	which will not be ok, since i've used c++46 for building the libshogun
+ wiking	so that should be set as well by ./configure script not just when building libshogun itself
+ wiking	but the examples as well
+ wiking	but even then i'm seeing some weird shit
+ wiking	LD_LIBRARY_PATH=/usr/home/wiking/shogun-buildbot/bsd1_-_libshogun/build/src/shogun ./basic_minimal
+ wiking	this give me
+ wiking	/usr/lib/libstdc++.so.6: version GLIBCXX_3.4.11 required by /usr/home/wiking/shogun-buildbot/bsd1_-_libshogun/build/src/shogun/libshogun.so.12
+ wiking	i'm trying to find info about this
+ wiking	ok i think i see wtf
+ wiking	just a sec i'll try to experiment with some extra compiler flags
+ wiking	;)
+ wiking	ok i think the problem occures here when it's linking the libshogun.so
+ wiking	that it doesn't link it to the right libstdc++.so.6
+-!- os252 [~stegle@e179243147.adsl.alicedsl.de] has left #shogun []
+ gsomix	>> You probably do not want to use this function. | in python docs :)
+ wiking	woah i've just seen in a printed book a screenshot of netscape navigator :DDD
+ wiking	gsomix: then u most defintely should use it :)
+ droopy	cool!?! ;>
+ gsomix	droopy, what do you think about higgs boson?
+ droopy	i'll re-pm you on this serv if pm is actually 'private'!?!
+* gsomix sighs
+ CIA-18	shogun: Soeren Sonnenburg master * rfa6ce12 / (2 files in 2 dirs): pass COMP_CPP through for compiling libshogun examples - http://git.io/sudcZg
+@sonney2k	wiking, another attempt...
+ wiking	sonney2k: okey! will check
+ wiking	or wait till it builds
+@sonney2k	yeah better that then
+@sonney2k	wiking, btw do you have some nice graphics produced w/ the help of shogun?
+@sonney2k	I am trying to create some kind of gallery
+@sonney2k	illustrating various applications/use cases/benchmarks whatever for the new website
+ wiking	sonney2k: will do it for you
+ blackburn	I have one idea but I need someone blender skilled :D
+ droopy	grin ^_^
+ wiking	sonney2k: i'll create some screenshots for the latent svm
+ wiking	sonney2k: but we can even for fun make a webservice :)
+@sonney2k	blackburn, heh
+@sonney2k	wiking, you mean with security audited code like shogun's :D
+ wiking	sonney2k: let say there's a cat regonizer :) and people can just upload any images to see if it locates the cat (if there's one) in the pic
+@sonney2k	rieck, woudl cry :D
+ wiking	sonney2k: DDDD
+ wiking	sonney2k: :>
+ wiking	well then just screenshots
+@sonney2k	wiking, well ok that is certainly safe
+@sonney2k	well to some extend
+ wiking	blackburn: :>>>>>
+@sonney2k	(bugs in image parsing lib)
+@sonney2k	I think such examples are really highly needed
+@sonney2k	what shogun can do is too abstract for everyone...
+@sonney2k	except the authors :D
+ wiking	:P
+ wiking	ok i think i'll need to add this flag to the linker
+ blackburn	I still convinced shogun is used by ten guys
+ wiking	-Wl,-rpath,/usr/local/lib/gcc46
+ wiking	but i'll test this now
+ wiking	blackburn: :DDD
+ blackburn	worst thing is that  we have outdated version in ubuntu/debian
+ wiking	blackburn: dude i think the train set is down! :D
+ blackburn	wiking: what do you mean?
+ wiking	it downloaded :)))
+ wiking	that 135 gigs
+ blackburn	oooohh
+ blackburn	finally
+ blackburn	okay now i have no idea what to do with it
+ blackburn	:D
+ blackburn	I mean RealFeatures(traindat) wouldn't work here LOL
+@sonney2k	blackburn, no just I use shogun - you all only work for me *eg*
+ blackburn	sonney2k: yeah I tend to believe ;)
+ wiking	blackburn: well now i'll upload the whole thing into the hdfs on the cluster
+ wiking	and then we can run on it feature extractors
+ wiking	you've said you'll create a c based hog extractor
+ blackburn	aham I have to hurry up with hogs
+ wiking	i'll port that retina or what the fuck was that descriptr :)
+ blackburn	yeah FREAK
+ blackburn	I didn't call you freak :D
+ wiking	freak
+ wiking	:)
+ wiking	that's the one
+ wiking	sonney2k: hmmm did that run well with other builders?
+ wiking	i mean libshogun build this time
+ wiking	ok
+ wiking	sonney2k: almost... ;)
+ shogun-buildbot	build #176 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/176  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ wiking	error in gmake basic_minimal CC=c++46 LIBRARY_PATH=LD_LIBRARY_PATH LIB_PATH=//usr/home/wiking/shogun-buildbot/bsd1_-_libshogun/build/src/build/lib INC_PATH=//usr/home/wiking/shogun-buildbot/bsd1_-_libshogun/build/src/build/include LIBS=-Xlinker --no-undefined  -lshogun
+ wiking	error in ./basic_minimal
+ wiking	================================================================================
+ wiking	gmake: unrecognized option `--no-undefined'
+ wiking	sonney2k: oh ok it's the same for you apparently
+ shogun-buildbot	build #152 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/152  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	wiking, grmpf
+ CIA-18	shogun: Soeren Sonnenburg master * r2442926 / examples/undocumented/libshogun/check.sh : escape flags - http://git.io/0YZxtg
+ shogun-buildbot	build #153 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/153
+ blackburn	wiking: hmm it looks like my substitution we discussed last night was wrong
+ blackburn	sonney2k: are you busy with that building stuff?
+ blackburn	wiking: probably I do not cover negative and positive cases when I transform s.t. part
+ gsomix	sonney2k, ta dam!
+ rieck	 /msg *status loadmod colloquy
+ rieck	rah!
+ wiking	:)
+ wiking	sonney2k: ok
+ shogun-buildbot	build #177 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/177
+ wiking	sonney2k: i have the solution... but i really don't know how to add this into the configure script
+ wiking	so basically i would need to give this compiler flag: -Wl,-rpath,/usr/local/lib/gcc46
+ wiking	i'll try to see how's this solved usually
+ wiking	with the configure script
+ wiking	because now for some reason when c++46 is doing the linking
+ wiking	it uses the standard /usr/lib/ path for the libgcc and libstdc++ libs
+ wiking	and that'll break of course
+ wiking	since it's for c++ (which is 4.2..)
+ wiking	this is the only thing left to be solved and then we can enable libshogun tests on freebsd
+ gsomix	good night guys
+@sonney2k	wiking, yeah but that is wrong
+@sonney2k	gsomix, tada?
+ gsomix	sonney2k, ta dam.
+ gsomix	works
+@sonney2k	gsomix, cool
+ gsomix	my_cool_features[a,b:c,d]
+@sonney2k	PR'd alreadY?
+ gsomix	sonney2k, PR will be tomorrow.
+--- Log closed Fri Jul 20 00:00:05 2012

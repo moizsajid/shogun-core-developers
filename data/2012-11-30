@@ -1,0 +1,256 @@
+--- Log opened Fri Nov 30 00:00:15 2012
+ wiking	doh
+ wiking	why can't i sgvector<float64_t> -> numpy.array?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ shogun-buildbot	build #159 of nightly_all is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/159
+ shogun-buildbot	build #190 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/190
+-!- ptizoom [~christian@79-71-89-182.dynamic.dsl.as9105.com] has quit [Quit: Ex-Chat]
+-!- ptizoom [~christian@79-71-89-182.dynamic.dsl.as9105.com] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Remote host closed the connection]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ shogun-buildbot	build #191 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/191
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Remote host closed the connection]
+--- Log opened Fri Nov 30 06:13:47 2012
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 7 nicks [0 ops, 0 halfops, 0 voices, 7 normal]
+-!- Irssi: Join to #shogun was synced in 6 secs
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+@sonney2k	force build "deb3 - modular_interfaces"
+@sonney2k	shogun-buildbot, force build "deb3 - modular_interfaces"
+ shogun-buildbot	build #703 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	shogun-buildbot, force build "nightly_default"
+ shogun-buildbot	build #192 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #192 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/192
+ shogun-buildbot	Hey! build deb3 - modular_interfaces #703 is complete: Success [build successful]
+ shogun-buildbot	Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/703
+-!- ptizoom_ [~christian@79-71-89-182.dynamic.dsl.as9105.com] has joined #shogun
+-!- ptizoom [~christian@79-71-89-182.dynamic.dsl.as9105.com] has quit [Read error: Connection reset by peer]
+ shogun-buildbot	build #193 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/193
+@sonney2k	shogun-buildbot, force build "nightly_default"
+ shogun-buildbot	build #194 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/b2aa0873566ba5bca1285bd6dee2c0b62fb97951
+-shogungit:#shogun- shogun/master b2aa087 Soeren Sonnenburg: don't use memset in DynArray or zero unused memory
+ shogun-buildbot	build #194 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/194
+@sonney2k	wiking, please try again - I potentially fixed the dynarray issue
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/6ccd8005716581e70cfececef4cd96a5f8e977df
+-shogungit:#shogun- shogun/master 6ccd800 Soeren Sonnenburg: add forgotten example and fix minor typo
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ shogun-buildbot	build #704 of deb3 - modular_interfaces is complete: Failure [failed compile octave_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/704  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #705 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/705
+ wiking	sonney2k: ok
+ wiking	sonney2k: how do i dot product two SGVector in python/
+ wiking	?
+ wiking	as numpy.dot cannot work over RealVectors
+ sonne|work	wiking: errm how did you end up with RealVectors?
+ wiking	hehhe that's a good question
+ wiking	so i'm trying to put together this toy example in python for latent svm
+ wiking	i have a LatentFeatures that stores a vector of structures where each structure has an SGVector in it
+ wiking	and when i try to access the SGVector<float64_t> in that structure
+ wiking	i end up getting RealVectors
+ wiking	sonne|work: i've thought there's a mapping between np.array <-> and SGVector
+ wiking	but for some reason it doesn't kick in
+ sonne|work	wiking: no there is none
+ sonne|work	an SGVector will be translated to a numpy array
+ sonne|work	so that is why I wonder how you manage to create and SGVector (if not manuallly)
+ wiking	yeah that's what i wonder
+ wiking	why the translation does not kick in
+ sonne|work	wiking: how do you create it?
+ wiking	so i have a simple struct
+ wiking	struct CWhatever { CWhatever(SGVector<float64_t> x) : feature(x) {}  SGVector<float64_t> feature; };
+ sonne|work	yeah if you access feature you will get it
+ wiking	and in numpy i do this: Whatever(np.array([1.0,1.0])
+ sonne|work	if you do CWhatever(numpy.array(..)) you get the vector
+ sonne|work	inited
+ wiking	x = Whatever(np.array([1.0,1.0])
+ wiking	x.feature
+ sonne|work	lost
+ wiking	is not np.array
+ sonne|work	wiking: add a method get_vector()
+ sonne|work	then you will get the translated numpy.array
+ wiking	let's see
+ wiking	recompiling...
+ wiking	ok cool now it works
+ wiking	sonne|work: do u know why doesn't it kick in before?
+ wiking	sonne|work: ok another problem
+ blackburn	because typemaps work for return and input types
+ wiking	blackburn: mmm seems it doesn't work in case of this type of func arg
+ wiking	Whatever(np.array([1.0,1.0])
+ wiking	blackburn: virtual CData* infer_latent_variable(const SGVector<float64_t>& w, index_t idx)=0;
+ wiking	so when a reference to the sgvector is passed
+ wiking	then the translation doesn't kick in i guess
+ wiking	right
+ wiking	?
+ wiking	    dot = np.dot(x, w)
+ wiking	TypeError: unsupported operand type(s) for *: 'float' and 'RealVector'
+ blackburn	wiking: you mean if you overload it in python? yes
+ wiking	w is const SGVector<float64_t>& w
+ wiking	and i overload this func in python with the director
+ wiking	and w is RealVector
+ wiking	and not an np.array
+ wiking	so the definition of that function should be virtual CData* infer_latent_variable(const SGVector<float64_t> w, index_t idx);
+ wiking	i guess
+ wiking	but then it's really stupid
+ wiking	i mean passing the whole vector instead of a reference :S
+ wiking	blackburn: ?
+ blackburn	wiking: why not to pass whole vector?
+ wiking	that's a rather awkward question
+ wiking	why would i pass the whole thing on the stack
+ wiking	instead of it's reference?
+ blackburn	which whole thing? two pointers and length?
+ sonne|work	wiking: why do you use &w ?
+ wiking	sonne|work: as sizeof(int32_t) < sizeof(SGVector)
+ wiking	and that the copy ctor doesn't kick in
+ wiking	on the stack
+ blackburn	so you want microoptimization which makes things impossible? ;)
+ sonne|work	wiking: it is all lightweight - it increases refcount & copies ptr to data / size
+-!- hoijui [~hoijui@dslb-088-075-034-093.pools.arcor-ip.net] has joined #shogun
+ wiking	sonne|work: still i believe that especially when one just reads the object, there's really no need for passing the whole object
+ sonne|work	wiking: &w might be dangerous - no refcount increase - vector might be gone ...
+ wiking	i mean this is my common c++ coding style
+ blackburn	but you write python + C++ interaction now right?
+ wiking	blackburn: well i thought it'd be niceer to make
+ wiking	the example in python
+ blackburn	will that work with python?
+ wiking	seems i'm wrong :D
+ blackburn	I don't know anything about references in python
+ wiking	blackburn: well i guess it could if one does the typemapping
+ blackburn	hard references I mean, like in C++
+ wiking	blackburn: i've just read vaguely the reference manual for swig
+ blackburn	no as it wraps another object on top of it
+ blackburn	I think so
+ wiking	seems to be possible somehow
+ blackburn	it is not the issue to be solved I think - sizeof(SGVector) is just 3 ints
+ blackburn	I don't know internals of python but I am sure the overhead is much better and you will not gain anything here
+ blackburn	argh
+ blackburn	much worse :D
+ blackburn	python should wrap more things and if you gain 8 bytes
+ wiking	no i meant that why to waste resources when u dont really have to
+ wiking	not only 8 bytes
+ wiking	but ctor + dtor invocation
+ blackburn	again - if you have a way to use C++ references in swig feel free
+ wiking	blackburn: yeah trying to figure out :D
+ blackburn	but it is not worth to change anything if you have no way around it
+ wiking	blackburn: u should have been here the other day with k0stia
+ wiking	telling him this line: "blackburn> again - if you have a way to use C++ references in swig feel free"
+ wiking	:D
+ blackburn	yeah he thinks C++ and python interaction is just
+ blackburn	oneliner
+ wiking	i think the attitude got a bit weird there
+ wiking	when he was demanding a fix for his problem
+ wiking	and that starting to say that it's not proper how it is done now
+ sonne|work	wiking: don't use SGVector & if you don't have a compelling reason to do so
+ wiking	blackburn: ok i'm stripping off &
+ wiking	const would not be a problem, right? sonne|work ?
+ wiking	const SGVector<float64_t> would be still a numpy.array?
+ sonne|work	wiking: you could still modify vector.vec
+ blackburn	should be but what you are going to const here?
+ wiking	blackburn: sgvector itself
+ wiking	sonne|work: u mean SGVector.vector?
+ wiking	sonne|work: it's still a weird SWIG type thingy
+ blackburn	I see nothing more safe in case of SWIG
+ wiking	compiling .... let's see
+ sonne|work	wiking: look - if you use multiple threads
+ sonne|work	your reference might have become invalid
+ sonne|work	so don't use it if you can avoid it
+ wiking	look at us, discussing true geeky stuff :D
+ wiking	how adoreable we are ;)
+ wiking	sonne|work: alright
+ wiking	sonne|work: anyways this example took more time than i thought in the first place and i want it to see it working
+ wiking	blackburn: so i have this struct name now: MILFeature
+ blackburn	hahaha OKAY
+ wiking	i'm tempted to keep it like this :)
+ sonne|work	MissinInLaFace?
+ wiking	sonne|work: fyi: http://en.wikipedia.org/wiki/MILF
+ wiking	ah ok sorry: http://en.wikipedia.org/wiki/MILF_%28slang%29
+ wiking	but yeah it's MIL = multiple instance learning
+ sonne|work	Moro Islamic Liberation Front,
+ wiking	sonne|work: hahahah pure guys really took a bad name
+ blackburn	oh good boy sonne|work doesn't know such bad words
+ wiking	blackburn: :D
+ sonne|work	ahh stiflers mom
+ wiking	lol face!!!
+ wiking	i still get RealVector
+ wiking	y u NO WORK!
+ blackburn	u can haz realvector
+ wiking	r no want realvector
+ wiking	ok i stripped of const-nes as well
+ wiking	better be working now!
+ wiking	mmm
+ wiking	why is there this shogun/features/DenseSubsetFeatures.cpp when it is completely empty!?
+ wiking	pluskid made there some funky stuff
+ wiking	ok
+ wiking	there's seomthing wrong :(
+ wiking	CData* CDirectorLatentModel::infer_latent_variable(SGVector<float64_t> w, index_t idx)
+ wiking	and when i override this in python
+ wiking	w is <Swig Object of type 'shogun::SGVector< double > *' at 0x10a514030>
+ wiking	:S
+ wiking	ideas?
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Quit: Leaving.]
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+ blackburn	wiking: what do you want to get?
+ sonne|work	ahh ok with directors yes
+ wiking	i want numpy.array
+ wiking	:D
+ wiking	i cannot?
+ blackburn	no, I don't think so
+ sonne|work	wiking: ohh that can become difficult... there are director in/out typemaps
+ sonne|work	but I would rather deal with SGVector directly here
+ wiking	ookey
+ sonne|work	for performance sanity
+ blackburn	there is no such thing like magic
+ sonne|work	otherwise your SGVector -> numpy -> SGVector
+-!- hoijui [~hoijui@dslb-088-075-034-093.pools.arcor-ip.net] has quit [Quit: Leaving]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+ wiking	sonne|work: here?
+ sonne|work	?
+ wiking	sonne|work: am i wrong when i think that svmocas should be able to find a w that can classify a toy dataset where -1.0 labelled ones are points from a gaussian with mean 5.0 and variance 1.0 while +1.0 labelled ones are from a mean of 100.0 and variance 1.0
+ wiking	and yeah it's only 1 dim
+ sonne|work	sure yes
+ wiking	you mean it should be able?
+ wiking	because i've just tried with svmocas
+ wiking	and no good :(
+ wiking	same with liblinear
+ wiking	i mean esseintially in this very stupid toy example
+ wiking	w*100 should be positive
+ wiking	and w*5.0 'should' be negative
+ wiking	but that's not possible of course :P
+ sonne|work	wiking: did you disable the bias term?
+ sonne|work	bias is regularized but still
+ sonne|work	w=0 and b sth like -30 :)
+ wiking	sonne|work: but how would it be possible to find a number (w) that gives negative values for numbers around 5.0
+ wiking	but positive ones for ~100.0
+ sonne|work	not possible - you need a bias term
+ sonne|work	center the data (zero mean) and try again otherwise
+ wiking	i've enabled now bias
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Quit: Leaving.]
+@sonney2k	wiking, and?
+@sonney2k	w/ bias all good?
+@sonney2k	wiking, btw how about introducing SGVector<T> SGVector<T>::get()
+ wiking	sonney2k: yeah that'd be a nice helper for pythno
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/0372dd02f75d03be23b7d03a1d1ce1829617282a
+-shogungit:#shogun- shogun/master 0372dd0 Soeren Sonnenburg: add getters for SG data types to enable further typemap converted...
+@sonney2k	ok then
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/57d201ef0d2e85bd21c9a85302d308bb1d4461b3
+-shogungit:#shogun- shogun/master 57d201e Soeren Sonnenburg: use malloc instead of calloc in dynarray
+-!- travis-ci [~travis-ci@ec2-23-22-85-244.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/3437261
+-!- travis-ci [~travis-ci@ec2-23-22-85-244.compute-1.amazonaws.com] has left #shogun []
+-!- travis-ci [~travis-ci@ec2-23-22-85-244.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/3437336
+-!- travis-ci [~travis-ci@ec2-23-22-85-244.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #706 of deb3 - modular_interfaces is complete: Failure [failed compile octave_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/706  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #596 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/596  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #133 of ubu1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ubu1%20-%20libshogun/builds/133  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #707 of deb3 - modular_interfaces is complete: Failure [failed compile octave_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/707  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #128 of rpm1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/128  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ wiking	mmm it failed :(
+@sonney2k	wiking, that is my malloc instead of calloc stuff
+ wiking	mmmm
+ wiking	githuuuuub
+ wiking	y u no work
+--- Log closed Sat Dec 01 00:00:38 2012

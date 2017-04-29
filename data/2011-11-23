@@ -1,0 +1,127 @@
+--- Log opened Wed Nov 23 00:00:51 2011
+-!- in3xes [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.230] has quit [Ping timeout: 260 seconds]
+-!- in3xes [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.230] has quit [Ping timeout: 240 seconds]
+-!- in3xes [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.230] has quit [Ping timeout: 252 seconds]
+-!- in3xes [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.230] has quit [Ping timeout: 240 seconds]
+ CIA-37	shogun: Soeren Sonnenburg master * recdb955 / (3 files in 3 dirs): rb_require narray on modshogun module load - http://git.io/JHWmTw
+-!- policecar [5ce7be6e@gateway/web/freenode/ip.92.231.190.110] has joined #shogun
+ policecar	hey hey, i'm manually installing shogun 1.0.0 on snowleopard and trying to make it work with a macports installed python2.6. do you happen to know where i need to put the shogun binaries for this python to be able to see the module? basically i'm looking for a macport not fink path version of /usr/local/lib/python2.6/dist-packages/ ...
+-!- policecar_ [~policecar@g231190110.adsl.alicedsl.de] has joined #shogun
+-!- policecar [5ce7be6e@gateway/web/freenode/ip.92.231.190.110] has quit [Quit: Page closed]
+-!- policecar_ is now known as policecar
+ sonne|work	policecar: please try shogun from git
+ sonne|work	or did it compile OK already
+ sonne|work	(I did a lot of fixes recently)
+ policecar	it compiled just fine. but thanks for the hint.
+ sonne|work	ok then
+ sonne|work	just search for e.g. modshogun.py
+ policecar	i just solved the problem by adding /usr/local/lib/python2.6/dist-packages to the pythonpath a moment ago
+ policecar	which is not nice but it works for now
+ sonne|work	exactly what you should be doing :)
+ policecar	maybe i missed the instruction
+ policecar	thanks for getting back to me!
+ sonne|work	policecar: well no - in principle it should work out of the box but everyone is cooking his own soup
+ policecar	yep
+-!- policecar [~policecar@g231190110.adsl.alicedsl.de] has quit [Quit: policecar]
+-!- policecar [~policecar@g231190110.adsl.alicedsl.de] has joined #shogun
+-!- policecar [~policecar@g231190110.adsl.alicedsl.de] has quit [Client Quit]
+-!- policecar [~policecar@g231190110.adsl.alicedsl.de] has joined #shogun
+-!- policecar [~policecar@g231190110.adsl.alicedsl.de] has left #shogun []
+-!- blackburn [~blackburn@188.168.4.253] has joined #shogun
+ blackburn	sonney2k: so is GLPK the only way to make MKL regression work?
+ CIA-37	shogun: Soeren Sonnenburg master * rbd6dcde / (5 files in 3 dirs):
+ CIA-37	shogun: get ruby back to work
+ CIA-37	shogun: - add configure option --ruby to be able to specify the ruby version to be used
+ CIA-37	shogun: - use rb_cObject instead of ruby_class to fix undefined symbol error
+ CIA-37	shogun: - beautify example - http://git.io/5PAJog
+@sonney2k	blackburn, no - we have mkl_regression_3sine_waves.m for example
+@sonney2k	so it works with regression too
+ blackburn	sonney2k: what is the problem then?
+@sonney2k	I need to reboot again to check if things work under osx
+@sonney2k	cu
+ blackburn	ok
+@sonney2k	blackburn, yes works all nice now
+@sonney2k	:D
+ blackburn	sonney2k: ruby?
+@sonney2k	yes
+ blackburn	nice
+@sonney2k	really weird hack I am using...
+@sonney2k	we no longer link to narray.so
+@sonney2k	but instead open it with dlopen
+@sonney2k	and then extract the few needed functions
+@sonney2k	with dlsym
+@sonney2k	regarding mkl + regression I suspect kernels are not properly normalized
+ blackburn	sonney2k: similar to java I would say?
+ blackburn	sonney2k: have you seen tikz? completely crazy stuff http://www.texample.net/tikz/examples/seismic-focal-mechanism-in-3d-view/
+@sonney2k	one potential fix would be to use the sqrtdiag kernel normalizer
+@sonney2k	latex wizardry...
+ blackburn	sonney2k: the problem I have now is after changing script there is an index error..
+ blackburn	i.e. before train one kernel is used
+@sonney2k	I am not sure what you are saying
+ blackburn	sonney2k: mkl is trained with one combined kernel
+ blackburn	then another is set
+@sonney2k	yes
+ blackburn	and apply is called
+@sonney2k	yes
+ blackburn	and I receive index errors
+ blackburn	in apply
+@sonney2k	in the example I pushed?
+ blackburn	no
+@sonney2k	in which?
+ blackburn	in the example I sent to you with dropbox
+ blackburn	if you have time please take a look
+ blackburn	hmm
+ blackburn	then if I change this line:
+ blackburn	cols,rows = numpy.meshgrid(test_idxs2,train_idxs2)
+ blackburn	it segfaults..
+@sonney2k	which line?
+@sonney2k	which file
+ blackburn	mkl_regression_cv.py
+ blackburn	77
+@sonney2k	damn complex example
+ blackburn	sonney2k: sorry, it is a port of example madeleine uses
+ blackburn	in java it was even worse
+ blackburn	sonney2k: I rewrote whole example trying to solve her issue
+ blackburn	and it leaded to another issues..
+@sonney2k	GLPK can only be used with mkl_norm=1
+@sonney2k	great
+@sonney2k	I guess this is kind of spaghetti research code
+ blackburn	sonney2k: it is CV in fact
+@sonney2k	blackburn, why are you using meshgrid
+ blackburn	sonney2k: what to use?
+@sonney2k	just index oeprations
+@sonney2k	operations
+ blackburn	ehmm won't it be diags?
+@sonney2k	like m[idx][:,idx] ?
+ shogun-buildbot	build #235 of ruby_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/235
+ blackburn	sonney2k: is it a share file? did you file changed anyhow?
+ blackburn	your*
+@sonney2k	sry but I don't have time now - just ask I will answer late
+@sonney2k	are
+ blackburn	sonney2k: ok sure
+@sonney2k	blackburn, any news?
+ blackburn	sonney2k: no, I'm still pretty busy with my semester work :(
+ blackburn	sonney2k: ah yes, I've got with segfault labels
+ blackburn	with this example
+ blackburn	==15121== Invalid read of size 1
+ blackburn	==15121==    at 0x8B2F49F: make_contiguous(_object*, int*, int, int, bool) (modshogun_wrap.cxx:4177)
+ blackburn	==15121==    by 0x8E56143: _wrap_new_Labels__SWIG_2 (modshogun_wrap.cxx:261084)
+ blackburn	==15121==    by 0x8E5671C: _wrap_new_Labels (modshogun_wrap.cxx:261181)
+@sonney2k	impressive that you always find sth new...
+@sonney2k	no way to do anything about it w/o seeing line 4177
+ blackburn	sonney2k: I guess it is free flag issue
+ blackburn	  4177     if (PyArray_ISFARRAY(ary) && !force_copy)
+ blackburn	  4178     {
+ blackburn	  4179         array = ary;
+ blackburn	  4180         *is_new_object = 0;
+ blackburn	  4181     }
+ blackburn	  4173 static PyObject* make_contiguous(PyObject* ary, int* is_new_object,
+ blackburn	  4174                                int dims, int typecode, bool force_copy=false)
+ blackburn	  4175 {
+ blackburn	  4176     PyObject* array;
+ blackburn	sonney2k: not really better I would say :)
+--- Log closed Thu Nov 24 00:00:13 2011

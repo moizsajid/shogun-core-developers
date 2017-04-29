@@ -1,0 +1,465 @@
+--- Log opened Mon Mar 10 00:00:05 2014
+--- Day changed Mon Mar 10 2014
+@HeikoS	lambday: in the b-test paper code?
+ lambday	HeikoS: yeah... oh and they used 0 mean as well
+@HeikoS	lambday: so thats exactly what we do for the linear time mmd
+@HeikoS	lambday: just that this is not really a linear time estimate ;)
+@HeikoS	lambday: they cheated there
+@HeikoS	we would just use the diagonal of this matrix
+@HeikoS	lambday: or in fact block averages
+@HeikoS	lambday: can you send me the githuvb page?
+ lambday	HeikoS: yeah.. just a sec
+ lambday	HeikoS: https://github.com/wojzaremba/btest
+@HeikoS	lambday: yeah, so they cheat for the variance
+ lambday	HeikoS: http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance Parallel algorithm -
+ lambday	talks about blocks
+@HeikoS	lambday: oh yeah, its totally possible to compute the blocks using multicore, everything is independent
+@HeikoS	lambday: good idea and extension :)
+@HeikoS	but check the btest.m file first
+ lambday	HeikoS: yeah
+ lambday	so that implementation is incorrent?
+@HeikoS	there they iterate over the blocks
+@HeikoS	lambday: nono its fine
+@HeikoS	but they compute a h-term for every block
+ lambday	yeah
+@HeikoS	so that mean(hh) is the simple average of the blocks
+@HeikoS	and var is the covariance (computed in quadratic time)
+@HeikoS	we compute the variance in linear time via doing running averages, thats very similar to what I did in the linear time MMD code
+@HeikoS	for computing the covariance matrix between the kernels
+ lambday	HeikoS: umm I am confused - do you mean https://github.com/lambday/shogun/blob/develop/src/shogun/statistics/LinearTimeMMD.cpp#L226 this is how it should be done?
+@HeikoS	lambday: yeah, this is just a running average of the individual statistic values
+ lambday	HeikoS: this one for computing covariance matrix - https://github.com/lambday/shogun/blob/develop/src/shogun/statistics/LinearTimeMMD.cpp#L505
+@HeikoS	lambday: for covariance matrix its also similar, since this covariance is between kernels
+ lambday	yeah!
+@HeikoS	I think the code should be re-usable, just compouting the statistic should be different
+@HeikoS	first it was running average/variance of these linear time estimates
+@HeikoS	now it is a running average/variance of those quadratic time block estimates
+@HeikoS	lambday: but it will be very easy to verify - using the permutation
+ lambday	HeikoS: ah this part has to be copied - I can't think of any clever way to separate this nicely :-/
+ lambday	HeikoS: and I didn't get the verify point :(
+@HeikoS	lambday: why copy?
+@HeikoS	lambday: should be done in streaming mmd I guess
+@HeikoS	that was the whole point of having a shared base class wasnt it?
+ lambday	HeikoS: put that part into another function?
+@HeikoS	lambday: yeah
+@HeikoS	both linear time mmd and btest just do this online mean/variance of something
+ lambday	HeikoS: alright - shall we do the same for covariance as well? cause we'd be computing that between kernels for btest too, right?
+ lambday	HeikoS: I mean, move that online algorithm into another function
+@HeikoS	lambday: yeah!
+@HeikoS	lambday: and for the verification:
+@HeikoS	lambday: we can just compute the null distribution via the permutation test
+@HeikoS	lambday: which gives the ground truth
+@HeikoS	lambday: and then we can compare this to the Gaussian from variance approximation
+ lambday	HeikoS: oh got it
+-!- gif [~gif@130.195.253.57] has joined #shogun
+ lambday	HeikoS: well I think both these methods can be moved to parent - things would be exactly same (except for the value of m2 which would be m/2 for linear and m for btest, which we can just pass via an additional arg)... things are exactly same!
+@HeikoS	lambday: yeah, indeed
+@HeikoS	lambday: I have to go to bed, see you tomorrow!
+ lambday	HeikoS: okay :) good night man!
+@HeikoS	lambday: good night
+-!- HeikoS [~heiko@ip-176-199-255-21.unitymediagroup.de] has quit [Quit: Leaving.]
+-!- lambday [67157f54@gateway/web/freenode/ip.103.21.127.84] has quit []
+-!- gif [~gif@130.195.253.57] has quit [Ping timeout: 264 seconds]
+-!- abinash_panda [75ef5e6f@gateway/web/freenode/ip.117.239.94.111] has joined #shogun
+-!- gif [~gif@130.195.253.57] has joined #shogun
+-!- gif_ [~gif@130.195.253.57] has joined #shogun
+-!- gif [~gif@130.195.253.57] has quit [Read error: Connection reset by peer]
+-!- gif_ [~gif@130.195.253.57] has quit [Remote host closed the connection]
+-!- gif [~gif@130.195.253.57] has joined #shogun
+-!- sunil1337 [0e8bd057@gateway/web/freenode/ip.14.139.208.87] has joined #shogun
+-!- sunil1337 [0e8bd057@gateway/web/freenode/ip.14.139.208.87] has left #shogun []
+-!- gif [~gif@130.195.253.57] has quit [Remote host closed the connection]
+-!- gif [~gif@130.195.253.57] has joined #shogun
+-!- gif [~gif@130.195.253.57] has quit [Remote host closed the connection]
+-!- gif [~gif@130.195.253.57] has joined #shogun
+-!- gif [~gif@130.195.253.57] has quit [Remote host closed the connection]
+-!- pranet [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- luckyjoon [12bd77d6@gateway/web/freenode/ip.18.189.119.214] has joined #shogun
+ luckyjoon	hello
+-!- pranet [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Quit: Page closed]
+-!- luckyjoon [12bd77d6@gateway/web/freenode/ip.18.189.119.214] has quit [Quit: Page closed]
+-!- witness___ [uid10044@gateway/web/irccloud.com/x-znsfgwuamstauosi] has joined #shogun
+ witness___	hi
+-!- tnosovich [~tnosovich@91.217.162.238] has quit [Ping timeout: 264 seconds]
+-!- abinash_panda [75ef5e6f@gateway/web/freenode/ip.117.239.94.111] has quit [Ping timeout: 245 seconds]
+-!- sonne|osx [~sonne@89.204.139.157] has joined #shogun
+-!- sonne|osx [~sonne@89.204.139.157] has quit [Quit: sonne|osx]
+-!- abinash_panda [0e8b2997@gateway/web/freenode/ip.14.139.41.151] has joined #shogun
+@besser82	wiking, lisitsyn: is there any specific reason to have the makefile in examples-dir to be purged?
+-!- kislay [~kislay@93.114.45.13] has joined #shogun
+@wiking	besser82: yeah i thought there's no need for it... and if so we can reproduce that by a cmakefile or?
+-!- kprah [67157d4c@gateway/web/freenode/ip.103.21.125.76] has joined #shogun
+ kprah	were we supposed to have a meet today?
+@wiking	see the dopic
+@wiking	*topic
+@wiking	there's every monday a general session
+ kprah	ok.
+ kprah	Today's topic is GSOC/slammtisch then?
+-!- kislay [~kislay@93.114.45.13] has quit [Ping timeout: 264 seconds]
+-!- kprah [67157d4c@gateway/web/freenode/ip.103.21.125.76] has quit [Ping timeout: 245 seconds]
+-!- abinash_panda [0e8b2997@gateway/web/freenode/ip.14.139.41.151] has quit [Ping timeout: 245 seconds]
+-!- kislay [~kislay@93.114.45.13] has joined #shogun
+-!- PirosB3 [~pirosb3@162.219.6.191] has joined #shogun
+ PirosB3	goodmorning
+ PirosB3	hi sonney2k thanks for the comments on the PR. why should we not use init_hogun exit_shogun in modular?
+-!- kislay [~kislay@93.114.45.13] has quit [Ping timeout: 264 seconds]
+-!- lisitsyn [~lisitsyn@109-226-71-150.clients.tlt.100megabit.ru] has quit [Quit: Leaving.]
+-!- lisitsyn [~lisitsyn@109-226-71-150.clients.tlt.100megabit.ru] has joined #shogun
+-!- ashwink [67157e57@gateway/web/freenode/ip.103.21.126.87] has joined #shogun
+-!- ashwink [67157e57@gateway/web/freenode/ip.103.21.126.87] has left #shogun []
+-!- ashwink [67157e57@gateway/web/freenode/ip.103.21.126.87] has joined #shogun
+-!- ashwink [67157e57@gateway/web/freenode/ip.103.21.126.87] has left #shogun []
+-!- ashwink [67157e57@gateway/web/freenode/ip.103.21.126.87] has joined #shogun
+-!- ashwink [67157e57@gateway/web/freenode/ip.103.21.126.87] has left #shogun []
+-!- PirosB3 [~pirosb3@162.219.6.191] has quit [Quit: PirosB3]
+-!- dhruv13 [~dhruv13@84.64.13.90] has joined #shogun
+-!- sonne|work [~sonnenbu@24-134-74-216-dynip.superkabel.de] has joined #shogun
+-!- kislay [~kislay@93.114.45.13] has joined #shogun
+-!- PirosB3 [~pirosb3@162.219.6.191] has joined #shogun
+-!- PirosB3 [~pirosb3@162.219.6.191] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@162.219.6.191] has joined #shogun
+-!- Sunil_ [0e8bd057@gateway/web/freenode/ip.14.139.208.87] has joined #shogun
+-!- PirosB3 [~pirosb3@162.219.6.191] has quit [Quit: PirosB3]
+-!- dhruv13 [~dhruv13@84.64.13.90] has quit [Ping timeout: 240 seconds]
+-!- Sunil_ [0e8bd057@gateway/web/freenode/ip.14.139.208.87] has quit [Ping timeout: 245 seconds]
+-!- PirosB3 [~pirosb3@162.219.6.191] has joined #shogun
+-!- PirosB3 [~pirosb3@162.219.6.191] has quit [Client Quit]
+-!- abinash_panda [0126170c@gateway/web/freenode/ip.1.38.23.12] has joined #shogun
+-!- FSCV [~FSCV@189.203.250.138] has joined #shogun
+-!- FSCV [~FSCV@189.203.250.138] has quit [Client Quit]
+-!- jiaolong [9e6d09e4@gateway/web/freenode/ip.158.109.9.228] has joined #shogun
+-!- jiaolong [9e6d09e4@gateway/web/freenode/ip.158.109.9.228] has left #shogun []
+-!- jiaolong [9e6d09e4@gateway/web/freenode/ip.158.109.9.228] has joined #shogun
+-!- witness___ [uid10044@gateway/web/irccloud.com/x-znsfgwuamstauosi] has quit [Quit: Connection closed for inactivity]
+-!- [paladin] [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- kprah [67157d4c@gateway/web/freenode/ip.103.21.125.76] has joined #shogun
+-!- kprah [67157d4c@gateway/web/freenode/ip.103.21.125.76] has quit [Ping timeout: 245 seconds]
+-!- kprah [67157f4c@gateway/web/freenode/ip.103.21.127.76] has joined #shogun
+-!- kprah [67157f4c@gateway/web/freenode/ip.103.21.127.76] has quit [Client Quit]
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has joined #shogun
+-!- PirosB3 [~pirosb3@162.219.6.191] has joined #shogun
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Ping timeout: 240 seconds]
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has joined #shogun
+-!- witness___ [uid10044@gateway/web/irccloud.com/x-ylzuqzgmsbzbgkfd] has joined #shogun
+-!- bumblebee [~quassel@202.78.172.162] has joined #shogun
+-!- bumblebee is now known as Guest31547
+-!- Guest31547 [~quassel@202.78.172.162] has quit [Client Quit]
+-!- bumblebee_ [~quassel@202.78.172.162] has joined #shogun
+ bumblebee_	just wanted to know, while making a pull request, i send it from "username/my_personal_develop" branch to the main "shogun/develop" branch?
+-!- Cheparukhin [b064f6fe@gateway/web/freenode/ip.176.100.246.254] has joined #shogun
+ PirosB3	hey guys, are we doing Stammtisch today?
+-!- HeikoS [~heiko@p4FED46C2.dip0.t-ipconnect.de] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- bumblebee_ [~quassel@202.78.172.162] has quit [Ping timeout: 252 seconds]
+-!- dhruv13 [~dhruv13@84.64.13.237] has joined #shogun
+ pickle27	sup
+ pickle27	wanna deploy the site now sonney2k
+-!- sonne|osx [~sonne@e177086223.adsl.alicedsl.de] has joined #shogun
+ sonne|osx	pickle27: hey there
+ pickle27	hey
+ sonne|osx	pickle27: maybe you want to do the upgrades yourself?
+ PirosB3	Hey guys, I just posted on the ML a new restructured version of the Shogun SaaS spec. If anyone wants to have a look and has some comments, be my guest :) The doc is available here: https://docs.google.com/document/d/1KISZL6lyeR-RvWEycTKqOunr3gwrA3PUnxZ8hiJYfgw/edit#heading=h.k3bcyd74up5z
+ pickle27	Im pretty indifferent, you were able to do them pretty quick before
+ pickle27	its just 2 simple evolutions and then we're done
+ sonne|osx	pickle27: well it makes sense if you do the releases of the webstuff in the future yourself anyways - right?
+ pickle27	yeah sure
+ pickle27	what do I need?
+ pickle27	also I lost that ssh key when I re did my home computer
+@HeikoS	sonne|osx: getting food now, back in 40 mins
+ sonne|osx	pickle27: okido then please guide me what to do
+-!- kislay [~kislay@93.114.45.13] has quit [Ping timeout: 244 seconds]
+ pickle27	so deploy the latest code
+ pickle27	then run
+ pickle27	./manage evolve --execute
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	Goedenavond :)
+-!- Cheparukhin [b064f6fe@gateway/web/freenode/ip.176.100.246.254] has quit [Ping timeout: 245 seconds]
+-!- Osho_ [0e8b2998@gateway/web/freenode/ip.14.139.41.152] has joined #shogun
+ sonne|osx	ok I did evolve
+ pickle27	everything ran good?
+ sonne|osx	well evolutions successfol
+ pickle27	okay sweet!
+ sonne|osx	ok restarting servers
+ pickle27	ohhhh
+ pickle27	okay I tried to load something
+ pickle27	and it was all down
+ pickle27	and I was freaking out for a sec
+ sonne|osx	pickle27: looks good to me
+ sonne|osx	pickle27: some minor thing - on the thumbnail scroll thing at the bottom we have some overlap of the cursor with the image
+ pickle27	subpages aren't loading but I think we just need to merge the next 2 PRs
+ sonne|osx	pickle27: ohh ok
+-!- kislay [~kislay@93.114.45.13] has joined #shogun
+ sonne|osx	pickle27: then be quick!
+ pickle27	sonne|osx: can you run a ./manage syncdb
+ sonne|osx	pickle27: well I did
+ pickle27	like just now?
+ sonne|osx	Creating tables ...
+ sonne|osx	Installing custom SQL ...
+ sonne|osx	Installing indexes ...
+ sonne|osx	Installed 0 object(s) from 0 fixture(s)
+ pickle27	hmm
+-!- Osho_ [0e8b2998@gateway/web/freenode/ip.14.139.41.152] has left #shogun []
+ pickle27	cause whats happening is that there is a column in the db that django doesn't understand
+ pickle27	but that column was supoosed to be removed by the evolution
+-!- kislay [~kislay@93.114.45.13] has quit [Read error: Connection reset by peer]
+-!- kprah [67157e4c@gateway/web/freenode/ip.103.21.126.76] has joined #shogun
+ pickle27	sonne|osx: what was the output from the evolution?
+ pickle27	can you try and run them again?
+ kprah	wiking: hey!
+@sonney2k	pickle27, then it says No evolution required.
+ pickle27	damn
+ pickle27	I mean I can add the line back to the model and it will stop crashing
+ pickle27	but deleting that old foreign key was the whole point
+ kprah	\msg wiking Should I unify all the bundle solvers : primal and bmrm to a single cutting plane solver?
+ pickle27	sonney2k: we have 2 options
+ pickle27	we can put the line in the modelback so it knows what to do with that field
+ pickle27	or we drop the column manually
+ pickle27	I don't know if django will like that
+ sonne|osx	pickle27: what would I need to run?
+ pickle27	you'd have to open mysql and run
+ pickle27	ALTER TABLE pages_articles DROP COLUMN rootsubpage
+ pickle27	if that fails we'll probably have to restore the db
+ sonne|osx	ALTER TABLE pages_articles DROP COLUMN rootsubpage;
+ sonne|osx	ERROR 1146 (42S02): Table 'shogun.pages_articles' doesn't exist
+ pickle27	okay I guess the table name wrong
+ pickle27	can you print a schema of the db?
+ PirosB3	need some Django help guys?
+ pickle27	sure feel free to help out
+ pickle27	I ran an evolution to drop an old column
+ pickle27	but its not happy about it
+ PirosB3	what migration app are you using? south?
+-!- drbabayeve [~drbabayev@193.104.110.150] has joined #shogun
+ pickle27	evolution
+ PirosB3	ash, never used
+ pickle27	I think we need to dump the db reset and restore
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Ping timeout: 244 seconds]
+ PirosB3	can you paste bin the evolution file?
+ PirosB3	and the error?
+ PirosB3	also, is the schema available online somewhere?
+ pickle27	https://github.com/shogun-toolbox/shogun-web/commit/14eb44b62c961da9112d6b4beb61b76076ea8a89
+ pickle27	the evolution runs fine
+ pickle27	the issue is django is still finding the field somehow
+ pickle27	\and then its not on the model so its throwing an error
+ PirosB3	mm interesting..
+ PirosB3	did you grep for the field name?
+ PirosB3	but did the migration finish successfully?
+-!- kprah [67157e4c@gateway/web/freenode/ip.103.21.126.76] has left #shogun []
+ pickle27	I have not greped for the field name
+ pickle27	yes the evolution ran successfuly
+ PirosB3	interesting, so where is it failing
+ PirosB3	can you paste the trace?
+ pickle27	wait
+ pickle27	I might have found it
+ pickle27	sonney2k:
+ pickle27	found it
+ pickle27	its a stray field
+ pickle27	thanks PirosB3
+ PirosB3	no worries :) glad you found it ;)
+ sonne|osx	pickle27: so now what?
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun-web: Kevin Hughes :master * 12db238 / pages/admin.py,pages/models.py: https://github.com/shogun-toolbox/shogun-web/commit/12db238950528b6e01b7990642038e6427c7c4de
+ shogun-notifier-	shogun-web: removes legacy models
+ shogun-notifier-	shogun-web: Kevin Hughes :master * 581ec39 / pages/admin.py,pages/models.py: https://github.com/shogun-toolbox/shogun-web/commit/581ec394389416a02ed75d8e6b1d4b83e5224c80
+ shogun-notifier-	shogun-web: Merge pull request #58 from pickle27/drop_tables_time
+ shogun-notifier-	shogun-web:
+ shogun-notifier-	shogun-web: removes legacy models
+ pickle27	sonney2k: can you deploy latest code
+@HeikoS	heya!
+ pickle27	it should be fine
+ pickle27	after that
+ lisitsyn	hey guys I have something to say about plugins :D
+ lisitsyn	who cares? ;)
+ pickle27	sonney2k: after deploy run ./manage syncdb
+ pickle27	it should drop the old tables
+@HeikoS	lisitsyn: I dont
+@HeikoS	hahaha ;)
+ lisitsyn	haha I knew
+@HeikoS	lisitsyn: no please shoot I want to have that
+@HeikoS	lisitsyn: loosing too much lifetime waiting for shogun to compile
+-!- kprah [67157d4c@gateway/web/freenode/ip.103.21.125.76] has joined #shogun
+ lisitsyn	okay I actually started something as I have absolutely no clue
+ lisitsyn	https://github.com/lisitsyn/plugins-playground
+ lisitsyn	it is quite easy to load library and stuff
+ lisitsyn	current version just loads some .so dynamically and calls method
+ lisitsyn	so the thing is that how do we go next
+ lisitsyn	basically what I see is
+ lisitsyn	we have to have some base classes
+ lisitsyn	as classifier multiclass classifier etc
+@HeikoS	lisitsyn: oh wow
+@HeikoS	cool that already works
+ lisitsyn	but we'd have to stick to some get("parametername",value);
+ lisitsyn	otherwise we can't get getter
+ lisitsyn	:D
+ lisitsyn	let me explain
+@HeikoS	lisitsyn: is that now parameter framework or plugins?
+@HeikoS	or both at once?
+ lisitsyn	HeikoS: they are pretty much linked together it seems
+ lisitsyn	so what I mean is
+ lisitsyn	imagine we have super svm
+@HeikoS	lisitsyn: mmh so those getters are like ultra slow right?
+ lisitsyn	and it has parameter heiko
+@HeikoS	lisitsyn: what to do with iterating over matrices?
+@HeikoS	and stuff like that?
+@HeikoS	or do we only do that for CSGObject like getters?
+@HeikoS	or how?
+ lisitsyn	that's the question
+ lisitsyn	so our super svm has parameter heiko = 3
+@HeikoS	access should be O(1) not O(1000)
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ lisitsyn	haha O(1000)
+@HeikoS	iglesiasg: greetings!
+@iglesiasg	HeikoS, hello hello
+ lisitsyn	HeikoS: that's the thing
+@HeikoS	lisitsyn: mmh but do we actually call getters in loops?
+ lisitsyn	so well it is the question whether we call get/set pretty often
+@HeikoS	lisitsyn: one can always call it before right?
+ lisitsyn	well yeah
+@HeikoS	lisitsyn: and iterating over matrices etc still works directly right?
+ lisitsyn	yeah this is not about matrices
+ lisitsyn	matrices are not modular at all they are still in core
+ lisitsyn	HeikoS: actually
+ lisitsyn	what we'd need is
+ lisitsyn	to replace all getters in classes
+ lisitsyn	which are plugins
+@HeikoS	lisitsyn: yeah I see
+ lisitsyn	see what I mean?
+ lisitsyn	anything else is ok
+@HeikoS	lisitsyn: so anyone who attempts this will commit suicide right?
+ lisitsyn	why?
+ shogun-notifier-	shogun-web: Kevin Hughes :master * 9e8b87f / pages/models.py: https://github.com/shogun-toolbox/shogun-web/commit/9e8b87f55eba7dc74dfd8705f5b22b9706b95082
+ shogun-notifier-	shogun-web: remove rootsubpage
+ lisitsyn	the problem is that once we loaded a plugin
+@HeikoS	lisitsyn: actually, I think computationally it should be fine, why would one call getters in a loop?
+ lisitsyn	and spawned its say classifier
+ pickle27	sonney2k: would help if I actually fixed it lol
+ lisitsyn	HeikoS: I can make it quite fast
+@HeikoS	lisitsyn: how? hashs?
+ lisitsyn	yeah
+@HeikoS	lisitsyn: man that would be so cool
+ lisitsyn	one downside that I see
+ lisitsyn	we'd get some string things
+ lisitsyn	libsvm = shogun.require('LibSVM')
+ lisitsyn	that's like handle for library
+ lisitsyn	or plugin
+ lisitsyn	next what we do is
+ lisitsyn	svm = libsvm.spawnClassifier()
+ lisitsyn	or sth like that
+-!- kprah_ [67157f4c@gateway/web/freenode/ip.103.21.127.76] has joined #shogun
+ lisitsyn	to do something with hashing
+ lisitsyn	we can do this thing:
+ lisitsyn	svm_C_parameter = shogun.parameter('C')
+-!- kprah [67157d4c@gateway/web/freenode/ip.103.21.125.76] has quit [Ping timeout: 245 seconds]
+ lisitsyn	svm.get(svm_C_parameter);
+ lisitsyn	oh sorry
+ lisitsyn	it should be shogun.floatParameter('C')
+ lisitsyn	like that
+ lisitsyn	this object would have some hash or index
+ lisitsyn	so get is still fast
+ lisitsyn	HeikoS: are you following this sht? :D
+@HeikoS	lisitsyn: yeah I am sorry
+ lisitsyn	no I just mean should I stop at this point
+ lisitsyn	or continue some explanations hehe
+@HeikoS	lisitsyn: could you set up a document where you write example (pseudo) code how things are used?
+@HeikoS	lisitsyn: its hard to loose overview
+ lisitsyn	yeah
+@HeikoS	this spawn thing, I did not really get it
+ lisitsyn	it comes directly from my mind yet
+ lisitsyn	HeikoS: well ok that needs explanation here I guess
+ lisitsyn	HeikoS: once we loaded a library
+ lisitsyn	we'd have to keep it as an object in our scope
+ lisitsyn	however that's okay if you just recall it next with
+ lisitsyn	shogun.module('LibSVM')
+ lisitsyn	HeikoS: the point is that if we have plugins we don't have qualified names in the scope
+ lisitsyn	we don't have shogun.classifier.LibSVM anymore
+@HeikoS	lisitsyn: cant we enforce those?
+-!- kprah_ [67157f4c@gateway/web/freenode/ip.103.21.127.76] has quit [Ping timeout: 245 seconds]
+@HeikoS	in a tree like manner?
+ lisitsyn	HeikoS: what do you mean?
+ lisitsyn	it would be possible for python
+ lisitsyn	but java etc
+ lisitsyn	I don't like altering behaviour in various languages
+@HeikoS	yeah I agree
+@HeikoS	lisitsyn: ok
+@HeikoS	lisitsyn: actually I think you just should do this,  discuss with somebody who wants to spend lots of brainpower on it
+@HeikoS	lisitsyn: unlikely to get much feedback from the other core people ;)
+ lisitsyn	HeikoS: I'll dump my mind laterz
+ lisitsyn	to some issue
+@HeikoS	lisitsyn: maybe a list of pros/cons would be nice too
+@HeikoS	lisitsyn: I currently dont really have an idea how this works in principle
+ lisitsyn	yeah but this looks like a complete solution in my mind
+ lisitsyn	:D
+@HeikoS	lisitsyn: well I pretty much trust you :D
+-!- drbabayeve [~drbabayev@193.104.110.150] has quit [Remote host closed the connection]
+@HeikoS	lisitsyn: anybody yet interested in that?
+ lisitsyn	HeikoS: gsoc?
+@HeikoS	lisitsyn: maybe you should make it a bit more attractive in the description.
+ lisitsyn	no that's too hardcore
+ lisitsyn	:D
+ lisitsyn	yeah my bad may be
+@HeikoS	lisitsyn: Its one of the most interesting projects
+@HeikoS	lisitsyn: and its not really ML, so that is interesting
+@HeikoS	but also to get to know shogun
+@HeikoS	unusual coding tasks
+@HeikoS	etc
+ lisitsyn	well I know a student that I can guide directly :D
+@HeikoS	lisitsyn: ok?
+@HeikoS	tell me more
+ lisitsyn	HeikoS: just kidding
+ lisitsyn	:D
+@HeikoS	we should soon get applications btw :)
+@HeikoS	lisitsyn: yourself?
+@HeikoS	haha
+ lisitsyn	HeikoS: quite near
+@HeikoS	noooo way man, too precious
+@HeikoS	lisitsyn: ah your girl? ;)
+ pickle27	sonne|osx: have you deployed again yet?
+ lisitsyn	haha yeah but this could be considered unfair
+-!- PirosB3 [~pirosb3@162.219.6.191] has quit [Quit: PirosB3]
+@HeikoS	hehe is she a c++ guru?
+ lisitsyn	HeikoS: no no
+@HeikoS	lisitsyn: btw will you come to the summer workshop this year?
+ lisitsyn	HeikoS: yeah if I can afford it
+@HeikoS	nice
+@HeikoS	lisitsyn: how do you feel about our gsoc status currently?
+ lisitsyn	HeikoS: that's okay
+ lisitsyn	we have some strong students
+-!- abinash_panda [0126170c@gateway/web/freenode/ip.1.38.23.12] has quit [Ping timeout: 245 seconds]
+@HeikoS	lisitsyn: yeah I agree
+@HeikoS	looking good
+@HeikoS	and the niveau is insane compared to other years, at least I have the feeling
+ shogun-notifier-	shogun-web: Kevin Hughes :master * 2bc3934 / pages/ (8 files): https://github.com/shogun-toolbox/shogun-web/commit/2bc3934cb8d02b36d1133dee63e2a6d6ad52ca8b
+ shogun-notifier-	shogun-web: roll up the db changes etc
+ shogun-notifier-	shogun-web: Kevin Hughes :master * 86622f7 / pages/ (8 files): https://github.com/shogun-toolbox/shogun-web/commit/86622f7aa938ef07ccdeeafd844e8df67cb3eaf4
+ shogun-notifier-	shogun-web: Merge pull request #59 from pickle27/rollup
+ shogun-notifier-	shogun-web:
+ shogun-notifier-	shogun-web: Rollup
+-!- HeikoS [~heiko@p4FED46C2.dip0.t-ipconnect.de] has quit [Ping timeout: 240 seconds]
+-!- HeikoS [~heiko@ra-vpn92.ra-vpn.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ lisitsyn	HeikoS: I noticed you have been online from some german address ;)
+ lisitsyn	and now it is uk again
+ lisitsyn	:D
+ shogun-notifier-	shogun-web: Kevin Hughes :master * 815047b / pages/models.py: https://github.com/shogun-toolbox/shogun-web/commit/815047bdf604dfbc3a9046ad74d3b05f4885913d
+ shogun-notifier-	shogun-web: add fake rootpage integer field
+@sonney2k	lisitsyn, heiko the tunnel guy
+ lisitsyn	haha
+@sonney2k	yay python shogun 3.2.0 uploaded https://buildd.debian.org/status/package.php?p=python-shogun
+@sonney2k	lets see what fails :)
+-!- [paladin] [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Quit: Page closed]
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has quit [Quit: Page closed]
+@sonney2k	puhh website is back up
+@sonney2k	what a stress...
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+@HeikoS	sonney2k, lisitsyn yeah tunnel :)
+@HeikoS	working on cluister computers
+-!- HeikoS [~heiko@ra-vpn92.ra-vpn.ucl.ac.uk] has quit [Read error: Connection reset by peer]
+-!- HeikoS [~heiko@p4FED46C2.dip0.t-ipconnect.de] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ sonne|osx	besser82: ok maybe it is indeed a bug in numpy that we ahve the failure on powerpc https://buildd.debian.org/status/package.php?p=python-shogun
+-!- sonne|osx [~sonne@e177086223.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- HeikoS [~heiko@p4FED46C2.dip0.t-ipconnect.de] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@p4FED46C2.dip0.t-ipconnect.de] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+--- Log closed Tue Mar 11 00:00:33 2014

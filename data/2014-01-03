@@ -1,0 +1,196 @@
+--- Log opened Fri Jan 03 00:00:35 2014
+@iglesiasg	sonney2k, yep, in case you use apply_structured that is true
+@sonney2k	iglesiasg, even with apply() !
+@sonney2k	iglesiasg, try it
+@iglesiasg	oh really!? let mesee
+@iglesiasg	sonney2k, true, indeed
+@iglesiasg	sonney2k, well, the fix here then is not to use to_structured I guess
+@iglesiasg	sonney2k, where is that handled though?
+@iglesiasg	sonney2k, that the return value is casted to structured labels
+@iglesiasg	sonney2k, SWIG code?
+@sonney2k	iglesiasg, in Machine.i  - yes swig code
+@sonney2k	pretty cool uh?
+@iglesiasg	sonney2k, yep
+@iglesiasg	haha yeah
+@sonney2k	iglesiasg, so please commit the fix that doesn't use this conversion
+@sonney2k	I will nevertheless
+@sonney2k	add %newobject to all methods in CLabelsFactory
+@iglesiasg	why so?
+@iglesiasg	sonney2k, don't we get a leak then?
+@sonney2k	no
+@sonney2k	it will return the object but ref'd
+@sonney2k	so if the refcount was 0 before it will be 1 now
+@iglesiasg	sonney2k, but that is right when doing to_structured(apply())
+@iglesiasg	what if doing?
+@iglesiasg	var =  apply()
+@sonney2k	also then
+@iglesiasg	to_structured(var)
+@sonney2k	var.ref_count() should be 1 right?
+@sonney2k	and then
+@sonney2k	var2= to_structured(var)
+@sonney2k	var2's refcount should be 2
+@sonney2k	because you have 2 references
+@iglesiasg	yep, right
+@iglesiasg	out of curiosity
+@iglesiasg	var = to_structured(var)
+@iglesiasg	what would it happen there? mmm
+@sonney2k	var would just be converted to type CStructuredLabels
+@sonney2k	and refcount would be 1
+@iglesiasg	about var2's refcount being 2, and var's refcount 1 in the setting before
+@sonney2k	iglesiasg, but now you know why we always do SG_REF when returning some object (except for new ones...)
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 991e3cd / doc/ipython-notebooks/structure/FGM.ipynb: https://github.com/shogun-toolbox/shogun/commit/991e3cdd904a99776518ac7e711a5849bf26da49
+ shogun-notifier-	shogun: Fix FGM notebook
+ shogun-notifier-	shogun: Do not use LabelsFactory in Python for apply's output, the cast is already
+ shogun-notifier-	shogun: handled by SWIG code in Machine.i
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 2451111 / doc/ipython-notebooks/structure/FGM.ipynb: https://github.com/shogun-toolbox/shogun/commit/2451111d21c830053d23f91b86a3064820d4625d
+ shogun-notifier-	shogun: Merge pull request #1806 from iglesias/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix FGM notebook
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 39842ca / src/interfaces/modular/Features.i: https://github.com/shogun-toolbox/shogun/commit/39842ca8fb6aae4e9619c9dd10a809f62fccd69c
+ shogun-notifier-	shogun: use %newobject on label factory functions to fix premature memory freeing
+@sonney2k	iglesiasg, alright nice teamwork nailing this down :D
+@iglesiasg	sonney2k, well it feels I didn't actually help much :D
+@sonney2k	iglesiasg, if you have time - scan the code for similar scary patterns...
+@sonney2k	iglesiasg, finding the exact line is half of the work!
+@iglesiasg	sonney2k, I just see one to_* in python_modular examples
+@iglesiasg	in one factor graph example from Shell too
+@iglesiasg	this is done in two steps so the crash did not pop up
+@iglesiasg	but I guess it is nicer without the cast so I will take it out
+@sonney2k	iglesiasg, yes
+@sonney2k	iglesiasg, but there might be more in the C++ code ... functions that take some object as input and return it without the ref increased or functions returning object w/o increasing the refcount
+@sonney2k	that is more subtle to find... so in case you have time have a look
+@iglesiasg	sonney2k, I am not sure why the first case should increase the ref count though :S
+@sonney2k	iglesiasg, and please update the NEWS about this bug
+@sonney2k	so we are now in release shape
+@iglesiasg	sonney2k, I mean, a function takes an object in the input, why should it do SG_REF of this?
+@sonney2k	iglesiasg, it should not only if it returns it and then only in the modular interfaces
+@iglesiasg	okok
+@iglesiasg	so
+@sonney2k	I am overdue with going to bed so be quick
+@iglesiasg	p* f(p*)
+@iglesiasg	should use this %newobject thing
+@iglesiasg	that's it
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 3038519 / examples/undocumented/python_modular/structure_factor_graph_model.py: https://github.com/shogun-toolbox/shogun/commit/30385190862550f63beffe69bc79e0b2b2da7614
+ shogun-notifier-	shogun: Remove LabelsFactory.to_structured in python modular example
+ shogun-notifier-	shogun: NO need to use this method to do the cast since it is already handled
+ shogun-notifier-	shogun: in Machine.i
+ shogun-notifier-	shogun: Fernando Iglesias :develop * a22dd82 / examples/undocumented/python_modular/structure_factor_graph_model.py: https://github.com/shogun-toolbox/shogun/commit/a22dd82bf954a7acb3dc7c244694956ff7ef33a2
+ shogun-notifier-	shogun: Merge pull request #1807 from iglesias/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Remove LabelsFactory.to_structured in python modular example
+ shogun-buildbot	build #424 of FC19 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20libshogun/builds/424  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+@sonney2k	iglesiasg, yes and also things doing
+@sonney2k	p* f()
+@sonney2k	returning a new object
+@iglesiasg	unit-SGVectorTest failed?!
+@sonney2k	and the others that return a reference should do SG_REF()
+@iglesiasg	we lost Fedora :D
+@sonney2k	iglesiasg, some numerical thing only though
+ shogun-buildbot	build #425 of FC19 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20libshogun/builds/425
+@sonney2k	iglesiasg, btw did you get my email about this? I am just wondering...
+@iglesiasg	sonney2k, about the buildbot fail? No, I didn't
+@sonney2k	iglesiasg, no the reply to your mail today
+@iglesiasg	sonney2k, got it today about three hours ago
+@iglesiasg	2 hours actually, 21:55, just checked it
+@iglesiasg	sonney2k, why do you wonder about it? Did you send it before that today?
+@iglesiasg	sonney2k, just added a line in NEWS https://github.com/shogun-toolbox/shogun/pull/1808/files
+@iglesiasg	just merge it please if that's how you wanted it
+@sonney2k	iglesiasg, I had some issue recently so I was just wondering
+* iglesiasg afk
+* iglesiasg back
+ shogun-buildbot	build #162 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/162  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- iglesiasg [~iglesiasg@211.Red-83-40-129.dynamicIP.rima-tde.net] has quit [Quit: Leaving]
+ shogun-buildbot	build #158 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/158  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- travis-ci [~travis-ci@ec2-54-211-35-213.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/16287958
+-!- travis-ci [~travis-ci@ec2-54-211-35-213.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #173 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/173  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #163 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/163  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #159 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/159  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot	build #174 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/174  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- travis-ci [~travis-ci@ec2-54-227-186-41.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/16288893
+-!- travis-ci [~travis-ci@ec2-54-227-186-41.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #164 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/164  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #160 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/160  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #669 of nightly_default is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/669
+ shogun-buildbot	build #175 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/175  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- lambday [67157f36@gateway/web/freenode/ip.103.21.127.54] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 245 seconds]
+-!- wiking [~wiking@info2k1.hu] has joined #shogun
+-!- lambday [67157f36@gateway/web/freenode/ip.103.21.127.54] has quit [Ping timeout: 272 seconds]
+-!- wiking [~wiking@info2k1.hu] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- mode/#shogun [+o wiking] by ChanServ
+ sonne|work	heya all good morning!
+ sonne|work	wiking, besser82 ^
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 7dccde8 / NEWS: https://github.com/shogun-toolbox/shogun/commit/7dccde870407ccf04be17b61f588d7e6ea78c691
+ shogun-notifier-	shogun: Update bugfix NEWS for latest release
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 609dcad / NEWS: https://github.com/shogun-toolbox/shogun/commit/609dcad8bd098bdb63c2449ac70d01521671f63c
+ shogun-notifier-	shogun: Merge pull request #1808 from iglesias/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Update bugfix NEWS for latest release
+ besser82	sonne|work, wiking, lisitsyn:  G' Morning!!!
+@wiking	mornin
+ shogun-buildbot	build #165 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/165  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #161 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/161  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #176 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/176  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- new_lido [~walid@41.218.176.150] has joined #shogun
+-!- new_lido [~walid@41.218.176.150] has quit [Ping timeout: 246 seconds]
+-!- iglesiasg [~fircuser@213.143.60.190] has joined #shogun
+ iglesiasg	sonne|work: hey
+ iglesiasg	maybe you remember I asked you a few days past about using Baum-Welch with real valued features
+ iglesiasg	I am not sure if that is currently possible sonce I just saw StringFeatures there
+ iglesiasg	err, StringFeatures<uint16_t> actually
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- iglesiasg [~fircuser@213.143.60.190] has quit [Read error: Connection reset by peer]
+ sonne|work	iglesias - yes I remember - unfortunately not yet in shogun - I can mentor you though how to do it...
+-!- iglesiasg [~iglesiasg@211.Red-83-40-129.dynamicIP.rima-tde.net] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	sonne|work, I need a couple of extensions to that
+@iglesiasg	sonne|work, handle real values as well as vector observations
+@iglesiasg	I have some Matlab code that is able to handle that, so I think I will try first with it
+-!- iglesiasg [~iglesiasg@211.Red-83-40-129.dynamicIP.rima-tde.net] has quit [Ping timeout: 264 seconds]
+-!- iglesiasg [~iglesiasg@211.Red-83-40-129.dynamicIP.rima-tde.net] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ sonne|work	iglesiasg: yeah sure - you would need to write a new HMM class for that if you would want to do that in shogun...
+-!- lambday [67157f36@gateway/web/freenode/ip.103.21.127.54] has joined #shogun
+-!- besser82 [quassel@fedora/besser82] has quit [Remote host closed the connection]
+-!- besser82 [quassel@fedora/besser82] has joined #shogun
+-!- zxtx_ [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Ping timeout: 264 seconds]
+-!- zxtx_ [~zv@129-79-241-148.dhcp-bl.indiana.edu] has joined #shogun
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has joined #shogun
+ pickle27	sonney2k: what irc client do you use on osx?
+-!- iglesiasg [~iglesiasg@211.Red-83-40-129.dynamicIP.rima-tde.net] has quit [Quit: Leaving]
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has joined #shogun
+@wiking	pickle27: colloquy is quite ok
+ pickle27	@wiking, alight I saw that one
+ pickle27	osx has too many choices but I find it harder to make up my mind compared to linux
+ pickle27	anyways figure I should get irc on my work machine so I can at least idle in here even though I don't have much time to do any development atm
+@wiking	pickle27: no worries most of us is busy as well with other stuff but still we idle here :P
+@sonney2k	wiking, pickle27 but we will do a rlease this weekend :)
+* sonney2k afk
+ pickle27	awesome!
+ lisitsyn	sonney2k: okay I am speeding up to get notebook ready before release ;)
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has quit [Ping timeout: 272 seconds]
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-205-49-151.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/16305671
+-!- travis-ci [~travis-ci@ec2-54-205-49-151.compute-1.amazonaws.com] has left #shogun []
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has quit [Ping timeout: 272 seconds]
+@wiking	sonney2k: great! :)
+@wiking	besser82: ping
+ bb_	quit
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has quit []
+-!- lambday [67157f36@gateway/web/freenode/ip.103.21.127.54] has quit [Ping timeout: 272 seconds]
+-!- wiking_ [~wiking@info2k1.hu] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection reset by peer]
+-!- wiking_ is now known as wiking
+-!- wiking [~wiking@info2k1.hu] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- mode/#shogun [+o wiking] by ChanServ
+ besser82	wiking:  pong
+--- Log closed Sat Jan 04 00:00:36 2014

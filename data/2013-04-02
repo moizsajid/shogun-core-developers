@@ -1,0 +1,185 @@
+--- Log opened Tue Apr 02 00:00:18 2013
+-!- FSCV_ [~FSCV@204.45.132.11] has quit [Quit: Leaving]
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has joined #shogun
+-!- blackburn1 [~blackburn@188.168.14.129] has joined #shogun
+-!- blackburn [~blackburn@188.168.14.129] has quit [Ping timeout: 272 seconds]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Ping timeout: 272 seconds]
+ shogun-buildbot_	build #341 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/341
+-!- lambday [b613104d@gateway/web/freenode/ip.182.19.16.77] has joined #shogun
+-!- lambday [b613104d@gateway/web/freenode/ip.182.19.16.77] has quit []
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 2234df4 / src/shogun/kernel/string/OligoStringKernel.cpp: https://github.com/shogun-toolbox/shogun/commit/2234df4636c1e6061fcc19209fe279850efa7354
+ shogun-notifier-	shogun: likely fix oligokernel bug
+ shogun-buildbot_	build #850 of deb2 - static_interfaces is complete: Failure [failed test python_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/850  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has joined #shogun
+@sonney2k	x
+ sonne|work	y
+@sonney2k	z
+ sonne|work	haha!
+ shogun-buildbot_	build #977 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/977  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ blackburn1	sonne|work: what is going on :D
+ sonne|work	blackburn1: I checked some old version of oligo and that was still giving reasonable results
+-!- blackburn1 [~blackburn@188.168.14.129] has left #shogun []
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- lambday [b613104f@gateway/web/freenode/ip.182.19.16.79] has joined #shogun
+-!- heiko [~heiko@027fc803.bb.sky.com] has joined #shogun
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- heiko [~heiko@027fc803.bb.sky.com] has quit [Quit: Leaving.]
+-!- lambday [b613104f@gateway/web/freenode/ip.182.19.16.79] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- hoijui [~hoijui@141.23.93.47] has joined #shogun
+-!- heiko [~heiko@027fc803.bb.sky.com] has joined #shogun
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Quit: Page closed]
+-!- ZeThomas [~thomaspr@2a02:2c40:100:a000:2810:8d1f:f379:1d82] has joined #shogun
+-!- ZeThomas [~thomaspr@2a02:2c40:100:a000:2810:8d1f:f379:1d82] has quit [Client Quit]
+-!- hoijui [~hoijui@141.23.93.47] has quit [Ping timeout: 264 seconds]
+-!- hoijui [~hoijui@141.23.93.47] has joined #shogun
+-!- blackburn [~blackburn@46.20.65.51] has joined #shogun
+-!- hoijui [~hoijui@141.23.93.47] has quit [Ping timeout: 252 seconds]
+-!- hoijui [~hoijui@141.23.93.47] has joined #shogun
+-!- hoijui [~hoijui@141.23.93.47] has quit [Ping timeout: 260 seconds]
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+@sonney2k	blackburn, I am making massive progress on oligo
+ blackburn	sonney2k: nice
+@sonney2k	now I have a matrix with NaNs instead of 1's
+@sonney2k	:D
+@sonney2k	:``-(
+ blackburn	haha
+ blackburn	NaNs for the win
+* sonney2k eats tons of chocolate for peace of mind
+@sonney2k	blackburn, btw similar to SparseUtils we should probably have a LabelFactory class for the casting business
+@sonney2k	create_from_*
+ blackburn	sonney2k: I was thinking about one thing
+ blackburn	sonney2k: why do we have labels and features (separately)?
+@sonney2k	blackburn, because labels might be anything, real numbers, ints, strucutres
+@sonney2k	and features might be strings, etc
+ blackburn	sonney2k: yes but what is the reason to keep them that separate?
+@sonney2k	if they were same type no need then
+@sonney2k	I see so some Label entry inside Features
+ blackburn	yes
+ blackburn	I do not suggest it yet but am just trying to understand if there is a special capability
+@sonney2k	blackburn, there is one CON - for unsupervised methods or dim red etc you have no labels
+ blackburn	sonney2k: yes
+-!- hoijui [~hoijui@dslb-088-075-046-171.pools.arcor-ip.net] has joined #shogun
+-!- heiko [~heiko@027fc803.bb.sky.com] has left #shogun []
+-!- lambday [3ba2174d@gateway/web/freenode/ip.59.162.23.77] has joined #shogun
+@sonney2k	blackburn, haha it gets worse and wors
+@sonney2k	e
+ blackburn	sonney2k: crashed your kernel?
+@sonney2k	no but parameters are all crap now
+ blackburn	sonney2k: in linux mean of kernel :)
+@sonney2k	blackburn, got it to work :D
+ blackburn	cool
+@sonney2k	there is some oddity when you use it from python
+@sonney2k	if you do
+@sonney2k	kernel = OligoStringKernel(size_cache=10, k=3, width=60)
+@sonney2k	it will accept this
+@sonney2k	but the parameters for k, width etc are crap
+ blackburn	sonney2k: wait so we do support keywords?
+@sonney2k	no but this is what n4nd0 wrote in his test script
+@sonney2k	and python didn't complain
+@sonney2k	it just called the default constructor (taking no args)
+@sonney2k	I have no idea why how this can happen
+ blackburn	sonney2k: I expect so
+@sonney2k	why does it not give an error?
+ blackburn	sonney2k: empty list and kwargs**
+@sonney2k	blackburn, so argument list is empty but keyword args exist?
+ blackburn	sonney2k: yes
+@sonney2k	but why does swig allow that?
+ blackburn	sounds legit to me
+ blackburn	sonney2k: I think kws are always allowed
+ blackburn	it is just a matter if you handle them or not
+@sonney2k	I mean then it should set kws properly
+@sonney2k	but it doesn't
+@sonney2k	anyway results look very sane to me now
+-!- FSCV [~FSCV@206.225.135.24] has joined #shogun
+-!- FSCV [~FSCV@206.225.135.24] has quit [Ping timeout: 248 seconds]
+@sonney2k	blackburn, OK I've thoroughly checked local alignment, oligo and locality improved kernel
+@sonney2k	they are ok
+@sonney2k	the simple locality improved kernel is not
+ blackburn	sonney2k: I see
+@sonney2k	gunnars code is pretty hard to digest
+@sonney2k	problem is that the kernel sometimes gives OK results
+@sonney2k	sometimes not
+@sonney2k	I don't understand why
+-!- FSCV [~FSCV@187.210.54.166] has joined #shogun
+@sonney2k	and of course valgrind is happy too...
+@sonney2k	blackburn, while we are at it - we should get rid of all the bool init() functions
+@sonney2k	but use void() instead
+ blackburn	sonney2k: why?
+@sonney2k	there are very few functions where we actually return anything
+@sonney2k	we usually SG_ERROR if something goes wrong
+@sonney2k	so the code looks like
+@sonney2k	SG_ERROR / ASSERT
+@sonney2k	and then return true;
+@sonney2k	so return values are stupid
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Ping timeout: 245 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * de9a300 / src/shogun/kernel/string/ (5 files): https://github.com/shogun-toolbox/shogun/commit/de9a3005ebd65c53c16a24f40e75a2662a46c45d
+ shogun-notifier-	shogun: String kernel fixes
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: - add reasonable sqrtdiag normalizer to LI kernel
+ shogun-notifier-	shogun: - add convenience constructor to the oligo kernel
+ shogun-notifier-	shogun: - add slow compute function back to oligo kernel
+ shogun-buildbot_	build #851 of deb2 - static_interfaces is complete: Failure [failed test python_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/851  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	blackburn, found it
+@sonney2k	blackburn, the SLIK kernel is not thread safe
+@sonney2k	so when we call get_kernel_matrix
+@sonney2k	it is done w/ multiple threads
+@sonney2k	-> kaboom
+ blackburn	sonney2k: hah
+@sonney2k	blackburn, it would be actually but it contains the init code in the compute function again - wtf!?
+@sonney2k	just some left over code
+@sonney2k	so it will be quicker once removed and work too..
+ blackburn	sonney2k: that's why we should call all the things as generic as possible
+ blackburn	I mean in kernel we should only define init
+@sonney2k	blackburn, well it is some left over code obviously sb. optimized the code but forgot to remove it from comput()
+@sonney2k	btw oligokernel looks like it gives best results here
+@sonney2k	blackburn, what do you mean w/ only define init?
+ blackburn	sonney2k: it should be called in CKernel
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * cf38f2c / src/shogun/kernel/string/SimpleLocalityImprovedStringKernel.cpp: https://github.com/shogun-toolbox/shogun/commit/cf38f2c9f2c6a2737b76e9fb95d0e7c2cdfaf37d
+ shogun-notifier-	shogun: Bugfix for SLIK kernel
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: - remove left over init code in compute function of SLIK kernel
+ shogun-notifier-	shogun: - this init code caused an unstable pyramid array, making
+ shogun-notifier-	shogun: the kernel fail when #threads > 1
+@sonney2k	blackburn, in constructor you mean?
+ blackburn	sonney2k: yeah probably
+ blackburn	sonney2k: I know it can't be virtual but we should find a way to avoid such errors
+@sonney2k	blackburn, that is not possible... we dont' know the kernels' features yet and we need to construct some array based on these features (to speed up compute)
+@sonney2k	this here was really just some stupid bug
+@sonney2k	so let me regenerate data for these kernels to get tests to pass
+ blackburn	alrigh
+@sonney2k	no idea how to do that though for static hmmm
+@sonney2k	hmmhh probably generate_testdata.py
+@sonney2k	kaboomn
+@sonney2k	this old test generator is just so obsolete...
+@sonney2k	blackburn, however it is our only chance for testing what we have in static interfaces :/
+ blackburn	yeah
+ shogun-buildbot_	build #852 of deb2 - static_interfaces is complete: Failure [failed test python_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/852  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 73f200d / tests/integration/generator/dataop.py: https://github.com/shogun-toolbox/shogun/commit/73f200df9b88813c5740feaae2e43c833180a4a2
+ shogun-notifier-	shogun: fix data generator for kernel integration tests
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 06939d9 / data: https://github.com/shogun-toolbox/shogun/commit/06939d951d1aa1efc592034373dbb2493ceaf947
+ shogun-notifier-	shogun: suck in new integration test data
+@sonney2k	blackburn, I looked at all the HMM related stuff
+@sonney2k	results are really crap
+@sonney2k	some inf's in there
+ blackburn	sonney2k: whoops
+@sonney2k	so it is only HMM_1en10_60_4_1_0_6_3_False_CUBE
+@sonney2k	failing in tests now AFAIK
+ shogun-buildbot_	build #978 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/978  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	that shouldn't be too hard to fix - I mean it worked at some point :D
+-!- lambday [3ba2174d@gateway/web/freenode/ip.59.162.23.77] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot_	build #853 of deb2 - static_interfaces is complete: Failure [failed test python_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/853  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot_	build #979 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/979  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 8ffd610 / data,tests/integration/generator/kernel.py: https://github.com/shogun-toolbox/shogun/commit/8ffd610d0fc72be7e1ce93db147dab98fe234074
+ shogun-notifier-	shogun: 1e-9 accuracy for LA kernel
+ shogun-buildbot_	build #854 of deb2 - static_interfaces is complete: Failure [failed test python_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/854  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot_	build #855 of deb2 - static_interfaces is complete: Failure [failed test python_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/855  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot_	build #980 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/980  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot_	build #981 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/981  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	blackburn, you don't happen to recall when the tests worked last time for HMM?
+-!- hoijui [~hoijui@dslb-088-075-046-171.pools.arcor-ip.net] has quit [Ping timeout: 252 seconds]
+-!- heiko [~heiko@027fc803.bb.sky.com] has joined #shogun
+--- Log closed Wed Apr 03 00:00:18 2013

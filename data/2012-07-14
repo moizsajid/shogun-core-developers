@@ -1,0 +1,378 @@
+--- Log opened Sat Jul 14 00:00:17 2012
+-!- blackburn [~blackburn@109.226.92.17] has left #shogun []
+-!- gsomix [~gsomix@85.26.235.226] has quit [Ping timeout: 246 seconds]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Quit: Page closed]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 265 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- emrecelikten [~emre@213.153.218.163] has quit [Ping timeout: 248 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ shogun-buildbot	build #22 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/22
+ shogun-buildbot	build #28 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/28
+ shogun-buildbot	build #18 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/18
+-!- pluskid [~pluskid@202.130.113.141] has joined #shogun
+-!- romi_ [~mizobe@187.11.98.72] has quit [Remote host closed the connection]
+-!- pluskid [~pluskid@202.130.113.141] has quit [Quit: Leaving]
+-!- zxtx [~zv@ool-43559feb.dyn.optonline.net] has joined #shogun
+ CIA-18	shogun: Evgeniy Andreev master * rd450473 / (3 files in 2 dirs): fixed warnings and bugs - http://git.io/8Q_FyA
+ CIA-18	shogun: Evgeniy Andreev master * rcc22b2c / (2 files): added buffer protocol example - http://git.io/4ZpCBw
+ CIA-18	shogun: Soeren Sonnenburg master * r5068d3e / (5 files in 3 dirs): Merge pull request #646 from gsomix/buffer_protocol - http://git.io/LS3WcA
+ shogun-buildbot	build #139 of deb3 - modular_interfaces is complete: Failure [failed compile ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/139  blamelist: Evgeniy Andreev <gsomix@gmail.com>
+ shogun-buildbot	build #140 of deb3 - modular_interfaces is complete: Failure [failed compile ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/140  blamelist: Evgeniy Andreev <gsomix@gmail.com>, Soeren Sonnenburg <sonne@debian.org>
+-!- gsomix [~gsomix@83.149.21.239] has joined #shogun
+ gsomix	good morning
+ gsomix	sonney2k, around?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- bern4rd [4f940120@gateway/web/freenode/ip.79.148.1.32] has joined #shogun
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ n4nd0	blackburn: I mentioned you yesterday in my blog :)
+ blackburn	n4nd0: cool, what did I do? ;)
+ n4nd0	blackburn: you helped me to find the memory leaks
+ blackburn	ahh
+ n4nd0	with the GCDEBUG suggestion ;)
+-!- bern4rd [4f940120@gateway/web/freenode/ip.79.148.1.32] has quit [Quit: Page closed]
+ CIA-18	shogun: Sergey Lisitsyn master * r3523a55 / (3 files): Get rid of wrong SGReferencedData based assignment when using CMap - http://git.io/frmWAg
+-!- blackburn [~blackburn@109.226.92.17] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ shogun-buildbot	build #141 of deb3 - modular_interfaces is complete: Failure [failed compile ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/141  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ CIA-18	shogun: Evgeniy Andreev master * rccb9c80 / (4 files in 2 dirs): fixed compile error, buffer stuff now is in typemaps - http://git.io/ehLzyg
+ CIA-18	shogun: Sergey Lisitsyn master * rb3303c6 / (4 files in 2 dirs): Merge pull request #647 from gsomix/buffer_protocol - http://git.io/XqcOMg
+ shogun-buildbot	build #39 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/39  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ n4nd0	blackburn: around?
+ blackburn	yeah
+ n4nd0	does this look weird to you? http://pastebin.com/832RHTKQ
+ n4nd0	it segfaults
+ n4nd0	I don't really understand why
+ blackburn	sure
+ blackburn	you need to do
+ n4nd0	what is it?
+ blackburn	for (int32_t i=0; i<new_num_cols; i++) new (&out[i]) SGMatrix<T>();
+ blackburn	before setting matrices
+ n4nd0	oh
+ blackburn	n4nd0: you allocate memory for matrices but reference counts are not allocated
+ blackburn	and when you try to do =
+ n4nd0	yeah
+ blackburn	it tries to free up matrix created before
+ blackburn	having no reference count allocated at all it kabooms
+ n4nd0	aham
+ n4nd0	mmm
+ n4nd0	but could the operator check if there is something allocated beforing trying to free up?
+ n4nd0	the operator= I mean
+ n4nd0	beforing = before ^ ....
+ blackburn	I am not sure it would work anyway
+ n4nd0	blackburn: do you mean with the new (&out[i]) SGMatrix<T>();?
+ blackburn	no, some check in =
+ n4nd0	what does new (&out[i]) SGMatrix<T>() exactly do anyway?
+ blackburn	inplace new
+ n4nd0	I don't think I get what the part (&out[i]) does
+ blackburn	it is a pointer you use
+ n4nd0	inplace? ok I am going to read about it :)
+ blackburn	it acts just like 'new' operator but exactly to &out[i] and not to some new piece of memory
+ n4nd0	I see
+ blackburn	in normal way it allocates object somewhere and returns a pointer
+ n4nd0	interesting
+ blackburn	but here we control where to place a pointer
+ blackburn	argh
+ blackburn	not pointer object I mean
+ n4nd0	ok
+ shogun-buildbot	build #142 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/142  blamelist: Evgeniy Andreev <gsomix@gmail.com>
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 246 seconds]
+ blackburn	sonney2k: I want to cut all the optimization abilities outdated stuff in configure
+ blackburn	it is really outdated - just noticed it forces to use nocona here - my cpu is corei7-avx
+ shogun-buildbot	build #143 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/143  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	blackburn: I have read that after using an inplace constructor one shouldn't call delete to free the memory used but the destructor directly
+ n4nd0	blackburn: do you recognize that?
+ blackburn	n4nd0: yeah
+ n4nd0	so no SG_UNREF
+ blackburn	yeah forgot to say that
+ blackburn	n4nd0: well actually we kinda emulate new[] and delete[]
+ n4nd0	blackburn: delete with SG_UNREF but new?
+ blackburn	n4nd0: no I mean SG_MALLOC + inplace new = new []
+ blackburn	and explicitly call dtors and SG_FREE is delete []
+ n4nd0	blackburn: so I could just use new[]?
+ blackburn	n4nd0: yeah may be :D
+ blackburn	new[] is not tracked unfortunately
+ n4nd0	blackburn: something line new SGMatrix<T>(num_rows, num_cols)[num]
+ n4nd0	?
+ blackburn	yeah that should work too
+ n4nd0	what do you mean with that it is not tracked?
+ blackburn	sg_trace_mallocs thing won't work
+ n4nd0	I don't follow you
+ blackburn	n4nd0: we have --enable-trace-mallocs option for configure
+ blackburn	that stores all SG_MALLOCs in map
+ blackburn	and if something is not freed on exit
+ blackburn	it will output
+ n4nd0	I see
+ n4nd0	this new SGMatrix<T>(num_rows, new_num_cols)[num_components] didn't make the trick
+ n4nd0	compile error
+ blackburn	bad
+ blackburn	then use that trick :D
+ n4nd0	which one?
+ blackburn	SG_MALLOC + inplace new + explicit dtors + SG_FREE
+-!- blackburn [~blackburn@109.226.92.17] has left #shogun []
+-!- gsomix [~gsomix@83.149.21.239] has quit [Quit: Ex-Chat]
+-!- gsomix [~gsomix@83.149.21.239] has joined #shogun
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- bern4rd [4f940120@gateway/web/freenode/ip.79.148.1.32] has joined #shogun
+-!- alexlovesdata [~AB@e178030125.adsl.alicedsl.de] has joined #shogun
+ n4nd0	hey guys
+ n4nd0	I just updated master and I am getting
+ n4nd0	modshogun_wrap.cxx.o: In function `LongIntFeatures_getbuffer':
+ n4nd0	/home/nando/Documents/shogun/shogun/src/interfaces/python_modular/modshogun_wrap.cxx:339264: undefined reference to `shogun::CDenseFeatures<long>::get_feature_matrix(int&, int&)'
+ n4nd0	modshogun_wrap.cxx.o: In function `ULongIntFeatures_getbuffer':
+ n4nd0	/home/nando/Documents/shogun/shogun/src/interfaces/python_modular/modshogun_wrap.cxx:340564: undefined reference to `shogun::CDenseFeatures<unsigned long>::get_feature_matrix(int&, int&)'
+ n4nd0	is it something local?
+ gsomix	n4nd0, strange
+ gsomix	it's my code
+ n4nd0	gsomix: aham, do you get it too locally?
+ gsomix	n4nd0, "locally". what do you mean? this stuff is in swig_typemaps.i
+ gsomix	n4nd0, try make clean, hm
+ n4nd0	yeah I did ig
+ n4nd0	I meant locally in your machine
+ n4nd0	gsomix: I don't think this is happening in the buildbot since python_modular compiles
+ n4nd0	my version of swig is SWIG Version 2.0.4
+ n4nd0	gsomix: can that be a problem?
+ gsomix	n4nd0, I use swig 2.0.4 so.
+ n4nd0	mmmm
+ gsomix	n4nd0, may be a problem in the order of include files. I need to check.
+ n4nd0	ok
+ n4nd0	gsomix: let me know if you find something please
+ gsomix	ok
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ gsomix	n4nd0, it seems that it's all right.
+-!- gsomix [~gsomix@83.149.21.239] has quit [Quit: Ex-Chat]
+-!- gsomix [~gsomix@83.149.21.239] has joined #shogun
+ n4nd0	gsomix: mmm ok
+ n4nd0	I have run make clean, configure and I am compiling again
+ n4nd0	let's see
+ gsomix	??
+ gsomix	*ok
+ n4nd0	:)
+ gsomix	n4nd0, ?
+ n4nd0	still failing
+ n4nd0	shit
+ n4nd0	blackburn: any idea?
+ n4nd0	modshogun_wrap.cxx.o: In function `LongIntFeatures_getbuffer':
+ n4nd0	/home/nando/Documents/shogun/shogun/src/interfaces/python_modular/modshogun_wrap.cxx:339259: undefined reference to `shogun::CDenseFeatures<long>::get_feature_matrix(int&, int&)'
+ n4nd0	modshogun_wrap.cxx.o: In function `ULongIntFeatures_getbuffer':
+ n4nd0	/home/nando/Documents/shogun/shogun/src/interfaces/python_modular/modshogun_wrap.cxx:340559: undefined reference to `shogun::CDenseFeatures<unsigned long>::get_feature_matrix(int&, int&)'
+ gsomix	n4nd0, only Long and ULong features?
+ n4nd0	it seems so
+ n4nd0	gsomix: does it give any clue?
+@sonney2k	blackburn, grab the latest sources from mplayer and merge the changes to detect your cpu in configure  - the stuff is not really outdated!
+ gsomix	sonney2k, \(^_^)/
+@sonney2k	gsomix, can you just add a try except NameError around your memoryview expression to fix the buffer proto example?
+@sonney2k	http://shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/143/steps/test%20python_modular/logs/stdio
+@sonney2k	gsomix, ^ that is stil failing
+@sonney2k	gsomix, hi there
+ gsomix	sonney2k, yeah, memoryview introduced only in python2.7
+ gsomix	I'll fix it, one moment
+ n4nd0	sonney2k: hi, do you happen to know why can this be caused? http://pastebin.com/D3Wmv2LT
+ n4nd0	it looks that it compiles ok in the buildbot but not in my machine
+ blackburn	re
+@sonney2k	n4nd0, also compiles fine here btw
+-!- blackburn [~blackburn@109.226.92.17] has quit [Read error: Connection reset by peer]
+@sonney2k	n4nd0, maybe one test before we dig deeper
+-!- blackburn1 [~blackburn@109.226.92.17] has joined #shogun
+@sonney2k	n4nd0, do git clean -dfx (but make sure you have no uncommitted stuff)
+@sonney2k	then recompile
+ n4nd0	untracked files are no problem right?
+ n4nd0	sonney2k: they won't disappear, will they?
+@sonney2k	n4nd0, this error cannot really happen except if you do ./configure --datatypes= ... and then add some custom stuff there
+@sonney2k	n4nd0, they disappear
+@sonney2k	everything that is not tracked will be gone
+-!- bern4rd_ [4f940120@gateway/web/freenode/ip.79.148.1.32] has joined #shogun
+-!- bern4rd_ [4f940120@gateway/web/freenode/ip.79.148.1.32] has quit [Client Quit]
+ blackburn1	(09:55:50 PM) sonney2k: blackburn, grab the latest sources from mplayer and merge the changes to detect your cpu in configure  - the stuff is not really outdated! --------- why to detect it?
+ n4nd0	sonney2k: they didn't disappear ;)
+@sonney2k	blackburn1, because on some archs / machines it helps to get faster code
+ blackburn1	sonney2k: native goes to correct march on my machine
+@sonney2k	n4nd0, are these in .gitignore perhaps?
+ n4nd0	sonney2k: no, otherwise they won't appear as untracked when doing git status
+@sonney2k	n4nd0:
+@sonney2k	touch shogun/lib/bla.cpp
+@sonney2k	git status
+@sonney2k	#
+@sonney2k	# Untracked files:
+@sonney2k	#shogun/lib/bla.cpp
+@sonney2k	git clean -dfx
+@sonney2k	Removing shogun/lib/bla.cpp
+ n4nd0	:O
+@sonney2k	n4nd0, anyways - compile and let us know if the error appears again
+ n4nd0	sonney2k: it didn't remove mines under examples/undocumented/libshogun and python_modular
+ blackburn1	sonney2k: echo 'int main(){return 0;}' > test.c && gcc -v -Q -march=native -O3 test.c -o test && rm test.c test
+ n4nd0	sonney2k: ok, copilation on the way right now
+ blackburn1	n4nd0: could you please do ^ too?
+ blackburn1	and check -march parameter
+ n4nd0	blackburn1: what do you meaan with check?
+ blackburn1	n4nd0: in output there will be -march=something
+ n4nd0	 -march=core2 -mcx16 -msahf -mno-movbe -mno-aes -mno-pclmul -mno-popcnt
+ blackburn1	aham thanks
+-!- blackburn1 is now known as blackburn
+ blackburn	sonney2k: I am pretty sure native detects right march
+ n4nd0	sonney2k: still, compilation error
+ n4nd0	sonney2k: it didn't remove those files because I was not in a root directory of their path
+ n4nd0	sonney2k: they were in shogun/examples/undocumented/...
+ n4nd0	sonney2k: I was in shogun/src
+ n4nd0	now doing git clean -dfx from shogun/ removed them
+ gsomix	sonney2k, fixed, I also removed ctypes from  buffer protocol code.
+@sonney2k	k
+ n4nd0	bah, the error is still there :(
+ blackburn	does anybody here use guake?
+ n4nd0	blackburn: I installed it when you told me about it, but I don't use it much to tell the truth
+@sonney2k	blackburn, march=core2
+ n4nd0	I am loyal to my terminator :)
+ blackburn	sonney2k: wrong?
+@sonney2k	n4nd0, I don't get why it happens
+ CIA-18	shogun: Evgeniy Andreev master * r4ef2573 / (3 files in 3 dirs): minor fixes for buffer protocol - http://git.io/m102Jg
+ CIA-18	shogun: Sergey Lisitsyn master * r1ab1290 / (3 files in 3 dirs): Merge pull request #648 from gsomix/buffer_protocol - http://git.io/QDoZ4g
+ gsomix	n4nd0, try again
+ blackburn	n4nd0: I patched it today to display current dir in tab name
+@sonney2k	blackburn, no correct
+ n4nd0	blackburn: nice
+ n4nd0	gsomix: let's see
+ blackburn	sonney2k: so currently march=native produces correct arch for you, me, gsomix and n4nd0
+@sonney2k	blackburn, sure
+ blackburn	I am pretty sure it would work for anything else
+ blackburn	why to do that then?
+@sonney2k	blackburn, not all gccs have that
+ blackburn	sonney2k: well I see no reason to use <4.3 now
+ blackburn	we force to use latest swig anyway
+ gsomix	sonney2k, btw, I'm working today on arithmetic operators stuff. it's works for all classes with buffer.
+ gsomix	DenseFeatures+=<class with buffer>, I mean
+ blackburn	is it possible to DenseFeatures+=SparseFeatures?
+ gsomix	trying to hacks it in shogun
+ gsomix	blackburn,
+ gsomix	hm
+ gsomix	yep, if SparseFeatures will return as a matrix of values in buffer
+-!- bern4rd [4f940120@gateway/web/freenode/ip.79.148.1.32] has quit [Quit: Page closed]
+-!- gsomix [~gsomix@83.149.21.239] has quit [Quit: Ex-Chat]
+-!- gsomix [~gsomix@83.149.21.239] has joined #shogun
+ n4nd0	good gsomix! you fixed it :)
+ gsomix	.___.
+ n4nd0	gsomix, blackburn, sonney2k problem solved!
+ n4nd0	gsomix: what was it then?
+ n4nd0	python version?
+ gsomix	n4nd0, I dunno lol. I just removed ctype (like unsigned long), because we have int64...
+ shogun-buildbot	build #40 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/40
+ n4nd0	gsomix: haha ok
+-!- heiko [~heiko@host86-183-73-88.range86-183.btcentralplus.com] has joined #shogun
+ puffin444	heiko!
+ blackburn	heiko!
+ puffin444	I have found a very serious bug in the model selection framework
+ heiko	puffin44, oh no, what is it?
+ puffin444	When I register a SGVector as a parameter, it has a pointer to the underlying SGVector.vector.
+ puffin444	The problem is that if the SGVector is ever manipulated (i.e. resize) or reassigned the parameter still has the pointer to the original SGVector.vector.
+ heiko	thats why usually a pointer to the pointer is stored
+ puffin444	So if I ever try to resize a SGVector in an object, I can never access it through the model selection framework. Even worse, I think this leads to a memory leak.
+ heiko	so that if the data changes, the pointer still is good
+ heiko	puffin444, Ill have a look tomorrow, no time today unfortunately. sorry
+ puffin444	Ok. I will send an example of what I mean over the mailing list.
+@sonney2k	gsomix, blackburn - buffer protocol is just for dense matrices. so we could in principle support it for sparse matrices too but that would mean that we have to expand to dense first...
+ gsomix	as I said
+@sonney2k	gsomix, yes the fix is correct
+@sonney2k	blackburn, I would rather stick to what the mplayer guys do
+ blackburn	sonney2k: they have outdated as well
+ blackburn	no sse4 check, no i7 support
+ blackburn	the latest thing they did is core2
+ gsomix	sonney2k, btw, where are you now?
+@sonney2k	gsomix, do you want to send a missile?
+ blackburn	sonney2k: I know you are a big fan of handmade and DIY but I see no actual reason to have such crappy config no one supports
+@sonney2k	blackburn, I think they check for gcc version and if it is new enough fall back to march=native
+@sonney2k	blackburn, so please check if it does
+ gsomix	sonney2k, huh, only dumplings :)
+@sonney2k	gsomix, it would totally suffice if you stay around after gsoc
+@sonney2k	I am pretty happy with what you do for shogun :)
+ blackburn	they have basically the same thing we do
+@sonney2k	blackburn, please test run their configure
+@sonney2k	I would expect it to find march=native on your cpu just fine
+ blackburn	sonney2k: yeah native
+ gsomix	sonney2k, no problem. I'm happy too, there is ?ool team. and thanks (*^__^*)
+ blackburn	gsomix: you must be happy to hear it, sonney2k asks me constantly to leave team
+ blackburn	he even suggested some money
+ gsomix	blackburn, huh, how many? ;)
+@sonney2k	blackburn, what?
+ blackburn	gsomix: he denies me to tell :(
+ gsomix	blackburn, btw you should 'prostavitsya'.
+ blackburn	why should I
+ shogun-buildbot	build #144 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/144
+ gsomix	blackburn, you didn't 'prostavitsya' last year after gsoc.
+ blackburn	I found that silly
+ gsomix	okay :(
+ gsomix	time to work
+ gsomix	sonney2k, overloading [] in c++ have no effect. it's needed overloading by hands.
+ gsomix	in swig code I mean
+ blackburn	saturday night is time to party!
+ blackburn	or to play WoW, no idea what normal people do
+ gsomix	blackburn, dota2
+ blackburn	argh
+-!- blackburn is now known as never_tell_me_ab
+ gsomix	free to play now, just in steam :)
+ never_tell_me_ab	argh
+ gsomix	lol
+-!- never_tell_me_ab is now known as blackburn
+ gsomix	blackburn, lol as lol, not LeagueOfLegends :)
+ n4nd0	gsomix, blackburn do you play games guys?
+ blackburn	I fscking hate games and gamers
+@sonney2k	gsomix, actually it should enable us to do sth like x+=y (when x and y are e.g. RealFeatures)
+ gsomix	n4nd0, huh, no :)
+@sonney2k	blackburn, on some kind of holy war today?
+ blackburn	sonney2k: why so?
+ gsomix	n4nd0, only small indie-games.
+ blackburn	I hate optics and games all the way
+ n4nd0	gsomix: no idea what tahs is :P
+ n4nd0	that*
+@sonney2k	gsomix, but right we don't have a typemap for numpy -> SimpleFeautres so I guess your way is what we need
+ gsomix	like Angry Birds on my IPad^W
+ puffin444	heiko, don't worry about the bug. It's something I screwed up.
+ n4nd0	gsomix: aham, ok :)
+ gsomix	sonney2k, mmm, I just doing it with using numpy.array's buffer.
+@sonney2k	gsomix, what is ?????????????
+ blackburn	lol
+ blackburn	sonney2k: to get some beer/vodka/anything in case of some achievement
+ blackburn	and to share it
+ gsomix	exactly
+@sonney2k	well gsomix could do now :D
+-!- gsomix [~gsomix@83.149.21.239] has quit [Quit: Ex-Chat]
+-!- gsomix [~gsomix@83.149.21.239] has joined #shogun
+ puffin444	Hey blackburn
+ blackburn	hey
+ puffin444	So currently I have a pull request for ARD kernels
+ blackburn	sonney2k: have you seen I added some very basic structure?
+ blackburn	to tutorial
+ puffin444	I have just added ARD into the parameter selection framework. It's done, but I need to make sure the code is commented and stuff.
+ puffin444	My question is that should I just close the current pull request and add a new one today/tomorrow with the new ARD learning attached?
+ blackburn	puffin444: I don't mind either way :)
+ blackburn	puffin444: if this one doesn't break compilation I am ok to merge
+ puffin444	The one up there now will not break compilation.
+ blackburn	what is ARD btw?
+ puffin444	I frankly don't know what it stands for :), but it essentially gives to a weight to each feature. That we can focus on the features that matter.
+ puffin444	Automatic Relevance Determination
+ blackburn	hmm I work on something similar right now
+ blackburn	for multitask :)
+ blackburn	I am currently working on modelselection stuff too btw
+@sonney2k	blackburn, what do you *not* work on?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ blackburn	sonney2k: I do not work on nuclear bomb
+@sonney2k	at least something positive :)
+ blackburn	only neutron one
+ puffin444	Hey blackburn, would you mind merging the current pr?
+ blackburn	I always say yes :D
+ CIA-18	shogun: puffin444 master * r3385475 / (5 files in 2 dirs): Cleaned up some ARD code. - http://git.io/mMGj8w
+ CIA-18	shogun: puffin444 master * r8246e94 / (8 files in 2 dirs): Added Gradient checking in the GradientModelSelection model. Added - http://git.io/6vh8DQ
+ CIA-18	shogun: Sergey Lisitsyn master * reb98b84 / (8 files in 2 dirs): Merge pull request #644 from puffin444/master - http://git.io/PVEOQQ
+ blackburn	puffin444: I have to modify some code realted to you probably
+ puffin444	really? where?
+ blackburn	puffin444: I am adding modelselectionoutput thing in all modelselection things
+ puffin444	okay
+ blackburn	argh may be some set_output would be better
+ blackburn	puffin444: I am adding modelselectionoutput class
+ blackburn	that outputs learned model during the process
+ blackburn	I need it to analyze sparsity of learned Ws
+-!- alexlovesdata [~AB@e178030125.adsl.alicedsl.de] has left #shogun []
+ shogun-buildbot	build #146 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/146  blamelist: puffin444 <walke434@msu.edu>
+ CIA-18	shogun: Sergey Lisitsyn master * rfc2e96c / (13 files in 3 dirs): Introduced ModelSelectionOutput class - http://git.io/WaHWTA
+-!- heiko [~heiko@host86-183-73-88.range86-183.btcentralplus.com] has quit [Quit: Leaving.]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot	build #147 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/147
+--- Log closed Sun Jul 15 00:00:17 2012

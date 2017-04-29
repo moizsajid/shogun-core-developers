@@ -1,0 +1,450 @@
+--- Log opened Mon Jan 05 00:00:22 2015
+-!- DSrupt [~DSrupt@73.6.109.86] has quit [Quit: (null)]
+-!- PirosB3 [~pirosb3@87.13.243.132] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@87.13.243.132] has joined #shogun
+-!- PirosB3 [~pirosb3@87.13.243.132] has quit [Client Quit]
+-!- txomon|home [~txomon@unaffiliated/txomon] has quit [Ping timeout: 245 seconds]
+-!- nszceta [~nszceta@24.131.255.77] has joined #shogun
+ nszceta	greetings all
+ nszceta	I have encountered a linker error https://bpaste.net/show/e441cdbdc58c
+ nszceta	on CentOS 7
+@wiking	oooh
+@wiking	i'm currently building shogun on centos7 w/o problems
+@wiking	this is how i run cmake: mkdir build && cd build && cmake -DENABLE_TESTING=ON ..
+@wiking	and then i compile simpley with: make -j4
+@wiking	and then i just run the tests: ctest --output-on-failure -j2
+@wiking	nszceta: so i'm wondering what could b wrong on your side
+@wiking	could u tell me how u run cmake?
+ nszceta	sure thing
+ nszceta	mkdir build && cd build && cmake -DPythonModular=ON .. && make
+@wiking	okey
+@wiking	that ran fine right?
+ nszceta	nope
+ nszceta	just rm -rf'd build and I am doing it again to get output
+ nszceta	here's what cmake has so far https://bpaste.net/show/d948188f7ba6
+@wiking	ok cool
+@wiking	run make now
+ nszceta	8%
+@wiking	btw you'll need to install some more packages on your distribution
+@wiking	otherwise you'll miss most of the new features of shogun
+ nszceta	what would you recommend
+ nszceta	I got atlas blas-devel... can't remember what else
+@wiking	eigen
+ nszceta	that is EPEL
+@wiking	and?
+@wiking	i mean sorry i'm just suggesting
+ nszceta	sure
+@wiking	u do what you really need to do
+ nszceta	what does Eigen bring to the table
+@wiking	we use eigen in most of our new implementations
+@wiking	basically anything that is deep learning, GP and some more
+ nszceta	will install
+ nszceta	I'm going to CTRL-C this make and get Eigen from EPEL before I go further
+@wiking	k
+-!- nszceta [~nszceta@24.131.255.77] has quit [Quit: Textual IRC Client: www.textualapp.com]
+-!- nszceta [~nszceta@95.211.186.115] has joined #shogun
+ nszceta	@wiking it's still not working
+ nszceta	https://bpaste.net/show/fd26ab2dafde
+ nszceta	what package do I need to compile from source?
+ nszceta	weirdly enough I have double cblas_dnrm2(const int N, const double *X, const int incX); in /usr/include/cblas.h
+ nszceta	so it seems like I already have the functions that error out during make
+ nszceta	not sure what is going on here...
+-!- Zygocat [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has quit [Read error: Connection reset by peer]
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has joined #shogun
+-!- nszceta [~nszceta@95.211.186.115] has quit [Ping timeout: 250 seconds]
+-!- DSrupt [~DSrupt@73.6.109.86] has joined #shogun
+-!- liletta5566 [~Thunderbi@124.16.137.194] has quit [Quit: liletta5566]
+-!- liletta5566 [~Thunderbi@124.16.137.194] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- PirosB3 [~pirosb3@87.13.243.132] has joined #shogun
+-!- PirosB3 [~pirosb3@87.13.243.132] has quit [Client Quit]
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- DSrupt [~DSrupt@73.6.109.86] has quit [Quit: (null)]
+-!- exploreshaifali [~shaifali@122.168.84.47] has joined #shogun
+-!- shaifali_ [~shaifali@182.70.214.127] has joined #shogun
+-!- exploreshaifali [~shaifali@122.168.84.47] has quit [Ping timeout: 240 seconds]
+-!- shaifali_ is now known as exploreshaifali
+-!- DSrupt [~DSrupt@73.6.109.86] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: Floatingman, naywhayare
+-!- Netsplit over, joins: naywhayare
+-!- Netsplit over, joins: Floatingman
+-!- DSrupt [~DSrupt@73.6.109.86] has quit [Quit: (null)]
+-!- nszceta [~nszceta@95.211.186.115] has joined #shogun
+-!- exploreshaifali [~shaifali@182.70.214.127] has quit [Ping timeout: 264 seconds]
+-!- PirosB3 [~pirosb3@87.13.243.132] has joined #shogun
+-!- exploreshaifali [~shaifali@182.70.214.127] has joined #shogun
+@wiking	nszceta: ping?
+ nszceta	hey
+ nszceta	I've been up since a few hours compiling ATLAS and LAPACK
+ nszceta	everything is still all ate up
+@wiking	compiling atlas?
+@wiking	why didn't u install it with yum?
+ nszceta	didn't work
+ nszceta	I had it installed
+@wiking	oh no
+ nszceta	shogun complained of missing symbols
+@wiking	yeah but that could have fixed
+ nszceta	anyway shogun cmake never ever detected ATLAS
+@wiking	another wahy
+@wiking	*way
+ nszceta	o ok, I can remove the libraries I compiled
+ nszceta	what do you recommend
+@wiking	so i have these package installed under centos7
+* nszceta takes note
+@wiking	lapack.x86_64                                3.4.2-4.el7                @base
+@wiking	lapack-devel.x86_64                          3.4.2-4.el7                @base
+@wiking	atlas.x86_64                                 3.10.1-7.el7               @base
+@wiking	atlas-devel.x86_64                           3.10.1-7.el7               @base
+@wiking	blas.x86_64                                  3.4.2-4.el7                @base
+@wiking	blas-devel.x86_64                            3.4.2-4.el7                @base
+@wiking	eigen3-devel.noarch                          3.2.2-1.el7                @epel
+@wiking	but of course if u want i can give you the full list of packages installed on that instance
+ nszceta	wiking thanks a lot for helping me out. I'll give you an update in a minute
+@wiking	k
+ nszceta	just ran a $ sudo yum -y install lapack lapack-devel atlas atlas-devel blas blas-devel eigen3-devel
+ nszceta	wiking, https://dpaste.de/jp8h/raw
+ nszceta	atlas is still not detected
+ nszceta	-- Could NOT find ATLAS (missing:  ATLAS_LIBRARIES)
+@wiking	nszceta: what version of shogun r u trying to use
+@wiking	?
+ nszceta	3.2
+ nszceta	I do have /usr/lib64/atlas/libsatlas.so.3.10
+ nszceta	and libsatlas and libtatlas
+@wiking	here's the cmake output: http://buildbot.shogun-toolbox.org/builders/CentOS7%20-%20libshogun/builds/139/steps/configure/logs/stdio
+ nszceta	weird, it doesn't find ATLAS either
+@wiking	nszceta: oh so you are saying that you are trying to use the src downloaded from the website
+@wiking	?
+ nszceta	I downloaded shogun source
+ nszceta	what do you mean
+@wiking	ok so
+@besser82	nszceta, add `-DATLAS_LIBRARIES=/usr/lib64/atlas/libtatlas.so -DATLAS_LAPACK=/usr/lib64/atlas/libtatlas.so` to your cmake-command  ;)
+@wiking	nszceta: use the latest version
+ nszceta	what do you mean latest version?
+ nszceta	git master?
+ nszceta	besser82 trying that out
+@wiking	nszceta: git clone https://github.com/shogun-toolbox/shogun.git
+@besser82	nszceta, checkout from github
+@besser82	nszceta, yes
+@besser82	nszceta, and those additional switches for cmake  ;)
+ nszceta	oh boy
+ nszceta	nothing like bleeding edge :D
+@wiking	besser82: no that should't be required for the git develop cmake anymore
+@wiking	besser82: it works out of box
+@wiking	besser82: on centos7 ;) see buildbot output
+ shogun-buildbot	build #2620 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2620  blamelist: sanuj <sanuj.sharma.in@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>, Bj?rn Esser <bjoern.esser@gmail.com>
+@besser82	wiking, allrighty, ic  ;)
+ nszceta	I thought you just showed me that wiking and it clearly says it doesn't see ATLAS
+ nszceta	-- Could NOT find ATLAS (missing:  ATLAS_LIBRARIES)
+ nszceta	in the build bot output
+@wiking	nszceta: :D
+ nszceta	what's going on
+@wiking	true :DDD
+@wiking	hahahah
+@wiking	but still
+@wiking	it works
+@wiking	:>>>
+ nszceta	wtf lol
+@wiking	ok let's just try with the latest github
+@wiking	git version
+@wiking	i think the errors you have is do to missing safeguards (macros) in the examples
+ nszceta	ok but we need to sort out ATLAS somehow also later
+@wiking	nszceta: why? :)
+ nszceta	performance?
+@wiking	i mean yeah we need a fix for cmake
+@wiking	true
+@wiking	:)
+@wiking	but trust me
+@wiking	you rather want eigen
+@wiking	because we are slowly switching everything to eigen
+ nszceta	I get that but how much is in eigen
+ nszceta	how much in atlas
+ nszceta	and also why eigen?
+@wiking	most of it is in eigen
+ nszceta	isn't atlas really old and tried and true?
+@wiking	nszceta: since it's a header only library
+@wiking	yeah and it is requiring fortran
+@wiking	and binary compiled libraries
+ nszceta	what's wrong with fortran lol
+ nszceta	if it works...
+@wiking	while eigen doesn't need anything
+ nszceta	alright fair enough
+@wiking	and that works for not only on x86 arch
+ nszceta	ATLAS only works on x86?
+@wiking	i dont know if it has for example NEON optimization
+ nszceta	alright I am building shogun with -j16 lets see how this works :D
+@wiking	(see arm)
+@wiking	i know that atlas has MMX, SSE2 optimization
+@wiking	i assue they haven't done arm optimization
+@wiking	*assume
+@wiking	so yeah eigen is lightweight but a bit more updated with current technologies
+@wiking	lapack blas and all that is great
+@wiking	but it's a bit ancient....
+@wiking	which is not bad... just sometimes having the zxcqy as a function name
+@wiking	is driving u crazy
+ nszceta	lol
+-!- marina [8d1756f6@gateway/web/freenode/ip.141.23.86.246] has joined #shogun
+ marina	happy new year everyone!
+ marina	I want to execute the following code
+ marina	pm = PerformanceMeasures(labels_test, output); acc = pm.get_accuracy();
+ marina	the problem is, that python could not find the method PerformanceMeasures...
+ marina	I have already imported shogun.Evaluation
+ marina	anyone who can help?
+@besser82	guess who  :P
+ marina	:D
+ nszceta	ok it failed
+ nszceta	wiking same error
+ nszceta	https://dpaste.de/owtn/raw
+@wiking	nszceta: whooooooo whooo
+@wiking	we got to the impossible
+@wiking	as the exact same thing works on my centos7
+ nszceta	wtf!
+@wiking	besser82: care to elaborate here?
+ nszceta	suggestions are welcome :D
+@besser82	wiking, sure  :D
+@besser82	nszceta, did you try my additional cmake-switches, yet?
+ nszceta	about to :D
+ nszceta	it found atlas with -DATLAS_LIBRARIES=/usr/lib64/atlas/libtatlas.so -DATLAS_LAPACK=/usr/lib64/atlas/libtatlas.so
+ nszceta	:D
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :develop * 276dd31 / src/shogun/lib/GPUMatrix.cpp,src/shogun/lib/GPUMatrix.h: https://github.com/shogun-toolbox/shogun/commit/276dd31e7a4b58cc1f5e1474ed00db06a2658176
+ shogun-notifier-	shogun: Fix a lot of indenting error and include <memory>
+ shogun-notifier-	shogun: we need to include <memory> for std::shared_ptr
+ shogun-buildbot	build #183 of trusty - libshogun - viennacl is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/183  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@besser82	nszceta, allrighty then  ;)
+ nszceta	60% :D
+-!- travis-ci [~travis-ci@ec2-54-81-186-111.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/45957563
+-!- travis-ci [~travis-ci@ec2-54-81-186-111.compute-1.amazonaws.com] has left #shogun []
+@wiking	oh motherfuckers
+ nszceta	viktor breaking the builds......
+@besser82	wiking, there is ladies inside the chan...  ;(
+ shogun-notifier-	shogun: Viktor Gal :develop * f59e2cf / src/shogun/lib/GPUVector.cpp,src/shogun/lib/GPUVector.h: https://github.com/shogun-toolbox/shogun/commit/f59e2cf9ca3299582f62a44da2620502282918b9
+ shogun-notifier-	shogun: yet another indent fixing and memory include movearound commit
+ shogun-notifier-	shogun: in order to fix std::shared_ptr
+@wiking	it'll be still motherfuckers
+ nszceta	oh crap it might be working now
+ nszceta	can we please add -DATLAS_LIBRARIES=/usr/lib64/atlas/libtatlas.so -DATLAS_LAPACK=/usr/lib64/atlas/libtatlas.so to the cmake find path
+@wiking	nszceta: shogun magic :)
+@wiking	we should rather fix the cmake script i reckon
+@besser82	wiking, who wrote it?  :P
+* wiking 
+@wiking	does that mean that i have to fix it as well?
+@wiking	isnt' this supposed to be an OSS project
+@wiking	?
+ nszceta	cmake/FindAtlas.lulz
+ nszceta	* shogun/cmake/FindAtlas.cmake
+@wiking	nszceta: yep... actualy that is taken from some random oss project
+ nszceta	wtf shogun/src/shogun/lib/SGVector.h:57: Warning 503: Can't wrap 'operator std::complex< double >*' unless renamed to a valid identifier.
+@wiking	nszceta: so that could be updated :)
+ nszceta	:D
+@wiking	nszceta: dont worry about that
+@wiking	but if u worry about it, fix it plz
+@besser82	wiking, lemme check for some updated version =)
+ nszceta	k
+@wiking	you have all u need for it :)
+@wiking	besser82: thnx
+ nszceta	just to recap
+ nszceta	after make I just run make install and that's that?
+@wiking	nszceta: regarding what ?:)
+@wiking	it all depends what u want
+ nszceta	installing shogun
+@wiking	yeah
+ nszceta	I am in my python virtual environment
+@wiking	that shoudl do it
+ nszceta	i just need it to work with python
+ nszceta	sweet
+@wiking	oh virtual env
+@wiking	hehehe
+@wiking	that's a totally different story
+ nszceta	of course
+@wiking	:)
+@wiking	i mean if u want to have shogun within the virtenv
+ nszceta	of course
+@wiking	ok if u know how to fix that
+@wiking	since then u need to ship the .so within the virtualenv
+ nszceta	ye
+@wiking	nszceta: might i ask what's the usecase in your case for shogun/
+ nszceta	machine learning systems for SemanticMD
+ nszceta	in particular we are interested in LMNN
+@wiking	:)
+@wiking	for that it's not lmnn what u want
+@wiking	but that's my 2 cents
+@wiking	(i did my phd recently on this topic)
+@wiking	most of the stuff i was doing within shogun was regarding that
+ nszceta	we have been investigating using LMNN stacked with opencv
+ nszceta	Very nice. I'm not experienced with ML but my team is.
+@wiking	that's only my 2 cents
+ nszceta	what is it about LMNN that makes you think it is not the best choice
+@wiking	well
+@wiking	i've used it
+@wiking	i mean i don't know what's your dataset size
+ nszceta	also for the record this worked: $ cmake -DPythonModular=ON -DATLAS_LIBRARIES=/usr/lib64/atlas/libtatlas.so -DATLAS_LAPACK=/usr/lib64/atlas/libtatlas.so ..
+@wiking	but lmnn will blow up your qp quite fast
+@wiking	but anyhow we'd be happy to hear if you are using shogun itself
+ nszceta	sure
+@wiking	note that it's still gplv3
+ nszceta	mhmm
+ shogun-buildbot	build #184 of trusty - libshogun - viennacl is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/184
+@wiking	there was an initiative to switch to 3 clause bsd but that's still an ongoing operation
+ nszceta	it shouldn't be an issue at all
+@wiking	well it is for a lot of companies
+ nszceta	we are strictly SaaS
+@wiking	that's why actually a lot of times it is not being used
+@wiking	and?
+@wiking	u dont see how that solves the licensing issue
+ nszceta	the software is not being distributed
+@wiking	yes but still you'll have to opensource the whole module that is linked to shogun
+@wiking	or for that matter whatever gplvX code is being used..
+@wiking	in an ideal case
+ nszceta	shogun will be linked to another module which produces output that is served by a web server and in such a case it does not matter what license is used
+@wiking	it does
+@wiking	a good read https://www.gnu.org/licenses/quick-guide-gplv3.html
+@besser82	wiking, not by meanings of "offer sources"
+@besser82	wiking, since there are no binaries offered
+ shogun-buildbot	build #2621 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2621  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ nszceta	wiking where are you based out of?
+@wiking	based out of what?
+@wiking	you mean currently based at?
+ nszceta	just curious which time zone you're working out of
+@wiking	sgt
+ nszceta	UTC + 8 ?
+ nszceta	damn
+-!- exploreshaifali [~shaifali@182.70.214.127] has quit [Quit: Leaving]
+@wiking	nszceta: btw for lmnn u most def need eigen
+ nszceta	eigen3-devel is installed :D
+ nszceta	I saw the writing on the wall :P
+ nszceta	now that there is a big push to eigen
+@wiking	well it's easy to depend on it
+ nszceta	thank god for ATLAS though
+@wiking	as you can see the whole blas is very messed up
+@wiking	especially across linux distros
+ nszceta	besser82 saved my ass on that :P
+ nszceta	compiling ATLAS is redic
+@wiking	ttyl
+ nszceta	ttyl
+ nszceta	thanks again
+@wiking	nw
+ shogun-buildbot	build #953 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/953  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@wiking	besser82: any idea when this is going to b fixed in FCRH?
+@wiking	i mean the json thingy
+@besser82	wiking, working on it ^^
+@wiking	kk
+ nszceta	what do you guys use shogun for?
+@wiking	well that's a good question
+@wiking	we are not aware of any other usage
+@wiking	other than our own phds
+@wiking	or masters
+@wiking	sometimes we saw some ppl from thomsonreuters and yahoo
+@wiking	but we have no clue if it's actually being used and if yes on what exactly
+ nszceta	interesting
+@wiking	lisitsyn: merry xmas, btw: www.pnas.org/content/110/2/448.full.pdf+html
+@lisitsyn	wiking: heh
+@wiking	lisitsyn: check fig 1 ;)
+@lisitsyn	wiking: ohh that's so past
+@wiking	lisitsyn: :DDDD
+@lisitsyn	wiking: everything has changed
+@lisitsyn	wiking: crimea is taken, support is overwhelming
+@wiking	:D
+@lisitsyn	wiking: I mean
+@lisitsyn	you don't talk about elections here now
+ nszceta	99% of crimea is pro-russian
+@lisitsyn	it is just not an issue
+ nszceta	jk :P
+@wiking	lisitsyn: :>
+@lisitsyn	they found a way to control majority
+@lisitsyn	:)
+@wiking	lisitsyn: so what' today's usd/rub
+@lisitsyn	I mean really educated and smart people are really like zombie nazis
+@lisitsyn	wiking: ~59
+@wiking	stable then
+@lisitsyn	wiking: quite
+@wiking	for the last 3 weeks no? :)
+@lisitsyn	wiking: holidays till 11th
+@wiking	yeah new year's is just about to come
+@wiking	;)
+@lisitsyn	yeah russia is dead after new year
+@lisitsyn	just consider there is no such country as it is totally passive
+@wiking	well the bear needs a sleep aswell :)
+@lisitsyn	nszceta: that's actually quite close to true :D
+@lisitsyn	wiking: usd/rub = 3600/(brent)
+@wiking	lisitsyn: :D
+@lisitsyn	wiking: putin said the more roubles USD cost the more money we have
+@wiking	marina: where did u get this PerformanceMeasures(...) from ?
+@wiking	lisitsyn: he is so true!
+@lisitsyn	wiking: zimbabwe is quite a rich country huh
+@lisitsyn	everybody is a billionaire
+ nszceta	lisitsyn made my day
+@lisitsyn	:D
+ nszceta	are you joking?
+@lisitsyn	nope ;)
+ nszceta	zimbabwean billionaires are poor
+ nszceta	http://nowiknow.com/wp-content/uploads/zimbabwe-100-trillion-dollar-bill-obverse.jpg
+@lisitsyn	but they are billionaires! :D
+@wiking	but they are still billionaires :)
+ nszceta	no, look
+@wiking	lisitsyn: we used to have that though...
+@lisitsyn	yeah I am kidding ;)
+ nszceta	100 trillion dollar bill :D
+@wiking	lisitsyn: 10E12
+@wiking	bill
+@wiking	i think i still have a copy somewhere in the attick :)
+ nszceta	they couldnt fit more zeros on the bill so they threw in the towel
+@lisitsyn	it is quite difficult to pay some tips there I guess
+ nszceta	just throw down 400 trillion dollars
+@lisitsyn	yeah
+@lisitsyn	:D
+ nszceta	should be enough for a tip
+@wiking	oh noooo
+@wiking	we had 5E11 :)
+@lisitsyn	so you go to some restaurant
+@lisitsyn	order some stuff
+@lisitsyn	and while you eat it gets another zero
+@wiking	lisitsyn: yep that was the case
+@wiking	lisitsyn: till u got from the bank to the black market exchange
+@lisitsyn	haha
+@lisitsyn	actually usd/rub was similar
+@wiking	your montly salary went down to be enough to buy 2 bread and some milk
+@lisitsyn	people were rushing to local exchanges
+@wiking	heheh yeah usual shit
+ nszceta	http://static.fjcdn.com/pictures/Obama+s+zero+dollar+bill+not+mine+found+while+stumbling+through+the_231969_4133821.jpg
+@wiking	marina: we dont have PerformanceMeasures anymore... it was deprecated around 2009
+@lisitsyn	performance measure hmm
+@lisitsyn	I think I wrote something about that
+@lisitsyn	hahha zero obama
+@wiking	420 would have been more classy
+@wiking	nm :)
+@lisitsyn	hah this pic is fascinating
+@lisitsyn	this fuel empty :D
+-!- marina [8d1756f6@gateway/web/freenode/ip.141.23.86.246] has quit [Quit: Page closed]
+@wiking	http://www.alexrad.me/discourse/why-rosyna-cant-take-a-movie-screenshot.html
+@wiking	lol
+@lisitsyn	wiking: must end with some anal control system
+@wiking	:>
+@lisitsyn	wiking: may be like that http://upload.wikimedia.org/wikipedia/en/7/79/IT_(South_Park%3B_The_Entity).jpeg
+@wiking	ahhahaha
+@wiking	ok so this commit
+@wiking	http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/494
+@wiking	i mean this commit: https://github.com/shogun-toolbox/shogun/commit/8a4d1a4fa14d954f8f91588a294f3593879e930b
+@wiking	supposed to be responsible for 2 leaks + uninited memory in shogun :D
+@wiking	how :
+@wiking	:>
+@wiking	ah ok no
+@wiking	it's actually a differnt fail
+@wiking	hah
+@wiking	so this one
+-!- nszceta [~nszceta@95.211.186.115] has quit [Quit: Textual IRC Client: www.textualapp.com]
+@wiking	https://github.com/shogun-toolbox/shogun/commit/285ad0411f8fc5f6e1e06cf38dcb7d705f80d9d1
+@wiking	ahhahahaha
+ shogun-buildbot	build #179 of osx2 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20modular_interfaces/builds/179  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- exploreshaifali [~shaifali@182.70.163.142] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot	build #508 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/508  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- txomon|home [~txomon@unaffiliated/txomon] has joined #shogun
+-!- PirosB3 [~pirosb3@87.13.243.132] has quit [Ping timeout: 255 seconds]
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 250 seconds]
+-!- PirosB3 [~pirosb3@host67-35-dynamic.18-79-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host67-35-dynamic.18-79-r.retail.telecomitalia.it] has quit [Client Quit]
+-!- exploreshaifali [~shaifali@182.70.163.142] has quit [Quit: Leaving]
+--- Log closed Tue Jan 06 00:00:23 2015

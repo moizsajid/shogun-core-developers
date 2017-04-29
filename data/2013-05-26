@@ -1,0 +1,463 @@
+--- Log opened Sun May 26 00:00:18 2013
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has joined #shogun
+-!- HeikoS [~heiko@176.248.212.176] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	sonney2k: can we do multiple inheritence in shogun?
+@HeikoS	I think I remember no, but I forgot
+@HeikoS	whats the best way to do a thing similar to java's interface (which is inheriting a couple of pure virtual methods)
+@HeikoS	lisitsyn: ^
+@lisitsyn	HeikoS: no MI :)
+@HeikoS	lisitsyn: how else=?
+@HeikoS	lisitsyn: also, I am thinking of adding a general ComputationTask class
+@HeikoS	which can be registered in another class
+@HeikoS	which then handles computation of all those
+@HeikoS	and different implementations may do it differently (multicore, mpi, etc)
+@lisitsyn	HeikoS: hmm
+@lisitsyn	when did you come to that idea?
+@lisitsyn	it reproduces something that is in my mind too
+@HeikoS	lisitsyn: I need this for log-det project
+@HeikoS	but would be better to have this in general
+@HeikoS	every task impleentation should have code how to solve it
+@HeikoS	and the std impleentation of CComputationPool
+@HeikoS	just does everything sequentially
+@HeikoS	then we program against that interface
+@HeikoS	and people might come up with more fancy things
+@HeikoS	without changing algorithm code
+@lisitsyn	HeikoS: I see
+@HeikoS	lisitsyn:  so lets think about this a bit
+@lisitsyn	but why do you need interfaces there?
+@HeikoS	lisitsyn: nevermind about this
+@HeikoS	lets talk about the computation
+@HeikoS	 :)
+@lisitsyn	HeikoS: hah ok
+@lisitsyn	HeikoS: what is computation pool?
+@HeikoS	ok
+@HeikoS	so CComputationPool
+@HeikoS	is an abstract base where one can register tasks
+@HeikoS	and one can call solve_all(), which gives a list of CComputationTaskResult instances
+@HeikoS	register(CComputationTask task)
+@lisitsyn	what is real instances of computation pool?
+@HeikoS	one example:
+@HeikoS	CSequentialComputationPool
+@HeikoS	solve_all just loops over all Tasks and solves them
+@HeikoS	each task knows how it gets solved
+@HeikoS	another exaple:
+@lisitsyn	okay sequential parallel what else?
+@HeikoS	MPI
+@HeikoS	group like structures
+@lisitsyn	ohh hah
+@HeikoS	problem dependent
+@HeikoS	there are only few generic ones
+@HeikoS	most of them will be problem specific
+@HeikoS	still only one interface from main algorithm
+@HeikoS	CIndependentParallelComputationPool
+@HeikoS	I think of using external libraries for more structured stuff
+@HeikoS	but for now, I am just interested in the interface
+@lisitsyn	what libraries?
+@HeikoS	something to schedule for example
+@HeikoS	but doesnt matter now
+@HeikoS	you could imagine that one class uses graphlab for example
+@HeikoS	if there is a lot of structure
+@HeikoS	but even multicore might be nice
+@lisitsyn	but it looks like doing a task in multicore manner is a more frequent case
+@lisitsyn	there is a strong reason to do tasks multicore
+@HeikoS	yes
+@HeikoS	definitely
+@HeikoS	once class could for example do grid-search in a multicore way
+@lisitsyn	when you do totally different things your context is switching like crazy
+@HeikoS	but bad example since grid-search is already impleented, and not in terms of tasks that one regiusters
+@lisitsyn	HeikoS: I'd rather call it Queue btw
+@HeikoS	but new things could be written in terms of tasks that one first registers, and then solves
+@lisitsyn	Pool is a different pattern
+@HeikoS	lisitsyn: it is not a queue
+@HeikoS	but agreed on pool is not good
+@lisitsyn	it is not a pool too ;)
+@HeikoS	Set? :)
+@lisitsyn	pool is a set of prepared objects
+@lisitsyn	set is so neutral that it doesn't tell anything
+@HeikoS	Organizer ?=
+@lisitsyn	engine may be
+@HeikoS	Engine is good! :)
+@lisitsyn	well it is engine in graphlab
+@lisitsyn	:D
+@lisitsyn	I've seen they have some fancy algorithms
+@lisitsyn	for philosophers thing
+@HeikoS	indeed
+@HeikoS	this is not what I want to do
+@lisitsyn	HeikoS: why do you need it btw?
+@HeikoS	log-det estimates *have* to be parallelized
+@HeikoS	can do up to factor few hundred
+@lisitsyn	HeikoS: did you consider opencling it too btw?
+@HeikoS	lisitsyn: I dont want to actually do this for now, but rather prepare it
+@HeikoS	its an experiment
+@HeikoS	other way would be to say:
+@HeikoS	ah nevermind
+@HeikoS	so I want to try it
+@HeikoS	even computing 1 estimate can be parallelized massively
+@lisitsyn	HeikoS: I like idea of formulating *all* operations as jobs/tasks
+@HeikoS	usually one needs a few hundred of them
+@HeikoS	lisitsyn: yes, thats the experiment, if we can make this work, things might be easier to parallelize
+@HeikoS	which they should
+@lisitsyn	I mean if we call train
+@HeikoS	so many loops of independent things in our code
+@lisitsyn	we should just enqueue some operation
+@HeikoS	exactly
+@HeikoS	also this would separate the code structure froim the actual computation a bit more
+@lisitsyn	HeikoS: as for pools - I hope we will get to them too
+@lisitsyn	would be cool to have a thing  that manages memory
+@HeikoS	indeed
+@HeikoS	lets experiment with those!
+@lisitsyn	HeikoS:  I personally have difficulties with experimenting in shogun
+@lisitsyn	it is big and I have superstitions :D
+@HeikoS	lisitsyn: the best point to do this is when the framework is extended
+@HeikoS	which the log-det project does
+@HeikoS	quite a few classes are necessary for this
+@HeikoS	I wouldnt do it for GP for example
+@HeikoS	there is already too much in single-thred logic
+@HeikoS	thread
+@lisitsyn	HeikoS: I would not go for generic design of that actually
+@lisitsyn	so lets just gradually do that specifically for your task
+@HeikoS	how do you mean that?
+@HeikoS	yes thats my plan
+@lisitsyn	and then generalize when we see a generalization point
+@lisitsyn	HeikoS: I failed too many times with generic design :D
+@HeikoS	haha :)
+@HeikoS	I will send you the class diagram once lambday and I have worked this out
+@HeikoS	he is a smart guy and probably can help a lot there...
+@HeikoS	it makes no sense to do this stuff single-threaded btw
+@HeikoS	lisitsyn: and we should have at least a general framework for multicore stuff with a unified interface
+@HeikoS	since so many tasks are like that
+@HeikoS	I  mean independent loops
+@lisitsyn	HeikoS: yes true
+@lisitsyn	just avoid trying to do that general right now
+@HeikoS	well, a little bit at least :)
+@HeikoS	general enough to have multiple forms for the log-det stuff
+@lisitsyn	HeikoS: it would be possible to design a general thing if we had experience
+@lisitsyn	otherwise we have to do that evolutionary
+@lisitsyn	HeikoS: I can design multiagent systems now - but soooo many mistakes have been fixed
+@HeikoS	i see
+@lisitsyn	so is that thing I am sure
+@lisitsyn	:)
+@HeikoS	one should never start coding too early :)
+@HeikoS	want to spend some time planning this
+@lisitsyn	we are just unexperienced to foreseen that
+@lisitsyn	nahh that fails too
+@lisitsyn	HeikoS: it depends on the experience again
+@lisitsyn	in this case I'd rather plan something not really detailed then code it
+@lisitsyn	then see everything is wrong
+@lisitsyn	and refactor
+@lisitsyn	then guess what :D
+@lisitsyn	HeikoS: should a task have a separate object to store data? how to store dependencies? what are types of dependencies?
+@HeikoS	lisitsyn: no dependencies
+@HeikoS	as I said, this is not my goal
+@HeikoS	independent loops
+@lisitsyn	HeikoS: yeah I mean there are a lot of questions
+@HeikoS	data is stored within task, or reference
+@lisitsyn	and not all of them are answer-able design-time
+@HeikoS	this depends on the implementation
+@lisitsyn	HeikoS: I see a lot of possibilities there anyway
+@HeikoS	lisitsyn: yes
+@HeikoS	lisitsyn: I mean, I just want to have something for the log-dets
+@lisitsyn	most of them are usually unforeseen so be ready to refactor and refactor ;)
+@HeikoS	I have coded up all of this in Matlab, both seq and par, so I know what happens, but maybe you are right and I should not be so general
+@lisitsyn	HeikoS: no I just warn you and lambday to not strive for generality from the very beginning
+@HeikoS	lisitsyn: again, he is not meant to implement parallel things
+@HeikoS	just write the sequential one against an interface that might be able to handle this
+@lisitsyn	I see
+@HeikoS	so and the interface I wanted to have btw is
+@HeikoS	that a class can inherit a set of methods
+@HeikoS	that are: register stuff, solve subproblem, etc
+@HeikoS	so whats a good way to simulat interfaces?
+@HeikoS	java doesnt have MI, thats why they have interfaces, but how do we do this?
+@lisitsyn	HeikoS: we are tied to no MI so forget about java :)
+@lisitsyn	I don't know
+@HeikoS	no way?
+@lisitsyn	it is problem dependent
+@HeikoS	by hand
+@lisitsyn	MI is totally troublesome
+@lisitsyn	HeikoS: you mean they form an hierarchy of classes to share some methods
+@lisitsyn	but all of them implement Task
+@lisitsyn	?
+@HeikoS	yes for example
+@lisitsyn	HeikoS: well I see no problem putting Task to the very top of that hierarchy
+@lisitsyn	so all depends..
+@HeikoS	lisitsyn:  Ill show you the class diagram :)
+@HeikoS	when its more or less done
+@lisitsyn	HeikoS: interfacing is java idiom so may be it just requires to change a point of view
+@lisitsyn	we will see
+@lisitsyn	HeikoS: alright will try to schlafen :)
+@HeikoS	good night lisitsyn! :)
+@lisitsyn	HeikoS: good night
+-!- foulwall [~foulwall@2001:da8:215:6901:93a:5fb3:ab52:7a68] has joined #shogun
+-!- HeikoS [~heiko@176.248.212.176] has quit [Quit: Leaving.]
+-!- nube is now known as out
+-!- out is now known as nube
+ shogun-buildbot	build #407 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/407
+-!- gsomix [~gsomix@83.149.21.63] has joined #shogun
+ gsomix	good morning
+ foulwall	gsomix: morning
+-!- gsomix [~gsomix@83.149.21.63] has quit [Ping timeout: 264 seconds]
+-!- nube [~rho@49.244.28.55] has quit [Ping timeout: 256 seconds]
+-!- foulwall [~foulwall@2001:da8:215:6901:93a:5fb3:ab52:7a68] has quit [Remote host closed the connection]
+-!- nube [~rho@49.244.116.16] has joined #shogun
+-!- flxb_ [~flxb@master.ml.tu-berlin.de] has joined #shogun
+-!- flxb [~flxb@master.ml.tu-berlin.de] has quit [Write error: Broken pipe]
+@sonney2k	morning...
+-!- sijin [~smuxi@144.214.222.109] has quit [Read error: Connection reset by peer]
+@sonney2k	pickle27, any insights?
+-!- iglesiasg [d58f32ac@gateway/web/freenode/ip.213.143.50.172] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- sijin [~smuxi@144.214.222.109] has joined #shogun
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 264 seconds]
+-!- foulwall [~foulwall@2001:da8:215:503:d9a2:88ea:88e3:5e47] has joined #shogun
+-!- hushell [~hushell@c-67-189-100-116.hsd1.or.comcast.net] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- foulwall [~foulwall@2001:da8:215:503:d9a2:88ea:88e3:5e47] has quit [Remote host closed the connection]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- iglesiasg [d58f32ac@gateway/web/freenode/ip.213.143.50.172] has quit [Ping timeout: 250 seconds]
+-!- vgorbati [5f8777f7@gateway/web/freenode/ip.95.135.119.247] has joined #shogun
+-!- van51 [~van51@athedsl-320452.home.otenet.gr] has joined #shogun
+-!- foulwall_ [~foulwall@2001:da8:215:503:746c:70bc:a9be:cac0] has joined #shogun
+-!- lisitsyn [~blackburn@109-226-74-97.clients.tlt.100megabit.ru] has quit [Ping timeout: 246 seconds]
+-!- vgorbati_ [5f85daa8@gateway/web/freenode/ip.95.133.218.168] has joined #shogun
+-!- vgorbati [5f8777f7@gateway/web/freenode/ip.95.135.119.247] has quit [Ping timeout: 250 seconds]
+-!- vgorbati_ is now known as vgorbati
+-!- zxtx [~zv@ool-457e751d.dyn.optonline.net] has quit [Ping timeout: 246 seconds]
+-!- zxtx [~zv@ool-457e751d.dyn.optonline.net] has joined #shogun
+-!- vgorbati [5f85daa8@gateway/web/freenode/ip.95.133.218.168] has quit [Ping timeout: 250 seconds]
+-!- vgorbati [5f85daa8@gateway/web/freenode/ip.95.133.218.168] has joined #shogun
+-!- gsomix [~gsomix@188.168.2.227] has joined #shogun
+ gsomix	hi
+ gsomix	sonney2k, sent PR.
+-!- van51 [~van51@athedsl-320452.home.otenet.gr] has left #shogun ["JOIN #shogun"]
+ gsomix	sonney2k, I hope it's readable now. :)
+-!- van51 [~van51@athedsl-320452.home.otenet.gr] has joined #shogun
+-!- vgorbati [5f85daa8@gateway/web/freenode/ip.95.133.218.168] has quit [Ping timeout: 250 seconds]
+-!- foulwall_ [~foulwall@2001:da8:215:503:746c:70bc:a9be:cac0] has quit [Remote host closed the connection]
+-!- foulwall [~foulwall@2001:da8:215:c252:4b2:f64d:b662:b135] has joined #shogun
+ gsomix	cu later, guys
+-!- sanyam [uid10602@gateway/web/irccloud.com/x-myercfhnlmkikdyu] has quit [Ping timeout: 252 seconds]
+-!- foulwall [~foulwall@2001:da8:215:c252:4b2:f64d:b662:b135] has quit [Ping timeout: 240 seconds]
+-!- nube [~rho@49.244.116.16] has quit [Ping timeout: 264 seconds]
+-!- nube [~rho@49.126.16.146] has joined #shogun
+-!- nube [~rho@49.126.16.146] has quit [Ping timeout: 256 seconds]
+-!- nube [~rho@49.244.8.172] has joined #shogun
+-!- gsomix [~gsomix@188.168.2.227] has quit [Ping timeout: 245 seconds]
+-!- gsomix [~gsomix@188.168.2.227] has joined #shogun
+-!- van51 [~van51@athedsl-320452.home.otenet.gr] has left #shogun ["PING 1369589370"]
+-!- sanyam [uid10602@gateway/web/irccloud.com/x-nsunvhvtlukipqcp] has joined #shogun
+-!- katia_ [5f43c1c3@gateway/web/freenode/ip.95.67.193.195] has joined #shogun
+-!- deerishi [c649b206@gateway/web/freenode/ip.198.73.178.6] has joined #shogun
+-!- vgorbati [5f6ff438@gateway/web/freenode/ip.95.111.244.56] has joined #shogun
+ pickle27	sonney2k: sorry haven't had a chance to work on that yet
+-!- deerishi [c649b206@gateway/web/freenode/ip.198.73.178.6] has quit [Ping timeout: 250 seconds]
+-!- katia_ [5f43c1c3@gateway/web/freenode/ip.95.67.193.195] has quit [Ping timeout: 250 seconds]
+-!- katia_ [5f43c1c3@gateway/web/freenode/ip.95.67.193.195] has joined #shogun
+ gsomix	good evening
+-!- vgorbati [5f6ff438@gateway/web/freenode/ip.95.111.244.56] has quit [Ping timeout: 250 seconds]
+-!- vgorbati [5f6ff438@gateway/web/freenode/ip.95.111.244.56] has joined #shogun
+ pickle27	sonney2k: valgrind didn't complain about qda
+ pickle27	sonney2k: paste is here http://pastebin.com/xc3SERUR
+-!- vgorbati [5f6ff438@gateway/web/freenode/ip.95.111.244.56] has quit [Ping timeout: 250 seconds]
+@sonney2k	pickle27, well yeah it is no memory leak but something else
+@sonney2k	pickle27, how about you pickle.dump all the input that the function gets when you run tester.py
+@sonney2k	and then load that to reproduce/debug the issue
+* sonney2k off
+ pickle27	sonney2k: I thought valgrind might complain because I thought it might be a result that is bigger than its return allocation if that makes sense
+ pickle27	sonney2k: okay
+ pickle27	sonney2k: the function doesn't get any input from tester.py it just runs the example
+ pickle27	sonney2k: at least thats what it looks like to me
+ gsomix	nite
+ pickle27	sonney2k: if I run the modular example on my own it runs fine
+ pickle27	sonney2k: I'll try the same data in the c++ example
+@sonney2k	pickle27, no
+@sonney2k	pickle27, did you pickle dump?
+ pickle27	sonney2k: I was just looking through to see what tester actually did
+ pickle27	sonney2k: doesn't it just run classifier_qdq_modular.py?
+@sonney2k	pickle27, yes but did you dump the data it gets?
+ pickle27	what do you main it doesn't get data the data is loaded in the example itself
+ pickle27	*mean
+@sonney2k	so did you dump it or not?
+ pickle27	theres no need to dump it, its the data/fm_train_real data
+@sonney2k	ok then let me do it
+@sonney2k	pickle27, alright so the reason is that m_store_covs is True in one test
+@sonney2k	pickle27, so just put a true as last argument and you can reproduce the crash in the example
+ pickle27	sonney2k: I thought that might be the problem but it still runs for me when I do that
+ pickle27	sonney2k: ahh got the bug now
+@sonney2k	pickle27, parameter_list = [[traindat, testdat, label_traindat, 1e-4, True], \
+@sonney2k	then it will crash
+ pickle27	sonney2k: and I see sort of whats happening with the tester
+ pickle27	okay I'll work on fixing this now
+@sonney2k	thanks
+ pickle27	sonney2k: got it now, I just switched to ozansener's covar calc instead
+ pickle27	theres a lot of room for better use of Eigen3 in QDA but it'll work for now
+@sonney2k	pickle27, heh feel free to do it - ohh and benchmarks welcome too!
+ pickle27	sonney2k: yeah I'd like to give it a try in the next bit!
+-!- katia_ [5f43c1c3@gateway/web/freenode/ip.95.67.193.195] has quit [Quit: Page closed]
+ pickle27	sonney2k: the test runs now but the result is different in a 2 places (unsure why slight numerical differences?) should I make a PR with the fix now and continue investigating?
+@sonney2k	gsomix, yes readable finally :-)
+-!- HeikoS [~heiko@176.248.212.176] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@sonney2k	HeikoS, hey there!
+@HeikoS	sonney2k: hi!
+@HeikoS	how is it going?
+@sonney2k	tomorrow is the day students will be notified
+@HeikoS	I know
+@HeikoS	sonney2k btw, discussing something with lambday
+@HeikoS	which is basically a class CIndependentComputationEngine
+@HeikoS	which can take instances of a CIndependentComputationTask
+@HeikoS	and run all of them in parallel
+@HeikoS	or sequentially
+@HeikoS	or whatever
+@HeikoS	we need this for the log-det stuff
+@sonney2k	HeikoS, ohh I think sergey had some thoughts on that too
+@HeikoS	and maybe it might be worth to think about generalising it for other things
+@HeikoS	yes we already discussed
+@sonney2k	and wiking would need this for his bagging machine and you for your xval stuff
+@HeikoS	so algorithms just produce a set of tasks instead of doing computations
+@HeikoS	those are given to the computation class
+@HeikoS	it returns results
+@HeikoS	results are being passed to algorithm which aggregate
+@HeikoS	but only for independent/trivially parallelizable stuff
+@HeikoS	otherwise it will be too complicated
+@HeikoS	but this way, many things might benefit
+@HeikoS	grid-serach for example
+@sonney2k	HeikoS, I am not sure how exactly this would work
+@HeikoS	we could have one class which does things in a multicore way
+@sonney2k	yeah multi core / multiple machines
+@sonney2k	machines == computeres
+@HeikoS	yes
+@HeikoS	and future implementations might be coded against this
+@HeikoS	sergey had some doubts however
+@HeikoS	and he is right, its not easy to do this in general
+@sonney2k	howe would it work in case of say bagging?
+@sonney2k	how do you tell which stuff is to be transferred to the remote machine and which not?
+@HeikoS	so the way I would do the abstraction is this
+@sonney2k	I currently can see this work with threads and just a couple of parameters
+@HeikoS	one has a class for indepedent tasks
+@HeikoS	which has abstract method solve
+@sonney2k	(beware already here - you have to set obj->parallel->set_num_threads(1) then)
+@HeikoS	The task itself know everything it needs to know
+@sonney2k	better compute()
+@HeikoS	you one can just call compute/solve
+@HeikoS	and the implementation of the task does everything and returns an instance of an abstract base for result
+@HeikoS	so then your algorithm just produces a set of those tasks
+@HeikoS	these may share data for now (as long as its not modified)
+@HeikoS	but the point is that they hold a complete representation of the subproblem
+@HeikoS	you pass them to computation enginge class
+@HeikoS	basic case: sequential: just a loop over all task.compute()
+@HeikoS	returns a set with result instances
+@HeikoS	one passes them to the algorithm which knows how to aggregate the results if it has produced the tasks
+@HeikoS	multicore implementation would run things at once
+@HeikoS	for this, one needs to clone stuff which is modified
+@HeikoS	read-only things can stay in shared memory
+@HeikoS	distributed implementation might serialize objects and send them to computer
+@HeikoS	s
+@HeikoS	since we are only considereing independent stuff, we dont have scheduling problems
+@sonney2k	HeikoS, so to get it right the task creates all required objects that are passed to the compute engine
+@HeikoS	yes
+@HeikoS	computation engine just calls compute() method in some way
+@sonney2k	how can one do that efficiently? I mean you don't want to create 10 copies of a data set in memory?
+@HeikoS	sonney2k, indeed
+@HeikoS	the thing is: if data is modified, there is no way around that
+@sonney2k	so you pass references only
+@HeikoS	anyway
+@sonney2k	and they are copied if needed
+@HeikoS	exactly
+@HeikoS	so multicore works on the same objects
+@sonney2k	yes for single machines
+@HeikoS	for multiple machines, data needs to be transfered anyway
+@HeikoS	no way around that
+@sonney2k	but for clusters we would just serialize
+@HeikoS	yes
+@HeikoS	to a byte stream or so
+@sonney2k	there is the issue with crashing parts
+@HeikoS	what do you mean with that?
+@sonney2k	(I get the picture and it should be OK)
+@sonney2k	say a cluster node crashes
+@HeikoS	I see
+@sonney2k	how do you fail over
+@sonney2k	or a thread cannot be created etc
+@HeikoS	well thats all to be handled by the computation engine implementation
+@HeikoS	so we can do this later
+@HeikoS	no problem, just try, if it doesnt work, try another machine
+@sonney2k	we have to somehow be able to 'resume' or to restart failed stuff or how $BIGCOMPANY does it start say 30% more jobs
+@sonney2k	to anticipate failures
+@HeikoS	sonney2k, I wouldnt do that
+@HeikoS	rather make tasks smaller
+@HeikoS	subtasks
+@HeikoS	an algorithm can even produce a set of different tasks
+@HeikoS	as long as it knows to aggregate the results
+@HeikoS	resuming is very difficult
+@HeikoS	(I think at least)
+@HeikoS	sonney2k: so I dont want to get involved in too much techical distributed programming, but rather start thinking about a framework that could be extended to this
+@HeikoS	for now, just multicore
+@HeikoS	but formulate algorithm in terms of that task-based framework
+@HeikoS	for independent stuff
+@HeikoS	so quite simple actually
+@sonney2k	HeikoS, I see, but IIRC you have a cluster @work?
+@HeikoS	yes, can do
+@sonney2k	qsub based stuff?
+@HeikoS	yes
+@HeikoS	so I have in mind to create a computation engine that submits qsub jobs
+@HeikoS	at some point
+@sonney2k	so IMHO it would be worth to do that
+@sonney2k	qsub and (just ssh based)
+@HeikoS	yes definitely, we have many independent subproblems in shogun
+@sonney2k	do your nodes share a common file system?
+@HeikoS	I am currently runnign a thing on 100 nodes, thats quite a big speedup factor.
+@HeikoS	yes
+@HeikoS	so one could indeed serialize
+@HeikoS	to a file
+@sonney2k	yes data to one big file and then load only the modified parameters from different files
+@sonney2k	I recall very much the limits we hit with a shared file system
+@HeikoS	this can even be handled by the tasks - give a filename for the main data, and just store the parameters in local variables
+@HeikoS	sonney2k, well one usually doesnt get ones hands on more than a few hundred nodes
+@sonney2k	back then I used bittorrent to cache data on all cluster nodes - all copying would otherwise have taken a week
+@HeikoS	sonney2k: haha :) when was that?
+@sonney2k	hmmhh 2007 or 8?
+@HeikoS	sonney2k: I mean these are all details on how the tasks are implemented, but it all works under the interface
+@sonney2k	looong time ago
+@HeikoS	so if one invests a lot of brainpower, one gets good results
+@HeikoS	if one does not, it might not scale
+@sonney2k	yes
+@HeikoS	point now would be more the general structure
+@sonney2k	the standard map-reduce scheme would work aswell with this
+@HeikoS	true
+@sonney2k	issue is still no loops possible
+@HeikoS	I would rather go for this independent task based stuff
+@HeikoS	more intuitive
+@HeikoS	also, shogun is not really parallel based
+@HeikoS	I mean its focus is not on this
+@HeikoS	but these independent things are just so easy and so useful
+@HeikoS	that  we could focus on just them
+@sonney2k	true
+@sonney2k	shogun is meant to run on single machines
+@sonney2k	with lots of cores
+@HeikoS	I would say this stuff that one would parallelize on qsub clusters would be very useful though
+@HeikoS	parameter sweeps etc
+@HeikoS	and exactly, first engine would be one with a shared memory model
+@HeikoS	then we could start modifying existing algorithms
+@HeikoS	and once this is more or less stable
+@HeikoS	one could try adding distributed things
+@HeikoS	step by step
+@sonney2k	HeikoS, the problem really is that you hardly get speedups by just switching multi-core -> multi-machine
+@sonney2k	the algorithm needs to be designed for that usually
+@HeikoS	lets see how it goes, will start with the log-det stuff, which is already a bit of a challenge under this framework. Many linear systems that share a lot of stuff
+@sonney2k	so yes only the big independent jobs will benefit
+@HeikoS	sonney2k: yes
+@sonney2k	but that is what you have in mind
+@HeikoS	the rest is too complicated anyway
+@HeikoS	grid-search is the best example
+@sonney2k	so bagging/ms/etc
+@HeikoS	and random forests etc
+@sonney2k	when I had to parallelize I did mostly ms
+@HeikoS	yes same, usually only independent stuff
+@sonney2k	sometimes data was too big
+@sonney2k	so I trained or applied on chunks
+@HeikoS	I see
+@HeikoS	sonney2k: gotta go now, diner is ready :) be back later
+@sonney2k	cu
+@sonney2k	nice talking to you as always :D
+-!- HeikoS [~heiko@176.248.212.176] has quit [Quit: Leaving.]
+--- Log closed Mon May 27 00:00:19 2013

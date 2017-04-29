@@ -1,0 +1,652 @@
+--- Log opened Sat Feb 18 00:00:19 2012
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	so is there any way to build a strong classifier with shogun where several "weak" ones are put together?
+ n4nd0	I am looking for it to work on an example application on face detection
+ n4nd0	I have made tests using fancy features but no good results using svm with a polynomial kernel
+@sonney2k	n4nd0, we don't have boosting if you mean that
+@sonney2k	try multiboost for that
+ n4nd0	sonney2k, I was looking for an alternative solution to boosting
+ n4nd0	I want to stick to shogun
+ n4nd0	sonney2k, about boosting, I have seen in the gsoc ideas page that one of the suggested projects last year was to merge shogun and multiboost
+@sonney2k	no longer there ...
+@sonney2k	too ambitious
+ n4nd0	aham
+ n4nd0	but would that still be of interest for shogun?
+@sonney2k	sure
+@sonney2k	alright ... sleep time!
+@sonney2k	cu
+ n4nd0	sonney2k, I have worked with adaboost in particular before
+ n4nd0	so I could start taking a look to multiboost and try to see how could that be ported to shogun
+ n4nd0	ok
+ n4nd0	good night
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- CIA-64 [~CIA@cia.atheme.org] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: CIA-18
+-!- blackburn [~qdrgsm@109.226.88.39] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ CIA-64	shogun: Sergey Lisitsyn master * rdd64345 / (5 files in 4 dirs): Fixed a couple of warnings - http://git.io/EduvuQ
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ blackburn	wiking: have you tried 1/2-homogay map?
+ blackburn	vedaldi surprisingly reported improvement with this
+ wiking	what's 1/2-hkm?
+ blackburn	wiking: order of homogaynit
+ blackburn	y
+ blackburn	I mean they use 1/2 as order
+ blackburn	and it smooths things
+ blackburn	but I got worse results
+ wiking	but how can he do 1/2 order
+ wiking	when it's an int in their implementation
+ wiking	:D
+ blackburn	hmm
+ blackburn	wait
+ blackburn	not order
+ blackburn	gamma
+ blackburn	my bad
+ blackburn	k(cx,cy) = c^\gamma k(x,y)
+ blackburn	wiking: using 0.5 for JS improved for 1%
+ blackburn	on my data
+ blackburn	hog
+ wiking	aha
+ wiking	compared to original JS?
+ wiking	or compared to 1.0 gamma ;P
+ wiking	i'm gonna introduce a new kernel today/tomorrow
+ wiking	and let's see if i can make that HKM as well
+ blackburn	wiking: JS with gamma = 1.0 and JS with gamma = 0.5
+ blackburn	btw it is pretty dirty hack
+ blackburn	for me
+ blackburn	wiking: jenson-shannon-renyi-mozart?
+ wiking	which? :)
+ wiking	ahahah yepp
+ wiking	:)
+ blackburn	wiking: hmm what is the natural gamma for JS btw?
+ wiking	none
+ wiking	i mean this is like basically a tailor series
+ wiking	so it's just approximation
+ wiking	so i guess gamma -> inf would get you to original JS
+ blackburn	hmm
+ wiking	Smaller value of @f$ \gamma @f$ enhance the kernel non-linearity and
+ wiking	are sometimes beneficial in applications
+ blackburn	I guess your suggestion about gamma -> inf wasn't right
+ wiking	yep
+ blackburn	gamma -> inf makes it LINEAR :)
+ wiking	and is says that
+ blackburn	or something like that
+ blackburn	oh I don't like it
+ blackburn	makes more params :(
+ wiking	if gamma = 1 then u should obtain the standard kernels
+ wiking	the order ->inf would do that what i'm saying
+ wiking	i mean yeah as it says here
+ blackburn	I see
+ wiking	The homogeneous kernel map
+ wiking	approximation is based on periodicizing the kernel
+ wiking	so basically you could see this
+ wiking	or at least i would see this as sampling the signal
+ wiking	and then u have there the Nyquist-Shannon sampling theorem
+ wiking	and basically period is the sampling rate
+ wiking	imho
+ blackburn	pretty complex huh
+ blackburn	but yeah I catch it
+ blackburn	wiking: where are you doing your phd btw?
+ wiking	gent, belgium
+ wiking	yesterday i've found a fucking paper that partially implements that idea i had lately
+ wiking	it'll be published next month
+ wiking	fuckers... from stanford..
+ blackburn	hah that fucked up feeling
+ blackburn	so you are a big traveller :)
+ blackburn	wiking: will you have enough time for doing latent svms this summer?
+ wiking	yep
+ blackburn	nice
+ wiking	i'll be in iceland for a month in july
+ wiking	doing nothing
+ blackburn	iceland??
+ wiking	yeah i was living quite around this world...
+ blackburn	I wish I did the same haha
+ wiking	nevertoolate
+ blackburn	notenoughmoney
+ blackburn	:D
+ wiking	u think i had ? :P
+ wiking	anyhow
+ wiking	there's this thingy
+ blackburn	will you live in a box?
+ blackburn	:D
+ wiking	http://www.pascal-network.org/?q=node/19
+ wiking	i think it's a good idea, and shogun could apply for it
+ wiking	the only problem is that the program is running out and they don't know if there's going to be a last call for participation or not...
+ wiking	they going to decide it on the end of march
+ wiking	and then with this you could travel
+ wiking	;)
+ wiking	ok i'm off now
+ blackburn	see you
+ blackburn	nice program
+ wiking	i'll be back sometime at night
+ blackburn	but no idea how to apply it for shogun
+ blackburn	ok
+ wiking	it's easy
+ blackburn	I mean we can hardly find 4-8 guye
+ blackburn	guys
+ wiking	nono
+ wiking	easy
+ wiking	you are one
+ wiking	:>
+ wiking	anyhow i'll let you know if they are going to be a last call for participation
+ blackburn	ok
+ blackburn	e.g. Soeren can't participate in this program
+ wiking	ttyl
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ blackburn	he is pretty busy with his job
+ blackburn	cu
+ blackburn	:)
+ blackburn	sonne|work: http://www.pascal-network.org/?q=node/19 is it any applicable to shogun?
+ blackburn	hm I forgot it is saturday
+ blackburn	:D
+ blackburn	sonney2k: ^
+-!- Ram108 [~amma@14.96.26.93] has joined #shogun
+ Ram108	blackburn: there?
+ blackburn	Ram108: yes
+ Ram108	hi i think i figured out what went wrong.........
+ Ram108	well the weight vectors were initialised to large values and the error equation yielded very small values to change the weight vectors appropriately
+ Ram108	thanks for the help..........
+ blackburn	hah, did I help you anyhow? :)
+ Ram108	lol
+ Ram108	erm do u mind i ask u hw long were u in this field of work?
+ Ram108	i mean machine learning
+ blackburn	hmm
+ Ram108	i am not able to grasp what all topics does this field comprise off
+ blackburn	more than year
+ blackburn	may be 1.5
+ Ram108	oh hmmm thanks :)
+ Ram108	well NN, SVM, fuzzy logic, Genetic algorithms
+ Ram108	is that about it?
+ Ram108	i mean do all the learning algorithms fall under one of these?
+ blackburn	NN + SVM mainly
+ blackburn	genetic stuff stands apart usually
+ blackburn	more generally, evolutionary computing
+ blackburn	fuzzy logic as well
+ Ram108	oh hmmm okay.........
+ blackburn	but there are a lot of intersections everywhere
+ Ram108	ah........
+ blackburn	shogun contains svms mainly
+ Ram108	i can see that lol
+ Ram108	thats perhaps why am not able to understand all the liblinear lib...... etc etc
+ Ram108	i ll read up on that......
+ Ram108	by the way could u enlighten me more on what Mr sonney is doing?
+ blackburn	I don't know, he does some research at tomtom
+ blackburn	earlier he was related to bioinformatics
+ Ram108	oh hmmm i c....... and he devout s rest of his spare time building shogun?
+ blackburn	yes
+ Ram108	ok :) last one....... hw old is shogun?
+ blackburn	since 1999
+ Ram108	thanks :)
+-!- Ram108 [~amma@14.96.26.93] has quit [Ping timeout: 240 seconds]
+-!- Ram108 [~amma@14.96.172.24] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- Ram108 [~amma@14.96.172.24] has quit [Ping timeout: 255 seconds]
+-!- naywhaya1e [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 240 seconds]
+-!- blackburn [~qdrgsm@109.226.88.39] has quit [Ping timeout: 240 seconds]
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Ping timeout: 240 seconds]
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- blackburn [~qdrgsm@109.226.88.39] has joined #shogun
+-!- Ram108 [~amma@14.99.168.133] has joined #shogun
+ blackburn	n4nd0: hey
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 252 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- Ram108 [~amma@14.99.168.133] has quit [Quit: Ex-Chat]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	sonney2k: hi! so about what we talked a bit yesterday of adding boosting to shogun
+ n4nd0	sonney2k: I would like to first start with adaboost, what do you think it is a good start to do it?
+ wiking	blackburn: yo
+ blackburn	wiking: hey
+ wiking	wazza
+ wiking	are we getting multiclass linear sum soon?
+ wiking	*svm
+ blackburn	heh
+ blackburn	yes, I'm working on it
+ blackburn	although not very fast
+ wiking	ok cool
+ wiking	that'd be great to see the speedup
+ blackburn	yeah liblinear with cramer singer should be fast and accurate
+ n4nd0	blackburn: do you know sth about multiboost and the gsoc project that was suggested last year porting it to shogun?
+ blackburn	n4nd0: no, unfortunately no
+ n4nd0	blackburn: I started thinking of it since I don't see other way of making the face detector work :(
+ blackburn	do you need a face detector?
+ n4nd0	blackburn: I have tried with some fancy haar features for a single svm but no luck
+ blackburn	did you get better results with boosting?
+ n4nd0	blackburn: well, not really ... it was more with the idea of making this example we talked about
+ n4nd0	blackburn: yes, with the implementation from scratch I did in matlab with boosting of weak classifiers it worked
+ blackburn	what are the numbers?
+ blackburn	if you really need boosting you may work on it, else it is okay to show bad results
+ blackburn	bad results are results as well right?
+ n4nd0	haha yes they are
+ n4nd0	in any case it could be nice try to get into shogun some of the algorithms in multiboost
+ n4nd0	blackburn: or do you think it might be too optimistic to do let say in a couple of non-intense weeks?
+ blackburn	n4nd0: Soeren said it is pretty ambitious
+ blackburn	did he?
+ n4nd0	he referred to the gsoc project that was proposed last year, but yes he said that
+ n4nd0	I had in mind anyway to limit to adaboost firstly
+ n4nd0	these are the parameters of the classifiers I get using a single svm in the CBCL database
+ n4nd0	>>>> accuracy   = 0.932669322709
+ n4nd0	>>>> precision  = 0.985507246377
+ n4nd0	>>>> error rate = 0.0673306772908
+ n4nd0	>>>> recall     = 0.28813559322
+ n4nd0	>>>> ROC area   = 0.907626093794
+ n4nd0	recall is too low
+ blackburn	what are results with your boosting?
+ n4nd0	I didn't try it with this database
+ blackburn	ehmm how then can you compare :)
+ n4nd0	because we could use that classifier "for real", not in real time though
+ n4nd0	but it worked nicely with images
+ n4nd0	and, even if I have not tried the svm with real images, with a recall of about 0.288 I don't think it will work fine
+ blackburn	I just wonder if recall is calculated correctly
+ blackburn	hmm seems so
+ blackburn	n4nd0: did you try kernels?
+ n4nd0	blackburn: I have used a polynomial one
+ blackburn	gaussian? sigmoid?
+ n4nd0	blackburn: I have tried it with degree 2 and 3
+ n4nd0	no, I have not tried other ones
+ blackburn	why?
+ n4nd0	in the page where I got the CBCL face data I read they had used those kernels and not others
+ blackburn	heh
+ n4nd0	I assumed those were the best for this application
+ n4nd0	but it might be that they improve
+ n4nd0	let me try
+ blackburn	well gaussian works well usually
+ blackburn	n4nd0: btw did you change C?
+ blackburn	normalization?
+ blackburn	these things are considerable steps
+ n4nd0	currently I am using a value of 1.0 for C
+ n4nd0	I tried changing it to bigger ones but it went worse
+ n4nd0	do you mean normalization for the training and test data?
+ blackburn	yes, both should be normalized
+ n4nd0	so the images get zero mean and std 1?
+ blackburn	I mean vectors of your features should have L2 norm = 1 for linear kernel
+ n4nd0	mmm
+ n4nd0	no
+ blackburn	could be better
+ n4nd0	the features are not normalized :(
+ blackburn	preprocessor = NormOne()
+ blackburn	preprocessor.apply_to_feature_matrix(train_features)
+ blackburn	preprocessor.apply_to_feature_matrix(test_features)
+ blackburn	something like that
+ n4nd0	ok, I will take it a look
+ n4nd0	even if the features are the pixel of the images and the images are already normalized, do you think it will make a difference?
+ n4nd0	they are normalized as I told you, zero mean and standard deviation equal to one
+ blackburn	I don't know
+ blackburn	better try
+ blackburn	:)
+ n4nd0	ok
+ n4nd0	blackburn: how is it a good way to choose the parameters for the kernels, such as the width for the Gaussian?
+ n4nd0	cross-validation?
+ blackburn	yeah
+ wiking	blackburn: hey man btw do you know viktor pelevin? he's one of my favorite contemporary writers... and i've just seen that they've made a movie out of one of his books http://www.imdb.com/title/tt0459748/
+ blackburn	wiking: yes, I've seen this movie :)
+ wiking	is it good?
+ blackburn	and have read a book as well
+ blackburn	not bad :)
+ wiking	unfortunately haven't read that book yet from him.. but all the latest ones...
+ wiking	starting from the yellow arrow
+ wiking	empire v
+ blackburn	generation P is the only book I've read :)
+ blackburn	from pelevin I mean
+ blackburn	not generally :D
+ wiking	and sacred book of the werewolf... and i don't know what was the english title for one playing in the big russian revolution time
+ wiking	hehehe
+ wiking	anyhow he's really cool
+ wiking	i'm just getting this movie
+ wiking	i'm just a bit scared of the subtitles
+ blackburn	is it translated?
+ blackburn	ah
+ blackburn	hey you should understand russian a little :)
+ wiking	heheh i do a little
+ blackburn	wiking: there are a lot of really good artists
+ wiking	it's funny when i was living in australia there were a lot of russians around me... i could understand 60-70% of what they were saying... but when i've tried serbian with them they couldn't understand a word...
+ blackburn	epifantsev as tatarsky, efremov as azadovsky..
+ blackburn	have you been living in australia??
+ wiking	yeah
+ wiking	for almost 2 years
+ blackburn	damn is there any island where you weren't?
+ wiking	never been to latin america nor africa and neither in asia
+ blackburn	:D
+ wiking	just been at bangkok airport 3 times :P
+ wiking	i wanted to do the transiberian
+ wiking	but that has been postponed... but hoping to do it once soon
+ wiking	where are u living in russia atm?
+ blackburn	you are welcome at samara/togliatti
+ blackburn	:)
+ wiking	aaah
+ wiking	it's by the volga river right?
+ blackburn	yeah
+ wiking	cool
+ wiking	how far is the star city from you? :)
+ blackburn	the place 'lada' cars are being made
+ blackburn	star?
+ wiking	i mean cosmos city
+ wiking	or what
+ wiking	in kazakstan
+ blackburn	ah baikonur?
+ wiking	aaah yeah
+ blackburn	pretty far
+ blackburn	let me check
+ wiking	fucking hell i'm tired not remembering the name
+ wiking	oooh fuck
+ wiking	it's that faaar
+ wiking	i mean baikonur
+ blackburn	~1200
+ wiking	heheheh so the name for the car lada samara is coming from the name of the city ?:)))
+ wiking	hahah didn't know that one :>
+ blackburn	yes
+ blackburn	VAZ is in togliatti
+ wiking	that's a funny car :>
+ blackburn	but cars was named after city, right
+ blackburn	sometimes it is called zubilo
+ blackburn	http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Lada_Samara.JPG/220px-Lada_Samara.JPG
+ blackburn	http://upload.wikimedia.org/wikipedia/commons/thumb/5/50/ColdChisels.jpg/220px-ColdChisels.jpg
+ blackburn	something similar right?
+ wiking	yep yep those lada samaras
+ wiking	i remember seeing them a lot
+ blackburn	where?
+ wiking	well all around eastern europe
+ wiking	but since the communism stopped being...
+ blackburn	btw now they do cars like that
+ blackburn	http://wroom.ru/i/cars2/lada_priora_1.jpg
+ wiking	woah
+ wiking	high tech shit
+ blackburn	not as ugly
+ wiking	loved russian cars
+ blackburn	as it was
+ wiking	they were reliable
+ wiking	and simple so easy to fix
+ blackburn	not really but it is easy to fix it
+ wiking	yeah i mean that's why
+ blackburn	with kuvalda
+ wiking	even if there was something even somebody with a little knowledge could fix it
+ wiking	uaz
+ wiking	or what was that truck
+ blackburn	uaz being made a little norther
+ blackburn	in ulyanovsk
+ wiking	ahhaha they were like survivor machines
+ wiking	:)
+ wiking	the uaz bus
+ wiking	http://upload.wikimedia.org/wikipedia/commons/a/a1/UAZ-Bus.jpg
+ blackburn	bus? I'm not sure
+ wiking	this oen!!!
+ blackburn	ah
+ blackburn	buhanka
+ wiking	do u know this one? :)
+ blackburn	this shit is fucking crazy
+ wiking	that thing was going in any shit :)))
+ blackburn	it is able to climb 75 degree mountain
+ blackburn	:D
+ wiking	yep
+ wiking	amazing shit
+ blackburn	I heard one story
+ blackburn	a couple of guys went to hunt a little
+ blackburn	here
+ blackburn	they had land cruiser, etc
+ blackburn	so they sticked in snow
+ blackburn	and there came man on this uaz
+ blackburn	pulled their cars easily and told them to use better cars next time :D
+ wiking	nothing can mess with an UAZ!!!
+ wiking	yeah i totally believe
+ blackburn	hah yeah crazy car
+ wiking	that car is some amazing piece of mechanism
+ blackburn	there are a lot of them still here
+ wiking	but yeah i really like russian made stuff... i mean they are just bruteforce
+ wiking	they were never nice and shinny stuff
+ wiking	but for the purpose it was great :)
+ blackburn	rather soviet
+ wiking	hahahaha
+ wiking	yeah
+ wiking	i just remember the soviet era stuff
+ wiking	dunno how is it now with russia :>
+ wiking	how's IT doing it there?
+ wiking	i mean it should be great in one way
+ blackburn	IT?
+ blackburn	inf. tech. stuff?
+ wiking	as there's amazing coders coming from russia
+ wiking	yeah inf.tech
+ blackburn	well it is ok
+ blackburn	for example we have a lot of outsource in samara
+ blackburn	netcracker, epam ,mercury
+ blackburn	I work at netcracker btw
+ wiking	heheheh i always wondered why people talk about outsourcing to india, when russian coders are way better imho
+ blackburn	yeah I think so :)
+ wiking	man when i was working with indians in nokia....
+ wiking	i really cannot explain
+ blackburn	I can imagine haha
+ wiking	if i could have i would release all their codes
+ blackburn	in one book?
+ blackburn	:D
+ wiking	it's like 2 functions they've used for EVERYTHING
+ blackburn	oracle_func_1
+ blackburn	oracle_func_2
+ wiking	exactly
+ wiking	i remember cleaning up their shit
+ blackburn	this function oracles everything
+ blackburn	hah
+ wiking	and the best is
+ wiking	using 2 files
+ wiking	.h and .cpp
+ wiking	not more
+ wiking	2
+ blackburn	damn how old are you?
+ wiking	and that was for a browser interface
+ blackburn	you were at every country I know
+ blackburn	:D
+ blackburn	worked in every company?
+ blackburn	:D
+ wiking	ahahah too old man too old
+ wiking	30
+ blackburn	ohh it is being clearer now
+ wiking	hehehe yeah makes sense right? :P
+ blackburn	hah yeah
+ wiking	but yeah it is fucking crazy cleaning up a 10k+ lines file
+ blackburn	I have 2/3 of your hah
+ wiking	hahahahahahahha
+ wiking	little green grasshopper then
+ blackburn	yeah
+ n4nd0	blackburn: wow the training with the Gaussian kernel is never ending :-O
+ blackburn	n4nd0: should be a little slower
+ blackburn	hmm..
+ blackburn	wiking: artist playing tatarsky in generation P had some crazy roles before
+ blackburn	for example
+ blackburn	http://www.youtube.com/watch?feature=player_detailpage&v=jhzpe7QxlGw
+ wiking	hahahaha
+ blackburn	lets test your russian
+ blackburn	did you get title? :)
+ wiking	what is ??????
+ wiking	?
+ blackburn	head
+ wiking	ahhaha
+ blackburn	TIDE or cutting off the head, something like that I guess
+ wiking	yeah
+ wiking	i didn't get ????
+ blackburn	just tide
+ wiking	cutting was ok
+ wiking	i got that one
+ wiking	and of course ili
+ wiking	:P
+ wiking	aaah golovi
+ blackburn	yeah
+ wiking	it's glava on serbian
+ wiking	i should have got it
+ blackburn	3:10 hah
+ wiking	:)
+ blackburn	hmm I just wonder what do you think about kosovo
+ wiking	honestly
+ blackburn	3:46 is ok a well
+ wiking	no opinion
+ wiking	i mean it's a big mess
+ wiking	it's just bad that people cannot agree on it in a normal manner
+ wiking	but that's quite usual in balkans :P
+ blackburn	as for me it was a great shame for my country to not help serbians there
+ wiking	i mean that they cannot communicate in a normal manner
+ blackburn	but may be I'm wrong
+ wiking	well
+ wiking	it's really not nice for the minorities there (kosovoar people)
+ wiking	because of the past stories... oppression by the serbs etc
+ wiking	so i completely understand that part
+ wiking	it's just funny when people from around the world who have no idea about anything
+ wiking	try to fix it
+ wiking	:)
+ wiking	but when you look at their 'own mess' it's even worse in a way
+ blackburn	so a lot of my friends (me as well) think 'kosovo je serbia' :)
+ wiking	like the guy who sketched up the 'solution' for kosovo is from finland
+ blackburn	funny thing I don't think chechnya should be included
+ blackburn	into russia
+ wiking	and for instance the situation with russians in finland (on the border)
+ wiking	it's like wtf
+ wiking	i mean finnish people just amazingly hating russians... :(
+ wiking	hehehe yeah you have some troubles of your own as well
+ blackburn	for what?
+ wiking	well i don't know
+ wiking	it's just something from the past
+ blackburn	do you know how they 'solved' chechnya problem?
+ blackburn	njet molotoff hah
+ wiking	hahahahahha
+ wiking	i mean their hate is irrational (finnish)
+ wiking	they hate russians because they tried to invade finland couple of times
+ blackburn	hah yeah
+ wiking	but they have almost no real problems with the swedes
+ wiking	who kind of like ruled them for 100+ years
+ wiking	so it's amazing how unbalanced that shit is
+ blackburn	I know no one hating finnish :)
+ wiking	but it's all the same with those countries there in the baltics
+ blackburn	estonia/latvia/lithuania same
+ wiking	yeah
+ blackburn	they hate their soviet legacy
+ wiking	yeah
+ wiking	but it's part of their culture
+ wiking	and identity
+ wiking	so funny to hate something that is part of u
+ wiking	:>
+ blackburn	btw currently we don't like soviet state of mind as well
+ wiking	ahhahahah
+ wiking	well
+ wiking	i don't know which was better
+ wiking	i mean don't get me wrong
+ wiking	i don't know that much of current state of russia
+ wiking	but the thing with putin and yelcin
+ blackburn	so the situation with putin clearly describes what I mean
+ blackburn	people here want vozhd
+ blackburn	who will rule them
+ wiking	yeah i kind of like sensed that one... that in russia some people just want a big leader
+ blackburn	30% do
+ wiking	something like stalin
+ blackburn	+ some falsification
+ wiking	or breznyev :P
+ blackburn	and here we go, putin again
+ wiking	ehehheheh
+ wiking	but that's amazing
+ wiking	i mean the whole thing around putin
+ wiking	the oligarch
+ wiking	it's like a big fucking maffia
+ blackburn	exactly it is
+ wiking	especially with gazprom
+ blackburn	some day he will be judged
+ blackburn	particularly yukos as well
+ wiking	i mean on the other hand if u look what was happening with yelcin...
+ blackburn	khodorkovsky
+ blackburn	yeltsin was worse for sure
+ wiking	i mean that was amazing how the things gone really bad with yeltsin
+ wiking	everything started to get wasted...
+ blackburn	but there was a big bonus for russia
+ blackburn	cost of oil
+ wiking	heheh yeah
+ blackburn	it impacted everything
+ blackburn	if there was 30$ for barrel - there would be no way for such 'great putin'
+ blackburn	would be only wastelands here :)
+ wiking	:P
+ blackburn	wiking: do you know how they trying to calm down people here?
+ blackburn	there were protests after elections
+ blackburn	a lot of
+ wiking	yeah
+ wiking	read about those
+ blackburn	they just grow hate to US
+ blackburn	:D
+ blackburn	they say US wants to do revolution here
+ wiking	no way!
+ blackburn	hahah
+ wiking	ahahahah
+ blackburn	yes, they say we don't want another lebanon here
+ blackburn	or siria
+ blackburn	or egypt
+ blackburn	it works for not-too-smart-people
+ blackburn	but more educated city people usually just laughs at it
+ wiking	sorry but i gotta run again... would love to continue this conversation some time soon
+ wiking	:(
+ blackburn	aha okay :)
+ wiking	but yeah fuck putin :P
+ blackburn	was great to talk to you
+ blackburn	hahah
+ wiking	yeah you too!
+ wiking	laterz!
+ blackburn	see you
+ wiking	cya
+ n4nd0	blackburn: should it be better if I increase the cache-size parameter?
+ n4nd0	right now is to 40, and it has been training the svm for a long long while
+ blackburn	n4nd0: yes, should be
+ blackburn	still??
+ blackburn	that's crazy :)
+ n4nd0	yeah I know :-P
+ n4nd0	but it is also because the size of the images changed when I tried with some fancy haar features
+ n4nd0	I am going to come back to the 19x19 and increase the size cache
+ n4nd0	which one is a good value for it?
+ blackburn	it is size of cache in mb
+ blackburn	you may use any that fits into your memory
+ n4nd0	and for the width in the Gaussian?
+ n4nd0	an approximate value that should go good?
+ n4nd0	is there any heuristic or thumb rule to use?
+ blackburn	well not really
+ blackburn	it should be very small and very large
+ blackburn	:D
+ blackburn	shouldn't*
+ blackburn	I don't know any good
+ n4nd0	I will try with 20 then
+ n4nd0	blackburn: nothing good with the Gaussian kernel :(
+ blackburn	bad
+ n4nd0	by the way
+ n4nd0	I don't think I got clearly the idea behind the two parameters for the kernel constructors
+ n4nd0	I mean the ones that are called
+ n4nd0	CDotFeatures * l, CDotFeatures * r
+ n4nd0	so far I am using the same for both
+ n4nd0	feats_train, feats_train
+ n4nd0	but feels weird to do it that way
+ n4nd0	blackburn: should they be different things?
+ blackburn	n4nd0: no
+ blackburn	ok when you train classifier
+ blackburn	you need k_ij between train features and train features
+ blackburn	but when you classify
+ blackburn	you need kernel values between train features and test features
+ n4nd0	aham
+ blackburn	that thing is going on when you call apply
+ blackburn	it inits kernel with
+ blackburn	feats_train, feats_test
+ blackburn	and when do things according alphas/support vectors
+ n4nd0	actually I am not changing anything new when I call apply
+ blackburn	apply does
+ n4nd0	I do sth like
+ n4nd0	kernel        = GaussianKernel(feats_train, feats_train, width, size_cache)
+ n4nd0	svm = LibSVM(C, kernel, labels_train)
+ n4nd0	svm.train()
+ n4nd0	output  = svm.apply(feats_test)
+ blackburn	svm.apply() changes kernel
+ blackburn	it inits kernel with feats train and feats test
+ blackburn	svm.apply(feats_train) I mean
+ n4nd0	ok
+ n4nd0	so there is nothing I should change?
+ n4nd0	is it done automatically?
+ blackburn	yes
+ blackburn	it is the same if you
+ blackburn	did
+ blackburn	kernel.init(feats_train,feats_test)
+ blackburn	output = svm.apply()
+ blackburn	without anytihng in apply()
+ n4nd0	cool I get it
+ blackburn	not very clear design here
+ n4nd0	I have to go now for a while
+ n4nd0	be back later
+ n4nd0	bye
+ blackburn	but no idea how to do it flexible and in better way
+ blackburn	bye
+--- Log closed Sun Feb 19 00:00:19 2012

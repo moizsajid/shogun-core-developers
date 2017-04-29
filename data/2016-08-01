@@ -1,0 +1,416 @@
+--- Log opened Mon Aug 01 00:00:46 2016
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+-!- mizari [~mizari@95-174-213-100.nts.su] has quit [Quit: Leaving]
+-!- sanuj [~sanuj@117.203.0.4] has joined #shogun
+@wiking	sanuj, ping
+ sanuj	wiking, hi
+@wiking	what do you mean by this "The latter part is rather tricky and I think modifying SG_ADD is not a good way to do it. Modifying SG_ADD won't mean not touching rest of the shogun classes, there is no way to avoid that. The point of tags parameters was to get rid of setters-getters in shogun and provide a better API. "
+@wiking	?
+@wiking	i mean SG_ADD is just to add parameters to the ParamaterMap
+@wiking	nothing else
+ sanuj	wiking, i mean we want to switch from parameter.h to tags-parameter
+ sanuj	right?
+@wiking	yes
+@wiking	but SG_ADD is just a simple macro
+@wiking	that can be changed into anything you want
+ sanuj	wiking, yes, but i'm saying that tweaking SG_ADD will break everything
+@wiking	why?
+@wiking	if you tweak it correctly
+@wiking	it should just work as it was working before?
+@wiking	i meant ! instead of ? :)
+ sanuj	wiking, only tweaking SG_ADD won't work, all other classes would also need modifications
+@wiking	why?
+@wiking	i mean
+@wiking	you have paramter X
+@wiking	you want to add that parameter to ParameterMap
+@wiking	no?
+ sanuj	yes
+@wiking	or what you want is to drop actually on interface level
+@wiking	the variables
+@wiking	that you add to the parameterMap?
+@wiking	i mean i dont see when is the momemnt that everythign breaks
+@wiking	and that you have modify everything?
+ sanuj	wiking, see this PR https://github.com/shogun-toolbox/shogun/pull/3405
+ sanuj	in this i have just modified one parameter
+@wiking	and this is what we want ?
+@wiking	lisitsyn, ^
+ sanuj	not exatly
+ sanuj	but somewhat like this
+@wiking	why do we wnat to remove parameters
+@wiking	from the class itself
+@wiking	i mean explicitly the param
+@wiking	we could just pass the reference to the param to the param map
+@wiking	or?
+@wiking	i mean i'm just putting here ideas
+ sanuj	yeah
+-!- mode/#shogun [+o shogun-buildbot] by wiking
+-!- mode/#shogun [-o shogun-buildbot] by ChanServ
+@wiking	fucking ChanServ
+ sanuj	wiking, if we use tags-parameters then there is no point to have member variables
+ sanuj	or is there?
+@wiking	not necessarily
+@wiking	i mean see the point here
+@wiking	:)
+@wiking	i mean the paramter map
+@wiking	is not only about removing the members
+@wiking	but as well to have an easy way for serialization framework
+@wiking	to serialize the classes
+ sanuj	yes
+@wiking	and as well for the model param framework
+@wiking	to do the parameter tuning
+@wiking	so it's not really just about having the membervariables eliminated from the class
+ sanuj	wiking, but if we have member variables then there will be 2 copies of variables
+@wiking	no
+ sanuj	one in map and one in member variable
+@wiking	obviously
+@wiking	just in case the old param framework
+@wiking	if we do it like that
+@wiking	then you just pass the reference
+@wiking	to that param
+@wiking	not the value of it
+ sanuj	wiking, map stores variables as Any objects
+@wiking	yeah but your variable can be a reference?
+@wiking	or not? :)
+ sanuj	yes it can
+@wiking	Saurabh7, ping ping
+@wiking	sanuj, so?
+ sanuj	wiking, actually, i'm a bit confused
+@wiking	why?
+ sanuj	wiking, there is one more thing
+@wiking	btw these are just ideas now
+ sanuj	wiking, open GaussianARDKernel_unittest.cc
+@wiking	but let's try to first exhaust all our options
+@wiking	before going with statements you did
+@wiking	in your email
+@wiking	which branch?
+ sanuj	develop
+ sanuj	got to line 179
+@wiking	yes
+ sanuj	wiking, we will have to remove things like these
+@wiking	you mean marking that something is a gradient param? :)
+@wiking	btw do we have a way to support this?
+ sanuj	wiking, i mean the usage of TParameter
+ sanuj	we can implement it differently using tags-parameter
+@wiking	yeah
+@wiking	sure i mean of course changing the whole backend
+ sanuj	wiking, do we want to stop using TParameter?
+@wiking	will mean some major refactors
+@wiking	but again
+@wiking	lets have a discussion about this
+@wiking	:)
+ sanuj	wiking, yeah, i wanted to start a discussion
+@wiking	mmm that email sounded like things are decided
+@wiking	nevermind
+ sanuj	but i just said that it is not just tweaking SG_ADD and it will work
+ sanuj	wiking, i discussed with heiko and lisitsyn, we thought that tweaking SG_ADD would let us make it work without touching many other shogun classes
+ sanuj	but that would be a dirty fix even if it works
+ sanuj	because with tags parameters we also want to get rid of setters and getters in each shogun class
+ sanuj	and provide a cleaner api
+ sanuj	wiking, what do you think?
+@wiking	yeah that i get
+@wiking	i mean setter/getter
+@wiking	well the only thing is that about TParameter
+@wiking	we still want to be able to set which params
+@wiking	are actually possible to optimize
+@wiking	in a param optimization fw
+@wiking	(again this is not the universal truth.. just my opinion)
+ sanuj	wiking, yeah, i'll have a better look at TParameter
+@wiking	but yeah about SG_ADD and having parameters still in the class itself
+@wiking	since we need to remove all the setter/getter methods (do we want to do this)
+@wiking	then we might think about removing
+@wiking	the object params
+@wiking	but maaaybe
+@wiking	we dont wanna do this kind of full upgrade
+@wiking	and old classes can have both getter/setters, i.e. keep the old ones
+@wiking	and just have what the tag based fw provides as well
+@wiking	i mean they are never gonna overlap
+@wiking	and they are gonna just provide the same functionality
+@wiking	right?
+@wiking	it doesn't really hurt to have those setter/getters there
+@wiking	but at least that way we dont have to do a major big commit
+@wiking	where we clear up classes
+@wiking	and of course when somebody sends in a new implementation/class
+@wiking	then we require not to have those setters getters anymore
+@wiking	just rely on the tag based one
+ sanuj	wiking, yeah, we need to go step by step
+ sanuj	wiking, i see what you are saying
+ sanuj	seems like a good approach
+@wiking	sonney2k, ping
+ sanuj	wiking, so what this means is
+ sanuj	the first step is
+@wiking	i mean first i wanna understand
+@wiking	what was lisitsyn idea here
+ lisitsyn	we need some kind of trickery to make *some* of tags to access m_my_member
+ sanuj	to keep the parameter stuff as it is
+@wiking	if he imagined a huge cleanup
+@wiking	ok he is alive
+@wiking	:)
+ lisitsyn	not the map but the member
+@wiking	k
+@wiking	so somehow the reference
+ lisitsyn	this is some kind of transition phase
+ lisitsyn	yeah
+@wiking	yep yeo
+@wiking	okok and then new things
+@wiking	have to just rely on tags
+@wiking	i suppose
+ lisitsyn	yeap
+ sanuj	and add a layer of tags-parameter, just to have another api to change the same set of parameters
+@wiking	yeah seems teh best approach here
+ lisitsyn	then we can start dropping get_something set_something
+@wiking	lisitsyn, do we wanna actively drop it?
+@wiking	i mean do a backward cleanup of already created classes?
+ lisitsyn	yeah if we want plugins
+@wiking	ah ok
+@wiking	but that's only when we already refactor things
+@wiking	so anyways when we touch the classes
+@wiking	that's ok
+@wiking	then it's justified to have the change
+ sanuj	wiking, lisitsyn i think as someone writes plugins for some old class, dropping unwanted stuff can happen then
+ lisitsyn	yes
+@wiking	sanuj, indeed
+ lisitsyn	something like that
+ sanuj	lisitsyn, even if we have member variables, the tags map will only store a reference
+ sanuj	so no duplication of stuff
+ lisitsyn	sanuj: yeah
+ lisitsyn	sanuj: we need to trick any
+ lisitsyn	to use exactly this area of memory
+ sanuj	lisitsyn, i think it already does that
+ sanuj	no?
+ lisitsyn	no it allocates new one
+ lisitsyn	I think I can come up with some implementation
+ sanuj	lisitsyn, *(storage) = new T(*reinterpret_cast<T const*>(v));
+ sanuj	here is "new"
+ lisitsyn	yeah but we need to force storage to be
+ lisitsyn	m_some_member of class
+ sanuj	lisitsyn, so currently there is duplication happening if we use member variables
+ lisitsyn	right
+ sanuj	lisitsyn, do we need to use SG_REF etc with tags-params
+ lisitsyn	nope
+ lisitsyn	sanuj: if we use Some
+ sanuj	lisitsyn, this memory, scope, references are driving me a bit crazy :D
+ lisitsyn	it's programming :D
+ sanuj	lisitsyn, so how do you plan to use the m_member memory in any?
+ lisitsyn	we just need to create any with storage=&m_member
+ lisitsyn	ah and also force it not to delete it afterwards
+ lisitsyn	otherwise it would kill the object
+-!- sanuj [~sanuj@117.203.0.4] has quit [Ping timeout: 264 seconds]
+-!- sanuj [~sanuj@117.203.0.4] has joined #shogun
+ sanuj	lisitsyn, open any.h
+ lisitsyn	sanuj: I remember it by heart ;)
+ lisitsyn	jk
+ sanuj	haha
+ sanuj	lisitsyn, so you mean "v" is getting deleted?
+ lisitsyn	sanuj: v = m_member
+ lisitsyn	and it should not be deleted
+ lisitsyn	yes
+ sanuj	yes
+ lisitsyn	so we need other policy
+ lisitsyn	like external one
+ sanuj	lisitsyn, which code is responsible for deleting "v"
+ lisitsyn	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/lib/any.h#L120
+ lisitsyn	sanuj: will commute to job now, then I think I can get some time to do that
+ sanuj	okay!
+ sanuj	lisitsyn, but, in MockObject i use m_member to set a variable and everything works fine
+ sanuj	will have to check again now
+-!- sanuj [~sanuj@117.203.0.4] has quit [Remote host closed the connection]
+-!- sanuj [~sanuj@117.203.0.4] has joined #shogun
+ lisitsyn	sanuj: in progress
+ sanuj	lisitsyn, i have a few doubts
+ sanuj	lisitsyn, the clear() function is only called in destructor and operator=
+ lisitsyn	sanuj: yeah no worries
+ sanuj	so how is it deleting "v"
+ sanuj	lisitsyn, the Any object is alive till the map is alive i guess
+ lisitsyn	yes
+ lisitsyn	the map is alive as long as object is alive
+ sanuj	lisitsyn, so the member function is not getting deleted then
+ sanuj	member variable*
+ lisitsyn	yes
+ lisitsyn	it should not be deleted
+ sanuj	cool
+ sanuj	lisitsyn, shall we make get/set virtual?
+ lisitsyn	why?
+ sanuj	lisitsyn, if you see GaussianKernel
+ sanuj	lisitsyn, it takes parameter width but saves log_width
+ lisitsyn	that sounds crazy
+ sanuj	the computation happens in set_width() or get_width()
+ sanuj	:D
+ sanuj	lisitsyn,
+ sanuj	void CGaussianKernel::set_width(float64_t w)
+ sanuj	{
+ sanuj	REQUIRE(w>0, "width (%f) must be positive\n",w);
+ sanuj	m_log_width=CMath::log(w/2.0)/2.0;
+ sanuj	}
+ sanuj	lisitsyn, so if we want this to happen for set<float64_t>("width", 1.0) then it has to be overloaded
+ lisitsyn	I am not sure what's the idea
+ lisitsyn	we can think of adding some transformation functions
+ lisitsyn	to our get/set
+ lisitsyn	it is easy to do
+ lisitsyn	with lambdas
+ sanuj	okay
+ sanuj	lisitsyn, yes actually
+ sanuj	now that we have c++11
+ sanuj	lisitsyn, and we still need to add a list_parameters() to list all parameters in an object
+ sanuj	it was removed due to the std::vector and SGVector decision
+ lisitsyn	rigght
+ lisitsyn	sanuj: ok writing test for this thing
+ sanuj	lisitsyn, cool cool
+ sanuj	lisitsyn, how to become a c++ god ? :D
+ lisitsyn	sanuj: what for?
+ lisitsyn	:D
+ sanuj	nice question
+ sanuj	haha
+ sanuj	i dunno
+ sanuj	lisitsyn, yandex makes coursera courses!
+ sanuj	https://www.coursera.org/specializations/data-structures-algorithms
+ lisitsyn	sanuj: yeap
+ lisitsyn	sanuj: it is also HSE
+ lisitsyn	where I used to work (or work)
+ lisitsyn	not sure :D
+ sanuj	haha
+ sanuj	lisitsyn, you are a project manager right?
+ lisitsyn	sanuj: no
+ lisitsyn	kind of team leader
+ lisitsyn	I do code stuff
+ lisitsyn	:)
+ sanuj	okay
+ sanuj	lisitsyn, what's the next thing?
+ lisitsyn	sanuj: which next thing?
+ sanuj	like what do you want to do next? be in software forever?
+ sanuj	i have seen people get bored
+ sanuj	lisitsyn, btw i'm trying sets/gets and checking if it works with R
+ lisitsyn	sanuj: anything that gets me yacht
+ lisitsyn	hahah
+ sanuj	haha
+ lisitsyn	and some house in sardinia
+ lisitsyn	lol
+ lisitsyn	sanuj: yeah would be cool if it works
+ lisitsyn	lets merge if it does
+ sanuj	okay
+ sanuj	lisitsyn, sardinia looks like a nice place :D
+ lisitsyn	never been there but it must be
+ sanuj	i see
+ lisitsyn	sanuj: oh I don't compile shogun often but now it eats my cpu like crazy :D
+ sanuj	yes it does
+ sanuj	lisitsyn, which machine do you use
+ lisitsyn	sanuj: macbook pro 2013
+ sanuj	aaah
+ sanuj	never used mac
+ lisitsyn	my eyes bleed when it is not retina
+ sanuj	haha
+ sanuj	lisitsyn, time to upgrade your machine! :D
+ sanuj	when apples releases new macs
+ lisitsyn	I broke my previous mac
+ lisitsyn	:D
+ sanuj	apple* :D
+ lisitsyn	they replaced it
+ sanuj	yeah but they are still boring
+ lisitsyn	I don't think they're going to replace it soon again
+ sanuj	oh man i forgot to update sgbase.i
+ sanuj	will have to build again
+ sanuj	lisitsyn, what does this comment mean? https://github.com/shogun-toolbox/shogun/pull/3357/files#diff-d1db47426b779ea8c77a30e93058c0abR3
+ lisitsyn	sanuj: you put GPL license header
+ sanuj	lisitsyn, what is BSD license header?
+ lisitsyn	check any new code
+ sanuj	 * Copyright (c) 2016, Shogun-Toolbox e.V. <shogun-team@shogun-toolbox.org>
+ sanuj	 * All rights reserved.
+ sanuj	okay
+ sanuj	and lisitsyn https://github.com/shogun-toolbox/shogun/pull/3357/files#diff-d1db47426b779ea8c77a30e93058c0abR38
+ sanuj	do i need to use """ blah """
+ lisitsyn	if __name__ == "__main__"
+ sanuj	oh
+ lisitsyn	and also check some argparse
+ sanuj	okay
+ lisitsyn	or anything else
+ lisitsyn	argparse is in base python thus best choice
+ lisitsyn	I also like docopt but it needs installation
+ sanuj	okay
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Sergey Lisitsyn :feature/external_any_policy * 9d34252 / src/shogun/lib/any.h,tests/unit/lib/Any_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/9d34252b1d85e97e038704e8bf03b81cb690cca3
+ shogun-notifier-	shogun: Add non-owning Any policy
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: This would enable us to implement SG_ADD so that
+ shogun-notifier-	shogun: parameters are used through map
+ shogun-notifier-	shogun: and member variables at the same time.
+ lisitsyn	sanuj: https://github.com/shogun-toolbox/shogun/pull/3406/files
+ sanuj	looking
+ sanuj	lisitsyn, this is neat
+ lisitsyn	sanuj: C++17 will have any
+ sanuj	lisitsyn, but we won't be using c++17 for ages
+ lisitsyn	yeah we will adopt it in 2019 in the best case
+ lisitsyn	:D
+ sanuj	haha
+-!- travis-ci [~travis-ci@ec2-54-167-78-142.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/148843490
+-!- travis-ci [~travis-ci@ec2-54-167-78-142.compute-1.amazonaws.com] has left #shogun []
+ lisitsyn	what?
+ sanuj	lol
+ lisitsyn	its green
+ sanuj	no clue
+ sanuj	it does that i guess
+ sanuj	lisitsyn, https://twitter.com/smilevector
+ lisitsyn	sanuj: booring
+ sanuj	haha
+ sanuj	lisitsyn, have you read the deeplearningbook.org?
+ lisitsyn	nope
+ sanuj	it was one of the suggested learning for the dl project
+ sanuj	lisitsyn, reading these kinds of books is difficult
+ lisitsyn	why?
+ sanuj	requires patience and diligence
+ sanuj	lisitsyn, i have updated this PR https://github.com/shogun-toolbox/shogun/pull/3357
+ sanuj	tell me if you want anything else changes
+ sanuj	changed*
+ sanuj	and then we can merge once travis passes
+ sanuj	wiking, ^
+@wiking	yeah please work on that patch
+@wiking	as that one is still not adequate
+ sanuj	okay
+ sanuj	wiking, what do you mean by your second comment?
+ sanuj	https://github.com/shogun-toolbox/shogun/pull/3357#discussion-diff-72966702R962
+ lisitsyn	wiking: https://github.com/shogun-toolbox/shogun/pull/3406 could you review and merge when you get time?
+ shogun-notifier-	shogun: Sergey Lisitsyn :feature/tags * 9d34252 / src/shogun/lib/any.h,tests/unit/lib/Any_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/9d34252b1d85e97e038704e8bf03b81cb690cca3
+ shogun-notifier-	shogun: Add non-owning Any policy
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: This would enable us to implement SG_ADD so that
+ shogun-notifier-	shogun: parameters are used through map
+ shogun-notifier-	shogun: and member variables at the same time.
+ shogun-notifier-	shogun: Viktor Gal :feature/tags * 2cf0195 / src/shogun/lib/any.h,tests/unit/lib/Any_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/2cf019538e75249810def33bc8cf24bf3d76f56f
+ shogun-notifier-	shogun: Merge pull request #3406 from shogun-toolbox/feature/external_any_policy
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Add non-owning Any policy
+-!- sanuj [~sanuj@117.203.0.4] has quit [Ping timeout: 252 seconds]
+@wiking	Saurabh7: ?
+ lisitsyn	wiking: gonna send PR
+ lisitsyn	with SG_ADD registering member
+@wiking	lisitsyn, sounds good
+@wiking	i'm here
+ lisitsyn	so that it can be used by getterr
+@wiking	waiting
+@wiking	and working on js
+ lisitsyn	:D
+ lisitsyn	lol
+ lisitsyn	js
+@wiking	http://www.networkworld.com/article/3101430/application-development/javascript-keeps-its-spot-atop-programming-language-rankings.html
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+ c4goldsw	Hello World
+@wiking	pong
+ Saurabh7	hi
+ Saurabh7	wiking: sry was aaway since afternoon
+ Saurabh7	let me type in quick
+@wiking	no worris
+@wiking	k
+@wiking	thnx
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@wiking	rcurtin, are you areound?
+@wiking	*around
+ rcurtin	wiking: yeah, just got back from lunch
+ rcurtin	I have a meeting at 1800 UTC though, so I won't be here forever :)
+ lisitsyn	wiking: equals of CSGObject is not const
+ lisitsyn	:D:D
+ lisitsyn	lol
+-!- sanuj [~sanuj@117.203.0.4] has joined #shogun
+-!- sanuj [~sanuj@117.203.0.4] has quit [Read error: Connection reset by peer]
+-!- sanuj [~sanuj@117.203.0.4] has joined #shogun
+-!- sanuj [~sanuj@117.203.0.4] has quit [Remote host closed the connection]
+ c4goldsw	Earth to wiking
+--- Log closed Tue Aug 02 00:00:48 2016

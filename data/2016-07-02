@@ -1,0 +1,158 @@
+--- Log opened Sat Jul 02 00:00:04 2016
+ shogun-buildbot	build #23 of clang - thread analysis is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang%20-%20thread%20analysis/builds/23  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+ shogun-buildbot	build #21 of clang - undefined behaviour analysis is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang%20-%20undefined%20behaviour%20analysis/builds/21  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ shogun-buildbot	build #35 of memleak - valgrind is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/memleak%20-%20valgrind/builds/35  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+ shogun-buildbot	build #1034 of nightly_none is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_none/builds/1034  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+ shogun-buildbot	build #1164 of nightly_default is complete: Failure [failed test notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1164  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+-!- sanuj [~sanuj@61.0.28.234] has joined #shogun
+-!- sanuj [~sanuj@61.0.28.234] has quit [Ping timeout: 240 seconds]
+-!- sanuj [~sanuj@59.89.147.18] has joined #shogun
+-!- sanuj [~sanuj@59.89.147.18] has quit [Client Quit]
+-!- sanuj [~sanuj@59.89.147.18] has joined #shogun
+-!- sanuj [~sanuj@59.89.147.18] has quit [Ping timeout: 272 seconds]
+-!- OXPHOS [~OXPHOS@23.27.82.137] has joined #shogun
+-!- OXPHOS [~OXPHOS@23.27.82.137] has quit [Ping timeout: 258 seconds]
+-!- GandalfTheWizard [~Emma@112.10.170.115] has joined #shogun
+-!- GandalfTheWizard [~Emma@112.10.170.115] has quit [Ping timeout: 252 seconds]
+-!- GandalfTheWizard [~Emma@112.10.170.115] has joined #shogun
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- sanuj [~sanuj@59.89.147.18] has joined #shogun
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+ sanuj	bzdmgz, yo
+ bzdmgz	sanuj: hey
+ sanuj	bzdmgz, how to get started with plugins and bring them in shogun
+ bzdmgz	uhmm you need some prototype first
+ bzdmgz	sanuj: have you seen in this aer thing we had dlopen
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ sanuj	yeah i saw that
+ sanuj	bzdmgz, but that's only for linux
+ bzdmgz	no that's posix
+ bzdmgz	macos and any unix and any linux
+ bzdmgz	good enough
+ bzdmgz	sanuj: so the idea is
+ sanuj	ohkay
+ bzdmgz	any plugin is a dynamic library that exposes just one function
+ bzdmgz	in aer it was called manifest IIRC
+ sanuj	yes
+ sanuj	it is manifest
+ bzdmgz	so this exposed function returns you a pointer to manifest
+ bzdmgz	and manifest can create some objects for you
+ sanuj	bzdmgz, so i first build a separate prototype repo using aer code?
+ bzdmgz	well mostly up to you
+ bzdmgz	just be sure to understand what's going on
+ bzdmgz	before we get into this mess :D
+ sanuj	ohkay
+ sanuj	bzdmgz, you are here for 2 weeks right?
+ bzdmgz	sanuj: yeap 2 weeks more then one week out then back
+ sanuj	okay, i would like to do the plugin foundation stuff in these 2 weeks so i can work autonomously while you are away
+ bzdmgz	ok sure lets try to do that
+ sanuj	bzdmgz, it seems this is not the correct method to check if a symbol with "name" exists
+ sanuj	https://github.com/shogun-toolbox/aer/blob/master/src/aer/dynamic/library.cpp#L33
+ sanuj	we should use dlerror()
+ sanuj	http://linux.die.net/man/3/dlopen
+ bzdmgz	ok feel free %)
+ sanuj	:D
+ sanuj	bzdmgz, is this a working prototype?
+ sanuj	how to test
+ bzdmgz	well there was an example
+ bzdmgz	it worked
+ bzdmgz	back then
+ sanuj	okay
+ sanuj	bzdmgz, what does this do => T (*fm)();
+ bzdmgz	pointer to function that returns T
+ sanuj	ohkay
+ sanuj	bzdmgz, *(void**)(&fm) = dlsym(handle, name.c_str());
+ sanuj	can't we do => (void*)fm = dlsym(..)
+ bzdmgz	no idea, you can try
+ sanuj	ohkay
+ sanuj	kernel is an overexploited term in computer science
+ sanuj	random thought ^
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+ sanuj	bzdmgz, std::function<int(int)> fn1 = half;
+ sanuj	what is int(int) here?
+ bzdmgz	man
+ bzdmgz	:D
+ bzdmgz	int argument int return value
+ sanuj	yeah but you need to pass a type to <>
+ bzdmgz	what type?
+ sanuj	std::function<int>
+ sanuj	i'm seeing the int(int) thing for the first time in <> :P
+ bzdmgz	what does that even mean
+ bzdmgz	std::function is not just a no-parameter function
+ bzdmgz	it can haz parameterz
+ sanuj	bzdmgz, i meant i hadn't seen functions passed as template arguments before
+ sanuj	only data types and objects
+ bzdmgz	yeah C++ is big
+ sanuj	it's huuuuuuuggeee
+ sanuj	bzdmgz, std::function<As<T>()>, this means a function returning As<T> with no arguments?
+ bzdmgz	yes
+ sanuj	okay
+ sanuj	bzdmgz, what is this line doing
+ sanuj	https://github.com/shogun-toolbox/aer/blob/master/src/aer/dynamic/manifest.hpp#L70
+ bzdmgz	lambda
+ sanuj	ohkay
+ bzdmgz	"->" to specify the output type
+ sanuj	oh so you need to do this to get object from manifest
+ sanuj	auto metaclass = manifest.classByName<MyBaseClass>("basic");
+ sanuj	auto object = metaclass.instance();
+ sanuj	bzdmgz, we will have to do this everytime when we want a new object from a plugin?
+ sanuj	metaclass.instance();
+ bzdmgz	kind of yeah
+ sanuj	bzdmgz, in python also
+ sanuj	or will this be hidden?
+ bzdmgz	no this should be hidden
+ sanuj	how will it be hidden?
+ bzdmgz	mmm
+ bzdmgz	create<T>(name)
+ bzdmgz	whatever
+ sanuj	ohkay
+ bzdmgz	if you want T called "svm-super-classifier"
+ bzdmgz	I guess you iterate over plugins
+ bzdmgz	or so
+ sanuj	this function loads the plugin and returns an object and then closes the plugin?
+ bzdmgz	I don't think we should unload the plugin immediately
+ bzdmgz	but the idea is quite like that
+ sanuj	ohkay
+ sanuj	bzdmgz, i understand your plugin prototype
+ bzdmgz	good
+ sanuj	i ran on local
+ sanuj	it works
+ bzdmgz	sanuj: I think we need to get back to class_list thing
+ bzdmgz	remember this one?
+ sanuj	yeah
+ bzdmgz	ok sry have to go now
+ sanuj	bzdmgz, but what about windows support
+ sanuj	ohkay
+ bzdmgz	ah nevermind
+ bzdmgz	windows will support linux soon
+ bzdmgz	:D
+ sanuj	we can't change shogun till it supports windows or can we?
+ bzdmgz	it is quite similar
+ sanuj	ohkay
+ bzdmgz	shogun doesn't work on windows anyway
+ sanuj	i see
+ bzdmgz	because reasons haha
+ sanuj	no problem then
+ bzdmgz	we use pthreads and shit like that
+ bzdmgz	massive overhaul
+ sanuj	bzdmgz, so i'll talk to you tomorrow about class_list thing
+ sanuj	if you are going now
+ bzdmgz	okie
+ bzdmgz	yeah
+ sanuj	cool
+ sanuj	take care
+ bzdmgz	see you
+ sanuj	bye
+-!- sanuj [~sanuj@59.89.147.18] has quit [Ping timeout: 264 seconds]
+-!- sanuj [~sanuj@59.89.147.18] has joined #shogun
+-!- sanuj [~sanuj@59.89.147.18] has quit [Quit: Leaving]
+-!- sanuj [~sanuj@59.89.147.18] has joined #shogun
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+-!- mizari [~mizari@95-174-213-100.nts.su] has quit [Quit: Leaving]
+-!- sanuj [~sanuj@59.89.147.18] has quit [Remote host closed the connection]
+-!- GandalfTheWizard [~Emma@112.10.170.115] has quit [Ping timeout: 252 seconds]
+--- Log closed Sun Jul 03 00:00:06 2016

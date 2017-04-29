@@ -1,0 +1,431 @@
+--- Log opened Tue Jul 17 00:00:17 2012
+-!- romi_ [~mizobe@200-232-221-127.dsl.telesp.net.br] has joined #shogun
+ shogun-buildbot	build #156 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/156  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- heiko1 [~heiko@host86-181-81-54.range86-181.btcentralplus.com] has left #shogun []
+-!- blackburn [~blackburn@109.226.92.17] has left #shogun []
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has quit [Quit: Page closed]
+-!- yoo [575b08cb@gateway/web/freenode/ip.87.91.8.203] has joined #shogun
+-!- yoo [575b08cb@gateway/web/freenode/ip.87.91.8.203] has quit [Quit: Page closed]
+-!- romi_ [~mizobe@200-232-221-127.dsl.telesp.net.br] has quit [Remote host closed the connection]
+ shogun-buildbot	build #31 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/31
+ gsomix	shogun-buildbot, wut?
+ gsomix	This example fully works on my python and numpy.
+-!- gsomix [~gsomix@188.168.5.70] has quit [Ping timeout: 248 seconds]
+-!- uricamic [~uricamic@2001:718:2:1634:30a2:9ad1:1080:d60f] has joined #shogun
+-!- pluskid [~pluskid@202.130.113.141] has joined #shogun
+-!- gsomix [~gsomix@r206-10.smr.ru] has joined #shogun
+ gsomix	sonney2k, around?
+-!- gsomix [~gsomix@r206-10.smr.ru] has quit [Remote host closed the connection]
+-!- gsomix [~gsomix@r206-10.smr.ru] has joined #shogun
+ rieck	sonney2k: alive?
+-!- thegruel [c1aa8a84@gateway/web/freenode/ip.193.170.138.132] has joined #shogun
+ thegruel	Hi! Anyone here using the python-modular interface?
+* thegruel feels ignored.
+ thegruel	Anyway, it'd be great if somebody fixed python-modular. Thanks guys!
+ gsomix	thegruel, hey
+ gsomix	what's wrong with python_modular?
+ thegruel	Hi gsomix.
+ thegruel	It can't create Features.Labels objects anymore, which break nearly all tests (see  http://bit.ly/eQDk8Q  )
+ thegruel	build #156 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/156  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ thegruel	No, wait, that log had yet another problem.
+ thegruel	Mine was simply "TypeError: Cannot create new instances of type 'Labels',
+ gsomix	thegruel, check, please, that you use latest git version of shogun.
+ gsomix	hm, strange error
+ gsomix	thegruel, btw, Labels now is abstract class. which code/example fails?
+-!- zxtx [~zv@ool-457e7550.dyn.optonline.net] has joined #shogun
+@sonney2k	thegruel, you have to use BinaryLabels, MulticlassLabels, RegressionLabels etc
+@sonney2k	gsomix, hey there
+@sonney2k	any idea what is going on on the bb?
+@sonney2k	gsomix, btw which swig version do you have?
+@sonney2k	rieck, yes alive just now
+@sonney2k	but can change any minute ...
+-!- pluskid [~pluskid@202.130.113.141] has quit [Quit: Leaving]
+ gsomix	sonney2k, 2.0.4
+@sonney2k	gsomix, bb and here 2.0.7
+-!- heiko [~heiko@host86-176-3-219.range86-176.btcentralplus.com] has joined #shogun
+ gsomix	sonney2k, hm, 2.0.7 fails at my gcc
+-!- heiko [~heiko@host86-176-3-219.range86-176.btcentralplus.com] has left #shogun []
+ gsomix	sonney2k, ok, but what about fail in examples?
+@sonney2k	gsomix, what happens w/ 2.0.7?
+ gsomix	sonney2k, segfault in compilation
+@sonney2k	gsomix, compiling swig segfaults?
+ gsomix	sonney2k, compiling shogun modulars
+@sonney2k	gsomix, works just fine here - which gcc version?
+ gsomix	sonney2k, 4.6.3
+@sonney2k	hmmhh 4.7.1 here
+ gsomix	oh, I'm slowpoke :)
+ gsomix	need to update all software
+@sonney2k	gsomix, or alternatively compile it with clang++
+@sonney2k	gsomix, package clang is needed for that...
+ gsomix	anyway fail in buffer protocol example is not related to swig.
+ gsomix	sonney2k, ok, I'll try.
+@sonney2k	gsomix, which python version do you have?
+ gsomix	2.7.3
+@sonney2k	me too
+@sonney2k	gsomix, buildbot has 2.6.6.
+@sonney2k	so it might be due to that
+@sonney2k	it compiles/runs just fine here
+ gsomix	what about numpy?
+ gsomix	sonney2k, btw this examples works on your machine?
+ gsomix	*example
+@sonney2k	I have 1.6.4
+@sonney2k	1.6.2
+@sonney2k	sry
+@sonney2k	and bb has 1.4.1
+ gsomix	hm
+@sonney2k	gsomix, you think it is too old?
+@sonney2k	maybe numpy didn't support buffer proto stuff yet
+ gsomix	yep
+ gsomix	because just fails on PyObject_CheckBuffer(o2);
+@sonney2k	gsomix, that is not easily installed - could you add some check for numpy 1.5 i.e. numpy.__version__ >= '1.5'
+ gsomix	sonney2k, what do to if numpy version <= 1.5?
+ gsomix	awww, ok
+ gsomix	sorry, got it
+@sonney2k	when <1.5 print some warning that this example requires numpy 1.5 or later
+@sonney2k	gsomix, in the example only I meant
+ gsomix	I see
+ gsomix	sonney2k, I also discuss with blackburn about slicing.
+ gsomix	I think, that DenseFeatures[a:b] should return numpy.array
+ gsomix	because it's easy way
+@sonney2k	gsomix, can one then do DenseFeatures[a:b] = numpy.arange(a,b) ?
+ gsomix	I think - yes
+@sonney2k	then yes :)
+@sonney2k	would just be good to be able to modify elements via slicing too
+ gsomix	aha
+-!- bern4rd [4f940120@gateway/web/freenode/ip.79.148.1.32] has joined #shogun
+@sonney2k	hey bern4rd
+* thegruel is back. Thanks for the clarifications. 
+ bern4rd	hey
+@sonney2k	bern4rd, have you seen the repo is now  at shogun-toolbox?
+ bern4rd	Fernando told me about the new repository
+@sonney2k	bern4rd, could you access it?
+ bern4rd	yes, I have clone it right now
+@sonney2k	I gave you r/w access but you never know
+ bern4rd	I'm going to check, I am a beginner with git
+@sonney2k	bern4rd, well just clone and push some minor change
+@sonney2k	bern4rd, btw what is the admin password?
+ bern4rd	yes I have r/w access
+@sonney2k	if I want to modify the style etc?
+ bern4rd	login:root, pass:toor
+@sonney2k	ok
+@sonney2k	I will then try to change a bit style wise - any idea what to do against conflicts when we both modify the sqlite db?
+ bern4rd	no :(
+-!- thegruel [c1aa8a84@gateway/web/freenode/ip.193.170.138.132] has quit []
+@sonney2k	bern4rd, well I will update in the evening and then play a bit with it
+@sonney2k	so if I keep change windows small then it can work just fine
+@sonney2k	bern4rd, and btw thanks for again for your work!
+* sonney2k afg
+ bern4rd	ok, I am going to explain better all the things in the readme.
+* sonney2k afk
+ bern4rd	you'r welcome =)
+ bern4rd	The content in the web-site is not complete, the application that recognizes numbers and the big table with the feature matrix are not in the database
+ rieck	sonne alive?
+-!- gsomix [~gsomix@r206-10.smr.ru] has quit [Remote host closed the connection]
+-!- heiko [~heiko@host86-176-3-219.range86-176.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-176-3-219.range86-176.btcentralplus.com] has left #shogun []
+-!- bern4rd [4f940120@gateway/web/freenode/ip.79.148.1.32] has quit [Quit: Page closed]
+-!- koen-shogun [~ksande@195.114.233.130] has joined #shogun
+-!- heiko [~heiko@host86-176-3-219.range86-176.btcentralplus.com] has joined #shogun
+-!- vojtech [9320543b@gateway/web/freenode/ip.147.32.84.59] has joined #shogun
+ rieck	vjotech!
+-!- bern4rd [4f940120@gateway/web/freenode/ip.79.148.1.32] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:30a2:9ad1:1080:d60f] has quit [Quit: Leaving.]
+-!- os253 [~stegle@as-net.tuebingen.mpg.de] has quit [Quit: os253]
+-!- vojtech [9320543b@gateway/web/freenode/ip.147.32.84.59] has quit [Quit: Page closed]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+ heiko	blackburn, sonney2k, I fixed the x-val kernel-multi-class error, it was a problem in store_model_features of CKernelMulticlassMachine
+ CIA-18	shogun: Heiko Strathmann master * r23dd339 / src/shogun/multiclass/MulticlassSVM.h : added small comment - http://git.io/iFjdUg
+ CIA-18	shogun: Heiko Strathmann master * r8d97d0c / src/shogun/machine/KernelMulticlassMachine.cpp : fixed store_model_features, which didnt work before, causing x-val on multi class kernel machines to fail badly - http://git.io/0oNEDQ
+ CIA-18	shogun: Heiko Strathmann master * r0d992a7 / src/shogun/multiclass/MulticlassLibSVM.cpp : code clean up and removing unnecesary sv commands - http://git.io/KmFogA
+ CIA-18	shogun: Heiko Strathmann master * rdb4985d / (3 files in 2 dirs): Merge pull request #653 from karlnapf/master - http://git.io/DUVqSQ
+ heiko	sonney2k, blackburn, Id like to push a thing: We need more tests (for new code) and code should be documented better
+ heiko	It happens so often (as just now) that somebody spends hours in finding a bug that could *easily* be detected by a test
+ heiko	so I think it should be compulsory for everybody to write a (small) test for every new (complex) method that is added
+ heiko	This would save time at the end of the day, also, we would be able to spot problems far more accurate
+ heiko	the current multiclass - cross-validation problem did not even fail a test. It just gave wrong results ( SV and non-SV permuted)
+ heiko	In my eyes, we shouldnt accept pull-requests without tests for new stuff anymore
+ heiko	it was just by chance that somebody found this problem with the multiclass CV. This damages SHOGUN's reputation
+ heiko	and one more thing: Debugging often is very very hard since the code is badly or not even at all commented
+ heiko	We should insist on comments in the code for every non-trivial thing that is going on
+ heiko	this would save much time while debugging
+ heiko	I think if we continue changing things at the current pace we will run into problems if we dont do these two things (tests & better in-code-documentation)
+ CIA-18	shogun: Heiko Strathmann master * r76c6df3 / src/shogun/machine/KernelMulticlassMachine.cpp : fixed error message - http://git.io/jvF96w
+ CIA-18	shogun: Heiko Strathmann master * r32e09ac / src/shogun/machine/KernelMulticlassMachine.cpp : Merge pull request #654 from karlnapf/master - http://git.io/BlIt7w
+-!- Netsplit *.net <-> *.split quits: wiking
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ blackburn	heiko: we need some approach for that
+ heiko	blackburn, yes, I think so
+ heiko	otherwise we cannot controll things anymore at some point, and it gets harder and harder for new poeple to get into SHOGUN
+ blackburn	other way is to freeze these kind of features
+ heiko	I would just make it madatory to write tests
+ heiko	if you fiddle around with indices, just write a test to make sure things are working that automatically checks things
+ heiko	etc
+ blackburn	what is test?
+ blackburn	how it works?
+ heiko	like a unit test or so
+ heiko	or a libshogun example
+ heiko	it should assert correct expected results
+ heiko	otherwise fail and teil you which method doesnt work
+ blackburn	no libshogun example is wrong way I am afraid
+ blackburn	problem is that is good for example could be bad for test
+ blackburn	and vice versa
+ blackburn	but we don't separate it still
+ heiko	yeah
+ shogun-buildbot	build #157 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/157  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ heiko	you are right
+-!- Netsplit over, joins: wiking
+ heiko	we should separate things
+ heiko	I write all tests to libshogun examples
+ heiko	but thats not good for illustration
+ heiko	I mean there are tools that give you code coverage etc
+ heiko	It slows down development
+ heiko	but greatly increases stability
+ heiko	since people have to think about code more
+ heiko	Ill read a bit about automated test systems for c++
+ CIA-18	shogun: Heiko Strathmann master * r2251909 / .gitignore : added doc dir - http://git.io/PCfGVg
+ CIA-18	shogun: Heiko Strathmann master * rfeee52c / (3 files in 2 dirs): Merge pull request #655 from karlnapf/master - http://git.io/h-3liw
+ CIA-18	shogun: Heiko Strathmann master * r581c5f8 / src/shogun/statistics/LinearTimeMMD.h : whitespace - http://git.io/uu1NKg
+ CIA-18	shogun: Heiko Strathmann master * rd19d98a / (2 files): documentation updates for doxygen - http://git.io/Vpl1jg
+ heiko	googletest seems nice, Ill try it out these days
+-!- heiko [~heiko@host86-176-3-219.range86-176.btcentralplus.com] has quit [Quit: Leaving.]
+ blackburn	back
+-!- heiko [~heiko@host86-176-3-219.range86-176.btcentralplus.com] has joined #shogun
+ shogun-buildbot	build #158 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/158  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ heiko	thats not be shogun-buildbot !
+ blackburn	heiko: calm down it is gsomix the cause
+ blackburn	:)
+ heiko	not really angry ;)
+ heiko	blackburn, what do you think of this:
+ heiko	http://code.google.com/p/googletest/wiki/Samples
+ blackburn	is it GNU?
+ blackburn	GPL I mean
+ blackburn	aham bsd
+ blackburn	i bet sonney2k would not like it
+ blackburn	and say something 'ah yet another one dependency I'LL KILL YOU' :D
+ heiko	lol :)
+ heiko	I also would love to use BOOST :)
+ blackburn	for what?
+ heiko	has for example all statistical distribution functions and cdfs
+ heiko	its a pain to import these from e.g. ALGLIB
+ blackburn	these ones you integrated?
+ blackburn	lol
+ heiko	and in boost these are already in, tested documented etc
+ blackburn	boost is huge dependency though
+ heiko	yes I know
+ heiko	shogun isnt small either :D
+ heiko	anyway, the tests are more important I think
+ blackburn	bad thing about boost and templates in general
+ blackburn	is really awful compilation speed and errors parseability
+ wiking	heiko: blackburn bsd license should not be a problem at all
+ wiking	heiko: second for the unit testing
+-!- gsomix [~gsomix@188.168.4.28] has joined #shogun
+ gsomix	good evening
+ wiking	heiko: heiko http://code.google.com/p/googlemock/wiki/V1_6_ForDummies
+ blackburn	do any of you think create a kaggle shogun team would be a cool idea?
+ wiking	blackburn: any competition in mind?
+ blackburn	well health heritage
+ blackburn	joke :D
+ blackburn	but still it is hard to go alone here
+ wiking	blackburn: 8 months ago i've started to do some stuff with hh
+ wiking	but i've failed to get any results
+ blackburn	yeah
+ shogun-buildbot	build #159 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/159  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ gsomix	shogun-buildbot, okay, okay. :( I'll fix it, I promise.
+@sonney2k	wiking, where is your weekly report?
+@sonney2k	heiko, so if you have time to discuss lets do it.
+@sonney2k	rieck, ping ping ping
+@sonney2k	gsomix, did you fix the example?
+@sonney2k	gsomix, I didn't see your PR...
+@sonney2k	gsomix, ahh and does clang++ work for you?
+ gsomix	sonney2k, little later, working on slicing now.
+@sonney2k	gsomix, please fix the example first... fixing broken builds unfortunately always have priority
+@sonney2k	has
+ heiko	blackburn, I participated in kaggle hh during a course in uni here, we were among the 500 first places :)
+ heiko	sonney2k, I have to leave soon sorry, but lets discuss tomorrow
+ blackburn	heiko: do you think together we can do that better?
+ heiko	I really would like to push that
+ heiko	blackburn, I used shogun actually :)
+ blackburn	yeah that is my point to
+ blackburn	too*
+ blackburn	to enhance shogun through usage
+ heiko	blackburn, my group was kind of good, but liblinear didnt support regression back then, would have helped a lot
+ heiko	I currently dont have time for that, but perhaps at the end of the year
+ gsomix	sonney2k, ok, sorry
+ heiko	gotta go now, see you later today or tomorrow!
+ blackburn	yeah after gsoc would be cool
+@sonney2k	blackburn, I don't have time for that unfortunately... but I talked to some guys at NIPS last year and they also said I (with them) should do this ;-)
+ blackburn	sonney2k: kaggle?
+-!- heiko [~heiko@host86-176-3-219.range86-176.btcentralplus.com] has quit [Quit: Leaving.]
+ audy	I want to kaggle
+ audy	sit in my mom's basement, mine data, get rich
+ blackburn	:D
+ gsomix	sonney2k, pr
+ blackburn	audy: IIRC you wanted to test ruby stuff?
+ blackburn	did you manage to try?
+ audy	blackburn not yet
+ audy	blackburn PI threw a big wrench in my research for no reason >:| so now I'm dealing with that
+@sonney2k	blackburn, kaggle yes
+ blackburn	sonney2k: we should ALL HAIL TO SHOGUN through kaggle then
+ blackburn	audy: PI?
+@sonney2k	audy, the destiny of all phds :)
+ audy	blackburn my boss. I'm a PhD student
+ blackburn	ah I see
+@sonney2k	blackburn, well if we could fund ourselves via winning all kaggle's and developing shogun at the same time - why not :D
+ audy	the shogun kaggle team?
+ blackburn	yeah
+ audy	there's a $3 mil prize on there currently
+ blackburn	my ideas can be good sometimes - I hope that is the case
+ shogun-buildbot	build #160 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/160  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ blackburn	it is getting boring to develop for develop
+@sonney2k	audy, probably no one is working on that yet right?
+ blackburn	sonney2k: only 1.5K teams yeah
+@sonney2k	blackburn, no problem to win then
+ blackburn	sonney2k: sure
+@sonney2k	I was worried a few million teams are on it
+@sonney2k	but a few K is no match for shogun :D
+ blackburn	lol
+ CIA-18	shogun: Evgeniy Andreev master * rfc0116a / examples/undocumented/python_modular/features_dense_buffer_protocol_modular.py : fixed buffer protocol example that needs numpy.version >= 1.5 - http://git.io/iMhYqA
+ CIA-18	shogun: Soeren Sonnenburg master * rb39de77 / examples/undocumented/python_modular/features_dense_buffer_protocol_modular.py : Merge pull request #656 from gsomix/buffer_protocol - http://git.io/yUkiig
+ blackburn	something killed my battery capacity - only 59% left :(
+@sonney2k	blackburn, running a shogun buildbot?
+@sonney2k	gsomix, thanks for the quick fix
+ blackburn	sonney2k: I am afraid bad battery but it is not the case of warranty return
+ blackburn	26.6 Wh is available when design capacity is 45
+ shogun-buildbot	build #161 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/161  blamelist: Evgeniy Andreev <gsomix@gmail.com>
+ gsomix	sonney2k, ^
+ gsomix	hm, strange
+ gsomix	what am I doing wrong? :(
+ gsomix	ah, my fault
+ gsomix	numpy.__version__ is string
+ blackburn	bad boy
+ CIA-18	shogun: Sergey Lisitsyn master * r48a7858 / (2 files): Made inner iterations of malsar ported code safe - http://git.io/5yttgQ
+ CIA-18	shogun: Sergey Lisitsyn master * r989a7f7 / examples/undocumented/libshogun/classifier_larank.cpp : Added larank libshogun example with multiple training call - http://git.io/KRplWA
+ CIA-18	shogun: Evgeniy Andreev master * r15b5263 / examples/undocumented/python_modular/features_dense_buffer_protocol_modular.py : minor fix - http://git.io/Jwh-TQ
+ CIA-18	shogun: Sergey Lisitsyn master * r2e7e626 / examples/undocumented/python_modular/features_dense_buffer_protocol_modular.py : Merge pull request #657 from gsomix/buffer_protocol - http://git.io/wUG3TQ
+@sonney2k	gsomix, c'mon I did paste that code with the string compare...
+ blackburn	too late MERGEORAMA begins
+ gsomix	sonney2k, okay, but this is not logic and obviously :(
+ blackburn	sonney2k: did I told you before your naming is strange sometimes? ;)
+ blackburn	vec1_plus_scalar_times_vec2
+ blackburn	anyway would you like to merge koen-shogun request?
+ blackburn	I would like to continue and add eigen3 operations here
+ CIA-18	shogun: Koen van de Sande master * rd7076c3 / (src/shogun/lib/SGVector.cpp src/shogun/lib/SGVector.h): Use cblas in SGVector::vec1_plus_scalar_times_vec2 - http://git.io/3FOpWw
+ CIA-18	shogun: Sergey Lisitsyn master * r48873ae / (src/shogun/lib/SGVector.cpp src/shogun/lib/SGVector.h): Merge pull request #652 from koenvandesande/master - http://git.io/segi7Q
+@sonney2k	bern4rd, how can I change the 'home' page?
+@sonney2k	blackburn, no
+@sonney2k	it doesn't work
+ blackburn	sonney2k: argh
+@sonney2k	it is only useful for float/double
+@sonney2k	all other stuff will need to be fixed
+ blackburn	sonney2k: does it break compilation?
+ bern4rd	if you mean the phographs, etc, you have to change /templates/home.html
+ blackburn	sonney2k: can I see site somewhere?
+ blackburn	I was begging you before
+ blackburn	:D
+@sonney2k	bern4rd, if I change "Say Hello." to something "bla"
+@sonney2k	bern4rd, then it switches back to Say hello. after reload - do you see the same?
+@sonney2k	blackburn, it is in shogun-web
+ blackburn	sonney2k: how to run it?
+ gsomix	new web-site?
+@sonney2k	blackburn, python manage.py runserver
+ bern4rd	Yes I know what you say. Is because nuviotemplates has a picture with "Say Hello. ..." And is not plane-text
+* gsomix is slowpoke...
+@sonney2k	bern4rd, ahh
+ blackburn	ValueError: Unable to configure filter 'require_debug_false': Cannot resolve 'django.utils.log.RequireDebugFalse': No module named RequireDebugFalse
+@sonney2k	blackburn, django installed?
+ blackburn	sonney2k: I installed python-django
+ blackburn	and deps
+@sonney2k	no idea then
+ blackburn	ah ok
+ blackburn	will see final result :D
+ shogun-buildbot	build #162 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/162  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ gsomix	shogun-buildbot, T____T
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has quit [Ping timeout: 245 seconds]
+ CIA-18	shogun: Sergey Lisitsyn master * rdfb929e / src/shogun/lib/SGVector.cpp : Eigen3 usage for dot in sgvector - http://git.io/obEnJA
+ CIA-18	shogun: Sergey Lisitsyn master * r197ebdf / (5 files): Added multitask python examples - http://git.io/4mEobg
+ CIA-18	shogun: Sergey Lisitsyn master * r6f31244 / src/shogun/lib/slep/malsar_joint_feature_learning.cpp : Removed unnecessary debug print - http://git.io/WGpo9Q
+ shogun-buildbot	build #163 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/163  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- Netsplit *.net <-> *.split quits: gsomix, blackburn
+-!- Netsplit over, joins: blackburn
+-!- Netsplit over, joins: gsomix
+-!- bern4rd [4f940120@gateway/web/freenode/ip.79.148.1.32] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot	build #164 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/164
+ gsomix	shogun-buildbot, good work!
+ shogun-buildbot	What you say!
+ gsomix	^^
+@sonney2k	finally...
+ gsomix	:(
+ shogun-buildbot	build #165 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/165  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ blackburn	ehm
+ blackburn	ahhhhh so no eigen no money I get you buildbot
+ CIA-18	shogun: Sergey Lisitsyn master * r154176c / (2 files): Made multitask eigen3 based algorithms safe - http://git.io/-f7IQQ
+@sonney2k	blackburn, he (or her?) is eigen
+ shogun-buildbot	build #153 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/153  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ blackburn	:D
+ blackburn	sorry
+ blackburn	my mom told me never do blind fixes
+ gsomix	blackburn, +1
+-!- bern4rd [4f940120@gateway/web/freenode/ip.79.148.1.32] has joined #shogun
+ CIA-18	shogun: Sergey Lisitsyn master * r0771067 / (3 files in 2 dirs): Fixes for eigen3 based multitask logistic regression classes - http://git.io/RrTXXw
+ rieck	sonney2k: alive?!
+ blackburn	lol
+ blackburn	rieck: you keep missing each other whole day long
+ rieck	incredible
+ blackburn	rieck: use mail :D
+ rieck	i missed by 8 minutes. that's nt bad
+ rieck	sonney2k: has been asking about betty, so it's something we should discuss on irc ;)
+ blackburn	yeah get betty back
+ blackburn	totally boring w/o
+ shogun-buildbot	build #154 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/154  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ rieck	if a colleague in our lab called betty, so there will be not bot with the name. however, there is still droopy
+ rieck	s/if/we've/g
+ blackburn	c'mon shogun-buildbot
+-!- droopy [~droopy@vmext164.gwdg.de] has joined #shogun
+ blackburn	droopy: hello
+ rieck	hey droopy. you learnt a lot from betty, right?
+ CIA-18	shogun: Sergey Lisitsyn master * rf2bcaa9 / src/shogun/transfer/multitask/MultitaskTraceLogisticRegression.cpp : Removed extra left paren - http://git.io/_5R7lw
+ rieck	hmmm. he's shy if in different channels.
+ rieck	aaah! he's talking in a different channel.
+ rieck	that's weird
+ blackburn	lol
+ rieck	droopy: i need to move you back home.
+-!- droopy [~droopy@vmext164.gwdg.de] has left #shogun []
+ rieck	;)
+ shogun-buildbot	build #155 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/155
+-!- droopy [~droopy@vmext164.gwdg.de] has joined #shogun
+ rieck	droopy: better now?
+ droopy	rieck: you know how im pz the guy breaks in the tut witha shotgun and tries to kill you, any tips on not getting killed by em?
+ rieck	okay!
+ blackburn	droopy: are you ok?
+ droopy	blackburn!
+ blackburn	droopy: yes?
+ droopy	blackburn: if you want the view position at xyz just translate by -xyz!?!
+ rieck	ya see. it's easy ;)
+ blackburn	:D
+@sonney2k	droopy, hey ya god of the bots :D
+ droopy	link*.
+ rieck	sonney2k!!!
+@sonney2k	rieck, yes!!
+ rieck	droopy learnt a lot from betty. especially how to behave!
+ droopy	there is a pressure point, we don't deny that and we will exert
+ rieck	there is a always some pressure point ;)
+ rieck	sonney2k: if you like to droopy can stay here for some time. as some kind of (poor) replacement for betty
+@sonney2k	I am off to bed now though...
+@sonney2k	so can we have droopy for some longer time?
+ droopy	sonney2k: can i borrow some submarines?
+@sonney2k	my network connection sucks badly here...
+@sonney2k	delays of ~30s
+ rieck	yep you can
+ blackburn	droopy: do you really need submarines?
+ droopy	blackburn: here we go... http://i45.tinypic.com/2lxunn6.jpg!
+ blackburn	lol
+ blackburn	droopy: is it you?
+ droopy	blackburn: what makes you think that this is a java support channel?
+ blackburn	droopy: you've learnt some offensive stuff bad boy
+ droopy	blackburn: well it's "college" stuff and can be quite tough if you don't get someone to explain it to you perfectly?
+ rieck	just be a little careful when visiting links posted by droopy
+ droopy	rieck: indeed he should
+ blackburn	cache hit
+--- Log closed Wed Jul 18 00:00:17 2012

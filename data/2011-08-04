@@ -1,0 +1,349 @@
+--- Log opened Thu Aug 04 00:00:15 2011
+--- Day changed Thu Aug 04 2011
+@sonney2k	it is just that for the use cases I had it did not accelerate anything
+ blackburn	I became a speed maniac
+ blackburn	sonney2k: in DistanceMachine thread thing is kinda cumbersome
+ blackburn	don't you think so?
+@sonney2k	blackburn, it is always cumbersome
+ blackburn	so no way to do it more generalized?
+@sonney2k	the problem is that you have to create some data structure that contains all meta-data
+@sonney2k	blackburn, I would say that for some patterns there is
+ blackburn	yes, in java I would use hash-table with string key
+ blackburn	what to use there - don't know
+ blackburn	hmm I will try to describe thread for computing distances and kernels
+ blackburn	I feel upset we have no scalability haha
+ blackburn	okay time to change my lifestyle from 'nocturnal'
+ blackburn	sonney2k: nite
+@sonney2k	blackburn, nite
+-!- blackburn [~blackburn@188.122.237.5] has quit [Quit: Leaving.]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- f-x [~user@117.192.206.210] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ [~in3xes@59.163.196.121] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Ping timeout: 252 seconds]
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@59.163.196.121] has quit [Ping timeout: 276 seconds]
+-!- in3xes__ is now known as in3xes
+ CIA-87	shogun: Baozeng Ding master * r787f384 / src/interfaces/csharp_modular/swig_typemaps.i : add csout typemap - https://github.com/shogun-toolbox/shogun/commit/787f384cf1bfd59837ed4a37d6835163b12bdf5d
+ CIA-87	shogun: Soeren Sonnenburg master * rbeb108c / src/interfaces/csharp_modular/swig_typemaps.i :
+ CIA-87	shogun: Merge pull request #261 from sploving/master
+ CIA-87	shogun: add out typemap - https://github.com/shogun-toolbox/shogun/commit/beb108c27bebcdbeb26057110cd36bd92ea7b9f2
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- heiko [~heiko@134.91.53.135] has joined #shogun
+@sonney2k	hi heiko
+ heiko	hej sonney2k
+@sonney2k	heiko, if you have time now we should discuss further steps.
+ heiko	ok, i have time :)
+ heiko	will send you some more patches while we are talking
+@sonney2k	heiko, I think parameter versioning is next on the list right?
+ heiko	basically, yes
+ heiko	still
+ heiko	most classes have not registered their modsel parameters
+@sonney2k	heiko, yeah but this is an independent construction site ...
+ heiko	true
+@sonney2k	the parameter add / etc stuff can be pretty intrusive again
+ heiko	how do you mean that?
+@sonney2k	it affects all classes
+ heiko	yes, ok
+ heiko	also there is this cached vector stuff
+ heiko	i did some SGVector replacements yesterday and noticed that this will be needed at a lot of points,
+ heiko	and also some CachedSparseVector etc stuff is needed
+ heiko	but ok, back to the versioning
+@sonney2k	heiko, these things are all straight forward ...
+@sonney2k	versioning is not so it seems
+@sonney2k	I mean how shall we do it - have one *global* version or object specific?
+@sonney2k	global has the advantage that only at one place the version needs to be changed
+@sonney2k	local - in all affected places
+ heiko	mmh
+@sonney2k	plus we have to serialize this version too...
+ heiko	global sounds better to mee
+@sonney2k	advantage is fine grained control but huge overhead
+@sonney2k	for me too
+@sonney2k	so global it is then
+@sonney2k	nevertheless we still have to save that version in the file once
+ heiko	yes
+@sonney2k	ok say we have it saved somehow
+@sonney2k	then we only need to modify loading
+ heiko	yes
+ heiko	and the loading then depends on the version
+@sonney2k	so when loading - the idea is that we want to be able to always load older versions of the object
+ heiko	what about if loading of a certain version simply only loads variables it knows
+@sonney2k	so we need to attempt loading all things that are in the objects with version <= new_version
+ heiko	and the loading routine of a newser version just calls this and adds its own stuff
+@sonney2k	heiko, I don't understand what you mean
+ heiko	do you want to write the version of each parameter to the file?
+@sonney2k	heiko, I thought we just decided against that
+ heiko	ah sorry, yes
+@sonney2k	that is what I meant above with more fine grained control...
+ heiko	ok
+ heiko	then forget what i said above
+ heiko	how do you want to do it?
+@sonney2k	if we don't attach the version to each parameter we have to assume one global version
+ heiko	ok
+@sonney2k	and the only thing we can do is to load everything <= GLOBABL_VERSION
+ heiko	and then write it once to a saved object
+ heiko	yes
+ heiko	but this should be ok right
+ heiko	I mean, one has to update shogun if he gots objects with a more recent version
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+@sonney2k	and GLOBAL_VERSION only changes between releases of shogun - so it should be fine
+ heiko	yes
+ heiko	and in every release, the loading routines then have to be updated
+ heiko	to work with versions before
+@sonney2k	so the task would then be: a) write out GLOBAL_VERSION in saved files b) load GLOBAL_VERSION if exists (do this first!) and then c) modify load to load only objects <= GLOBAL_VERSION
+@sonney2k	this of course assumes that a) there are no variable type differences, b) there are only variable additions with sane initialization
+@sonney2k	and no deletions :)
+@sonney2k	which brings us to a new problem
+@sonney2k	how do we know that the variable did not get deleted?
+@sonney2k	I mean how do we support this?
+ heiko	good question
+@sonney2k	wouldn't we then need the version attached to each variable?
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+ heiko	does that solve the problem?
+@sonney2k	if we had some introduced_in_version=0; removed_in_version=17;
+@sonney2k	yes
+ heiko	I have to admit that I dont know how loading is done currently
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+@sonney2k	for everything else we need some post processing functions
+@sonney2k	these could already now go in the load_serializable_post()
+@sonney2k	so one would get the loaded_parameter_version in the parameters and can then do adjustments as needed
+ heiko	ok
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+ heiko	i am still a bit unsure where to start
+ heiko	I mean saving the version is easy
+@sonney2k	there is still one more problem
+ heiko	but for loading, this has to be different for each new version, right?
+@sonney2k	when do do loading and some variable is renamed / changed type - we still need the old ptrs in the object
+@sonney2k	otherwise we cannot load them
+ heiko	oh, yes
+ heiko	mmh, how to solve this?
+ heiko	perhaps by temporary void pointers and then casting them depending on old type
+@sonney2k	yeah but it can be even worse
+@sonney2k	think of 3 versions of a file
+@sonney2k	one has double* v; the other int* v; the other SGVector v;
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+ heiko	and then?
+@sonney2k	heiko, ok I think void* would work - we just need to load all objects - have them in some void* DynArray and then it can be used to construct the final thing
+ heiko	yes
+ heiko	and for every element, we have to check version and then evtl do conversion stuff depending on changes
+ heiko	deletion could also be treated there: simply do nothing with the data
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+ heiko	same with type changes
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+@sonney2k	heiko, Re deletion - it might be worthwhile to not even load deleted variables
+@sonney2k	I mean it could happen that these are *huge* arrays
+ heiko	mmh, true
+ heiko	then the list of names has to be checked before loading
+ heiko	and only load if name still exists
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+ heiko	sonney2k, 2 mins afk
+@sonney2k	the only thing is that this is getting complicated
+@sonney2k	it would really be much easier to always load everything that is <= GLOBAL_VERSION
+@sonney2k	then, when each parameter knows its loaded_version one can do whatever changes in the load_serializable_post()
+@sonney2k	this would include renames, deletions, type changes - everything
+ heiko	re
+ heiko	but is it so hard to check whether a parameter is still there?
+@sonney2k	so when loading it needs to check the version in the file and the removed_in_version parameter
+ heiko	I mean just implement a method for this and then eventually sip
+ heiko	skip
+@sonney2k	if it is > removed version
+@sonney2k	it will put it in some void* dynarray with the associated name
+@sonney2k	heiko, how do you check it? I mean how do you distinguish this from rename or type change?
+ heiko	mmh also true
+ heiko	but the renamings have to be checked at some point
+ heiko	a map is needed anyways
+ heiko	with renamings /type changes
+ heiko	i mean, while iterating over the DynArray, the steps are:
+ heiko	1) check version, if smaller than current, go on
+ heiko	2) check map for name
+ heiko	(we could do a method for that, that simply is identity when name has not changed, and new name in other case)
+@sonney2k	wait, why does one have to check for renaming?
+@sonney2k	ohh and how do we treat name changes like v -> vector -> v ?
+ heiko	for each version, there has to be a map, not?
+@sonney2k	I mean some loop behavior or whatever clash
+ heiko	so when you have: 1.0: v, 2.0:vector, 3.0:v
+@sonney2k	ok that would work
+ heiko	and you load while you are in 4.0
+ heiko	you check version and then use map for that version
+ heiko	or even better
+ heiko	maps call themselves
+@sonney2k	?
+ heiko	sorry, i meant one map for each version that contains the change
+ heiko	then you know change from 1.0 to 2.0 and from 2.0 to 3.0
+ heiko	and do not need a new map fpr 1.0 to 3.0
+ heiko	simply transitive
+@sonney2k	yes
+@sonney2k	that makes a lot of sense
+ heiko	and all this could be in one method that is handed the name and the version and this method does all the conversion automatucally
+@sonney2k	but when you do a map anyways - could one instead of using the post function also attach a translate() function?
+ heiko	yes, perhaps better ?
+@sonney2k	I only see one problem (as always)
+@sonney2k	dependencies between loaded objects
+@sonney2k	but would still work
+@sonney2k	one would then first load everything
+@sonney2k	and then call all these translate functions
+ heiko	yes
+@sonney2k	for version 0, then for 1 ... up to GLOBAL_VER
+@sonney2k	actually for loaded_ver ... GLOBAL_VER
+ heiko	and i mean, couldnt deletion of variables also be treated that way?
+@sonney2k	yes
+@sonney2k	everything would work this way
+ heiko	but stuff has to be loaded first
+ heiko	even if not used
+@sonney2k	yes
+@sonney2k	but that is ok I think
+ heiko	what about something like, only load names/type of variables first, but not data
+ heiko	then do all the mapping, and in the last step load data
+@sonney2k	I mean we guarantee 100% efficiency for the latest version
+ heiko	yes also true
+@sonney2k	and if one wants to transition things - one only has to do this once
+ heiko	older versions slowly get slower :)
+ heiko	yes, then save it again
+@sonney2k	yes
+ heiko	well, then it would be ok to always load everything, i mean there might be extreme cases  ....
+ heiko	but i am unsure whether this really will happen
+@sonney2k	yeah but extreme cases require extreme measures :)
+@bettyboo	smart sonney2k
+@sonney2k	e.g. one could then compile 10 different shogun versions
+ heiko	 hehe ;)
+@sonney2k	and transition from one version to another ...
+@sonney2k	so I suggest you try to first write down the map and global version nr
+ heiko	yes,
+ heiko	at first, will only to an identity map to get things working
+ heiko	still, my picture of all this is very abstract - not really concrete where to do things
+@sonney2k	well or if sth is not found in the map then it is assumed unchanged
+ heiko	but ok, will reed some code now
+ heiko	ah ok
+ heiko	not found on the key side
+ heiko	and if not found on value side, it was deleted
+ heiko	do we actually have a map data structure?
+@sonney2k	unfortunately not
+@sonney2k	I mean in the end a sorted list would be sufficent
+@sonney2k	some struct sorted by variable name
+@sonney2k	heiko, ahh and if no hash map exists then one assumes nothing changed
+ heiko	ok
+@sonney2k	heiko, and to dump this hash map it would be best if it was derived from SGObject
+ heiko	alright
+ heiko	but its no hash map, or?
+@sonney2k	heiko, but we only need  to look up 'variable_name' for version X
+@sonney2k	and then we get the struct with whatever...
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+ heiko	sonney2k, do you think it is safe to make computer_sparse_feature_vector a const method?
+ heiko	compiles at least
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+ heiko	sonney2k, because i just realilsed that i assumed a feature matrix for the copy_subset method (needed for model selection), but I think it is more wise to call get_feature_vector instead. However this needs the method to be const because copy_subset is const
+ heiko	oh no
+ heiko	the cache, well then it is not possible :)
+-!- sploving1 [~sploving@210.77.14.135] has joined #shogun
+-!- f-x [~user@117.192.206.210] has quit [Ping timeout: 260 seconds]
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- blackburn [~blackburn@188.122.237.5] has joined #shogun
+ blackburn	heiko: guten abend ;)
+ blackburn	do you need any efficient CSet?
+@sonney2k	sploving1, how is it going with the c# typemaps?
+@sonney2k	blackburn, he now needs a map ohh and we need an LRU cache :)
+ blackburn	hey where might you use it?
+@sonney2k	for kernel caching and for caching the on-demand computed feature vectors (from the preprocessors)
+@sonney2k	I know thought that currently basically everyone uses a feature matrix - in memory :)
+ sploving1	sonney2k, not work now. len = ((sizeof($input)) / (sizeof($input[0]))); does not work
+ sploving1	but it has no realvector error now
+@sonney2k	sploving1,and if you remove the sizeof stuff? don't you get the realvector error again?
+@sonney2k	I mean you didn't change the in typemap or?
+ sploving1	the csout typemap can remove the realvector error
+ sploving1	but now it does not pring any correct for the get_labels
+ sploving1	print
+@sonney2k	sploving1, regarding the len thing above - can't you use a macro with the defined type such that you can cast appropriately and use sizeof(SG_TYPE) or so?
+ sploving1	sonney2k, for double[] in c#, it is converted to be  double* in the wrap.cxx file, so it is not easy to just use the macro
+ sploving1	http://msdn.microsoft.com/en-us/library/z6cfh6e6%28v=VS.80%29.aspx
+@sonney2k	and when you use CSHARPTYPE, CTYPE?
+ sploving1	has something about the array size, but I am still trying to understand it
+-!- f-x [~user@117.192.196.206] has joined #shogun
+ sploving1	CSHAPTYPE is c# type, and CTYPE is c type
+@sonney2k	sploving1, ok - just to understand. you have to marshal the array to some raw thing - how do you unmarshal it?
+ heiko	blackburn, guten Abend :) but still sonny here
+ sploving1	I think marshal includes two: passting array from .net to C, and passing array from C to .Ne
+ sploving1	.net
+ sploving1	they have inattributes and outattributes
+ sploving1	inattrbutes is used to convertes C# to C, and outattributtes converts C to C#, this is what i understand
+@sonney2k	sploving1, so when you do MarshalAs(UnmanagedType.LPArray)
+@sonney2k	it will create a pointer to what?
+@sonney2k	double?
+ sploving1	sonney2k, yeap.
+ sploving1	double[] -> double*
+@sonney2k	sploving1, shouldn't you use then MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.R8) ?
+@sonney2k	sploving1, at least http://www.gnu.org/projects/dotgnu/pnetlib-doc/System/Runtime/InteropServices/UnmanagedType.html#UnmanagedType.R8%20Field says 8 byte float
+@sonney2k	sploving1, btw would your typemap now work if you hard code a length of say 3 and just use this?
+ sploving1	array = SG_MALLOC(SGTYPE, len); to be array = SG_MALLOC(SGTYPE, 3);?
+ sploving1	I have a try
+-!- sploving1 [~sploving@210.77.14.135] has left #shogun []
+-!- sploving1 [~sploving@210.77.14.135] has joined #shogun
+ sploving1	sonney2k, no.
+ sploving1	double[] y = new double[3] {5, 2, 3};
+ sploving1	the result is: -3.19979336298487E-44
+ sploving1	-3.27625512940976E-44
+ sploving1	1.37980654479024E-309
+-!- sploving1 [~sploving@210.77.14.135] has left #shogun []
+ f-x	sonney2k: how should i use SG_MALLOC if the constructor should be called after initialization?
+@sonney2k	f-x no way - just don't do such things
+ f-x	ok
+-!- heiko [~heiko@134.91.53.135] has quit [Ping timeout: 258 seconds]
+ f-x	sonney2k: so could you help me out on this one thing
+@sonney2k	f-x, which?
+ f-x	to make the ring of examples suitable for all types
+ f-x	i thought it would be ok to call the constructor of type T when the ring is initialized
+ f-x	i.e., there will be 1024 pre-initialized T-objects
+ f-x	where T=float64_t*, or a sparse vector entry etc
+ f-x	or maybe in my case even a VwExample
+ f-x	sonney2k: is there a way to do a generic initialization without new[]?
+ f-x	ok, wait.. i'll try something and get back to you if there's a problem
+ f-x	sonney2k: yes - the code would be simpler if i could call the constructor during initialization.. is using new[] not allowed now?
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Client Quit]
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- f-x [~user@117.192.196.206] has quit [Ping timeout: 260 seconds]
+-!- f-x [~user@117.192.218.249] has joined #shogun
+@sonney2k	f-x, well you can use CALLOC to have them all 0
+ blackburn	sonney2k: can I introduce method not available in interfaces but only in libshogun? how?
+@sonney2k	?
+@sonney2k	you mean %ignore?
+@sonney2k	in .i files?
+ blackburn	hmm seems yes
+ blackburn	thanks
+ blackburn	sonney2k: so you don't mind realloc for simplefeatures, right?
+@sonney2k	blackburn, no - that was one of the reasons for the SG_MALLOC transition
+ f-x	sonney2k: How do I allocate memory for the labels inside?
+ f-x	say it's class a { ptr* b }; does b get allocated to any value when I calloc an obj of type a?
+@sonney2k	yes. NULL
+ f-x	in my case for vw it's like 'class example { label* b; }', and the ring stores example objects.. i would like a new label to be created when the example is created
+ f-x	so far creating this within the constructor of example has been the simplest way i could see
+ f-x	sonney2k: what's the rule for using new/SG_MALLOC now? for single object, use new and for multiple use SG_MALLOC?
+@sonney2k	f-x, the rule is just don't use new[]
+@sonney2k	f-x, allocating objects in constructor is anyway not a great idea...
+-!- f-x [~user@117.192.218.249] has quit [Ping timeout: 260 seconds]
+* serialhex *LOVES* *nix!!!!
+-!- f-x [~user@117.192.202.35] has joined #shogun
+-!- heiko [~heiko@134.91.53.135] has joined #shogun
+-!- heiko [~heiko@134.91.53.135] has quit [Ping timeout: 258 seconds]
+ CIA-87	shogun: Heiko Strathmann master * r51aed9e / (16 files): made get_dim_feature_space method const - http://bit.ly/o9Lz7h
+ CIA-87	shogun: Heiko Strathmann master * r4d85fba / (2 files): made get_dim_feature_space method const - http://bit.ly/qeKdr5
+ CIA-87	shogun: Heiko Strathmann master * r332c8e4 / src/shogun/lib/DataType.h : (hopefully) removed some warnings regarding initialization - http://bit.ly/p8NV0F
+ CIA-87	shogun: Heiko Strathmann master * r765bfc3 / src/shogun/lib/DataType.h : removed another compiler warning - http://bit.ly/rofgZP
+ CIA-87	shogun: Soeren Sonnenburg master * rbf0c2af / (17 files in 2 dirs):
+ CIA-87	shogun: Merge pull request #262 from karlnapf/master
+ CIA-87	shogun: made get_dim_feature_space method const - http://bit.ly/rdgA1w
+@sonney2k	f-x, your patch doesn't apply
+ f-x	sonney2k: what do you mean?
+@sonney2k	f-x, it needs to be rebased agains master
+ f-x	ok.. i see you already applied heiko's DataType.h patch, probably conflicts
+ f-x	i'll send another request
+@sonney2k	take your time - I am too tired now will look at it tomorrow
+ f-x	ok, sent anyway
+-!- f-x [~user@117.192.202.35] has quit [Remote host closed the connection]
+--- Log closed Fri Aug 05 00:00:55 2011

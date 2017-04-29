@@ -1,0 +1,424 @@
+--- Log opened Sat Jun 11 00:00:17 2011
+-!- ins__ [~ins@p5DDCE1B6.dip.t-dialin.net] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- in3xes_ is now known as in3xes
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- in3xes1 [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- in3xes_ [~in3xes@210.212.58.111] has joined #shogun
+-!- in3xes1 [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- in3xes_ is now known as in3xes
+-!- in3xes [~in3xes@210.212.58.111] has quit [Ping timeout: 276 seconds]
+-!- in3xes [~in3xes@59.163.196.121] has joined #shogun
+-!- alesis-novik [~alesis@78-56-236-240.static.zebra.lt] has joined #shogun
+-!- blackburn1 [~blackburn@188.122.224.102] has joined #shogun
+-!- blackburn1 is now known as blackburn
+-!- blackburn1 [~blackburn@188.122.224.102] has joined #shogun
+-!- blackburn [~blackburn@188.122.224.102] has quit [Read error: No route to host]
+-!- blackburn1 [~blackburn@188.122.224.102] has quit [Ping timeout: 240 seconds]
+-!- blackburn [~blackburn@188.122.224.102] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- blackburn1 [~blackburn@188.122.224.102] has joined #shogun
+-!- blackburn [~blackburn@188.122.224.102] has quit [Ping timeout: 255 seconds]
+-!- blackburn [~blackburn@188.122.224.102] has joined #shogun
+-!- blackburn1 [~blackburn@188.122.224.102] has quit [Ping timeout: 276 seconds]
+-!- blackburn [~blackburn@188.122.224.102] has quit [Ping timeout: 240 seconds]
+-!- blackburn [~blackburn@188.122.224.102] has joined #shogun
+-!- f-x [~user@117.192.200.14] has joined #shogun
+-!- cwidmer [~quassel@connect.tuebingen.mpg.de] has joined #shogun
+@sonney2k	blackburn, back
+ f-x	sonney2k: hey! is the get_feature_vector(float64_t** dst, int32_t* len, int32_t num) in DotFeatures used anywhere?
+ f-x	or is it always supposed to be reimplemented in a derived class?
+ f-x	i'm asking since DotFeatures is not supposed to be specific to a data type (eg. float64_t) but in the definition dst is explicitly mentioned as float64_t
+@sonney2k	f-x, it is actually using the add operation to create the feature vector
+@sonney2k	and add is using float64_t*
+ f-x	ok.. so is it possible to use DotFeatures as a standalone features class?
+ f-x	or do you have to use one of the derived classes like SimpleFeatures<T> ?
+ CIA-18	shogun: Sergey Lisitsyn master * r24b8f99 / (4 files in 2 dirs): Added CIsomap - http://bit.ly/jvk3pQ
+@sonney2k	f-x, dotfeatures itself needs some derived feature class (in which the add etc operations are defined)
+ CIA-18	shogun: Soeren Sonnenburg master * rd761ec2 / examples/undocumented/ruby_modular/classifier_libsvm_minimal_modular.rb : Merge branch 'master' of git://github.com/serialhex/shogun - http://bit.ly/lX40eY
+ f-x	hmm.. add_to_dense_vec hasn't been defined in DotFeatures
+@sonney2k	f-x, note that get_feature_vector of dot features cannot be fast as it uses add to compute the vector
+@sonney2k	f-x, exactly
+ f-x	sonney2k: so is the get_feature_vector() of dotfeatures used anywhere? i see it has been redefined in simplefeatures
+@sonney2k	f-x, I think every sensible feature class redefines it for speed reasons
+ f-x	yeah, it seems so
+ f-x	and btw i mailed you about a possible inheritance method
+ f-x	but for that StreamingFeatures will have to be templated
+ f-x	and i guess some derivations in DotFeatures and SimpleFeatures etc will have to be made virtual
+@sonney2k	f-x, I've seen your mail but didn't have time yet to read it in detail will do this evening
+ f-x	ok sure
+ f-x	just wanted to know if there were any glaring problems with that
+ f-x	i'm trying to change stuff according to that right now, will see if things work out
+-!- cwidmer [~quassel@connect.tuebingen.mpg.de] has quit [Quit: http://quassel-irc.org - Chat comfortably. Anywhere.]
+ blackburn	sonney2k: here
+ blackburn	sonney2k: Chris will sent you my 'objectives' for mid-term
+ blackburn	we just had had a discuss about goals and so on
+@sonney2k	blackburn, very good
+ blackburn	sonney2k: about my issues with distances - I think I have solved it
+@sonney2k	blackburn, even better :D
+ blackburn	sonney2k: in the version you've pushed isomap is duplicated to classicmds
+ blackburn	sonney2k: need your opinion
+@sonney2k	f-x, btw did you finish the getline thing I mean using some buffer?
+ f-x	sonney2k: that problem isn't sorted yet
+ f-x	about the file pointer not being immediately after the \n
+ f-x	after every call to getline
+ f-x	fgets() seems a more direct route now
+ f-x	i haven't done it yet
+ blackburn	I have to use geodesic distance (just shortest paths between all objects) and now it is just computed inside Isomap routines - shall I create that specific distance?
+ f-x	so is it okay that the file pointer is at some unexpected position after a getline?
+@sonney2k	f-x, if you make it a function of ascii file - sure
+@sonney2k	I mean ascii file is line based and so it will only ever call getline repeatedly
+ f-x	okay, i think i'll just call it something other than 'getline' as that would confuse users
+@sonney2k	ok
+@sonney2k	blackburn, wow! just got chris' email
+@sonney2k	blackburn, lots of things you intend to finish
+@sonney2k	blackburn, when is your last exam?
+ blackburn	21
+ blackburn	sonney2k: why lots? :)
+@bettyboo	he
+ blackburn	LLE, classic MDS and Isomap is ready
+ blackburn	only LMDS to be implemented
+@sonney2k	blackburn, great - that almost leaves you with 1 month after your exams to recover and code
+ blackburn	sonney2k: yeap, right after my exams serious work would be started :D
+ blackburn	sonney2k: is it ok to delete and replace features in apply_to_feature_matrix?
+@sonney2k	blackburn, you can totally modify feature matrix (and reduce its size) - but tha't sit
+ blackburn	sonney2k: well I have two ways:
+ blackburn	method apply_to_distance returning CSimpleFeatures*
+ blackburn	or method apply_to_distance using some args to return matrix
+ blackburn	the only problem: is it possible to 'typemap' this arg list: (CDistance, float64_t*, int32_t, int32_t)?
+ blackburn	I mean in python it should be: preprocessor.apply_to_distance(dist) and returning matrix or features
+ blackburn	ah I think I have an idea
+ blackburn	CSimpleFeatures<float64_t>* apply_to_distance(CDistance* distance);               for modular
+ blackburn	and
+ blackburn	void apply_to_distance(CDistance* distance, float64_t* dst, int32_t rows, int32_t cols);              for internals
+@sonney2k	blackburn, what is wrong with SGMatrix?
+@sonney2k	f-x, I read your email now
+ blackburn	sonney2k: you mean why I don't use SGMatrix?
+@sonney2k	blackburn, instead of float64_t* dst, int32_t rows, int32_t cols
+ blackburn	sonney2k: it is not a solution anyway but yes, I'll refactor to it SGMatrix a bit later
+ f-x	sonney2k: any suggestions?
+@sonney2k	blackburn, why not? then it is typemapped
+ blackburn	seems trying to explain problem helps to understand ways to solve :)
+ blackburn	okay
+ blackburn	thank
+ blackburn	s
+@sonney2k	f-x, I really would like to avoid multiple inheritance
+ f-x	sonney2k: that would be ideal... but how else do we make streaming simplefeatures compatible with dotfeatures and simplefeatures?
+@sonney2k	f-x, I don't mind streaming features to become a templated class - however I would split it up into say StreamingStringFeatures, StreamingSimpleFeatures, StreamingSparseFeatures
+ f-x	yes, that has to be done
+ f-x	StreamingSimpleFeatures would be further templated
+@sonney2k	(and each of them tempalted)
+@sonney2k	yes
+ f-x	so you mean to say StreamingFeatures<T> is okay?
+@sonney2k	no
+@sonney2k	StreamingSimpleFeatures<T>
+@sonney2k	is ok
+ f-x	StreamingSimpleFeatures<T>: public StreamingFeatures
+@sonney2k	I am not sure what StreamingFeatures<T> should be
+ f-x	like this?
+ f-x	the template in StreamingFeatures is for the buffer to know what kind of data it is storing
+ f-x	while allocating memory, i've hardcoded new float64_t[size] into the buffer/parser code
+ f-x	i was thinking that should be replaced with new T[size] to make it more general
+@sonney2k	f-x, but you cannot derive from general templated classes
+ blackburn	sonney2k: is it ok to you to use RowMajor (not ColumnMajor) in algos?
+@sonney2k	blackburn, why would one?
+ f-x	sonney2k: hmm... i thought you just had to put the method definitions in the .h file and it was fine
+ blackburn	sonney2k: don't know, it is implemented this way now in LLE and MDS
+ f-x	can you give me an example of something which you think won't work?
+ f-x	so that i can test it
+ blackburn	I could change it if it is not ok :)
+@sonney2k	f-x, StreamingSimpleFeatures<T>: public StreamingFeatures<T>
+ f-x	sonney2k: so you're sure that won't work?
+@sonney2k	blackburn, I mean all matrices and everything in shogun are column major (like lapack likes it)
+@sonney2k	it makes only sense to deviate from that if it is faster in your setup
+ f-x	right now the basic 'example' class is defined with float64_t* fv
+ f-x	and i'd really like it if it was more generalized
+ blackburn	sonney2k: okay, I will change it
+ blackburn	most of matrices anyway are symmetrical
+ f-x	so the templating begins all the way from example<T>, buffer<T>, parser<T>, streamingfeatures<T> ...
+@sonney2k	blackburn, if they are symmetric it doesn't really matter right :)
+@sonney2k	f-x, well you have this thing http://womble.decadent.org.uk/c++/template-faq.html#base-lookup
+ f-x	yes, i'd have to use all those this->member
+ f-x	or "using x::y"
+ f-x	declarations
+ blackburn	sonney2k: exactly but I have to change some things for non-symmetrical. will do it a bit later
+ f-x	so it is possible, but it may be messy
+@sonney2k	messy == avoid
+ blackburn	sonney2k: reported to ML
+ f-x	but the parser/buffer are not linked with any features class.. how do they know what kind of features they're expected to read/store?
+@sonney2k	f-x, there is one benefit when deriving from CFeatures - it could use the preprocessors
+ f-x	sonney2k: yes.. but it will derive from CFeatures when it derives from say CDotFeatures
+@sonney2k	f-x, you can defintely construct a parser<T> as member variable
+@sonney2k	so just using CStremingSipleFeatures<T> works just fine
+@sonney2k	f-x, I am not sure that deriving from e.g. SimpleFeatures etc is a good idea
+@sonney2k	I mean these feature objects assume that the number of examples is known
+@sonney2k	and so what would happen if you apply them to an algorithM/
+@sonney2k	?
+ f-x	agreed.. it's probably easier to write the operations from scratch
+ f-x	the algorithm would have to be changed a lot to consider the 'streaming' modifications
+ f-x	(if we apply SimpleFeatures to the algorithm)
+@sonney2k	I would derive all the templated CStreaming*Features<T> from CFeatures
+ f-x	and write the functions separately?
+@sonney2k	underneath use your templated buffers/parsers (here we should really check that we don't dupllicate too much with what is available in the CFile thing - I would rather add code to that then having a new serparete interface)
+ f-x	i was thinking of somehow integrating with SimpleFeatures, StringFeatures etc and using the functions already present, but that's more problematic
+@sonney2k	however you will then have to convert all the online methods to use that interface
+ f-x	yes, the methods based on say CDotFeatures won't work
+ f-x	if we derive directly from CFeatures
+@sonney2k	and I still don't see how one could do better then CStreamingDotFeatures and define all the op's in there again...
+ f-x	the amount of work is probably the same even if we derive it from DotFeatures... anyhow most of the functions have to be redefined
+ f-x	the only advantage was that the present algorithms would work (or at least accept as input parameters) with these features
+@sonney2k	f-x, the problem I see is that e.g. LibSVM can work with dotfeatures
+@sonney2k	but not with any kind of stremaing features
+@sonney2k	so most of the algorithms won't work...
+ f-x	unless we redefine them to work with streaming features
+@sonney2k	the only online methods we have in shogun are perceptron, sgd, liblinear, larank
+@sonney2k	so modifying these to work with either CDotFeatures / CStreamingDotFeatures sounds much easier too me
+@sonney2k	f-x, but for libsvm we don't even know any efficient online algorithm
+ f-x	 so LibSVM isn't supposed to work with streaming features at all?
+ f-x	okay.. good
+ f-x	:D
+@sonney2k	f-x, I guess someone would first have to write a paper about it how to do it properly
+@sonney2k	I am afraid though that this is not so easy
+@sonney2k	kernel methods are not really suited for online learning
+ f-x	so for the time being our targets are perceptron, sgd, liblinear, larank and vw
+@sonney2k	these are all linear methods (ok larank might be able to use kernels)
+ f-x	i'm hoping the structure we're adopting now will be compatible with vw
+@sonney2k	why not?
+@sonney2k	in the end fw needs some vectorial input
+ f-x	i guess most methods just follow the input()->train()->predict() sequence
+ f-x	you're right.. but i'll need john to help me out on exactly what should go into vw's "train" and "predict" functions
+ f-x	anyway, that comes a bit later
+ f-x	sonney2k: could we just finalize the inheritance? (just so i have some concrete record of it)
+@sonney2k	to avoid any misunderstanding - could you please summarize what you would do now
+@sonney2k	exactly :D
+ f-x	:)
+ f-x	read my mind
+ f-x	err.. StreamingFeatures derives from CFeatures first
+ f-x	correct?
+@sonney2k	yes
+@sonney2k	well but only if you need streamingfeatures
+@sonney2k	you could aswell directly start with CStreamingStringFeatures<T> : public CFeatures
+ f-x	exactly what i was thinking..
+ f-x	plus it's difficult to have a StreamingFeatures without a type specified
+@sonney2k	I would introduce a new feature property STREAMING
+@sonney2k	currently we only have FP_DOT as property
+ f-x	hmm.. right
+@sonney2k	f-x, well it could be used to limit your algorithm to streamingfeatures
+ f-x	make my own property?
+ f-x	okay.. STREAMING
+@sonney2k	but on the other hand you could as well require CFeatures and check that the streaming property is set
+@sonney2k	f-x, libshogun/features/FeatureTypes.h add it to EFeatureProperty
+@sonney2k	then call set_property(FP_DOT); in constructor
+@sonney2k	that's it
+ f-x	cool :)
+ f-x	so now i'm allowed to change the member functions and stuff right?
+ f-x	(not expecting to maintain compatibility with the current SimpleFeatures<T> since the algorithm must be changed too)
+@sonney2k	yeah whatever streaming features fits most
+ f-x	good, since it was a knotty problem with all that loopy inheritance
+@sonney2k	f-x, if we really want SimpleFeatues<T> to use StreamingFeatures one could add a function to CSImpleFeatures<T>::obtain_from_streaming(CStreamingSimpleFeatures<T>* f)
+@sonney2k	this would then load all the features into memory and done
+@sonney2k	then all algo's would work again
+ f-x	good idea
+@sonney2k	actaully a good way to test things
+ f-x	so all online->batch would be possible
+@sonney2k	should give same results :D
+ f-x	and a reverse batch->online wouldn't be difficult
+@sonney2k	yeah
+ f-x	looks interesting :)
+@sonney2k	f-x, true even that
+@sonney2k	so the only thing I am not too sure of now is whether CStreamingDotFeatures should derive from CFeatures or not
+@sonney2k	I mean should CStreamingSimpleFeatures derive from CStreamingDotFeatures?
+@sonney2k	(that is how it is done currently for non-streaming features0
+@sonney2k	)
+ f-x	It wouldn't be a problem, i think
+@sonney2k	blackburn, thanks - looks good
+ f-x	i guess if we're using more features that use the dot operation, it might help to have a CStreamingDotFeatures class
+ f-x	as long as the inheritance is linear, things look fine
+@sonney2k	f-x, I mean I would directly copy the interface of CDotFeatures
+@sonney2k	because most of the online methods are linear ones and do benefit from dotfeatures quite a bit
+ f-x	copy into CStreamingDotFeatures?
+@sonney2k	yeah - if necessary adjust API
+@sonney2k	and then when you modify e.g. SVMSGD you don't have much to do
+@sonney2k	because the same functions are there
+ f-x	SVMSGD, online version, would be a different function though, right?
+ f-x	with most of the code same
+ f-x	so the caller uses something like SVMSGD_Online() whatever for the online version and SVMSGD() for the batch version
+@sonney2k	f-x, I would modify SVMSGD to accept either CDotFeatures or CStreamingDotFeatures
+ f-x	okay, overload?
+@sonney2k	I am not sure yet - templated or overloaded - definitely no if else mess
+@sonney2k	I guess overloaded
+ f-x	overloaded is safer, i agree
+@sonney2k	and encapsulate the functions that do add_dense_vec etc
+ f-x	in CStreamingSimpleFeatures
+@sonney2k	I mean if you use templates then you could plug in CDotFeatures or CStreamingDotFeatures
+@sonney2k	and the rest stays the same
+@sonney2k	if not you will have to encapsulate all the functions that use the DotFeatures
+ f-x	i'm not sure if i'm totally clear with this.. even if i use templates, i'd still have to modify the train() method
+ f-x	basically train() should train using one example, and repeated calls to train() would be required to train for the whole dataset
+ f-x	or a new function "train_one_example()" could be made and train() itself makes repeated calls to train_one_example() until all examples are used up
+@sonney2k	f-x, true
+@sonney2k	even the DotFeatures require an example inde
+@sonney2k	x
+@sonney2k	so the online algorithm is very different
+ f-x	the index should be removed, or should always be set to zero.. in effect, functioning as a dummy
+@sonney2k	I mean you need to call the get_next_vector things only
+@sonney2k	(in the online variant of sgd)
+@sonney2k	so StreamingDotFeatures would not have any index
+ f-x	so basically this means modfiying the algorithm will not be a search-and-replace exercise :/
+ f-x	but still it looks pretty doable
+ f-x	i guess this should be good enough for me to implement the SGD at least :)
+ f-x	thanks a lot, sonney2k.. things seem a lot clearer now
+@sonney2k	f-x, so what do you think is reasonable for midterm?
+ f-x	what do you have in mind, sonney2k? :)
+@sonney2k	I mean the long term plan for gsoc would probably be all the streaming feature types and converting all the algorithms
+ f-x	+ vw
+@sonney2k	f-x, I am not sure what John would want you to do on the vw side
+@sonney2k	yeah
+ f-x	i mean vw for shogun
+@sonney2k	yes
+ f-x	what's the most important feature type according to you?
+ f-x	SimpleFeatures?
+@sonney2k	I mean you have 2.5 months full time - so it is possible I think
+ f-x	it's possible, i agree.. unless some big structural change comes up later and everything requires a whole rewrite... that's all i'm worried about
+@sonney2k	I would say that with ascii based files SimpleFeatures and SparseFeatures are really easy to do
+@sonney2k	f-x, I don't see that coming though
+@sonney2k	(famous last words...)
+ f-x	:D
+ f-x	it's a relief, nonetheless
+@sonney2k	So I think you should aim for getting simple and sparse streaming features to work together with dotfeatures
+@sonney2k	and then SGD or so on top of it
+@sonney2k	this month
+ f-x	sounds pretty good..
+@sonney2k	then I would rather change more of the online algorithms (say liblinear)
+ f-x	i haven't seen much of the sparse features code, but shouldn't be that much of a problem, not that the structure is resolved
+ f-x	*now that the
+@sonney2k	f-x, I mean in the end look at DataType.h
+@sonney2k	all you need to do is return a SGSparseVector<T>
+@sonney2k	it is basically index, value
+@sonney2k	and all the dotfeatures code can be generalized from what you find in simplefeatures / sparsefeatures
+@sonney2k	I would create some static functions in there that you could use in the streaming* variants
+@sonney2k	so it should be very doable in 1-2 weeks for some simple ascii format
+ f-x	true, true
+@sonney2k	f-x, the problem I see with all this i/o business is that shogun already has the CFile* interface
+@sonney2k	and it would be best if you could utilize this somehow
+ f-x	or incorporate any new functions i make into CFile
+@sonney2k	or derived files
+@sonney2k	yes
+ f-x	what exactly do you want me to use in CFile?
+ f-x	CStreamingFile derives from it
+ f-x	and the built-in functions read the whole file
+@sonney2k	f-x, just the API - it is perfectly fine to have StreamingFile
+@sonney2k	and incrementally return the next vector when one calls get_float32_vector etc
+ f-x	yeah.. that makes sense
+ f-x	right now i use get_real_vector in parser.h which does the same i think
+@sonney2k	f-x, I guess you should rename this then to CStreamingAsciiFile and implemnet the API functions
+@sonney2k	and use these functions in your StreamingFeature classes
+ f-x	will do. since 'StreamingFile' is actually a modification of AsciiFile.
+@sonney2k	I guess the buffering is also only necessary for asciffiles?
+ f-x	wouldn't buffering be beneficial for binary files too?
+ f-x	i mean the parsing step would be simplified, but the example objects would be read and stored in the buffer in a similar fashion
+@sonney2k	f-x,I am loosing track of all the buffers
+ f-x	let's call this one the "ring" :)
+@sonney2k	I mean for ascii we have an input buffer that just buffers what is in the raw file right?
+ f-x	call it the I/O buffer
+@sonney2k	and then we have a buffer for the examples that stores the parsed data right?
+ f-x	called a 'ring'
+ f-x	yes
+@sonney2k	heh
+@sonney2k	so the ring is always necessary agreed
+@sonney2k	the i/o buffer too?
+ f-x	the I/O buffer isn't implemented yet for AsciiFile
+@sonney2k	I don't know
+ f-x	no I don't think the IO buffer would be necessary
+@sonney2k	f-x, yeah but it is the getline ting
+ f-x	since we can directly red one example at a time
+ f-x	yes, the getline thing is a simple substitute
+ f-x	it would be much faster if we read as much data as possible into the IO buffer, and then use getline on that
+@sonney2k	f-x, I meant when you do getline with fread (without seeking)
+@sonney2k	exactly
+ f-x	so IO buffer must be copied from VW and made compatible
+@sonney2k	for binary it could only be that reading examples of low dimensionality would benefit from a buffer
+@sonney2k	othewise fread is called very often...
+ f-x	exactly
+ f-x	i need to have a deeper look though, to be able to make a final statement on this
+@sonney2k	not sure if that is really a problem though
+ f-x	but most likely the buffer could be needed -- but only if it is speedy enough
+ f-x	no, not a major problem
+@sonney2k	I mean I don't have such small examples in practice
+ f-x	oh.. ok. good
+ f-x	anyway it wouldn't hurt to assume for now that the buffer may be needed for binary too..
+@sonney2k	so plan would be 1. put the fread based getline in asciifile 2. do the StreamingAsciffFile and use this getline 3. convert StreamingFeatures to be templated CStreamingSimpleFeatures and derived from CFeatures and make it use the StreamingFile API
+@sonney2k	4. get OnlineSGD to work
+@sonney2k	f-x, does that make sense?
+ f-x	sonney2k: it does, it does
+@sonney2k	and for the buffering you borrow code from vw
+ f-x	exactly what i was about to ask
+@sonney2k	it would be great to have a CVowpalWabbit soon in shogun though
+@sonney2k	I gues
+ f-x	yeah.. that name has a nice ring to it :)
+@sonney2k	I don't know if it is realistic to for midterm
+@sonney2k	I mean you would totally have to port the algorithm to use shogun's dotfeatures
+ f-x	CVowpalWabbit? i guess a lot of discussion would be required to port that properly
+@sonney2k	so that is sth you can only do with john giving you lots of hints
+ f-x	definitely
+ blackburn	hey what VW does? :D
+ f-x	there are tons of optimizations in vw that may be difficult to fit into our structure
+@sonney2k	f-x, in the end VW implements SGD with john specific tricks I guess
+ blackburn	classifying?
+ f-x	prediction
+@sonney2k	blackburn, online SVm - like SGD
+ blackburn	ah I see
+ blackburn	I just dimreduction redneck so don't know much about these svms :D
+ f-x	blackburn: redneck? by now you're an old veteran!
+ blackburn	hehe
+@bettyboo	:)
+ blackburn	I mean I'm dummy in SVMs :)
+@sonney2k	f-x, I would suggest you try to do 1-3 next week
+@sonney2k	please please small patches whenevery you have sth finished
+@sonney2k	otherwise I won't be able to review these easily
+ f-x	how big is 'something' supposed to be?
+@sonney2k	(bug chunks are hard to digest...)
+ f-x	"bug chunks" :P
+@sonney2k	big :D
+@sonney2k	f-x, I mean if you do fread based getline in asciifile -> pull request
+@sonney2k	if you write StremaingAsciiFIle -> pull request
+@sonney2k	and so on
+@sonney2k	small logical units
+ f-x	okay.. got it
+ blackburn	I've invented a game: we pull code with bugs and Soeren is guessing where it is
+@sonney2k	blackburn, in the end I can only loose :`-(
+ f-x	blackburn: yeah, it's 5 vs. 1
+@sonney2k	f-x, so lets discuss again end of next week - and I hope to see plenty fo pull requests
+ blackburn	sonney2k: but you are 80 lvl coder :D you have chances
+@sonney2k	if you have questions in the meantime ask per mail or chat
+ f-x	sonney2k: sure.. a pull request soon.
+ f-x	i guess i'll go to bed now.. thanks for the insight, sonney2k
+@sonney2k	f-x, thanks for this nice discussion and I hope you will have some fun doing these things
+* sonney2k wonders why f-x always writes similar sentences :D
+ f-x	sonney2k: i'm sure i will :) now things seem much simpler
+ f-x	:D
+ f-x	bbye, sonney2k and blackburn
+ blackburn	f-x: are you robot? what is an integral of cot(x)? :D
+ blackburn	bye :)
+ f-x	blackburn: don't give me bad dreams.. i'm trying to go to bed now :)
+@bettyboo	;)
+@sonney2k	:)
+@bettyboo	^_^
+-!- f-x [~user@117.192.200.14] has quit [Quit: ERC Version 5.3 (IRC client for Emacs)]
+ blackburn	sonney2k: how are your family?
+* sonney2k feels exhausted
+@sonney2k	everyone asleep
+@sonney2k	healthy and growing ...
+ blackburn	nice :)
+@sonney2k	went swimming / to the zoo
+@sonney2k	was a lot of fun I can tell
+ blackburn	I have seen you live near lake?
+@sonney2k	my daughter was pretty excited about a pelican trying to chase him...
+ blackburn	hehe
+@sonney2k	(these are running around freely in the zoo 'tierpark')
+ blackburn	you are happy: have nice places here :)
+ blackburn	http://maps.yandex.ru/-/CBQOqN98 - place where I live :D
+--- Log closed Sun Jun 12 00:00:16 2011

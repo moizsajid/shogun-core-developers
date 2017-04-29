@@ -1,0 +1,520 @@
+--- Log opened Fri Jul 05 00:00:18 2013
+@sonney2k	pickle27, seen this CJADiag.diagonalize
+@sonney2k	mathematics/ajd/JADiag_unittest.cc:111: Failure
+@sonney2k	Value of: true
+@sonney2k	Expected: isperm
+@sonney2k	Which is: false
+@sonney2k	[  FAILED  ] CJADiag.diagonalize (5 ms
+@sonney2k	https://travis-ci.org/shogun-toolbox/shogun/jobs/8746957
+-!- gsomix [~gsomix@109.188.126.210] has quit [Ping timeout: 248 seconds]
+ pickle27	sonney2k: yeah I did see that
+ pickle27	sonney2k: it creates new test data each time but its never failed when I've ran it
+ pickle27	sonney2k: it should use a chi square but there wasn't an easy way to do that so I left it as gaussian which may be the problem
+ pickle27	sonney2k: but like I said its never happened to me before and it passed the other builds right
+ pickle27	sonney2k: is there an easy way to do chi squared in Shogun? there is a nice way to do it with C11...
+@sonney2k	pickle27, maybe you didn't initialize the rng then?
+ shogun-buildbot	build #1318 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1318  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	if test data is random you will get different results all the time
+ pickle27	sonney2k: yeah but the final result from this test should always be a permutation matrix
+ pickle27	even with random input
+ pickle27	I mean it is constrained random input so that it should work
+@sonney2k	pickle27, welcome to the wonderful world of the numerics of float/double
+ pickle27	sonney2k: haha yup
+@sonney2k	pickle27, so just do a fixed seed
+@sonney2k	if that works locally then it should work remotely
+ pickle27	sonney2k: okay I'll do that
+@sonney2k	pickle27, CMath::init_random(17)
+ pickle27	sonney2k: I have another PR up for the second alg so I'll just push to that
+@sonney2k	pickle27, I also have some code style comments
+@sonney2k	pickle27, please do for (int i...)
+@sonney2k	space between for and (
+ pickle27	ah right
+@sonney2k	and also when a for loop as more than 1 line use { }
+ pickle27	sonney2k: should be fixed up in my latest PR
+ pickle27	im testing it on my system right now
+ pickle27	sonney2k: looks like setting the random seed didn't fix the second build
+ pickle27	sonney2k: could it be a clang problem?
+ pickle27	sonney2k: my is_perm function isn't the best because the matrix will have a random scale
+ pickle27	it would help if I could reproduce on my computer, can I just apt-get clang and try?
+ pickle27	nvm gcc failed on the other one..
+ shogun-buildbot	build #1319 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1319  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ pickle27	sonney2k: I sent a commit to print the matrix, hopefully this will help me figure out whats up!
+ pickle27	how long do travis logs stay for? I have to step out for a bit
+ pickle27	got the logs saved before I had to head out!
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+ shogun-buildbot	build #391 of nightly_none is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/391
+-!- FSCV [~FSCV@50.7.50.60] has quit [Quit: Leaving]
+ shogun-buildbot	build #383 of nightly_all is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/383
+-!- zxtx_ [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: zxtx
+ shogun-buildbot	build #448 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/448
+-!- nube [~rho@49.244.93.13] has quit [Quit: Leaving.]
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- nube [~rho@116.90.239.3] has quit [Quit: Leaving.]
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- nube [~rho@116.90.239.3] has quit [Quit: Leaving.]
+@sonney2k	pickle27, for eternity
+@sonney2k	wiking_, ping again
+ wiking_	sonney2k: pong
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+ sonne|work	wiking_: good morning!
+ sonne|work	wiking_: could you please give me some url for the feed?
+-!- hushell [~hushell@c-24-21-141-32.hsd1.or.comcast.net] has joined #shogun
+ hushell	sonney2k: Hi, I got a strange problem. After included SGObject.h, I have to include Parameter.h to use SG_ADD, but CParameter has already been declaried
+ votjakovr	sonne|work: guten morgen :) i see, that you added evaluate_*() methods to black list for c# modular, is that temporal solution?
+ sonne|work	votjakovr: good enough for some time :)
+ hushell	Another question, how can I register some member whose type is const char*, or I have to use SGString?
+ votjakovr	sonne|work: ok
+ sonne|work	votjakovr: it is totally unclear why using 2 SGVectors or other SG* datatypes works with all other typemaps but our csharp one
+ sonne|work	votjakovr: needs to be bug reported / toy example created
+ sonne|work	votjakovr: anyway not so bad
+ sonne|work	hushell: well depends :) what do you use your char* for
+ sonne|work	hushell: best is to use SGVector<char>
+ hushell	sonne|work: I want to have an identity
+-!- nube [~rho@116.90.239.3] has quit [Quit: Leaving.]
+ hushell	"astring" cannot be converted to SGVector<char> implicitly
+ hushell	but std::string is possible
+-!- nube [~rho@116.90.239.3] has joined #shogun
+ sonne|work	hushell: asstring?
+ hushell	sonne|work: for the const char* member, I need to pass a "name" in the argument of constructor
+ hushell	"astring" means a string in c++ :)
+ hushell	I mean in a function call
+ sonne|work	hushell: as in void foo(int x, const char* name) ?
+ hushell	sonne|work: yep
+ wiking_	sonne|work: http://maeth.com:8000/shogun_workshop.ogg
+ sonne|work	hushell: yeah sure
+ hushell	so const char* cannot be used as a member? if we have to register it
+-!- iglesiasg [~iglesias@2001:6b0:1:1041:fda4:69d9:9772:7713] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ sonne|work	hushell: register means?
+ sonne|work	hushell: without more context I cannot really answer this
+ hushell	sonne|work: I solved it by using SGString, but I am wondering why we need to register member variables? register here means SG_ADD
+ sonne|work	you only need that when you want to say that this variable needs to be saved (serialization) or could be used in modelselection
+ hushell	sonne|work: Thanks! then not everybody need to do that
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+ sonne|work	hey van51
+ sonne|work	good morning
+ van51	sonne|work: hello
+ van51	sonne|work: good morning to you too
+ sonne|work	I was wondering how the training time is now and what parameters you used
+ van51	sonne|work: I think it's still taking a lot of time
+ van51	sonne|work: all I did was to specify C=4
+ sonne|work	van51: and epsilon?
+ sonne|work	van51: any normalization?
+ sonne|work	as in make vectors norm =1 ?
+ sonne|work	no right?
+ sonne|work	then it is no wonder :)
+ van51	sonne|work: no nothing like that :)
+ sonne|work	van51: so what epsilon did you set then?
+ sonne|work	default?
+ van51	sonne|work: yea I just wanted to get it running first
+ sonne|work	ok 1e-3 with not properly scaled data will kill you
+ sonne|work	van51: a standard trick is to divide the vector by the number of non-zero elements
+ sonne|work	van51: so you should implement support for that in your features (optional of course)
+ sonne|work	for n-grams it is rather easy since a constant
+ sonne|work	for delimited words it depends on #words
+ sonne|work	van51: OK?
+ van51	sonne|work: ok
+ sonne|work	van51: just add a hack for the moment to see how fast it becomes
+ van51	sonne|work: so just before i returns the vector in the dense_dot?
+-!- nube [~rho@116.90.239.3] has quit [Quit: Leaving.]
+ van51	sonne|work: actually it doesn't return a vector
+-!- nube [~rho@116.90.239.3] has joined #shogun
+ sonne|work	van51: it returns a scalar so just multiply with that normalization const
+ sonne|work	i.e. norm_const = 1.0/num_ngrams
+ sonne|work	van51: with add_to_dense_vec you have to do it for each element
+ sonne|work	van51: and dot the thing squared
+ van51	sonne|work: why dot the thing squared?
+ sonne|work	van51: it is (a * norm_const) * (b*norm_const)
+ sonne|work	(both a & b are normalized)
+-!- iglesiasg_ [~iglesias@n131-p244.kthopen.kth.se] has joined #shogun
+-!- iglesiasg [~iglesias@2001:6b0:1:1041:fda4:69d9:9772:7713] has quit [Read error: Connection reset by peer]
+-!- iglesiasg_ [~iglesias@n131-p244.kthopen.kth.se] has quit [Client Quit]
+-!- iglesiasg [~iglesias@2001:6b0:1:1041:fda4:69d9:9772:7713] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ van51	sonne|work: so in a setting of 500 examples, c=4 , default e
+ van51	sonne|work: with converter it takes like 2-3 secs
+ van51	sonne|work: dot-features took -last night- 4 mins
+ van51	sonne|work: and I don't see an improvement with normalization
+ sonne|work	yeah but C=1 is probably for scaled data OK C=4 for unscaled as you have is way to high. I guess more in the range of 1e-3
+ sonne|work	van51: that cannot be
+ van51	sonne|work: there is a significant speedup with C=0.001
+ van51	sonne|work: but with normalization the results seem worse
+ sonne|work	van51: sure results are not comparable
+ sonne|work	you need different C
+-!- HeikoS [~heiko@nat-180-11.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has quit [Read error: Connection reset by peer]
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has left #shogun ["Went to the store!"]
+ sonne|work	van51: can you show me how you normalize?
+-!- nube [~rho@116.90.239.3] has quit [Ping timeout: 248 seconds]
+ van51	sonne|work: yea
+ van51	sonne|work: one moment
+ van51	sonne|work: https://gist.github.com/van51/5933588
+-!- lambday [67157e4f@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.126.79] has joined #shogun
+ lambday	HeikoS: hi
+@HeikoS	lambday:  hi!
+ lambday	HeikoS: I tested with one matrix with pathetic condition number (10^4)
+@HeikoS	and?
+ lambday	and the accuracy is 1E-5
+ lambday	the trace
+ lambday	of log
+ lambday	I think if we want more accuracy, we should use arprec
+ lambday	(for shifts, weights etc)
+ lambday	the accuracy I wanted is 1E-19
+@HeikoS	this is with direct solves?
+ lambday	yup
+@HeikoS	lambday: and can you easily try arprec?
+ lambday	HeikoS: for Jacobi elliptic functions I already have the arprec version
+@HeikoS	lambday: I see
+@HeikoS	lambday: this might actually be the solver
+ lambday	HeikoS: brb... a call
+ lambday	:(
+@HeikoS	lambday: I think thats fine for now (especially since this is only to test whether things work), for the real deal with sparse matrices and cocg_m, we should get a better accurac<y
+ lambday	HeikoS: bakc
+ lambday	HeikoS: yes...
+ lambday	and also, this is the difference in the trace
+@HeikoS	lambday: what do you mean?
+ lambday	not the norm of the difference of the approximated log(m) and actual log(m)
+@HeikoS	ah yes
+@HeikoS	sure
+@HeikoS	but we have the exact trace right?
+ lambday	yes... I was checking with octave... I'll soon add the eigen3 version soon
+@HeikoS	lambday: okay
+@HeikoS	lambday: good!
+ lambday	not too bad, right?
+ lambday	hmm :)
+@HeikoS	sounds good, yes :)
+@HeikoS	so now, the more interesting things begin :D
+ lambday	yes :D
+@HeikoS	conjugate gradient pain ;)
+ lambday	next two days I can give fully to gsoc..
+ lambday	:D
+ lambday	weekends yay :D
+ lambday	I should add sparse thing before going into cocg
+ lambday	right?
+@HeikoS	lambday: yes thats true
+ lambday	oh and what about having a different base for cocg_m?
+@HeikoS	lambday: explain this a bit
+ lambday	I don't think we can manage it in the same interface as other solvers
+ lambday	since their solve returns an SGVector
+-!- wiking_ is now known as wiking
+-!- wiking [~wiking@info2k1.hu] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- mode/#shogun [+o wiking] by ChanServ
+ lambday	for cocg_m, we should return a SGMatrix instead
+ lambday	and the sum can't get inside the solve
+ lambday	because each of the solution vectors need to be multiplied with their corresponding weight before the sum
+ lambday	getting the weights inside the solve of cocg_m will go, but I don't think that's a good idea :(
+@HeikoS	lambday: yeah you are right
+@HeikoS	lambday: damn ;)
+@HeikoS	do you have a suggestion?
+ lambday	tell me about it :'(
+ lambday	no :'(
+ lambday	except having a different base...
+ lambday	it won't cost generality because I moved the m_linear_solver down the the implementation of CRationalApproximation
+ lambday	so, CLogRationalApproximationIndividual will have CLinearSolver m_linear_solver, and CLogRationalApproximationCOCG will have C<suggest-something>Solver m_linear_solver
+@HeikoS	cant we use a base class for these two types of solvers?
+@HeikoS	well
+@HeikoS	you know what
+@HeikoS	thats fine, your suggestion
+ lambday	how shall we differentiate the signatures? :(
+@HeikoS	it *is* a different solver
+ lambday	its just the return type that changes :(
+@HeikoS	which does something different
+@HeikoS	i.e. solve multiple systems
+ lambday	yes it is...
+@HeikoS	so thats fine
+ lambday	please suggest names (I suck at it :( )
+-!- iglesiasg [~iglesias@2001:6b0:1:1041:fda4:69d9:9772:7713] has quit [Ping timeout: 245 seconds]
+ lambday	holy crap using eigen3 we get super duper accuracy! :-o
+ lambday	this is rational approximation: 4.60517018598809446672
+ lambday	this is rational approximation: 4.60517018598809446672
+ lambday	oops
+ lambday	sorry
+ lambday	4.60517018598809180219
+ lambday	this
+ van51	sonne|work: I have to g2g
+ van51	sonne|work: I'll be back in 2-2.5 hours
+ lambday	HeikoS: :D
+@HeikoS	lambday:  wow :D
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has quit [Quit: Leaving.]
+@HeikoS	awesome
+@HeikoS	lambday: wait what did you change there?
+ lambday	HeikoS: look at the accuracy we got:: 2.664535259100375697e-15
+ lambday	:-o
+ lambday	nothing! I just used eigen3's log instead of testing with what octave gives
+@HeikoS	lambday: nice!
+@HeikoS	yeah octave sucks ;D
+ lambday	yahooooooo!
+@HeikoS	lambday: carefull about this though
+@HeikoS	eigen3 probably uses a similar trick for computing matrix logs :)
+ lambday	errr....
+ lambday	:(
+@HeikoS	so its like running the same code twice
+@HeikoS	but it is still very good!
+ lambday	:) :)
+ lambday	but
+ lambday	umm..
+@HeikoS	This function computes the matrix logarithm using the Schur-Parlett algorithm
+ lambday	eigen3's log gives the whole matrix
+@HeikoS	no its different
+ lambday	ahan!
+@HeikoS	its the higham paper
+@HeikoS	I tried that before, ours will be better for large one :)
+@HeikoS	cool
+ lambday	hope so :) :)
+@HeikoS	very very encouraging
+@HeikoS	!
+ lambday	yessss!! :D
+ lambday	I'll add this unit-test real soon!
+-!- iglesiasg [~iglesias@n131-p244.kthopen.kth.se] has joined #shogun
+ lambday	HeikoS: using arprec we got that ~1e15 accuracy, using normal float64_t we got ~1e-8
+@HeikoS	lambday: ok good, these are very useful values for the documentation later on
+@HeikoS	lambday: so keep them, make them into unit tests
+ lambday	yes
+ lambday	okay :)
+ lambday	I'll be back later.... :)
+ lambday	see you
+-!- lambday [67157e4f@gateway/web/cgi-irc/kiwiirc.com/ip.103.21.126.79] has quit [Quit: lambday]
+-!- iglesiasg [~iglesias@n131-p244.kthopen.kth.se] has quit [Quit: Ex-Chat]
+-!- Netsplit *.net <-> *.split quits: @HeikoS, pickle27, hushell, sonne|work, flxb, shogun-buildbot, zxtx_, naywhayare, @sonney2k, @wiking,  (+1 more, use /NETSPLIT to show all of them)
+-!- Netsplit over, joins: @wiking, @sonney2k, shogun-buildbot
+-!- Netsplit over, joins: @HeikoS, hushell, zxtx_, pickle27, sonne|work, flxb, naywhayare, sanyam
+-!- mode/#shogun [-ooo sonney2k wiking HeikoS] by ChanServ
+-!- Netsplit *.net <-> *.split quits: hushell
+-!- Netsplit over, joins: hushell
+-!- Netsplit *.net <-> *.split quits: flxb, naywhayare, HeikoS
+-!- Netsplit over, joins: @HeikoS
+-!- Netsplit over, joins: flxb
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has quit [Client Quit]
+-!- van51 [~van51@79.131.147.28] has joined #shogun
+-!- van51 [~van51@79.131.147.28] has quit [Remote host closed the connection]
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+-!- kevin_ [~kevin@rcv3-lab-pc.ee.queensu.ca] has joined #shogun
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has quit [Ping timeout: 276 seconds]
+-!- kevin_ is now known as pickle27
+-!- foulwall [~user@2001:da8:215:c252:482c:7add:959d:1be5] has joined #shogun
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has left #shogun ["QUIT :Leaving."]
+-!- sonne|work [~sonnenbu@91-64-72-127-dynip.superkabel.de] has left #shogun []
+-!- foulwall [~user@2001:da8:215:c252:482c:7add:959d:1be5] has quit [Remote host closed the connection]
+-!- lisitsyn [~lisitsyn@109-226-115-134.clients.tlt.100megabit.ru] has joined #shogun
+-!- nube [~rho@49.244.14.60] has joined #shogun
+-!- nube [~rho@49.244.14.60] has quit [Quit: Leaving.]
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+-!- hushell [~hushell@c-24-21-141-32.hsd1.or.comcast.net] has quit [Ping timeout: 264 seconds]
+-!- mode/#shogun [+o sonney2k] by ChanServ
+@sonney2k	van51, I meant how you normalize
+@sonney2k	van51, as gist
+ van51	sonney2k: I'm not following :)
+ van51	sonney2k: there was the normalization in the gist I sent you earlier
+ van51	sonney2k: do you want something else?
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has joined #shogun
+-!- HeikoS [~heiko@nat-180-11.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+@sonney2k	van51, oops looked at the wrong one
+ pickle27	sonney2k: my unit test is still failing on Travis, I set the random seed for CMath but I'm also using setRandom from Eigen3
+ pickle27	do you know how to set the random seed for eigen3? I can't find how to do it
+@sonney2k	van51, ok some bug is in there still
+@sonney2k	van51, in line 12 it should be 1.0/((sv1.size()-3)*(sv2.size()-3))
+@sonney2k	van51, note that you do 1/sv1.size() which will always be 0
+@sonney2k	in line 44
+@sonney2k	it should be 1.0/(sv.size()-3) for the same reason
+ van51	sonney2k: woops
+@sonney2k	and line 62 should be
+@sonney2k	alpha/(sv.size()-3)
+@sonney2k	and then line 65 should be removed
+@sonney2k	and line 72 should be just += n_const;
+ van51	sonney2k: idd
+@sonney2k	van51, please fix and show me again
+ van51	sonney2k: I updated the gist
+ lisitsyn	pickle27: hey
+@sonney2k	van51, looks good except for the missing ; in line 63
+@sonney2k	van51, so try again!
+ van51	sonney2k: yea compiler told me!
+@sonney2k	van51, btw how do you compile / what interfaces do you compile for?
+ lisitsyn	pickle27: may be srand does the job
+@sonney2k	van51, I am kind of your compiler too
+@sonney2k	van51, quick new results pleas :-)
+@sonney2k	it should be lightning fast now
+ pickle27	lisitsyn: I tried with srand and it didn't fix travis
+ lisitsyn	sonney2k: struct a; template <typename T> struct b { }; struct a : b<a> { };
+ lisitsyn	:D
+@sonney2k	lisitsyn, van51's compiler not yours :P
+@sonney2k	pickle27, why srand?
+ van51	haha
+ lisitsyn	sonney2k: warum ich bin allein
+@sonney2k	pickle27, CMath::init_random!
+ lisitsyn	sonney2k: eigen's random
+@sonney2k	lisitsyn, is that needed?
+@sonney2k	no idea what you do
+ lisitsyn	sonney2k: I'd not use it actually
+ lisitsyn	didn't notice pickle27 used it
+ pickle27	lisitsyn: sonney2k I don't think thats the problem anymore looking into some other things
+ pickle27	sonney2k: lisitsyn I replaced using Eigens random with CMath, lets see what happens with travis now
+@sonney2k	pickle27, but it works locally?
+ pickle27	yeah
+ pickle27	sonney2k: its never failed for me
+ pickle27	its testing whether or not the end result is a permutation matrix
+ pickle27	on Travis there is a column that is all zeros
+@sonney2k	van51, how do you compile?
+@sonney2k	van51, any results already?
+ van51	sonney2k: on 50 examples, with C=0.001 it takes 75s
+ van51	sonney2k: with C=1 it takes 25s
+@sonney2k	50k examples?
+@sonney2k	or 50?
+ van51	sonney2k: I compile for static interface
+ van51	just 50
+ van51	:(
+@sonney2k	errm
+@sonney2k	with or w/o optimizations
+ van51	sonney2k: on that machine right now it's with
+@sonney2k	van51, if you just need C++
+@sonney2k	van51, then you can do ./configure --interfaces=
+@sonney2k	and then make / make install
+@sonney2k	etc
+ van51	sonney2k: ah ok
+@sonney2k	you sure that it takes the right lib?
+ van51	sonney2k: yeah I believe so
+@sonney2k	van51, how many positive / negative examples has this?
+ van51	22/28
+@sonney2k	and ngram-size is what 3?
+ van51	yeap
+ pickle27	sonney2k: lisitsyn why hasn't travis started on my latest commit?
+ lisitsyn	pickle27: I guess it is enqueued
+@sonney2k	van51, look at page 89 in http://sonnenburgs.de/soeren/publications/SonRaeRie07.pdf
+@sonney2k	van51, table 4.4
+ pickle27	doesn't look like anything is queued
+@sonney2k	that is a 'slow' method (compared to what you have) running on webspam
+@sonney2k	it takes 2 secs for 100 examples
+@sonney2k	van51, try with n=8
+ pickle27	lisitsyn: okay its building now, hopefully Travis likes it this time
+@sonney2k	van51, ok so lets do a quick benchmark
+@sonney2k	van51, take the 50 examples and just call add_to_dense_vec with all of them to some null vector and measure the time
+ van51	sonney2k: ok
+@sonney2k	van51, btw this is a good benchmark for dotfeatures anyway - so it makes a lot of sense to do this in the CDotFeatures class
+@sonney2k	van51, maybe there even is sth like this already in there
+ van51	sonney2k: on it
+@sonney2k	van51, indeed
+@sonney2k	there is
+@sonney2k	van51, jsut call benchmark_add_to_dense_vector()
+@sonney2k	and benchmark_dense_dot_range()
+@sonney2k	van51, I would expect it takes <1s
+ van51	sonney2k: with default number of repeats?
+@sonney2k	van51, yeah
+@sonney2k	it is averaging
+ van51	sonney2k: http://pastebin.com/Jua8ZKxZ
+ lisitsyn	pickle27: something is happening with your PR
+ lisitsyn	;0
+ lisitsyn	;)
+@sonney2k	van51, ok then if liblinear is taking > 1000 iterations you can get such bad results
+@sonney2k	van51, lets try SVMOcas instead of liblinear
+@sonney2k	van51, same syntax just CSVMOcas(C,data,labels)
+ van51	sonney2k: ok and I was looking for the class reference now :P
+@sonney2k	van51, I will have to leave in 10 minutes - so please give me a result before :)
+ lisitsyn	sonney2k: we need to fix lua detection
+ lisitsyn	let me try to do that
+@sonney2k	van51, in any case you should update olivier/benoit on your progress and even send them the example you wrote and describe what you did
+@sonney2k	lisitsyn, hmmhh so I guess I broke it
+ lisitsyn	if it finds lua it tries to compile *even* if no headers are there
+@sonney2k	lisitsyn, I was addign support for lua52 some months back
+@sonney2k	I guess I broke sth
+ van51	sonney2k: now it takes 0.88s for 100 examples
+ lisitsyn	sonney2k: well it should just fail with no headers
+ lisitsyn	I will try to patch it now
+ van51	sonney2k: it's much much faster
+@sonney2k	van51, ok then give it say 10k examples
+@sonney2k	van51, it might be that liblinear recovers with many more examples
+@sonney2k	van51, liblinear is numerically not that stable
+ lisitsyn	btw I can confirm now iphone has libsvm inside :D
+ lisitsyn	kind of huge success for these guys
+@sonney2k	weird though
+@sonney2k	lisitsyn, what do they learn with libsvm/liblinear
+@sonney2k	van51, btw did you enable progress output?
+ lisitsyn	sonney2k: no idea but license is inside
+ lisitsyn	sonney2k: face recognition? who knows
+ van51	sonney2k: no I did not
+ van51	sonney2k: I have a run that finished iin 112s
+ van51	sonney2k: but the first one segfault'ed
+ van51	sonney2k: and the next one said corrupted double-linked list
+@sonney2k	lisitsyn, I mean I can understand they *learn* some models on some cluster(s) but then just applying stuff doesn't need a license or anything
+ lisitsyn	sonney2k: no it is in license of any iphone
+ lisitsyn	so some code is running on iphone
+@sonney2k	lisitsyn, no face recog etc that is all pretrained
+@sonney2k	van51, sounds bad
+@sonney2k	van51, enable progress output!
+ lisitsyn	sonney2k: I know
+@sonney2k	van51, svm.io.set_progress_enabled() or so
+@sonney2k	van51, not good about the crash - valgrind on some subset...
+@sonney2k	van51, 10k examples took >6000s with the 'old' approach so yes about 100 sounds right
+@sonney2k	van51, alright I am off - keep it going!
+ van51	sonney2k: ok! at least that is promising
+ van51	cu!
+ lisitsyn	van51: can you explain me the things you are doing in a few words?
+ van51	lisitsyn: sure
+ van51	lisitsyn: right now we are trying to benchmark CHashedDocDotFeatures which stores internally a CStringsFeatures object and whenever a dot product is required it tokenizes the appropriate string feature vector on the fly
+ van51	lisitsyn: then hashes the tokens to a dimension d
+ van51	which is much smaller than the dimension of the entire document collection
+ van51	and the idea then is that you train a linear model on that smaller dimension
+ lisitsyn	so the internal storage is still strings?
+ van51	yes
+ lisitsyn	why is it more efficient than just store hashes?
+ lisitsyn	I mean sounds like hashes are compressing things
+ lisitsyn	van51: just trying to understand ;)
+ van51	lisitsyn: well from what I understand pre-hashing the tokens takes time and space
+ van51	lisitsyn: maybe not that much now that the collection fits in memory
+ lisitsyn	say I have
+ lisitsyn	1 mb text file
+ lisitsyn	how much space hashed thing takes?
+ van51	it depends on the hash size that you specify
+ van51	imagine you try to fit that text file in a vector of size 0..to 2^16 for instance
+ van51	lisitsyn: this post here explains it well : http://metaoptimize.com/qa/questions/6943/what-is-the-hashing-trick
+ lisitsyn	van51: but that's BoW right?
+ lisitsyn	I mean transforming doc -> 2^16 binary features
+ van51	lisitsyn: actually it's a count
+ van51	lisitsyn: and the BoW representation would have a large dimension of all posible tokens, say N
+ van51	lisitsyn: here we specify a dimension d << N
+ lisitsyn	van51: one question that would clarify
+ lisitsyn	BoW is indeed memory inefficient (like N possible tokens)
+ lisitsyn	but you say when using hashing we get d<<N, why not to compute them explicitly?
+ van51	lisitsyn: explicitly you mean beforehand?
+ lisitsyn	van51: yes
+ van51	lisitsyn: well I'm not an expert, I'll just tell you what I have read and come to understand
+ lisitsyn	van51: yes I am not expert at all too :)
+ van51	lisitsyn: precomputing it would take up some time before-hand and also more space
+ van51	lisitsyn: either on disk or in memory
+ lisitsyn	van51: so it takes more time with hashing but less space?
+ van51	lisitsyn: I'm guessing is the good old trade-off yea
+ lisitsyn	alright thanks
+ van51	lisitsyn: also I think it would be hard if your collection had to be streamed
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 8a34d14 / src/configure: https://github.com/shogun-toolbox/shogun/commit/8a34d146ea5e8ab4eb218f81387fb388f93fa95e
+ shogun-notifier-	shogun: Fixed lua detection
+ lisitsyn	naywhayare: I guess that ^ fixes the thing you reported on lua
+ naywhayare	rockin'.  glad I could help a bit :)
+ naywhayare	(even though technically I only pointed out the problem and didn't quite help)
+ naywhayare	thanks :)
+ lisitsyn	naywhayare: thanks fro reporting!
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 268 seconds]
+-!- travis-ci [~travis-ci@ec2-23-20-235-49.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/8778519
+-!- travis-ci [~travis-ci@ec2-23-20-235-49.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #1197 of bsd1 - libshogun is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1197  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ shogun-buildbot	build #1320 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1320  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+--- Log closed Fri Jul 05 23:23:30 2013
+--- Log opened Fri Jul 05 23:23:36 2013
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 13 nicks [2 ops, 0 halfops, 0 voices, 11 normal]
+-!- Irssi: Join to #shogun was synced in 7 secs
+ pickle27	lisitsyn: yeah I saw, it still failed though, I don't under stand
+ pickle27	lisitsyn: I'll discuss with you later maybe tomorrow? the result should be a permutation matrix and on my systems it is, but on Travis one of the columns doesn't have a one
+ pickle27	lisitsyn: it looks like its usually the first column too
+ pickle27	lisitsyn: I don't know whats up
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has quit [Quit: Leaving]
+--- Log closed Sat Jul 06 00:00:19 2013

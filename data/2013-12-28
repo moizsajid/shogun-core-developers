@@ -1,0 +1,761 @@
+--- Log opened Sat Dec 28 00:00:25 2013
+-!- FSCV_ [~FSCV@fixed-203-250-138.iusacell.net] has quit [Quit: Leaving]
+-!- Jagged [~NULL@vtluug/member/jagged] has left #shogun []
+ shogun-buildbot	build #663 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/663
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Quit: Leaving]
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has joined #shogun
+@wiking	besser82: ping?
+ besser82	wiking: pong!
+@wiking	besser82: ok so i've skid the article you've sent
+ besser82	wiking: and what do you say?
+ besser82	wiking: What's your oppinion
+@wiking	besser82: one thing we should remember: there was a plan to move slowly from SGReferencedData to std::shared_ptr
+ besser82	wiking: shared_ptr like non-copyable?
+@wiking	besser82: it's like the shared pointer in boost
+@wiking	besser82: that does automatic reference counting + freeing
+ besser82	wiking: I see  :D
+ besser82	wiking: Nice idea
+@wiking	so i dont know how that would work out with this idea
+@wiking	as there it uses auto_ptr
+ besser82	wiking: we possibly can change that,  I need to look at the specs of shared_ptr && auto_ptr
+@wiking	besser82: yeah i've had a quick look they not compatible :P
+ besser82	wiking: damn
+@wiking	but then again
+ besser82	wiking: yes
+@wiking	if we put every class into shared_ptr
+@wiking	it's almost like auto_ptr<>
+@wiking	shared_ptr is a template as well that can hold any type of object
+@wiking	template< class T > class shared_ptr;
+@wiking	with that we can throw out SGReferencedData
+ besser82	wiking, so they are interchangeble  ;)
+@wiking	besser82: i would say so
+ besser82	wiking: mostly
+@wiking	but yeah if we do this
+ besser82	wiking: Yes?
+@wiking	we should do as well the shared_ptr thing as well
+@wiking	as that would be another standardization of the code itself
+@wiking	instead of using our own solution
+ besser82	wiking: +1  :D
+@wiking	i.e. possibly more interopability
+@wiking	as it's part of c++11
+ besser82	wiking: so when shall we start?
+@wiking	besser82: well i think we should finish your cmake developments
+@wiking	since that already introduces some kind of a vertical split of the code
+ besser82	wiking, yes, somehow. but just from build-pov
+@wiking	since you've created CMakeLists.txt in almost each subdir
+@wiking	besser82: yeah true but that would be required anyways for this transition
+ besser82	wiking, which are in 98% just symlinks to some common CMakeLists  :-P
+ besser82	wiking, so my changes would be somewhat superfluous one this point of transition
+ besser82	wiking, since on moving to plg.so  we basically need to change virtually everything
+ besser82	wiking, like modular_interfaces and all
+@wiking	besser82: well yeah modular interfaces would need a total refactoring
+@wiking	besser82: so yeah basically we would need a new feature branch
+@wiking	and start experimenting there
+@wiking	first try to do the splitting only on the c++ level
+@wiking	and then try to fix the modular interfaces
+ besser82	wiking: would be a beginning  ;)
+ besser82	wiking: but if we are moving to plugin-style, I'd strongly recommend keeping every plugin inside a seperate git-repo
+ besser82	wiking: and use some common-toolchain to checkout and build
+ besser82	wiking: which would make freezes and stuff quite easier
+ besser82	wiking: have a look at those suse YaST repo-style  ;)
+ besser82	wiking, https://github.com/yast
+ besser82	wiking, they are using a git-repo for one thing each
+ besser82	wiking, and have some common {build,dev}tools
+ besser82	wiking, https://github.com/yast/yast-meta
+ besser82	wiking, https://github.com/yast/yast-devtools
+ besser82	wiking, with such a structure we could make things quite easier for user and developers a well
+ besser82	wiking, we could create a tool like shogun-manager or sth.  which checks out the needed repos and builds them
+@wiking	besser82: mmm i wouldn't do that
+ besser82	wiking, why? can you explain your pov?
+@wiking	besser82: i feel that that's just too much of an overhead
+ besser82	wiking, in the first place  YES
+ besser82	wiking, but when thinking about further progress NO
+@wiking	besser82: there's just way tooo many plugins
+ besser82	wiking, not everyone needs / uses the whole set of features
+@wiking	besser82: if u think about Features
+@wiking	or Kernel
+@wiking	each of the kernel should be a separate plugin imho
+@wiking	but for each of the kernel to make a separate repo
+@wiking	that's just waaaay too much
+ besser82	wiking, somehow
+@wiking	there are for example 75 different kernel implementations
+@wiking	and that's just really kernel
+ besser82	wiking, i see
+@wiking	think about all the others
+@wiking	features, machine, classifiers
+@wiking	etc etc
+ besser82	wiking, so we would endup with ~400 repos or so
+@wiking	or more like 1000
+ besser82	wiking, but with some `smart` managment that wouldn't be so much pain
+ besser82	wiking, we would just need some metadata about what's needed for which purpose  ;)
+ besser82	wiking, and the manager-app could then resolve
+ besser82	wiking, on the other hand we could manage the repos a bit task-based
+ besser82	wiking, like having a repo for all kernel, classifier, etc ....
+ besser82	wiking, a common repo
+ besser82	wiking, so we would end with lemme guess ~20 repos
+ besser82	wiking, have i been too aggressive on marketing my idea?  :(
+@sonney2k	besser82, hey good morning
+@sonney2k	besser82, any news on cmake?
+@sonney2k	or have you been thinking all day night about the split thing
+ besser82	sonney2k: actually that plugin-split-action(tm) occupies all my mind  ;)
+ besser82	sonney2k: my currrent thoughts are:  Shall I really spend more time in sth. we need to re-assemble, when running off with that split-stuff?
+ besser82	sonney2k: And it is not that plugin-things, only, which moves me brains
+ besser82	sonney2k: the is sooooo much stuff about shogun, it's future, our goals, the possibilities, possible movements, getting people involved, making it THE one
+ besser82	sonney2k: I'm thinking about stuff centred making SHOGUN the B.I.G. thing
+ besser82	sonney2k: making it easier for people to contrib
+ besser82	sonney2k: creating community
+ besser82	sonney2k: all such
+ besser82	sonney2k: my mind currently shoots ideas like bulletts out of an uzi
+ besser82	sonney2k: creating sth. like pypi or rubygems, but around shogun
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Remote host closed the connection]
+-!- zxtx [~zv@c-98-223-196-32.hsd1.in.comcast.net] has joined #shogun
+ besser82	lisitsyn:  ^^^   What do you think?
+ lisitsyn	besser82: yes that's how I see it
+ besser82	lisitsyn: all the same I do?
+ lisitsyn	besser82: actually I see it as something like cross-language platform
+ lisitsyn	let me explain
+ besser82	lisitsyn: sure
+ lisitsyn	from linguistics position :D
+ lisitsyn	shogun is like a commander ;)
+ lisitsyn	I see it would be wonderful to have cross-lang inteface for cross-lang stuff
+ besser82	lisitsyn: that can be implemented by a plugin  :D
+ lisitsyn	yes
+ besser82	lisitsyn: python is easy as dell  ;)
+ lisitsyn	I mean
+ lisitsyn	we have scikits, weka
+ lisitsyn	we can rule them all
+ lisitsyn	in a cross-platform manner
+ lisitsyn	err cross-language
+ besser82	lisitsyn: but ruby or other lang might be some more tricky
+ lisitsyn	why?
+ lisitsyn	lets have some ruby standart interface for classifier et
+ lisitsyn	when once you get some code you do some glueing
+ lisitsyn	to support that interface
+ lisitsyn	and our runner runs and gets results back
+ besser82	lisitsyn: ok, ok, but python can be intergrated like full interpreter with really few code  ;)
+ lisitsyn	yeah
+ lisitsyn	same for matlab etc
+ besser82	lisitsyn: ruby and others are more tough
+ besser82	lisitsyn: from that pov
+ besser82	lisitsyn: are you sure?
+ lisitsyn	besser82: sure about what? :)
+ besser82	lisitsyn: embedding interpreters being easy as baking a pie?
+ lisitsyn	why to embed them?
+ lisitsyn	it is enough to run it as a process and get results back
+ besser82	lisitsyn: like with pipes  ?
+ lisitsyn	yes
+ besser82	lisitsyn: would be nice to get that a bit more elaborated  :-P
+ lisitsyn	besser82: okay I download some code by famous-researcher-of-machine-learning
+ besser82	lisitsyn: which code from sonney2k ?!?
+ lisitsyn	it has function do_stuff(...)
+ besser82	lisitsyn: go on
+ lisitsyn	we set up COMMON interface for matlab classifiers we support
+ lisitsyn	lets say it is train(X,Y)
+ lisitsyn	you write
+ lisitsyn	train(X,Y)
+ lisitsyn	    do_stuff(....)
+ lisitsyn	with proper dispatching of parameters
+ lisitsyn	I mean you extract all the data you need whatever original algorithm requires
+ besser82	lisitsyn: I see
+ besser82	lisitsyn: My thought on this particular topic was more like having the possibility to be able to develop plugins in other lang, which directly interface with shogun
+ lisitsyn	besser82: yeah if possible
+ lisitsyn	but what about matlab shit?
+ besser82	lisitsyn, sure for python easy as spending 500$
+ besser82	lisitsyn, :-P
+ besser82	lisitsyn, just a bit of code and some `Cython`-magic and here we go
+ besser82	lisitsyn, so for python we just need a bit of native python-code and some Cython cppdefs ---> convert to *.cpp ---> compile a plugin ---> go
+ besser82	lisitsyn, that wrapper-plugin is then able to "embed" the whole python-interpreter and load-in shogun-plugins written in pure-python
+ besser82	lisitsyn, ruby, java, ...  would be some more work I guess
+ besser82	lisitsyn, matlab?  I dunno, I don't own, I don't use
+ besser82	lisitsyn, but should be perfectly the same as octave
+ lisitsyn	yes would be better
+ besser82	lisitsyn, better what?
+ lisitsyn	to compile it as plugins
+ besser82	lisitsyn, lang-embed-plugins you mean?
+ lisitsyn	yes
+ lisitsyn	than piping them
+* besser82 throws an instance of confused-exception (What?)
+ lisitsyn	:D
+ lisitsyn	besser82: making them plugins (your suggestion) would be better than piping (my suggestion)
+ besser82	lisitsyn, now i got it  :D
+ besser82	lisitsyn, yes piping is somewhat fragile, I'm afraid
+ besser82	lisitsyn, and i dunno whether there is protobuf support for matlab  :-P
+ besser82	lisitsyn, which would be another way
+ besser82	lisitsyn, but having plugins "embedding" the interp  would be the best i guess
+ besser82	lisitsyn, how do like that idea of having sth. like pypi or gems for shogun?
+ lisitsyn	besser82: yeah that sounds good
+ lisitsyn	besser82: though I'd make it as minimal as possible
+ besser82	lisitsyn, which minimal?
+ lisitsyn	besser82: just some basic thing - not like whole new packaging system
+ besser82	lisitsyn, no nothing just stealing metadata stuff && needs from gems or sth  ;)
+ besser82	lisitsyn, like having a wrapper which is able to resolve deps between plugins, fetches the needed one (e.g. git checkout), builds && registers them
+ besser82	lisitsyn, with the shogun-interface-lib
+-!- besser82 is now known as besser82|mobile
+-!- besser82|mobile is now known as group
+-!- group is now known as besser82|mobile
+-!- besser82|mobile is now known as besser82
+ lisitsyn	besser82: actually such repo is what I want to develop :D
+ besser82	lisitsyn: Nice!  then go ahead with that  :D
+ lisitsyn	I think I'd like to learn a bit how to design this type of software
+ besser82	lisitsyn, pkg-manager?
+ lisitsyn	yeah somewhat like that
+ besser82	lisitsyn, if you need some help or design ideas you can ask Ale? Kozumpl?k <ales@redhat.com>
+ lisitsyn	ha you have contacts right
+ lisitsyn	:D
+ besser82	lisitsyn, yes  :D
+ besser82	lisitsyn, another one might be Klaus K?mpf <kkaempf@suse.de>
+ lisitsyn	besser82: I am trying to learn piano, any contacts? :D
+ besser82	lisitsyn, mmmhhhhhh....
+ lisitsyn	besser82: it is Heiko! ;)
+ besser82	lisitsyn, some local mi?usic-student, perhaps  :-P
+ lisitsyn	he is kind of musician
+ besser82	lisitsyn, yes, but not piano, i'm afraid
+ lisitsyn	besser82: every musician can play piano at least a bit ;)
+ lisitsyn	besser82: Heiko plays guitar mainly afaik
+ besser82	lisitsyn, yes,  and yes a bit for sure.  But enough to teach?
+ lisitsyn	haha no idea
+ besser82	lisitsyn, and mind the distance  :-P
+ lisitsyn	besser82: I am experimenting of self-taught learning
+ besser82	lisitsyn, me too  ;)
+ besser82	lisitsyn, all me skillz are mostly from self-studies
+ lisitsyn	besser82: yeah so why not to try to learn music this way too
+ lisitsyn	:D
+ besser82	lisitsyn, my greatest problem with that is: I'm left-handed
+ lisitsyn	besser82: me too
+ lisitsyn	besser82: what is the problem?
+ besser82	lisitsyn, most instruments are made for right-handed
+ lisitsyn	besser82: well.. kind of
+ lisitsyn	besser82: but what is the instrument which is that inconvenient for left-handed guys?
+ besser82	lisitsyn, guitar e.g.
+ besser82	lisitsyn, basically all string instr
+ lisitsyn	I feel it makes no difference when you don't know how to play ;)
+ besser82	lisitsyn, kk  but if you try to make it sound nice?!?
+ lisitsyn	I mean it is harder to write with right hand because you have been doing it left hand all the way
+ lisitsyn	but when you learn instrument it should be ok ;)
+ lisitsyn	besser82: there is a long way to make it sound nice anyway haha
+ besser82	lisitsyn, actually it hasn't to do much with the way you learned....
+ lisitsyn	besser82: I love upright bass, want to get it once and start learning
+ lisitsyn	it is symmetric so no problem with left-handness
+ lisitsyn	besser82: what do you mean?
+ besser82	lisitsyn, it's the way the "wiring" in ya brain has grown  ;)
+ lisitsyn	besser82: I am not sure, I believe you can change that wiring enough
+ besser82	lisitsyn, raise a lefthanded child writing with the right hand and it will surely get depressions and other psychologic problem
+ besser82	lisitsyn, known fact
+ lisitsyn	oh yeah people used to do that before
+ besser82	lisitsyn, some 70 y back
+ lisitsyn	besser82: but that's true for any force applied to child
+ besser82	lisitsyn, not with force  ;)
+ besser82	lisitsyn, just gentle teaching is enough
+ besser82	lisitsyn, one simply cannot reorder the two halves of the brain
+ lisitsyn	besser82: I am not sure ambidexterity is not possible to train
+ besser82	lisitsyn, nope it's born that way
+ besser82	lisitsyn, there are actually a lot of things which is decided @~3rd month of pregnancy
+ besser82	lisitsyn, sexual orientation, left / right handed, .....
+ lisitsyn	besser82: oh no sexual orientation could be decided much later
+ besser82	lisitsyn, possibly yes, but some scientist found out the basics are made then
+ besser82	lisitsyn, being gay or a dyke isn't just a decision
+ lisitsyn	besser82: haha yes most of the times yes it is not a decision
+ lisitsyn	but I would believe it is quite related to environment and stresses you have in childhood
+ besser82	lisitsyn, that can be possibly some "weak" circumstances, but I know a lot of gays which didn't have any suspicious things in their childhood
+ lisitsyn	I mean just like that anecdotical thing - if girl had difficult relationships with her father you can expect some kind of sexual behaviour
+ besser82	lisitsyn, they are just that way
+ lisitsyn	besser82: I don't speak about great suspicious things - some small things could change the game
+ besser82	lisitsyn, which ones?!?
+ lisitsyn	besser82: if I knew I said but that's how I see it ;)
+ lisitsyn	brain and all these mental things are kinda complex you know ;)
+ besser82	lisitsyn, yes
+ besser82	lisitsyn, god, why did you not make brain && mental stuff like boolean????
+ besser82	:-P
+ lisitsyn	I am quite biased to the thought that any human is like tabula rasa once born
+ besser82	lisitsyn, nope
+ lisitsyn	well not physically
+ lisitsyn	and not for the things that are related to genes
+ besser82	lisitsyn, even not for psychologic stuff
+ lisitsyn	no I can't accept that ;)
+ besser82	lisitsyn, baby catches more in mama's belly than we believe
+ lisitsyn	well we all know baby can't speak and understand
+ lisitsyn	speak and understand words not emotions
+ besser82	lisitsyn, and emotions can be enough
+ lisitsyn	so I am not sure it matter what is spoken around
+ besser82	lisitsyn, not the word, but tone  ;)
+ lisitsyn	yes I can agree human like any other animal can catch the emotion beneath
+ besser82	lisitsyn, jupp
+ lisitsyn	besser82: what's the jupp about? ;)
+ besser82	lisitsyn, s=eval(jupp) ; print $s ---> Yes
+ lisitsyn	ahh
+ besser82	just the german way to ack / yes  ;)
+ lisitsyn	besser82: one more thing you could not agree with me is that thing about humans being animals ;)
+ lisitsyn	I suspect you won't accept that
+ besser82	lisitsyn, as long as we did not find the missing link...
+ besser82	lisitsyn, I can whether denie nor agree
+ besser82	lisitsyn, but everything pretty leads to the asumption the common evolution theory is correct  ;)
+ besser82	lisitsyn, so yes, in fact we are animals
+ besser82	lisitsyn, that's one thing i totally agree with
+ besser82	lisitsyn, we have enough basic-instincts in us to prove that
+ besser82	lisitsyn, you know why one cannot stop eating crisps once started?
+ lisitsyn	besser82: haha
+ besser82	lisitsyn, it has to do with our basic-instrincts
+ lisitsyn	be back soon
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Quit: Leaving.]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+ lisitsyn	besser82: having troubles with my notebook ac adapter haha
+ besser82	lisitsyn, the sound of biting down on some crisps triggers sth in the Medulla oblongata
+ besser82	lisitsyn, hehe
+ lisitsyn	basically it is mechanically broken
+ besser82	lisitsyn, get a new one  ;)
+ lisitsyn	besser82: yeah that's what I am thinking of
+ lisitsyn	new notebook or new ac adapter :D
+ besser82	lisitsyn, wanna buy a real mobile workstation?
+ lisitsyn	besser82: oh no I am fan of small devices :D
+ besser82	lisitsyn, kk
+ lisitsyn	you can suggest me i19 48-core CPU
+ lisitsyn	;)
+ besser82	lisitsyn, :-P
+ lisitsyn	besser82: http://images.amazon.com/images/G/01/electronics/samsung/samsung-12q2bts-series5-13-main-lg.jpg
+ lisitsyn	my current one
+ lisitsyn	piece of crap
+ besser82	lisitsyn, no but i could offer i7-2680QM 4-core / HT
+ besser82	lisitsyn, those are the shitty ones from samsung
+ besser82	lisitsyn, my old "Q45" is still alive  ;)
+ lisitsyn	besser82: it is made mostly of plastic and my way of using it makes it broken day by day
+ lisitsyn	and it has already dead battery
+ lisitsyn	1.5yr old
+ besser82	lisitsyn, the q45 was made of magnesium  ;)
+ besser82	lisitsyn, 7 yo
+ lisitsyn	besser82: that's why I like macbook air
+ besser82	lisitsyn, don't buy things with bitten fruit on it  ;)
+ besser82	http://business.chip.de/bii/149460082_270cd35a4e.jpg  <-- Q45
+ lisitsyn	besser82: you've got to convince sonney2k macs are bad too ;)
+ besser82	lisitsyn, on it
+ besser82	sonney2k, ^^^  Stuff with bitten fruit on it is bad, you know  ;)
+ besser82	lisitsyn, ^^^  :-P
+ besser82	lisitsyn, those are good  ;)  --->  http://shop.lenovo.com/de/de/laptops/thinkpad/x-series/x240/
+ lisitsyn	besser82: yeah
+ besser82	lisitsyn, but quite expensive for so less power
+ lisitsyn	besser82: I do not need any power ;)
+ besser82	lisitsyn, I can sell you my q45 for ~200EUR
+ lisitsyn	it would be enough to have ssd and not that bad cpu to handle
+ lisitsyn	hahaha
+ lisitsyn	why would I buy it
+ lisitsyn	;)
+ besser82	lisitsyn, has ssd and Core2Duo 2,5 GHz
+ besser82	lisitsyn, 4GB RAM
+ besser82	lisitsyn, 12"
+ besser82	lisitsyn, DVD-RW
+ lisitsyn	besser82: 8 gb, ssd and 1.7 i5 here
+ lisitsyn	;)
+ lisitsyn	sounds like downgrade
+ besser82	lisitsyn, but it doesn't break  ;)
+ besser82	lisitsyn, like the one you currently have
+ lisitsyn	besser82: well it had a few flights
+ besser82	lisitsyn, mine too
+ besser82	lisitsyn, nothing broken
+ lisitsyn	like hard landing to floor :D
+ besser82	lisitsyn, mine too
+ besser82	lisitsyn, nothing broken
+ lisitsyn	heh yeah metal shouldn't suffer that much
+ besser82	lisitsyn, only screen needed replacement once
+ lisitsyn	yeah I replaced samsung screen once too
+ lisitsyn	not on this machine though
+ lisitsyn	russian winter (tm)
+ lisitsyn	I got back to home and turn it on
+ lisitsyn	I guess it was quite cold yet and a few seconds after it cracked :D
+ besser82	lisitsyn, hehe
+ besser82	lisitsyn, was an lcd, right?
+ lisitsyn	yes
+ besser82	lisitsyn, those are known to crack when getting too cold and powered
+ besser82	lisitsyn, the other offer i can make is i7-2680QM 32GB-RAM, SSD, 2 HDD, BlueRay-burner, nvidia 580GTX
+ besser82	lisitsyn, 1,4 Gbit/s WLAN
+ lisitsyn	haha whaat a monstah
+ besser82	lisitsyn, 17"  ~6kgs
+ lisitsyn	hahahah
+ besser82	lisitsyn, real workstation  ;)
+ lisitsyn	well you don't have to go to gym
+ lisitsyn	if you have such a thing
+ besser82	lisitsyn, no, but how do know i don't care about my overweight?!?
+ besser82	:-P
+ lisitsyn	besser82: me too though I prefer to not carry such things ;)
+ besser82	lisitsyn, let's say so:  That Workstation suits me "size"
+ lisitsyn	haha I get what you mean
+ besser82	lisitsyn, 140 kgs pure erotic  :-P
+ lisitsyn	haha yeah then I totally get what I mean
+ lisitsyn	a bit less than 100 here :D
+ besser82	lisitsyn, you must "train" harder then to get closer to the 140  :-P
+ lisitsyn	besser82: with my kind of genetic properties it should be easy enough :D
+ lisitsyn	besser82: I guess you haven't trained hard to achieve that too ;)
+ besser82	lisitsyn, not really
+ lisitsyn	it is a gift haha
+ lisitsyn	of nature
+ besser82	lisitsyn, yes  :D
+ besser82	lisitsyn, but some girls don't understand that :(
+ lisitsyn	hehe yeah
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Saurabh7 :develop * db77e9f / / (3 files): https://github.com/shogun-toolbox/shogun/commit/db77e9f7de9d7323c882d16406ca53dc7d40a088
+ shogun-notifier-	shogun: add LOOxval
+ shogun-notifier-	shogun: Saurabh7 :develop * 1010cba / src/shogun/evaluation/ (2 files): https://github.com/shogun-toolbox/shogun/commit/1010cbabf8325379b035d3ebfc100008f8faf240
+ shogun-notifier-	shogun: add stdxval inheritance to loo
+ shogun-notifier-	shogun: Saurabh7 :develop * abd777f / examples/undocumented/libshogun/splitting_LOO_crossvalidation.cpp: https://github.com/shogun-toolbox/shogun/commit/abd777fe72889a606f6d624921a160e1681179af
+ shogun-notifier-	shogun: update looxval example
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 79a2b45 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/79a2b4574082d096a3e5628ac1378daf0c452629
+ shogun-notifier-	shogun: Merge pull request #1799 from Saurabh7/loocrossval
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: add LOOxval
+ besser82	lisitsyn, ^^^  merge alert!!!!
+ lisitsyn	besser82: alarm
+ besser82	lisitsyn, AUSWEIS BITTE!
+ lisitsyn	besser82: I remember there was a game with germans yell
+ lisitsyn	ALARM
+ lisitsyn	I think it is commandos
+ besser82	lisitsyn, yes some 15 years back or so  ;)
+ lisitsyn	cool game
+ lisitsyn	I should not take a look at it to not ruin my memories
+ besser82	lisitsyn, yes
+ besser82	lisitsyn, you know Wolfenstein 3D?
+ lisitsyn	yeah sure
+ besser82	lisitsyn, the Germans there are yelling stuff too
+ besser82	lisitsyn, MEIN LEBEN!
+ lisitsyn	and in 'return to castle wolfenstein' too ;)
+ besser82	lisitsyn, :D
+ besser82	lisitsyn, both games are forbidden in Germany
+ lisitsyn	really?
+ lisitsyn	hahaha
+ lisitsyn	lol
+ besser82	lisitsyn, but everbody has a copy  :-P
+ lisitsyn	why?
+ besser82	lisitsyn, because of some graphical 3rd Reich symbols
+ besser82	lisitsyn, like those svatiskas and pictures of Hitler
+ lisitsyn	but they look cool ;)
+ lisitsyn	it has its own aesthetics
+ besser82	lisitsyn, in Indiana Jones the last Crusade there was a special version for germany too
+ besser82	lisitsyn, somehow yes, but those symbols are forbidden in germany
+ lisitsyn	I mean it wasn't a cool thing but I don't think restricting every mention of anything
+ lisitsyn	is a good thing to do
+ besser82	lisitsyn, showing stuff is ~5y prison
+ lisitsyn	like these holocaust denial laws - people should be free to be idiots and believe to anything they want
+ besser82	lisitsyn, not in germany
+ lisitsyn	besser82: why?
+ lisitsyn	besser82: I know it is that but I mean it would be better to not restrict anything ;)
+ besser82	lisitsyn, those laws were made by the allied
+ besser82	lisitsyn, and are still valid
+ besser82	lisitsyn, like some other crappy law too
+ lisitsyn	besser82: nazi symbols are forbidden here too by the way
+ besser82	lisitsyn, laws surving stalin, I guess?
+ lisitsyn	besser82: hmm I don't know when was it introduced
+ lisitsyn	besser82: actually stalin's laws were beautiful piece of humanity
+ lisitsyn	but not the real life :D
+ besser82	lisitsyn, hehe
+ besser82	lisitsyn, some minor contradiction
+ besser82	lisitsyn, like in all totalitary systems ;)
+ lisitsyn	besser82: stalin is a hero for like a half of people here ;)
+ besser82	lisitsyn, shouldn't that be lenin?
+ lisitsyn	besser82: no lenin is like forgotten
+ besser82	lisitsyn, or Gorbatschow
+ besser82	lisitsyn, like for people in Ex-GDR
+ lisitsyn	gorbi is hated
+ lisitsyn	besser82: most of the people just hate gorbachev
+ besser82	lisitsyn, what did he do?
+ lisitsyn	in their minds he destroyed the great country
+ lisitsyn	;)
+ lisitsyn	besser82: in fact it was on the way to be destroyed anyway
+ besser82	lisitsyn, yes
+ besser82	lisitsyn, CCCP was on it's last breathes those days
+ lisitsyn	besser82: same thing for yeltsin
+ lisitsyn	which is totally hated too
+ besser82	lisitsyn, Boris I can understand  ;)
+ lisitsyn	well at least he was a funny guy
+ besser82	lisitsyn, funny yes, but ...
+ lisitsyn	most of the time being drunk
+ lisitsyn	:D
+ besser82	lisitsyn, There is some discount vodka named after him in Germany  ;)
+ besser82	lisitsyn, Jeltzin - pure russian vodka  :D
+ lisitsyn	besser82: he wasn't the most clever guy but he let quite okish people to rule
+ lisitsyn	so 90s were not that terrible
+ besser82	lisitsyn, and then came Putin  :-P
+ lisitsyn	besser82: yes and he made a few good things and then become a monster
+ besser82	lisitsyn, yes
+ lisitsyn	basically starting from 2004-2006 he has been doing crazy things
+ besser82	lisitsyn, then went to make some serious $$$$$$$$$$$$$$$  and left over to Medwedwew
+ lisitsyn	besser82: extra oil prices made people quite rich in 2001-2004
+ lisitsyn	most of the people bought cars these days etc
+ lisitsyn	it was really good years economics-wise
+ besser82	lisitsyn, but now most people are poor again  :(
+ lisitsyn	besser82: there are crazy amounts of money still
+ lisitsyn	actually just go get it
+ besser82	lisitsyn, lets-a-go !!!!!
+ lisitsyn	:D
+ besser82	lisitsyn, tell me where to grab  :-P
+ lisitsyn	besser82: no really, goverment still has a lot of money
+ besser82	lisitsyn, and some very few others
+ lisitsyn	besser82: we do a project for russian railways
+ besser82	lisitsyn, which one?
+ lisitsyn	well some scheduling
+ lisitsyn	and we get quite $$$
+ lisitsyn	for nothing serious
+ besser82	lisitsyn, then go out and grab some more  ;)
+ lisitsyn	they have millions of $ flying around
+ lisitsyn	besser82: they just care to grab some % of that and redirect the work
+ lisitsyn	and still in the end (2-3 step of redirection)
+ lisitsyn	it is quite good money
+ lisitsyn	if I wasn't on salary I'd get rich with such things :D
+ besser82	lisitsyn, then put your foot in the door and save me a place in that chain  ;)
+ besser82	lisitsyn, and then we redirect the work to some indians
+ lisitsyn	besser82: that's quite easy - you just talk to right people
+ lisitsyn	:D
+ besser82	lisitsyn, like 75% us / 25% them  :D
+ lisitsyn	besser82: I can say they are mostly located in moscow :D
+ besser82	lisitsyn, then start talking  ;)
+ lisitsyn	no other places to make deals in russia
+ besser82	lisitsyn, don't you live in Moscow
+ lisitsyn	besser82: no, samara
+ besser82	lisitsyn, is it a great distance?
+ lisitsyn	besser82: 1K km
+ lisitsyn	1.15 by plane ;)
+ besser82	lisitsyn, ok
+ besser82	lisitsyn, so need to go
+ besser82	lisitsyn, so I need to go there  ;)
+ lisitsyn	besser82: really all the money is in moscwo
+ lisitsyn	quite easy thing :D
+ besser82	lisitsyn, but i don't speak tha ???????  :(
+ lisitsyn	I suspect you have less centric distribution of money flow
+ besser82	lisitsyn, actually yes
+ besser82	lisitsyn, in Germany it is more shattered
+ lisitsyn	as far as I know munich is kind of more rich city than berlin
+ besser82	lisitsyn, yes
+ besser82	lisitsyn, and more expensive by far
+ lisitsyn	that's impossible for russia - everything is in moscow
+ lisitsyn	:D
+ besser82	lisitsyn, 2-room, ghetto-style flat starts @ 1K5EUR without heating
+ lisitsyn	that's crazy
+ besser82	lisitsyn, there are more people than flats  ;)
+ lisitsyn	besser82: however quite similar to moscow prices
+ besser82	lisitsyn, let's go moscow and grab some $$$, then
+ lisitsyn	besser82: I pay ~625$ here
+ besser82	lisitsyn, for what?
+ lisitsyn	1 room, ~70 m2
+ besser82	lisitsyn, that's normal price like in Germany
+ lisitsyn	besser82: quite above average here
+ lisitsyn	besser82: though I decided to take it due to larger volume and 18th floor ;)
+ besser82	lisitsyn, 18th floor !?!?
+ lisitsyn	besser82: yeah
+ besser82	lisitsyn, who wants to live there?
+ lisitsyn	besser82: I ;)
+ lisitsyn	besser82: why not?
+ besser82	lisitsyn, It's da much too high
+ lisitsyn	besser82: http://instagram.com/p/cedWoGTfWN/
+ lisitsyn	that's what I see from da window when it is summer
+ besser82	lisitsyn, looks like somewhere in an industrial complex....
+ lisitsyn	besser82: no typical russian city
+ lisitsyn	besser82: the closest building is university :D
+ besser82	lisitsyn, other countries, other circumstances  ;)
+ lisitsyn	besser82: I'd say it is kind of new centre of the city actually
+ besser82	lisitsyn, you can imagine me house like some in a typical uptown-suburb
+ lisitsyn	besser82: I like that kind of houses
+ besser82	lisitsyn, wanna come to germany?
+ besser82	lisitsyn, have some flat in spare  ;)
+ lisitsyn	besser82: not decided where I want to come :)
+ lisitsyn	besser82: I am 'almost married' ;)
+ besser82	lisitsyn,  good for getting visa  :-P
+ besser82	lisitsyn,  esp. USA
+ besser82	lisitsyn,  :D
+ lisitsyn	they didn't give it to me though
+ besser82	lisitsyn,  then go get married and you'll get  ;)
+ lisitsyn	yes but a bit later :D
+ besser82	lisitsyn,  for germany you just need grandpa with german shepheard  :-P
+ lisitsyn	besser82: I am neither jew nor related to germany in any means ;)
+ lisitsyn	so no options but typisch process :)
+ besser82	lisitsyn,  yes, like I said
+ besser82	lisitsyn,  you need to tell you granpa had a german shepheard  ;)
+ besser82	lisitsyn,  BITTE SEHR, IHRE PAPIERE  :D
+ lisitsyn	besser82: I am not sure I understand what is shepheard ;)
+ besser82	lisitsyn, it's a dog  ;)
+ lisitsyn	besser82: ah then I get it right
+-!- travis-ci [~travis-ci@ec2-54-235-33-212.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/16080333
+-!- travis-ci [~travis-ci@ec2-54-235-33-212.compute-1.amazonaws.com] has left #shogun []
+ besser82	lisitsyn, ^^^  Heiko hat's kaputt gemacht  ;)
+ besser82	lisitsyn, let's get back to some more serious stuff, like "How we can make SHOGUN rule the world"  ;)
+ lisitsyn	besser82: shogun kaputt gemacht
+ besser82	lisitsyn, yes  ;)
+ besser82	lisitsyn, how do we want to start making shogun better?
+ besser82	lisitsyn, liking doing plugins and all?
+ lisitsyn	besser82: 1) I get some rest 2) I start doing some shit
+ lisitsyn	:D
+ lisitsyn	besser82: we should start experimenting with plugins
+ lisitsyn	cause I have barely any idea how to develop that so far
+ besser82	lisitsyn, did you read the link in my email?
+ lisitsyn	not yet
+ lisitsyn	good you remind
+ besser82	lisitsyn, there is some idea about how to get some very basic plugin"server"
+ besser82	lisitsyn, like loading and registering symbols
+ besser82	lisitsyn, some ground to start from
+ besser82	lisitsyn, wiking had some idea about using shared_ptr for CSGObjects
+ besser82	lisitsyn, and derived
+@sonney2k	besser82, lisitsyn are you guys enjoying the trip?
+ besser82	sonney2k, which trip?
+ lisitsyn	sonney2k: what trip?
+@sonney2k	seems like it is not cold enough to kill the fancy mushrooms
+ lisitsyn	besser82: is he trying to offence us? :D
+ besser82	lisitsyn, looks like
+@sonney2k	you have all the dictator power of stalin and hitler combined
+@sonney2k	I am more than afraid!
+ lisitsyn	I don't get this language :D
+ lisitsyn	I feel unsafe
+ besser82	sonney2k, we don't want to harm anybody  ;)
+@sonney2k	lisitsyn, what is wrong with java modular javac: file not found: /home/travis/build/shogun-toolbox/shogun/build/src/interfaces/java_modular/*.java ?!
+ lisitsyn	besser82: I see auto_ptr here
+@sonney2k	lisitsyn, did someone remove java stuff?
+ lisitsyn	auto_ptr is a NO-GO
+ lisitsyn	:D
+ lisitsyn	sonney2k: it wasn't me
+ lisitsyn	;)
+ besser82	lisitsyn, that is just an example
+ besser82	lisitsyn, we need to mod that ;)
+ lisitsyn	besser82: okay well I get it
+ lisitsyn	besser82: this technique is known for me
+ besser82	lisitsyn, auto_ptr is one posibility amoung much and some few better ones ;)
+ lisitsyn	shared_ptr for the win!
+ besser82	lisitsyn, +1  ;)
+ lisitsyn	besser82: auto_ptr is dangerous with its strange copy behaviour
+ lisitsyn	besser82: the main problem I see is
+ besser82	lisitsyn, which
+ lisitsyn	how to resolve some plugin in python
+ lisitsyn	i.e. I wrote a plugin
+ lisitsyn	how can I resolve it w/o the need to recompile shogun with its support
+ lisitsyn	shogun.mypluginclassifier
+ lisitsyn	this won't work
+ besser82	lisitsyn, like building a c++-base pluging which provides the interpreter
+ lisitsyn	I mean basic shogun doesn't export plugin names
+ besser82	lisitsyn, we don't need
+ lisitsyn	well but you need to get that shogun.myclassifier
+ lisitsyn	how do you do that?
+ besser82	lisitsyn, we need some cheap metadata around with the plugins
+ lisitsyn	yes it is clear
+ lisitsyn	but still
+ besser82	lisitsyn, datatypes and object shall get unified
+ lisitsyn	for our user
+ lisitsyn	how does he call new plugin?
+ lisitsyn	shogun.load('mystuff')?
+ lisitsyn	or what?
+ besser82	lisitsyn, sth. like that
+ besser82	lisitsyn, and that plugin should have some init() to provide ptr to all stuff inside
+ lisitsyn	well factory
+ lisitsyn	it should provide a factory
+ besser82	lisitsyn, the plugin?
+ lisitsyn	yeah so you can create new classifier
+ besser82	lisitsyn, classifier like?
+ lisitsyn	besser82: well you loaded a module
+ besser82	lisitsyn, yes
+ lisitsyn	and then use its factory to create new instance
+ lisitsyn	of classifier it supports
+ lisitsyn	or whatever it does
+ besser82	lisitsyn, that should be handled by some kind of plugin server....
+ lisitsyn	why?
+ lisitsyn	you should be able to create multiple instances of that
+ besser82	lisitsyn, yes
+ lisitsyn	so it should be explicit
+ besser82	lisitsyn, but handled through plugin-server
+ lisitsyn	'I need liblinear SVM instance'
+ lisitsyn	besser82: the worst thing here is that we need to use a lot of strings
+ lisitsyn	to name modules, to resolve them during runtime
+ besser82	lisitsyn, pluginserver.request('instance of type')
+ besser82	lisitsyn, which then returns ptr to that new instace
+ lisitsyn	I think it is shogun.create('LibLinearSVM') or whatever
+ lisitsyn	or even
+ lisitsyn	shogun.createClassifier(..)
+ lisitsyn	cause you need it explicit in python
+ besser82	lisitsyn, how ever we name the child ;)
+ lisitsyn	otherwise people won't able to cast it back to classifier
+ besser82	lisitsyn, unfied object /data- types ???
+ lisitsyn	besser82: how unified?
+ lisitsyn	is it up to sgobject or whatever it is called?
+ besser82	lisitsyn, like having only one type of each thing
+ besser82	lisitsyn, Things deriving from CSGObj should be unified eg
+ lisitsyn	ehmmm so kernel and classifier have the same set of methods?
+ besser82	lisitsyn, posibly
+ besser82	lisitsyn, lemme check code
+ lisitsyn	besser82: it could be a problem
+ besser82	lisitsyn, why?
+ lisitsyn	well what is apply for kernel?
+ lisitsyn	or what is train for distance
+ besser82	lisitsyn, empty stub, that does nothing?
+ lisitsyn	besser82: sounds bad
+ lisitsyn	I mean too many methods that do nothing but exist there for a reason
+ besser82	lisitsyn, how to resolve otherwise?
+ besser82	sonney2k, are you still around?!?
+ lisitsyn	besser82: create_classifier, create_processor etc
+ besser82	lisitsyn, andd how to annouce / declare the availability?
+ lisitsyn	la excepcione !
+ lisitsyn	throw new FuckYouException
+ lisitsyn	:D
+ shogun-buildbot	build #150 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/150  blamelist: Saurabh7 <saurabh.mahindre@gmail.com>
+* besser82 throws an instace of FuckYouException: (What?) MyAss!!!
+ besser82	lisitsyn, ?????
+ lisitsyn	besser82: okay availability of what?
+@sonney2k	besser82, yes
+ besser82	sonney2k, what's wrong with java?
+@sonney2k	besser82, travis is unhappy
+@sonney2k	I am waiting for the buildbot to see if this is just a heisenbug
+ besser82	lisitsyn, about which methods / functions are inside the new avail class
+@sonney2k	besser82, actually all good on the buildbot
+ besser82	sonney2k, looks like a glitch to me
+ besser82	lisitsyn, without needing predecl or headers?
+ lisitsyn	besser82: if we speak about plugins we have no headers
+@sonney2k	lisitsyn, I only see the problem with registering sth new to non-interpreted interfaces (java, csharp, ...)
+ lisitsyn	sonney2k: yes but that's terribly major proble
+@sonney2k	lisitsyn, why? everything has to be available *at compile time*
+@sonney2k	that is normal with such $langs
+ lisitsyn	sonney2k: how can plugin be available at compile time?
+ besser82	lisitsyn, they don't need but some decl needs to be
+ lisitsyn	then we have to put every and each plugin to shogun itself
+ lisitsyn	I mean at least their exported names
+ besser82	lisitsyn, or we just use unified stuff ;)
+ lisitsyn	unified interface is the way
+ lisitsyn	but it is not unified like one possible class
+ lisitsyn	rather a few possible classes
+ besser82	lisitsyn, as i said
+ besser82	lisitsyn, a handfull of generic stuff and all is fine ;)
+ besser82	sonney2k, did you read those full backlog?
+ besser82	sonney2k, like the beginning of my chat with lisitsyn ?
+ besser82	sonney2k, what's your oppionion about that?!?
+@sonney2k	besser82, yeah but no idea what you have in your minds
+ besser82	sonney2k, mein kopf ist so klar, wie der korn darin  :-P
+ besser82	sonney2k, features, features, features
+ lisitsyn	haha we have to write specification
+ lisitsyn	we all know what do we want to get
+ besser82	sonney2k, like pluginize everything and make stuff possible like with e.g. rubygems
+ besser82	sonney2k, shogun-samurai install fancy-extension-for-shogun  ;)
+ besser82	lisitsyn, spec like?
+ lisitsyn	besser82: describe anything
+ lisitsyn	before coding
+ besser82	lisitsyn, ahh kk  like ISO  :D
+@sonney2k	besser82, bakufu is the name
+ besser82	sonney2k, that was the name i wanted to reserve for the "core" stuff  ;)
+ lisitsyn	besser82: yes first ISO certified machine learning toolbox :D
+ lisitsyn	can we speak docs
+ lisitsyn	?
+ lisitsyn	besser82: sonney2k: are you ok with describing it in gdoc?
+ besser82	sonney2k, like having shogun the interface, bakufu the "core" plugins maintained by us and samurai for community / gem stuff  ;)
+@sonney2k	lisitsyn, or github wiki!
+ besser82	sonney2k, +1  ;)
+ shogun-buildbot	build #148 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/148  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+ lisitsyn	sonney2k: besser82: it is less realtime but ok
+ lisitsyn	https://github.com/shogun-toolbox/shogun/wiki/Shogun-splitting
+ lisitsyn	how does it handle multiple changes?
+ lisitsyn	are they overwritten?
+@sonney2k	lisitsyn, realtime is etherpad
+@sonney2k	e.g. http://beta.etherpad.org/
+ lisitsyn	sonney2k: google docs is as well?
+ lisitsyn	I trust google docs more :D
+ lisitsyn	especially due
+ lisitsyn	to ' Pad contents are destroyed periodically'
+ besser82	lisitsyn, sonney2k which one now? gh-wiki, gdocs or ethercrap?
+ lisitsyn	no idea :)
+@sonney2k	I am for gh-wiki
+@sonney2k	it is public -> better
+ lisitsyn	okay
+ besser82	lisitsyn, sonney2k me is fine with either
+ shogun-buildbot	build #165 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/165  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Saurabh7 <saurabh.mahindre@gmail.com>
+ shogun-buildbot	build #151 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/151  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- HeikoS [~heiko@90.211.150.15] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+--- Log closed Sun Dec 29 00:00:27 2013

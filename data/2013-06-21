@@ -1,0 +1,268 @@
+--- Log opened Fri Jun 21 00:00:54 2013
+-!- lisitsyn [~lisitsyn@83.234.54.94] has quit [Quit: Leaving.]
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 255 seconds]
+-!- FSCV [~FSCV@187.210.54.166] has quit [Quit: Leaving]
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Remote host closed the connection]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 240 seconds]
+ shogun-buildbot	build #434 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/434
+-!- hushell [~hushell@c-24-21-141-32.hsd1.or.comcast.net] has joined #shogun
+-!- sanyam [uid10602@gateway/web/irccloud.com/x-dagcmudckvzdcxma] has joined #shogun
+-!- FSCV [~FSCV@189.139.252.135] has joined #shogun
+-!- FSCV [~FSCV@189.139.252.135] has quit [Client Quit]
+-!- thoralf [~thoralf@enki.zib.de] has joined #shogun
+ thoralf	Hey.
+-!- lambday [67157d4c@gateway/web/freenode/ip.103.21.125.76] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: ERC Version 5.3 (IRC client for Emacs)]
+-!- stepan_ [4d4b4af8@gateway/web/freenode/ip.77.75.74.248] has joined #shogun
+-!- stepan_ [4d4b4af8@gateway/web/freenode/ip.77.75.74.248] has quit [Client Quit]
+-!- vgorbati [c3ee5cb1@gateway/web/freenode/ip.195.238.92.177] has joined #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- gsomix [~gsomix@109.169.232.211] has quit [Ping timeout: 240 seconds]
+ lambday	lisitsyn: hey
+ lambday	lisitsyn: good morning
+ lisitsyn	lambday: hey
+ lambday	lisitsyn: one question - if a PR is not merged yet, can't I send another PR with a different commit? I want to create two separate PRs with those
+ lisitsyn	lambday: yes from different branches
+ lambday	ohkay
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Remote host closed the connection]
+-!- nube [~rho@49.244.76.165] has joined #shogun
+-!- hushell [~hushell@c-24-21-141-32.hsd1.or.comcast.net] has left #shogun ["WeeChat 0.3.7"]
+ vgorbati	lisitsyn: hi there, I am sorry for disappearing - I had a really tough preparation for my bachelor stuff (I did not expect myself that it would eat so much time). But now I am finally free) Did somebody already implement neural networks for shogun?)
+ lisitsyn	vgorbati: why sorry, just take your time, you are not on duty :)
+-!- stepan_ [4d4b4af8@gateway/web/freenode/ip.77.75.74.248] has joined #shogun
+ stepan_	Hi, I wrote simple test using shogun::CGMM, here http://pastebin.com/pzAG4XEp. Running this program with valgrind reports errors http://pastebin.com/mHZpJD93. There are some definitely lost bytes. Could you please advice me where the bug is?
+ lambday	stepan_: its probably because you are SG_UNREF-ing features
+ stepan_	lambday: ok, I will test it without SG_UNREF, and let you know
+ stepan_	lambday: run it withou SG_UNREF and still definitely lost bytes errors
+ lambday	stepan_: nono.. try this.. don't create features with "new", or, create both gm and features by new
+ stepan_	lambday: ok, I will try it...
+ lambday	then SG_REF gm, and then when you're done with it, do SG_UNREF(gm)
+ lambday	(I am not so sure though :( )
+ lambday	stepan_: you can try "gist" for pasting codes and results :)
+ stepan_	othanks for info, I tried first version without the "new" for features and the report is here https://gist.github.com/anonymous/5830272. No lost bytes but sigseg. So I will try the second advice...
+ stepan_	creating "new" gm, code and report here https://gist.github.com/anonymous/5830320. Still errors
+ lisitsyn	vgorbati: so what's up, are you done with your bachelors?
+ vgorbati	lisitsyn: well, at least I could warn you beforehand, but I really wasn't aware that I would be so busy)
+ vgorbati	lisitsyn: yes, I finally has my diploma:)
+ lambday	stepan_: checking..
+ stepan_	lambday: thanks
+ lisitsyn	vgorbati: ahh congrats then!
+ vgorbati	lisitsyn: speaking about neural networks: this is what I have in mind right now: http://www.codeuml.com/?635074069489821901 . I'll start with implementing FeedforwardNetwork and BackpropagationTrainer for it. What do you think?
+ vgorbati	lisitsyn: it is on the very abstract level, without any details
+ lisitsyn	vgorbati: I admit I don't know what is the best approach here as I never designed NNs
+ vgorbati	lisitsyn: well, I did take a look at some libraries as sonney suggested. Some of them do not use inheritance at all, some do:) Its actually quite a difficult problem, since NN's architecture are really different, and its hard to find something general in all types of NNs:)
+ lisitsyn	vgorbati: I think we should try to implement DBN
+ vgorbati	lisitsyn: dynamic bayesian networks?
+ vgorbati	lisitsyn: or deep belief networks?)
+ lisitsyn	vgorbati: yes, deep belief network
+ vgorbati	lisitsyn: that's quite an ambitious goal:) But anyway, DBF are layered networks, so starting with feedforward nets seems reasonable
+ lambday	stepan_: can you try adding SG_REF(features) as well? https://gist.github.com/anonymous/5830320#file-gistfile1-cpp-L50 ??
+ stepan_	lambday: yes I done it and still leaks...
+ lambday	stepan_: :( sorry man! can't figure it out :( lisitsyn could you please take a look?
+ stepan_	lambday: thats ok, thanks for help anyway
+ vgorbati	lisitsyn: then I will start with feedforward nets, if you do not mind. After that, we can try to slowly move towards DBNs. The main architectural question I have to you (and other main contributors), is about training: either I should use 'Trainer's classes, as in the diagram I provided, or just make a method 'train' in the network class (and add some paramater to it, called 'TrainingType' or something).
+ vgorbati	lisitsyn: I prefer the 'Trainer's class approach, but some popular NN's libraries use the second one as well..
+ lisitsyn	lambday: sorry I didn't following
+ lisitsyn	what's up?
+ lambday	lisitsyn:  so stepan_ has this code which leaks
+ lisitsyn	vgorbati: I don't mind any approach as I don't understand how to design them properly :)
+ stepan_	lisitsyn: Hi, I wrote simple test using shogun::CGMM, here http://pastebin.com/pzAG4XEp. Running this program with valgrind reports errors http://pastebin.com/mHZpJD93. There are some definitely lost bytes. Could you please advice me where the bug is?
+ stepan_	and after seome consulatation https://gist.github.com/anonymous/5830320#file-gistfile1-cpp-L50
+ lisitsyn	stepan_: the second leak is missed SG_UNREF(knn) I guess
+ lisitsyn	in GMM
+ lisitsyn	stepan_: the first leak is bug in CGaussian
+ lisitsyn	stepan_: so no bug in your code
+ stepan_	lisitsyn: aha so it's bug in library?
+ stepan_	strange, I was trying mlpack GMM as well, and also found some bugs in library...
+ stepan_	is GMM some obscure method?
+ stepan_	I don't understadn machine learning, just implementing GMM
+ lisitsyn	stepan_: obscure? what do you mean by that?
+ stepan_	lisitsyn: that it's not used often, some other approach is preferable so proper implementations are lacking
+ lisitsyn	stepan_: ahh no, I wouldn't say so
+ lisitsyn	stepan_: well it scales bad
+ lisitsyn	but is indeed better than simple k-means
+ stepan_	ok. Thanks all of you for helping me with shogun. It's pitty I can not use it for GMM
+-!- stepan_ [4d4b4af8@gateway/web/freenode/ip.77.75.74.248] has quit [Quit: Page closed]
+-!- gsomix [~Miranda@109.169.232.211] has joined #shogun
+ gsomix	hello
+-!- nube [~rho@49.244.76.165] has quit [Ping timeout: 246 seconds]
+-!- nube [~rho@49.244.120.226] has joined #shogun
+-!- FSCV [~FSCV@50.7.50.60] has joined #shogun
+-!- thoralf [~thoralf@enki.zib.de] has quit [Quit: Konversation terminated!]
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- FSCV_ [~FSCV@65.19.131.247] has joined #shogun
+-!- FSCV [~FSCV@50.7.50.60] has quit [Ping timeout: 252 seconds]
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+-!- FSCV_ [~FSCV@65.19.131.247] has quit [Quit: Leaving]
+-!- gsomix [~Miranda@109.169.232.211] has quit [Ping timeout: 260 seconds]
+-!- gsomix [~Miranda@109.169.185.242] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Read error: Connection reset by peer]
+-!- lisitsyn [~lisitsyn@185.6.239.26] has joined #shogun
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+ lambday	anyone got his welcome package? just curious :-/
+ pickle27	mine arrived!
+ van51	lambday: I got it this morning
+ lambday	pickle27: van51 awesome! mine didn't :(
+ lambday	votjakovr: yours?
+ van51	lambday: be patient :)
+ pickle27	I'm sure it will show up soon
+ lambday	van51: pickle27 yes :)
+ van51	I was looking forward to the t-shirt
+ van51	but they told me you get that at the end :(
+ lambday	van51: me too
+ lambday	van51: oh!
+ lisitsyn	heh yes t-shirt arrives later
+ pickle27	me too damn!
+ van51	pity
+ lambday	end means after end term?
+ pickle27	I was actually just at mountain view and hit up the google store
+ lambday	pickle27: you bought some stuffs there?
+ lambday	ah, moutain view :D
+ lambday	hey there is this movie coming, "internship".. trailer looks funny
+ pickle27	yeah I haven't seen it yet
+ pickle27	looks like it might be kinda funny
+ lambday	pickle27: its not released yet I guess.. the "wedding crashers" group again, huh :D
+ pickle27	lambday: yeah I bought a google shirt
+ lambday	pickle27: great, man!
+ lambday	(y)
+ pickle27	they had some pretty sweet stuff in the store
+ pickle27	you need to be with an employee to be allowed in
+ lambday	gotta be
+ lambday	how was your interview? I've read that you had one
+ pickle27	lambday: it was okay, I was interviewing for the montreal office and it wasn't as cool as mountain view :(
+ pickle27	I actually accepted one of my other offers yesterday
+ pickle27	so no Google for me ... yet
+ lambday	pickle27: nothing is :(
+ lisitsyn	pickle27: what is bad about montreal office?
+ lambday	pickle27: congratulations, man! :)
+ pickle27	lambday: thanks!
+ pickle27	lisitsyn: it was just smaller and most of the people were older and quieter
+ pickle27	mountainview had a lot more life
+ lambday	lol
+ lambday	quiter is bad, really really bad :D
+ lambday	quieter*
+ pickle27	lambday: where are you at with school?
+ lisitsyn	well I wish there was less life in some of my co-workers
+ pickle27	lisitsyn: haha!
+ lambday	pickle27: I'm from Indian Institute of Technology, Bombay, India
+ pickle27	lambday: very cool!
+ lambday	lisitsyn: get married :P
+ pickle27	lambday: I got to visit India earlier this yeah
+ pickle27	year*
+ lambday	pickle27: cool, man! where did you visit?
+ pickle27	I was in the north though, went to IIT Kanpur and BITS Pilani
+ lisitsyn	lambday: btw about marriage, is that true about that recent law in india?
+ lambday	lisitsyn: what law?
+ lisitsyn	like if you do the right things with a girl you are considered married
+ lambday	if you have sex, you'll be considered as married?
+ lisitsyn	:D
+ lisitsyn	yes-yes
+ lambday	lol
+ pickle27	then I went on a bit of a tourist tour and saw Jaipur, Delhi and Agra
+ lisitsyn	that's crazy funny
+ lambday	lisitsyn: no frickin' idea! these guys are freaks!
+ lambday	pickle27: awesome!!! delhi is like my 2nd home :D
+ pickle27	neat
+ lisitsyn	lambday: our guys recently wanted to restrict oral sex
+ lisitsyn	:D
+ lambday	lisitsyn: fuck!! no :(
+ pickle27	lambday: so are you still in undergraduate or a masters?
+ lambday	pickle27: masters... will be graduating next year
+ pickle27	nice!
+ lambday	pickle27: you too final year, right?
+ pickle27	I'm just finishing my masters
+ pickle27	yeah!
+ lambday	pickle27: great! I can't wait to get out of the campus!
+ lambday	will be sitting for job placement this year, in Dec.. wish me luck :)
+ pickle27	lambday: yeah its getting that way for me too
+ pickle27	will do!
+ lisitsyn	I am quite tired of dormitories too :D
+ lambday	lisitsyn: hehehe :D you should really consider about the marriage stuff then :P
+ lisitsyn	lambday: why that?
+ lambday	don't have to stay in dormitories :D
+ lisitsyn	well we are together with my gf for a few years like 5 already but still why :D
+ lisitsyn	I don't have to stay here
+ lisitsyn	I just save some money
+ lambday	lisitsyn: hahaha! that's superb :D
+ lisitsyn	because it is of much more cost to rent a flat
+ lisitsyn	like 500$/month
+ lambday	oh crap!
+ lisitsyn	here I pay like
+ lisitsyn	40-50$ may be
+ lisitsyn	I don't remember
+ lisitsyn	:D
+ lambday	hahaha :D great
+ lambday	I have to pay $500 per semester for food+hostel+insti fees.. :(
+ lisitsyn	I don't know about rates is that a lot for you?
+ lisitsyn	I mean gsoc stipend for pickle27 costs much less than for you I guess :)
+ lisitsyn	wrong word, not costs - offers
+ pickle27	yeah I mean the stipend is quite a lot here but I imagine it would go further in other parts of the world
+ lambday	well, I earn $300 a month, so.. yea that's a lot :(
+ pickle27	did you mean for a smile at the end there?
+ lambday	pickle27: I meant the fees :D about gsoc, yayyy :D
+ pickle27	ah gotcha
+ lisitsyn	one reason I decided not to participate in this year's gsoc as student is that I earn more at job now
+ lambday	lisitsyn: hehe good for us :D
+ pickle27	could you have participated? I thought you were done with school
+ lisitsyn	pickle27: you are older ;)
+ lambday	lisitsyn: how old are you? :-o
+ pickle27	lisitsyn: really? neat
+ lisitsyn	lambday: 22
+ lambday	lisitsyn: LOL =)
+ lambday	you old man!
+ lambday	:P
+ lisitsyn	lambday: you are of the same year or?
+ pickle27	omg did you guys try the new github ui?
+ lisitsyn	pickle27: I don't get that, they changed everything again :D
+ lambday	pickle27: I tried and not a day passes that I don't regret it
+ pickle27	I just clicked to try I hope I dont regret
+ lambday	lisitsyn: I'm 26, sadly
+ lisitsyn	lambday: ahh :D
+ pickle27	age is but a state of mind
+ lambday	true that ;)
+ lisitsyn	heh didn't know
+ lisitsyn	pickle27: is that you are now 27 and later 28? ;)
+ lambday	you couldn't possibly be 22 :-/ you said you're final years masters
+ lisitsyn	lambday: not final
+ lisitsyn	first year
+ lambday	prefinal
+ lisitsyn	I finished high school when I was 17 (like everybody does here)
+ lisitsyn	4 years of bachelors
+ lisitsyn	lambday: where is the error? ;)
+ lambday	lisitsyn: hmm... sounds legit
+ lambday	I finished when I was 18, took 2 years break from studies, bachelors 4 years, 2 years in masters :-/
+ pickle27	lisitsyn: no I am 24
+ lisitsyn	pickle27: right between me and lambday
+ pickle27	indeed
+ lambday	and Heiko?
+ lisitsyn	lambday: he is slightly older than you iirc
+ lambday	hmmmm..
+ pickle27	do either of you know R?
+ lisitsyn	pickle27: tried to learn it but you know
+ lambday	nope! :(
+ pickle27	dang
+ pickle27	there is this one line in jdiag that I don't understand and google is not being helpful :(
+ pickle27	ctot.prov <- ctot
+ pickle27	I don't know what .prov is doing
+ lisitsyn	pickle27: sounds very martian
+-!- gsomix_ [~Miranda@109.169.234.173] has joined #shogun
+-!- gsomix [~Miranda@109.169.185.242] has quit [Read error: Connection reset by peer]
+ pickle27	hmm
+ gsomix_	good evening, old people, hehe
+ pickle27	alright I'll be back in a bit I need a snack
+-!- gsomix_ is now known as gsomix
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 264 seconds]
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: ERC Version 5.3 (IRC client for Emacs)]
+-!- zxtx [~zv@76.91.177.87] has joined #shogun
+-!- zxtx [~zv@76.91.177.87] has quit [Ping timeout: 248 seconds]
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has quit [Quit: Leaving]
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has left #shogun ["PART #gsoc-gr :PING 1371849232"]
+-!- lambday [67157d4c@gateway/web/freenode/ip.103.21.125.76] has quit [Ping timeout: 250 seconds]
+--- Log closed Sat Jun 22 00:00:55 2013

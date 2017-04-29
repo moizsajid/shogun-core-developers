@@ -1,0 +1,97 @@
+--- Log opened Tue Oct 18 00:00:06 2011
+ blackburn	sonney2k: how can one use uint64_t?
+ shogun-buildbot	build #238 of octave_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/238
+-!- blackburn [~blackburn@188.168.4.221] has quit [Quit: Leaving.]
+-!- Netsplit *.net <-> *.split quits: sonne|work, shogun-buildbot
+-!- Netsplit over, joins: shogun-buildbot, sonne|work
+-!- blackburn [~blackburn@188.168.4.77] has joined #shogun
+ CIA-3	shogun: Soeren Sonnenburg  * rdb8a1a4 / src/configure : add int32_t and int64_t to default data types - http://git.io/pQRAfw
+ blackburn	sonney2k: I guess you forgot to disable unnecessary preprocessors
+@sonney2k	?
+ blackburn	sonney2k: they are templated
+@sonney2k	blackburn, please do then
+ blackburn	yeah
+ blackburn	sonney2k: what is the alphabet for uint64?
+@sonney2k	can be any
+ blackburn	sonney2k: oh sorry I know what serializable dummy is
+ blackburn	how can I forgot that
+ blackburn	it is macro adding load and save to datatypes
+ blackburn	to make it work in java
+@sonney2k	you mean the serialization hooks?
+@sonney2k	for classes that don't support it right?
+ blackburn	sonney2k: yes
+@sonney2k	k
+ blackburn	hehe I was too tired yesterday
+@sonney2k	blackburn, if you have a better idea on how to beautify this ifdef USE_FLOAT64 mess - feel free to improve things
+ blackburn	sonney2k: no idea
+@sonney2k	maybe a macro that produces the %template with the right name / type or so
+ blackburn	sonney2k: I don't think it is necessary
+ blackburn	we don't change it too much often
+@sonney2k	when drastically limiting data types we can get it to compile requiring <1.5GB
+@sonney2k	so at least sth
+ blackburn	sonney2k: have you measured?
+ shogun-buildbot	build #223 of java_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/java_modular/builds/223
+@sonney2k	sure
+@sonney2k	did you see my posts yesterday?
+@sonney2k	<sonney2k> blackburn, ok we are down to 375kLoC (from 531kLoC)
+@sonney2k	<sonney2k> when compiling with datatypes=char,uint8_t,uint16_t,uint64_t,float32_t,float64_t
+@sonney2k	<sonney2k> but examples use all types...
+@sonney2k	<sonney2k> so it is only a poor mans solution
+@sonney2k	<sonney2k> but yes better than nothing
+ blackburn	yes I've seen that
+ blackburn	but have you measured required memory?
+ blackburn	sonney2k: http://www.shogun-toolbox.org/buildbot/builders/java_modular/builds/223/steps/compile/logs/warnings%20%289%29
+@sonney2k	yes
+@sonney2k	no idea what that is
+ blackburn	sonney2k: I have narrowed CFeatures to CSimpleFeatures at EmbeddingConverter
+ blackburn	in return type of apply
+ blackburn	i.e. generally converter returns Features
+ blackburn	but EmbeddingConverter always returns CSimpleFeatures
+ blackburn	and java do not support it
+ blackburn	well no idea how to avoid it
+@sonney2k	blackburn, why not always return CFeatures?
+@sonney2k	and add special dynamic casts to return simple features?
+ blackburn	sonney2k: where to add dyn cast??
+@sonney2k	blackburn, you could add a function e.g. get_converted_simplefeatures() or so to your embeddingconverter
+@sonney2k	and that will just call apply() and convert the result of apply to simplefeatures
+ blackburn	embed()
+@sonney2k	other naming suggestions - get_applied_as_simplefeatures
+@sonney2k	or embed
+@sonney2k	yes
+ blackburn	sonney2k: you're such a big fan of long names ;)
+@sonney2k	I am a fan of names I can make sense of
+@sonney2k	embed doesn't tell me anything
+ shogun-buildbot	build #222 of python_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_modular/builds/222
+ blackburn	sonney2k: so what is the memory reqs for compilation now?
+@sonney2k	blackburn, depends on the number of types you enable
+@sonney2k	with the few types above it was around 1.5G for octave_modular
+@sonney2k	and around 1G for python_modular
+ blackburn	sonney2k: before?
+@sonney2k	~3.5 GB
+ blackburn	oh
+ blackburn	nice
+ CIA-3	shogun: Sergey Lisitsyn  * r115a78d / src/interfaces/modular/Preprocessor.i : Added checking for enabled types to preprocessor modular interfaces - http://git.io/cNYLQA
+ CIA-3	shogun: Sergey Lisitsyn  * rea9ad9a / (26 files in 4 dirs): Added embed method to EmbeddingConverter, adapt structure - http://git.io/X7UWTQ
+ blackburn	sonney2k: one more algo
+ CIA-3	shogun: Sergey Lisitsyn  * r99027e8 / (6 files in 3 dirs): Introduced NeighborhoodPreservingEmbedding (NPE) - http://git.io/9FAPpQ
+@sonney2k	...and counting
+ blackburn	sonney2k: I'm not sure it is very useful though
+-!- blackburn [~blackburn@188.168.4.77] has quit [Quit: Leaving.]
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has joined #shogun
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has quit [Ping timeout: 244 seconds]
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has joined #shogun
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has quit [Ping timeout: 256 seconds]
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has joined #shogun
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has quit [Ping timeout: 276 seconds]
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has joined #shogun
+-!- blackburn [~blackburn@188.168.2.167] has joined #shogun
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has quit [Ping timeout: 248 seconds]
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has joined #shogun
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has quit [Ping timeout: 256 seconds]
+-!- alesis-novik [~alesis@5ac57106.bb.sky.com] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: alesis-novik
+-!- Netsplit over, joins: alesis-novik
+-!- heiko [~heiko@host109-152-233-34.range109-152.btcentralplus.com] has joined #shogun
+ heiko	sonney2k, around?
+-!- heiko [~heiko@host109-152-233-34.range109-152.btcentralplus.com] has quit [Quit: Leaving.]
+--- Log closed Wed Oct 19 00:00:12 2011

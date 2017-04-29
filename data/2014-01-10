@@ -1,0 +1,275 @@
+--- Log opened Fri Jan 10 00:00:45 2014
+-!- besser82 [quassel@fedora/besser82] has quit [Remote host closed the connection]
+-!- besser82 [quassel@fedora/besser82] has joined #shogun
+ shogun-buildbot	build #676 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/676
+-!- new_lido [~walid@41.218.172.45] has joined #shogun
+-!- new_lido [~walid@41.218.172.45] has quit [Quit: Leaving]
+-!- sonne|osx [~sonne@82.113.121.185] has joined #shogun
+-!- sonne|osx [~sonne@82.113.121.185] has quit [Quit: sonne|osx]
+ besser82	sonne|work:  the problem isn't the pickle-protokoll
+ besser82	sonne|work:  it is the incompat of binary-structures
+ besser82	sonne|work:  like one can load pickles from Py2.X in Py3
+ besser82	sonne|work:  an restore their contents...
+ besser82	sonne|work:  but not that is not guranteed for c-compiled extension
+ besser82	sonne|work:  basic types aren't the prob (str, int, float, list,...)
+ besser82	sonne|work:  they will surely work
+ besser82	sonne|work:  but stuff like numpy-array isn't compat
+ besser82	sonne|work:  it can be restored with a trick, but the contents is garbled
+ besser82	sonne|work:  and instances of classes from a c-compiled ext. are likely to fail / segfault
+ besser82	sonney2k:  ^^^
+ besser82	sonne|work, sonney2k:  but that actually is in nature of those pickles
+ besser82	sonne|work, sonney2k:  but I just found a "nasty" hack that may or may not help; need to try that
+ besser82	sonne|work, sonney2k:  but I just found a "nasty" hack that may or may not help; need to try that
+ besser82	sonne|work, sonney2k:  we possibly might be able to restore the pickles by aletring them "manually" to reflect pickled str as bytes;  that might do the trick...
+ besser82	sonne|work:  I assume the problem of that segfault is caused by sth. like the incompat of Py3::str and std::string / cstr
+ besser82	sonne|work:  cstr == char*
+ besser82	sonne|work:  a Py3::str may have a memory footprint of mixed width dependending on the type of char in it
+ besser82	sonne|work:  so some char may have a width of 2 or 4 bytes, others just 1 byte
+ besser82	sonne|work:  when std::string / char* is tied to 1 byte a char
+ besser82	sonne|work:  so passing a Py3::str-type (created from Py2::Pickle) into c / c++ as is may cause that segfault
+ besser82	sonne|work:  so I need to check whether this happenes when passing Py3::bytes to std::str / char*
+ besser82	sonne|work:  Py3::bytes should be perfectly char*
+ besser82	sonne|work:  which may / should
+ besser82	sonne|work:  do the trick...
+ sonne|work	hmmhh
+ besser82	sonne|work: same assumption for numpy-array  ;)
+ sonne|work	besser82: yeah scary hack.
+ sonne|work	besser82: we need some other way in the future
+ besser82	sonne|work:  other way for what? serialization of shogun::object?
+ besser82	sonne|work:  pickling / data exports
+-!- Saurabh7 [~Saurabh7@117.222.9.123] has joined #shogun
+* besser82 throws an instace of PuzzledException: What() Which other way for what?
+-!- sonne|osx [~sonne@24-134-74-216-dynip.superkabel.de] has joined #shogun
+-!- sonne|osx [~sonne@24-134-74-216-dynip.superkabel.de] has quit [Ping timeout: 272 seconds]
+ sonne|work	besser82: I think currently we compare objects with some string comparison or so - maybe we can just load them and have for different object types different comparators
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has joined #shogun
+ thoralf	Hey.
+ besser82	sonne|work:  the assertions aren't the problem  ;)
+ besser82	sonne|work:  the problem is restoring the *pristine* contents of the pickles
+ besser82	thoralf:  Hey!
+ thoralf	Hey Bjesser
+ thoralf	:)
+ besser82	sonne|work:  since the _Unpickler passes incompat binary-data into the modshogun / numpy classes  :-P
+ besser82	thoralf:  :D
+ besser82	sonne|work:  so we should change the way how objects are serialized for storage  ;)
+ besser82	sonne|work:  like using json instead of pickles  ;)
+ besser82	sonne|work:  which is pretty indep from lang / os / arch
+ besser82	sonne|work:  only carries nice ascii which then gets eval() and pushed into the data-structs
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has quit [Ping timeout: 264 seconds]
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has joined #shogun
+-!- Saurabh7 [~Saurabh7@117.222.9.123] has quit [Quit: Leaving]
+ sonne|work	besser82: ahh because it is no longer a ascii but whatever string right?
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has quit [Ping timeout: 245 seconds]
+@wiking	besser82: there are miner issues with json...
+@wiking	besser82: see the serializationjson unit test
+@wiking	besser82: https://github.com/shogun-toolbox/shogun/issues/1464
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ besser82	sonne|work:  nope, not that encoding issue...  It's da Py3-internal string-footprint...
+ besser82	wiking:  thx 4 info
+ besser82	sonne|work:  as I've written abouve
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has joined #shogun
+-!- zxtx_ [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Ping timeout: 252 seconds]
+ sonne|work	besser82: could you give me a minimal pointer how to do a spec file?
+ sonne|work	besser82: I need to quickly create an rpm...
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has quit [Ping timeout: 246 seconds]
+-!- zxtx_ [~zv@129-79-241-148.dhcp-bl.indiana.edu] has joined #shogun
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has joined #shogun
+-!- ChenZu [3ad5332a@gateway/web/freenode/ip.58.213.51.42] has joined #shogun
+ ChenZu	Hi
+ ChenZu	Anybody can help me ? I'am crazy with shogun installation with matlab
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ ChenZu	I execute the command 'sudo make install' and there no sg.mex64 anything in the matlab directory
+-!- ChenZu [3ad5332a@gateway/web/freenode/ip.58.213.51.42] has quit [Quit: Page closed]
+ besser82	sonne|work:  still in need for rpm?
+ besser82	sonne|work:  rpmdev-newspec is creating some skel
+ sonne|work	besser82: yeah still in need
+ besser82	sonne|work:  %prep %build %install %check %clean and such are like bash-script
+ besser82	sonne|work:  need some template?
+ besser82	sonne|work:  what kind of sw?
+ sonne|work	on monday
+ besser82	sonne|work:  kk
+ sonne|work	work stuff
+ sonne|work	but yeah cool...
+ sonne|work	besser82: I basically have some directory
+ sonne|work	that I just want to copy somewhere under /home/user
+ sonne|work	and ship this as rpm
+ sonne|work	that is all
+ besser82	sonne|work:  then tar.gz that dir, list tarball as Source0
+ sonne|work	besser82: probably ultra easy for you
+ sonne|work	how?
+ besser82	sonne|work:  yes, just a few seconds of work
+ besser82	sonne|work:  shall i giv e you template?
+ besser82	sonne|work:  like having some dummy tar and performing needed action of that
+ sonne|work	yeah
+ sonne|work	just this tar line
+ besser82	first create tarball of the dir you want to ship: tar cf $my.tar $src
+ besser82	sonne|work:  ^^^  then compress
+ besser82	sonne|work:  like gz -9 $my.tar
+ besser82	sonne|work:  then create some spec
+ besser82	sonne|work:  %prep
+ besser82	sonne|work:  %setup -qn $dir_in_tar
+ besser82	sonne|work:  %build
+ besser82	sonne|work:  # noop
+ besser82	sonne|work:  %install
+ besser82	sonne|work:  mkdir -p %yourtarget && cp -a . $your_target
+ besser82	sonne|work:  %changelog
+ besser82	sonne|work: done
+ sonne|work	besser82: sounds good
+ sonne|work	oki more monday
+* sonne|work off home
+ besser82	sonney2k:  I just prepared a rpm.spec example, doing what you said it should...
+ besser82	sonney2k:  shall I mail it to you?
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- FSCV [~FSCV@50.7.50.60] has joined #shogun
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+@sonney2k	besser82, yes please thanks!
+@sonney2k	besser82, I am already happy though
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+@sonney2k	lisitsyn, how is your holidays?
+ lisitsyn	sonney2k: had exam today :D
+ lisitsyn	yes I can notebook a little
+@sonney2k	lisitsyn, I thought you had vacations?
+ lisitsyn	sonney2k: they are over and exams are still here :(
+ lisitsyn	good thing about it is that is the last exams I have to take any longer
+ lisitsyn	:D
+ lisitsyn	wow some major changes here
+@sonney2k	lisitsyn, parse error... that was your last exam?
+@sonney2k	lisitsyn, major changes?
+ lisitsyn	sonney2k: haha okay lets do it again
+ lisitsyn	sonney2k: I have two more exams but these are last as I'll just have to write up some thesis
+ lisitsyn	sonney2k: major changes is what I see in git pull ;)
+ lisitsyn	is that more parseable? ;)
+@sonney2k	lisitsyn, yes perfectly parseable :D
+@sonney2k	lisitsyn, not so big changes - only in the build system
+@sonney2k	lisitsyn, besser82 did a lot of python3 fixes
+@sonney2k	lisitsyn, and we now have a new buildbot that checks for python3
+@sonney2k	lisitsyn, quite a lot already works
+-!- zxtx_ [~zv@129-79-241-148.dhcp-bl.indiana.edu] has quit [Ping timeout: 246 seconds]
+ lisitsyn	sonney2k: cool
+ lisitsyn	sonney2k: I am curious whether some quite major -> py3 conversion happens any day
+@sonney2k	lisitsyn, where?
+ lisitsyn	sonney2k: I just mean it is like between 2.7 and 3.x still
+@sonney2k	lisitsyn, I would say all major extensions are ported by now
+@sonney2k	lisitsyn, doesn't mean it is used though - but I would guess that soon linux distributions are all switching over to python3.3 as default
+@sonney2k	soon as in their next stable release
+ lisitsyn	sonney2k: makes sense
+* sonney2k is wrestling with the debian packages again...
+@sonney2k	lisitsyn, btw did you know we have 4 weeks until gsoc deadline
+ besser82	sonney2k, lisitsyn: for fedora transition to py3 as default is scheduled for f22 ~ Dec. 2014 ;)
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has quit [Ping timeout: 272 seconds]
+ besser82	sonney2k, lisitsyn: python2 basically is dead, by means of interp-development
+@sonney2k	besser82, yeah it just plain works(tm)
+ besser82	sonney2k, lisitsyn: 2.7.X is last release of py2-series; only bugfixes / security maintainance  ;)
+ besser82	sonney2k:  Works? what?  Py3?
+@sonney2k	both :)
+@sonney2k	but 2.7 is rock stable
+ besser82	sonney2k:  yes it is prooven stuff for sure; RHEL7 comes with it, but no Py3  :(
+ adrin	besser82, don't worry about fedora deadlines, I don't remember the last time they were actually on time :D
+@sonney2k	adrin, sounds like debian deadlines ;)
+ besser82	adrin:  I know  ;)  I'm one of those Fedora-guys  ;)
+ adrin	besser82: hahahahaha
+ besser82	adrin:  https://badges.fedoraproject.org/user/besser82  :-P
+ adrin	besser82: oh cool, I see :D pitty that I immigrated a while ago, unless I could blame you all the time :P
+ besser82	adrin:  :-P  Then just come back and checkout all brand-new bugz in new F20
+ lisitsyn	sonney2k: 4 weeks?
+ lisitsyn	ohshhhhhh
+ adrin	besser82: lol, I just found rolling distros more comfortable at some point, but thanks for the offer ;)
+ besser82	adrin:  fedora offer rolling, too  ;)  Checkout rawhide
+ besser82	adrin:  https://fedoraproject.org/wiki/Releases/Rawhide/de
+ adrin	besser82: lol, yeah I remember it, I used to switch to rawhide all the time no later than a beta release. But you have to admit alphas and pre-alphas are really really unstable.
+ besser82	adrin:  not what I saw from the last 3 pre-alphas
+ besser82	adrin:  there had been some quirks for sure, but they were pretty good for workstation use
+ adrin	besser82: I see, the last time I had a fedore was probably three releases ago, I'll have a look again :-)
+ besser82	adrin:  I had been shifting to F18 / F19 / F20 pre-alpha immediatly after branch-off and basically all stuff was usable, but some minor gliches  :D
+ besser82	adrin:  nice to hear!
+ adrin	besser82: after all, I'm way more comfortable around rpm baseds.
+ besser82	adrin:  btw. there are nice shogun-rpms avail in official fedora-repo  ;)
+ adrin	besser82: I'm sure glinches are not worst than gentoo ones ;)
+ besser82	adrin:  not even comparable  ;)
+@sonney2k	lisitsyn, I told you we are late this time with me not pushing you guys :D
+ besser82	adrin:  the worst glitch I had was systemd spamming /var/log in F20 Alpha TC3
+@sonney2k	lisitsyn,  on the other hand we did some releases
+ adrin	besser82: I know :D ok, gotta go, schones wochenende ;)
+ besser82	adrin:  Dir ebenfalls!  :D
+ besser82	adrin:  Danke
+ adrin	besser82: systemd is also a hasel in gentoo.
+ besser82	adrin:  in Fedora it is pretty good running now
+ besser82	adrin:  as basically the same ver is targeted for RHEL7
+-!- ChanServ changed the topic of #shogun to: Shogun Machine Learning Toolbox | Next Stammtisch Monday 2014-01-14 19-24hrs UTC |Devs are usually around between 10am-10pm UTC | When asking questions please be patient or use the mailing list. We always answer but it might take a while. | Channel logs http://bit.ly/1eBecWl
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@sonney2k	iglesiasg, could you please twitter like hell about shogun stuff?
+@sonney2k	iglesiasg, as in new releases
+@iglesiasg	sonney2k, all right
+@sonney2k	iglesiasg, that we want to participate in gsoc 2014
+@sonney2k	and are looking for mentors etc?
+@iglesiasg	sonney2k, okok
+@iglesiasg	sonney2k, btw, I think I'd prefer mentoring this year
+@sonney2k	iglesiasg, and that we are back in debian https://buildd.debian.org/status/package.php?p=shogun
+@sonney2k	iglesiasg, very welcome
+@sonney2k	iglesiasg, what would you want to do?
+@iglesiasg	sonney2k, great
+@iglesiasg	sonney2k, I was thinking of proposing a project in MCMC since it is related to my PhD
+@sonney2k	maybe baseline ML algorithms?
+@iglesiasg	Heiko knows about it too
+@sonney2k	heh
+-!- zxtx_ [~zv@129-79-241-148.dhcp-bl.indiana.edu] has joined #shogun
+@sonney2k	I guess HeikoS would want to do it :D
+@iglesiasg	we can discuss about it then
+@iglesiasg	sonney2k, no idea if Heiko this year wants to participate as student?
+@iglesiasg	I can mentor him lol
+@sonney2k	iglesiasg, excellent suggestion
+@sonney2k	iglesiasg, make sure to push him hard
+@sonney2k	otherwise he will get a side job and learn a new music instrument
+@iglesiasg	haha yeah
+@sonney2k	iglesiasg, he just doesn't work w/o pressure ;)
+@iglesiasg	your call to retweet now guys
+@sonney2k	iglesiasg, ok I did all the marketing I could :)
+ lisitsyn	iglesiasg: let you mentor me
+ lisitsyn	!
+ lisitsyn	:D
+ lisitsyn	I am still eligible
+@iglesiasg	lisitsyn, haha ok, a pleasure :)
+@sonney2k	lisitsyn, we can play with rose ponies if you'd like
+@iglesiasg	lisitsyn, I would learn from you instead of the other way round though :D
+ lisitsyn	sonney2k: I am curious what would be on carol's mind if she see a guy jumping from student to mentor and back
+ lisitsyn	:D
+@iglesiasg	hehe
+@iglesiasg	curious situation indeed
+@iglesiasg	but I'd say it is fine
+@iglesiasg	lisitsyn, would you like to be student this year?
+ lisitsyn	iglesiasg: no no
+@sonney2k	lisitsyn, well marry sb. in rossia and you can see the look on her face :D
+ lisitsyn	it would be unfair
+* sonney2k afk
+@iglesiasg	lisitsyn, I see your point
+ lisitsyn	I mean I won't have much time
+@iglesiasg	but taking into account some of the projects there have been and the work done...
+ lisitsyn	real students have much more time to enjoy that
+ lisitsyn	not just sponsor some work
+@iglesiasg	that is true
+ lisitsyn	and I can't predict where I am going to be just in a few months :D
+@iglesiasg	and well, the idea is also trying to get people that may become contributors
+@iglesiasg	hehe
+ lisitsyn	some kind of decision period soon
+ lisitsyn	and this sucks phew :D
+@iglesiasg	c'mon!
+@iglesiasg	those periods should be exciting :)
+* besser82 is off
+@iglesiasg	besser82, you could mentor some infra stuff maybe
+@wiking	mmmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeentoooooooooooooooooooooooooor
+@wiking	:D
+@wiking	iglesiasg: have u managed to check out those things?
+@iglesiasg	wiking, HR department is having a look and said we would talk this week
+@iglesiasg	next week hehe
+@sonney2k	wiking, what do you want to do?
+@wiking	iglesiasg: great!
+@wiking	iglesiasg: fight for your right!
+@sonney2k	night all
+@iglesiasg	good nighty
+ besser82	iglesiasg:  infra stuff like?!?
+@iglesiasg	besser82, one of the many stuff you usually suggest ;)
+@iglesiasg	wiking, lisitsyn, anybody there?
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+--- Log closed Sat Jan 11 00:00:47 2014

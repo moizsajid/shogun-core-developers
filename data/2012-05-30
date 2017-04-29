@@ -1,0 +1,256 @@
+--- Log opened Wed May 30 00:00:41 2012
+ n4nd0	good night people
+ blackburn	nite
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- av3ngr [av3ngr@nat/redhat/x-xnbshjkyvrpdknhi] has joined #shogun
+-!- ckwidmer [~chris@HSI-KBW-046-005-237-106.hsi8.kabel-badenwuerttemberg.de] has quit [Remote host closed the connection]
+-!- blackburn [~blackburn@31.28.59.65] has quit [Quit: Leaving.]
+-!- uricamic [~uricamic@2001:718:2:1634:a0dd:d302:38df:5709] has joined #shogun
+-!- heiko [~heiko@host86-176-2-66.range86-176.btcentralplus.com] has joined #shogun
+-!- abn_ [av3ngr@nat/redhat/x-tijaowgwtfpejqol] has joined #shogun
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-xnbshjkyvrpdknhi] has quit [Ping timeout: 245 seconds]
+ sonne|work	heiko: whats up?
+ heiko	sonne|work, hi
+ sonne|work	hey ...
+ heiko	currently: NIPS, exam on friday, (so far: exam yesterday)
+ sonne|work	crazy
+ sonne|work	hope you survive this
+ heiko	but also reading stuff to implement eigenspectrum based threshold estimate for quadratic MMD
+ heiko	yeah me too :)
+ sonne|work	you did ping me yesterday?
+ heiko	yes, I was just asking whether shogun had eigenvalue methods, but then I found them myself
+ heiko	I added this little convienience methods using SGVectors though
+ heiko	whats up in Berlin?
+ sonne|work	heiko: yeah I wanted to move more functions from CMath -> SGVector etc
+ sonne|work	so you patch is very welcome
+ heiko	so all of them should be converted?
+ sonne|work	heiko: in two days I will be on paternal leave
+ heiko	I would love to see the display methods
+ sonne|work	so just finishing up stuff
+ sonne|work	heiko: yes exactly
+ heiko	paternal leave?
+ sonne|work	you know play time with kids ;-)
+ heiko	sonne|work, ok then Ill convert all methods I touch
+ heiko	ah ok
+ heiko	nice
+ heiko	dont forget to do that over all the coding :D
+ sonne|work	heiko: no worries will be on holidays too so no time for coding next week
+ heiko	sonne|work, nice!
+ heiko	sonne|work, I really like these director classes, havent tried them yet though, but its awesome
+ sonne|work	yeah I think so too
+ sonne|work	only problem is speed penalty
+ sonne|work	so factor 10 slower...
+ sonne|work	but hey could be worse
+ heiko	yes, but I mean
+ heiko	sometimes people that dont want to get involved into internals just want a new kernel
+ heiko	or a new other thing
+ heiko	and now thats possible
+ blackburn	heiko: do you need full spectrum?
+ sonne|work	yeah. but we have to enable that one by one
+ heiko	blackburn, no, eigenvalues are fine so far, still experimenting a bit
+ sonne|work	it will only be possible case by case
+ blackburn	heiko: all eigenvalues?
+ heiko	sonne|work, but thats fine
+ sonne|work	we need to figure out for which cases we need this stuff...
+ heiko	blackburn, yes, so far, although I will sort them and only use most numerically stable ones
+ blackburn	for max/min you can use arpack I mean
+ heiko	ah ok
+ heiko	currently using the lapack based compute_eigenvalues thingi
+ blackburn	a lot of options
+ blackburn	heiko: dsyev?
+ heiko	yes that one
+ heiko	isnt arpack more for sparse matrices?
+ heiko	will be back in 5 mins ...
+ blackburn	heiko: no - reverse interface - it is like COFFIN for eigenstuff
+ blackburn	it depends on structure of matrix
+ blackburn	basically it is pretty related to krylov subspace method
+ blackburn	which require span of [ Ax A^2 x .... ]
+ blackburn	so for example like in power method for largest eigenvalue it would require only few matrix vector products
+ sonne|work	blackburn: btw I was thinking about getting DirectorDOTFeatures to work
+ blackburn	what do you have in mind
+ blackburn	?
+ sonne|work	and I think one way to do it is to define all these add/dense_dot etc operations again but based on SGVector
+ sonne|work	so then the low-level functions would call the sgvector ones
+ sonne|work	and these are the ones that via typemaps etc are nicely exposed to python and other langs
+ blackburn	yes obvious
+ blackburn	hmm while you are available
+ blackburn	what do you think about openmping it gradually?
+ blackburn	I attempted to openmp everything but it needs to be rebased now totally
+ heiko	re
+ sonne|work	blackburn: regarding openmp - maybe you can openmp the most difficult part, e.g. dotfeatures first. if this works then I think it will work for all stuff
+ sonne|work	(works == same speed as w/ pthreads)
+ blackburn	yes but shall I commit it then?
+ blackburn	really hard to track one more branch
+ heiko	blackburn, I will just have a look how it works and compare against my matlab implementation and then get back to you
+ blackburn	ok
+ heiko	have to study kernel covariance operator now :)
+-!- abn_ [av3ngr@nat/redhat/x-tijaowgwtfpejqol] has quit [Ping timeout: 248 seconds]
+-!- blackburn [~blackburn@31.28.59.65] has quit [Ping timeout: 244 seconds]
+-!- heiko1 [~heiko@host86-183-72-132.range86-183.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-176-2-66.range86-176.btcentralplus.com] has quit [Ping timeout: 260 seconds]
+-!- gsomix [~gsomix@37.61.181.114] has joined #shogun
+ gsomix	hello
+-!- alex_thedatawhis [82955843@gateway/web/freenode/ip.130.149.88.67] has joined #shogun
+-!- heiko1 [~heiko@host86-183-72-132.range86-183.btcentralplus.com] has quit [Ping timeout: 245 seconds]
+-!- alex_thedatawhis [82955843@gateway/web/freenode/ip.130.149.88.67] has quit [Quit: Page closed]
+ gsomix	sonne|work, hey. I'm sorry, I will get back to work at evening. Exam... tomorrow. Preparing is needed.
+-!- heiko [~heiko@host86-177-112-17.range86-177.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-177-112-17.range86-177.btcentralplus.com] has quit [Ping timeout: 245 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	summer, yaay!!
+-!- alexdatawhispere [82955843@gateway/web/freenode/ip.130.149.88.67] has joined #shogun
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:a0dd:d302:38df:5709] has quit [Quit: Leaving.]
+-!- heiko [~heiko@host86-177-112-17.range86-177.btcentralplus.com] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- heiko [~heiko@host86-177-112-17.range86-177.btcentralplus.com] has quit [Ping timeout: 245 seconds]
+-!- heiko [~heiko@host86-177-112-17.range86-177.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-177-112-17.range86-177.btcentralplus.com] has quit [Ping timeout: 245 seconds]
+ blackburn	n4nd0: did you finish your exams?
+ n4nd0	blackburn: yeah!
+ blackburn	I just came with cool game - everyone say some math word and I have to put some sentence with it to my thesis :D
+ gsomix	blackburn, topology
+ blackburn	easy
+ blackburn	n4nd0: your turn
+ n4nd0	blackburn: let me think...
+ gsomix	blackburn, ok. then I think I need to consult with Verbitsky, hehe
+ n4nd0	blackburn: curl
+ blackburn	n4nd0: hah ok!
+ blackburn	ok currently diffeomorphism, curl, Darboux sum, topology (gsomix want to change?)
+ blackburn	puffin444: surprise me
+ blackburn	sonney2k: and you :)
+ puffin444	Noetherian Rings
+ gsomix	blackburn, nope.
+ blackburn	oh sh
+ puffin444	Did I break your thesis?
+ blackburn	yes probably it is not about svms anymore
+ blackburn	:D
+ blackburn	however one guy said Klein group already
+ blackburn	uh I asked him to change :D
+ blackburn	affinity now
+ blackburn	puffin444: could you please change? :D
+ blackburn	sounds like a bit of hardcore to put rings to svms :D
+ puffin444	Uhh... Dense Set
+ blackburn	hah ok!
+ blackburn	thanks :)
+ blackburn	in summary, I need to add affinity, curl, dense set, topology, diffeomorphism, darboux sum
+ blackburn	okk sounds crazy :D
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Ping timeout: 245 seconds]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+ puffin444	Anybody here an expert in blas?
+ blackburn	well not expert but have some experience
+ blackburn	what is the issue?
+ puffin444	So I am calling cblas_dposv, Solves Ax=B where A is a positive symmetric matrix
+ blackburn	right
+-!- cwidmer [~chris@HSI-KBW-046-005-237-106.hsi8.kabel-badenwuerttemberg.de] has joined #shogun
+ puffin444	It is somehow possible that the contents of A get modified during the function?
+ blackburn	yes it modifies A
+ blackburn	stores cholesky upper triangular L
+ puffin444	Should I be calling clapack_dposv or dposv_?
+ blackburn	clapack_dposv
+ blackburn	puffin444: in mathematics/lapack.h we provide impl of clapack_dposv that calls usually fortran extern dposv_
+ blackburn	if atlas is available no need to define clapack_dposv so it will be used from atlas with the same interface
+ puffin444	I think I have been just using the wrong function all along
+ blackburn	where?
+ puffin444	There got it now. I should have been using clapack_dpotrs as I already had the factorization
+ blackburn	ah yes
+ blackburn	dpotrf and dpotrs
+ blackburn	dposv is dpotrf and dpotrs basically
+ blackburn	however multiple calls of dposv make no sense
+ blackburn	it would factor factors
+ puffin444	Exactly
+ puffin444	Yay! I can calculate the gradients now!
+ blackburn	heh cool
+ puffin444	Ok. I think its time to take a break. See you later.
+ blackburn	cu
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Quit: Page closed]
+-!- alexdatawhispere [82955843@gateway/web/freenode/ip.130.149.88.67] has quit [Quit: Page closed]
+ n4nd0	blackburn: hey, I got one question
+ n4nd0	blackburn: why is it that we cannot have modular interface for matlab?
+ blackburn	easy question - swig does not support it :D
+ n4nd0	aham I see
+ n4nd0	my friend is using shogun for his thesis
+ n4nd0	he started with octave and it was all right
+ n4nd0	but he needed some OOP and it looks like octave is somewhat limited there
+ blackburn	python is the key to everything
+ n4nd0	so he's now in matlab but found that there's no modular interface there
+ n4nd0	I think he will manage with static in any case
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- heiko [~heiko@host86-169-107-96.range86-169.btcentralplus.com] has joined #shogun
+ gsomix	good night guys
+ gsomix	exam is tomorrow... networks
+ blackburn	good luck
+ heiko	good luck
+ gsomix	tnx
+ blackburn	heiko: are you busy right now?
+ heiko	no, resting :)
+ heiko	blackburn, but in generell yes
+ heiko	NIPS till friday
+ heiko	and I got an exam on friday also
+ blackburn	I have one ML question
+ blackburn	heh
+ blackburn	what is it is about?
+ heiko	exam or nips?
+ heiko	I mean, I if I can help you, I will enjoy doing it :) whats the question?
+ blackburn	heiko: do you know what is L1/Lq norm?
+ blackburn	both exam and nips
+ heiko	blackburn, exam is about kernel theory: RKHS theory, some kernel algorithms, distributions in feature space, MMD, a bit of convex optimisation
+ blackburn	heh cool
+ heiko	nips working title is kernel selection for large scale two sample tests
+ heiko	yes the course was pretty cool
+ heiko	I know Lq norm
+ blackburn	I have troubles deriving dual of some special task
+ heiko	using Lagrangian?
+ blackburn	L1/Lq is basically if you divide your vector to some cells and compute Lq of it
+ blackburn	summarizing it with L1
+ blackburn	L1/L2 of [1 2 3 4] = (1+4) + (9+16)
+ blackburn	if groups are first twos and second
+ heiko	oh that is used in the group lasso right?
+ blackburn	heh exactly
+ blackburn	the problem is I do not understand how ||w||^2 would looks like in terms of alphas :)
+ blackburn	would look*
+ heiko	do you have like a formal description of the problem?
+ blackburn	no but let me try to latex it a little
+ heiko	you can use gmailtex
+ heiko	(thats faster /easier than whole latex procedure)
+ blackburn	http://latex.codecogs.com/gif.latex?||w||_{1/2}%20=%20\sum_{g%20\in%20G}%20||w_g||_2
+ blackburn	heiko: is that idea clear for you?
+ blackburn	let G some indices space :)
+ heiko	mmh that graphic isnt properly displayed here
+ blackburn	why??
+ blackburn	wait I start to think my question is stupid
+ heiko	I cannot read it :(
+ blackburn	argh
+ heiko	background is black instead of white
+ blackburn	:D
+ heiko	and font is also black
+ blackburn	heiko: ok nevermind I have to think about it a little more
+ heiko	I am only seeing the antialiased pixels
+ blackburn	the thing I was confused is how to compute derivate of dual lagrangian by w
+ blackburn	if norm is complicated
+ heiko	ah ok
+ heiko	derivatives of norms
+ heiko	I always do it component wise if this happens
+ heiko	and the re-assemble the result later once I understand whats going on
+ blackburn	in case of 2 norm it is pretty basic
+ blackburn	just like scalars
+ heiko	are you talking about the SVM dual?
+ blackburn	yes
+ blackburn	just want to get liblinear easy patched
+ blackburn	it is based on gradient so I think if I had it I would patch it
+ heiko	mmh, I dont really get it, but nevermind, have you solved it though?
+ blackburn	solved what?
+ blackburn	I think I have to formulate questions more precisely :D
+ blackburn	just confused you
+ heiko	yes :)
+ heiko	well, I gotta go to  bed anyway
+ heiko	We can discuss tomorrow if you want
+ blackburn	ok :)
+ heiko	I will be st
+ heiko	I will be online during the day since I have to study :)
+ heiko	good night
+-!- heiko [~heiko@host86-169-107-96.range86-169.btcentralplus.com] has left #shogun []
+ blackburn	good night
+--- Log closed Thu May 31 00:00:41 2012

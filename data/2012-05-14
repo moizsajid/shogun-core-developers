@@ -1,0 +1,357 @@
+--- Log opened Mon May 14 00:00:40 2012
+-!- av3ngr [av3ngr@nat/redhat/x-crzsxpnlvzddpsxs] has joined #shogun
+-!- abn_ [av3ngr@nat/redhat/x-fpjupbrdnhavmnjp] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-crzsxpnlvzddpsxs] has quit [Ping timeout: 252 seconds]
+-!- abn_ [av3ngr@nat/redhat/x-fpjupbrdnhavmnjp] has quit [Client Quit]
+-!- vikram360 [~vikram360@117.192.165.186] has quit [Ping timeout: 244 seconds]
+-!- vikram360 [~vikram360@117.192.161.59] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- vikram360 [~vikram360@117.192.161.59] has quit [Quit: Leaving]
+-!- uricamic [~uricamic@2001:718:2:1634:8cea:f88e:2be4:5ab] has joined #shogun
+-!- emrecelikten [~emrecelik@213.74.82.26] has joined #shogun
+ emrecelikten	Hi all
+ n4nd0	hey emrecelikten
+ emrecelikten	n4nd0: How are you today?
+ n4nd0	emrecelikten: I am fine, what about you?
+ emrecelikten	n4nd0: Fine, had a GSoC all-nighter. "Converging" into zombie mode with each passing hour :D
+ n4nd0	:D
+ n4nd0	brb
+ CIA-113	shogun: Soeren Sonnenburg master * r73b9eea / src/interfaces/lua_modular/swig_typemaps.i : remove left over %enddef - http://git.io/wt_gnQ
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric_	hi there
+ n4nd0	sonne|work: good morning! around??
+ n4nd0	Nico and I discussed the other day that it would be good to think of how doing KernelSOMachine even if it is *very very* slow
+ n4nd0	in order to introduce it in shogun I came up with two possibilities for the class hierarchy
+ n4nd0	either: CMachine <---- CSOMachine and CSOMachine has two children, CLinearSOMachine and CKernelMachine
+ n4nd0	or: CLinearMachine <---- CLinearSOMachine and CKernelMachine <---- CKernelSOMachine
+ n4nd0	I like better the first possibility, sonne|work what do you think?
+ sonne|work	n4nd0: yes first one
+ sonne|work	it matches what we do with multiclassmachines
+ n4nd0	sonne|work: good, thank you!
+-!- blackburn [~qdrgsm@188.122.250.167] has joined #shogun
+-!- blackburn [~qdrgsm@188.122.250.167] has quit [Quit: Leaving.]
+-!- emrecelikten is now known as emre-away
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+ cronor	is it intended that in python you have to import CSVMLightOneClass? everything else is without the C
+ n4nd0	cronor: there might probably be a line missing in interfaces/python_modular/Classifier.i or similar file
+ cronor	n4nd0: i'll check it
+-!- emre-away is now known as emrecelikten
+ CIA-113	shogun: Soeren Sonnenburg master * reed11fa / src/interfaces/modular/Classifier.i : remove C prefix from CSVMLightOneClass in modular interfaces - http://git.io/TYSPwg
+ sonne|work	cronor: thx
+ n4nd0	cronor: you fixed it, cool :)
+ cronor	 n4nd0 no, soeren fixed it. i wasn't sure if i should commit a one-line fix
+ n4nd0	oh, ahyhow, it got fixed
+ cronor	although i would like to contribute to the project. are there any open issues which can be done without too much cpp knowledge? i looked through the github issues and they seem all kind of big
+ n4nd0	cronor: if you would like to avoid cpp you could for example work on some examples in python or any other language we support of your preference
+ cronor	it's not about avoiding cpp, i just don't have very little experience and don't feel able to do a restructuring issue
+ n4nd0	all right
+ cronor	*just have little experience
+ n4nd0	I know that sonne|work was interested in expanding LDA to support multiclass
+ sonne|work	yup
+ n4nd0	there is already code implemented in python to do that in scikits
+ eric_	hi all
+ n4nd0	I ported their QDA into shogun
+ n4nd0	so I guess that the plan here would be to substitute our current LDA by something similar to what they have there, working for multiclass directly
+ n4nd0	sonne|work: right?
+ eric_	which string kernel could you advice me to use for string features of different sizes ? and using a quite large alphabel (RAWBYTE). Thanks in advance for any hints!
+ n4nd0	eric_: hey! I am not an expert on string kernels but, isn't the normal thing that string features are of different lengths??
+ eric_	n4nd0: no in shogun most of the string kernel are implemented to compare strings of the same length
+ n4nd0	eric_: oh, my bad then :(
+ eric_	n4nd0: only few of them (maybe I am wrong..) are compatible with fetures of different size, and since I have a quite big alphabet I dont know which kernel could do the work ??
+ n4nd0	eric_: I am sorry I cannot help you, I don't know that much about different string kernels
+ cronor	n4nd0: i'll look into it tonight and see
+ n4nd0	cronor: all right, feel free to ask me around here if you need some help
+ eric_	n4nd0: do you know who implemented the available string kernels in shogun ?
+ n4nd0	eric_: I am not sure ... I'd say sonne|work is the most likely option
+ n4nd0	eric_: anyway, have you just tried testing different of them and analyse which one gives to you better results?
+ eric_	n4nd0: allright, thx, I hope he will read the logs
+ n4nd0	eric_: I guess you could do an example using your test data and just plug in one or other StringKernel and see which one performs best
+ sonne|work	n4nd0: re MC-LDA yes or even just add a multiclass variant
+ n4nd0	sonne|work: I have a bit of trouble here https://gist.github.com/2634487
+ sonne|work	?
+ n4nd0	sonne|work: you see for example in CResultTest or in CStructuredApplication::get_joint_feature_representation
+ n4nd0	the return type
+ n4nd0	the one that appears there as vector
+ n4nd0	I am not sure what to use in shogun since it must be something like an SGVector
+ n4nd0	but it may work if the features are Dense, Sparse or String
+ n4nd0	sonne|work: do you know what I mean?
+ sonne|work	no
+ sonne|work	n4nd0: can't you use sth like http://shogun-toolbox.org/doc/en/current/classshogun_1_1CDotFeatures.html
+ sonne|work	I mean never ever explicitly use the feature representation but just define some operations that are needed?
+ eric_	sonne|work: Hi, hopping you have time to respond: what family of string kernels should I focus if I use string features of different size with a quite big alphabet ?
+ n4nd0	sonne|work: but I don't think that the joint feature representation should return something like CDotFeatures, it should return just a feature vector
+ n4nd0	sonne|work: so as I see it is, is the joint space is represented with DenseFeatures it should return a SGVector, if it is with SparseFeatures a SGSparseVector, and so on
+ sonne|work	eric_: some n-gram thing I would say... probably hashed
+ sonne|work	n4nd0: what I meant is - why is it necessary at all?
+ sonne|work	otherwise I think it is just a SGVector<float64_t>
+ sonne|work	but a huuuuuge one
+ sonne|work	(potentially)
+ n4nd0	sonne|work: mm what do you mean with why is it necessary?
+ sonne|work	n4nd0: for example in SVMs you never need access to the examples x
+ sonne|work	or Phi(x)
+ sonne|work	all you need is the operations defined in dotfeatures
+ sonne|work	like w <- w+ alpha*Phi(x)
+ eric_	sonne|work: does shogun permits such ngram hashing ?
+ sonne|work	eric_: indeed migt not for n-gram kernel...
+ eric_	sonne|work: tx. another dummy question: I have a alphabet of size=100, how basically can I do the "mapping" to match the CStringFeatures<char> to use it in the implemented string kernels in shogun ?
+-!- nicococo [~nico@lacedcoffee.ml.tu-berlin.de] has joined #shogun
+-!- gsomix [~gsomix@188.168.2.14] has joined #shogun
+ gsomix	#????? !
+ gsomix	water, water everywhere
+-!- nicococo [~nico@lacedcoffee.ml.tu-berlin.de] has left #shogun []
+-!- blackburn [~qdrgsm@188.122.250.167] has joined #shogun
+-!- emrecelikten [~emrecelik@213.74.82.26] has quit [Quit: Leaving.]
+ gsomix	blackburn, ?????
+ blackburn	heh\
+ n4nd0	hey gsomix!
+ n4nd0	you have been working lately with SGVector and SGSparseVector right?
+ blackburn	gsomix: have you finished with your array conversion?
+-!- uricamic [~uricamic@2001:718:2:1634:8cea:f88e:2be4:5ab] has quit [Quit: Leaving.]
+ CIA-113	shogun: Soeren Sonnenburg master * rea2e2f2 / src/interfaces/lua_modular/swig_typemaps.i : fix valgrind error in lua typemap - http://git.io/kqOp3Q
+ blackburn	oo
+-!- karlnapf [~heiko@host86-174-150-108.range86-174.btcentralplus.com] has joined #shogun
+ gsomix	n4nd0, a little. sonney2k working with SGVector/SGMatrix/SGSparseVector now.
+ gsomix	blackburn, nope.
+-!- blackburn [~qdrgsm@188.122.250.167] has quit [Quit: Leaving.]
+ n4nd0	gsomix: nico and I are wondering if we could have a type that could behave either as a SGVector or as a SGSparseVector
+ n4nd0	you know to put a method like
+ n4nd0	vector f() {}
+ n4nd0	and some implementations of f return SGVector and others SGSparseVector
+-!- blackburn [~blackburn@188.122.250.167] has joined #shogun
+-!- blackburn [~blackburn@188.122.250.167] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.122.250.167] has joined #shogun
+ gsomix	n4nd0, it sounds cool. but I think you should talk with sonney2k about it. sorry
+ blackburn	n4nd0: why do you need it?
+ n4nd0	gsomix: ok, I'll ask him
+ n4nd0	blackburn: https://gist.github.com/2634487
+ n4nd0	look at line 101
+ n4nd0	for the joint feature vectors
+ n4nd0	i.e. the feature vectors that one do with information of the training data and the labels
+ blackburn	n4nd0: can it be sparse?
+ n4nd0	something like psi(xi, yi)
+ n4nd0	blackburn: nico said that normally dense representation is used
+ n4nd0	but that he would like to use sparse for high dimensional spaces
+ n4nd0	he seemed interested in that sparse vector provided here
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+-!- blackburn [~blackburn@188.122.250.167] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+-!- blackburn [~blackburn@188.122.250.167] has joined #shogun
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Ping timeout: 248 seconds]
+@sonney2k	karlnapf, around and have a bit of time?
+@sonney2k	n4nd0 - this is the wrong(tm) approach
+@sonney2k	karlnapf, if so
+@sonney2k	karlnapf, please run make check-valgrind in the libshogun dir
+ karlnapf	sonney2k, hi there, I have a few minutes unfortunately :(
+ karlnapf	yes I know that the examples fail
+ karlnapf	I already had a look but couldnt find the error after some time
+ karlnapf	I dont really get it, for the SGVector transition, just de-activating the reference counts worked
+ karlnapf	but for the matrices, it doesnt work
+@sonney2k	karlnapf, I think it is due to the way we serialize sgvector stuff
+ karlnapf	yes
+ karlnapf	definately
+@sonney2k	we need a separate way...
+@sonney2k	basically we have to store the refcount for these too
+ CIA-113	shogun: Heiko Strathmann master * r33e2e37 / (7 files): -some interface changes after talked to Arthur - http://git.io/TyMy0w
+ CIA-113	shogun: Heiko Strathmann master * r2639838 / src/shogun/evaluation/CrossValidation.cpp : code cleanups - http://git.io/zn11kg
+ CIA-113	shogun: Heiko Strathmann master * rd2863d9 / (8 files in 2 dirs): Merge pull request #526 from karlnapf/master - http://git.io/9kZc4Q
+@sonney2k	otherwise we have a leak at some point /double free
+ karlnapf	yes
+ karlnapf	I already thought a bit about this
+@sonney2k	I even don't mind if you do an incompatible change here
+ karlnapf	I am a bit afraid that this will cause trouble
+ karlnapf	when you save there is a certain refcount
+ karlnapf	then when you load from another situation
+@sonney2k	shogun 2.0 is very different from 1.0 - so we cannot really do anything about it
+ karlnapf	its not correct anymore
+ karlnapf	well, that solves at least the migration problem :)
+@sonney2k	karlnapf, ok this will happen if we have external objects that are not serialized pointing to things
+ karlnapf	sonney2k, ok, lets save the refcount into the vector then
+ karlnapf	however, this still doesnt solve the mem-leak problem
+@sonney2k	but still much better than leaks in the general case
+@sonney2k	why not?
+ karlnapf	at least I think
+ karlnapf	because if you de-activate the ref-counting
+ karlnapf	it still has to work
+@sonney2k	yes but w/ leaks
+ karlnapf	why? there were no leaks before the transition
+@sonney2k	exactly
+@sonney2k	*before*
+@sonney2k	now we never use SG_FREE(vec.vector) or destroy_vector() etc
+ karlnapf	but if I now use the system with the ref-counting deactivated
+ karlnapf	Oh, I already checked that
+ karlnapf	I manually added SG_FREEs to the examples
+ karlnapf	still leaking
+ karlnapf	there is something more subtle going on
+@sonney2k	it is not the correct way anyway
+ karlnapf	yes true
+ karlnapf	mmh, I really fear touching all these examples again :)
+@sonney2k	karlnapf, so please ping me when you write out the refcount along with the vector
+ karlnapf	but ok
+ karlnapf	yes, will notify you.
+ karlnapf	sorry for being not so much available currently, but theres another exam tomorrow
+@sonney2k	oh
+@sonney2k	ok
+ karlnapf	and two next week
+@sonney2k	no worries
+ karlnapf	but then I almost got them all, the last two are more relaxed :)
+ blackburn	9th exam - 678 to go but heiko is relaxed now :D
+ karlnapf	well, whats the alternative? freaking out all day is quite exhausting :D
+ blackburn	I rather joke on # of exams :)
+ karlnapf	k :)
+ karlnapf	too many
+ karlnapf	my brain feels so saturated
+ karlnapf	ok, guys, gotta go, take care sonney2k, blackburn, bye
+@sonney2k	blackburn, does the lua_modular stuff die on your machine too
+@sonney2k	karlnapf, cu! and thanks
+ blackburn	sonney2k: I have never never ever tried
+-!- karlnapf [~heiko@host86-174-150-108.range86-174.btcentralplus.com] has quit [Quit: Leaving.]
+@sonney2k	blackburn, then please try features_string_char_modular.lua
+ blackburn	sonney2k: ok need to switch system
+-!- blackburn [~blackburn@188.122.250.167] has quit [Quit: Leaving.]
+@sonney2k	hmmhh
+@sonney2k	look at this
+@sonney2k	#0  0x00007ffff5f84e7c in shogun::CStringFeatures<char>::set_feature_vector (this=0x0, vector=..., num=0) at features/StringFeatures.cpp:230
+@sonney2k	#1  0x00007ffff67c2f8b in _wrap_StringCharFeatures_set_feature_vector (L=0x62b010) at modshogun_wrap.cxx:172721
+@sonney2k	this === 0x0
+@sonney2k	gsomix, done with dynamicobjectarray?
+-!- blackburn [~qdrgsm@188.122.250.167] has joined #shogun
+ gsomix	sonney2k, nope. I'm little busy with optics now.
+@sonney2k	blackburn, <sonney2k> #0  0x00007ffff5f84e7c in shogun::CStringFeatures<char>::set_feature_vector (this=0x0, vector=..., num=0) at features/StringFeatures.cpp:230
+@sonney2k	<sonney2k> #1  0x00007ffff67c2f8b in _wrap_StringCharFeatures_set_feature_vector (L=0x62b010) at
+@sonney2k	crazy!
+@sonney2k	seems like the object is dead
+ blackburn	sonney2k: cool :D
+ blackburn	sonney2k: modshogun_wrap.cxx:742:17: fatal error: lua.h: No such file or directory
+ blackburn	sonney2k: which pkg?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	sonney2k: hi! tell me, what is the good approximation then :)?
+@sonney2k	n4nd0, as I said
+@sonney2k	n4nd0, don't use the feature representation
+@sonney2k	figure out which operations you need on Phi(x,y) and define only these
+@sonney2k	e.g <Phi(x,y),w>
+@sonney2k	w <- w+ alpha Phi(x,y)
+@sonney2k	etc
+@sonney2k	so you will never need to use Phi(x,y) *explicitly*
+ n4nd0	sonney2k: ok, I understand that
+ n4nd0	sonney2k: but what I don't see is how to considere it that way is going to save me somehow the need of defining a return type for the function
+@sonney2k	n4nd0, that trick is very powerful... we use it in linear svms to train in million dim feature spaces w/ millions of examples w/o every computing Phi(x) explicitly
+@sonney2k	you don't need that function at all
+ blackburn	COFFIN!
+@sonney2k	yeah
+ n4nd0	aham, so no function
+@sonney2k	n4nd0, you can provide a default one that returns a SGVector by computing w <- 0 + Phi(x,y) following the example above
+ n4nd0	sonney2k: blackburn , can you put me an example how to apply this trick in a simple case?
+ n4nd0	let's say we have to do <Phi(x,y), w>
+ n4nd0	how do we compute without computing Phi(x,y) explicitily
+ blackburn	n4nd0: if you need <Phi(x,y), w> then just provide a function that does <Phi(x,y), w>
+ n4nd0	haha
+ blackburn	hmm it is not said that it is  always possible
+ blackburn	not explicitly
+ n4nd0	eeeh can you elaborate there a bit? :)
+ blackburn	n4nd0: okay for example we have poly features
+ blackburn	n4nd0: in dot features we have only two required operations
+ blackburn	dot and add
+ blackburn	so if we want poly features we don't need to construct it explicitly
+@sonney2k	n4nd0, please have a look at the link I gave you with the operations in there
+ n4nd0	sonney2k: blackburn I will look at it after dinner and get back with any doubt
+ n4nd0	thank you!
+ blackburn	sonney2k: hmm what should be done to make lua work?
+ blackburn	lua: features_dense_real_modular.lua:1: module 'modshogun' not found:
+ blackburn	no field package.preload['modshogun']
+ blackburn	no file './modshogun.lua'
+@sonney2k	p SWIG_Lua_ConvertPtr(L,1,(void**)&arg1,swig_types[878],0)
+@sonney2k	0x0
+@sonney2k	!!!
+@sonney2k	wtf
+@sonney2k	seems like the thing is NULL - so no wonder it dies
+@sonney2k	blackburn, look at the beginning of check.sh
+ blackburn	ok
+-!- blackburn [~qdrgsm@188.122.250.167] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.122.250.167] has joined #shogun
+-!- blackburn [~blackburn@188.122.250.167] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.122.250.167] has joined #shogun
+ CIA-113	shogun: Soeren Sonnenburg master * ra4985db / examples/undocumented/lua_modular/features_string_char_modular.lua : disable set_feature_vector from lua for now - http://git.io/pnkbsw
+ CIA-113	shogun: Soeren Sonnenburg master * rcb50eab / src/interfaces/lua_modular/swig_typemaps.i : simplify lua typemaps (use sgvector & co) - http://git.io/XlIz8w
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- ckwidmer [~chris@HSI-KBW-046-005-237-106.hsi8.kabel-badenwuerttemberg.de] has joined #shogun
+-!- blackburn [~blackburn@188.122.250.167] has quit [Quit: Leaving.]
+-!- blackburn [~qdrgsm@188.122.250.167] has joined #shogun
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Ping timeout: 245 seconds]
+-!- gsomix_ [~gsomix@188.168.14.11] has joined #shogun
+-!- gsomix [~gsomix@188.168.2.14] has quit [Ping timeout: 244 seconds]
+-!- gsomix_ [~gsomix@188.168.14.11] has quit [Read error: Operation timed out]
+ n4nd0	blackburn: hey
+ blackburn	n4nd0: hi
+ n4nd0	blackburn: so about the features issue
+ n4nd0	I have got the idea that what I should do then is to make a new class that inherits from CDotFeatures
+ n4nd0	I think that the operations that we need are basically those that are defined there
+ blackburn	yeah that is common case
+ n4nd0	and I think that we need a new class since the features here are computed from a feature vector of the input space and some kind of structured data
+ n4nd0	blackburn: do you think that is a good idea?
+ blackburn	n4nd0: yes probably
+ n4nd0	ok
+ n4nd0	then I don't really think that the sparse or non sparse issue matter
+ n4nd0	matters*
+ n4nd0	I mean that there is no need to regard it separately
+-!- Marty28 [~marty@cable-158-181-77-81.cust.telecolumbus.net] has joined #shogun
+ n4nd0	hey Marty28, how is it going?
+ Marty28	Hiho
+ Marty28	Fine
+ Marty28	Applying shogun to several datasets
+ n4nd0	good
+ Marty28	Has your google summer started?
+ n4nd0	nice results?
+ Marty28	Yes for easy cases
+ n4nd0	the oficial date has not come yet, but I think we are all hands on it already :D
+ Marty28	Cool
+ Marty28	I am currently playing hide and seek with shogun
+ n4nd0	why so?
+ Marty28	Creating artificial data and letting shogun identify the features
+ n4nd0	nice, what are you using to identify the features?
+ Marty28	If the field i am in is new i cannot rely on existinf experience
+ Marty28	G
+ Marty28	I have to make assumptions on what feature combonations my labels rely on
+ Marty28	Depend on
+ Marty28	E.g. Localized motifs combined with other numbers
+ Marty28	So first i have to make shogun depend on them
+ Marty28	Else later shogunwill not show me the importance of the real features
+ n4nd0	interesting
+ Marty28	I do not go for sensitivity but for the importance and usage of features as a result
+ Marty28	My boss does not like that
+ Marty28	Bioinformaticists want benchmarks
+-!- in3xes [~in3xes@106.78.49.114] has joined #shogun
+ Marty28	Biologists want explanations
+ n4nd0	as we all do ;)
+ n4nd0	well ... ok, maybe not all
+ Marty28	So ideally i take features that have been shown to be important by biologists
+ Marty28	In SOME of my positive labels
+ Marty28	Then i optimize shogun for using this type of information
+ Marty28	F shogun finds my features of the biologists' examples
+ Marty28	If
+ Marty28	It will also find/use features that are like these cases
+ Marty28	Candidates for research for biologists
+ shogun-buildbot	build #543 of lua_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/lua_modular/builds/543
+ Marty28	So i guess i have to be careful that the feature selection does not go for the trivial features masking the subtle ones
+ Marty28	Hmmm
+ Marty28	So i could use real data and hide noisy features in the positives
+ Marty28	The i remove the big features and see if the small ones pop up with different methods
+ Marty28	Hmmm
+ n4nd0	there may be also some of weighting for the features that could help here?
+ n4nd0	more importance to the subtle ones could make that they are not forgotten
+ Marty28	I know
+ n4nd0	all right ...
+ Marty28	Still i guess artificial data will help
+ Marty28	Also it gives me presentable results
+ Marty28	My real data is rather difficult
+ Marty28	Alsomi will check how methods will react on mixed phenomena
+ Marty28	I.e. When feature combinations a and b and c lead to +1 label
+ Marty28	E.g. 1,2,4 and 5,6,8 but not 1,6,8
+ Marty28	I will see, just a master thesis
+ n4nd0	good night people
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ Marty28	N8
+-!- cronor [~cronor@e178176184.adsl.alicedsl.de] has joined #shogun
+-!- Marty28 [~marty@cable-158-181-77-81.cust.telecolumbus.net] has quit [Quit: Colloquy for iPad - http://colloquy.mobi]
+--- Log closed Tue May 15 00:00:40 2012

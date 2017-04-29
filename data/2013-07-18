@@ -1,0 +1,1308 @@
+--- Log opened Thu Jul 18 00:00:36 2013
+-!- FSCV [~FSCV@187.210.54.166] has quit [Quit: Leaving]
+--- Log closed Thu Jul 18 01:10:47 2013
+--- Log opened Thu Jul 18 01:16:21 2013
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 11 nicks [2 ops, 0 halfops, 0 voices, 9 normal]
+-!- Irssi: Join to #shogun was synced in 6 secs
+@iglesiasg	good night!
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- Guest95788 [~lds@ks204975.kimsufi.com] has joined #shogun
+-!- Guest95788 [~lds@ks204975.kimsufi.com] has left #shogun []
+-!- nube [~rho@36.252.175.251] has joined #shogun
+-!- nube1 [~rho@36.253.200.47] has joined #shogun
+-!- nube [~rho@36.252.175.251] has quit [Ping timeout: 276 seconds]
+-!- zxtx [~zv@rrcs-76-79-81-162.west.biz.rr.com] has quit [Ping timeout: 248 seconds]
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 260 seconds]
+-!- nube [~rho@36.252.74.87] has joined #shogun
+-!- nube1 [~rho@36.253.200.47] has quit [Ping timeout: 264 seconds]
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- hushell [~hushell@c-24-21-220-10.hsd1.or.comcast.net] has joined #shogun
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+-!- nube [~rho@36.252.74.87] has quit [Ping timeout: 246 seconds]
+-!- nube [~rho@116.90.239.13] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- gsomix__ [~gsomix@95.67.187.5] has joined #shogun
+-!- gsomix_ [~gsomix@95.67.183.60] has quit [Ping timeout: 245 seconds]
+-!- vgorbati [c3ee5cb1@gateway/web/freenode/ip.195.238.92.177] has joined #shogun
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	morning everyone
+-!- foulwall` [~user@2001:da8:215:503:55a7:5925:5abd:ac97] has joined #shogun
+-!- Yanglittle [b74040fc@gateway/web/freenode/ip.183.64.64.252] has joined #shogun
+ Yanglittle	hey is there any body?
+@iglesiasg	Yanglittle: yes, sure. What is it?
+ hushell	iglesiasg: how are you?
+@iglesiasg	hushell: hey! good good, what about you?
+ Yanglittle	the performance of mkl is lower than the best single kernel.  is there any suggestions?
+@iglesiasg	Yanglittle: what is the single kernel?
+@iglesiasg	Yanglittle: and what kernels are you using in MKL?
+@iglesiasg	correct me if I am wrong, in MKL you input a set of kernels from which the algorithm will choose what weights to give to each one, right?
+ Yanglittle	yeah.
+ hushell	iglesiasg: good! seems you have finished the LMNN :)
+@iglesiasg	hushell: well, sort of the first version of it. I am preparing right now some unit tests before I send the pull request
+@iglesiasg	Yanglittle: so what is the kernel you are using in the single case and the ones you use in MKL?
+ hushell	sounds good, you are doing fast!
+ Yanglittle	both are chi2kernel
+@iglesiasg	hushell: so so :)
+ hushell	iglesiasg: where can I watch your talk :D
+@iglesiasg	hushell: wiking and/or sonney2k will edit them and put them in youtube I think
+ hushell	That's nice!
+ hushell	I am going to sleep now, I'll go back to check my PR tomorrow
+@iglesiasg	ok, good night!
+@iglesiasg	hushell: what about Patrick btw?
+@iglesiasg	I read you said something he had moved
+ hushell	He is kind of busy I think
+@iglesiasg	aaah ok
+ hushell	but it's okay
+@iglesiasg	we need him to have a look at the new code
+ hushell	I know what I should do right now :)
+ hushell	He may miss the mid-term meeting
+@iglesiasg	I see
+ hushell	but we can find sometime to have a discussion here
+@iglesiasg	Sure, it shouldn't be a major issue
+ hushell	let me get the inference work first :)
+@iglesiasg	all right
+ hushell	all right! CU
+-!- hushell [~hushell@c-24-21-220-10.hsd1.or.comcast.net] has quit [Quit: WeeChat 0.3.7]
+ Yanglittle	..
+@iglesiasg	Yanglittle: so what is you MKL setting?
+@iglesiasg	are you giving different values of some parameter for the chi2kernel?
+ Yanglittle	epsilon=1e-3, num_threads=1, mkl_epsilon=0.001, mkl_norm=2  , yes , i give many parameters for every different kernel.
+ Yanglittle	i thought it should choose the best combination that perform better than the single one.
+@iglesiasg	I am no MKL expert actually
+ Yanglittle	and who  is ..
+@iglesiasg	my idea is that you give to MKL several kernels, and it will do a linear combination of these kernels that maximizes some measure
+@iglesiasg	but I am not sure how many kernels you ought input it and so on
+ Yanglittle	i didn't find where to set the measure.
+@iglesiasg	well I guess that is not something you can set, but a property of MKL
+@iglesiasg	maybe there is some freedom and you can choose someting about that I am not sure. Did you check examples and the documentation?
+ Yanglittle	i checked.
+ Yanglittle	all the examples i have checked.
+@iglesiasg	iglesiasg: so you are using several chi2kernel with different values for the width parameter in MKL?
+@iglesiasg	Yanglittle: ^
+ Yanglittle	yes, that's it.
+@iglesiasg	Yanglittle: out of curiosity, do you know if that could be better than using one chi2kernel with the optimal choice of the width (chosen using model selection with cross-validation)
+@iglesiasg	Yanglittle: in the examples I can see that they normally use *different* kernels, not the same kernel with different parameters
+@iglesiasg	that's why I wondered
+ Yanglittle	in the examples, it is the same feature with different kernels, but here i  have different features from the same data.
+@iglesiasg	Yanglittle: the same feature with different kernels?
+ Yanglittle	for example ,for the same features, use chi2kernel, powerkernel and so on, then to find the best combination.
+@iglesiasg	the features are the data
+ Yanglittle	so ?
+@iglesiasg	that when you say I have different features from the same data I don't understand what do you mean exactly
+@iglesiasg	I mean, if you are using different data (features) for your MKL setting and your single kernel setting
+@iglesiasg	it is not a surprise that the single one can be better
+ Yanglittle	for training examples, we extract feature F1, and feature F2, here F1 and F2 are different features. if i concatenate F1 and F2, there'll be one feature.
+-!- gsomix__ [~gsomix@95.67.187.5] has quit [Quit: Leaving]
+-!- Yanglittle [b74040fc@gateway/web/freenode/ip.183.64.64.252] has quit [Ping timeout: 250 seconds]
+-!- lambday [67157e4c@gateway/web/freenode/ip.103.21.126.76] has joined #shogun
+-!- HeikoS [~heiko@nat-164-208.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ thoralf	HeikoShi :)
+@HeikoS	thoralfhi! :)
+-!- nube [~rho@116.90.239.13] has quit [Quit: Leaving.]
+@iglesiasg	HeikoS: hey! I've got a question about unit tests
+@HeikoS	iglesiasg: hi, yes?
+@iglesiasg	HeikoS: say I want to test several functions of the class using the same toy data
+@iglesiasg	HeikoS: should I create just one test for all or one test for function?
+@iglesiasg	HeikoS: in the second case, is it fine to have another function in the test file to have the data creation just in one part?
+@HeikoS	iglesiasg: if you go with the classic unit tests, you should create tests that are as small as possible, i.e. one test for every function
+@iglesiasg	all right
+@iglesiasg	I like that better too
+@HeikoS	iglesiasg: but there are also other ways with the mocking framework, see wiking 's examples for that
+@HeikoS	iglesiasg: I would not use a shared function to create the data though
+@HeikoS	just copy/paste the code
+@HeikoS	unit tests should depend on as little external code as possible
+@iglesiasg	HeikoS: ok, but it feels bad to repeat code :S
+@HeikoS	iglesiasg: true, but thats the point, that you fully controll things
+@HeikoS	iglesiasg: just keep the toy data as small as possible to get a reasonable test
+@iglesiasg	HeikoS: ok
+@iglesiasg	thanks!
+@HeikoS	iglesiasg: no problem :)
+ lambday	HeikoS: hi :)
+@HeikoS	lambday: hi!
+ lambday	I've got a problem - even creating a simple SGSparseMatrix<complex64_t> gives segfaults
+ lambday	HeikoS: I'm sending you the code
+ lambday	exact same code with float creates no problem
+@HeikoS	lambday: what does the code?
+@HeikoS	cloning?
+@HeikoS	lambday: we have to remove the sparse matrices from the parameter framework again, nothing will work with them
+ lambday	HeikoS: it just creates a SGSparseMatrix (I was writing unit-tests for operator*)
+@HeikoS	lambday: I see
+@HeikoS	show me
+-!- mode/#shogun [+o sonney2k] by ChanServ
+ lambday	HeikoS: https://gist.github.com/lambday/6028280
+@sonney2k	foulwall`, around?
+@sonney2k	wiking, ping again?
+@HeikoS	lambday:
+@HeikoS	/home/heiko/Desktop/shogun/shogun/src/shogun/mathematics/eigen3.h:17:24: fatal error: Eigen/Eigen: No such file or directory
+@HeikoS	weiiiird
+ lambday	whoa!!
+@HeikoS	lambday:  this is where is it for me
+@HeikoS	/usr/include/eigen3/Eigen/Eigen
+ lambday	HeikoS: that's really weird!!!!
+ lambday	HeikoS: anyway you can comment that eigen3 part... its not needed anyway
+@HeikoS	lambday: ok
+ lambday	my gdb says it gets screwed up in unref() in SGReferencedData.cpp I guess
+@HeikoS	lambday: but the second test fails
+@HeikoS	and it needs eigen
+ lambday	HeikoS: umm... just comment that out :D even creating SGSparseMatrix with complex64_t gives segfaults :(
+@HeikoS	lambday: ok compiled
+ lambday	HeikoS: segfault? :-s
+@HeikoS	yes, isolating the problem ...
+@HeikoS	test1 segfaults here
+ lambday	test1?? the float 1??
+@HeikoS	lambday:  not sorry
+@HeikoS	wait :)
+ lambday	hehe :D
+@iglesiasg	sonney2k: ping
+@sonney2k	iglesiasg, pong
+@iglesiasg	sonney2k: so you mentioned something the other day about the PR
+@iglesiasg	sonney2k: https://github.com/shogun-toolbox/shogun/pull/1237
+-!- vgorbati [c3ee5cb1@gateway/web/freenode/ip.195.238.92.177] has quit [Quit: Page closed]
+ lambday	I'll be back in 5 mins
+@HeikoS	lambday: the problem is caused by the = operator which unrefs the old SGSparseVector<complex64_t>, (which does not exist)
+@sonney2k	iglesiasg, errm no I see this for the first time
+@sonney2k	iglesiasg, I commented about thoralf's PR
+@sonney2k	iglesiasg, IMHO with his we should drop all pthread stuff from the headers the same way you do it with eigen now
+@iglesiasg	sonney2k: ah all right
+@iglesiasg	thoralf: then you are interested about this ^ :)
+-!- nube [~rho@49.244.27.182] has joined #shogun
+ thoralf	Let me see.
+@iglesiasg	sonney2k: so about the LMNN PR, at the beginning I made the methods in LMNNImpl static
+@sonney2k	iglesiasg, but it might not be possible
+@iglesiasg	sonney2k: so there is no need in LMNN for a LMNNImpl member (I wanted to avoid include<LMNNImpl.h> in LMNN.h)
+ thoralf	sonney2k, iglesiasg: I don't see comments on github.
+@sonney2k	iglesiasg, the train() function is way to long. you should split it up into at least 3 private sub-functions
+@iglesiasg	sonney2k: but that can be done also with declaring the class. So should I keep the methods static? Does it make a difference?
+@sonney2k	maybe one checking the paratmeters
+@iglesiasg	sonney2k: ok, that makes sense
+ lambday	HeikoS: why it doesn't create problem for float64_t then? :(
+@HeikoS	lambday: ah, good question
+ lambday	HeikoS: its exactly the same code :(
+@sonney2k	iglesiasg, basically the rule is if you need to write documentation then you better write a function which is named like your comment
+@iglesiasg	understood
+@sonney2k	iglesiasg, so maybe check_parameters, init_training, find_cutrent_impostors etc
+@HeikoS	sonney2k, iglesiasg this sometimes really fails, pls always write documentation
+@sonney2k	thoralf, no comment there
+@HeikoS	for users
+@sonney2k	HeikoS, ?
+@sonney2k	HeikoS, not applicable here
+@HeikoS	sonney2k: there are so many undocumented methods in shogun, just saying in gerneral
+@sonney2k	we are talking about a particular train method in a .cpp
+ thoralf	sonney2k: Are any actions/comments required on my side?
+@HeikoS	sonney2k: ah sorry then
+@sonney2k	thoralf, with the opaque pointers iglesiasg digged out I would rather try to solve it this way
+@HeikoS	still, I like comments in code, you are right it should be clear by itself, but still should be commented here and there to make reading easier
+@sonney2k	thoralf, so shogun is self contained and doesn't need extra link flags
+@sonney2k	I mean
+@HeikoS	lambday: wow thats a really weird one
+ thoralf	sonney2k: Okay, but my commit contained two issues. :)
+@sonney2k	when some C++ guy links agianst it
+ lambday	HeikoS: complex64_t stores two doubles in two consecutive address..
+ thoralf	sonney2k, HeikoS: What I'm missing are not function comments (I can read them by myself) but some explaination of how classes intended to work.
+ lambday	complex64_t v(1.0, 2.0);
+ lambday	0xffefffda0, val=1.000000 0xffefffda8, val=2.000000
+ lambday	HeikoS: :-/
+@HeikoS	thoralf: every public thing should be documented in my eyes, and classes need descriptions you are right
+@HeikoS	lambday: yes, currently running debugger
+ thoralf	sonney2k, HeikoS: Good examples are classes, which tell "this method solves <x_i, w> >= 1 + for ..."
+ thoralf	etc.
+@HeikoS	thoralf: yes, agreed
+@sonney2k	thoralf, yeah your best guess is the example
+ thoralf	HeikoS: Yes, but comments get outdated very fast when reafctoring.  But the purpose of a class seldom changes.
+ thoralf	HeikoS: Nobody changes comments once they are there. ;)
+@HeikoS	yes, we do not need many comments, just a few, since the get outdated, but class documentation has to be updated upon refactoring, no way around that
+@sonney2k	HeikoS, *amen*
+@sonney2k	it is really tough to do this
+@sonney2k	when you do a massive refactoring
+@sonney2k	you need to check all comments too
+@sonney2k	few people do this
+@sonney2k	and it is a lot of work
+@sonney2k	but yes I know...
+@HeikoS	sonney2k, thats true, but big picture comments dont change that often
+@HeikoS	like "this block does this and that where the idea is bla"
+@HeikoS	anyway
+@HeikoS	sonney2k: lambday found an interesting bug
+@HeikoS	maybe you have an idea?
+@sonney2k	which is?
+@iglesiasg	wiking, HeikoS : I see we need jinja2 now to build the unit tests
+ thoralf	/ First do initialization
+ thoralf	init();
+@iglesiasg	HeikoS: easy_install Jinja2 && pip install Jinja2?
+ thoralf	/ run training
+ thoralf	train()
+ thoralf	:)
+@sonney2k	thoralf, :P
+@HeikoS	thoralf: haha! :)
+@HeikoS	sonney2k: https://gist.github.com/karlnapf/6028411
+@sonney2k	that is what I meant we shouldn't do
+@sonney2k	iglesiasg, I've read more of your code. In general please shorten your functions a bit - split them up into smaller logical units
+@sonney2k	this makes things easier believe me :)
+ thoralf	Anyone here who did not read "Clean Code"?
+@iglesiasg	sonney2k: all right, will do
+@HeikoS	sonney2k: float64_t works, complex fails upon unrefing the "old" SGSParseVector in the matrix
+@iglesiasg	thoralf: I didn't
+@sonney2k	thoralf, me neither but I had a lecture from uncle bob just a week ago
+@sonney2k	HeikoS, uiii subtle!
+@sonney2k	HeikoS, lambday I know... it is my malloc hack
+ lambday	sonney2k: malloc hack?
+@HeikoS	when the matrix is allocated?
+@HeikoS	sonney2k: I just tried replacing that by calloc but no help
+@sonney2k	lambday, I guess adding SG_SPECIALIZED_MALLOC(SGSparseVector<complex64_t>) to shogun/lib/memory.cpp (end of the file) will fix it
+ lambday	sonney2k: aha! trying it
+ thoralf	sonney2k: I just contains rules like "speaking names instead of comments", etc.  But it also sets a "economical" state of mind for writing code, that can be understood.
+@HeikoS	sonney2k: man
+@HeikoS	where is this coming from?
+@sonney2k	HeikoS, not sure you want to know
+@HeikoS	what does this do?
+@sonney2k	HeikoS, we have these SG_MALLOC etc macros
+@sonney2k	which use malloc underneath
+@sonney2k	however there is one catch
+@HeikoS	lambday: that fixes it :)
+@sonney2k	when you use a try C++ object which needs an inplace constructor call
+ thoralf	sonney2k: Back to my PR: It also contains fixes for running "make check-examples" without calling "make install" first.
+@sonney2k	as in you want to have an SGVector array
+@HeikoS	sonney2k: yes like SGReferencedData
+@sonney2k	etc
+@sonney2k	with malloc its constructor is not called
+ thoralf	sonney2k: I think its very handy when using IDEs.
+@HeikoS	sonney2k: ok cool, learned another thing today
+@sonney2k	so you would need to use new FOO[10]();
+@sonney2k	note the () at the end
+@HeikoS	sonney2k: yep I see
+@sonney2k	it will call the constructor of FOO for all 10 elements
+@HeikoS	sonney2k: why dont we have SG_NEW then?
+@sonney2k	now we could either overload our malloc code to use new[]() on SG* (which I did)
+@iglesiasg	lambday: tests/unit/lib/computation/SerialComputationEngine_unittest.cc:48: undefined reference to `shogun::CDenseMatrixOperator<double>::CDenseMatrixOperator(shogun::SGMatrix<double>)'
+@iglesiasg	lambday: do you get that too?
+@HeikoS	since the behaviour is not really MALLOC like (it initialises things=)
+@iglesiasg	lambday: I think it is in your unit tests
+@sonney2k	or call new[]() directly
+@sonney2k	or drop SG_MALLOC and always use new*
+@HeikoS	sonney2k: but then its not traced
+@sonney2k	yeah
+@sonney2k	no tracing and no realloc
+@sonney2k	no idea
+@HeikoS	sonney2k: mmmh
+ lambday	iglesiasg: I'll check
+@sonney2k	all not optimal
+@HeikoS	sonney2k: I mean I like SG_MALLOC, but couldnt we just have SG_NEW in addition which does the new thing and traces?
+@HeikoS	then it would also be clear how they are used: the same way as in c++
+@iglesiasg	lambday: I get it running make in tests/unit
+ lambday	HeikoS: did it fix? I get the same error :-/
+@HeikoS	lambday: no fixes it for me
+@HeikoS	(at least for my small example)
+ lambday	iglesiasg: I'll surely check and change it.. I must have missed a few things :-/ don't know how that worked here
+ lambday	HeikoS: checking again
+@HeikoS	lambday:  no all fine
+@HeikoS	just tried once more
+@sonney2k	HeikoS, no idea how to do it other than the way I do it with sgmalloc currently
+@HeikoS	sonney2k:  new macro SG_NEW?
+@HeikoS	which calls constructors?
+@HeikoS	or even rename SG_MALLOC to SG_NEW
+@HeikoS	which would then be consistent with c++ api
+@HeikoS	but thats a subtlety
+@iglesiasg	lambday: maybe it is my bad, who knows
+@HeikoS	sonney2k, iglesiasg, ipython notebooks can even play sounds
+@HeikoS	http://nbviewer.ipython.org/urls/raw.github.com/Carreau/posts/master/07-the-sound-of-hydrogen.ipynb
+@sonney2k	HeikoS, then you have to know when to use what... no idea I tried to hide that but as you can see it can cause issues...
+@iglesiasg	HeikoS: funny!
+@sonney2k	HeikoS, that would be cool for pickle27's demo!
+@HeikoS	sonney2k: if we would call it SG_NEW, I think it would be fine, since c++ new does exactly what our SG_MALLOC does
+@HeikoS	sonney2k: say do you got another minute?
+@HeikoS	sonney2k: want to talk about model-selection framework
+@HeikoS	sonney2k: so currently there is a problem with setting registered parameters: we directly modify the memory
+@HeikoS	so no checks for illegal values, and no post-modification of things that depend on parameters
+@HeikoS	which is both bad
+@HeikoS	lisitsyn recently proposed automagic setters/getters based on registered parameters,
+@sonney2k	(sounds like the intro of a paper)
+@HeikoS	if we had them, maybe we could use them for the above case
+@HeikoS	developers could overload them and add checks if they want, or recompute maximum string length or whatever
+@HeikoS	sonney2k: another problem I currently have with the grid-search framework:
+@HeikoS	its way easier to just write a nested loop and use Shoguns cross-validation class to select parameters
+@sonney2k	HeikoS, so all user set paraemters would go through lisitsyn's setters/getters right?
+@HeikoS	sonney2k: yes
+@sonney2k	we just have to make sure that we don't cause some stupid slowdowns
+@HeikoS	and we could call those automatically also
+@HeikoS	I have to talk so sergey about this
+@HeikoS	just an idea
+@HeikoS	I played a bit with all this for examples and had a few problems with it
+@HeikoS	sonney2k: and the other thing:
+@HeikoS	all those trees are horrible, and sometimes its also unstable
+@HeikoS	so here is a provocative statement: lets drop the model-selection
+@HeikoS	provide proper (stable) cross-validation instead - it is the hard part of model selection anyway
+@HeikoS	and then users would have to write the loop themselves and use setters to change parameters
+@HeikoS	it seems so much easier and even more flexible (see SVM-C problem)
+@sonney2k	woa!
+@sonney2k	dropping your own gsoc project is quite sth1
+@HeikoS	sonney2k: its somewhat extreme I know, but think about it
+@HeikoS	what would that mean
+@HeikoS	or: can we make things a bit easier to controll
+@HeikoS	after all, its only half of the gsoc project, since x-validation was a major part
+@HeikoS	its just the grid-search
+@HeikoS	writing a nested loop and use setters seems so  much easier
+@HeikoS	and much less work for us: no model-selection api, easier parameter framework changes, no parameter tree cross-product, smaller examples etc
+@sonney2k	HeikoS, it is but I remember that we had lots of people asking back then for the grid search ms feature
+@HeikoS	sonney2k: so if we have an example that explains how to do that? its just two lines per parameter: loop and setter call
+@HeikoS	we still have x-validation so its easy to get a performanc emeasure of your choice
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * f3b43d5 / src/shogun/lib/SGReferencedData.cpp,src/shogun/lib/SGReferencedData.h: https://github.com/shogun-toolbox/shogun/commit/f3b43d57592c643ccde07202d163844cbf990ec4
+ shogun-notifier-	shogun: move pthread include from .h -> .cpp
+@sonney2k	HeikoS, people rarely use x-validation but rather fixed splits when they have enough data
+@HeikoS	sonney2k: well that can be emulated with the class easily
+@HeikoS	sonney2k: just thinking about how to make things a bit easier
+@HeikoS	sonney2k: but its just a thought, wanted to share it
+@sonney2k	HeikoS, I get you point but I don't know. There is no win-win here...
+@HeikoS	sonney2k: its just sooo hard to maintain the modelselection framework
+@HeikoS	I mean we have it and it works, so one doesnt *have* to use it
+@sonney2k	HeikoS, maybe explicit trees are not the best way then. maybe doing it recursively over the parameters would be easier
+@HeikoS	sonney2k: I agree, but I have the feeling that doing this with the parameter framework is somewhat of an overkill - so much code, so  many things to test, so many cases, so much time spent. but its so easy to do it without the framework
+@sonney2k	thoralf, only 14 classes with pthread left :D
+@HeikoS	x-validation is harder to do, people shy away from that usually, but brute-force trying all parameters is something everyone knows
+@HeikoS	sonney2k: btw for MMD, I did not even attempt to integrate the kernel selection in the modelselection framework, way too complicated
+@HeikoS	sonney2k: and for GPs I am also unsure whether it would be easier to have  class that is specialised on GPs only. Easier to handle etc
+@sonney2k	HeikoS, if it is that difficult than it is not useful
+@HeikoS	sonney2k: Ill start a discussion on github, lets see what the others think
+@HeikoS	sonney2k: how can I add issues labels on github?
+@HeikoS	got it
+ shogun-buildbot	build #1460 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1460  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- foulwall [~user@2001:da8:215:503:4467:308e:f09f:763] has joined #shogun
+@sonney2k	foulwall, ping?
+ foulwall	Hey sonney2k , I talked with lisitsyn about the demention reduction demo.
+-!- foulwall` [~user@2001:da8:215:503:55a7:5925:5abd:ac97] has quit [Ping timeout: 264 seconds]
+ foulwall	sonney2k: pong.
+@sonney2k	foulwall, yeah seen it
+@sonney2k	foulwall, so you can use his code right?
+ foulwall	right, just add a image uploader
+@sonney2k	foulwall, I am wondering about ocr currently
+@sonney2k	are you still working on the ocr demo?
+ foulwall	ah, forgot to send pr.
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+ foulwall	problems are fixed
+ lisitsyn	foulwall: sorry but that's dimension reduction :)
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ foulwall	lisitsyn: :)
+@sonney2k	foulwall, please do then and show us the demo :)
+ lisitsyn	demention is too close to dementia which is mental illness
+ lisitsyn	:D
+ foulwall	ok sonney2k
+ foulwall	lisitsyn: haha
+@sonney2k	foulwall, you should give me a tour - so I can try to add a few algorithms my own with your framework
+-!- travis-ci [~travis-ci@ec2-54-234-188-131.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9222493
+-!- travis-ci [~travis-ci@ec2-54-234-188-131.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	foulwall, not now but soon. if you could maybe put this into a README would be great so I could try my own
+@sonney2k	and it will be helpful for others later
+-!- lisitsyn [~lisitsyn@92-240-133-94.clients.tlt.100megabit.ru] has left #shogun []
+ foulwall	ok sonney2k
+-!- lisitsyn [~lisitsyn@92-240-133-94.clients.tlt.100megabit.ru] has joined #shogun
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+@sonney2k	wiking, maybe you read this later - we need a blacklist for failing classes for the serialization tests for the time beeing
+@sonney2k	then we can fix them one by one
+@sonney2k	wiking, I wrote some is_valid function - no idea if it works the intended way
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * e6c551d / src/shogun/ (4 files): https://github.com/shogun-toolbox/shogun/commit/e6c551da1377e573790d2c344deef691e622af40
+ shogun-notifier-	shogun: move pthread .h -> .cpp
+@sonney2k	thoralf, 4 pthread's are missing now then all good :)
+ shogun-buildbot	build #1461 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1461  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@wiking	sonney2k: yeah i saw it
+@wiking	it should work .... we should add a different list as well for classes like DenseFeatures... where the function arg for new_sgserializable is not PT_NOT_GENERIC
+-!- travis-ci [~travis-ci@ec2-54-234-188-131.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9223403
+-!- travis-ci [~travis-ci@ec2-54-234-188-131.compute-1.amazonaws.com] has left #shogun []
+@iglesiasg	lambday, hey there! I just saw you issued a PR, that fixes already those tests we mentioned before?
+ lambday	iglesiasg: yes
+ lambday	:D
+ lambday	iglesiasg: lol I just mentioned your name in that PR
+@iglesiasg	lambday, hehe
+@iglesiasg	lambday, thank you for fixing it so promptly!
+ lambday	iglesiasg: but I can't get unit-tests compiled completely..
+ lambday	iglesiasg: hehe
+@iglesiasg	lambday, oh really, still? What is it?
+ lambday	iglesiasg: I installed jinja2 but it gives segfaults for one of the clone methods and gets out of there
+ lambday	sorry, clone tests
+ lambday	HeikoS:
+ lambday	iglesiasg: sorry I meant, compiled just fine.. couldn't check
+@iglesiasg	lambday, all right
+ lambday	iglesiasg: could you please check once when it gets merged? :(
+@iglesiasg	lambday, yes, I will
+ lambday	iglesiasg: thanks :)
+@iglesiasg	no problem ;)
+@sonney2k	wiking, so shall we add an additional blacklist set / dictionary?
+ shogun-notifier-	shogun: lambday :develop * a892cdc / / (13 files): https://github.com/shogun-toolbox/shogun/commit/a892cdc09c96b8d11df48e687207d4312093e278
+ shogun-notifier-	shogun: fixes and added unit-tests in log-det
+ shogun-notifier-	shogun: Heiko Strathmann :develop * cb4ceff / / (13 files): https://github.com/shogun-toolbox/shogun/commit/cb4ceff0f0aa6fe61ba3133e555f1bbe1299444d
+ shogun-notifier-	shogun: Merge pull request #1252 from lambday/feature/log_determinant
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fixes and added unit-tests in log-det
+@HeikoS	lambday, iglesiasg yes the clone tests curently segfault
+ lambday	HeikoS: alright..
+ lambday	HeikoS: by the way, I used a non-SG type struct in CG solver...
+@HeikoS	lambday: but thats good, bugs in clone are detected this way, for all classes from now :)
+ lambday	HeikoS: yes.. :)
+@HeikoS	lambday: could you explain this a bit?
+ lambday	HeikoS: I added a class IterativeSolverIterator which is not SG type
+ lambday	HeikoS: and I used that in solve method inside CG solver
+@HeikoS	lambday: I see, that should be fine, just hide it to the outside world :)
+ lambday	HeikoS: it takes Eigen3 things as params so didn't keep it in standard way
+ lambday	HeikoS: hide as in?
+@HeikoS	lambday: not expose it through modular interfaces or through methods as a parameter
+@HeikoS	just internal c++ parameter
+ lambday	HeikoS: alright.. I haven't added any modular interface for any of the classes yet (not sure how that is done yet)..
+ lambday	I'll keep in mind when I do
+@HeikoS	lambday: dont worry its very easy
+@HeikoS	lambday: but this class is not parameter or return value of some method right?
+ lambday	HeikoS: nope
+ lambday	HeikoS: just used internally inside solve method of CG
+@HeikoS	lambday: you can do anything for internal things :)
+ lambday	HeikoS: alright :D
+ lambday	HeikoS: saw your comments.. will change the msgs :)
+@HeikoS	lambday: yeah sorry I should have been more clear on this
+@HeikoS	but it is always good to have the numbers if there is a problem
+ lambday	HeikoS: yes.. more helpful for the users
+ shogun-buildbot	build #1463 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1463  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1462 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1462  blamelist: lambday <heavensdevil6909@gmail.com>
+-!- gsomix [~gsomix@178.45.92.6] has joined #shogun
+ gsomix	sonney2k, hey
+@HeikoS	wiking: around?
+-!- travis-ci [~travis-ci@ec2-23-20-131-34.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9225440
+-!- travis-ci [~travis-ci@ec2-23-20-131-34.compute-1.amazonaws.com] has left #shogun []
+-!- iglesiasg_ [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Read error: Connection reset by peer]
+ lambday	HeikoS: I'll be back later.. currently thinking what more tests can I add
+ lambday	HeikoS: I'll add COCG by tonight I am hopinh
+@HeikoS	lambday: ok, thats time well spent :)
+ lambday	HeikoS: hehe :D
+ lambday	HeikoS: bye for now :) see you
+-!- lambday [67157e4c@gateway/web/freenode/ip.103.21.126.76] has quit []
+-!- foulwall [~user@2001:da8:215:503:4467:308e:f09f:763] has quit [Ping timeout: 264 seconds]
+ gsomix	sonney2k, sorry, was not availbale at morning/day. I'm working on csv, but have some questions.
+-!- nube [~rho@49.244.27.182] has quit [Ping timeout: 240 seconds]
+ iglesiasg_	ok ,see you later people
+-!- iglesiasg_ [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- foulwall [~user@2001:da8:215:6901:1548:83bb:4040:5bd7] has joined #shogun
+ foulwall	Hey sonney2k
+ foulwall	pr sent, and you can check the ocr @ http://nn.7nn.de:8000/ocr/entrance
+-!- foulwall [~user@2001:da8:215:6901:1548:83bb:4040:5bd7] has quit [Ping timeout: 245 seconds]
+-!- foulwall [~user@2001:da8:215:c252:e1fd:aee6:b45f:82d6] has joined #shogun
+ pickle27	foulwall: very cool demo!
+ thoralf	foulwall: Cool, feels like Microsoft Paint ;)
+-!- lambday [67157d4c@gateway/web/freenode/ip.103.21.125.76] has joined #shogun
+-!- foulwall [~user@2001:da8:215:c252:e1fd:aee6:b45f:82d6] has quit [Ping timeout: 245 seconds]
+-!- foulwall [~user@2001:da8:215:c252:b159:493b:b848:a6ab] has joined #shogun
+ foulwall	thanks pickle27 , thoralf
+ foulwall	dive into dementia reduction demo:)
+@lisitsyn	foulwall: looks cool!
+@lisitsyn	foulwall: just one bug I spotted - when you paint some more prediction is changed
+@lisitsyn	but not the pixelized thing to the right
+ foulwall	thanks lisitsyn , I'll have a check
+-!- van51 [~van51@athedsl-399972.home.otenet.gr] has joined #shogun
+-!- foulwall [~user@2001:da8:215:c252:b159:493b:b848:a6ab] has quit [Ping timeout: 245 seconds]
+ gsomix	van51, hey
+ van51	gsomix: hello
+ gsomix	van51, how are you?
+ van51	gsomix: fine :) how about you?
+ gsomix	van51, me too, but I have question.
+ van51	gsomix: shoot
+ gsomix	van51, what solution for quoting in DelimiterTokenizer you keep in your mind?
+ van51	gsomix: you mean to handle situations like "... \".. " ?
+ gsomix	yep
+ gsomix	I think, I need it. And I can try to do it myself.
+ gsomix	But need your advice
+ van51	gsomix: I guess I would add a case if the current char is \ to not consider the next char as a delimiter
+ van51	gsomix: by setting a flag maybe
+ van51	gsomix: but I think it needs to be discussed more if it is to be inserted in the delimiter phase
+ van51	gsomix: as in what it would do in "\\" etc
+ van51	gsomix: have you discussed it with sonney2k?
+ thoralf	gsomix: Could you do a trivial change for me?  gcc complaing about "#include <cstdio>_" in io/LineReader.cpp
+ van51	gsomix: if you 're parsing each line through the tokenizer it really feels like the support for that should be added in there
+ gsomix	thoralf, yeah, I'll fix it.
+ thoralf	gsomix: No hurry, it's only a warning.
+ thoralf	io/LineReader.cpp:10:18: warning: extra tokens at end of #include directive [enabled by default]
+ van51	gsomix: let me try to get through a compiler error and I'll see what I can do in the tokenizer class :)
+ gsomix	van51, "have you discussed it with sonney2k?" nope, waiting for evening.
+ gsomix	van51, ok!
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- lambday [67157d4c@gateway/web/freenode/ip.103.21.125.76] has quit []
+@HeikoS	lisitsyn, sonney2k around?
+@HeikoS	{ return g == PT_NOT_GENERIC? new CRealFileFeatures(): NULL; }
+@HeikoS	I dont understand that
+@HeikoS	can I only create empty instances if the generic type is PT_NOT_GENERIC?
+-!- iglesiasg [~iglesias@2001:6b0:1:1041:6549:4678:d91c:7b6f] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	guten Tag
+ thoralf	Guten Tag :D
+@iglesiasg	:)
+@iglesiasg	do you guys have problems with git?
+@iglesiasg	git fetch upstream
+@iglesiasg	hangs forever here
+ thoralf	iglesiasg: It took a while, but it works.
+@HeikoS	tada
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 2163945 / src/shogun/kernel/BesselKernel.cpp: https://github.com/shogun-toolbox/shogun/commit/2163945fb06fbaad66322bd228f9399e932be5ec
+ shogun-notifier-	shogun: removed double parameter
+ shogun-notifier-	shogun: Heiko Strathmann :develop * ddcd0b6 / src/shogun/kernel/MultiquadricKernel.h,src/shogun/kernel/PyramidChi2.h: https://github.com/shogun-toolbox/shogun/commit/ddcd0b6917003be4199f047bc18ca0dad40b12e2
+ shogun-notifier-	shogun: fixed return of get_name
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 7bc238f / src/shogun/kernel/BesselKernel.cpp: https://github.com/shogun-toolbox/shogun/commit/7bc238f6c206ba24165c4cffb2661fdc26c689c4
+ shogun-notifier-	shogun: removed another double parameter
+ shogun-notifier-	shogun: Heiko Strathmann :develop * faea6dd / src/shogun/base/SGObject.cpp: https://github.com/shogun-toolbox/shogun/commit/faea6dded5bb7c35ce63ec2f636f84a9a662217e
+ shogun-notifier-	shogun: fixed typo
+ shogun-notifier-	shogun: Heiko Strathmann :develop * a44ff18 / src/shogun/kernel/string/ (2 files): https://github.com/shogun-toolbox/shogun/commit/a44ff18fcdffeffb523d061b283b3cc39a235764
+ shogun-notifier-	shogun: cleaned up and fixed some uninitialised memory bugs. Proper parameter registering
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 0e4ef5e / src/shogun/kernel/string/ (2 files): https://github.com/shogun-toolbox/shogun/commit/0e4ef5e4bf8d784aa3ba55ae85b85933827ef671
+ shogun-notifier-	shogun: autoformatter, some more cleanups
+ shogun-notifier-	shogun: removed PT_NOT_GENERIC thing again
+ shogun-notifier-	shogun: Heiko Strathmann :develop * fd06ef2 / src/shogun/ (14 files): https://github.com/shogun-toolbox/shogun/commit/fd06ef255329b318f2d7bddbc7fa47bd279db80e
+ shogun-notifier-	shogun: Merge pull request #1258 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: A bunch of bugfixes detected by clone/equals automated tests
+ shogun-buildbot	build #1464 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1464  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1466 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1466  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@lisitsyn	HeikoS: still here?
+@HeikoS	lisitsyn:  yes hi
+@lisitsyn	hey
+@lisitsyn	okay so you have a problem with realfilefeatures only right?
+@HeikoS	lisitsyn: any idea about the PT_Generic thing
+@HeikoS	lisitsyn: yes two issues:
+@HeikoS	first:
+@HeikoS	CSGObject* object = new_sgserializable("DynamicArray", PT_NOT_GENERIC);
+@HeikoS	returns NULL
+@lisitsyn	that's correct
+@lisitsyn	iirc dynamic array is templated, right?
+@HeikoS	exactly
+@HeikoS	so how to automatically extract that? :)
+@lisitsyn	like whether the class is templated?
+@HeikoS	lisitsyn: have a look at the file clone_unittest jinja
+@lisitsyn	we have some detection for that in class_list.cpp.py
+@HeikoS	lisitsyn: wiking has to add that to the test then :)
+@lisitsyn	I can do that
+@HeikoS	lisitsyn: cool :)
+ shogun-buildbot	build #1465 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1465  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	lisitsyn: so the test then has to be generated for all types of all templated classes
+@HeikoS	lisitsyn: cool!
+@HeikoS	lisitsyn:  there is another problem:
+@HeikoS	CSGObject* copy=new_sgserializable(get_name(), this->m_generic);
+@HeikoS	thats done in clone
+@lisitsyn	yeah probably
+@HeikoS	but the problem is: if you have a class that inherits from a generic one with fixed T
+@HeikoS	it is not detected as generic
+@HeikoS	but m_generic is still set to T
+@HeikoS	so again, returns NULL
+@HeikoS	the way to fix that that I see is to manually set generic to PT_NOT_GENERIC when you derice from a generic class with fixed T
+@wiking	HeikoS: ping
+@HeikoS	lisitsyn: do you agree?
+@HeikoS	wiking: hi!
+@wiking	HeikoS: yes yes basically if u get null
+@wiking	you could start doing the rest
+@HeikoS	wiking: ah good to see you, 100s of questions :)
+@lisitsyn	HeikoS: yes sure
+@wiking	yeah yeah i kniw
+@lisitsyn	wiking: looks ukrainian
+@wiking	so CSGObject* object = new_sgserializable("GaussianKernel", PT_NOT_GENERIC);
+@HeikoS	wiking: so issue 2 first, manually do set_generic(PT_NOT_GENERIC)
+@lisitsyn	kniw :D
+@wiking	and object == NULL
+@wiking	then you could start like
+@wiking	CSGObject* object = new_sgserializable("GaussianKernel", PT_NOT_GENERIC);
+@wiking	CSGObject* object = new_sgserializable("GaussianKernel", PT_BOOL);
+@wiking	etc etc.
+@wiking	or?
+@HeikoS	wiking: but the problem is for example with RealFileFeatures: public CDenseFeatures<float64_t>
+@wiking	HeikoS: nono
+@HeikoS	wiking: yes thats the solution for problem 1
+@wiking	HeikoS: that is actually not the case
+@lisitsyn	HeikoS: but that's not generic right?
+@HeikoS	wiking: but problem 2, how to solve that
+@HeikoS	lisitsyn: true, but it inherits from a generic class
+@HeikoS	and doesnt reset the m_generic flag
+@lisitsyn	uhmm I am a bit lost then
+@lisitsyn	ahhh
+@wiking	HeikoS: why don't you do this:
+@wiking	if the new_sgserializable(<whatever>, PT_NOT_GENERIC);
+@lisitsyn	so all our classes are generic once their parent is generic
+@wiking	returns NULL then you need to use PT_BOOL, PT_CHAR etc.
+@wiking	either you do this or do a list of classes that are 'special'
+@wiking	meaning that they are not generic...
+@wiking	like CDenseFeatures, CDenseSubsetFeatures etc.
+@wiking	or this wouldn't work?
+@lisitsyn	wiking: yes that solves this problem
+@lisitsyn	trouble arises when we have
+@HeikoS	wiking: which problem are you talking about, 1 or 2?
+@lisitsyn	sgobject -> ... -> generic -> not generic
+@HeikoS	lisitsyn:  thats problem 2
+@HeikoS	lets structure this a bit
+@lisitsyn	HeikoS: yes but 1 is easy to solve right?
+@HeikoS	first problem:
+@lisitsyn	;)
+@wiking	ok what's the first problem? :)
+@wiking	and what is 2nd?
+@HeikoS	CSGObject* object = new_sgserializable("DynamicArray", PT_NOT_GENERIC);
+@HeikoS	returns NULL in the unit test template
+@wiking	HeikoS: yes
+@wiking	becuase
+@HeikoS	so we have to extract the PT_GENERIC for the class that we put in the template and fill it in accordingly
+@HeikoS	thats not hard right?
+@HeikoS	class_list.py can do this already
+@lisitsyn	easy yes
+@lisitsyn	class_list.py does that so I am on it
+@HeikoS	lisitsyn: cool, thanks!
+@HeikoS	second problem:
+@HeikoS	inheritance: sgbject->generic->non_generic
+@wiking	HeikoS: example plz
+@HeikoS	like for example CRealFileFeatures: public CDenseFeatures<float64_t>
+@HeikoS	this->m_generic is set to PT_FLOAT64
+@HeikoS	so creating an empty instance of CRealFileFeatures with PT_NOT_GENERIC fails
+@wiking	HeikoS: this problem arises in the clone() method itself, or?
+@HeikoS	wiking: yes
+@wiking	so it's not related with the unit test itself
+@HeikoS	since when you clone, you want to create an empty instance of the same PT_GENERIC type
+@HeikoS	wiking: no
+@HeikoS	but similar issue
+@wiking	ah i see
+@wiking	shit :S
+@HeikoS	so my solution would be that classes that inherit from generic ones but are not templated have to set m_generic=PT_NOT_GENERIC by hand
+@HeikoS	this can be detected through the automated unit tests (they fail otherwise)
+@wiking	HeikoS: mmm that would make sense
+@HeikoS	but I wonder whether there is an automagic solution
+@wiking	i mean THAT class is actually PT_NOT_GENERIC
+@HeikoS	wiking: exactly
+@wiking	so semantically takeing the meaning of PT_NOT_GENERIC and PT_GENERIC
+@HeikoS	wiking: I mean it is not generic
+@wiking	the class that is inherited from a generic class, but itself is not generic
+@wiking	it should be PT_NOT_GENERIC
+@HeikoS	wiking: yes
+@HeikoS	so where are the PT_GENERIC set?
+@wiking	i'm for this solution
+@HeikoS	manually?
+@HeikoS	lisitsyn: what do you think?
+@HeikoS	wiking: I think thats fine. If people add new classes and forget that, unit tests will fail :D
+@HeikoS	wiking: how do I add new files with tests?
+@HeikoS	I tried (not hard) but failed :)
+@wiking	HeikoS: i would set it in the constructor of the class or it's init() function if it has... like CRealFileFeatures should set m_generic or whatever to PT_NOT_GENERIC by hand
+@wiking	HeikoS: ok what ya need
+@wiking	what kind of unit test?
+@HeikoS	I wanted to have some seperate tests for checking the output of get_name() that is executed before the others
+@wiking	just write on gist one TEST() block and i'll generate the automated template test for it
+@HeikoS	then test clone before clone_equals
+@HeikoS	and also test equals (on empty instances) before clone_equals
+@wiking	okok
+@HeikoS	and then finally, test all sorts of serialisations
+@wiking	that's fine
+@HeikoS	wiking: since currently clone_equals fails but one doesnt know the reason, the others would help there and are fast to run
+@wiking	no worries
+@wiking	can u write one example of each?
+@wiking	with any class
+@wiking	e.g. CRealFileFeatures
+@wiking	?
+@wiking	put it on gist and i'll write the template + py script to generate the tests for all classes
+@HeikoS	wiking: for the first ones thats trivial
+@HeikoS	EXPECT_TRUE(strcmp(get_name(), {{class_name}})==0);
+@HeikoS	wiking: but ok I will do
+@wiking	HeikoS: i guess it should be not only a separate test but a separate file?
+@HeikoS	wiking: yes
+@wiking	or it could be part of the clone_unittest?
+@wiking	(i wouldn't go with that option...)
+@HeikoS	wiking: and could we soon try to run all those automated test with valgrind automagically?
+@HeikoS	wiking: no new file would be better I think
+@HeikoS	wiking: https://gist.github.com/karlnapf/6031039
+@HeikoS	if these would be executed (in this order) before the clone_equals, this would help a lot
+@HeikoS	wiking, lisitsyn maybe talk to each other as sergey is modifying the generator scripts for the tests to consider all generic cases
+@lisitsyn	sorry was trying to repair my bike :D
+@wiking	lisitsyn: :DDDD
+@wiking	HeikoS: so the gist1 would be testing equails
+@lisitsyn	chain got disconnected
+@wiking	HeikoS: and gist2 would be testing clone itself
+@HeikoS	wiking: ehm :)
+@wiking	and after this clone+equails?
+@wiking	*equals
+@wiking	ah nooo
+@wiking	i see
+@wiking	okok
+@HeikoS	wiking: yes, first equals on empty instances, then clone itself, then clone&equals
+@HeikoS	so if we run them with valgrind, we will see where problems are coming from
+@wiking	okok
+@wiking	i'm on it
+ shogun-notifier-	shogun: Heiko Strathmann :develop * b757a6d / src/shogun/kernel/string/SpectrumMismatchRBFKernel.cpp: https://github.com/shogun-toolbox/shogun/commit/b757a6d1d416d6df896e88b52f6d1ab6bd16010d
+ shogun-notifier-	shogun: whitespace change
+ shogun-notifier-	shogun: Heiko Strathmann :develop * a384e6b / src/shogun/features/RealFileFeatures.cpp,src/shogun/features/RealFileFeatures.h: https://github.com/shogun-toolbox/shogun/commit/a384e6b4400bdeb2d4158a45cbc81b9336a4c0cb
+ shogun-notifier-	shogun: remove generic type by hand
+ shogun-notifier-	shogun: Heiko Strathmann :develop * e0b2b58 / src/shogun/ (3 files): https://github.com/shogun-toolbox/shogun/commit/e0b2b5805ba326666121185044ac8decd3f95830
+ shogun-notifier-	shogun: Merge pull request #1259 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: unset generic for RealFileFeatures
+@HeikoS	wiking, lisitsyn this fixes problem 2 :)
+@HeikoS	man sooo many bugy detected by this automated stuff
+@HeikoS	really good, we will be able to rely on those methods in the future, good for parallel stuff etc
+@lisitsyn	HeikoS: ok let me fix the P1 then
+ shogun-buildbot	build #1468 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1468  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1467 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1467  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	lisitsyn: MulticlassStrategy is missing in class_list.cpp any idea whsy?
+@lisitsyn	HeikoS: hmm
+@HeikoS	lisitsyn: abstract :)
+@lisitsyn	ah yes
+@HeikoS	getting tired  her e:)
+@sonney2k	Re
+@sonney2k	HeikoS, had a good day?
+@HeikoS	sonney2k: ehm, why? )
+@sonney2k	wiking, did you check the videos already?
+@sonney2k	HeikoS, hacked like hell?
+@HeikoS	sonney2k: yeah had some time today :)
+-!- travis-ci [~travis-ci@ec2-54-226-190-137.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9233755
+-!- travis-ci [~travis-ci@ec2-54-226-190-137.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	sonney2k: flow of bugs doesnt stop :)
+@HeikoS	but I am half way through
+@HeikoS	the class list
+@sonney2k	HeikoS, it can only grow :)
+@HeikoS	now CGUIPluginEstimate
+@HeikoS	sonney2k: these tests by wiking are worth gold
+@sonney2k	wait everything CGUI* should not be in the test
+@HeikoS	we can actually make sure that all those things work
+@HeikoS	wiking:  ^
+@HeikoS	sonney2k: still contains uninitialsed variables
+@HeikoS	wiking, sonney2k we can leave them in there
+@HeikoS	its good to have these checks
+@sonney2k	iglesiasg, with the opaque pointer stuff - we should somehow mark the classes that we don't want to expose externally
+@sonney2k	so we don't install these headers
+@iglesiasg	sonney2k, sure
+@iglesiasg	sonney2k, so are we doing it to reduce compilation time mainly?
+@iglesiasg	sonney2k, or are there other reasons?
+@sonney2k	iglesiasg, I see 3 reasons
+@sonney2k	1) reduce compilation time
+@sonney2k	2) reduce swig wrapper code size
+@sonney2k	3) don't have external library dependencies (like pthread/eigen...) in shogun code
+@iglesiasg	sonney2k, a couple of questions: 1) the classes for opaque pointers, should they inherit from SGObject?
+@sonney2k	iglesiasg, they can do whatever they want
+@iglesiasg	all right
+@iglesiasg	sonney2k,  that answers the second question too I guess so no need :)
+@HeikoS	sonney2k: any reason why in GUI you dont ref parameters? SG_REF I mean
+@sonney2k	HeikoS, legacy code...
+@HeikoS	sonney2k: so its safe to add this?
+@sonney2k	HeikoS, I woudln't voluntarily touch this code
+@HeikoS	have to
+@HeikoS	uninitialised mrmory
+ thoralf	HeikoS: Hehe, initialization should be safe for working code.
+ thoralf	HeikoS: If it doesn't work afterwards, you found something really-weird[tm]. ;)
+@HeikoS	thoralf: indeed :)
+ thoralf	HeikoS: I like these kind of bugs. :)
+@HeikoS	I mean all shogun objcets should not crash if you just call the base constructor and delete afterwards right?
+@iglesiasg	let's say all objects :)
+ thoralf	"My fix shouldn't have any side effects.  Why did it stopped working anyway?"
+ thoralf	HeikoS: There are more objects like this.  One second.
+@wiking	HeikoS: yes i can :)
+@HeikoS	wiking:  thanks :)
+@HeikoS	thoralf: I will find them all
+ thoralf	This one should be one of them: src/shogun/structure/SequenceLabels.cpp
+ thoralf	Just an educated guess.  Tell me if I was right. :)
+@HeikoS	thoralf: will do :)
+@HeikoS	very soon, we will have none of those
+ gsomix	sonney2k, hey?
+ thoralf	HeikoS: [ERROR] constructur CStructuredLabels() needs size argument
+ thoralf	HeikoS: I guess it should be at least marked as SG_NOTIMPLEMENTED
+ thoralf	:)
+ thoralf	HeikoS: But actually that's no crash.
+@HeikoS	wiking: do you have an idea how we can test non-trivial class instances in an automatic way?
+@HeikoS	so not base constructor
+@sonney2k	gsomix, hey
+ gsomix	sonney2k, how are you?
+@sonney2k	iglesiasg, problem is that I have this pthread class here
+@sonney2k	iglesiasg, all in .h (templated class)
+ thoralf	HeikoS: Hmm.  The test generator then needs to understand the semantic of the parameters *and* also needs to initialize them properly.
+ thoralf	HeikoS: So if the parameters are also non-trivial? ;)
+@sonney2k	iglesiasg, now I am refactoring it into a CLock class providing all the functions there
+@iglesiasg	sonney2k, that sounds good. Is there any problem doing that?
+@sonney2k	iglesiasg, but it has a state / a type variable so my CLock.h depends on pthread but I don't want it too
+@sonney2k	to
+@sonney2k	gsomix, did swim my first few km
+@HeikoS	thoralf: yes
+@sonney2k	but too much wind
+@HeikoS	obviously devs have to write those
+ thoralf	HeikoS: Anyway, automated tests are bad since they don't have real assertions.
+ gsomix	sonney2k, I'm stuck with some details. are there some ideas how truly work with quotation?
+@HeikoS	I am thinking of something that is being provided but then automatically checked
+@sonney2k	gsomix, truly as in?
+ thoralf	HeikoS: But you could generate code for different corner cases for every data type (lets say SGMatrix) and then manually write code like: new CFooBar(empty_sgmatrix), new CFooBar(one_element_sgmatrix), etc.
+ thoralf	HeikoS: So everyone can re-use this code without bothering about trivial test cases.
+@sonney2k	gsomix, I think you can only follow https://en.wikipedia.org/wiki/Comma-separated_values#Basic_rules_and_examples
+ thoralf	HeikoS: Eliminate code duplication when initializing tests. :)
+@sonney2k	gsomix, I don't really care if we don't support *all* of it though
+@sonney2k	the most basic format will be sufficient most of the time
+@sonney2k	gsomix, as in just ,'s
+@iglesiasg	sonney2k, any way to get rid of that state variable easily?
+@HeikoS	thoralf: this is more to check that all is set up fine for serialisation and clone
+ thoralf	HeikoS: So forget automatic tests - just make it easy[tm] to write new tests.
+ thoralf	HeikoS: I know.  But you asked for automatic tests. ;)
+@HeikoS	thoralf: no, this actually help developers writing new classes since theyx are forced to do the basic things correctly
+@iglesiasg	sonney2k, if you make the methods in CLock used in the pthread class static, then the pthread class does not need a CLock member and it could make sense to have a pthread class member in CLock
+ thoralf	HeikoS: Writing tests as an tutorial into shogun?
+@HeikoS	thoralf: thats always good :)
+ thoralf	HeikoS: I think if you ("we") provide code for trival corner cases, this will help even sonney2k to write more test. ;)
+@sonney2k	iglesiasg, the only idea I have is to use a void* currently and alloc / cast it from the .cpp
+ gsomix	sonney2k, hm, ok. I just want to ask when I should process quotation: either in BufferedReader or in DelimiterTokenizer? I think that it's work for tokenizer - it will be automagically for readers.
+@iglesiasg	it sounds pro-hacking :)
+@sonney2k	gsomix, ohh I thought that this is not even the tokenizer nor the reader
+@sonney2k	but the csvreader
+ thoralf	HeikoS: Just imagine some kind of emplate: "CFoobar( __INSERT_SG_MATRIX_HERE__ )", then generate some code that iterates over all provided SG_MATRIX instances, instanciates and destroys instances.
+@HeikoS	thoralf: totally
+ gsomix	sonney2k, in this case I should read line, then tokenize by <quote_char> and analyze it. right?
+@sonney2k	gsomix, I mean stuff like " " can just be stripped for everything that is not string
+ thoralf	HeikoS: Some python script that generates CPP code.
+@HeikoS	thoralf: we have this, look at wikings tests
+@sonney2k	gsomix, and for strings you might need to merge multiple tokens if they contain a , (and this is the delimiter token)
+@sonney2k	and the strings are in " "
+ thoralf	HeikoS: But why can't you use this to write automated tests for non-trivial constructors?
+@sonney2k	gsomix, so  your job is easy for all non-string stuff
+@HeikoS	thoralf: I get the idea now, nice idea
+@HeikoS	so we have a set of objects of all sorts of types
+@HeikoS	that are then inserted into the constructors
+@HeikoS	sounds tricky, but might actually be helpful
+ thoralf	HeikoS: All you need to do is to write a "template" for each constructor you want to test.
+ thoralf	HeikoS: Why tricky?
+ thoralf	HeikoS: just write: foreach my $sgmatrix (@sgmatrices) { print "void foo${i}Test() { CFoobar * f = new CFoobar( $placeholder ); delete f; }\n"; }
+@sonney2k	gsomix, csv is no 'standard' so supporting a couple of formats is totally sufficient
+@HeikoS	thoralf: we have a lot more classes in sghoun thats why I think its tricky
+ thoralf	HeikoS: Okay, I understand.
+@sonney2k	gsomix, you should send a PR once you have the simplest variants working
+@sonney2k	gsomix, we can always improve
+ thoralf	HeikoS: Need to go.  See you tomorrow?
+@HeikoS	thoralf: bye! :)
+ thoralf	HeikoS: I like your idea, maybe I could help.
+@sonney2k	gsomix, OK or questions?
+ thoralf	HeikoS: At least for memory-checking it could be handy.
+@sonney2k	iglesiasg, better ideas?
+ gsomix	sonney2k, questions. :) reader is responsible for determining the number of columns, not user. right?
+@sonney2k	iglesiasg, I mean this is what I have: https://gist.github.com/sonney2k/6031731
+@HeikoS	thoralf: cool, lets discuss soon!
+ gsomix	for csv
+@sonney2k	gsomix, sure
+@iglesiasg	sonney2k, did you read the one with static methods?
+@sonney2k	gsomix, but with an optional SGVector<index_t> argument where the user can specify which columns to take
+@sonney2k	iglesiasg, yeah but you have no state then right?
+@iglesiasg	true... stupid solution
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 248 seconds]
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+@iglesiasg	I am thinking
+ gsomix	sonney2k, ok. now I'm little stuck with sequential read. My BufferedReader does not guarantee, that stream position will be at end of token after read.
+@iglesiasg	sonney2k, but I don't understand. Why does it need the state from the pthread class?
+ gsomix	is it problem?
+@sonney2k	iglesiasg, it is the lock
+@iglesiasg	sonney2k, the class CLock here is *not* the one to cover with opaque pointer then?
+@sonney2k	gsomix, I don't get it then. Doesn't your buffered reader read 1 line at a time?
+@sonney2k	iglesiasg, no no it is CSGObject / CMap etc
+@sonney2k	iglesiasg, these need some way to 'lock' things
+ gsomix	sonney2k, nope. reader read big block of file in buffer. and then tokenizing it in memory.
+@sonney2k	against concurrent access (pthread)
+@iglesiasg	ok
+@sonney2k	gsomix, I thought you use it to just read full lines? I mean I know that it internally reads big blocks but then?
+@sonney2k	gsomix, what do you do?
+@iglesiasg	sonney2k, so the CSGObject, the CMap, etc have a CLock member
+@sonney2k	iglesiasg, problem is I need this pthread_spinlock_t or pthread_mutex_t in CLock
+@sonney2k	iglesiasg, yes
+@sonney2k	iglesiasg, I could certainly have a void* lock; in CLock
+@iglesiasg	sonney2k, but we don't need to expose the CLock to the interfaces either
+@sonney2k	and then allocate the real lock to this
+@sonney2k	iglesiasg, no but it is some .h still
+ gsomix	sonney2k, then, after reading of big block, you can get token (part of the file between the delimiters) in useful form: string or number.
+ gsomix	but stream position of your file is at end of big block.
+@iglesiasg	sonney2k, aham ok. Then the problem here is different. I do include eigen and STL stuff in the LMNNImpl header
+@sonney2k	iglesiasg, so you mean not to expose CLock to anything outside right?
+@iglesiasg	sonney2k, yes
+@sonney2k	gsomix, but why not get line by line? and then csv tokenize the line?
+@sonney2k	iglesiasg, so how do we mark classes then that are not to be exported?
+@sonney2k	not swigged etc?
+@iglesiasg	sonney2k, isn't some SWIG instruction to do that?
+@iglesiasg	I thought that was the whole point of it :)
+@iglesiasg	that there was something to tell SWIG not to create wrappers around some classes
+ gsomix	sonney2k, yes, that's what I was thinking today. it will produce little more SGVectors. but not critical.
+ gsomix	sonney2k, next question about ?File interface. Do we plan to change it?
+ gsomix	I mean change pure arrays to SGVectors.
+@sonney2k	iglesiasg, ahh yes sure we just don't %include it
+@sonney2k	iglesiasg, but not that we also install the .h files
+@iglesiasg	sonney2k, that's it!
+@sonney2k	iglesiasg, and in principle everyone can just use the libshogun.so* and the *.h files and do everything from c++ w/ shogun
+@iglesiasg	sonney2k, yes
+@sonney2k	gsomix, what are you doing currently
+@sonney2k	?
+@iglesiasg	sonney2k,  although it would be actually nicer if the "opaque pointer classes" can only be used from a specific class
+@sonney2k	iglesiasg, in this case having a CLock class might be actually useful (it works under osx/linux ...)
+@sonney2k	iglesiasg, C++ has no package private so...
+@iglesiasg	yeah, no idea how to do that
+@iglesiasg	sonney2k, but anyway in this way we reduce the wrapper code size and thus, compilation time (I guess)
+@HeikoS	sonney2k: wow CHMM.cpp serious stuff !
+@sonney2k	HeikoS, I want to minimize shogun's external .h files
+@HeikoS	sonney2k: agreed
+@sonney2k	HeikoS, as in we currently have tons of functions in .h files that we don't want to see exposed to the outside
+@HeikoS	yep
+@HeikoS	agreed
+@sonney2k	we had the issue with iglesiasg with eigen/std whatever external that was needed
+@iglesiasg	sonney2k, to the outside is basically SWIG interfaces, right?
+@sonney2k	but could well be hidden
+@HeikoS	sonney2k:  how do you want to proceed on this?
+@sonney2k	iglesiasg, yeah basically what one can see from  swig or via out libshogun interface (the .h files we ship and will install)
+@iglesiasg	they are still exposed in libshogun using opaque pointers, I think
+@sonney2k	HeikoS, the question is how to mark .h files external...
+@sonney2k	HeikoS, either we use some other extension - say .hpp
+@HeikoS	sonney2k: lisitsyn probably has best ideas on this
+@sonney2k	and only install .h files
+@lisitsyn	heyaa
+@HeikoS	sonney2k: I dont like that, too complicated
+@sonney2k	or we mark the files somehow
+@iglesiasg	lisitsyn, hey!
+@lisitsyn	the problem is ..
+@lisitsyn	iglesiasg: hey
+@sonney2k	HeikoS, as in DO_NOT_EXPORT
+@lisitsyn	we don't want to expose some .h?
+@iglesiasg	yes!
+@HeikoS	sonney2k: yep I like that more
+@sonney2k	lisitsyn, yes not install
+@lisitsyn	I think keeping that in filename would be better
+-!- pickle27 [~kevin@130.15.16.96] has joined #shogun
+@sonney2k	HeikoS, apart from that woaah! You were on some crazy cleanup spray today. I don't see how stuff can work with what you suggest but anyway! wow!
+@sonney2k	lisitsyn, what did you do with tapkee?
+@sonney2k	lisitsyn, .hpp? or .internal
+@lisitsyn	sonney2k: I think we are installing it
+@sonney2k	lisitsyn, bah :/
+@HeikoS	sonney2k: the unit tests dont segfault anymore now
+@sonney2k	HeikoS, and if we used a different file suffix
+@HeikoS	some fail, but thats fine
+@HeikoS	sonney2k: if we want to seriously use clone/equals we have to do those tests
+@lisitsyn	sonney2k: easiest way is to not install .hpp
+@HeikoS	sonney2k: I want to push things to be more stable
+@sonney2k	not .hpp but .h_internal or whatever
+@sonney2k	or .hpp
+@HeikoS	sonney2k: and I really think we should drop tons of code, I saw sooo many things today that will never ever work again
+@sonney2k	we could of course have some #define DO_NOT_EXPORT
+@sonney2k	and then put that in each file we don't want to expoert
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 23ee5e6 / src/shogun/base/SGObject.cpp: https://github.com/shogun-toolbox/shogun/commit/23ee5e6de9cdaa9f46562d3f6a18b7dbffbb385c
+ shogun-notifier-	shogun: updated error message of clone fails
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 5c4d110 / src/shogun/features/streaming/StreamingHashedDocDotFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/5c4d110bdc45e70059beefa70ba15594ce2bc3e7
+ shogun-notifier-	shogun: fixed uninitialised memory issues
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 9f30ba8 / src/shogun/classifier/vw/VowpalWabbit.cpp: https://github.com/shogun-toolbox/shogun/commit/9f30ba8e669d44c077d3a6b4e3a1d156b78b81f2
+ shogun-notifier-	shogun: fixed uninitialised memory bugs
+@lisitsyn	do not export is worse I believe as you can't see what file is exported without looking into it
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 2298b8f / src/shogun/distance/KernelDistance.h: https://github.com/shogun-toolbox/shogun/commit/2298b8fc539cecb0b0559f773b097fcc6528bc47
+ shogun-notifier-	shogun: fixed null-pointer exception
+ shogun-notifier-	shogun: Heiko Strathmann :develop * e542d2b / src/shogun/multiclass/ (3 files): https://github.com/shogun-toolbox/shogun/commit/e542d2b73d6cf7c464887a6dfb667963822f1a9b
+ shogun-notifier-	shogun: fixed some uninitialised memory related bugs
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 15b307a / src/shogun/ui/GUIPluginEstimate.cpp,src/shogun/ui/GUIPluginEstimate.h: https://github.com/shogun-toolbox/shogun/commit/15b307a4001e688a3e57ffdf46fb5421b59c7fbf
+ shogun-notifier-	shogun: added init method to fix uninitialsed memory bugs
+ shogun-notifier-	shogun: Heiko Strathmann :develop * ab0d397 / src/shogun/ui/ (6 files): https://github.com/shogun-toolbox/shogun/commit/ab0d3977de71d7f031dfc8026580c7e7a39707df
+ shogun-notifier-	shogun: fixed uninitialised memory bugs
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 783aa89 / src/shogun/ (11 files): https://github.com/shogun-toolbox/shogun/commit/783aa89bf8711c67a125218834c135e834178de0
+ shogun-notifier-	shogun: more uninitialised memory fixed
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 8a9fd52 / src/shogun/evaluation/ (4 files): https://github.com/shogun-toolbox/shogun/commit/8a9fd5297788bdfb056f9fa7afa4fb46f9d27efb
+ shogun-notifier-	shogun: fixed some ultra subtle bugs that broke clone/equals
+@HeikoS	ah I should have squashed that sorry
+@sonney2k	HeikoS, seen lisitsyn's argument
+@sonney2k	HeikoS, I think he has a point
+@sonney2k	HeikoS, I would rather go for .hpp or some other suffix too
+@iglesiasg	sonney2k, yes me too
+@iglesiasg	I'd rather use another one than .hpp
+@sonney2k	iglesiasg, which?
+@sonney2k	.hsg ?
+@iglesiasg	sonney2k, I don't know if there is something standard used for this
+@iglesiasg	let's think first how would we use them
+@iglesiasg	would them files that are just included from .cpp files?
+@iglesiasg	what should we keep in there, class definition + implementation?
+ shogun-buildbot	build #1469 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1469  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	sonney2k, lisitsyn you know better how to do that than me :)
+@sonney2k	iglesiasg, these files should never be included from a .h file
+@sonney2k	iglesiasg, apart from that they can contain anythin
+@iglesiasg	sonney2k, agree
+ shogun-buildbot	build #1471 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1471  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@sonney2k	iglesiasg, I would move out all code from private (certain protected) functions into that stuff
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 0a0df56 / src/shogun/multiclass/ecoc/ECOCStrategy.cpp: https://github.com/shogun-toolbox/shogun/commit/0a0df56183d44f6af046ea033e115b5747c5b5cb
+ shogun-notifier-	shogun: fix forgotten SG_REF
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 1207010 / src/shogun/multiclass/ecoc/ECOCStrategy.cpp: https://github.com/shogun-toolbox/shogun/commit/12070100762b7bcfbc2a475548a0ba69e6dc191b
+@iglesiasg	sonney2k, yes
+ shogun-notifier-	shogun: Merge pull request #1261 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fix forgotten SG_REF that broke a python example
+@HeikoS	wiking, lisitsyn unit-tests are not segfaulting anymore, but some of them are failing, once wiking has added the other baseline tests, feel free to search for the problems
+@sonney2k	lisitsyn, HeikoS, iglesiasg I am for .hsg
+-!- travis-ci [~travis-ci@ec2-107-22-157-209.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9235956
+-!- travis-ci [~travis-ci@ec2-107-22-157-209.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	going home, see you guys!
+@iglesiasg	HeikoS, bye!
+@iglesiasg	sonney2k, .hsg files are a thing or something you came up with?
+@iglesiasg	unassigned file extension
+@iglesiasg	?
+@HeikoS	wiking: in fact, the remaining unit tests might be caused by the PT_NOT_GENERIC thing, the few I checked were caused by this
+@HeikoS	lisitsyn: ^
+ van51	hello sonney2k
+@HeikoS	all of them are generic classes
+@lisitsyn	HeikoS: I am on it
+@lisitsyn	just near to be done actually
+@lisitsyn	I am writing template
+@HeikoS	lisitsyn: cool, how much longer does it take? will wait then
+ van51	sonney2k: first of all I'm sending a PR about the streaming version of the hashed sparse features
+@lisitsyn	HeikoS: may be 20 minutes I don't know
+@HeikoS	lisitsyn: ok going then :) see you tomorrow
+ van51	sonney2k: but I'm having a weird problem which I'll explain there, maybe you have an idea
+@lisitsyn	HeikoS: see you!
+ shogun-buildbot	build #1472 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1472  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ van51	sonney2k: secondly, Olivier in his email suggested that maybe I should do a cleanup of the StreamingVwFeatures class
+ van51	sonney2k: do you think I should do that?
+ van51	sonney2k: the next step would be to implement quadratic features
+ shogun-buildbot	build #1473 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1473  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ van51	sonney2k: when I get started with them, should they be an extension/extra method of the StreamingVwFeatures class?
+@sonney2k	iglesiasg, I came up with it would be a .h and sg for shogun internal
+@sonney2k	van51, hey there
+@iglesiasg	sonney2k, aaah ok. Then it is funny, because I found this :D http://file.downloadatoz.com/hsg-file-extension/
+ shogun-buildbot	build #1470 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1470  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ van51	sonney2k: I g2g
+ van51	sonney2k: sorry for talking you so late..
+ van51	sonney2k: comment here and I'll check the logs
+ van51	sonney2k: also I've sent the PR
+ van51	byes
+-!- van51 [~van51@athedsl-399972.home.otenet.gr] has quit [Quit: Leaving.]
+ gsomix	sonney2k, writing marcoses for csv reader.
+ gsomix	sonney2k, I can send WIP PR, if it's needed.
+@sonney2k	gsomix, better do so we have sth to discuss
+ gsomix	sonney2k, ok.
+ gsomix	sonney2k, btw there is header LibSVMFile.
+@sonney2k	iglesiasg, ohh I have an issue wiht my CLock still
+ gsomix	but where is code?
+@iglesiasg	sonney2k, what is it?
+@sonney2k	iglesiasg, the Map class is templated and it uses in its functions the lock.lock() etc functions *from the header*
+@sonney2k	iglesiasg, so I cannot use forward declarations of CLock
+@sonney2k	iglesiasg, and so my effort is rather pointless for CMap...
+@sonney2k	gsomix, not sure what you are asking
+-!- HeikoS [~heiko@nat-164-208.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+@sonney2k	gsomix, do you mean how a libsvm == svmlight file looks like?
+ gsomix	sonney2k, yeah, it will be useful for me. :)
+@sonney2k	gsomix, it is just
+@sonney2k	+1 index:value index:value
+@sonney2k	and +/-1 at the beginning is the label
+@iglesiasg	sonney2k, it looks messy in CMap
+@sonney2k	so result is a SGVector with the labels and SGSparseMatrix
+ gsomix	sonney2k, aha, thanks.
+@sonney2k	gsomix, some may actually not have the labels though
+ gsomix	sonney2k, and last question while you are here. protobuf is Google's framework?
+ gsomix	err, format
+@sonney2k	gsomix, it is a general description language for data
+ gsomix	sonney2k, http://code.google.com/p/protobuf/ this?
+@sonney2k	gsomix, it basically works like this:
+@sonney2k	gsomix, you define something like a C struct { }; with all the data in tehre
+@sonney2k	for *one* small struct only
+@sonney2k	in some .proto file
+@sonney2k	so for an sgvector that could actually be the whole e.g. repeated double vector=1;
+@sonney2k	and then you can take that .proto file and use protoc to compile it into a .cpp / .h file
+@sonney2k	and you get classes that you can fill with dat
+@sonney2k	a
+@sonney2k	and in the end can create a binary output stream to put on disc
+@sonney2k	same for loading
+ gsomix	sonney2k, aham.
+@sonney2k	 however there is one catch
+@sonney2k	you should not generate too big proto objects
+@sonney2k	since they need to be completely in memory
+@sonney2k	to be decoded / written to disc
+ gsomix	sonney2k, there is not clear what is purpose for shogun. something like serialization for complex data?
+@sonney2k	gsomix, no write the data in some efficient but portable binary format
+@sonney2k	gsomix, protobuf exists for java python c ...
+ gsomix	ah, ok
+@sonney2k	it is not for serialization
+@sonney2k	I mean what I would want to use it for
+@sonney2k	but rather for dumping objects
+@sonney2k	gsomix, I think we should allow one of the compressors we have in shogun to be applied on top anyways
+@sonney2k	but first things first
+@sonney2k	(see shogun/lib/Compressor.h)
+ gsomix	sonney2k, ok. got it, thanks for briefing.
+-!- pickle27 [~kevin@130.15.16.96] has quit [Quit: Leaving]
+-!- zxtx [~zv@rrcs-76-79-81-162.west.biz.rr.com] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-107-22-157-209.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9239710
+-!- travis-ci [~travis-ci@ec2-107-22-157-209.compute-1.amazonaws.com] has left #shogun []
+-!- foulwall [~user@2001:da8:215:c252:345c:3d3e:aa54:5dec] has joined #shogun
+@wiking	ok
+@wiking	time to do some work on shogun
+@wiking	anybody still awake?
+@sonney2k	wiking, hey there!
+@wiking	sonney2k: yo
+ foulwall	Hey sonney2k
+@sonney2k	wiking, how is it going with the videos? did you have a chance to look at them?
+@wiking	how's the island?
+@wiking	sonney2k: yep
+@sonney2k	foulwall, awake already?
+ foulwall	Hello wiking
+@wiking	sonney2k: trying to cut them... but it'll need some nice postprocessing
+@wiking	sonney2k: i'll have them before august
+@wiking	but i cannot promise more than that
+@wiking	ok?
+@sonney2k	wiking, yes certainly - much faster than me!
+ foulwall	nop, too hot here, I cannot fall asleep.
+@sonney2k	foulwall, heh comfy here around 22 C at day time
+@sonney2k	and 16C at night
+@sonney2k	wiking, yeah it is nice here. wind is a bit strong to swim but body surfing is fun too
+@wiking	sonney2k: i'm at 35+ day and 25+ night ;)
+@wiking	sonney2k: the island is covered with 3g? :P
+@sonney2k	wiking, poor guy
+@wiking	sonney2k: nah i love hot weather
+@wiking	so it's good for me
+@sonney2k	wiking, yes I bought a t-mobile prepaid just for that
+@wiking	sonney2k: hehehe cool
+@sonney2k	but for some reason I spent my 1G limit within 1 week already
+@wiking	lol
+@wiking	too much pr0n ;)))))
+@sonney2k	so now I am on 32K
+@sonney2k	and linux updates ;)
+@wiking	:D
+@wiking	ah shit
+@wiking	somebody fix this
+@wiking	as i keep forgetting it
+@sonney2k	wiking, no seriously I was sharing this amoung a couple of android / linux devices
+@sonney2k	I guess they all updated over night
+@wiking	or is this intentional:
+@wiking	io/LineReader.cpp:10:18: warning: extra tokens at end of #include directive [-Wextra-tokens]
+@wiking	#include <cstdio>_
+@wiking	aaah yeah for sure they work autoupdating all the apps
+@sonney2k	wiking, no gsomix promised to fix this - but you are like #3 to report it
+@wiking	ah ok
+@wiking	fixing it now
+@wiking	good that github has webeditor ;)
+ shogun-notifier-	shogun: Viktor Gal :develop * 26b76c6 / src/shogun/io/LineReader.cpp: https://github.com/shogun-toolbox/shogun/commit/26b76c6ae7f6290b57cb4c5744ee7933215f47da
+ shogun-notifier-	shogun: Remove extra tokens at end of #include
+@wiking	done
+ gsomix	wiking, tnx, you're my hero. :)
+-!- travis-ci [~travis-ci@ec2-107-22-157-209.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9240022
+-!- travis-ci [~travis-ci@ec2-107-22-157-209.compute-1.amazonaws.com] has left #shogun []
+@wiking	hehe
+@sonney2k	wiking, one question also to you - I want to move all code that we don't want to expose to swig / libshogun headers somehow into extra classes
+@wiking	liek?
+@wiking	which ones?
+@sonney2k	wiking, i.e. all private functions go into some helper classes
+@sonney2k	maybe even useless protetcted functions
+@sonney2k	that are then just forward declared
+@sonney2k	and no .h is included
+@wiking	mmm
+@wiking	that's a lot of tidious work
+@sonney2k	wiking, sure but it will decrease swig wrapper code size
+@sonney2k	and also improve compile speed
+@wiking	tru
+@iglesiasg	sonney2k, compilation speed wouldn't improve for any other reason apart from swig wrapper size, right?
+@sonney2k	wiking, the question now is I need to place things into other header files - lisitsyn suggested to use some other suffix and I was thinking about using .hsg (for header shogun internal)
+@sonney2k	iglesiasg, but also recompile time !!
+@iglesiasg	sonney2k, true, indeed
+@sonney2k	iglesiasg, you usually have all the heavy code in the private functions
+@iglesiasg	yes
+@iglesiasg	I am very supportive with this change!
+@iglesiasg	sonney2k, header shogun internal may be misleading though since these files will not be actually headers, right? I mean we will put in there both class definitions and implementations
+@sonney2k	iglesiasg, no just headers
+@wiking	sonney2k: nobody did this before? :)
+@sonney2k	iglesiasg, and in .cpp still the impl.
+@sonney2k	kid crying
+@sonney2k	sec
+@iglesiasg	wiking, do you mean in another project?
+@wiking	sonney2k: i mean i guess some bigger project has done this before maybe... we should check out what they came up with. before completely reinventing the wheel
+@iglesiasg	wiking, yes, I agree with you
+@iglesiasg	wiking, any idea where?
+ gsomix	ohmfg, big http://en.wikipedia.org/wiki/Tettigoniidae at my ceiling
+@iglesiasg	wiking, opencv has matlab and python bindings I believe
+@iglesiasg	gsomix, run and save your life man!
+@wiking	since hopefully they're doing this for a while i.e. they even might have some know-how about this whole thing.
+@wiking	gsomix: yeah i caught today 2 of them
+@iglesiasg	fuck, I would scream like a girl for sure
+@iglesiasg	I am really scared of insects :(
+@wiking	iglesiasg: i know what i'll get u for your next bday ;D
+@iglesiasg	actually, yesterday I had a bad time with a bee
+@iglesiasg	no insects please!
+@wiking	iglesiasg: a scorpio in a jar? :P
+@iglesiasg	T_T
+@wiking	hehe no worries
+@wiking	it's already dead
+@wiking	:D
+@wiking	ok anyhow now back to the unit tests heiko requested
+@iglesiasg	I prefer a dog puppy ;)
+@lisitsyn	iglesiasg: ahh that's why you live in sweden
+@iglesiasg	lisitsyn, well, the insects are smaller in Spain
+@wiking	lisitsyn: :DDDD
+@iglesiasg	at least the ones I have come across
+@wiking	iglesiasg: but more deadlier :D
+@iglesiasg	wiking, really? I was never aware
+@wiking	i mean there's no actual scary shit in northern europe
+ gsomix	iglesiasg, I'm scared a little. it's happened because of I have no glass in the window at my room.
+@wiking	the most scary stuff is a bear
+@wiking	:P
+@wiking	gsomix: hehehe invasion is about to start
+@lisitsyn	wiking: you speak like you met one
+@lisitsyn	don't say you did
+@lisitsyn	:D
+@wiking	lisitsyn: mmm not in sweden
+@sonney2k	wiking, yes QT is using this everywhere
+@wiking	lisitsyn: i've met one in a national park in the states... luckily i was on the high ground... so he just pissed off... but it was like 30m from me.
+@lisitsyn	hah damn man you have interesting life
+ shogun-buildbot	build #1474 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1474  blamelist: Viktor Gal <vigsterkr@gmail.com>
+@wiking	lisitsyn: http://www.flickr.com/photos/vigsterkr/3671143607/in/set-72157620721450002
+@wiking	lisitsyn: i had my camare on me....
+@lisitsyn	wiking: crazy!
+@wiking	it's like 100mm focal
+@wiking	so it was really not that far
+@lisitsyn	wiking: you take quite nice photos
+@wiking	lisitsyn: that was long time ago
+@wiking	exactly before i started my phd
+@wiking	:(
+@iglesiasg	wiking, amazing!
+@sonney2k	wiking, so wiking yes this is standard and encouraged procedure - we just didn't know about it
+@wiking	maybe when i finish my phd i start finally again to take pix
+@wiking	sonney2k: oh i see that's cool
+@wiking	sonney2k: so we could take the ideas from qt
+@wiking	sonney2k: so that we dont run into the same pitfalls
+@sonney2k	but we need a scheme of marking external and interanl files
+@lisitsyn	wiking: what camera do you use?
+@iglesiasg	sonney2k, is there a link where they show this in qt or did you just find it in the code?
+@sonney2k	iglesiasg, it was in the wikipedia page you gave me
+@wiking	lisitsyn: i used to have a canon 400d, but it got stolen with my good objectives.... now i own a canon 5d mark ii
+@iglesiasg	sonney2k, lol none like myself to put me in evidence
+@sonney2k	https://en.wikipedia.org/wiki/Opaque_pointer
+@lisitsyn	wiking: you must have some money to have such a camera ;)
+@sonney2k	One type of opaque pointer commonly used in C++ class declarations is the d-pointer. The d-pointer is the only private data member of the class and points to an instance of a struct.... The d-pointer is heavily used in the Qt and KDE libraries.
+@wiking	lisitsyn: well i dont spend too much on anything else... so i saved money for a long time.... and it's a big plus if your wife is doing stop motion animation where a pro camera is the minimum requirement ;P
+@wiking	sonney2k: yeah i'm just reading this http://zchydem.enume.net/2010/01/19/qt-howto-private-classes-and-d-pointers/
+@lisitsyn	wiking: I see :)
+@wiking	http://techbase.kde.org/Policies/Library_Code_Policy#D-Pointers
+@wiking	as well
+@lisitsyn	trickery
+-!- zxtx [~zv@rrcs-76-79-81-162.west.biz.rr.com] has quit [Ping timeout: 246 seconds]
+@sonney2k	wiking, it will actually help us to have some stable ABI even
+-!- foulwall` [~user@dirtycod.es] has joined #shogun
+@wiking	yeah
+@wiking	indeed
+@wiking	i was just reading that part
+-!- foulwall [~user@2001:da8:215:c252:345c:3d3e:aa54:5dec] has quit [Ping timeout: 264 seconds]
+@iglesiasg	time to get home, I will take a look about the conversation and the d-pointers links later
+@iglesiasg	see you!
+-!- iglesiasg [~iglesias@2001:6b0:1:1041:6549:4678:d91c:7b6f] has quit [Quit: Ex-Chat]
+@sonney2k	foulwall`, please cache the ocr demo
+@sonney2k	foulwall`, it takes ages to get feedback - and maybe print the detected number not as popup but as some text beneath
+@sonney2k	foulwall`, but it looks excellent apart from that!!
+@sonney2k	wiking, only problem is templated classes
+@sonney2k	wiking, they don't fit - because then one cannot use a class forward declaration
+@sonney2k	since in a truly templated class everythin is in the .h
+@sonney2k	and so in the implementations one woudl need to access the forward declared class' member functions
+@sonney2k	alrighty
+@sonney2k	I need my 5hrs sleep
+@sonney2k	cu!
+ foulwall`	sonney2k, did you check the new version?
+ foulwall`	http://nn.7nn.de:8000/ocr/entrance
+@sonney2k	foulwall`, ahh yes much better
+@sonney2k	foulwall`, but one issue when one clicks recognize
+@sonney2k	and then paints sth
+@sonney2k	and clicks recognize
+@sonney2k	the image is not updated
+@sonney2k	not the prediction
+ foulwall`	I'll fix that in today's pr
+@sonney2k	foulwall`, and the circle is sometimes white
+@sonney2k	when painting
+-!- travis-ci [~travis-ci@ec2-107-22-157-209.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9243700
+-!- travis-ci [~travis-ci@ec2-107-22-157-209.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	and while we are at it - we should probably collect the drawn images that a user classifies to improve accuracy
+* sonney2k Zzzzz
+ foulwall`	Oh, thanks for telling me :) night sonney2k
+--- Log closed Fri Jul 19 00:00:37 2013

@@ -1,0 +1,602 @@
+--- Log opened Fri May 03 00:00:30 2013
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has joined #shogun
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has quit [Ping timeout: 276 seconds]
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has joined #shogun
+-!- cameron__ [~quassel@global-2-11.nat.csx.cam.ac.uk] has quit [Remote host closed the connection]
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has joined #shogun
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has left #shogun []
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- cesarfm [b2c73bf3@gateway/web/freenode/ip.178.199.59.243] has joined #shogun
+ cesarfm	Hello, I made another pull request for the Group lasso example, now in the develop branch
+-!- rgirish28 [~rgirish28@61.17.226.13] has joined #shogun
+ shogun-buildbot	build #378 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/378
+-!- rgirish28 [~rgirish28@61.17.226.13] has left #shogun []
+-!- cesarfm [b2c73bf3@gateway/web/freenode/ip.178.199.59.243] has quit [Ping timeout: 245 seconds]
+-!- rgirish28 [~rgirish28@61.17.226.13] has joined #shogun
+-!- rgirish28 [~rgirish28@61.17.226.13] has quit [Ping timeout: 276 seconds]
+-!- hushell [43bd6474@gateway/web/freenode/ip.67.189.100.116] has joined #shogun
+-!- rgirish28 [~rgirish28@111.92.71.249] has joined #shogun
+-!- rgirish28 [~rgirish28@111.92.71.249] has quit [Quit: rgirish28]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+@sonney2k	wiking, pong again :)
+@sonney2k	lisitsyn, happy? 34 now :)
+ gsomix	good morning
+-!- iglesiasg [~nando@n165-p239.kthopen.kth.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ sonne|work	gsomix: morning! how is your csv reader doing :)
+ gsomix	sonne|work, hm, I'll do it little later - doing some python3 related stuff
+ sonne|work	ahh ok
+-!- hushell [43bd6474@gateway/web/freenode/ip.67.189.100.116] has quit [Ping timeout: 245 seconds]
+ gsomix	sonne|work, btw, about csv. should I add it into shogun at once? or just develop separately?
+ sonne|work	gsomix: well a line reader function first in CFile or CAsciiFile
+ sonne|work	but you can do as you wish
+ gsomix	ok
+-!- hushell [43bd6474@gateway/web/freenode/ip.67.189.100.116] has joined #shogun
+-!- makokal [~bokal@pD9EF09DC.dip0.t-ipconnect.de] has quit [Quit: makokal]
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has joined #shogun
+ monalisag	Hello, I wanted to know some details about the project Large Scale Learning & Dimension reduction using hashing.
+ monalisag	In the project descrption it isnt mentioned but is this method anyway related to locality sensitive hashing ?
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ sonne|work	monalisag: a little bit maybe.
+ sonne|work	monalisag: it is not about designing a hash though
+ sonne|work	but more to just use a fast one to reduce #dims
+ sonne|work	and one is totally ignorant about hash collisions etc\
+ monalisag	part of my work for this project would be to explore the kind of hashing function we can use ?
+ monalisag	or i have to use the already implemented CHash class for this purpose ?
+ sonne|work	monalisag: it would only involve using the hash function 'MurmurHash3'
+ sonne|work	which is already in CHash yes
+ sonne|work	monalisag: it is more about defining certain type of DotFeature derived classes that use this compression
+ sonne|work	e.g. you could think of n-grams and bag of words (text documents) that you could hash
+ sonne|work	or e.g. quadratic (or higher order) polynomial features
+ sonne|work	monalisag: so one can do real large scale *non-linear* learning by computing features on-the-fly
+ sonne|work	for example I have used this to detect splice sites on DNA
+ monalisag	got it. thanks :)
+ monalisag	one more thing. Should I look into Vowpal Wabbit and see how they use this on-the-fly hashing trick ?
+ sonne|work	so one could do fancy applications with it w/o requiring lots of memory etc
+ sonne|work	monalisag: no need to do this
+ sonne|work	shogun does this too
+ sonne|work	as soon as you implement the functions in CDotFeatures
+ sonne|work	vw & liblinear & ocas & sgd etc will use the on-the-fly features
+ monalisag	for the tokenizing purposes can i take inspiration from scikit or some other library which performs similar job ?
+-!- hushell [43bd6474@gateway/web/freenode/ip.67.189.100.116] has quit [Quit: Page closed]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+ sonne|work	monalisag: it has to be C/C++ code though. Recall that this is called billions of times
+ monalisag	I would be implementing the code myself but I would like to explore how they(other libraries) have made their code efficient in cases where the text corpuses are huge.
+ sonne|work	monalisag: sure. It is not limited to text though. But we will have to focus on a few domains otherwise this is getting too much.
+ sonne|work	maybe with some nice application
+-!- makokal [~bokal@eduroam-pool3-097.wlan.uni-bremen.de] has joined #shogun
+-!- cameron__ [~quassel@global-2-1.nat.csx.cam.ac.uk] has joined #shogun
+-!- thoralf [~thoralf@enki.zib.de] has joined #shogun
+ thoralf	Hey there.
+ sonne|work	thoralf: hey
+ thoralf	sonne|work: I just committed my hack - but I did not check if it has side effects.
+ thoralf	sonne|work: Is there some kind of unit or regression testing?
+ sonne|work	thoralf: yes. Might be though that we don't have any for streaming features
+ sonne|work	in any case this will either work or crash(tm)
+ thoralf	And how can someone run the tests locally?  I didn't find anything in the documentation...
+-!- cameron__ [~quassel@global-2-1.nat.csx.cam.ac.uk] has quit [Quit: http://quassel-irc.org - Chat comfortably. Anywhere.]
+-!- goldbug [~quassel@global-2-1.nat.csx.cam.ac.uk] has joined #shogun
+-!- goldbug [~quassel@global-2-1.nat.csx.cam.ac.uk] has quit [Client Quit]
+ sonne|work	thoralf: make tests
+ sonne|work	thoralf: and they are run for your PR too
+ sonne|work	thoralf: https://travis-ci.org/shogun-toolbox/shogun/builds/6846696
+-!- abinash [01261262@gateway/web/freenode/ip.1.38.18.98] has joined #shogun
+-!- abinash [01261262@gateway/web/freenode/ip.1.38.18.98] has quit [Ping timeout: 245 seconds]
+ monalisag	hey, could you redirect me to a source where I can read about quadritic feature hashing ?
+ sonne|work	monalisag: it is a one-liner: hash(idx) and idx follows some enumeration of the features, e.g. when you have x_i i=0,1,2 you could have x_0, x_1, x_3 and x_0 x_1, x_0 x_2, x_1 x_2, x_1 x_3
+ sonne|work	scratch the last :) there is no x_3 :)
+-!- goldbug [~quassel@global-2-1.nat.csx.cam.ac.uk] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- goldbug [~quassel@global-2-1.nat.csx.cam.ac.uk] has quit [Remote host closed the connection]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- sijin [~smuxi@144.214.222.109] has quit [Read error: Connection reset by peer]
+ monalisag	sonne|work: will the text tokenizer and classifier code be added to shogun or it would just used as a use case for testing the implemenation of CHashedNGramDotFeatures ?
+-!- goldbug [~quassel@global-2-1.nat.csx.cam.ac.uk] has joined #shogun
+-!- iglesiasg [~nando@n165-p239.kthopen.kth.se] has quit [Ping timeout: 264 seconds]
+ goldbug	just submitted my gsoc proposal
+ goldbug	:)
+-!- goldbug [~quassel@global-2-1.nat.csx.cam.ac.uk] has quit [Quit: http://quassel-irc.org - Chat comfortably. Anywhere.]
+-!- goldbug [~quassel@global-2-1.nat.csx.cam.ac.uk] has joined #shogun
+-!- iglesiasg [~nando@n165-p239.kthopen.kth.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- erlenda [~erlenda@fw-oslo.intelcom.no] has joined #shogun
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+@wiking	sonne|work: ping
+ monalisag	sonne|work: I have submitted my proposal. Please have a look.
+ sonne|work	wiking: do you have a python3 machine?
+@iglesiasg	sonne|work: python3 working here if I might be able to help :)
+@wiking	sonne|work: sorry no
+ sonne|work	iglesiasg: we need some python3 enabled buildbot
+@iglesiasg	sonne|work: aah ok I see, I meant my laptop so I don't think we should use it as buildbot :)
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has quit [Quit: Page closed]
+-!- ozan [~ozan@ee-167-250.eee.metu.edu.tr] has joined #shogun
+ ozan	I am currently writing a proposal for GSOC 2013
+ ozan	already submitted a patch today https://github.com/shogun-toolbox/shogun/pull/1046
+ ozan	and contacted with potential mentor (Vojtech)
+ ozan	is there anything else I need to do after submitting my proposal to GSOC 2013
+@iglesiasg	ozan: I think your PR is against master, isn't it?
+ ozan	yes should I change ?
+ ozan	is there any specific branch for that
+-!- goldbug [~quassel@global-2-1.nat.csx.cam.ac.uk] has quit [Ping timeout: 256 seconds]
+@iglesiasg	ozan: see the comment here for example https://github.com/shogun-toolbox/shogun/pull/1044
+ ozan	and is there any other QDA example/application that I can test
+@iglesiasg	ozan: there ara QDA examples in examples/undocumented/python_modular and libshogun too
+ ozan	I already used them
+ ozan	ok I am fixing
+@iglesiasg	ozan: I took a quick look to your PR
+@iglesiasg	ozan: one comment is that the idea of using Eigen was not because of using their structures but mainly to avoid loops in the computations and so on
+@iglesiasg	ozan: maybe I am wrong, but it looks to me like you have kept most of the loops
+ ozan	except the one of them yes I keep them all
+ ozan	issue is that I first wanted to get working example
+@iglesiasg	ozan: sure, good idea
+ ozan	after finishing my application to GSOC 2013 I am planning to solve that loops
+ ozan	since deadline is today I wanted to have working patch :)
+@iglesiasg	ok
+ ozan	I think I can solve loops and prepare a new pull request next week
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has quit [Quit: Leaving.]
+@iglesiasg	ozan: aham ok
+ sonne|work	iglesiasg: hmmhh 37 already
+@iglesiasg	ozan: there is also another PR someone sent with Eigen for QDA, you might want to take a look
+@iglesiasg	sonne|work: how many do you guess at the end of the day?
+ sonne|work	I was estimating 30
+ sonne|work	and yesterday 35
+@iglesiasg	haha ok no more estimates then
+ sonne|work	now maybe 40
+@iglesiasg	I think 40 for sure
+ sonne|work	IDK
+ sonne|work	we had 48 last year
+ sonne|work	so almost no difference then
+@iglesiasg	good
+ ozan	I have not seen that PR yet. I can merge my code with the PR you mentioned
+@iglesiasg	sonne|work: it would be pretty good if we get the same #slots
+ sonne|work	yeah but we cannot count on it
+@iglesiasg	ozan: https://github.com/shogun-toolbox/shogun/pull/1028
+@iglesiasg	sonne|work: we shall see
+-!- goldbug [~quassel@global-2-11.nat.csx.cam.ac.uk] has joined #shogun
+ ozan	I closed my PR on master request
+-!- nube [~rho@49.244.7.158] has joined #shogun
+ ozan	Finally submitted my propsal :)
+ ozan	I have another question should I be enrolled as a student during GSOC
+ ozan	?
+ ozan	I am finishing my master in may and starting my PhD in september. Is it a problem ?
+@iglesiasg	ozan: I think it is better if you check GSoC's FAQ or the many mails that have been regarding that topic in GSoC's ML
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Thoralf Klein :master * 875e256 / src/shogun/features/streaming/StreamingSparseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/875e2565b13bf6cb6fba0b5ab1272b968d0c79eb
+ shogun-notifier-	shogun: Fixes #660: Hack to fix double-free (simply setting features to NULL).
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 3a6d04e / src/shogun/features/streaming/StreamingSparseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/3a6d04ea7af155e0b0779ef825a6f4f4d336ef3a
+ shogun-notifier-	shogun: Merge pull request #1047 from tklein23/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Small hack to fix double-free in StreamingSparseFeatures
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has joined #shogun
+ shogun-notifier-	shogun: Evgeniy Andreev :develop * 21a894f / src/interfaces/python_modular/protocols_helper.i: https://github.com/shogun-toolbox/shogun/commit/21a894fd2605d8f262a02482ebe577837d7f78a6
+ shogun-notifier-	shogun: fixed compilation with python3 bindings
+ shogun-notifier-	shogun: Evgeniy Andreev :develop * bc3e9ba / / (20 files): https://github.com/shogun-toolbox/shogun/commit/bc3e9ba2d971d0372730478689ceef2b180e1d54
+ shogun-notifier-	shogun: small fixes in examples for python3 compatibility
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 2a04b18 / / (21 files): https://github.com/shogun-toolbox/shogun/commit/2a04b184641fd16f21e1b1b119a3f182390c03d9
+ shogun-notifier-	shogun: Merge pull request #1048 from gsomix/feature/python3_bugfix
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Pack of fixes for python3 modular interface
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has quit [Client Quit]
+ shogun-buildbot	build #904 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/904  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+@lisitsyn	sonne|work: why do these assholes want our domains?
+ sonne|work	thoralf: argh my bad - next time please do the PR against the development branch
+ sonne|work	lisitsyn: strictly speaking they are not ours
+ sonne|work	but everyone can get them
+@lisitsyn	sonne|work: yes of course
+@lisitsyn	sonne|work: but why?
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has joined #shogun
+ shogun-buildbot	build #905 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/905
+ shogun-buildbot	build #906 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/906  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- monalisag_ [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+@lisitsyn	sonne|work: and we've got 40!
+@lisitsyn	:D
+ sonne|work	already?
+ sonne|work	hmmhh
+ sonne|work	so number is about the same then
+ sonne|work	83%
+ shogun-buildbot	build #739 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/739
+ shogun-buildbot	build #740 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/740  blamelist: Evgeniy Andreev <gsomix@gmail.com>, Soeren Sonnenburg <sonne@debian.org>
+-!- cesarfm [528247df@gateway/web/freenode/ip.82.130.71.223] has joined #shogun
+ gsomix	shogun-buildbot, I love you too, dear
+ gsomix	lisitsyn, sonne|work 5 hours, 6 minutes remaining. there is time to write another proposal... and one more... and
+ sonne|work	gsomix: cyg1 is in berserk mode
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has quit [Quit: Page closed]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot	build #741 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/741
+-!- iglesiasg [~nando@n165-p239.kthopen.kth.se] has quit [Quit: leaving]
+-!- monalisag_ [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has quit [Quit: Page closed]
+ shogun-buildbot	build #1039 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1039
+-!- mikhailBelous [~quassel@37.98.242.99] has joined #shogun
+ gsomix	shogun-buildbot, goow work
+ gsomix	*good
+-!- erlenda [~erlenda@fw-oslo.intelcom.no] has quit [Quit: Leaving]
+@lisitsyn	sonne|work: and 41
+ sonne|work	I would prefer 42
+ sonne|work	but ok qpsize in SVMLight is set to 41
+ sonne|work	simply because of some theorem that could prove convergence for odd numbers :D
+@wiking	sonne|work: ok got a sec?
+ sonne|work	sec yes
+@wiking	sonne|work: ok
+@wiking	sonne|work: what should we do with the PRNG try
+@wiking	keep it or drop it?
+ sonne|work	test it and merge it
+@wiking	since it did not really fix our integration problem :(
+ sonne|work	not all of it
+@wiking	sonne|work: ok then before doing that i'll add dSFMT
+@wiking	so that we can generate random float vectors fast
+ sonne|work	but even having a re-entrant rng is very worth having!
+@wiking	my only concern is
+@wiking	that for each random generation whether it's only a number or an array of randoms
+@wiking	we have an SG_REF/SG_UNREF pair
+@wiking	which is a bit of an overhead
+ sonne|work	wiking: btw could you please merge master into develop? I accidentally merged one commit into master...
+@wiking	maybe i should just use it w/o the get_global_rand() and define it as extern
+@wiking	sonne|work: ok i'll do that as soon as i have some time today
+@wiking	there's some other stuff on my todo list
+ sonne|work	wiking: yeah that is sth we cannot afford
+@wiking	like get a 10 minutes sleep :)
+@wiking	sonne|work: you mean SG_REF/UNREF ?
+ sonne|work	c'mon sleep is overrated
+@wiking	sonne|work: haha lol yeah
+ sonne|work	yes it should need no ref/unref
+@wiking	ok
+@wiking	i'll fix that one
+@wiking	and as u suggested
+-!- mikhailBelous [~quassel@37.98.242.99] has quit [Remote host closed the connection]
+@wiking	i'll add a non-thread safe api as well
+ sonne|work	yes
+@wiking	oooor
+@wiking	i mean to be honest
+@wiking	we could have 2 SFMT structs in the clas
+@wiking	class
+@wiking	and then we dont need to reinit it
+@wiking	it's not thaaaat big of a struct that it would start eating the memory like crazy
+@wiking	:P
+@wiking	1 sfmt for 32 bits and 1 sfmt for 64 bits
+@wiking	sonne|work: your 2 cents on this one?
+@wiking	basically sfmt_32 and sfmt_64. inited once and that's all
+@wiking	and have dsfmt for the doubles
+ sonne|work	yeah why not. but you would init them with the same seed for the non-thread safe api
+@wiking	sonne|work: yep
+@wiking	everything the same
+@wiking	just that we dont have to reinit each time when we change state
+-!- nube [~rho@49.244.7.158] has quit [Quit: Leaving.]
+ shogun-buildbot	build #1040 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1040  blamelist: Evgeniy Andreev <gsomix@gmail.com>, Soeren Sonnenburg <sonne@debian.org>
+ sonne|work	wiking: fine with me. if possible lets have one way to seed all 3 rng's
+ sonne|work	the int/float/double one
+ sonne|work	I recall hunting bugs when still doing matlab for hours
+@wiking	yep
+ sonne|work	until I figured that randn and rand have a different init/seed
+ sonne|work	and everyone who knows better can still use the thread-safe functions
+ sonne|work	though we then have a hard time doing anything reproducible
+@lisitsyn	sonne|work: 42
+-!- nube [~rho@49.244.7.158] has joined #shogun
+ sonne|work	now lads&gents please leave it at that :D
+-!- gsomix_ [~gsomix@88.200.243.155] has joined #shogun
+-!- gsomix [~gsomix@95.67.166.72] has quit [Read error: Connection reset by peer]
+-!- gsomix_ is now known as gsomix
+-!- goldbug [~quassel@global-2-11.nat.csx.cam.ac.uk] has quit [Ping timeout: 245 seconds]
+@wiking	:>
+@lisitsyn	sonne|work: 43
+* sonne|work senses spam
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has quit [Quit: Leaving.]
+ shogun-buildbot	build #1041 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1041
+-!- goldbug [~quassel@global-2-11.nat.csx.cam.ac.uk] has joined #shogun
+-!- mona2302 [4fbdb06e@gateway/web/freenode/ip.79.189.176.110] has joined #shogun
+-!- nube [~rho@49.244.7.158] has quit [Quit: Leaving.]
+ shogun-notifier-	shogun: Thoralf Klein :develop * 875e256 / src/shogun/features/streaming/StreamingSparseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/875e2565b13bf6cb6fba0b5ab1272b968d0c79eb
+ shogun-notifier-	shogun: Fixes #660: Hack to fix double-free (simply setting features to NULL).
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 3a6d04e / src/shogun/features/streaming/StreamingSparseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/3a6d04ea7af155e0b0779ef825a6f4f4d336ef3a
+ shogun-notifier-	shogun: Merge pull request #1047 from tklein23/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Small hack to fix double-free in StreamingSparseFeatures
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * e97bd41 / src/shogun/features/streaming/StreamingSparseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/e97bd4190016fbfab6916221630394294c531ba8
+ shogun-notifier-	shogun: merge accidental commit to master containing streamingfeatures fix into develop
+-!- goldbug [~quassel@global-2-11.nat.csx.cam.ac.uk] has quit [Ping timeout: 255 seconds]
+ shogun-buildbot	build #907 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/907  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ shogun-buildbot	build #742 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/742  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+-!- ozan [~ozan@ee-167-250.eee.metu.edu.tr] has quit [Quit: Leaving]
+ shogun-buildbot	build #743 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/743  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #908 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/908
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has joined #shogun
+-!- makokal [~bokal@eduroam-pool3-097.wlan.uni-bremen.de] has quit [Quit: makokal]
+-!- monalisag [6eeaec2c@gateway/web/freenode/ip.110.234.236.44] has quit [Client Quit]
+-!- Hao [d8a55f4d@gateway/web/freenode/ip.216.165.95.77] has joined #shogun
+ Hao	This is a report of "Set yourself up" part in proposal of GSOC 2013. Name: Hao Liu. Email: haoliu@nyu.edu
+ gsomix	Hao, hi
+ Hao	Hi:-)
+ Hao	I am interested in Large Scale Learning: loglinear time kernel expansion (aka Fast Food) project. I am still preparing my proposal, hope it's not too late.
+-!- mikhailBelous [~quassel@37.98.242.99] has joined #shogun
+ gsomix	Hao, so, there are 3 hours before deadline. :)
+ gsomix	If you have any questions about project, you should contact sonney2k directly - it's Soeren Sonnenburg.
+-!- goldbug [~quassel@global-2-11.nat.csx.cam.ac.uk] has joined #shogun
+ mona2302	Hi, I'm a beginner user of Shogun Can I maybe create some R-program for my entry task? I want to answer for one of entry tasks.
+@lisitsyn	45
+@lisitsyn	46
+ shogun-buildbot	build #1043 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1043  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ gsomix	shogun-buildbot, dance
+ shogun-buildbot	<(^.^<)
+ shogun-buildbot	<(^.^)>
+ shogun-buildbot	(>^.^)>
+ shogun-buildbot	(7^.^)7
+ shogun-buildbot	(>^.^<)
+ gsomix	cool
+@wiking	:>
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has joined #shogun
+ Hao	let me try this.
+ Hao	 shogun-buildbot, dance
+-!- Hao [d8a55f4d@gateway/web/freenode/ip.216.165.95.77] has quit [Quit: Page closed]
+-!- Hao [d8a55f4a@gateway/web/freenode/ip.216.165.95.74] has joined #shogun
+-!- mona2302 [4fbdb06e@gateway/web/freenode/ip.79.189.176.110] has quit [Ping timeout: 245 seconds]
+-!- nube [~rho@49.244.66.144] has joined #shogun
+-!- van511 [~van51@athedsl-318776.home.otenet.gr] has joined #shogun
+@lisitsyn	47
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has quit [Ping timeout: 252 seconds]
+-!- van511 [~van51@athedsl-318776.home.otenet.gr] has left #shogun []
+-!- cesarfm [528247df@gateway/web/freenode/ip.82.130.71.223] has quit [Ping timeout: 245 seconds]
+-!- van511 [~van51@athedsl-318776.home.otenet.gr] has joined #shogun
+-!- mikhailBelous [~quassel@37.98.242.99] has quit [Remote host closed the connection]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- mikhailBelous [~quassel@37.98.242.99] has joined #shogun
+-!- mikhailBelous [~quassel@37.98.242.99] has quit [Remote host closed the connection]
+@lisitsyn	sonney2k: michael schumacher in the mentors list himself!
+@lisitsyn	:D
+@lisitsyn	48 finally
+ gsomix	shogun-buildbot, dance
+ shogun-buildbot	<(^.^<)
+ shogun-buildbot	<(^.^)>
+ shogun-buildbot	(>^.^)>
+ shogun-buildbot	(7^.^)7
+ shogun-buildbot	(>^.^<)
+-!- abinayam [3d0c1363@gateway/web/freenode/ip.61.12.19.99] has joined #shogun
+-!- nube [~rho@49.244.66.144] has quit [Quit: Leaving.]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- Hao [d8a55f4a@gateway/web/freenode/ip.216.165.95.74] has quit [Ping timeout: 245 seconds]
+-!- abinayam [3d0c1363@gateway/web/freenode/ip.61.12.19.99] has quit [Ping timeout: 245 seconds]
+@lisitsyn	49
+-!- abinayam [3d0c1363@gateway/web/freenode/ip.61.12.19.99] has joined #shogun
+ abinayam	Hi
+ gsomix	shogun-buildbot, don't dance, bot, don't dance...
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ abinayam	I have submitted my proposal on implementing robust classification methods. Is anyone out there with the same choice?
+ shogun-notifier-	shogun: Cesar Fuentes :develop * b372a7f / examples/undocumented/python_modular/graphical/group_lasso.py: https://github.com/shogun-toolbox/shogun/commit/b372a7fa8f22436bba1718232c76bdfe9a8863ae
+ shogun-notifier-	shogun: FeatureBlockLogisticRegression example
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 62eeb15 / examples/undocumented/python_modular/graphical/group_lasso.py: https://github.com/shogun-toolbox/shogun/commit/62eeb15227ab59c2f8bdd3a08ddf253ab0019683
+ shogun-notifier-	shogun: Merge pull request #1045 from cesarfm/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Group lasso example
+-!- abinayam [3d0c1363@gateway/web/freenode/ip.61.12.19.99] has quit [Ping timeout: 245 seconds]
+ vgorbati	lisitsyn: hi, here?
+@lisitsyn	vgorbati: hey, yes
+ vgorbati	lisitsyn: I have finally started working on implementation, and I am looking through your code to find how to construct matrices of distances and angles to neighbors. It looks like using SparseTriplet's is the way?
+@lisitsyn	vgorbati: yes that's the fastest way
+ vgorbati	lisitsyn: ok, then what I can't get, is why are you reserving space for (k+1)^2 values per row? I thought that there would only k-values (1 for each neighbor) per row..
+@lisitsyn	vgorbati: in lle?
+ vgorbati	lisitsyn: yes
+@lisitsyn	vgorbati: if we put these weights per row
+@lisitsyn	we get the W matrix
+@lisitsyn	but later we need WW'
+@lisitsyn	so I just form WW' here
+ vgorbati	lisitsyn: got it. btw, then it looks like there is a small typo in locally_linear.hpp at line 31: should be sparse_triplets.reserve((k*k+2*k+1)*(end-begin));
+ shogun-buildbot	build #744 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/744
+@lisitsyn	yes 2 is missed it seems
+@lisitsyn	thanks!
+@sonney2k	lisitsyn, yes germans can only code and drive :D
+@sonney2k	lisitsyn, woa 50?!
+@sonney2k	more than last year? didn't expect that/
+@lisitsyn	sonney2k: yeah 50
+@lisitsyn	sonney2k: better for us I guess :)
+-!- goldbug [~quassel@global-2-11.nat.csx.cam.ac.uk] has quit [Ping timeout: 252 seconds]
+ gsomix	>> 44 minutes remaining
+@sonney2k	lisitsyn, as in likely more slots yes but c'mon where is that rush coming from
+@lisitsyn	sonney2k: some of them are kind of desperate
+ gsomix	waiting for many last-femtosecond-proposals
+@sonney2k	lisitsyn, my theory now is that people since they are only allowed to apply for 5 (instead of 20) projects, are more carefully selecting projects
+ vgorbati	lisitsyn: it's my pleasure:) I am also wondering, is the '#pragma omp parallel'  this 'OpenMP' parallelism that is mentioned on ideas page?
+@sonney2k	and not do it in the very beginning
+@lisitsyn	vgorbati: yes that's openmp
+@lisitsyn	sonney2k: yeah they don't spread
+ vgorbati	lisitsyn: I guess I should also use it?
+@lisitsyn	it is not like fishing now
+@sonney2k	lisitsyn, btw do you know how one can stop the running openmp threads?
+@lisitsyn	vgorbati: serial first!
+ vgorbati	lisitsyn: ok, better for me)
+@lisitsyn	sonney2k: from the outer code?
+@sonney2k	lisitsyn, yes
+@lisitsyn	vgorbati: *never ever* write parallel code without serial ;)
+@lisitsyn	sonney2k: ehmm some flag may be
+ vgorbati	lisitsyn: got it, sensei:) I just thought that the problem is quite the same
+@lisitsyn	vgorbati: openmp can be surprising hard to debug sometimes
+@lisitsyn	well once you get used to it it is easy though
+@lisitsyn	sonney2k: any way to do that with pthreads?
+@lisitsyn	sonney2k: it doesn't sound like a good practice for me actually
+-!- van511 [~van51@athedsl-318776.home.otenet.gr] has left #shogun ["QUIT :Leaving."]
+@lisitsyn	sonney2k: 51
+ shogun-buildbot	build #1044 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1044  blamelist: Cesar Fuentes <cfuentesm85@gmail.com>
+@lisitsyn	half an hour left!
+-!- goldbug [~quassel@global-2-11.nat.csx.cam.ac.uk] has joined #shogun
+@sonney2k	lisitsyn, when you train some shogun method you can cancel any method by sending it the URG signal
+@sonney2k	or press ctrl+c
+ gsomix	sonney2k, btw buildbot spams me in personal chat.
+@lisitsyn	sonney2k: we have a double player!
+@lisitsyn	pickle27 is doing stuff for scikits :)
+@sonney2k	I used this quite a bit when doing research
+@sonney2k	lisitsyn, how do you know?
+@lisitsyn	sonney2k: got it - should be solveable
+@lisitsyn	sonney2k: https://github.com/scikit-learn/scikit-learn/pull/1885
+ gsomix	sonney2k, can I perform "notify off" in personal chat?
+ gsomix	shogun-buildbot, notify list
+ shogun-buildbot	The following events are being notified: ['failure', 'successToFailure', 'failureToSuccess']
+@lisitsyn	gsomix: youve got to change your nickname then..
+@lisitsyn	hah
+ gsomix	sonney2k, nevermind... it's all ok now
+ gsomix	lisitsyn, hey, my nickname is registered
+@sonney2k	lisitsyn, I have no idea how this could work with openmp
+@lisitsyn	52
+@sonney2k	lisitsyn, looks like it is not possible http://stackoverflow.com/questions/8265191/force-closing-a-thread-using-openmp-in-c
+@sonney2k	but hey what we could do is install a signal handler
+@sonney2k	set some global variable
+@lisitsyn	sonney2k: yeah nothing really impossible
+@sonney2k	and then poll this variable
+@sonney2k	the only problem with the signal handler is that it is not allowed to run in thread context
+@sonney2k	so it must run in the main thread
+@sonney2k	and it is also not clear what happens if the other threads finish before we get user input
+* sonney2k gets drunk
+@sonney2k	B52
+@lisitsyn	haha
+@lisitsyn	53
+@sonney2k	there goes my drink
+@lisitsyn	ehm last one is ehhm
+@sonney2k	lisitsyn, please prepare an email to mentors
+@lisitsyn	sonney2k: yeah will do
+@sonney2k	once the deadline is passed - we should have at least 2 people scoring each student
+@sonney2k	for students we intend to accept better >3
+@sonney2k	and if a mentor wants to accept a student he should give him some practical task to be really sure and also press the 'I want to mentor this'
+@lisitsyn	54
+@sonney2k	lisitsyn, c'mon is it you under disguise?
+@lisitsyn	hah no
+@sonney2k	sonney2k, tell them they should become pretty sure within next week...
+@sonney2k	this number of proposals is insane ... so it will be an acceptance rate of <20%
+@lisitsyn	sonney2k: ten more minutes!
+* sonney2k looks up the script for plotting stats
+@lisitsyn	55
+@lisitsyn	56
+ shogun-buildbot	build #1045 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1045  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ gsomix	last minute!
+@lisitsyn	that's it
+ gsomix	lisitsyn, so what? 56?
+@lisitsyn	gsomix: yes
+@lisitsyn	here comes a deadline mail
+@lisitsyn	oops
+@lisitsyn	57
+@lisitsyn	I missed one
+-!- makokal [~bokal@212.201.44.246] has joined #shogun
+@lisitsyn	crazy
+@lisitsyn	sonney2k: is that more than first year?
+ gsomix	you are popular, guys, hehe
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+ gsomix	sonney2k, http://researchinprogress.tumblr.com/post/32893888233/reviewing-conference-papers
+ naywhayare	the quality of applicants is... variable
+ naywhayare	I asked if they had worked with an open source project before... one applicant responded:
+ naywhayare	I have worked with many open source solutions wile creating my projects.Some of them are:MS SQL Server
+ gsomix	O_O
+ naywhayare	that was my reaction
+@lisitsyn	naywhayare: hah nice
+@lisitsyn	naywhayare: how many did you get?
+@sonney2k	lisitsyn, https://dl.dropboxusercontent.com/u/31480471/gsoc2013-applications.png
+@lisitsyn	crazy curve
+@sonney2k	lisitsyn, compare to last year http://shogun-toolbox.org/page/Events/gsoc2012
+@lisitsyn	quite similar?
+ naywhayare	lisitsyn: 41
+@lisitsyn	naywhayare: quite a lot too
+ naywhayare	the majority came in during the past hour
+ naywhayare	the curve probably looks about the same as what sonney2k posted
+@sonney2k	lisitsyn, not at all
+@sonney2k	last year was 48
+@lisitsyn	naywhayare: our last minute proposals are like spam
+ naywhayare	many posit that they can solve extremely difficult publication-worthy problems without any supporting evidence whatsoever...
+@sonney2k	lisitsyn, exactly. In our first year we made the mistake not to require a code contribution
+@sonney2k	so we had 70 or so proposals
+@lisitsyn	haha
+@sonney2k	kind of exponential growth
+ naywhayare	I might try requiring a patch next year, but them I imagine I'd have to sort through numerous patches that probably don't even work
+ naywhayare	s/them/then/
+@sonney2k	naywhayare, yes that's the price
+@sonney2k	but you know then who is good
+@sonney2k	naywhayare, btw you still have until may 22 to decide
+@sonney2k	so you should really require from every student you consider some kind of code contribution
+@sonney2k	this way you become very sure if the student can do the job
+-!- makokal [~bokal@212.201.44.246] has quit [Quit: makokal]
+ naywhayare	don't I have to have my projected slot allocations done by sunday though?
+@lisitsyn	naywhayare: yeah you'd better have to
+@lisitsyn	naywhayare: but you'll have time to finally settle it
+ naywhayare	okay, that's good
+ naywhayare	I definitely have a few students who I'd like to get in further touch with, so I am glad I have a few weeks to do that
+@lisitsyn	naywhayare: what is the number of slots you'd like to have?
+ naywhayare	it depends on what my mentors want.  we could do up to 6 but I've been told to not expect more than 1 or 2 during the first year
+ naywhayare	so in that sense it depends more on google than the other mentors...
+@lisitsyn	sonney2k: I am going to send a welcome letters
+@lisitsyn	for the workshop
+@lisitsyn	sonney2k: y/n?
+@sonney2k	naywhayare, yeah first year is usually no more than 2
+@sonney2k	so you have to make tough choices
+@sonney2k	in very rare circumstances up to 5
+@sonney2k	but still <10% acceptance...
+ naywhayare	yeah, 2 is about what I'm expecting.  based on the ratings it looks like we have 2 or 3 standout students and 7 or 8 who could be reasonable
+ naywhayare	anyway, I have to run for now... thanks for the advice :)
+@sonney2k	naywhayare, np
+-!- makokal [~bokal@pD9EF09DC.dip0.t-ipconnect.de] has joined #shogun
+@sonney2k	lisitsyn, please send out the email to the mentors first
+@lisitsyn	sonney2k: yeah will do
+@lisitsyn	sonney2k: workshop mails - y/n?
+@sonney2k	lisitsyn, yes but let me fix them first
+@lisitsyn	sonney2k: let me send you draft then
+@lisitsyn	sonney2k: in your inbox
+-!- goldbug [~quassel@global-2-11.nat.csx.cam.ac.uk] has quit [Remote host closed the connection]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	56 applications OMG!
+@sonney2k	57 even
+@sonney2k	so much about my estimate of 20
+@iglesiasg	hehe
+@iglesiasg	sonney2k: how many applicants?
+@lisitsyn	iglesiasg: you mean different persons?
+@lisitsyn	iglesiasg: 5 double applications
+@lisitsyn	so 52 different persons
+@iglesiasg	lisitsyn: oh impressive
+@iglesiasg	sonney2k: I will wait for your post and the graph showing that exponential curve :)
+ gsomix	iglesiasg, hi
+@iglesiasg	gsomix: hello hello
+@lisitsyn	sonney2k: done
+ gsomix	sonney2k, cool, there is patch for lua52 support. btw how many people who use lua for ML?
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+@iglesiasg	oh just saw the graph, crazy
+@sonney2k	gsomix, well torch is written in lua
+@sonney2k	so I know a couple of big shots that use it
+ gsomix	sonney2k, ok, thanks
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+@sonney2k	lisitsyn, argh argh argh
+@lisitsyn	sonney2k: ?
+@sonney2k	I again overlooked that the PR was against master
+ shogun-notifier-	shogun: Ingvaras Merkys :master * fd4ada9 / examples/generate_documented.sh,src/interfaces/lua_modular/swig_typemaps.i: https://github.com/shogun-toolbox/shogun/commit/fd4ada911b0cbfc9a4bd1846cc6d18533435fe8c
+ shogun-notifier-	shogun: lua52 fix
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 255beac / examples/generate_documented.sh,src/interfaces/lua_modular/swig_typemaps.i: https://github.com/shogun-toolbox/shogun/commit/255beac14c3952ab4443388aaa55ad673bc3745b
+ shogun-notifier-	shogun: Merge pull request #1056 from crunchiness/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed interface for Lua 5.2
+@lisitsyn	sonney2k: you evil!
+@sonney2k	lisitsyn, is there any better way than git merge master?
+ shogun-buildbot	build #911 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/911  blamelist: Ingvaras Merkys <ingvaras@gmail.com>
+@lisitsyn	sonney2k: I don't think so
+* sonney2k bangs his head against a wall
+@lisitsyn	sonney2k: what is wrong with merge?
+ shogun-buildbot	build #746 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/746  blamelist: Ingvaras Merkys <ingvaras@gmail.com>
+ shogun-notifier-	shogun: Ingvaras Merkys :develop * fd4ada9 / examples/generate_documented.sh,src/interfaces/lua_modular/swig_typemaps.i: https://github.com/shogun-toolbox/shogun/commit/fd4ada911b0cbfc9a4bd1846cc6d18533435fe8c
+ shogun-notifier-	shogun: lua52 fix
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 255beac / examples/generate_documented.sh,src/interfaces/lua_modular/swig_typemaps.i: https://github.com/shogun-toolbox/shogun/commit/255beac14c3952ab4443388aaa55ad673bc3745b
+ shogun-notifier-	shogun: Merge pull request #1056 from crunchiness/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed interface for Lua 5.2
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 72f954a / examples/generate_documented.sh,src/interfaces/lua_modular/swig_typemaps.i: https://github.com/shogun-toolbox/shogun/commit/72f954a7d02bddef7deb2a8228f20fe95eb24a4c
+ shogun-notifier-	shogun: Merge accidentally accepted PR against master into develop
+ shogun-buildbot	build #912 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/912  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- makokal [~bokal@pD9EF09DC.dip0.t-ipconnect.de] has quit [Quit: makokal]
+-!- travis-ci [~travis-ci@ec2-107-22-69-126.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6865358
+-!- travis-ci [~travis-ci@ec2-107-22-69-126.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #747 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/747
+ shogun-buildbot	build #748 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/748  blamelist: Ingvaras Merkys <ingvaras@gmail.com>, Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #913 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/913
+ shogun-buildbot	build #1046 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1046
+ shogun-buildbot	build #1047 of deb3 - modular_interfaces is complete: Failure [failed compile lua_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1047  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- cesarfm [b2c73bf3@gateway/web/freenode/ip.178.199.59.243] has joined #shogun
+ gsomix	nite
+ shogun-buildbot	build #1048 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1048  blamelist: Ingvaras Merkys <ingvaras@gmail.com>, Soeren Sonnenburg <sonne@debian.org>
+--- Log closed Sat May 04 00:00:30 2013

@@ -1,0 +1,202 @@
+--- Log opened Fri Nov 23 00:00:15 2012
+-!- blackburn [~blackburn@188.168.2.62] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- ptizoom [~christian@79-71-89-182.dynamic.dsl.as9105.com] has joined #shogun
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/73f922810bc07524be102def2d90022992fa4ea9
+-shogungit:#shogun- shogun/master 73f9228 Soeren Sonnenburg: use DynArray instead of std::vector in interface
+@sonney2k	wiking, please check if it works with dynarray
+ wiking	ok i'll do
+@sonney2k	wiking, I am going put all the load* functions from features into SG* datatypes
+@sonney2k	and then refactor *features to use it and even worse refactor sparse/string features to use the SGStructures
+@sonney2k	SG datatypes that is
+@sonney2k	Math is now mostly cleaned up now (stuff that belongs to vector in SGVector)
+@sonney2k	wiking, btw http://shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/666/steps/compile%20python_modular/logs/warnings%20%2839%29
+@sonney2k	/home/buildbot/slaves/shogun-slave3/deb3_-_modular_interfaces/build/src/shogun/structure/CCSOSVM.h:35: warning: Compound shogun::CCCSOSVM is not documented.
+@sonney2k	could you write a bit what this is?
+ wiking	yeah as soon as i can finish some other patches :)
+ wiking	woah
+ wiking	i've created a MONSTER!:
+ wiking	latent svm
+ wiking	without CCP
+ wiking	CCCP
+ wiking	and it's like twice faster than the CCCP version
+ wiking	and more accurate
+ wiking	yeeey
+ wiking	:>>
+ wiking	sonney2k: here?
+ sonne|work	wiking: sounds cool :)
+ wiking	sonne|work: so the question i was about to ask is
+ wiking	that we have now libmrm libp3bm etc etc and now this other one i've created
+ wiking	but these are not strictly solvers for structure output
+ wiking	they are general solvers that can solve an unconstrained optimization in the form of: 1/2\lambda ||w||^2 + R(w)
+ wiking	where R(w) is a risk function
+ sonne|work	wiking: so you suggest to write some optimization package / classes?
+ wiking	sonne|work: well to move it out from structure/ directory
+ sonne|work	we wanted to wrap libqp / etc etc anyways so would make sense
+ sonne|work	yeah sure
+ wiking	maybe to optimization/ ?
+ sonne|work	feel free to create it
+ wiking	would that be  agood place for it?
+ sonne|work	wiking: only issue is that external libs should stay in some external dir
+ sonne|work	n4nd0: hey - long time no see here in #shogun
+ wiking	mmm
+ wiking	well the thing is
+ wiking	that now we have in optimization
+ wiking	lbfgs
+ wiking	that is completely external
+ wiking	so that and liblinear
+ sonne|work	wiking: otherwise all the libsvm etc stuff from external should be in svm's again
+ wiking	should rather move under
+ wiking	lib/external
+ wiking	as libocas and libqp is already there
+ wiking	or?
+ wiking	or create an ./external
+ wiking	and that should contain all our external lib imports
+ sonne|work	if this is a lib we just use + modified then yes
+ sonne|work	what would fit in optimization/ are some c++ objects wrapping these libs
+ wiking	well both liblinear and lbfgs are just external libs
+ wiking	or just simply have optimization/external
+ wiking	and then we put there the imported files
+ wiking	and in optimization we have the files created by ourselves
+ wiking	and there could be as well that wrapper class
+ sonne|work	I don't like having multiple external/ directories
+ sonne|work	its also messy IMHO
+ sonne|work	one external is just fine
+ n4nd0	sonne|work: hi! not so long time I think :)
+ n4nd0	I had an exam two days ago
+ n4nd0	gtg now, tty later
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- zxtx [~zv@ool-45750cfe.dyn.optonline.net] has quit [Ping timeout: 240 seconds]
+-!- n4nd0 [~nando@n182-p206.kthopen.kth.se] has joined #shogun
+-!- n4nd0 [~nando@n182-p206.kthopen.kth.se] has quit [Client Quit]
+-!- n4nd0 [~nando@n182-p206.kthopen.kth.se] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/2fcfa0d4d3b8f7d90452f29dc6795ff29a7a511c
+-shogungit:#shogun- shogun/master 2fcfa0d Soeren Sonnenburg: fix a number of doxygen errors
+-!- n4nd0 [~nando@n182-p206.kthopen.kth.se] has quit [Ping timeout: 252 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 240 seconds]
+-!- blackburn [~blackburn@109.226.125.245] has joined #shogun
+@sonney2k	wiking, what does the w=0 in CCCSOSVM(CStructuredModel* model, SGVector<float64_t> w = 0); stand for?
+@sonney2k	I don't really understand what it does
+@sonney2k	wiking, I assume it is supposed to alloc an empty vector? let me rather write CCCSOSVM(CStructuredModel* model, SGVector<float64_t> w = SGVector<float64_t>());
+-!- zxtx [~zv@ool-45750cfe.dyn.optonline.net] has joined #shogun
+@sonney2k	wiking, ohh and I can not make any sense out of the sparse_dot stuff in SGSparseVector... it doesn't say that sth has to be sorted nor do I understand the need for floor_log symmetric dot etc...
+ wiking	sonney2k: yes
+ wiking	it says
+ wiking	sonney2k:
+ wiking	** @brief template class SGSparseVector * The assumtion is that the stored SGSparseVectorEntry<T>* vector is ordered * by SGSparseVectorEntry.feat_index in non-decreasing order. * This has to be assured by the user of the class.
+ wiking	from the SGSparseVector.h
+@sonney2k	wiking, ohh and ::dot_prod_symmetric will crash if one vector has no elements
+@sonney2k	ok I see the comment
+@sonney2k	but I still don't understand how you compute the dot prod
+ wiking	this u ask 1 month after
+ wiking	you have applied the patch? :)
+ wiking	which part u dont understand?
+@sonney2k	wiking, better now than never
+@sonney2k	first of all what if one vector has zero length
+@sonney2k	it will crash
+ wiking	                if (a.num_feat_entries == 0 || b.num_feat_entries == 0)
+ wiking	                        return 0;
+ wiking	        static T sparse_dot(const SGSparseVector<T>& a, const SGSparseVector<T>& b)
+ wiking	right after the function
+ wiking	so that's the first thing it checks
+ wiking	so it will not crash
+@sonney2k	sorry this one is my bad
+ wiking	ok next..? :)
+ wiking	trust me this code is solid
+@sonney2k	but then what does the cmp_dot_prod_symmetry_fast do?
+ wiking	has been used in another sys for years
+@sonney2k	I totally don't understand it...
+@sonney2k	maybe I am too tired or sth but this it doesnt' get better
+ wiking	:D
+@sonney2k	wiking, why are there 3 functions for this dot prod?
+ wiking	well to be fast
+ wiking	as if u dont do this checks
+ wiking	you end up doing way too much work
+@sonney2k	the only thing I understand is that it makes sense to iterate over vector with the least number of elements as often as possible
+@sonney2k	but I still don't understand what cmp_dot_prod_symmetry_fast does
+@sonney2k	and what is floor_log for?
+ wiking	have u checked these func?
+@sonney2k	wiking, I totally understand dot_prod_symmetric
+@sonney2k	so at least sth
+@sonney2k	wiking, but the ::dot_prod_asymmetric one??
+ wiking	https://www.everlane.com/black-friday
+ wiking	this should be our motto as well :D
+ blackburn	yeah lets close until 2014
+@sonney2k	2013
+ blackburn	why 2013?
+ wiking	sonney2k: gdb it
+ blackburn	have some specific reason? :)
+ wiking	if u dont trust
+ blackburn	let me explain
+ blackburn	what is going on here?
+ blackburn	:D
+ wiking	really?
+ wiking	comeooon
+ blackburn	wiking: why it multiplies each of a with each of b?
+ blackburn	ah
+ blackburn	sorry
+ blackburn	okay it works
+ blackburn	but we should use eigen and http://www.roflcat.com/images/cats/I_Should_Buy_A_Boat.jpg
+ wiking	:DDDD
+ wiking	yeah i've thought about using eigen
+ wiking	but interfacing is a problem
+ wiking	so we should rightout use eigen for sparse vector representation
+ blackburn	is there anything cool I should buy this black friday?
+ wiking	as i couldn't find a way to do a simple wrapping like in case of densevector
+ blackburn	not taking a boat into account
+ blackburn	wiking: yeah it is a problem
+ wiking	and if we start copying data
+ wiking	then it's already too much time/resource to waste
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/49682e5e5390f77f4cd15dc6420845f58fdd004a
+-shogungit:#shogun- shogun/master 49682e5 Soeren Sonnenburg: add some more documentation
+ blackburn	sonney2k: actually I prefer macroses that require ; in the end
+ blackburn	don't you think it is better?
+@sonney2k	blackburn, doxygen will then complain about this one - I would prefer not to have macros in .h ...
+@sonney2k	but yes I prefer ; at macro ends too
+ blackburn	sonney2k: btw I managed to use macroses to generate code
+ blackburn	take a look
+ blackburn	https://github.com/lisitsyn/tapkee/blob/master/tapkee/utils/logging.hpp
+ blackburn	sonney2k: I have got a feeling we had some problems with that before
+@sonney2k	blackburn, we use similar stuff in shogun...
+ blackburn	sonney2k: where?
+@sonney2k	blackburn, everywhere in interfaces and load/save
+ blackburn	ah right
+ blackburn	sonney2k: no wait
+ blackburn	sonney2k: I form name of function with macro parameter
+ blackburn	message_##LEVEL
+@sonney2k	yeah I've seen
+@sonney2k	blackburn, do you know how eigen3's sparse vector is organized?
+ blackburn	sonney2k: a vector of pairs in a nutshell I'd say
+ blackburn	just like we do
+@sonney2k	hmmhh I think it is two separate arrays? http://eigen3.sourcearchive.com/documentation/3.0.0-2/CompressedStorage_8h_source.html
+@sonney2k	http://eigen3.sourcearchive.com/documentation/3.0.0-2/SparseVector_8h_source.html
+ blackburn	right
+@sonney2k	at least it has CompressedStorage<Scalar,Index> m_data;
+ blackburn	yeah sure
+ blackburn	my answer was just guess
+ blackburn	but it makes sense
+@sonney2k	hmmhh thats not really efficient :/
+ blackburn	why so?
+@sonney2k	iterating over arrays means iterating over different memory locations
+@sonney2k	so no linear memory reads are possible
+@sonney2k	I guess that is the price one has to pay when using the standard row/column compressed storage
+ blackburn	okay I got your point
+ blackburn	but I am not sure about losses
+ blackburn	it would be consistent to get some loss here but how much?
+ blackburn	it can be kinda microoptimization
+@sonney2k	I designed this in 2000 with this in mind and it is certainly not any different other than storage wise
+ blackburn	so well
+ blackburn	you feel linear memory read is better
+ blackburn	because it allows to cache right?
+@sonney2k	yes linear memory read is fast, random access is not
+@sonney2k	eigen3's dynamicsparsematrix is like ours
+ blackburn	well actually access to two arrays with the same offset should be efficient
+ blackburn	my understanding of assembly makes me think it is exactly 2 ops
+ blackburn	so it is not really random access
+ blackburn	one should rather measure :D
+ blackburn	but I should rather sleep :D
+ shogun-buildbot	build #669 of deb3 - modular_interfaces is complete: Failure [failed test ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/669  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+--- Log closed Sat Nov 24 00:00:15 2012

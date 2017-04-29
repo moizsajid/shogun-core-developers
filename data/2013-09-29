@@ -1,0 +1,440 @@
+--- Log opened Sun Sep 29 00:00:19 2013
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 4c446fb / CMakeLists.txt,examples/undocumented/libshogun/Makefile: https://github.com/shogun-toolbox/shogun/commit/4c446fb49381fe24f87977487fdb17539f7cd5ae
+ shogun-notifier-	shogun: disable SSE on CYGWIN
+@sonney2k	wiking, ^ that should fix the build on cygwin
+@sonney2k	hushell, in case you are awake - could you please remove the pickle.dump code from your notebook?
+@sonney2k	shogun-buildbot: force build --branch=develop 'cyg1 - libshogun'
+ shogun-buildbot	build #1552 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	hushell, hi there
+ shogun-buildbot	build #548 of nightly_default is complete: Failure [failed updatedoc notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/548
+@sonney2k	iglesiasg, do you know how to edit ipython notebooks?
+@iglesiasg	sonney2k, yes
+@iglesiasg	do ipython notebook in the directory where the ipynb file is
+@iglesiasg	and then in the browser click on the notebooks's name you want to edit
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 50f3914 / data: https://github.com/shogun-toolbox/shogun/commit/50f3914e4aa55358cfa7d531c3410fa7ec34aec7
+ shogun-notifier-	shogun: require new data version
+@sonney2k	iglesiasg, now notebooks are being build and we get error msgs: http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/548/steps/notebooks/logs/stdio
+@iglesiasg	I see
+@sonney2k	iglesiasg, and as you can see the path name for the Image.open is wrong for the bss_image example
+@iglesiasg	aham yeah
+@sonney2k	and i the FGM
+@sonney2k	it fails to pickle.dump the result
+@sonney2k	so these need fixing
+ shogun-buildbot	build #62 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/62  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	iglesiasg, I dont' get though why lambday's logdet is not working
+@sonney2k	it says invalid JSON
+@sonney2k	iglesiasg, and then finally yours
+@sonney2k	LMNN is taking > 1200s
+@sonney2k	buildbot timeout
+@sonney2k	and killed
+@iglesiasg	sonne|work, yep. As i mentioned in the message yesterday, I have to fix that.
+@iglesiasg	It is my next thing in the list IIRC, should be able to do it tom
+@sonney2k	iglesiasg, the sooner the better thanks
+@iglesiasg	I am just going to cut down the dimensions that are used and ensure that it takes less time
+@iglesiasg	sonney2k, the problem is that there are many outer products computed and the dimension here is 1472 or so
+@iglesiasg	outer product is quadratic in the dimension so it turns out to be quite slow
+@sonney2k	iglesiasg, and this is already done in parallel as I've seen
+@iglesiasg	so I just have to find a number of dimensions such that it can be computed fast enough for the purpose in the notebook, but also so the example remains meaningful
+@iglesiasg	sonney2k, parallelized in my code?
+@sonney2k	iglesiasg, well the process had load 8
+@sonney2k	so I guess so
+@iglesiasg	mmmm
+@iglesiasg	I didn't do anything to parallelize it :)
+@iglesiasg	maybe Eigen does something automatically about it?
+@iglesiasg	lisitsyn, Eigen expert! :) ^
+@sonney2k	iglesiasg, could you please do one thing
+@sonney2k	iglesiasg, go to shogun/doc/ipython-notebooks/logdet
+@sonney2k	and then ipython notebook and open that thing
+@sonney2k	it always says here JSON error
+@iglesiasg	sonney2k, all right. Let me try it
+@sonney2k	so maybe the file is corrupt
+@sonney2k	iglesiasg, and?
+@iglesiasg	sonney2k, I cannot load the notebook even
+@sonney2k	iglesiasg, exactly
+@sonney2k	so I am removing it
+@iglesiasg	An unknown error occurred while loading this notebook. This version can load notebook formats v3 or earlier.
+@iglesiasg	sonney2k, maybe it happens because lambday made some edit of the ipynb manually
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 7ad393e / doc/ipython-notebooks/ (2 files): https://github.com/shogun-toolbox/shogun/commit/7ad393e8da91ee289984b4bb292ce1fa07c81c78
+ shogun-notifier-	shogun: Fix ipython notebooks
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: - drop corrupt logdet.ipynb
+ shogun-notifier-	shogun: - don't pickle dump/load results in FGM
+@iglesiasg	I have experimented doing that and seen that error in the browser when I screwed an edit
+@sonney2k	iglesiasg, maybe... no idea
+ shogun-buildbot	build #1552 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1552
+@sonney2k	hurray
+@sonney2k	cyg1 is green
+@sonney2k	for the first time in 100 years :D
+@iglesiasg	haha yeah
+@sonney2k	and only 3400 warnings
+@iglesiasg	"only"
+@iglesiasg	sonney2k, I am running LMNN in the same data set in my laptop right now and monitoring top
+@iglesiasg	one process and over 300% CPU
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- iglesiasg_ [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+ iglesiasg_	so there is some parallelization taking place in there
+-!- iglesiasg_ is now known as iglesiasg
+ iglesiasg	just google it, it seems that Eigen does some parallelization in matrix-matrix operations
+ iglesiasg	I've just googled* it, I meant
+ iglesiasg	all right, I am off now. See ya!
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Client Quit]
+-!- AndChat49209 [~AndChat49@dab-bas1-h-1-5.dab.02.net] has joined #shogun
+-!- AndChat49209 [~AndChat49@dab-bas1-h-1-5.dab.02.net] has quit [Client Quit]
+-!- AndChat|49209 [~AndChat49@dab-hlw1-h-36-9.dab.02.net] has quit [Ping timeout: 256 seconds]
+ shogun-buildbot	build #45 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/45  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- new_lido [~walid@41.218.180.72] has quit [Ping timeout: 248 seconds]
+-!- travis-ci [~travis-ci@ec2-107-20-121-49.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/11914363
+-!- travis-ci [~travis-ci@ec2-107-20-121-49.compute-1.amazonaws.com] has left #shogun []
+-!- new_lido [~walid@41.218.173.134] has joined #shogun
+ shogun-buildbot	build #63 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/63  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #42 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/42  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #470 of nightly_all is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_all/builds/470
+ shogun-buildbot	build #549 of nightly_default is complete: Failure [failed updatedoc notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/549
+-!- sonne|osx_ [~sonne@g225081177.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f053047221.adsl.alicedsl.de] has quit [Ping timeout: 248 seconds]
+-!- sonne|osx_ is now known as sonne|osx
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- zxtx [~zv@c-50-133-182-155.hsd1.ma.comcast.net] has joined #shogun
+-!- zxtx [~zv@c-50-133-182-155.hsd1.ma.comcast.net] has quit [Remote host closed the connection]
+-!- gsomix [~gsomix@178.45.81.222] has quit [Read error: Connection reset by peer]
+-!- lambday [67157f4c@gateway/web/freenode/ip.103.21.127.76] has joined #shogun
+-!- lambday [67157f4c@gateway/web/freenode/ip.103.21.127.76] has quit [Ping timeout: 250 seconds]
+-!- lambday [67157e4c@gateway/web/freenode/ip.103.21.126.76] has joined #shogun
+ lambday	sonne|osx: moin moin
+ lambday	sonne|osx: fixed the broken notebook
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ lambday	lisitsyn: hi
+ lambday	lisitsyn: for submitting the code samples, I collected the patches using git format-patch -1 <hash> for all my commit hash.. would that do?
+ wiking	sonne|osx: ping
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has joined #shogun
+ wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+ wiking	shogun-buildbot_ force build --branch=develop 'nightly_default'
+ wiking	shogun-buildbot_: force build --branch=develop 'nightly_default'
+ shogun-buildbot_	build #550 forced
+ shogun-buildbot_	I'll give a shout when the build finishes
+ shogun-buildbot_	build #550 of nightly_default is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/550
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	build forced [ETA 6m50s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	Hey! build nightly_default #551 is complete: Success [build successful]
+ shogun-buildbot	Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/551
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	build forced [ETA 6m54s]
+ shogun-buildbot	I'll give a shout when the build finishes
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	build forced [ETA 6m55s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #553 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/553
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+ hushell	sonney2k: Sorry I just went back home, pickle.dump is not allowed?
+@sonney2k	hushell, no please fix the notebook if you can
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 93ba0ed / doc/ipython-notebooks/structure/FGM.ipynb: https://github.com/shogun-toolbox/shogun/commit/93ba0ed097f8dab6a5f777e305cf2eb62ef82bee
+ shogun-notifier-	shogun: another attempt to fix FGM
+ shogun-notifier-	shogun: lambday :develop * 6a1b8d9 / doc/ipython-notebooks/logdet/logdet.ipynb: https://github.com/shogun-toolbox/shogun/commit/6a1b8d964c9596567e5187282a142ac04cc67de9
+ shogun-notifier-	shogun: log-det ipython notebook json error fixed
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 9bfee5f / doc/ipython-notebooks/logdet/logdet.ipynb: https://github.com/shogun-toolbox/shogun/commit/9bfee5f2c9d243d0c845f5590b00623436749a35
+ shogun-notifier-	shogun: Merge pull request #1692 from lambday/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: log-det ipython notebook json error fixed
+ hushell	sonney2k: then how do I save something? e.g. the model parameters
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ hushell	sonney2k: I have prepared the new PR, but can I wait until the SGD PR merged? But I am fine if you want to fix the pickle.dump first.
+ shogun-buildbot	build #1835 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1835  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+ wiking	sonney2k: can u plz edit the /usr/local/bin/install-latest-shogun-doc.sh or chmod it so that buildbot user can write it and then i'll change it...
+@sonney2k	wiking, all notebooks fail again http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/553/steps/notebooks/logs/stdio
+@sonney2k	I guess you changed sth
+ wiking	sonney2k: yes i'm working on it atm...
+-!- lambday [67157e4c@gateway/web/freenode/ip.103.21.126.76] has quit [Ping timeout: 250 seconds]
+ shogun-buildbot	build forced [ETA 6m55s]
+ shogun-buildbot	I'll give a shout when the build finishes
+-!- travis-ci [~travis-ci@ec2-107-20-106-168.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/11922283
+-!- travis-ci [~travis-ci@ec2-107-20-106-168.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #43 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/43  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #46 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/46  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- travis-ci [~travis-ci@ec2-107-20-106-168.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/11922352
+-!- travis-ci [~travis-ci@ec2-107-20-106-168.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #554 of nightly_default is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/554
+ shogun-buildbot	build #1836 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1836
+ wiking	okkeeey sonney2k the notebooks are fine now
+ wiking	sonney2k: can u plz chown buildbot:buildbot /usr/local/bin/install-latest-shogun-doc.sh
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ shogun-buildbot	build #1555 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1555  blamelist: lambday <heavensdevil6909@gmail.com>, Soeren Sonnenburg <sonne@debian.org>
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	hi guys
+ shogun-notifier-	shogun: Viktor Gal :develop * 5e4721c / CMakeLists.txt,src/shogun/lib/config.h.in: https://github.com/shogun-toolbox/shogun/commit/5e4721cf083c925d5edb0901c19e64c96ecf55da
+ shogun-notifier-	shogun: Attempt to fix issue #1625
+ shogun-notifier-	shogun: rename macro USE_HMMPARALLELSTRUCTURES -> USE_HMMPARALLEL_STRUCTURES as
+ shogun-notifier-	shogun: it is used in HMM.cpp
+ wiking	iglesiasg: hey
+@iglesiasg	wiking, what's up
+ wiking	we are getting 1 cell error in LMNN notebook
+@iglesiasg	wiking, yeah, too much time, right?
+ wiking	https://github.com/shogun-toolbox/shogun/issues/1687#issuecomment-25317993
+@iglesiasg	wiking, I am on it right now. I am going to see if it gets fast enough reducing the number of features used
+ wiking	this one is failing atm
+@iglesiasg	wiking, "failing"
+@iglesiasg	I think it is simply timing out
+ wiking	okey
+ wiking	i'm just copy-pasting :P
+@iglesiasg	but anyway, yes. Let me do something about it
+ wiking	no idea what's happening in depth
+ wiking	iglesiasg: btw i dont think it's timeout problem
+ wiking	as it was running for real25m1.033s
+ wiking	25mins
+ wiking	iglesiasg: http://www.shogun-toolbox.org/static/notebook/current/LMNN.html
+@iglesiasg	wiking, http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/548/steps/notebooks/logs/stdio
+ wiking	this the current output
+@iglesiasg	wiking, check the very last thing
+ wiking	http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/554/steps/notebooks/logs/stdio
+ wiking	this is the last build
+@iglesiasg	all right
+ wiking	as u can see from the html
+ wiking	http://www.shogun-toolbox.org/static/notebook/current/LMNN.html#Multiclass-classification
+ wiking	the second cell doesn't have an output
+@iglesiasg	weird
+ shogun-buildbot	build #64 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/64  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@iglesiasg	wiking, it is not the only one without output though
+ wiking	yeah realised in the meanwhile :((
+@iglesiasg	wiking, mmm the output is weird
+@iglesiasg	it is not aligned with the corresponding cell
+ wiking	huh
+@iglesiasg	wiking, see for instance the cell you told me that it doesn't have output
+ wiking	it's shifted or what?
+@iglesiasg	it has it, but it appears after the next cell
+ wiking	iglesiasg: ooooh
+ wiking	yeah
+ wiking	i see
+ wiking	let's check the ipynb
+@iglesiasg	no idea why that is happening
+@iglesiasg	but actually in that HTML everything went fine I think
+ wiking	http://www.shogun-toolbox.org/static/notebook/current/LMNN.ipynb
+@iglesiasg	wiking, in the ipynb it is like that as well
+ wiking	yeah as suspected the generated ipynb has a problem :(
+@iglesiasg	yes
+ wiking	i wonder why's that
+@iglesiasg	my bet is that it is because of the time
+@iglesiasg	I mean we are seeing weird behaviour, sometimes it fails because of time out
+ wiking	yeah
+@iglesiasg	sometimes it doesn't but the output is cell-shifted
+ wiking	iglesiasg: there's a 1000s timeout currently
+@iglesiasg	wiking, for the whole notebook?
+@iglesiasg	or waiting for a cell's output?
+ wiking	cell
+@iglesiasg	wiking, it should be more than enough actually. In my computer it takes half that time
+@iglesiasg	wiking, but I guess the buildbot is just very loaded
+@iglesiasg	wiking, so let me reduce the number of dimensions and experiment a bit with the time
+ wiking	ok maybe there's still a little problem with the timeout settings
+@iglesiasg	wiking, what is it?
+ wiking	i've changed another timeout number in the generator script
+ wiking	maaaybe it'll fix it
+ wiking	i'm not 100%
+@iglesiasg	wiking, ok
+@iglesiasg	so I wait then :)
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- new_lido [~walid@41.218.173.134] has quit [Ping timeout: 256 seconds]
+-!- new_lido [~walid@41.218.173.134] has joined #shogun
+@iglesiasg	wiking, do we have to wait for nightly to get results about this?
+ shogun-buildbot	build #44 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/44  blamelist: lambday <heavensdevil6909@gmail.com>, Soeren Sonnenburg <sonne@debian.org>
+@iglesiasg	wiking, I have just made some tests, and using 500 features training takes about 40 seconds in my machine and the feature selection is still good
+@iglesiasg	so I can easily update the notebook to do it this way
+@iglesiasg	in case problems with the time out persist
+@iglesiasg	all right, I will be back later. See you!
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- lambday [67157c4c@gateway/web/freenode/ip.103.21.124.76] has joined #shogun
+ lambday	wiking: hi
+ lambday	sonne|osx: wiking: the failing notebook cells are because of a dependency on colpack graph coloring library
+-!- new_lido [~walid@41.218.173.134] has quit [Ping timeout: 240 seconds]
+-!- new_lido [~walid@41.218.173.134] has joined #shogun
+ shogun-buildbot	build #47 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/47  blamelist: lambday <heavensdevil6909@gmail.com>, Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #1556 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1556
+-!- lambday [67157c4c@gateway/web/freenode/ip.103.21.124.76] has quit [Ping timeout: 250 seconds]
+-!- new_lido [~walid@41.218.173.134] has quit [Ping timeout: 240 seconds]
+-!- new_lido [~walid@41.218.173.134] has joined #shogun
+-!- new_lido [~walid@41.218.173.134] has quit [Client Quit]
+ shogun-buildbot	build #65 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/65  blamelist: lambday <heavensdevil6909@gmail.com>, Soeren Sonnenburg <sonne@debian.org>
+-!- hushell [~hushell@c-98-232-178-161.hsd1.or.comcast.net] has quit [Ping timeout: 248 seconds]
+-!- pickle27 [~Kevin@zaq31faa991.zaq.ne.jp] has joined #shogun
+ shogun-buildbot	build #1914 of deb3 - modular_interfaces is complete: Failure [failed test ruby modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1914  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- van51 [~van51@athedsl-409794.home.otenet.gr] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 245 seconds]
+-!- pickle27 [~Kevin@zaq31faa991.zaq.ne.jp] has quit [Quit: Leaving]
+-!- gsomix [~gsomix@80.234.64.47] has joined #shogun
+ gsomix	good evening
+-!- gsomix [~gsomix@80.234.64.47] has quit [Ping timeout: 264 seconds]
+-!- lisitsyn [~lisitsyn@213.178.35.165] has quit [Quit: Leaving.]
+-!- gsomix [~gsomix@5850-AMTS-2-43.dialup.samtel.ru] has joined #shogun
+@sonney2k	van51, will you be around in the evening (in 2-3 hrs)?
+@sonney2k	wiking, our sse2 detection is b0rken - that is why cygwin was failing
+@sonney2k	wiking, I only did a workaround disabling sse2 on cygwin
+ van51	sonney2k: probably yeah
+-!- hushell [~hushell@c-98-232-178-161.hsd1.or.comcast.net] has joined #shogun
+@sonney2k	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	build forced [ETA 27m30s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #555 of nightly_default is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/555
+ van51	sonney2k: ping
+@sonney2k	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	build forced [ETA 27m30s]
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	van51, pong
+ van51	sonney2k: hey
+ van51	sonney2k: did you see my comment on github?
+@sonney2k	van51, yes but what I am saying is we don't really need that array at all
+ wiking	sonney2k: bundle them
+@sonney2k	wiking, no
+ wiking	sonney2k: why not?
+ wiking	they have both bundle options
+@sonney2k	I don't like the bundle approach
+@sonney2k	it is error prone
+ van51	sonney2k: so should I try to replace it?
+@sonney2k	wiking, I would rather say this is required - install it if you won't or go w/o
+ wiking	system? if it's not a package then bundle is better
+ wiking	as it's tested
+ wiking	and works
+ wiking	in several builds;)
+@sonney2k	wiking, it is tested now
+ wiking	sonney2k: as i see with self installed lib u end up having problems (see pic)
+ wiking	sonney2k: have u installed those packages on 7nn.de as well?
+@sonney2k	wiking, it is the wrong approach IMHO - it is the work distributions should be and are doing
+@sonney2k	wiking, no 7nn won't build any longer
+@sonney2k	it is just the webserver now
+ wiking	k
+@sonney2k	van51, yes please
+@sonney2k	van51, I think it would be best to use an SGVector for that task
+ wiking	sonney2k: what was the problem with sse2?
+ wiking	i mean we are using -march=native
+@sonney2k	wiking, there is still
+ wiking	so i dont really get how's this our 'fault'
+@sonney2k	wiking, if we have HAVE_SSE2 on cygwin - all examples using random will crash - this is what we have seen
+@sonney2k	van51, OK?
+ van51	sonney2k: yeah
+ wiking	sonney2k: does that machine have sse2?
+ van51	sonney2k: on it
+@sonney2k	van51, if you use SGVector you can just create a new one of appropriate size and assign it later to the member variable
+@sonney2k	van51, then call resize() to squeeze it to the correct size
+ van51	sonney2k: ok great. that's what I had in mind ;)
+@sonney2k	wiking, well cat /proc/cpuinfo said so but no idea
+@sonney2k	wiking, we need a real sse2 test code snippet that is run to be sure
+@sonney2k	wiking, I couldn't find any proper sse2 detection for cmake (not even opencv has one)
+@sonney2k	wiking, so I decided to disable it on cygwin
+@sonney2k	wiking, but I guess we will run into trouble on older archs too
+@sonney2k	van51, if you can - could you check who is using set_array() (from the original code) too - I mean the code there is wrong - it should free old memory and I suspect some copy & paste bug or other stupid error
+@sonney2k	wiking, one more thing - about shogun vs. opencv
+ van51	sonney2k: ok. right after I finish
+@sonney2k	wiking, I think we should add an option in cmake to make it possible to use cv mat
+@sonney2k	wiking, so we can have some fancy opencv examples later and for now just https://gist.github.com/pickle27/6751722
+@sonney2k	van51, thanks tons!
+ van51	sonney2k: np!
+ wiking	sonney2k: afaik we should add helper function to do cv::mat <-> SGMatrix
+ wiking	we've discussed this with sergey as well
+@sonney2k	wiking, yes sure - would be easy to do - SGMatrix's etc are very very similar to cv mat
+@sonney2k	wiking, and van51 could finally do the gender detection demo with opencv's face detector and shogun's lbppyr features
+@sonney2k	wiking, but dependency is that we have cmake support for that
+ wiking	sonney2k: it's easy
+@sonney2k	if we have we can keep the example from pickle27
+ wiking	sonney2k: there's opencv cmake detector
+@sonney2k	wiking, just add it then
+ wiking	provided by opencv itself
+@sonney2k	wiking, so what is needed then?
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has joined #shogun
+ van51	sonney2k: I've updated the PR
+ van51	going to eat now
+@sonney2k	van51, does it work now?
+@sonney2k	van51, and btw regarding memory - just drop the training data once you have the classifier and it did call init_optimization
+ shogun-buildbot	build #556 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/556
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: van51 :develop * 84e81cf / / (3 files): https://github.com/shogun-toolbox/shogun/commit/84e81cf49c1883f0eb7d6bbe8fdccd087b829aed
+ shogun-notifier-	shogun: Fixed seg fault and a leak in CommUlongStringKernel and added a unit test
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * d2f0062 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/d2f0062064d546746cab592bf9fb9fbee6efc8ee
+ shogun-notifier-	shogun: Merge pull request #1688 from van51/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed seg fault and a leak in CommUlongStringKernel and added a unit test
+@sonney2k	now only fernando should fix his notebook and we are good
+ hushell	sonney2k: no problem with pickle now?
+@sonney2k	hushell, I removed it
+@sonney2k	hushell, http://www.shogun-toolbox.org/static/notebook/3.0/FGM.html
+ hushell	sonney2k: thanks! look great!
+ wiking	hushell: your average testing error with bmrm is always around 0.24?
+ hushell	wiking: you mean overfitted?
+ hushell	wiking: I didn't tune much the regularization, but this result is similar to the results in Patrick's paper
+ wiking	hushell: no the question is what number u usually get
+ wiking	for testing error
+ wiking	does it vary a lot or it's always around 0.24?
+ wiking	sonney2k: current should be current and not a symlink to any release
+ wiking	as it's a nightly build
+ wiking	not any release build
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	wiking, how do you do a release build then?
+ wiking	you just make one manually
+ hushell	wiking: yeah, it is always 0.2394, IIRC no random stuff in bmrm
+ wiking	hushell: ok cool
+@sonney2k	wiking, then please don't name it current but 'latest'
+@sonney2k	wiking, for the documentation we have a scheme that takes the version number
+@sonney2k	wiking, and installs under this version number the doc
+@sonney2k	wiking, then we have two symlinks
+@sonney2k	wiking, current == currrent stable release
+@sonney2k	wiking, and latest == latest developer build
+ wiking	sonney2k: eh why?
+ wiking	current is current
+ wiking	stable is stable
+@sonney2k	wiking, then you have to change this in doc too and update all links everywhere
+ wiking	that's kind of defacto rule
+ wiking	for all sw releasing
+-!- new_lido [~walid@41.218.177.204] has joined #shogun
+ shogun-buildbot_	build #1915 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1915
+@sonney2k	wiking, http://docs.buildbot.net/current/index.html http://docs.buildbot.net/latest/index.html etc
+ wiking	yey so there's one more opensource library :)
+ wiking	this current vs latest even semantically does not have any sense
+ wiking	i'm sorry but this is very misleading
+ shogun-buildbot_	build #45 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/45  blamelist: van51 <vangelis_51@hotmail.com>
+ shogun-buildbot_	build #48 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/48  blamelist: van51 <vangelis_51@hotmail.com>
+ shogun-buildbot_	build #66 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/66  blamelist: van51 <vangelis_51@hotmail.com>
+ shogun-buildbot_	build #46 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/46  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ shogun-notifier-	shogun: hushell :develop * 0ab27a9 / / (14 files): https://github.com/shogun-toolbox/shogun/commit/0ab27a98007f214ab42439094e6b89973045edff
+ shogun-notifier-	shogun: SOSVM SGD solver
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 6c6213c / / (14 files): https://github.com/shogun-toolbox/shogun/commit/6c6213cf2e0f3c41d0047e775a9368e6219b6f68
+ shogun-notifier-	shogun: Merge pull request #1669 from hushell/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: SOSVM SGD solver
+ shogun-buildbot_	build #49 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/49  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- gsomix [~gsomix@5850-AMTS-2-43.dialup.samtel.ru] has quit [Ping timeout: 240 seconds]
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 6225623 / doc/ipython-notebooks/metric/LMNN.ipynb: https://github.com/shogun-toolbox/shogun/commit/6225623be96e42e84c784aec4d40f86e5e103d82
+ shogun-notifier-	shogun: Update LMNN notebook using far less number of features in the metagenomics example
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 6b307c3 / doc/ipython-notebooks/metric/LMNN.ipynb: https://github.com/shogun-toolbox/shogun/commit/6b307c38d667da7832eb7646df0b07413a7b5bfb
+ shogun-notifier-	shogun: Merge pull request #1698 from iglesias/feature/lmnn
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Update LMNN notebook using far less number of features in the metagenomi...
+--- Log closed Mon Sep 30 00:00:20 2013

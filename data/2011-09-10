@@ -1,0 +1,119 @@
+--- Log opened Sat Sep 10 00:00:12 2011
+ blackburn	broken in 0.9
+@sonney2k	ugh
+@sonney2k	I really thought I have checked these
+ blackburn	sonney2k: will check some more tags tomorrow
+ blackburn	and btw I have to integrate superlu as soon as possible
+ blackburn	our LLE is slower than scikits-learn one
+ blackburn	it is a blocker for my possible paper about our implementations
+@sonney2k	heh :)
+@sonney2k	go ahead
+@sonney2k	and the GNB needs fixing too
+@sonney2k	anyways
+@sonney2k	night
+ blackburn	yeah
+ blackburn	a lot of things to fix
+ blackburn	I will have a hard next week, but I hope later it will go smoother
+ blackburn	there will be some development kick-off at my job
+ blackburn	see you
+-!- blackburn [~blackburn@31.28.44.65] has quit [Quit: Leaving.]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- blackburn [~blackburn@31.28.44.65] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 258 seconds]
+ CIA-3	shogun: Sergey Lisitsyn master * r41f17ea / src/configure : Added SuperLU detection - http://git.io/PMelQA
+@sonney2k	blackburn, ok
+ blackburn	sonney2k: ok for what?
+@sonney2k	no worries - just stay in the team
+ blackburn	:)
+@sonney2k	what is the superlu stuff?
+ blackburn	sonney2k: sparse direct solver
+ blackburn	I'm currently integrating it to arpack
+ blackburn	sonney2k: the problem is LLE uses sparse weight matrix
+ blackburn	and arpack provides reverse interface making possible to use sparse solver
+ blackburn	that's how sklearn guys did that
+-!- mrsrikanth [~mrsrikant@59.92.77.64] has joined #shogun
+ blackburn	sonney2k: http://dl.dropbox.com/u/10139213/shogun/logos.png
+ blackburn	any?
+ blackburn	sonney2k: http://cs9996.vk.com/u3917169/-7/z_c97fe19b.jpg
+ CIA-3	shogun: Sergey Lisitsyn master * rf34ce2c / src/configure : Fixed typo in configure - http://git.io/a79CNA
+-!- mrsrikanth [~mrsrikant@59.92.77.64] has quit [Quit: Leaving]
+ blackburn	sonney2k: helloo
+@sonney2k	blackburn, yes?
+@sonney2k	blackburn, I like the 3rd one
+@sonney2k	who painted ti?
+@sonney2k	it?
+ blackburn	sonney2k: me, who else can?
+@sonney2k	I guess we should have a vote on the mailinglist
+@sonney2k	or even a call for logos if someone thinks he can do better
+ blackburn	sonney2k: do you know some good sparse matrix multiplication lib or so?
+@sonney2k	umfpack?
+ blackburn	sonney2k: I need matrix-matrix dot product
+@sonney2k	what is a matrix matrix dotproduct?
+ blackburn	ehh?
+ blackburn	I have sparse matrix W and have to compute W'W
+ blackburn	I realized it is the only bottleneck
+@sonney2k	maybe http://www.cise.ufl.edu/research/sparse/ssmult/
+ blackburn	uh
+ blackburn	I guess faster to write it by myself
+@sonney2k	blackburn, maybe it is not that difficult
+@sonney2k	if you assume indices are sorted for sparse vectors
+@sonney2k	you could keep track of all indices in a row
+ blackburn	sonney2k: I would write very specialized version of this product
+ blackburn	multiplication
+ blackburn	well I did it already but wrong
+@sonney2k	yeah it is not too easy
+ blackburn	sonney2k: did it with std::list, is it ok?
+ blackburn	sonney2k: finally our LLE became faster than sklearn's one
+@sonney2k	blackburn, can't you use dynarray?
+ blackburn	sonney2k: I guess I can
+ blackburn	8.37s shogun lle
+ blackburn	11.59s scikits learn lle
+ blackburn	sonney2k: DynArray have pretty big granularity
+ blackburn	I need list with constant time insertion
+@sonney2k	you can adjust granularity though
+ blackburn	sonney2k: I have N (number of examples) lists with no apriori known sizes
+@sonney2k	isn't that a bit too much?
+@sonney2k	N lists?!
+ blackburn	sonney2k: how can I store non-zero indexes any other way?
+@sonney2k	ahh number of examples. misread taht
+ blackburn	sonney2k: so ok to use std::list?
+@sonney2k	still no  - but what are you doing?
+@sonney2k	what is in the list?
+ blackburn	sonney2k: indexes of non zero elements of columns
+@sonney2k	blackburn, but then you could use dynarray and set granularity to number of non-zero elements in row your multiply with (or subsets of it)
+ blackburn	sonney2k: ok will try
+ blackburn	sonney2k: done
+ blackburn	a little slower
+ blackburn	but without your hateful std haha
+@sonney2k	which granularity size did you use?
+ blackburn	m_k*2
+ blackburn	well k parameter twice
+@sonney2k	m_k ?
+ blackburn	typically where are <m_k non zero elements
+ blackburn	exactly m_k in a tow
+ blackburn	row*
+@sonney2k	I mean you knwo the number of elements in a row
+@sonney2k	so that is m_k?
+@sonney2k	why m_k * 2?
+ blackburn	number of non zero elements in row
+@sonney2k	I mean it can only become smaller
+ blackburn	sonney2k: no, in column it can be larger
+@sonney2k	blackburn, yes but not in product
+ blackburn	ehh?
+@sonney2k	then it is intersection of row / col indices
+ blackburn	I do W'W
+@sonney2k	the number of nnz components!?
+ blackburn	so column is multiplied on column
+ blackburn	using dynarray costs 0.4s :)
+ blackburn	granularity doesn't affect any speed
+ blackburn	I would parallelize that too
+@sonney2k	how is that possible then?! I mean if you used huge granularity dynarray must be faster than any list
+ blackburn	no idea, may be wrong measurement
+-!- blackburn [~blackburn@31.28.44.65] has quit [Read error: No route to host]
+-!- blackburn [~blackburn@31.28.44.65] has joined #shogun
+ CIA-3	shogun: Sergey Lisitsyn master * rf8944e0 / (2 files): Beautified dimreduction examples - http://git.io/OmoPsw
+ CIA-3	shogun: Sergey Lisitsyn master * r613d9dc / (2 files): Improved performance of locally linear embedding - http://git.io/BjbdOQ
+ CIA-3	shogun: Sergey Lisitsyn master * r7e0438e / src/shogun/preprocessor/LocallyLinearEmbedding.cpp : Removed unnecessary includes - http://git.io/fr_OXw
+ CIA-3	shogun: Sergey Lisitsyn master * r5ef91ed / src/shogun/preprocessor/KernelLocallyLinearEmbedding.cpp : Updated KLLE - http://git.io/nwu-Yw
+--- Log closed Sun Sep 11 00:00:17 2011

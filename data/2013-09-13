@@ -1,0 +1,627 @@
+--- Log opened Fri Sep 13 00:00:57 2013
+@sonney2k	gsomix, btw you will need to read the whole protobuf message into memory anyway so you can aswell read it with fread()
+ shogun-buildbot	build #1791 of deb3 - modular_interfaces is complete: Failure [failed test python_modular test ruby_modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1791  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, hushell <hushell@hushell-U510.(none)>
+ shogun-buildbot	build #1790 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1790
+ shogun-notifier-	shogun-data: Soeren Sonnenburg :master * 5e90268 / testsuite/tests/ (9 files): https://github.com/shogun-toolbox/shogun-data/commit/5e90268c3c1a3947747ce5d33ccf032dba662e43
+ shogun-notifier-	shogun-data: add tests for new examples
+ shogun-buildbot	build #1447 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1447
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 77e6cf4 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/77e6cf49b1fba302316a3683d618c390b36ebe61
+ shogun-notifier-	shogun: require new data version and muten examples
+-!- HeikoS [~heiko@213.190.120.70] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ sonne|osx	HeikoS: doing the night shift?
+@HeikoS	sonne|osx: its 1040 here :)
+@HeikoS	and you=?
+@HeikoS	just came home
+ sonne|osx	00:40 :)
+@HeikoS	I see
+@HeikoS	so its you who is doing this :D
+@HeikoS	how are things?
+ sonne|osx	HeikoS: we have a buildbot x-mas tree now
+ sonne|osx	HeikoS: seen that armada http://buildbot.shogun-toolbox.org/waterfall
+ sonne|osx	HeikoS: wikings new botnet
+@HeikoS	wow!
+@HeikoS	thats a lot
+@HeikoS	pretty cool
+@HeikoS	mmh the most important one fails
+@HeikoS	debian modular
+@HeikoS	but very nice
+@HeikoS	are those all running on the new server?
+ sonne|osx	yeah and we've come quite far almost 50% are good
+ sonne|osx	HeikoS: no
+ sonne|osx	but most
+ sonne|osx	actually modular is ok
+ sonne|osx	I am changing examples and by doing so I am creating issues
+ sonne|osx	trying to get rid of the tools dir
+ sonne|osx	and AsciiFile
+ sonne|osx	I can tell that I am happy to have tests for the examples
+@HeikoS	tests for examples?
+ sonne|osx	yes
+ sonne|osx	the integration tests are exactly that
+@HeikoS	ah
+@HeikoS	I see
+@HeikoS	so they are helping with things?
+@HeikoS	that could not otherwise be catched?
+@HeikoS	I am still wondering what that would be
+ sonne|osx	well they ensure that the examples are doing the same thing even when I refactor them
+@HeikoS	API errors are catched by running them, result changes are detected by units
+@HeikoS	I dont know
+@HeikoS	there were again so many errors in the tests recently that were all just not really anything
+@HeikoS	where we replaced the test files
+@HeikoS	but
+@HeikoS	ok, thats a discussion for later
+ sonne|osx	I know you don't like them. I am just happy to have them. Otherwise I would have broken examples.
+ sonne|osx	anyway
+ sonne|osx	we still have lots and lots on the todo
+@HeikoS	yeah I mean I want to replace them to not loose anything
+ sonne|osx	before we can release
+@HeikoS	yes I know
+@HeikoS	I will join next week
+@HeikoS	for one week at least
+ sonne|osx	but how would you check if an example returns the correct thing?
+@HeikoS	units
+ sonne|osx	but that is C++ code
+@HeikoS	because then we also know *what* is wrong rather than *that* something is wrong
+ sonne|osx	when you refactor an example I mean
+@HeikoS	I dont know what could sneak through
+ sonne|osx	ohh with python examples you also know
+@HeikoS	as said, I haven't seen an example of an integration test that could not been otherwise catched
+@HeikoS	I still would run them
+@HeikoS	to get API/include errors
+ sonne|osx	but they might return results that you didn't intend
+@HeikoS	we should discuss this in a quiet moment at some point
+@HeikoS	I am not in general against python tests
+@HeikoS	but these integration tests where we serialize, I dont like that
+@HeikoS	since it changes when you touch the class
+@HeikoS	would rather just store certain things or so
+@HeikoS	(or have migration working)
+ sonne|osx	or then consciously update the test data
+ sonne|osx	I don't like us breaking serialization
+ sonne|osx	if we break it
+ sonne|osx	some test should fail
+ sonne|osx	and we should make a conscious decision
+@HeikoS	I spent probably about 10hrs "fixing" tests, where I did not have a single error but only changes
+@HeikoS	but it should not break if you add/remove a variable
+ sonne|osx	if we had examples in all languages doing exactly the same
+ sonne|osx	we could generate a reference output
+ sonne|osx	and then compare
+@HeikoS	mmh
+@HeikoS	yeah thats good actually
+ sonne|osx	so we know that java, octave, python ,... all return the same result
+ sonne|osx	I didn't get that far as you can see
+@HeikoS	still my question: what errors dont we detect otherwise?
+@HeikoS	what is an example of a problem that only is catched like this?
+ sonne|osx	how do you ensure that a python example gives the same result like an octave example?
+@HeikoS	did we ever have a problem with this?
+@HeikoS	for these inter-laguage things, I agree, thats nice to have
+ sonne|osx	well I have. we tried to do examples to be exactly the same in all languages
+@HeikoS	but I would not do it with fixed files
+ sonne|osx	I mean we have the same documentation for all
+@HeikoS	rather run code, dump, and check whether its the same
+ sonne|osx	so they should do the same
+@HeikoS	can be done automatically
+@HeikoS	thats actually a nice thing to have
+@HeikoS	but then we would need the *same* examples
+ sonne|osx	yeah I do that too but then when sty is changed it might break
+ sonne|osx	we had
+ sonne|osx	we are deviating from that
+@HeikoS	its impossible
+ sonne|osx	why?
+@HeikoS	we rather should have automatically generated tests for all modular classes
+@HeikoS	a test that is defined once and then carried our automatically
+ sonne|osx	you cannot test everything
+ sonne|osx	and you don't test the example
+@HeikoS	true, but how would you get preople to write the very same example in all languages?
+@wiking	yey
+ sonne|osx	it is very little work
+@wiking	streaming feature fixed
+@HeikoS	so, maybe let me phrase it this way: we should change the fact that the integration tests break all the time without something being wrong
+@HeikoS	wiking: hi! nice!
+ sonne|osx	it is basically just copying into the different dirs
+ sonne|osx	with very minimal adjustments
+ sonne|osx	maybe we can automate that even
+@HeikoS	sonne|osx: writing is fine, but maintaining is not
+@HeikoS	sonne|osx: the only way to do it is automation
+@HeikoS	imagine the costs of changing one example
+@HeikoS	you would have to change 7 files
+@HeikoS	+ integration test files
+ sonne|osx	1 integration test file which is just generator.py example.py
+ sonne|osx	that is really cheap
+@HeikoS	no its like 3 comits
+@HeikoS	and it should not happen
+@HeikoS	or it need not to happen in my eyes
+@HeikoS	but maybe the better way to go is to to the migration for new varialbes
+@HeikoS	or something
+@HeikoS	or just even ignore
+@HeikoS	dont know
+@HeikoS	sonne|osx: but lets discuss that later
+@HeikoS	not the time now
+@wiking	oh man ascii reader has quite some error or i dont know
+ sonne|osx	wiking: I am killing buildbot 3
+ sonne|osx	wiking: that can be removed soon
+@wiking	/Users/wiking/shogun/tests/unit/features/StreamingDenseFeatures_unittest.cc:48: Failure
+ sonne|osx	wiking: it is too slow
+@wiking	Value of: example.vector[j] Actual: -0.80468112230300903
+@wiking	Expected: expected.vector[j]
+@wiking	Which is: -0.80468114524960255
+@wiking	-0.8046811452496025
+@wiking	is actually in the file
+@wiking	is this error normal or i'm doing something wrong?
+ sonne|osx	wiking: please pretend AsciiFile doesn't exist
+@wiking	sonne|osx: what should i use for writing then?
+ sonne|osx	wiking: CSVFile
+@HeikoS	sonne|osx, wiking I will write a mail to the students/mentors now that people should stop coding very soon
+ sonne|osx	HeikoS: yes very good
+ sonne|osx	HeikoS: we should have a quick meeting again so they can all help with the release
+ sonne|osx	otherwise we can hardly make it
+@HeikoS	yeah sergey scheduled it
+ sonne|osx	woking has been working for 3 but it is still a looong todo list
+ sonne|osx	wiking ^
+@wiking	3?
+@wiking	ah lol
+@sonney2k	shogun-buildbot, force build --branch=develop 'deb1 - libshogun'
+ shogun-buildbot	build forced [ETA 9m15s]
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	shogun-buildbot, force build --branch=develop 'deb3 - shogun_modular'
+ shogun-buildbot	no such builder 'deb3 - shogun_modular'
+@wiking	sonne|osx: hahaha
+@sonney2k	shogun-buildbot, force build --branch=develop 'deb3 - modular_interfaces'
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+@wiking	sonne|osx: CSVFile is buggy
+ sonne|osx	wiking: bug gsomix!
+@wiking	sonne|osx: 2 dim vector
+@wiking	-1.69268,0.477893,
+@wiking	-1.56754,0.684399,
+@wiking	^ first two line
+ sonne|osx	wiking: but all examples work fine with it
+ sonne|osx	wiking: what's the issue?
+ sonne|osx	the trailing , ?
+@wiking	yeah
+@wiking	why is there? :D
+ sonne|osx	wiking: create an issue and assign it to gsomix
+ sonne|osx	we need as much testing as possible :D
+ shogun-buildbot	build forced [ETA 34m11s]
+ shogun-buildbot	I'll give a shout when the build finishes
+@wiking	CDenseFeatures<float64_t>* orig_feats=new CDenseFeatures<float64_t>(data); CCSVFile* saved_features = new CCSVFile(fname, 'w'); orig_feats->save(saved_features); saved_features->close(); SG_UNREF(saved_features);
+ sonne|osx	alight I should sleep now
+@wiking	i did this
+ sonne|osx	night!
+ shogun-buildbot	Hey! build deb1 - libshogun #2115 is complete: Success [build successful]
+ shogun-buildbot	Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2115
+@wiking	gsomix: https://github.com/shogun-toolbox/shogun/issues/1579
+ shogun-buildbot	build #71 of FC19 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20modular_interfaces/builds/71  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@HeikoS	wiking: you are really on a run :)
+ shogun-buildbot	build #1792 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1792
+ shogun-buildbot	build #1448 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1448  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-notifier-	shogun: Viktor Gal :feature/FixStreaming * 1874222 / tests/unit/features/StreamingDenseFeatures_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/187422275532dad4983ff6777df5ac2ee5fc471b
+ shogun-notifier-	shogun: Add basic unit test for StreamingDenseFeatures reading
+ shogun-notifier-	shogun: Viktor Gal :feature/FixStreaming * 9f21f87 / src/shogun/io/streaming/ (3 files): https://github.com/shogun-toolbox/shogun/commit/9f21f879ec9c9baa7f270d267563f314cfa7649d
+ shogun-notifier-	shogun: Fix Example<T> in ParseBuffer.h
+ shogun-notifier-	shogun: instead of trying to store the example as SGVector<T> in an Example<T>
+ shogun-notifier-	shogun: rather store it as T* as T can be SGSparseVectorEntry.
+ shogun-notifier-	shogun: Use SG_REALLOC instead of SG_MALLOC in StreamingAsciiFile when reading
+ shogun-notifier-	shogun: sparse vectors, this way enabling true buffering in ParseBuffer
+ shogun-notifier-	shogun: Viktor Gal :feature/FixStreaming * b9a6012 / tests/unit/features/StreamingDenseFeatures_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/b9a60125f5fc9f242752d8dbbbc4a6fecce24e59
+ shogun-notifier-	shogun: Add example_reading_from_features to StreamingDenseFeatures unit test
+@wiking	let's see what travis says about this...
+@wiking	ok i'm off to sleep soonish
+@iglesiasg	good night!
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- HeikoS [~heiko@213.190.120.70] has quit [Quit: Leaving.]
+-!- sonne|osx_ [~sonne@f053047034.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f053046093.adsl.alicedsl.de] has quit [Ping timeout: 260 seconds]
+-!- sonne|osx_ is now known as sonne|osx
+-!- pickle27 [~Kevin@199.119.128.114] has quit [Quit: Leaving]
+-!- besser82 [~besser82@fedora/besser82] has quit [Read error: Operation timed out]
+-!- zxtx [~zv@rrcs-76-79-81-162.west.biz.rr.com] has quit [Read error: Operation timed out]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+ gsomix	wiking, ok, I'll fix.
+ gsomix	sonney2k, ok, got it.
+ gsomix	sonney2k, but there are many possibilities in how we can read messages.
+ gsomix	sonney2k, one of
+ gsomix	https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.io.coded_stream#CodedInputStream
+ gsomix	need go to classes
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has left #shogun []
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :develop * 057c667 / src/shogun/io/streaming/InputParser.h,src/shogun/io/streaming/ParseBuffer.h: https://github.com/shogun-toolbox/shogun/commit/057c667214ff6093c07d3dc12a88a76e6c06bae8
+ shogun-notifier-	shogun: InputParser and ParseBuffer requires pthread
+ shogun-notifier-	shogun: check if it's available
+ shogun-notifier-	shogun: Viktor Gal :develop * 1874222 / tests/unit/features/StreamingDenseFeatures_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/187422275532dad4983ff6777df5ac2ee5fc471b
+ shogun-notifier-	shogun: Add basic unit test for StreamingDenseFeatures reading
+ shogun-notifier-	shogun: Viktor Gal :develop * 9f21f87 / src/shogun/io/streaming/ (3 files): https://github.com/shogun-toolbox/shogun/commit/9f21f879ec9c9baa7f270d267563f314cfa7649d
+ shogun-notifier-	shogun: Fix Example<T> in ParseBuffer.h
+ shogun-notifier-	shogun: instead of trying to store the example as SGVector<T> in an Example<T>
+ shogun-notifier-	shogun: rather store it as T* as T can be SGSparseVectorEntry.
+ shogun-notifier-	shogun: Use SG_REALLOC instead of SG_MALLOC in StreamingAsciiFile when reading
+ shogun-notifier-	shogun: sparse vectors, this way enabling true buffering in ParseBuffer
+ shogun-notifier-	shogun: Viktor Gal :develop * b9a6012 / tests/unit/features/StreamingDenseFeatures_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/b9a60125f5fc9f242752d8dbbbc4a6fecce24e59
+ shogun-notifier-	shogun: Add example_reading_from_features to StreamingDenseFeatures unit test
+ shogun-notifier-	shogun: Viktor Gal :develop * 625d74e / / (4 files): https://github.com/shogun-toolbox/shogun/commit/625d74e3198eb73423e0b912ba391a36c7df1f70
+ shogun-buildbot	build #72 of FC19 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20modular_interfaces/builds/72  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- hushell [~hushell@c-98-232-178-161.hsd1.or.comcast.net] has joined #shogun
+ shogun-buildbot	build #124 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/124  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1449 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1449  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1450 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1450  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1794 of deb3 - modular_interfaces is complete: Failure [failed test python_modular test ruby_modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1794  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+ zombie|sonnewrk	moin wiking!
+ zombie|sonnewrk	look deb3 modular is back happy!
+ zombie|sonnewrk	wiking: and cyg1 almost too! http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1450/steps/test/logs/stdio
+ zombie|sonnewrk	wiking: however could do the following: when a test fails we rerun it with gdb and create a full backtrace at least or even w/ valgrind?
+ zombie|sonnewrk	wiking: so we have something to work with?
+ zombie|sonnewrk	besser82: btw did the version thing w/o git work?
+ besser82	zombie|sonnewrk: yes, works :)
+ zombie|sonnewrk	perfect
+-!- lisitsyn1 [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- lisitsyn1 [~lisitsin@mxs.kg.ru] has left #shogun []
+-!- lisitsyn1 [~lisitsin@mxs.kg.ru] has joined #shogun
+ besser82	zombie|sonnewrk: is there any closer targeted release date for 3.0.0 than Oct. 13 ???
+ besser82	zombie|sonnewrk: like 2nd half of Oct or some KW?
+ besser82	zombie|sonnewrk: I'm asking, because beta freeze for F20 is target ~15.10.13
+ zombie|sonnewrk	besser82: I can't tell
+ besser82	zombie|sonnewrk: kk, thanks :)
+ zombie|sonnewrk	we are making good progress but there are tons of issues stil
+ zombie|sonnewrk	l
+ zombie|sonnewrk	and gsoc is still running so we cannot do a hard freeze just yet
+ zombie|sonnewrk	however it looks already pretty good http://buildbot.shogun-toolbox.org/waterfall
+ zombie|sonnewrk	man buildbots became green
+ zombie|sonnewrk	osx used to be green no idea what changed
+ zombie|sonnewrk	cyg has only 3 tests failing
+ zombie|sonnewrk	besser82: so there is only FC19 modular that needs fixing
+ zombie|sonnewrk	the rest is rather optional
+ zombie|sonnewrk	(various code quality / analysis stuff)
+ zombie|sonnewrk	besser82: btw how did you manage to get it to configure on FC19 with http://buildbot.shogun-toolbox.org/builders/FC19%20-%20modular_interfaces/builds/72/steps/configure/logs/stdio
+ besser82	zombie|sonnewrk: is this error on FCRH, too?
+ zombie|sonnewrk	besser82: we don't have a buildbot for modular on FCRH
+ zombie|sonnewrk	so no idea
+ besser82	zombie|sonnewrk: there should be an update for rubygem-narray on F19, which will fix this problem
+ besser82	zombie|sonnewrk: within next day or so
+ zombie|sonnewrk	besser82: ahh cool!
+ zombie|sonnewrk	then we sit it out
+ besser82	zombie|sonnewrk: I'll give you links to updated builds, when I'm done with it :)
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ thoralf	Hello everybody
+ zombie|sonnewrk	thoralf: good morning berlin!
+ thoralf	Good morning Zombie ;)
+ thoralf	Lets hope that wiking did not break any of the streaming stuff...
+ thoralf	No break :)
+ thoralf	But a leak.
+-!- hushell [~hushell@c-98-232-178-161.hsd1.or.comcast.net] has quit [Quit: WeeChat 0.3.7]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: ZhengyangL :develop * cd9c28e / / (8 files): https://github.com/shogun-toolbox/shogun/commit/cd9c28e592a8b660d48f8120f3ce6aa2456e2dcf
+ shogun-notifier-	shogun: A Simple MLData Downloader with unittest
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 1b219d5 / / (8 files): https://github.com/shogun-toolbox/shogun/commit/1b219d56d873cabe880ce63e6b5ee4f8704220c6
+ shogun-notifier-	shogun: Merge pull request #1580 from ZhengyangL/feature/mldatafile
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: add unit-test to simple mldata downloader / fix the indent / make url_prefix configurable
+ shogun-buildbot	build #2120 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2120  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #2119 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2119  blamelist: ZhengyangL <liuzhengyang@outlook.com>
+ zombie|sonnewrk	foulwall: around? Seen the build failures?
+ zombie|sonnewrk	foulwall: you need to ifdef the examples/tests with the HAVE_CURL too
+ thoralf	zombie|sonnewrk: About the suppressions file.  But I think it doesn't make sense (yet) to have many suppression files - it's okay to collect a few suppressions first in one file and split them on demand.
+ thoralf	zombie|sonnewrk: It's less convenient, btw., since you have to pass every suppression file on the valgrind command line.
+ thoralf	Any suggestions for the name (or directory) are welcome.
+ thoralf	As far as I checked there's no way to pass a directory or include suppressions into some "master suppression file".
+ zombie|sonnewrk	thoralf: no but for example it woud be nice to store proper vimrc settings emacs settings too
+ zombie|sonnewrk	thoralf: so sth like configs / settings ?
+-!- van51 [~van51@athedsl-410351.home.otenet.gr] has joined #shogun
+-!- HeikoS [~heiko@213.190.120.70] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ thoralf	zombie|sonnewrk: I'm no vi guy.  Do you mean these comments to tell the editor tab width, indentation, character set?
+ thoralf	zombie|sonnewrk: Oh, now I got it.
+ thoralf	zombie|sonnewrk: You want a settings directory and the valgrind.supp inside?
+ thoralf	zombie|sonnewrk: configs/valgrind.supp
+-!- lambday [67157e37@gateway/web/freenode/ip.103.21.126.55] has joined #shogun
+ lambday	HeikoS: hi :)
+ lambday	zombie|sonnewrk: hi... you've turned into a zombie :-o
+-!- HeikoS [~heiko@213.190.120.70] has quit [Quit: Leaving.]
+ thoralf	unit tests are broken: tests/unit/io/MLDataHDF5File_unittest.cc:29:2: error: unknown type name 'CMLDataHDF5File'
+ zombie|sonnewrk	thoralf: yes
+ zombie|sonnewrk	foulwall: ^ that is yours
+ zombie|sonnewrk	or I fix it
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 0d3efc0 / tests/unit/io/MLDataHDF5File_unittest.cc,tests/unit/metric/LMNN_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/0d3efc068a59fb5fc758645fedcfce8dd79e6ca0
+ shogun-notifier-	shogun: don't fail when curl is not available
+ foulwall	Thanks zombie|sonnewrk
+ foulwall	merging van51's language detection demo
+ shogun-buildbot	build #2121 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2121
+ shogun-buildbot	build #73 of FC19 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20modular_interfaces/builds/73  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #125 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/125  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- HeikoS [~androirc@217.28.182.64] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	lambday, around?
+-!- lambday_ [67157f37@gateway/web/freenode/ip.103.21.127.55] has joined #shogun
+ lambday_	HeikoS: hi
+ lambday_	HeikoS: sorry I was away
+@HeikoS	No worries
+ lambday_	HeikoS: how did your presentation go?
+ gsomix	RE from classes
+ gsomix	hello
+@HeikoS	Good so far, another one tonight
+ lambday_	great!
+@HeikoS	How are things gong for you?
+-!- lambday [67157e37@gateway/web/freenode/ip.103.21.126.55] has quit [Ping timeout: 250 seconds]
+ lambday_	Should I use the ozone for the ipython or the new matrix that you said? 473x473 one?
+ lambday_	I had some trouble converting that one into ascii
+@HeikoS	Maybe both.  Problem is that it takes very long
+@HeikoS	Leave the ozone maybe
+ lisitsyn1	HeikoS: your mail!
+ lisitsyn1	I am confused
+ lambday_	alirght...
+@HeikoS	lisitsyn1, ignore it
+ lisitsyn1	I confess I don't know what meeting I am trying to schedule
+ lisitsyn1	:D
+ lisitsyn1	HeikoS: really, what should we do
+@HeikoS	lisitsyn1, well you should be clear about that
+@HeikoS	lambday_, so for the notebook, it would be good to use the smaller matrix to illustrate things
+ lambday_	HeikoS: so we are postponing preconditioning stuff after gsoc?
+@HeikoS	lambday_, you can nicely explain the fill in effect etc
+ lambday_	HeikoS: yeah
+@HeikoS	lambday_, after
+ lambday_	alright
+@HeikoS	Now it's time to wrap up, takes time
+ lambday_	okay
+@HeikoS	Let me sen double my poster....you might take things from there
+ lambday_	double?
+ lambday_	lisitsyn1: how are you? :)
+ lisitsyn1	HeikoS: I know
+ lisitsyn1	lambday_: fine, what about you?
+@HeikoS	lambday_, sorry tablet. I meant let me send you my poster
+ lisitsyn1	HeikoS: so help me, what have I scheduled? :D
+ lambday_	HeikoS: hehe... ya checking
+ lambday_	lisitsyn1: good.. :)
+@HeikoS	lisitsyn1, I have no idea. I thought this was a Dev only meeting, ask wiking Nd Soren maybe
+@HeikoS	Gotta go, see you in a bit
+ lisitsyn1	haha okay this is getting worse
+ lambday_	HeikoS: alright see you.. poster looks amazing btw
+-!- lisitsyn1 is now known as lisitsyn
+-!- lambday_ is now known as lambday
+-!- HeikoS [~androirc@217.28.182.64] has quit [Ping timeout: 246 seconds]
+ zombie|sonnewrk	foulwall: cool
+ zombie|sonnewrk	foulwall: does it work?
+ shogun-buildbot	build #1451 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1451  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ zombie|sonnewrk	van51: now that you are `free' again would you want to start the kitchen duties :)
+ van51	zombie|sonnewrk: haha I have already ;)
+ van51	zombie|sonnewrk: but I would like some implementation instructions
+ zombie|sonnewrk	van51: excellent
+ van51	zombie|sonnewrk: first of all I am trying to implement it as shown here in alg 1 : http://books.nips.cc/papers/files/nips21/NIPS2008_0885.pdf
+ zombie|sonnewrk	van51: I assume it is the same principle like the random fourier features?
+ thoralf	van51: Did you get some feedback about the hashing thing?
+ van51	zombie|sonnewrk: yeah, from my understanding actually the RFFeatures are a special case of kitchensinks
+ zombie|sonnewrk	yes
+ van51	thoralf: zombie|sonnewrk said it was ok the way it is. the others haven't replied yet
+ zombie|sonnewrk	thoralf: yes all ok
+ zombie|sonnewrk	thoralf: we don't care too much about collisions
+ thoralf	zombie|sonnewrk: hashing "feature" with "feature" as seed?
+ zombie|sonnewrk	not with feature but the index
+ thoralf	zombie|sonnewrk: Doesn't seem right.
+ thoralf	s/feature/index/ yes
+ thoralf	zombie|sonnewrk: You get a completely different hashing function with different collision properties.
+ zombie|sonnewrk	thoralf: what do you propose instead?
+ thoralf	zombie|sonnewrk: Choosing a seed (fixed, maybe const in the source) and then use this seed for hashing all indices.
+ thoralf	Otherwise you're changing the hashing function every time. ;)
+ thoralf	And maybe another seed for the quadratic features (I don't really care) to make sure both functions are independent.
+ thoralf	(or using virtual indices from a different range than the linear features)
+ van51	thoralf: in a paper they had sent me to read it says that each feature was supposed to have a different hash function
+ thoralf	van51: Really?  Which one?
+ van51	thoralf: http://olivier.chapelle.cc/pub/ngdstone.pdf
+ van51	section 4.3
+ thoralf	van51: No, thats different:
+ thoralf	No, sorry.  It's not. ;)
+ thoralf	van51: Okay, then ignore my first objection.  What about the second one?  About computing your "virtual" indices?
+ van51	thoralf: to use num_feats + index instead of index+index?
+ thoralf	van51: Yes, because this way you're sure producing more collisions than neccessary.
+ thoralf	I'm checking the code again, one second.
+ van51	thoralf: the only definite collision that it incurs is when the indexes are 0 I think
+ van51	thoralf: I think I had considered at that time to use num_feats + idx and that I had a reason for doing it the way I did but I can't recall it atm
+ van51	thoralf: it would also work the way you are saying and I can't find a reason against it but I don't see the difference it would make
+ thoralf	I found two different ways of computing the hashes in the code.  shogun/features/HashedSparseFeatures.cpp:142 and shogun/features/HashedDenseFeatures.cpp:198
+ thoralf	Let me check.
+ thoralf	linear "CHash::MurmurHash3((uint8_t* ) &i, sizeof (index_t), i);" and quadratic "CHash::MurmurHash3((uint8_t* ) &n_idx, sizeof (index_t), n_idx) " <-- You get collisions for every "j = i * vec.size() + i"
+ thoralf	This was in shogun/features/HashedDenseFeatures.cpp:198
+ thoralf	Agree?
+ thoralf	Okay, but since i < vec.size(), this should not happen.  Okay. ;)
+ van51	thoralf: hehe I like how you ask and then answer it yourself :p
+ van51	thoralf: I may not even have an answer, but it doesn't matter :p
+ thoralf	In shogun/features/HashedSparseFeatures.cpp:142: hash_i(i) vs hash_{2*i}(i)
+ thoralf	Should be okay, too.
+ thoralf	LOL.
+ thoralf	Yes, my first look was quite short.  But now I had to double check my claim. ;)
+ thoralf	And now I see why you're using two different ways of hashing (sparse vector without known length vs. dense vector with known length).
+ van51	thoralf: yeah it did have something to do with that
+ thoralf	Hope you don't mind that the results using sparse are not the same as with dense vectors. ;)
+ van51	thoralf: hmm I hadn't thought of that but I don't think that it matters
+ van51	thoralf: you 're not after a specific representation but after the compactness
+ thoralf	van51: I like the idea having two concurrent (but compatible) versions: You can use the learned model with dense and sparse features.
+ thoralf	But that really doesn't matter.
+ thoralf	Btw., I checked the implementation from scikits-learn.
+ thoralf	They indeed hash all features with the same seed.
+ van51	thoralf: well tbh we also use the same seed in the HashedDocDotFeatures version
+ van51	thoralf: maybe it's a matter of preference
+ thoralf	Yes, seems like.
+ thoralf	tbh?
+ van51	to be honest
+ thoralf	Thanks for the debate. ;)
+ van51	thoralf: anytime :)
+-!- HeikoS [~androirc@217.28.182.64] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ thoralf	wiking: Your changes broke StreamingAsciiFile - I'm getting segfaults at shogun/io/streaming/StreamingAsciiFile.cpp:573
+ thoralf	CStreamingAsciiFile::get_sparse_vector_and_label (this=0x6103b0, vector=@0x628798: 0x0, len=@0x6287a8: 47, label=@0x6287a0: 0)
+ thoralf	wiking: The problem disappears when replacing SG_REALLOC my SG_MALLOC.
+ thoralf	I found out that the vector returned by realloc is NULL.
+@HeikoS	lambday, you can also have the latex code if you want. How is the current state Btw. What are you working on, what is planned for the next days?
+ lambday	HeikoS: I have been a bit slow due to insti related stuffs... I'll try to finish off the refactoring and examples as planned
+ lambday	HeikoS: you told that there is something in the log-det that could have been done in a better way and you'll tell me...
+@HeikoS	What about the individual CG solvers for LogDetEstimator?
+ lambday	HeikoS: COCG - still to be fixed
+@HeikoS	Ehm,.... :)
+@HeikoS	Can't remember
+ lambday	:(
+@HeikoS	Ok, then COCG,  refactoring is most important
+-!- thoralf [~thoralf@enki.zib.de] has quit [Quit: Konversation terminated!]
+@HeikoS	And then examples for the most important classes, really important
+ lambday	HeikoS: yeah.. but that won't take long...
+ lambday	HeikoS: I can't convert the matrix into an ascii one
+@HeikoS	I noticed the class dox should also be updated...
+@HeikoS	Which matrix?
+ lambday	HeikoS: checked out their dataset by the way, many many sparse matrices there to try out
+ lambday	HeikoS: the sparse matrix 473x473 with max eig ~10^11
+@HeikoS	Ah, what's the problem there? You can even store it densely
+ lambday	the one you used for the probe sampler plot
+ lambday	HeikoS: its in .mat format, my octave code that I used for ozone is not working for it
+@HeikoS	Ah...
+@HeikoS	I can send it as ascii
+@HeikoS	Will do tonight
+ lambday	HeikoS: regarding class docs, I'll review them carefully after I am done with examples
+ lambday	HeikoS: thanks man :)
+@HeikoS	Yeah cool, in particular you should explain how things work together
+@HeikoS	So many classes, so should help people through this jungle :)
+ lambday	HeikoS: yeah... the LogDetEstimator unit-tests already do that, so you think I'll write similar examples, with that real matrix, right?
+ lambday	hahaha yeah its a jungle alright
+ lambday	now even I seem to forget which class was for what
+ lambday	HeikoS: could you please explain a bit regarding the tutorial thing that you wrote in the mail?
+-!- HeikoS [~androirc@217.28.182.64] has quit [Read error: Connection reset by peer]
+-!- heiko [~androirc@217.28.182.64] has joined #shogun
+ heiko	lambday, actually
+ heiko	Just use python
+ heiko	It CN load the file
+ heiko	Can
+ heiko	And then export as ascii
+ heiko	That's easy
+ heiko	See my notebokk
+ lambday	alright
+ heiko	Just two lines
+ heiko	And you need to get into python anyways this week :)
+ lambday	yeah!
+ lambday	heiko: so, csc_matrix works compatibly with our sparse matrix?
+ heiko	Yep
+ heiko	That's how we store them
+ lambday	cool!
+ heiko	It's pretty easy to exchange data using python
+ lambday	heiko: I actually had some trouble installing these packages... I'll check today only
+ heiko	Everything is there
+ heiko	Lambday just don't use cholmod
+ heiko	That was only needed for the ozone
+ lambday	heiko: alright..
+ heiko	Also note you addendum the sparse let to shogun
+ heiko	So no need
+ heiko	For cholmod
+ heiko	Just a bit slower in Eigen3
+ lambday	okay
+ heiko	But the other notebook doesn't need it
+ lambday	heiko: what does this loadmat is taking? loadmat("S")["S"] ?? S.mat is the filename?
+ heiko	It returns a dictionary
+ heiko	With keys being strings and values being the data
+ lambday	okay
+ heiko	It's all well documented Btw Google for function names
+ heiko	Python dictionaries are very cool btw
+ lambday	yeah!
+ lambday	was checking the documentation already... never worked in scipy... gonna be fun
+ heiko	Yeah it's very cool stuff
+ van51	heiko: hey! quick question.. did you have a reason for postponing to register parameters in MulticlassStrategy?
+ lambday	heiko: so, by this monday, all examples+ipython+refactoring has to be complete?
+ heiko	lambday, as said in the mail, last week should be used for cleaning up, so try to finish these things as soon as possible
+ lambday	okay.. yeah that sounds good
+ heiko	van51, yes, integration tests were down. Feel free to change. But make sure to run the tests before and after. Might have to change quite a few test files
+ lambday	I couldn't get pip-install and stuffs working.. as soon as I get that, things won't take long
+ van51	heiko: ok, I'll have a quick look :)
+ zombie|sonnewrk	gsomix: do you have some WIP PR ready?
+ heiko	van51, would be helpful if you did that and removed warnings :) we have to do this for the release anyways. ?..
+ gsomix	zombie|sonnewrk, nope. I'll send today at evening. need go to home now (100+ km)
+ zombie|sonnewrk	gsomix: ok
+-!- heiko [~androirc@217.28.182.64] has quit [Quit: AndroIRC - Android IRC Client ( http://www.androirc.com )]
+-!- gsomix [~gsomix@185.6.239.51] has quit [Remote host closed the connection]
+-!- heiko [~androirc@217.28.182.64] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- van51 [~van51@athedsl-410351.home.otenet.gr] has quit [Quit: Leaving.]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- heiko [~androirc@217.28.182.64] has quit [Read error: Connection reset by peer]
+-!- heiko [~androirc@217.28.182.64] has joined #shogun
+-!- zombie|sonnewrk [~sonnenbu@91-64-72-127-dynip.superkabel.de] has left #shogun []
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has left #shogun []
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: hushell :develop * c64978c / / (7 files): https://github.com/shogun-toolbox/shogun/commit/c64978c1cb0c45652907d3f93fc7c804d70d5bed
+ shogun-notifier-	shogun: refactor a bit MAPInference and add more unit-tests
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 862f445 / / (7 files): https://github.com/shogun-toolbox/shogun/commit/862f4451018a4c41049c2b0bd7f7e441cc13d22e
+ shogun-notifier-	shogun: Merge pull request #1581 from hushell/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: refactor a bit MAPInference and add more unit-tests
+-!- van51 [~van51@athedsl-410351.home.otenet.gr] has joined #shogun
+-!- heiko [~androirc@217.28.182.64] has quit [Read error: Connection reset by peer]
+ shogun-buildbot	build #74 of FC19 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20modular_interfaces/builds/74  blamelist: hushell <dom343@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #126 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/126  blamelist: hushell <dom343@gmail.com>
+ shogun-buildbot	build #127 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/127  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #1452 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1452  blamelist: hushell <dom343@gmail.com>
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has joined #shogun
+ shogun-buildbot	build #1453 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1453  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-notifier-	shogun: ZhengyangL :develop * b5ab66b / / (3 files): https://github.com/shogun-toolbox/shogun/commit/b5ab66bb905273e59cd364e2c93d65c745b0c85b
+ shogun-notifier-	shogun: combine #IFDEFs and fix little ident mistakes
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 123f403 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/123f403c09b6cbf05ea615bb060499bf988ad103
+ shogun-notifier-	shogun: Merge pull request #1582 from ZhengyangL/feature/mldatafile
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: combine #ifdefs / fix little indent mistakes
+ shogun-buildbot	build #75 of FC19 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20modular_interfaces/builds/75  blamelist: Soeren Sonnenburg <sonne@debian.org>, ZhengyangL <liuzhengyang@outlook.com>
+ shogun-buildbot	build #128 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/128  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #129 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/129  blamelist: ZhengyangL <liuzhengyang@outlook.com>
+ shogun-buildbot	build #1454 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1454  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	foulwall, do you have van51's demo ready?
+@sonney2k	or what is still missing
+ lisitsyn	sonney2k: I can shogunize a bit if you guide me a bit
+ lisitsyn	any suggestions?
+ shogun-buildbot	build #1455 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1455  blamelist: ZhengyangL <liuzhengyang@outlook.com>
+ lisitsyn	okay checking tests
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 8539417 / / (27 files): https://github.com/shogun-toolbox/shogun/commit/85394179f0599e18e7df84b7582eebc10eb29816
+ shogun-notifier-	shogun: drop AsciiFile
+@sonney2k	lisitsyn, look at this http://buildbot.shogun-toolbox.org/static_analysis/2013-09-11-1/
+ lisitsyn	sonney2k: haha nice
+@sonney2k	lisitsyn, there are errors in slep, transfer, tapkee etc
+ lisitsyn	good ok
+@sonney2k	not easy to fix and not easy to parse so have a look
+ shogun-buildbot	build #2126 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2126  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	lisitsyn, or any of https://github.com/shogun-toolbox/shogun/issues?labels=&milestone=3&page=1&state=open
+@sonney2k	lisitsyn, or sth cmake related
+@sonney2k	lisitsyn, whenever a test fails we should run the test with gdb to get a backtrace and/or valgrind
+@sonney2k	to know how to fix it
+ lisitsyn	sonney2k: uh that's not really trivial
+ lisitsyn	okay let me check what can I do
+@sonney2k	lisitsyn, we had that before
+ shogun-notifier-	shogun: Thoralf Klein :develop * 29803fa / .valgrind.supp: https://github.com/shogun-toolbox/shogun/commit/29803faf703c5f08b40288809d7bc5180671e47a
+ shogun-notifier-	shogun: Valgrind suppression file for pthread/openmp reachable-memory warnings.
+ shogun-notifier-	shogun: Thoralf Klein :develop * 262f476 / configs/valgrind.supp,.valgrind.supp: https://github.com/shogun-toolbox/shogun/commit/262f4767fb4d9da0fdccc9803e649b3b267b0bb9
+ shogun-notifier-	shogun: Moved valgrind suppressions into new configs/ directory.
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 7401d1a / configs/valgrind.supp: https://github.com/shogun-toolbox/shogun/commit/7401d1a4dfc49518fda3ae733d0503c3af0531c8
+ shogun-notifier-	shogun: Merge pull request #1570 from tklein23/valgrind_suppressions
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Valgrind suppression file for pthread/openmp reachable-memory warnings.
+-!- van51 [~van51@athedsl-410351.home.otenet.gr] has quit [Quit: Leaving.]
+ shogun-buildbot	build #2127 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2127
+ shogun-buildbot	build #2129 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2129  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #76 of FC19 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20modular_interfaces/builds/76  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ shogun-buildbot	build #130 of osx1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/130
+ shogun-buildbot	build #1456 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1456  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 246 seconds]
+ shogun-buildbot	build #1457 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1457  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 4cef68a / src/shogun/transfer/domain_adaptation/DomainAdaptationSVM.cpp: https://github.com/shogun-toolbox/shogun/commit/4cef68a61eeb620639e31d487c72b15cb4d394a9
+ shogun-notifier-	shogun: Added pre_svm check in DA SVM
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 78130a2 / src/shogun/io/CSVFile.h: https://github.com/shogun-toolbox/shogun/commit/78130a24dd16b7c9807760d70d6e73cfa3ca2f0f
+ shogun-notifier-	shogun: Added missed include in csv file
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * ae29935 / src/shogun/features/SparseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/ae29935f09ea8086699f2656f704e7fc2b4a1f06
+ shogun-notifier-	shogun: Fixed possible nullptr in sparse features
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 88061d1 / src/shogun/features/DenseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/88061d1a006422b2248cc2c2395e0c15a066da0c
+ shogun-notifier-	shogun: Fixed possible nullptr in dense features
+ shogun-buildbot	build #2130 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2130  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #2131 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2131  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- lambday [67157f37@gateway/web/freenode/ip.103.21.127.55] has quit [Ping timeout: 250 seconds]
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 260 seconds]
+@wiking	 lisitsyn http://www.liveleak.com/view?i=37b_1378633407
+@wiking	ROTFLMAO
+ lisitsyn	wiking: ah yeah old joke
+@wiking	:P
+ lisitsyn	wiking: very american though!
+ lisitsyn	:D
+ lisitsyn	wiking: do you know who's on asciifile removal?
+ lisitsyn	wiking: I am not really sure what should be done about compilation failure now
+-!- zxtx [~zv@rrcs-76-79-81-162.west.biz.rr.com] has joined #shogun
+--- Log closed Sat Sep 14 00:00:58 2013

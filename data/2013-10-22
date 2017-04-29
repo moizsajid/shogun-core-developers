@@ -1,0 +1,269 @@
+--- Log opened Tue Oct 22 00:00:51 2013
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Quit: Leaving.]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+ shogun-buildbot	build #586 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/586
+-!- HeikoS [~androirc@cpe-66-74-186-205.dc.res.rr.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	Ping
+@HeikoS	Pong
+@sonney2k	HeikoS, night shift!
+-!- HeikoS1 [~heiko@cpe-66-74-186-205.dc.res.rr.com] has joined #shogun
+ HeikoS1	okipou
+-!- HeikoS1 [~heiko@cpe-66-74-186-205.dc.res.rr.com] has quit [Quit: Leaving.]
+-!- besser82 [~besser82@77-20-93-165-dynip.superkabel.de] has joined #shogun
+-!- besser82 [~besser82@77-20-93-165-dynip.superkabel.de] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+@wiking	besser82: yo
+ besser82	wiking: ya!
+@wiking	besser82: so i'm just preparing a docker file for shogun
+@wiking	besser82: do u know how to setup docker for fedora?
+ besser82	wiking: not yet, but I can someone who is more affine with infra....
+@wiking	besser82: these are the requirements: http://docs.docker.io/en/latest/installation/kernel/#kernel
+@wiking	for kernel
+@wiking	besser82: fedora infra uses openstack?
+@wiking	http://lists.openstack.org/pipermail/openstack-announce/2013-October/000151.html
+@wiking	has native docker support
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+@wiking	lisitsyn: yo
+ lisitsyn	wiking: hey
+@wiking	lisitsyn: do u have repo creation permissions for shogun-toolbox user on github?
+ lisitsyn	wiking: lemme check
+@wiking	lisitsyn: btw: do u know this: http://docker.io/
+@wiking	lisitsyn: i'm just trying to put together a Dockerfile for this in order to have shogun+notebooks
+@wiking	it's pretty great stuff
+@wiking	unfortunately it's not tooo much native support
+@wiking	i.e. only linux
+@wiking	but others can use vagrant
+@wiking	like i'm doing now
+ lisitsyn	wiking: it doesn't look I have such permissions
+@wiking	:(
+ lisitsyn	about docker - no idea actually
+@wiking	lisitsyn: check this out: https://github.com/dotcloud/docker/blob/master/README.md
+@wiking	this is the most interesting of the whole stuff: https://github.com/dotcloud/docker/blob/master/README.md#better-than-vms
+ lisitsyn	wiking: ha, another thing written in go
+@wiking	indeed :)
+ lisitsyn	wiking: sometimes I think we should use go too
+ lisitsyn	:D
+@wiking	:D
+@wiking	of course :P
+@wiking	ok now the question where should we store nightly packages on the website?
+@wiking	we shoudl totally have like
+@wiking	http://www.shogun-toolbox.org/download
+@wiking	or http://www.shogun-toolbox.org/downloads
+@wiking	and http://www.shogun-toolbox.org/download/nightly
+@wiking	any insights?
+ lisitsyn	wiking: I am ok with any
+@wiking	ok i'll check how this can be done
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@wiking	ok
+@wiking	where should we store the dockerfile
+@wiking	should we just include it in the source repo?
+@wiking	although anyway this image is going to be here: https://index.docker.io/
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- thoralf [~thoralf@enki.zib.de] has joined #shogun
+ thoralf	Hey all.
+ lisitsyn	thoralf: hey
+ thoralf	Quite empty in here.
+ thoralf	I expected a crowded channel and everyone looking forward to work on the release. ;)
+@sonney2k	thoralf, sure thing
+ lisitsyn	thoralf: ha
+ lisitsyn	no money no honey
+@sonney2k	wiking, shouldn't we put nightly releases just under ftp://shogun-toolbox.org/shogun/nightly/ ?
+@sonney2k	wiking, or snapshots/
+@sonney2k	with this scheme
+@sonney2k	shogun-3.0.0~git20131021.8dfde37
+@sonney2k	which is from this logic: VER=3.0.0
+@sonney2k	GITVER=`date +%Y%m%d`.`cd shogun ; git log -1 --pretty=%h`
+@sonney2k	DESTDIR=shogun_${VER}~git$GITVER
+@sonney2k	lisitsyn, thoralf, wiking, besser82 btw what would you want to mentor for next years gsoc?
+ lisitsyn	sure why not sonney2k
+ besser82	sonney2k: Sure! I can do it :)
+@sonney2k	lisitsyn, and an idea what?
+ lisitsyn	sonney2k: sorry :D
+ lisitsyn	skipped 'what' part
+ lisitsyn	I'd go for internals!
+@sonney2k	besser82, with heiko we thought you might be interested in some shogun & cloud part :)
+ lisitsyn	change guts of shogun
+@sonney2k	lisitsyn, like what?
+ besser82	sonney2k: That would be great!
+ lisitsyn	sonney2k: parameters, serialization, parallel/distributed stuff
+ besser82	lisitsyn: How about getting rid of SVMlight sh*t?
+ lisitsyn	oh well I have no expertise in svms to be honest
+@sonney2k	besser82, we thought about that too - possible but tough
+@sonney2k	besser82, one would have to pimp gpdt svm
+@sonney2k	and honestly I am not sure if it is worth it
+ besser82	sonney2k: and we can fine someone with expertise in this...
+ lisitsyn	sonney2k: ah yes and I still think shogun should become client/server app :D
+ besser82	sonney2k: So cloud / distributed / OpenCL computation is mine, then  ;)
+ lisitsyn	the 'training' part
+ lisitsyn	I believe this is the killer
+ besser82	lisitsyn: can be done with ease when we get some distributed computation running ;)
+ besser82	lisitsyn: like in next year's gsoc  ;)
+@sonney2k	well think of something very concrete that can be done in <3months
+@sonney2k	with some easy entrance projects upfront
+ lisitsyn	I would do that by myself but give me the money ;)
+ lisitsyn	haha
+@sonney2k	with HeikoS I had an 8 hour drive yesterday down to the south
+@sonney2k	so we came up with a loooong list of ideas and things
+ lisitsyn	sonney2k: did HeikoS push you to the funding thing?
+ lisitsyn	I mean he wanted to get some money to hire someone
+@sonney2k	lisitsyn, errm it is not really that I am blocking him here
+ lisitsyn	sonney2k: no I didn't say you are blocking it ;) just curious if you support that
+@sonney2k	lisitsyn, why should I block it?
+@sonney2k	if he finds funding for any of us it would be good right?
+ thoralf	sonney2k: In general I'm interested in large scale discriminative stuff (multilabel classification, SVMs) - but haven't a clue what direction I should move.
+ thoralf	next
+@sonney2k	thoralf, well think about sth you would want to have in shogun / or want to see fixed
+@sonney2k	thoralf, I mean e.g. the streaming features framework etc might need some extension/overhaul
+ lisitsyn	sonney2k: sure pure good
+@sonney2k	we need some kind of release script
+@sonney2k	where should that go?
+@sonney2k	main CMakefile.txt ?
+@sonney2k	or some shell script?
+ thoralf	sonney2k: Of course, streaming and sparse computations are essential, but it's infrastructure stuff.
+ thoralf	sonney2k: I prefer working on use-cases and fix infrastructure "on the way". ;)
+@sonney2k	thoralf, any idea for a nice use case?
+ thoralf	sonney2k: Multilabel classification.
+ thoralf	:D
+@sonney2k	ohh ordinal regression is sth I would want to have too
+ thoralf	(Or tags or whatever you might call it...)
+@sonney2k	thoralf, yeah yeah
+ lisitsyn	I'd go application-centric
+@sonney2k	applications is seriously the best way to show off shogun's powers
+@sonney2k	lisitsyn, if we had your traffic sign recognition thing as application that would be cool
+@sonney2k	lisitsyn, one could even make a demo out of this
+ lisitsyn	sonney2k: I don't know how should it look like
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 6c23967 / README.md,README_developer.md: https://github.com/shogun-toolbox/shogun/commit/6c239672028335cde00a53dd0ce833f5a603cfe1
+ shogun-notifier-	shogun: update readme and mention how to do a release in the developer readme
+ shogun-notifier-	shogun: and when to change the soname.
+@sonney2k	lisitsyn, some images with traffic signs can be uploaded - signs are located and classified
+@sonney2k	but first things first
+ lisitsyn	sonney2k: big thing actually
+ lisitsyn	detection is an issue as well
+@sonney2k	lisitsyn, we really need the dimred notebook for the release
+ lisitsyn	for the release?!
+ lisitsyn	sonney2k: I worked last night and night before last night :D
+@sonney2k	lisitsyn, an it is easy to do given what you did for the tapkee
+@sonney2k	lisitsyn, maybe fernando could do it?
+@sonney2k	lisitsyn, I mean it is just takeing the code from graphical examples
+ lisitsyn	I am a two weeks overdue with some thing
+@sonney2k	and the descriptions from the website
+ lisitsyn	yes fernando knows about it as well
+@sonney2k	lisitsyn, ok then lets ask iglesiasg when he is online
+ lisitsyn	I can draft a plan may be
+@sonney2k	lisitsyn, yeah just submit some notebook following the template and with some outline added
+@sonney2k	thoralf, do you have any time to help?
+ lisitsyn	okay I'll spend some time on that tomorrow I hope
+ thoralf	sonney2k: As always yes and no. :)
+@sonney2k	thoralf, alright let me say what I think is the only things missing for a proper release:
+@sonney2k	bug count etc is in OK shape
+@sonney2k	we only need to fix one issue and that is what Heiko needs to do here and will
+@sonney2k	the remaining stuff is 'just' to get the notebook cloud thing going - but that is what wiking and besser82 are doing
+@sonney2k	and to get some nice applications  / demos
+@sonney2k	so people love us when they see us
+@sonney2k	the rest is good enough(tm)
+@sonney2k	so we need some more notebooks
+@sonney2k	and polish the demos and integrate them into the main website
+@sonney2k	thoralf, and for that I could use some help - I need some thumbnail images for the (already online) demos http://fatbot.shogun-toolbox.org/
+@sonney2k	so I can place them at the bottom of our website
+ thoralf	sonney2k: notebooks are a nice challenge - anything in particular?
+@sonney2k	thoralf, there is tons of stuff one could do wrt notebooks. we have no general intros into anything
+@sonney2k	so descriptions for regression, classification, clustering etc
+ thoralf	sonney2k: And about the thumbnails - simply rendering the web page, taking a snapshot and shrinking it would be enough?
+@sonney2k	thoralf, yes
+@sonney2k	well ne
+@sonney2k	no
+@sonney2k	you unfortunately have to put some points there for regression
+@sonney2k	to get some curve estimated
+@sonney2k	otherwise it would just be some grid
+@sonney2k	thoralf, but if you could do the notebooks I could ask van51 if he is up to helping out with the demos
+ thoralf	sonney2k: I'll have a look on what we have and will try to do some basic notebooks.
+@sonney2k	thoralf, thanks
+ thoralf	sonney2k: Haven't used ipython notebooks yet, but HeikoS already did some great stuff to copy from. ;)
+ thoralf	sonney2k: One last thing: Deadline.
+* thoralf needs deadlines to get productive :D
+@sonney2k	thoralf, use the template
+@sonney2k	thoralf, iglesiasg created some template so just copy from that one
+@sonney2k	thoralf, well do 1 notebook by end of today
+@sonney2k	tomorrow
+@sonney2k	sry
+@sonney2k	which one?
+ thoralf	sonney2k: I'm thinking of a toy example to show sparse features & streaming & hashing.  Plotting performance for different hash sizes.
+@sonney2k	thoralf, makes sense
+ thoralf	sonney2k: Any ideas/wishes?
+ thoralf	Which dataset might be suitable, for example?
+* thoralf can generate some random data as well.
+@sonney2k	thoralf, problem if `real' data here would be that it would be huge - some spam vs non-spam thing for that would be nice
+@sonney2k	well or some random stuff
+ thoralf	Something high-dimensional, but sparse features would splitting natural language sentences into char-n-grams (n=2 or 3 would do).
+ thoralf	Do we have text data?
+ thoralf	Well, I'll do something.  No matter what.
+@sonney2k	thoralf, well van51 has one notebook about that
+@sonney2k	thoralf, http://shogun-toolbox.org/static/notebook/current/HashedDocDotFeatures.html
+ shogun-buildbot	build #1973 of deb3 - modular_interfaces is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1973  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	thoralf, your notebook could go hand-in-hand with this one since it is only mentioning the streaming part as an extra
+ thoralf	Btw. a typo in van51s notebook "Gunar R?atsch" (reference section ;))
+ lisitsyn	R?
+ lisitsyn	what?
+ lisitsyn	R?R?R?R?
+ lisitsyn	:D
+ lisitsyn	how does that sound :D
+@sonney2k	lisitsyn, very male
+-!- FSCV [~FSCV@23.228.64.94] has joined #shogun
+ thoralf	sonney2k: S?oren <-- Can you imagine how "S?" sounds as well? ;)
+ thoralf	See you tomorrow.
+-!- thoralf [~thoralf@enki.zib.de] has quit [Quit: Konversation terminated!]
+@sonney2k	like a rattlesnake!
+-!- travis-ci [~travis-ci@ec2-54-224-139-217.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/12882086
+-!- travis-ci [~travis-ci@ec2-54-224-139-217.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	Morning :)
+-!- HeikoS1 [~heiko@cpe-66-74-186-205.dc.res.rr.com] has joined #shogun
+-!- FSCV [~FSCV@23.228.64.94] has quit [Quit: This computer has gone to sleep]
+-!- HeikoS1 [~heiko@cpe-66-74-186-205.dc.res.rr.com] has left #shogun []
+ lisitsyn	HeikoS: hello
+-!- zxtx [~zv@c-98-223-204-216.hsd1.in.comcast.net] has joined #shogun
+-!- zxtx [~zv@c-98-223-204-216.hsd1.in.comcast.net] has quit [Ping timeout: 240 seconds]
+-!- van51 [~van51@athedsl-399544.home.otenet.gr] has joined #shogun
+ van51	hello
+-!- besser82 [~besser82@fedora/besser82] has quit [Quit: freedom, friends, features, first ---> fedoraproject.org]
+@sonney2k	van51, hey!
+ van51	sonney2k: hello
+ van51	sonney2k: did you see my reply?
+@sonney2k	van51, we are in pretty different timezones atm
+@sonney2k	van51, not yet
+ van51	sonney2k: what time is it there? 10am or 12am?
+@sonney2k	10  yeah
+@sonney2k	van51, just read your mail. very nice
+@sonney2k	van51, well thumbnails first and then trying to get demos ready
+ van51	sonney2k: ok
+ van51	sonney2k: 140x105 ?
+@sonney2k	van51, I mean there are still some flaws
+@sonney2k	van51, same size like the others we currently have
+@sonney2k	and van51 we can work on demos as long as we want
+@sonney2k	van51, for now we need to get the release to be in good enough shape and then release though
+ van51	sonney2k: ok sure. Maybe I'll check some issues then afterwards
+@sonney2k	van51, for the screenshots you have to click some nice points together and then get some image back
+@sonney2k	van51, and please describe your example more
+@sonney2k	van51, so that it is clear that this was trained from a few wikipedia articles
+@sonney2k	van51, best wishes from HeikoS btw
+ van51	sonney2k: thx HeikoS, you too :)
+ van51	sonney2k: are the asp and arts examples not supposed to be working?
+ van51	sonney2k: asp works actually
+ van51	sonney2k: can you give me a brief description of those two as well so I can make some intro text?
+@sonney2k	van51, I will do the descr for these - the examples are not so cool display wise unfortunately
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- HeikoS [~androirc@cpe-66-74-186-205.dc.res.rr.com] has quit [Ping timeout: 252 seconds]
+ van51	sonney2k: does the multiclass demo work for you? it's not displaying an image for me sometimes
+ van51	sonney2k: and never when I have selected the gaussian kernel
+ van51	sonney2k: https://dl.dropboxusercontent.com/u/23851310/thumbs.zip
+-!- FSCV [~FSCV@23.228.64.94] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- van51 [~van51@athedsl-399544.home.otenet.gr] has quit [Quit: Leaving.]
+-!- van51 [~van51@athedsl-399544.home.otenet.gr] has joined #shogun
+-!- new_lido [~walid@41.218.172.136] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+--- Log closed Wed Oct 23 00:00:53 2013

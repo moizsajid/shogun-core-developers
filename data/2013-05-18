@@ -1,0 +1,329 @@
+--- Log opened Sat May 18 00:00:06 2013
+-!- nube [~rho@110.44.115.229] has quit [Quit: Leaving.]
+-!- dvalcarce [5b757556@gateway/web/freenode/ip.91.117.117.86] has quit [Ping timeout: 250 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- van51 [~van51@athedsl-320452.home.otenet.gr] has quit [Ping timeout: 260 seconds]
+-!- foulwall [~foulwall@2001:da8:215:503:7592:c803:cf8a:68f5] has joined #shogun
+ shogun-buildbot	build #398 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/398
+-!- foulwall [~foulwall@2001:da8:215:503:7592:c803:cf8a:68f5] has quit [Remote host closed the connection]
+-!- foulwall [~user@2001:da8:215:503:7592:c803:cf8a:68f5] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- foulwall [~user@2001:da8:215:503:7592:c803:cf8a:68f5] has quit [Ping timeout: 264 seconds]
+-!- nube [~rho@49.244.56.213] has joined #shogun
+-!- foulwall [~user@2001:da8:215:503:7592:c803:cf8a:68f5] has joined #shogun
+-!- foulwall [~user@2001:da8:215:503:7592:c803:cf8a:68f5] has quit [Ping timeout: 264 seconds]
+-!- foulwall [~user@2001:da8:215:6901:f0f2:469f:ab0:2494] has joined #shogun
+-!- foulwall [~user@2001:da8:215:6901:f0f2:469f:ab0:2494] has quit [Ping timeout: 245 seconds]
+-!- foulwall [~user@2001:da8:215:503:81a:d016:1e9d:4fda] has joined #shogun
+-!- iglesiasg [~fjig@share-01.csc.kth.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- hushell [~hushell@c-67-189-100-116.hsd1.or.comcast.net] has joined #shogun
+-!- vgorbati [4d2f813b@gateway/web/freenode/ip.77.47.129.59] has joined #shogun
+-!- hoijui [~hoijui@dslb-088-074-126-103.pools.arcor-ip.net] has joined #shogun
+ foulwall	morning everyone!
+@iglesiasg	good morning
+ foulwall	Hi iglesiasg!
+-!- vgorbati [4d2f813b@gateway/web/freenode/ip.77.47.129.59] has quit [Ping timeout: 250 seconds]
+@iglesiasg	SystemError: Out of memory error, tried to allocate -6464406072 bytes using malloc.
+@iglesiasg	discovering new errors
+@iglesiasg	O_O
+@lisitsyn	iglesiasg: sounds like overflow!
+@iglesiasg	lisitsyn: I have a bug for sure, something uninitialized I'd bet
+@iglesiasg	sssssssssss'
+@iglesiasg	oops sorry
+-!- van511 [~van51@athedsl-320452.home.otenet.gr] has joined #shogun
+ van511	hello
+-!- van511 is now known as van51
+ van51	sonney2k: I made a PR, about that insertion issue and now I am waiting for travis :D
+-!- foulwall [~user@2001:da8:215:503:81a:d016:1e9d:4fda] has quit [Ping timeout: 260 seconds]
+ van51	sonney2k: so it turns out that, although it was doing an invalid memory read every time the insert was called on an empty array, it did add that element and everything was working ok after that
+ van51	the problem was in a loop in CombinedKernel where it went over all the kernels of the array and all the features
+ van51	and it wasn't supposed to increment the feature index if the kernel was a CustomKernel
+ van51	that's why it crashed in python and not in octave
+ van51	because the example in python used a CustomKernel
+-!- hoijui [~hoijui@dslb-088-074-126-103.pools.arcor-ip.net] has quit [Quit: Leaving]
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+@sonney2k	van51, excellent analysis :D
+@sonney2k	foulwall, have a look I slightly tried to improve the gp example
+@sonney2k	foulwall, ohh and I created the repository under shogun-toolbox
+@sonney2k	iglesiasg, heh!
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Ping timeout: 252 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: van51 :develop * af89c11 / / (6 files): https://github.com/shogun-toolbox/shogun/commit/af89c11e5061d40732a7ff3600f6ae8b64dbcc2d
+ shogun-notifier-	shogun: Fixed insert in CombinedKernel/CombinedFeatures -- Added some unit tests
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 8b54eaf / / (6 files): https://github.com/shogun-toolbox/shogun/commit/8b54eaff29b7197bcb5f862aabb11b26d0595c12
+ shogun-notifier-	shogun: Merge pull request #1108 from van51/feature/fix_insert_bug
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed insertion in CombinedKernel/CombinedFeatures
+ shogun-buildbot	build #990 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/990  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #999 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/999
+-!- foulwall_ [~foulwall@2001:da8:215:503:845d:8a7c:4625:8019] has joined #shogun
+ foulwall_	sonney2k: new Gp-demo not working, trying to find the bug.
+-!- travis-ci [~travis-ci@ec2-23-22-169-12.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/7275889
+-!- travis-ci [~travis-ci@ec2-23-22-169-12.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #836 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/836  blamelist: van51 <vangelis_51@hotmail.com>
+ shogun-buildbot	build #991 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/991
+ shogun-buildbot	build #1129 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1129  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- iglesiasg [~fjig@share-01.csc.kth.se] has quit [Quit: leaving]
+ shogun-buildbot	build #1130 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1130  blamelist: van51 <vangelis_51@hotmail.com>
+-!- foulwall_ [~foulwall@2001:da8:215:503:845d:8a7c:4625:8019] has quit [Remote host closed the connection]
+-!- foulwall [~foulwall@2001:da8:215:c252:88d0:3a67:5118:5696] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@lisitsyn	sonney2k: alright really no chance to get another slot
+@lisitsyn	they would want that excellent outstanding proposal we need a slot for
+-!- foulwall [~foulwall@2001:da8:215:c252:88d0:3a67:5118:5696] has quit [Remote host closed the connection]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 250 seconds]
+-!- nube [~rho@49.244.56.213] has quit [Ping timeout: 248 seconds]
+-!- van51 [~van51@athedsl-320452.home.otenet.gr] has quit [Ping timeout: 256 seconds]
+-!- van51 [~van51@athedsl-320452.home.otenet.gr] has joined #shogun
+-!- nube [~rho@49.244.110.205] has joined #shogun
+-!- vgorbati [4e6fbbaa@gateway/web/freenode/ip.78.111.187.170] has joined #shogun
+@sonney2k	lisitsyn, of course not
+@sonney2k	if we had 2 slots
+@sonney2k	then maybe we woudl be considered
+@lisitsyn	sonney2k: yeah we must be happy with that crazy amount
+@lisitsyn	we have now
+@sonney2k	exactly
+@sonney2k	being greedy is not a good thing
+@sonney2k	better fewer students and fun than maxxed out to the limit
+@sonney2k	van51, we are getting closer :-)
+@sonney2k	van51, the buildbot at least for static interfaces is happy again
+@lisitsyn	sonney2k: I am now getting some expertise in opencl
+@lisitsyn	have to
+@sonney2k	lisitsyn, is there any ML algorithm except NN's benefiting from that?
+@lisitsyn	sonney2k: I didn't try to implement anything
+@lisitsyn	sonney2k: well DR is implementable with gpus
+@lisitsyn	sonney2k: svms - you may know better
+@sonney2k	I tried once - not with opencl but cuda but it wasn't worth it
+@lisitsyn	well but you are not an cuda expert
+@lisitsyn	that matters a lot
+@lisitsyn	so I don't know
+@sonney2k	for svms maybe some block wise thing would work
+@sonney2k	lisitsyn, surely not but you cannot a single bit improve if you have random memory access patterns
+@sonney2k	and I had that
+@lisitsyn	sonney2k: yes, I expect some mini batch here instead
+@sonney2k	and worse
+@sonney2k	you need to access memory linearly
+@sonney2k	that works fine for e.g. gaussian kernel and others
+@lisitsyn	sonney2k: I mean batched SGD would work really fine here
+@sonney2k	sure
+@sonney2k	is it worth the effort though?
+@lisitsyn	sonney2k: I don't know - some-x speedup
+ van51	sonney2k:  what is it unhappy for? :)
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: iglesias :develop * c63fee3 / src/shogun/structure/ (2 files): https://github.com/shogun-toolbox/shogun/commit/c63fee3820fac7bf32bedf2ade966f22c1a91866
+ shogun-notifier-	shogun: Fix SO-SVM constructors missing call to init.
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 5bd41d9 / src/shogun/structure/ (2 files): https://github.com/shogun-toolbox/shogun/commit/5bd41d941fe4b3d7475fad2bef16d95f24236c06
+ shogun-notifier-	shogun: Merge pull request #1109 from iglesias/feature/fix_init
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix SO-SVM constructors missing call to init.
+@sonney2k	van51, some tests still fail
+@sonney2k	van51, I am investigating
+@sonney2k	foulwall -  gp example works fine here
+ vgorbati	sonney2k: hello, I have just sent a PR for the issue 'remove CFeatures::get_size'
+ van51	ah I see some it failed inside python modular
+ vgorbati	sonney2k: no surpises there, I've just removed all get_size methods and that's all:)
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 8390dae / src/shogun/regression/GaussianProcessRegression.cpp: https://github.com/shogun-toolbox/shogun/commit/8390daeacb2aba2b0c7462e1e01c51c81565b239
+ shogun-notifier-	shogun: add whitespace
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 7491998 / examples/undocumented/libshogun/regression_gaussian_process_sum.cpp: https://github.com/shogun-toolbox/shogun/commit/7491998e54c890217b39cfc72ca22e65c620478c
+ shogun-notifier-	shogun: temporarily disable combined kernels in gp example
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 5948cc0 / src/configure: https://github.com/shogun-toolbox/shogun/commit/5948cc0a05c149b0ac4c8208dba4c49d1785ef6a
+ shogun-notifier-	shogun: mention prng for mersenne
+ shogun-notifier-	shogun: vladislav.horbatiuk@gmail.com :develop * a633ff6 / src/shogun/features/ (45 files): https://github.com/shogun-toolbox/shogun/commit/a633ff6f4d9fd9a7672144bee73bc1c5e52938bb
+ shogun-notifier-	shogun: Removed CFeatures::get_size() method (according to https://github.com/shogun-toolbox/shogun/issues/1102).
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 436faf0 / src/shogun/features/ (45 files): https://github.com/shogun-toolbox/shogun/commit/436faf037d52b08ce62c5dd86f6e926bb9e67e0b
+ shogun-notifier-	shogun: Merge pull request #1112 from vladislav-horbatiuk/vgorbati-develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Removed CFeatures::get_size() method (Closes: #1112)
+@lisitsyn	sonney2k: what about one more infrastructure thing for vgorbati?
+ shogun-buildbot	build #992 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/992  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	lisitsyn, what do I have to write to get an issue closed in a git commit comment?
+@lisitsyn	sonney2k: closes #666
+@sonney2k	so Closes : #xxx won't work?
+@sonney2k	lisitsyn, is that documented somehwere?
+@lisitsyn	sonney2k: yes
+@lisitsyn	sonney2k: https://github.com/blog/1386-closing-issues-via-commit-messages
+@lisitsyn	sonney2k: close closes closed fixes fixed
+ van51	sonney2k: can I assist in the investigation? :P
+-!- travis-ci [~travis-ci@ec2-107-22-88-191.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/7282608
+-!- travis-ci [~travis-ci@ec2-107-22-88-191.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #837 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/837
+ shogun-buildbot	build #838 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/838  blamelist: iglesias <fernando.iglesiasg@gmail.com>
+@sonney2k	van51, I am just running make tests locally and am checking
+@sonney2k	van51, once I see sth I will let you know - thanks!
+@sonney2k	lisitsyn, ohh we can change the default branch too
+@sonney2k	lisitsyn, cool faq :D
+ shogun-buildbot	build #839 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/839  blamelist: Soeren Sonnenburg <sonne@debian.org>, vladislav.horbatiuk@gmail.com <vladislav.horbatiuk@gmail.com>
+ vgorbati	sonney2k: is the issue https://github.com/shogun-toolbox/shogun/issues/906 still valid?
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+ shogun-buildbot	build #1131 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1131  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	vgorbati, yeah but that is tough
+-!- travis-ci [~travis-ci@ec2-50-16-137-229.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/7282706
+-!- travis-ci [~travis-ci@ec2-50-16-137-229.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	van51, btw what is missing now?  product kernel / combined kernel / combined features are all gone now or?
+@sonney2k	van51, I mean wrt CList -> Dynarray
+ van51	sonney2k: I am currently working on ProductKernel
+ shogun-buildbot	build #993 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/993
+ van51	sonney2k: I have one method left in that class and then some small changes in other classes that reference it
+-!- vgorbati [4e6fbbaa@gateway/web/freenode/ip.78.111.187.170] has quit [Ping timeout: 250 seconds]
+@sonney2k	van51, ok keep going then
+@sonney2k	man I screwed tester.py
+@sonney2k	it was going printing berserk
+@sonney2k	van51, ok we have 3 tests failing related to combined kernel: kernel_combined_custom_poly_modular.py  mkl_binclass_modular.py statistics_mmd_kernel_selection_combined.py
+@sonney2k	van51, ohh but it is  pretty clear
+@sonney2k	it cannot read in the old test data because lhs/feature_array etc didn't exist yet
+@sonney2k	van51, so I only have to regenerate integration test data and then it should be all good
+ van51	sonney2k: ok! let me know
+ van51	sonney2k: you regenerate them throught generate_testdata.py?
+ van51	through*
+@sonney2k	van51, just generator.py in python_modular dir
+@sonney2k	van51, that will then in shogun/data/tests create the 'references'
+@sonney2k	for the regression tests
+-!- travis-ci [~travis-ci@ec2-107-22-88-191.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/7282777
+-!- travis-ci [~travis-ci@ec2-107-22-88-191.compute-1.amazonaws.com] has left #shogun []
+ van51	sonney2k: I see the files.. are these serializations of the expected values?
+@sonney2k	van51, the way we do examples is that they are all functions returing some values
+@sonney2k	(at least for python_modular)
+@sonney2k	so what is returned is serialized
+@sonney2k	in python slang pickle'd
+ shogun-notifier-	shogun-data: Soeren Sonnenburg :master * 10d6bd9 / testsuite/tests/ (7 files): https://github.com/shogun-toolbox/shogun-data/commit/10d6bd96d3a99c22d5e6863abfb1b2f7dc69582d
+ shogun-notifier-	shogun-data: update tests using combined kernel / features for list -> array change
+ van51	sonney2k: and then the output from edited code is compared against those serializations?
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 829c74a / data,tests/integration/python_modular/tester.py: https://github.com/shogun-toolbox/shogun/commit/829c74acfc69fb2c5f238e4d87da3d286b5b9ac8
+ shogun-notifier-	shogun: fix utterly verbose tester and require new data version
+@sonney2k	van51, yes tester.py is just doing that
+@sonney2k	it calls the function gets the output and loads the serialized stuff and does a  1:1 string comparison
+ van51	sonney2k: so you take for granted that the moment when you generate those files the code works fine
+ van51	sonney2k: I am trying to understand, now that you regenerated those files to have the appropriate variable name, won't they also have as correct output the output from my version?
+@sonney2k	van51, exactly
+ van51	so even if it isn't bug-free, it can't fail
+@sonney2k	van51, well you checked that  already with the octave example
+@sonney2k	van51, and your (impressive!) unit tests make me very confident that what  you did is fine
+ van51	sonney2k: I sense a little irony there? :P
+@sonney2k	van51, no!
+@sonney2k	I mean it!
+ van51	sonney2k: maybe in situations like these, you could just sed the generated file
+@sonney2k	they are realy thourough
+ van51	so that the number outputs remain from the original
+@sonney2k	van51, yeah but not easy in this case
+@sonney2k	van51, to make your mind at peace
+@sonney2k	I just checked the diff
+@sonney2k	output *is* the same
+@sonney2k	van51, btw we print a diff of the serialized  vs. run outputs
+@sonney2k	so that is how I know
+@sonney2k	and it displays only the feature stuff
+ van51	sonney2k: ok! got it
+ van51	I also wanted to understand the way that testing worked
+@sonney2k	lisitsyn, any idea why https://travis-ci.org/shogun-toolbox/shogun/jobs/7283797 IsomapTest.neighbors_preserving suddenly fails?
+ van51	and also if you're at ease, then I'm at ease :)
+@lisitsyn	sonney2k: argh
+@lisitsyn	forgot to take a look
+@lisitsyn	sonney2k: no I can't reproduce it actually
+@sonney2k	lisitsyn, it fails only with clang!
+@lisitsyn	let's disable it
+@lisitsyn	hmmmmm
+@lisitsyn	always with clang?
+@sonney2k	IDK
+@sonney2k	guess not
+ shogun-buildbot	build #840 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/840  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@lisitsyn	let me try
+@sonney2k	van51, well what we do for testing is:
+@sonney2k	a) run unit tests
+@sonney2k	b) run all examples (jsut run no checks)
+@sonney2k	c) run legacy integration tests (they are hefty hand work not easy to extend but we keep them around since they are the only way to test static interfaces currently)
+@sonney2k	d) run the new integration tests I just described
+@sonney2k	only problem currently is that graphical tests are not run
+@sonney2k	they would fail since no X / interactive
+ shogun-buildbot	build #1132 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1132  blamelist: Soeren Sonnenburg <sonne@debian.org>, iglesias <fernando.iglesiasg@gmail.com>, vladislav.horbatiuk@gmail.com <vladislav.horbatiuk@gmail.com>
+ van51	so it's still failing :S
+ van51	or it is an old one?
+-!- travis-ci [~travis-ci@ec2-23-22-169-12.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/7283795
+-!- travis-ci [~travis-ci@ec2-23-22-169-12.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	van51, give it time
+@sonney2k	in 28 mins we will know more
+ van51	ok, getting back to work then :D
+@sonney2k	wiking, look at these warnings - http://shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1133/steps/compile%20python_modular/logs/warnings%20%2825%29
+@sonney2k	wiking, many are coused by SFMT - could you please fix them?
+ shogun-buildbot	build #1133 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1133  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 248 seconds]
+@sonney2k	van51, everything works except for evaluation_multiclassovrevaluation_modular.py
+ van51	sonney2k: i'll look into it
+@sonney2k	van51, it is not your fault though -that thing was failing from time to time already
+@sonney2k	and look at the diff
+@sonney2k	http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1133/steps/test%20python_modular/logs/stdio
+@sonney2k	-w SGVector<float64> 2 ({-0.8028154615399042}{0.8573335463636752})
+@sonney2k	+w SGVector<float64> 2 ({-0.8039184503697107}{0.8565511265518505})
+@sonney2k	we have some *small* deviations
+@sonney2k	but dont' understand where these come from
+ van51	aah, I remember you discussing about those here
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * eb9d67b / src/ (5 files): https://github.com/shogun-toolbox/shogun/commit/eb9d67bcaf8345bf1b199b528d447ffef618329d
+ shogun-notifier-	shogun: define HAVE_SSE2 in lib/config.h too and fix a few doxygen errors
+ shogun-buildbot	build #841 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/841  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- travis-ci [~travis-ci@ec2-75-101-250-159.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/7284935
+-!- travis-ci [~travis-ci@ec2-75-101-250-159.compute-1.amazonaws.com] has left #shogun []
+ shogun-notifier-	shogun-data: Soeren Sonnenburg :master * 3fa1fdf / testsuite/tests/evaluation_multiclassovrevaluation_modular0.txt: https://github.com/shogun-toolbox/shogun-data/commit/3fa1fdfc6e0abb9bfaf7d0733ac34d5140914348
+ shogun-notifier-	shogun-data: another attempt to fix the test
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 5edcf8a / / (2 files): https://github.com/shogun-toolbox/shogun/commit/5edcf8a6945fd2d538e017c889bccb8db38fb1b5
+ shogun-notifier-	shogun: simplify example
+-!- van51 [~van51@athedsl-320452.home.otenet.gr] has left #shogun ["PING 1368910020"]
+-!- hushell [~hushell@c-67-189-100-116.hsd1.or.comcast.net] has quit [Quit: leaving]
+ shogun-buildbot	build #842 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/842
+-!- travis-ci [~travis-ci@ec2-107-22-88-191.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/7285539
+-!- travis-ci [~travis-ci@ec2-107-22-88-191.compute-1.amazonaws.com] has left #shogun []
+-!- van51 [~van51@athedsl-320452.home.otenet.gr] has joined #shogun
+ shogun-buildbot	build #1134 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1134  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- hushell [~hushell@c-67-189-100-116.hsd1.or.comcast.net] has joined #shogun
+@sonney2k	van51, my guess now is either some kind of randomness in the algorithm or multi-threading
+@sonney2k	but hmmh
+@sonney2k	hey hushell - how is your nips paper going?
+@sonney2k	hah
+@sonney2k	found it
+@sonney2k	            int j = i+rand()%(active_size-i);
+ van51	sonney2k: good job :D
+ hushell	hey sonney2k! I am finishing it there are few experiments need to be done
+ hushell	I'll have 2 meetings with my supervisor to disucss the introduction and then I can move to gsoc :)
+@sonney2k	lisitsyn, look at this shogun/lib/tapkee/external/barnes_hut_sne/tsne.hpp:x = 2 * (rand() / ((double) RAND_MAX + 1)) - 1;
+@sonney2k	van51, we have lots of rand() still in there
+@lisitsyn	sonney2k: ugly indeed
+@sonney2k	liblinear, lots of tapkee, murmurhash ...
+ hushell	the weechat is really nice. I can hang out forever here
+ shogun-buildbot	build #1135 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1135  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	hushell, when is the deadline? next week?
+ hushell	May 31
+ hushell	but I don't want to wait until last day
+@sonney2k	hushell, wow! good planning
+@sonney2k	we *never* finished early
+@sonney2k	all the nips papers I was co-author on we finished around 5 am or later :D
+@sonney2k	on the day of the deadline of course
+ hushell	:D I hope I can finish early but who knows
+@sonney2k	lisitsyn, maybe you could make that part of the interface so it could call shogun's random?
+@sonney2k	hushell, yeah...
+@lisitsyn	sonney2k: yes sure
+@lisitsyn	once I am done with that shitty opencl assignment :D
+@sonney2k	lisitsyn, that also explains why test one unit test fails sometimes?
+@lisitsyn	sonney2k: unfortunately not
+@lisitsyn	isomap is not random
+@sonney2k	lisitsyn, also not multithreaded I guess?
+@lisitsyn	sonney2k: multithreaded
+@lisitsyn	but openmp
+@lisitsyn	so not in shogun
+@sonney2k	so it is multithreaded but disabled?
+@sonney2k	or is openmp on?
+@sonney2k	lisitsyn, I wonder why liblinear tests never failed
+@sonney2k	rand is also crappido
+@lisitsyn	sonney2k: yes, we don't have openmp enabled
+@sonney2k	lisitsyn, ok
+ shogun-notifier-	shogun-data: Soeren Sonnenburg :master * c35bd0e / testsuite/tests/evaluation_multiclassovrevaluation_modular0.txt: https://github.com/shogun-toolbox/shogun-data/commit/c35bd0e9cd97ce65f5f11756b9655bcee9c91c61
+ shogun-notifier-	shogun-data: regenerate with non random liblinear
+@sonney2k	hmmhh wiking are you sure about CMath::random?
+@sonney2k	I have some concerns that this won't work
+@sonney2k	wiking, I take it back :D
+--- Log closed Sun May 19 00:00:08 2013

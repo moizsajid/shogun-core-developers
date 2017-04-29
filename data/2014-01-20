@@ -1,0 +1,606 @@
+--- Log opened Mon Jan 20 00:00:00 2014
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- sonne|osx_ [~sonne@f052020014.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f052018132.adsl.alicedsl.de] has quit [Ping timeout: 272 seconds]
+-!- sonne|osx_ is now known as sonne|osx
+ shogun-buildbot	build #686 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/686
+-!- shallhome [~shallhome@193.28.144.96] has joined #shogun
+-!- shallhome [~shallhome@193.28.144.96] has quit [Remote host closed the connection]
+-!- sonne|osx [~sonne@f052020014.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@89.204.130.57] has joined #shogun
+ sonne|osx	besser82: we have the same pickle problem again
+ sonne|osx	besser82: please enlighten me how you fixed it!
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- sonne|osx [~sonne@89.204.130.57] has quit [Ping timeout: 252 seconds]
+-!- sonne|osx [~sonne@89.204.137.33] has joined #shogun
+-!- sonne|osx [~sonne@89.204.137.33] has quit [Client Quit]
+-!- sonne|osx [~sonne@24-134-74-216-dynip.superkabel.de] has joined #shogun
+-!- sonne|osx [~sonne@24-134-74-216-dynip.superkabel.de] has quit [Client Quit]
+ besser82	sonne|work:  which pickle-problem @ which test / build?  I can haz linxx, plz?
+ sonne|work	besser82: well all python3 tests fail due to me adding  the pickle string based comparison
+ sonne|work	besser82: so IIRC you figured there is some encoding problem....
+ besser82	sonne|work:  encoding ain't the only one  ;)
+ besser82	sonne|work:  but in fact the major one
+ besser82	sonne|work:  lemme cycle through all recent commits to see what changed and I'll give you some advice  ;)
+ sonne|work	besser82: well it is just this pickle.dumps(objs) == comparison in tester.py
+ besser82	sonne|work:  then there is no general solution (tm);  the most problematic thing is the incompat between numpy and py3-numpy, which can't be solved without external workaround like storing the numpy-datatypes with numpy's internal serialization methods, unfortunately.  :(
+ sonne|work	besser82: well all I want is that this doesn't crash!
+ besser82	sonne|work:  you mean the segfaults, don't you?
+ sonne|work	yes
+ besser82	sonne|work:  those were never fixed IIRC
+-!- lambday [67157f36@gateway/web/freenode/ip.103.21.127.54] has joined #shogun
+ sonne|work	besser82: I thought you did sth with the encoding?
+ besser82	sonne|work:  because of we cannot restore py2_mod stuff with py3_mod...
+ besser82	sonne|work:  I did some experiments with that, but that actually wasn't successful  :(
+ besser82	sonne|work:  It's not only the encoding / datatypes used in pickle; it's basically more  :(
+ besser82	sonne|work:  I tried sth. with manually hex-editing the pickles to have str-data stored as py3-bytes, but then there is some other serious trouble, when opening them with py3_modular  :(
+ besser82	sonne|work: the only way I see to get that fixed is to have different pickles for py2 and py3
+ besser82	sonne|work: but hoding the same data...
+ besser82	sonne|work:  which brings us to the next question:  How to get that done?
+ besser82	sonne|work:  I mean, those pickled must have been created somewhen; but how?
+ sonne|work	besser82: well it is just some ascii file that we create
+ sonne|work	besser82: how would embed some ascii string python2/3 compatible
+ adrin	sonne|work, besser82: hey, what's up? Good morning.
+ sonne|work	adrin: good morning
+ besser82	sonne|work:  basically I would try to use some py3::bytes-type which is perfectly binary-compat with char*
+ sonne|work	adrin: we are trying to get python3 to work ...
+ besser82	sonne|work:  but the problem here is py2 doesn't know "bytes" and has str only, which is the same as char*, too
+ adrin	if you put a "b" before the string, it will be interpreted as a byte-char in py3, and will be ignored in py2.7, why doesn't that work here?
+ sonne|work	adrin: who says it wouldn't :)
+ besser82	adrin:  Hey! G'Mornin!  Yes, as sonne|work says all about Python3 && shogun
+ sonne|work	adrin: we are just not python3 experts
+ sonne|work	that is something we can fix at tonights stammtisch :)
+ adrin	besser82, sonne|work: there are two prefixes for strings in python, "u" and "b"
+ sonne|work	adrin: in python 2.6 etc too?
+ adrin	"u" is ignored by py3, and "b" is ignored by 2.7
+ adrin	no py2.6 doesn't know about them
+ adrin	sonne|work: these two were introduced in py2.7, to make people able to have strings compatible in both 2 and 3 pythons, but you will need to have at least py2.7
+ besser82	sonne|work, adrin:  for Py2.6 one needs to `import __future__` within some exception
+ besser82	sonne|work, adrin:  like try: import __future__ except: #noop
+ sonne|work	adrin: how do we get these if we are reading a file?
+ besser82	sonne|work, adrin:  but that won't fix the problem with pickles  :-P
+ adrin	sonne|work: so the problem is that you want to read a file and you need to make sure you're interpreting it as ASCII bytes?
+ besser82	adrin: no, we are importing a pickle made with proto 2
+ besser82	adrin: and for some reason py3_modular segfaults when restoring the py2_mod data from that pickle  ;)
+ sonne|work	sry no time for that jsut now
+ sonne|work	adrin: will you be around in the evening?
+ adrin	sonne|work: yeah sure. I'll try to see what I can do until then.
+ adrin	besser82: In the mean time, it would be nice if you could send me a py2_mod data so that I can try to load it.
+ besser82	adrin:  you can fetch them from here: https://github.com/shogun-toolbox/shogun-data/tree/master/testsuite/tests
+ besser82	adrin:  here is a list of those failing / segfaulting tests:  http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/36
+ adrin	besser82: thanks
+ besser82	adrin:  the BIG problems is the binary-incompat of numpy-arrays && those segfaults, when restoring data from python_modular of shogun  ;)  np.  You're welcome  :D
+-!- lambday [67157f36@gateway/web/freenode/ip.103.21.127.54] has quit [Ping timeout: 272 seconds]
+ adrin	besser82: I see
+ besser82	adrin: btw. manually converting str to bytes in pickle didn't work.  :(
+ besser82	adrin: like sed -e 's!^S\'!B\'!g' pickle.file
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has joined #shogun
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has quit [Ping timeout: 272 seconds]
+-!- sonne|osx [~sonne@89.204.138.241] has joined #shogun
+ sonne|osx	adrin, besser82 btw we can of course generate the data again with python2.7 or python3 if that helps
+ besser82	sonne|osx:  that would be the easiest solution  ;)
+ besser82	sonne|osx:  we need separate pickles for py2 && py3 and all would be fine
+ sonne|osx	besser82: would this ensure that it can be read with python2.7 then?
+ sonne|osx	besser82: nah
+ sonne|osx	one for all
+ besser82	sonne|osx:  one for all isn't possible ---> numpy
+ sonne|osx	besser82: so there is no way to load numpy data from python3?
+ besser82	sonne|osx:  it is when pickle is from py3
+ besser82	sonne|osx:  they are not interchangeable
+ besser82	sonne|osx:  that's why numpy has own im/export methods for data  ;)
+ sonne|osx	besser82: and stuff like pickle.load(file_obj, encoding='latin1') ?
+ besser82	sonne|osx:  will be readble, but numpy data is a mess then
+ besser82	sonne|osx:  as to be seen in tesstsuite on py3, which fail but don't segfault  ;)
+ sonne|osx	besser82: hmmhh btw will you be around for the stammtisch tonight?
+ besser82	sonne|osx:  sure!
+ besser82	sonne|osx:  not till the end, but at least ~2 h
+ sonne|osx	yeah sure
+ sonne|osx	besser82: no idea why the numpy people did it this way
+ sonne|osx	sucks badly that you cannot load your old data
+ besser82	sonne|osx:  you can but only with some extra steps
+ sonne|osx	besser82: which are?
+ besser82	sonne|osx:  you need to load from the py-ver the pickle was made with and then export the numpy-data with the export-method of numpy
+ besser82	sonne|osx:  that export is gurateed to be readable from every recent python
+ sonne|osx	besser82: which would be savenpy? or what
+ sonne|osx	c'mon
+ sonne|osx	:(
+ besser82	sonne|osx:  load pickle
+ besser82	sonne|osx:  $my_numpy_array.save($file_handle)
+ besser82	sonne|osx:  open other python-ver
+ besser82	sonne|osx:  create empty numpy-array
+ besser82	sonne|osx:  $new_array.load($my_export_from_old_pyver)
+ sonne|osx	besser82: not good - maybe we can work around this with python's stringIO
+ sonne|osx	adrin: what do you think? Maybe we store numpy stuff with stringIO - then we could keep one single format?
+ besser82	sonne|osx: why using stringIO?
+ sonne|osx	besser82: string that behaves like a file handle
+ besser82	sonne|osx: i mean numpy has own methods for that... ???
+ sonne|osx	besser82: so we could write that string out instead of pickle
+ sonne|osx	and it would be compatible
+ besser82	sonne|osx: that can be done with those numpy.methods, too
+ besser82	sonne|osx: those are gurateed to be compat within different python-interp
+ sonne|osx	besser82: lets talk about that in the evening
+ besser82	sonne|osx:  kk
+* sonne|osx off train
+-!- sonne|osx [~sonne@89.204.138.241] has quit [Quit: sonne|osx]
+-!- lambday [67157e37@gateway/web/freenode/ip.103.21.126.55] has joined #shogun
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has joined #shogun
+ adrin	besser82: me and my office mate were looking at the errors/data
+ besser82	adrin:  Many thx!  and what did you find out?
+ adrin	besser82: he's never had such a problem with pickle, but he never used different python versions
+ besser82	adrin:  same for us, too  ;)
+ adrin	besser82: nothing yet, but we're trying to see how to tell pickle how to interpret strings
+ besser82	adrin:  thanks for your work  ;)
+ adrin	besser82: I personally prefer to handle it that way, or generating the data using utf strings, and tell pickle in py2 to interpret them as utf, I guess then there is no need for multiple data files, right?
+ besser82	adrin:  would that work with numpy-arrays?
+ adrin	besser82: don't know yet, but we have py2.6, 2.7, and 3.3 available. Personally I don't recommend to worry/support 2.6. 2.7 and 3.3 should be enough
+ besser82	adrin:  I would apprechiate support for py2.6 because of RHEL6  ;)
+ besser82	adrin:  But those details i might add somewhen later then  ;)
+ adrin	besser82: I see. Then we'll test 2.6 too. Shall I ask for a peice of code which generates the pickle data + a sample saved data + the code which is supposed to read it? We found many files which can't read a data, but it would be nice if we had just an example, if available. If not, we'll try with a simple string/np.ndarray/set/list file if even with such a simple example the problem perists.
+ besser82	adrin:  I think sonney2k has that code or some examples about generation....
+ besser82	adrin:  but trying with some toy data would at least point into the right direction, I think.
+ adrin	besser82: ok, we'll do it. BTW, is the stammtisch a real physical one or you guys were talking about a virtual stammtisch? :D
+-!- gsomix [~gsomix@46.20.65.64] has quit [Ping timeout: 264 seconds]
+ besser82	adrin:  virtual one on irc  ;)
+ besser82	adrin:  distances are a bit problematic  ;)
+ besser82	adrin:  you, toralf and sonney2k possibly could meet physically Berlin  ;)
+ besser82	adrin:  me is from Hildesheim (30 km south of HAnnover)
+-!- snik [~snik@lap-13-03.ag3.mpi-sb.mpg.de] has joined #shogun
+ besser82	snik:  hi!  You must be one of adrin's office mates, right?!?
+ snik	Hi! besser82, yes, i am!
+ besser82	snik:  nice to meet you!  :D
+ snik	Nice to meet you too! :)
+ besser82	snik:  and thank for helping with that py3-thing!  :D
+ adrin	besser82: haha, we're based in Saarbruecken, Berlin is a bit far :D
+ snik	oh, we have just started..
+ besser82	adrin:  kk, that's a bit far to Berlin, too  ;)
+ adrin	besser82: why the 'latin_1' decoding option for numpy arrays is not an option here? I didn't understand why it's not desireable.
+ besser82	adrin:  the problem is: numpy-array-pickles are not binary compatible between py2 and py3  :(
+ besser82	adrin:  one can encode / decode the pickled-data using 'latin-1', but the outcome is just garbage
+ adrin	besser82: ok, let me see, it didn't seem garbage, let me check
+ adrin	besser82: my mistake, it IS garbage. will be back soon :D
+ snik	ok, right, it really is!
+ besser82	adrin, snik:  numpy.save/load() works between pyvers, but pickle seems not.  :(
+-!- genrut [~genrut@193.28.144.131] has joined #shogun
+ snik	besser82: pickle is really an issue, visibly even for the larger community, especially with the protocol thingy
+ besser82	snik:  unfortunately, yes  :(
+-!- genrut [~genrut@193.28.144.131] has quit [Ping timeout: 246 seconds]
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has quit [Ping timeout: 272 seconds]
+ adrin	besser82: I guess we failed :D, the problem is the ndarray representation is in unicode format, and can not be read in python 2
+ adrin	besser82: we tried to save using py3, and load in py2, but for this reason it doesn't work
+ besser82	adrin:  save like pickle?
+ besser82	adrin:  or numpy.save?
+ adrin	besser82: yeah, in theory it should work if the protocol is 2, but it doesn't
+ adrin	besser82: did you guys try the numpy.save/savez? I would vote for them if they work between python versions
+ adrin	besser82: we thought if we could save the data in py3 in a way that py2 could read it, then somehow the problem is solved, but even this solution didn't work
+ besser82	adrin:  let me discuss that with sonney2k on tonight's stammtisch...
+ besser82	adrin: the other ugly thing is those segfaults of python3_modular, when trying to recreate data from py2 pickle...  :(
+ besser82	adrin:  any thoughts on that?
+ snik	besser82, adrin: yes, i too vote for numpy.save and savez options, but may be we should give a second round of check to see pickling in py3 and reading/loading in py2 works/does not work.
+ adrin	besser82: we believe they are not segfaults and are the exceptions of python which are being interpreted by cmake as segfault. Can this be the case?
+ snik	besser82: i am looking into the segfaults of all those Python_modulars, i will get back if can find some thing on it
+ besser82	adrin:  nope, those segfaults are segfaults  :(
+ besser82	adrin:  but not in python directly
+ besser82	adrin:  the python_modular just interfaces to libshogun
+ besser82	adrin:  and the segfault come from there...
+ adrin	besser82: couldn't it be because the data is no loaded properly?
+ besser82	adrin:  I suspect the incompat between py3-ustr and char*
+ besser82	adrin:  py2::str == char*
+ besser82	adrin:  py3::ustr == somewhat homebrewed by python-devs
+ besser82	adrin:  but py3::bytes == char*  ;)
+ adrin	besser82: oh yeah you're right. It perfectly makes sense if we're passing some str data to the C code, but if the data is just a numpy array and a bunch of numbers, why would it give a segfault?
+ besser82	adrin:  nope that just isn't numpy-only
+ besser82	adrin:  there is some json-style data
+ besser82	adrin:  which is stored as py2::str and get converted to py3::ustr on import ---> crash
+ besser82	adrin:  we need to find a way to store that json-string somehow both py-ver will read correctly
+ besser82	adrin:  but howss
+ besser82	adrin:  but how? ;)
+ adrin	besser82: yeah it makes sense, I hate to have to change the C code to support the unicode
+ adrin	besser82: the quick solution would be to convert the encoding of all the strings into bytearray before giving it to the C code, which is straightforward
+ adrin	besser82: but I'm not sure if that's a desireable solution
+ besser82	adrin: mhhh
+ besser82	adrin: that would need some custom unpickler, right?!?
+ adrin	besser82: it might need to feed the encoding parameter while unpickling only in py3, and maybe also converging the ustr to bytearray right after loading the data.
+ adrin	bessesr82: about the np.savez, I just checked and it seems the data saved in py3 can be perfectly loaded in py2
+ adrin	besser82:brb
+ besser82	adrin: as I said  :D  kk
+ snik	besser82, adrin:  leaving office now, see you guys tomorrow! Will sleep over the problem, hopefully we will shoot it down soon! :)
+ besser82	snik:  allrighty!  Gute Nacht, sch?nen Feierabend  :D  Many thx for your help!
+ snik	besser82:   my pleasure, if i can be of any help to the community! Danke, gleichfalls :)
+-!- thoralf [~thoralf@91-65-136-3-dynip.superkabel.de] has joined #shogun
+ thoralf	Heyhey :)
+ besser82	thoralf:  Hey!
+ thoralf	S?ren told you're missing me. ;)
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	sup people
+ besser82	thoralf:  yes, the stammtisch feels so empty w/o you  ;)
+ besser82	iglesiasg:  nuthang new ;)  And yourself?
+@iglesiasg	besser82, in process of git bisect-ing :)
+ besser82	iglesiasg:  Nice!  Sound promising to get that testsuite running  ;)
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has joined #shogun
+@sonney2k	iglesiasg, how is it going?
+@sonney2k	And heya good evening gents :)
+@sonney2k	pickle27, any news from across the world?
+ pickle27	not really!
+@iglesiasg	sonney2k, compiling another revision :D
+ pickle27	had a question about gsoc - when is the app deadline?
+-!- votjakovr [~votjakovr@188.134.46.30] has joined #shogun
+@iglesiasg	let's check
+@iglesiasg	pickle27, http://www.google-melange.com/gsoc/events/google/gsoc2014
+@iglesiasg	there you go
+@iglesiasg	valentine's day :DD
+ besser82	sonney2k:  heyya!
+ besser82	adrin:  ping?
+@sonney2k	pickle27, verrry soon...
+ pickle27	cool! I was just curious - are we submitting all of those to the idea list or are we going to clean it up a bit
+ adrin	besser82: ping-reply
+@sonney2k	hey votjakovr!
+ besser82	adrin:  wb  :D
+@sonney2k	pickle27, we need to bring it into gsoc'13 shape
+ adrin	besser82: had to rush for dinner, mensa-last-minute-food :D
+@iglesiasg	I think there will be updates to the ideas list
+ besser82	lisitsyn, lisitsyn1:  AUSWEIS BITTE!  :-P
+ votjakovr	sonney2k: hi :)
+@sonney2k	adrin, besser82 so regarding numpy and pickle - why not save things with numpy to a file - then read it in and pickle it as string / byte array?
+@sonney2k	or snik ^^
+@iglesiasg	pickle27, btw, I saw last week the video you posted on fb about shopify
+@iglesiasg	pickle27, the company looks really great man!
+ lisitsyn1	besser82: mein ausweis ist weg
+ pickle27	yeah its a pretty good time here
+@iglesiasg	awesome
+ pickle27	btw if anyone is looking for a job .. just let me know
+ besser82	lisitsyn1: :-P
+ lisitsyn1	pickle27: remote? ;)
+@iglesiasg	pickle27, will ask in three years :D
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has joined #shogun
+ pickle27	we have some remote people, we mostly try and get people to relocate atm
+ adrin	sonny2k: I'm confused, if you save numpy data with numpy.save/savez, you can load it in another python version. About strings, we need to set the encoding while loading in py3, and maybe then change the encoding before passing to the C code
+ besser82	sonney2k:  as adrin said...
+ pickle27	lisitsyn1: I also joined the sublime text bandwagon
+ besser82	sonney2k:  numpy-arrays in pickles are not compat between py2 / py3 and never will
+ lisitsyn1	pickle27: cool, I think I am going to do that too
+ lisitsyn1	oh sh I just had 13 hrs workday after fulltime working weekend
+@sonney2k	adrin, besser82 the point is we want a *single* .pickle file to write to
+ lisitsyn1	this makes no sense :D
+ besser82	sonney2k:  as it looks like atm: not a chance
+ besser82	sonney2k:  or we will definetively need an own impl. of Unpickler
+@sonney2k	adrin, besser82 so we could do a trick to store numpy arrays - we save them to a file with save, read them in as ascii string - followed by some decoding
+ besser82	sonney2k:  that is not needed
+ besser82	sonney2k:  one can save that data with numpy's own methods and read it in as needed
+ adrin	sonny2k: I guess you're mixing two seperate problems, strings, and numpy arrays.
+ besser82	sonney2k:  the string-problem is mostly related to the segfaults, when restoring modshogun-data from pickles
+@sonney2k	besser82, but how do you then save shogun's objects and numpy arrays when they are in the same list?
+@sonney2k	adrin, no no
+ besser82	sonney2k:  in different pickles  :-P
+ besser82	sonney2k:  one simply cannot have a pickle with that data to be compatible between py2 / py3
+ besser82	sonney2k:  the other approach would be json or hdf5
+ besser82	sonney2k:  hdf5 using pytables
+-!- thoralf [~thoralf@91-65-136-3-dynip.superkabel.de] has quit [Ping timeout: 265 seconds]
+ besser82	sonney2k:  the numpy-devs discussed that for ~3 monthes
+ besser82	sonney2k:  how to keep pickles compat
+ besser82	sonney2k:  but one cannot accomplish
+ besser82	sonney2k:  if there would have been a way they would have done it
+-!- thoralf [~thoralf@91-65-136-3-dynip.superkabel.de] has joined #shogun
+ pickle27	lisitsyn1: I thought you already did? we talked about it a while ago
+ lisitsyn1	pickle27: nah no
+ lisitsyn1	wanted to
+ pickle27	its pretty sweet, plus there is vintage mode if there is some vim command you want
+ pickle27	btw do we still use tabs in shogun?
+@sonney2k	besser82, ohh well - we could of course save numpy data as sth else but in an extra file - nah we have too many already and we could certainly save each element in the list we are returning into the same file with some minor logic
+@sonney2k	besser82, we could drop returning numpy objects altogether but instead work with scalars / the shogun objects directly
+@sonney2k	pickle27, how is it going with the website?
+ besser82	sonney2k:  which still will not be pickable...
+ pickle27	I've been poking around
+ pickle27	its complicated because we want all that information just also to be simpler
+ adrin	besser82: if the json dump for ndarray could work, why wouldn't numpy-devs use it?
+ besser82	adrin:  they do sth. similar in their load/save methods  ;)
+ adrin	besser82: but anyway I'm not much in favor of dumping floating points as serialized-text data
+ besser82	adrin:  yes, that might be problematic
+@sonney2k	besser82, sure it would - look we don't need the all the magic
+@sonney2k	besser82, just in the examples we return instead of the numpy array
+@sonney2k	some string
+@sonney2k	and that /can/ be pickled and compared
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has quit [Ping timeout: 272 seconds]
+@sonney2k	or even we return the numpy array but iterate over objects if they are a list/tuple and convert them to some string representation - aka binary npy format
+-!- lambday [67157e37@gateway/web/freenode/ip.103.21.126.55] has quit [Ping timeout: 272 seconds]
+@sonney2k	hey thoralf - I am still confused what to do with the bmrm fix /patch of yours
+ thoralf	sonney2k: Me too. ;)
+ adrin	sonney2k: so you're suggesting to make everything numpy-dump-able?
+ thoralf	sonney2k: I'm was pretty sure that I did the right thing, but Michal did the whole thing, so I need to check even more careful. ;)
+@sonney2k	adrin, well we have the following setup: we return some list / tuple of results in our examples
+@sonney2k	adrin, some of them are scalars, some SGObjects and some is numpy stuff
+@sonney2k	adrin, in our regression tests we simply check if the objects are the same / similar
+@sonney2k	so why not for numpy stuff add some extra treatment?
+@sonney2k	thoralf, yeah to bad he didn't respond to your last Q
+ adrin	sonney2k: yeah sure, if it solves the problem it makes sense.
+ thoralf	sonney2k: Any suggestion how to proceed?
+ thoralf	I could reason (in more detail) about how I think it is, but maybe someone else could double-check my arguments...
+@sonney2k	thoralf, well it is michael who knows - the only idea I have is take some big example train it with bmrm and then apply the patch and see if results are *exactly* the same
+@sonney2k	iglesiasg, done with bisect?
+@iglesiasg	sonney2k, Bisecting: 3 revisions left to test after this (roughly 2 steps)
+@iglesiasg	I am going to see those revisions as well...
+@iglesiasg	but I am suspicious
+@iglesiasg	all the revisions I have found so far during the process were good...
+ adrin	sonney2k, besser82: I need to catch the bus, see you tomorrow.
+@sonney2k	adrin, cu!
+ besser82	adrin:  kk,  sch?nen Feierabend && Gute Nacht!
+ thoralf	sonney2k: But since his implementation is definitely wrong (producing memory errors when setting beta), I don't expect the same results.
+@sonney2k	iglesiasg, if you figure that out the only remaining test is evaluation_clustering_simple
+@iglesiasg	arrrgh
+@sonney2k	today was a tough day in berlin - walking on ice
+@iglesiasg	I am starting to get concerned that there is something wrong going on here
+ thoralf	sonney2k: I think the only question is if my patch is correct (beside the memory integrity).
+@sonney2k	I've never seen more people fall...
+ thoralf	sonney2k: But you're idea is good: We could try to solve the same problem and then compare duality gap or something like that.
+@sonney2k	thoralf, actually we have some test even
+@sonney2k	just since yesterday :)
+ thoralf	Or use the weight vector and use the (training) data to compute sth. like average square mean between predicted and trained value
+@sonney2k	thoralf, no no - it should be 100% identical
+ thoralf	sonney2k: I think the implementation is wrong!
+ thoralf	The beta is initialized wrong!
+ thoralf	So why should it return the *same* results?
+@sonney2k	thoralf, muahh then you should email vojtech / CC michael with your explanation. they are $DEITY
+ lisitsyn1	don't fix it
+ lisitsyn1	:D
+ lisitsyn1	it is going to be a hydra
+-!- charry [~charry@91.210.101.37] has joined #shogun
+@sonney2k	lisitsyn, yes marvin :)
+ thoralf	lisitsyn1: I already fixed it. ;)
+ thoralf	sonney2k: vojtech-who?
+@sonney2k	thoralf, vojtech franc
+ thoralf	Hmm, okay.
+@iglesiasg	sonney2k, I screwed up
+@iglesiasg	a revision that yesterday failed, now it doesn't fail
+@iglesiasg	only reason I found, because I am compiling using ccache and something is messing around with this
+@sonney2k	iglesiasg, :`-(
+@iglesiasg	yep, exactly
+@sonney2k	iglesiasg, did you uninstall previous releases?
+@iglesiasg	sonney2k, no
+@sonney2k	perhaps you have a include conflict?
+@sonney2k	iglesiasg, ohh you have to!
+@iglesiasg	:(
+@iglesiasg	how do I do that?
+@iglesiasg	I was basically
+@iglesiasg	git co some_revision
+@iglesiasg	ccache make -j2
+@iglesiasg	sudo make install
+@iglesiasg	in tests/integration/python_modular $ python tester.py linear_time_mmd.py
+-!- negativ [~negativ@91.210.101.170] has joined #shogun
+@iglesiasg	sonney2k, what should I have done?
+@iglesiasg	sonney2k, rm -rf build each time? uninstall how?
+@sonney2k	iglesiasg, always remove the installed shogun dir incl headers/libshogun/python stuff
+@sonney2k	yes
+@sonney2k	and rm-rf build too all the time
+@wiking	include conflict should have been fixed already by one of besser82's commit
+-!- charry [~charry@91.210.101.37] has quit [Ping timeout: 252 seconds]
+@sonney2k	wiking, doesn't help if we git bisect old releases
+@wiking	adding make uninstall target to cmake is a fairly easy process, there are howtos for it so if somebody is up for that should do it
+@wiking	sonney2k: indeed
+@iglesiasg	aargh fuck me man, this is so annoying
+@sonney2k	and that is what we are doing
+@wiking	sonney2k: bisect within a docker image
+@sonney2k	wiking, how does that help?
+@sonney2k	I mean rm'ing is far easier
+@wiking	well you can just delete the container...
+@wiking	and start from the next commit
+@iglesiasg	sonney2k, btw I am not sure what dirs yo umean with "remove the installed shogun dir incl headers/libshogun/python stuff"
+@wiking	iglesiasg: e.g. /usr/local/include/shogun /usr/local/lib/libshogun* /usr/local/lib/python2.7/sites-package/shogun
+@wiking	something like this
+@wiking	if u have installed it
+@wiking	of cours
+@iglesiasg	wiking, got it, thanks!
+@iglesiasg	wiking, I was not sure if there were those ones or something else inside shogun tree dir
+@wiking	iglesiasg: but you dont have to make install to be able to run ctests
+@iglesiasg	wiking, the problem is that in this case I cannot try it with ctest
+@iglesiasg	wiking, I have to run by hand the tester
+@iglesiasg	wiking, let me show you why
+@wiking	iglesiasg: then just set PYTHONPATH
+@wiking	and LD_LIBRARY_PATH
+@iglesiasg	why so?
+@iglesiasg	to what?
+@wiking	so that u dont need the make install
+@wiking	well why else would you kill yourself with make install? :)
+@sonney2k	true - you don't need make install then
+@wiking	and then do rm -rf all the time after a check
+@iglesiasg	don't get it
+@iglesiasg	I thought swig interfaces required the sudo make install
+@wiking	iglesiasg: well u dont need to do make install in order to be able to do a simple check
+@wiking	iglesiasg: no they dont
+@iglesiasg	I guess the pythonpath ld_library_path thing fix that
+@wiking	iglesiasg: what's the script u r trying to run?
+@iglesiasg	wiking, I am running the integration test on linear_time_mmd.py
+@wiking	mmm
+@iglesiasg	so tests/integration/python_modular/tester.py linear_time_mmd.py
+@wiking	well you might have a smal problem
+@wiking	with the version
+@wiking	where imports are not from modshogun
+@wiking	but from shogun
+@iglesiasg	ok...
+@iglesiasg	I think I am cool with doing install and removing the directories actually
+@iglesiasg	just would like to avoid repeating the process all over again :)
+@iglesiasg	sonney2k, but I think it is better if I try to do this connecting remotely to fatbot
+@iglesiasg	each installation takes far too long locally
+@iglesiasg	hmm but will I have problems there with the installation issue??
+@sonney2k	iglesiasg, don't install
+@sonney2k	like wiking said
+@sonney2k	it really is better
+@iglesiasg	sonney2k, sure ok
+@iglesiasg	but tell me what to do instead
+@iglesiasg	set PYTHONPATH, LD_LIBRARY_PATH
+@iglesiasg	to?
+@iglesiasg	I don't really follow why that fixes it
+@iglesiasg	I would understand that setting them tells make where to install the stuff
+@sonney2k	iglesiasg, PYTHONPATH=path/to/modshogun ( the directory)
+@sonney2k	iglesiasg, LD_LIBRARY_PATH=/path/to/libshogun (the dir again)
+@sonney2k	and then python example.py
+@sonney2k	iglesiasg, well if there is no default install of shogun -> no clash
+@iglesiasg	sonney2k, the directory means from where I want to execute the python example.py?
+-!- gsomix [~gsomix@46.20.65.64] has joined #shogun
+@sonney2k	iglesiasg, no the dir where the modshogun.so / libshogun*.so* are in
+@iglesiasg	sonney2k, i am not sure what to do really
+@sonney2k	iglesiasg, 1) remove shogun install'd files
+@sonney2k	2) build again
+@sonney2k	3) set python/ld_lib path
+@sonney2k	4) run the example
+@sonney2k	if any of this fails ask here
+ gsomix	sonney2k, hey. sry, I cannot to participate in today's hacking night. :( my laptop got wet by milk, need to dry.
+@iglesiasg	aaaah I think I got it now
+@iglesiasg	sonney2k, the key was telling me that 3) goes after 2) :)
+ gsomix	nothing serious, but keyboard does not work properly
+@sonney2k	gsomix, you can type pretty well still ;)
+ gsomix	sonney2k, nope
+ gsomix	shift, ctrl, alt keys are crazy
+@iglesiasg	sonney2k, was it ssh to bug.7nn.de for fatbot?
+@sonney2k	sonney2k, fatbot.shogun-*
+@iglesiasg	ssh to fatbot.shogun.toolbox.org is not working at all
+-!- infomix [~infomix@91.210.100.173] has joined #shogun
+@sonney2k	iglesiasg, works totally fine here
+@iglesiasg	it sort of hangs up here
+@sonney2k	iglesiasg, well then do it locally...
+@iglesiasg	sonney2k, a little bit weird that I ping without a trouble though
+@sonney2k	lisitsyn, wiking can you still ssh fatbot?
+-!- gsomix [~gsomix@46.20.65.64] has quit [Ping timeout: 272 seconds]
+@wiking	sonney2k: i could about 4 hours ago
+@wiking	and still i can
+@wiking	y?
+@wiking	15388 sonne     20   0 8135m  36m  392 R  99.6  0.1   7685:48 python
+@wiking	15391 sonne     20   0 12.9g  36m  392 R  99.6  0.1   7726:18 python
+@wiking	they are running now for a while
+@iglesiasg	wiking, would you mind adding a moment my public key?
+@iglesiasg	wiking, the one that is there is an old one
+@wiking	iglesiasg: in your home?
+@wiking	ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDq1H9qVAPm7JZkhy+Mk2cwwExAJJgbnI0S9bT4ZO03caNWuBaP92c/mHNQi7x1+IyCCwd4jqInMrQ6MDTqz1YGZqsWknRzYxT0hs8Z1SSD06gs5APBfkaVpMgyuwLFyKTjqmib9H9vyZnTMj/d+ZYXxlb8DNT78aJqEnDRe8rNps4gCGOq5bJNkcaIV/aL5IJmwLmofjvhtD2O4I6U8pUgat6ulsJFlDTDCha3lEfMcP4KeqH7uSK/pCuT8Z1Xp0LaGgQjOlrHtTRJ73b3U5bXRKPMn+UmifdqXjIB5Vhbj0KDxnqcP3k8cJK27gUDXa8ApTj9oWOMFK6/qQxE/qLB fernando.iglesiasg@gmail.com
+@wiking	this is what you have in authorized_keys atm
+@wiking	if u want something else
+@wiking	gimme
+@wiking	and tell me if i should append or overwrite
+@iglesiasg	wiking, let me see one second
+@wiking	iglesiasg: u can actually give out public key in public.... that's the idea :P
+@wiking	but ok adding
+@wiking	iglesiasg: tyr now
+@wiking	should be working
+@iglesiasg	wiking, nope actually :S
+@wiking	mmm interesting
+@wiking	oh maaan
+@wiking	your problem is the username. u r trying with iglesiasg but your username on fatbot is iglesias
+@wiking	without the last g on the end
+@wiking	iglesias
+@iglesiasg	wiking,  I tried iglesias too ;)
+@iglesiasg	ssh iglesias@fatbot.shogun-toolbox.7nn.de
+@iglesiasg	Permission denied (publickey).
+@wiking	plz try now again
+@wiking	and and u r trying the wrong host as well
+@wiking	:DDD
+@wiking	fatbot.shogun-toolbox.org
+@wiking	so
+@wiking	ssh iglesias@fatbot.shogun-toolbox.org
+@wiking	u have 2 more seconds to try as after that i'm gone
+@wiking	iglesiasg: if u want access to 7nn.de
+@wiking	i can add there your public key as well
+@wiking	no actually there i cannot
+@wiking	as there i dont have sudo
+-!- thoralf [~thoralf@91-65-136-3-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+@iglesiasg	wiking, .org worked, thanks!
+-!- votjakovr [~votjakovr@188.134.46.30] has quit [Quit: WeeChat 0.4.0]
+@sonney2k	ohh man
+@sonney2k	iglesiasg, now finally figure it out :)
+-!- infomix [~infomix@91.210.100.173] has quit [K-Lined]
+-!- negativ [~negativ@91.210.101.170] has quit [K-Lined]
+-!- rymrym [~rymrym@193.104.110.37] has joined #shogun
+@sonney2k	argh
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has quit [Ping timeout: 272 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun-data: Soeren Sonnenburg :master * 6b289bd / testsuite/tests/ (2 files): https://github.com/shogun-toolbox/shogun-data/commit/6b289bd5e22d88ec6ad5918063906267a7b65d81
+ shogun-notifier-	shogun-data: update data for fixed clustering evalution
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 2483b5a / / (3 files): https://github.com/shogun-toolbox/shogun/commit/2483b5ab18f9195b104e682cfbbb4d49baacd39d
+ shogun-notifier-	shogun: fix ClusteringMutualInformation - init matrix as zero fixing valgrind errors and tests
+@sonney2k	finally - iglesiasg so now only the mmd stuff remains!
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has joined #shogun
+@iglesiasg	sonney2k, I am doing my best!
+@iglesiasg	sonney2k, the process is much faster now compiling in fatbot
+@iglesiasg	sonney2k, I hope it will work out this time to detect the revision that broke the test
+ besser82	sonney2k:  How do we want to get that py_mod SGObj thing started?
+@sonney2k	besser82, no idea
+@sonney2k	besser82, maybe gsoc task
+ besser82	sonney2k:  and Who to mentor?
+@sonney2k	too big I am afraid
+ besser82	sonney2k:  what about that cmake-stuff && gsoc?
+ besser82	sonney2k:  shall I put that to iglesia's gdrive?
+@sonney2k	besser82, sure!
+ besser82	sonney2k:  kk
+@sonney2k	besser82, I shouldn't be mentoring more than 2 things so not sure if examples is a good thing for me - though I have a plan... the only problem to decide is whether we want some intermediate language to write the examples in or not
+ besser82	sonney2k:  not really,  keeping the examples lang by lang would be good
+ besser82	sonney2k:  just sharing the reference data
+@sonney2k	besser82, no no
+@sonney2k	it is too much effort to write the examples lang by lang
+@sonney2k	and they should be very simple just for reference
+@sonney2k	more complex stuff should be a notebook
+-!- rymrym [~rymrym@193.104.110.37] has quit [K-Lined]
+ besser82	sonney2k:  ok, ok
+ besser82	sonney2k:  but what "intermediate" language to chose?
+@sonney2k	no idea
+ lisitsyn1	javascript!
+@sonney2k	maybe wiking has an idea?
+ lisitsyn1	w00t you are toalking abouuut?
+@sonney2k	lisitsyn, writing shogun examples in some intermediate language / or jinja templates so that it can easily be converted to all $LANG we support
+ lisitsyn1	sonney2k: think that's possible?
+ lisitsyn1	sounds ok but I have no idea
+ lisitsyn1	sonney2k: then we can follow common naming schemes!
+ lisitsyn1	e.g. it is just wrong to have get_stuff in java
+ lisitsyn1	nobody uses that convention in java
+ lisitsyn1	code looks un-idiomatic
+ lisitsyn1	wrrrrong
+@sonney2k	lisitsyn, sure - if you look at the examples they all look the same except for some very minor deviations
+@sonney2k	lisitsyn, yeah swig supports that even...
+ lisitsyn1	hmm then we should have it
+ lisitsyn1	it must be really confusing to use _ in java
+@sonney2k	lisitsyn, yeah ... doing examples just once would have some huge advantage too
+ pickle27	I could be okay to mentor that project if besser82 has enough on his plate
+@sonney2k	lisitsyn, we could return only shogun objects
+@sonney2k	lisitsyn, and then these can be serialized with SerializableAsciiFile
+@sonney2k	and read back in and compared with equals
+@sonney2k	so we have cross language tests
+@sonney2k	and all examples do the same  / it is ensured that they all give the same correct output
+@sonney2k	pickle27, didn't you have sth else already?
+ shogun-buildbot	build #37 of deb4 - python3 is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/37  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ pickle27	I have the opencv integration
+ pickle27	I only want to mentor one project but if no one picks that one then i'd be happy to help on examples
+@sonney2k	pickle27, OK
+@sonney2k	pickle27, any idea what intermediate language one could use?
+@sonney2k	I would want to keep it as simple as possible
+@sonney2k	no idea if jinja2 templates would do...
+ pickle27	honestly most of the examples are already super basic because of the load helper methods
+@sonney2k	pickle27, yes they are intended to be only reference examples
+ pickle27	I would probably do a second take and move all of the data generation into a contained class
+@sonney2k	pickle27, we would want to make things even more simple / reference like
+@sonney2k	pickle27, and put all the higher level stuff into notebooks etc
+@sonney2k	pickle27, I think jinja2 is sufficient - I mean the shogun stuff has the very same syntax across languages
+@sonney2k	and data is supposed to be loaded from disk likely even with shogun.
+ pickle27	yeah I think that would work
+@sonney2k	pickle27, me might want to have a few examples still using this loader crap
+@sonney2k	but that again has the same syntax
+@sonney2k	pickle27, problem is if we pose this for a student we should try *one* minimal example - like e.g. compute the Gaussian Kernel or so
+ pickle27	I would make all the examples use the loader
+ pickle27	then it would be super simple to generate them
+@sonney2k	pickle27, why not - I think we could have some cmake rule that converts *.py.jinja2 into *.py
+@sonney2k	and if other *.py's exist it would just not touch things
+@sonney2k	so we *could* have additional examples if stuff doesn't work out
+ pickle27	yeah totally
+ pickle27	btw just to be clear I'm talking about making sure all these are consistent and then use them to gen examples: https://github.com/shogun-toolbox/shogun/blob/develop/examples/undocumented/python_modular/tools/load.py
+@sonney2k	pickle27, yes
+@sonney2k	pickle27, we are still talking about hundreds of examples
+ pickle27	okay just checking we're on the same page
+@sonney2k	so it will be quite some pile of work
+ pickle27	yeah i know
+ pickle27	there is probably lots that we don't really need slash are basically repeated from unit tests
+@sonney2k	also they need to be changed to just return shogun objects - e.g. the kernel's can only be reasonably tested when they return the kernel matrix
+@sonney2k	but that would be an SGMatrix - so we need to put them in some CustomKernel or have some other datatype for that that has a .equals
+ pickle27	actually just thinking now, it might be cool to try and move a lot of those really simple tests to be automatically copied from unit tests
+ pickle27	cause we're packing a lot of duplication right now aren't we?
+ pickle27	I know that all of the examples I wrote for gsoc were basically the same as my unit tests
+ pickle27	we could have a flag or something that says this unit test is also a basic example and then it gets copied in
+ pickle27	anyways I got to run but I might look into that after Im done on the website see if I can put something together
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has quit [Quit: Page closed]
+@sonney2k	pickle27 it is actually even more simple - a unit test would compute e.g. the gaussian kernel and check if values are as expected - in the example you just have the GaussianKernel and done
+ shogun-buildbot	build #2142 of deb3 - modular_interfaces is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2142  blamelist: Soeren Sonnenburg <sonne@debian.org>
+--- Log closed Tue Jan 21 00:00:01 2014

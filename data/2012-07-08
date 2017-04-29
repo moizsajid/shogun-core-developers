@@ -1,0 +1,952 @@
+--- Log opened Sun Jul 08 00:00:17 2012
+ wiking	oh configure script why you no work!
+ blackburn	n4nd0: want to fix some bugs?
+ blackburn	:D
+ n4nd0	blackburn: I am bit busy with some other bugs in the HM-SVM
+ n4nd0	but yeah of course
+ blackburn	ah ok
+ n4nd0	I can lend a hand there if so
+ blackburn	no rather do HM-SVM :)
+ n4nd0	where are they?
+ blackburn	n4nd0: mainly in serialization and parameter trees
+ blackburn	good news for heiko
+ blackburn	:D
+ n4nd0	:S
+ n4nd0	files? where do they fire?
+ blackburn	ah
+ blackburn	serialization_basic_tests
+ blackburn	==15481== HEAP SUMMARY:
+ blackburn	==15481== LEAK SUMMARY:
+ blackburn	==15481== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 2 from 2)
+ blackburn	base_load_file_parameters
+ blackburn	==15235== HEAP SUMMARY:
+ blackburn	==15235== LEAK SUMMARY:
+ blackburn	==15235== ERROR SUMMARY: 3 errors from 3 contexts (suppressed: 2 from 2)
+ blackburn	base_load_all_file_parameters
+ blackburn	==15241== HEAP SUMMARY:
+ blackburn	==15241== LEAK SUMMARY:
+ blackburn	==15241== ERROR SUMMARY: 3 errors from 3 contexts (suppressed: 2 from 2)
+ blackburn	base_map_parameters
+ blackburn	==15247== HEAP SUMMARY:
+ blackburn	==15247== LEAK SUMMARY:
+ blackburn	==15247== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 2 from 2)
+ blackburn	bahh
+ n4nd0	ok
+ blackburn	n4nd0: nevermind let heiko fix that :)
+ n4nd0	I will not start with them right away because I am with this HM-SVM test
+ blackburn	no problem
+ n4nd0	blackburn: I will tell you again once I am done and if they are not fixed I will dive in ;)
+ wiking	anyone seen something like this before
+ wiking	features/SparseFeatures.cpp: In member function 'void shogun::CSparseFeatures<ST>::free_sparse_feature_matrix()':
+ wiking	features/SparseFeatures.cpp:95: error: expected class-name before '(' token
+ blackburn	wiking: wow
+ n4nd0	wiking: I don't recognize it
+ wiking	although i'm a bit puzzled by that line
+ wiking	SGSparseVector<ST>* sparse_feature_matrix;
+ blackburn	wiking: try to add include of SGSparseVector
+ wiking	aah ok
+ wiking	(&sparse_feature_matrix[i])->~SGSparseVector();
+ blackburn	just some guess
+ blackburn	don't ask :D
+ blackburn	well
+ wiking	why do we need the address?
+ blackburn	it is caused
+ wiking	and not just sparse_feature_matrix[].~ ...
+ blackburn	by the allocate thing
+ blackburn	hmm
+ blackburn	yes you are right it is the same
+ blackburn	I thought you are asking why the heck we are calling dtor manually
+ wiking	mmm
+ wiking	but it doesn't help :))
+ blackburn	wiking: include?
+ blackburn	interesting
+ wiking	mmm i'll try now
+ blackburn	wiking: what doesn't help?
+ wiking	nop
+ blackburn	prediction error on training data (3 classes): 0.308333 random guess error would be: 0.666667
+ blackburn	LOL
+ wiking	                ((SGSparseVector<ST>*)&sparse_feature_matrix[i])->~SGSparseVector();
+ wiking	doesn't help either
+ wiking	hahah this is weird shit
+ blackburn	yeah kind of
+ wiking	mmm let's see
+ wiking	ok
+ wiking	it's the gcc
+ blackburn	wiking: what is -v?
+ wiking	c++ (GCC) 4.2.1 20070831 patched [FreeBSD]
+ wiking	so this doesn't like it
+ blackburn	woooow
+ blackburn	:D
+ wiking	c++46 (FreeBSD Ports Collection) 4.6.4 20120608 (prerelease)
+ wiking	takes it
+ blackburn	newer than mine
+ wiking	what's your numba?
+ blackburn	gcc version 4.6.3 (Ubuntu/Linaro 4.6.3-1ubuntu5)
+ wiking	anybody has 4.2.x compiler around?
+ wiking	on a different os?
+ blackburn	IIRC 4.2 is really some crappy v
+ blackburn	or <4.4
+ wiking	yeah but still
+ wiking	we need to check then in configure script ;P
+ wiking	ok
+ wiking	same with 4.2 c++ on osx
+ blackburn	wiking: does it work with 4.6 on your machine?
+ wiking	blackburn: on fbsd it does with 4.6
+ wiking	on osx i have clang 3.1 by default
+ wiking	and that does as well
+ wiking	only that 4.2.1 does not like it neither on osx nor on freebsd
+ wiking	hahaha
+ wiking	i think it's a gcc bug
+ blackburn	yeah seems to be
+ wiking	http://gcc.gnu.org/bugzilla/show_bug.cgi?id=23287
+ wiking	here's the bug for it
+ wiking	:)
+ blackburn	argh
+ wiking	Fixed for 4.4.
+ wiking	fixed for 4.3 as well, closing.
+ wiking	ok
+ wiking	so this is crashing in 4.1.x and 4.2.x
+ wiking	only works from 4.3.x
+ wiking	so i guess it's safe to add a gcc 4.3.x dependency in the configure script
+ blackburn	wiking: yeah
+ CIA-18	shogun: Sergey Lisitsyn master * r77ab132 / (3 files in 3 dirs): Fixed MKL libshogun example - http://git.io/bK_ZRA
+ blackburn	wiking: do we check version?
+ wiking	yep
+ blackburn	wiking: where?
+ wiking	                                        case $cxx_version in
+ wiking	                                                2.96*)
+ wiking	                                                        cxx_version="$cxx_version, bad"
+ wiking	                                                        cxx_found=no
+ wiking	apparently 2.96* is bad :)
+ shogun-buildbot	build #83 of deb1 - libshogun started, including [77ab1329c966b952c91e09c0c1bf7a48f29fa967]
+ wiking	everything else is good
+ wiking	:>>>
+ shogun-buildbot	build #83 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/83
+ shogun-buildbot	build #89 of deb2 - static_interfaces started, including [77ab1329c966b952c91e09c0c1bf7a48f29fa967]
+ shogun-buildbot	build #91 of deb3 - modular_interfaces started, including [77ab1329c966b952c91e09c0c1bf7a48f29fa967]
+ shogun-buildbot	build #11 of cyg1 - libshogun started, including [77ab1329c966b952c91e09c0c1bf7a48f29fa967]
+ blackburn	we seriously need to clean up configure
+ shogun-buildbot	build #89 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/89  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ n4nd0	good night men of the night's watch, it's time for me to retire :)
+ wiking	gnite
+ blackburn	nite
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ CIA-18	shogun: Sergey Lisitsyn master * rb32d3e0 / (2 files in 2 dirs): Fixed kernel and bmrm warnings - http://git.io/3UImvg
+ shogun-buildbot	build #84 of deb1 - libshogun started, including [b32d3e011bc5892f929166beb450aae09366f1a1]
+ shogun-buildbot	build #84 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/84
+ shogun-buildbot	build #92 of deb3 - modular_interfaces started, including [b32d3e011bc5892f929166beb450aae09366f1a1]
+ wiking	ok
+ wiking	i just need to figure it out now with the bash case
+ CIA-18	shogun: Sergey Lisitsyn master * rbfa3239 / src/shogun/classifier/svm/OnlineLibLinear.h : Made OnlineLibLinear fields private - http://git.io/306ylQ
+ CIA-18	shogun: Sergey Lisitsyn master * rbe76f99 / (6 files in 3 dirs): Revert "Added PegasosSVM" - http://git.io/QfqmRQ
+ shogun-buildbot	build #11 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/11
+ shogun-buildbot	build #12 of cyg1 - libshogun started, including [b32d3e011bc5892f929166beb450aae09366f1a1]
+ wiking	and then actually we have shogun compiling on fbsd
+* wiking wonders why is it so fucking slow...
+ wiking	another magic: error: '::getline' has not been declared
+ blackburn	:D
+ shogun-buildbot	build #91 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/91  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #90 of deb2 - static_interfaces started, including [b32d3e011bc5892f929166beb450aae09366f1a1]
+ blackburn	where?
+ wiking	io/AsciiFile.cpp
+ blackburn	nice
+ blackburn	wiking: first googling shows that it probably broken in freebsd's gcc :D
+ wiking	no fucking way
+ wiking	it does have getline
+ wiking	but not ::getline
+ wiking	aah ok
+ wiking	i see from the man
+ wiking	;)
+ blackburn	wiking: what do you see?
+ wiking	defining the macro _WITH_GETLINE, prior to the inclusion of <stdio.h>.
+ blackburn	wiking: I can do this and push, or will you do?
+ shogun-buildbot	build #92 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/92  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #85 of deb1 - libshogun started, including [bfa3239987a7831f96945aa69c158adbfff65609, be76f9993dfb8ae69582a02bfb3891ec917ad61f]
+ shogun-buildbot	build #12 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/12
+ wiking	blackburn: didn't help yet
+ blackburn	hmm
+ wiking	blackburn: i'll push the PR when i have all the fixes for fbsd
+ blackburn	thanks
+ shogun-buildbot	build #85 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/85
+ shogun-buildbot	build #13 of cyg1 - libshogun started, including [bfa3239987a7831f96945aa69c158adbfff65609]
+ shogun-buildbot	build #93 of deb3 - modular_interfaces started, including [bfa3239987a7831f96945aa69c158adbfff65609, be76f9993dfb8ae69582a02bfb3891ec917ad61f]
+ shogun-buildbot	build #90 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/90  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #91 of deb2 - static_interfaces started, including [bfa3239987a7831f96945aa69c158adbfff65609, be76f9993dfb8ae69582a02bfb3891ec917ad61f]
+ wiking	i did it as they suggest but no help
+ wiking	only if i remove the ::
+ blackburn	wiking: ifdef it when
+ wiking	and then it works even w/o the define
+ wiking	yeah i guess that'll be it
+ wiking	just lets see how it ends
+ wiking	since it's still compiling
+ wiking	done
+ wiking	ok that actually wasn't that bad...
+ wiking	only 2 file needs to be changed
+ shogun-buildbot	build #91 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/91  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ blackburn	wiking: do you know wheter clang supports openmp?
+ shogun-buildbot	build #13 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/13
+ shogun-buildbot	build #14 of cyg1 - libshogun started, including [be76f9993dfb8ae69582a02bfb3891ec917ad61f]
+ wiking	blackburn: yeps
+ wiking	it does
+ wiking	although it is from 3.2 i think
+ wiking	:)
+ wiking	https://github.com/motonacciu/clomp
+ blackburn	argh
+ blackburn	so we shall wait
+ wiking	http://polly.llvm.org/
+ wiking	:)
+ wiking	http://polly.llvm.org/performance.html
+ wiking	looks good
+ wiking	:)
+ shogun-buildbot	build #93 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/93  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #14 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/14
+ CIA-18	shogun: Sergey Lisitsyn master * rf3871d0 / (2 files in 2 dirs): Made parameters work for SLEP FBLR - http://git.io/tyAciQ
+ shogun-buildbot	build #86 of deb1 - libshogun started, including [f3871d06c0c06f3bfe5c9d8550110ec283038014]
+ shogun-buildbot	build #86 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/86
+ shogun-buildbot	build #94 of deb3 - modular_interfaces started, including [f3871d06c0c06f3bfe5c9d8550110ec283038014]
+ shogun-buildbot	build #92 of deb2 - static_interfaces started, including [f3871d06c0c06f3bfe5c9d8550110ec283038014]
+ shogun-buildbot	build #15 of cyg1 - libshogun started, including [f3871d06c0c06f3bfe5c9d8550110ec283038014]
+ shogun-buildbot	build #92 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/92  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #15 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/15
+ shogun-buildbot	build #94 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/94  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ CIA-18	shogun: Sergey Lisitsyn master * ra838aaa / (2 files): Made print result virtual and available in EvaluationResult - http://git.io/FXjBtg
+ shogun-buildbot	build #87 of deb1 - libshogun started, including [a838aaa11a3cc989e453eb17aa57d7ce8bdd0da1]
+-!- blackburn [~blackburn@81.28.187.0] has left #shogun []
+ shogun-buildbot	build #87 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/87
+ shogun-buildbot	build #93 of deb2 - static_interfaces started, including [a838aaa11a3cc989e453eb17aa57d7ce8bdd0da1]
+ shogun-buildbot	build #95 of deb3 - modular_interfaces started, including [a838aaa11a3cc989e453eb17aa57d7ce8bdd0da1]
+ shogun-buildbot	build #16 of cyg1 - libshogun started, including [a838aaa11a3cc989e453eb17aa57d7ce8bdd0da1]
+ shogun-buildbot	build #93 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/93  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #11 of nightly_all started, including []
+ shogun-buildbot	build #16 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/16
+@sonney2k	rieck, hey konrad can we have betty back?
+ shogun-buildbot	build #95 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/95  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #16 of nightly_default started, including []
+ shogun-buildbot	build #11 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/11
+ shogun-buildbot	build #14 of nightly_none started, including []
+ shogun-buildbot	build #14 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/14
+ CIA-18	shogun: Soeren Sonnenburg master * r0746d4a / src/interfaces/modular/modshogun_ignores.i : ignore constructor with two SGVector arguments in csharp interface - http://git.io/d7gqgw
+ shogun-buildbot	build #88 of deb1 - libshogun started, including [0746d4a052bfb55fd339e37d20bbb7df628b2c49]
+ shogun-buildbot	build #16 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/16
+ shogun-buildbot	build #88 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/88
+ shogun-buildbot	build #94 of deb2 - static_interfaces started, including [0746d4a052bfb55fd339e37d20bbb7df628b2c49]
+ shogun-buildbot	build #96 of deb3 - modular_interfaces started, including [0746d4a052bfb55fd339e37d20bbb7df628b2c49]
+ shogun-buildbot	build #17 of cyg1 - libshogun started, including [0746d4a052bfb55fd339e37d20bbb7df628b2c49]
+ shogun-buildbot	build #94 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/94  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #17 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/17
+ shogun-buildbot	build #96 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/96  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- pluskid [~pluskid@111.120.50.40] has joined #shogun
+-!- pluskid [~pluskid@111.120.50.40] has quit [Quit: Leaving]
+-!- blackburn [~blackburn@81.28.187.0] has joined #shogun
+-!- blackburn [~blackburn@81.28.187.0] has quit [Quit: Leaving.]
+-!- blackburn1 [~blackburn@81.28.187.0] has joined #shogun
+ blackburn1	sonney2k: I solved AC issue for a while with hardresetting notebook :D
+ blackburn1	linux way
+-!- heiko [~heiko@host86-181-154-192.range86-181.btcentralplus.com] has joined #shogun
+ blackburn1	heiko: I have cool news for ya
+ blackburn1	almost all serialization and modelselection examples have memory leaks :)
+ heiko	blackburn1, yeeeeeah :)
+ heiko	the did not have before
+ heiko	argh! :)
+ heiko	I will have a look later today, have to leave now
+-!- heiko [~heiko@host86-181-154-192.range86-181.btcentralplus.com] has quit [Quit: Leaving.]
+-!- blackburn1 [~blackburn@81.28.187.0] has quit [Quit: Leaving.]
+ wiking	sonney2k: here?
+@sonney2k	wiking, ?
+@sonney2k	...I will certainly be areound in the evening
+ wiking	ok
+ wiking	i'll just commit stuff and you'll comment them there ;)
+ wiking	__MACH__
+ wiking	what's this macro?
+ wiking	lol i just love http://defunkt.io/hub/
+ wiking	i've just sent my PR for freebsd fixes via command line ;)
+ wiking	sonney2k: once the freebsd fixes are merge i'll need the master name and passwd for the freebsd buildslave
+-!- blackburn [~blackburn@81.28.187.0] has joined #shogun
+-!- heiko [~heiko@host86-181-154-192.range86-181.btcentralplus.com] has joined #shogun
+@sonney2k	blackburn, google-chrome works again :-) The problem only happens when I use the kernel 3.5-rcX but not under 3.4.X !
+@sonney2k	kind of wtf!
+ blackburn	hah
+ blackburn	kind of regression I'd say
+@sonney2k	I cannot tell how happy I am
+@sonney2k	yeah I reported that throuh all possible channels... lets see if they will laugh at me :D
+ blackburn	sonney2k: my AC thing is solved too (for now)
+@sonney2k	one happy family
+@sonney2k	now only heiko needs to fix the build and rieck setup betty :D
+ heiko	sonney2k, just started looking at it :)
+ blackburn	sonney2k: do you have any overheat problems with your MBP?
+ heiko	sonney2k, blackburn, the x-val example did work, what was recently changed?
+@sonney2k	blackburn, well 60C is the CPU
+ blackburn	heiko: puffin444's stuff I guess
+ blackburn	sonney2k: idle?
+@sonney2k	yeah
+ heiko	mmh
+ heiko	k
+@sonney2k	wiking, about the freebsd patch
+ blackburn	sonney2k: I just wanted to say I managed to slow down internal gpu and it is something like -2C to before
+@sonney2k	wiking, are you sure that HAVE_ATLAS='#define HAVE_ATLAS 1' is correct?
+@sonney2k	wiking, sounded like it should be just HAVE_LAPACK='#define HAVE_LAPACK 1'
+@sonney2k	heiko, well the buildbot has it all - basically only puffins stuff touches the x-val stuff
+ heiko	yeah ok, I will have a look now
+@sonney2k	wiking, and I don't understand the getline change
+@sonney2k	it must be ::getline I am afraid
+ blackburn	sonney2k: freebsd has getline issues
+ blackburn	:D
+@sonney2k	otherwise it is an endless recursion
+ wiking	sonney2k: i was compiling with ATLAS
+ wiking	sonney2k: so it should have HAVE_ATLAS='#define HAVE_ATLAS 1'
+@sonney2k	ok
+ wiking	and as well as lapack
+ blackburn	heiko: ah btw I made print_result of CVResult  virtual
+ blackburn	have you seen?
+ wiking	sonney2k: for the ::getline it just says no such function... only getline...
+ heiko	not yet, but makes sense right :)
+ wiking	sonney2k: i couldn't fix it other way :(
+@sonney2k	wiking, but then it will take the one from CAsciiFile
+ blackburn	heiko: I had troubles with printing out result
+ blackburn	heiko: ah btw two questions
+ heiko	k
+ blackburn	what is ratio to divide train/test set in StratifiedCrossValidation?
+ blackburn	how much vectors will it take as train vectors?
+@sonney2k	wiking, http://www.unix.com/man-page/freebsd/3/getline/
+@sonney2k	seems like it works slightly differently
+ heiko	what do you mean?
+ heiko	mmh well you specify a number of folds
+ wiking	sonney2k: it's the same function arg as far as i can see
+ blackburn	heiko: right
+ heiko	then nr_examples / folds is the size of test data
+ blackburn	ahh
+ blackburn	I didn't know that
+ heiko	and one of the training sets might be larger smaller by one
+ blackburn	heiko: is it something common practice?
+ blackburn	I am pretty lame with xval to be honest
+ heiko	maybe it should be specified in the doc
+ heiko	blackburn, yes thats practice
+ blackburn	I see
+ heiko	divide into equal sized sets
+ wiking	sonney2k: the only thing is this stupid hack about #define _WITH_GETLINE
+ heiko	and then use all but one for training
+ heiko	for all combinations
+ wiking	sonney2k: but yeah even using that doesn't help with ::getline
+@sonney2k	wiking, yeah but then ::getline() should work
+ blackburn	heiko: I thought of 50/50 or so
+ blackburn	:D
+ heiko	in stratified also, the class ratios are tried to kept equal
+ wiking	sonney2k: but it doesnt :)
+ heiko	blackburn, thats 2 folds :)
+ blackburn	I see
+@sonney2k	wiking, what exactly does it say?
+ wiking	sonney2k: lemme reproduce it
+ blackburn	heiko: if I have one parameter only
+@sonney2k	wiking, with the rest I am fine
+ blackburn	should I put it into root or to child of root?
+ heiko	blackburn, the extreme is LOO, that is as many folds as training examples
+ wiking	sonney2k: have u seen the gcc bug
+ wiking	sonney2k: that's pretty funny ;)
+ heiko	to child of root
+ wiking	sonney2k: io/AsciiFile.cpp:1089:9: error: '::getline' has not been declared
+ CIA-18	shogun: Viktor Gal master * re2ce7e7 / (7 files in 4 dirs): Fix indentation to comply with shogun standard - http://git.io/xMgbeA
+ CIA-18	shogun: Soeren Sonnenburg master * ree792cd / (7 files in 4 dirs): Merge pull request #630 from vigsterkr/latent - http://git.io/JT_ALA
+ shogun-buildbot	build #89 of deb1 - libshogun started, including [e2ce7e783ee19cecfaabfc1e0262b2ad1fae9772]
+ shogun-buildbot	build #90 of deb1 - libshogun started, including [ee792cd1b55347ae3a36c1d5d8a6cf6c3f337596]
+ blackburn	heiko: I actually have something strange with xval
+ heiko	blackburn, what is it?
+ blackburn	heiko: it chooses value with AUC = 0.5 :D
+ wiking	sonney2k: and i've tried googling about this, but no help until now :(
+ wiking	i mean about ::getline
+ heiko	you mean model selection
+ heiko	grid-search?
+ blackburn	heiko: yeah sure
+ shogun-buildbot	build #89 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/89
+ shogun-buildbot	build #95 of deb2 - static_interfaces started, including [e2ce7e783ee19cecfaabfc1e0262b2ad1fae9772]
+ shogun-buildbot	build #18 of cyg1 - libshogun started, including [e2ce7e783ee19cecfaabfc1e0262b2ad1fae9772]
+ blackburn	I do not separate these two parts so much :D
+ heiko	it depends on which criterion you optimize, do you optimize for AUC? (Thats not always a good idea)
+ wiking	sonney2k: another possibility is that i use that work around for freebsd as in case for __MACH__
+ heiko	and the direction is important, might be that you minimize or so :)
+@sonney2k	wiking, problem really is that this won't work with just getline()
+@sonney2k	just because the signatures overlap
+ heiko	since 0.5 AUC is the worst classifier that you can construct for symmetric class ratio :)
+ wiking	sonney2k: yeah i guess it'll be a infinite recurisve call
+ blackburn	heiko: yeah I know
+ blackburn	heiko: but isn't maximize default for ROC?
+ heiko	Should be
+ blackburn	ok I'll check
+ heiko	but this would mean that ALL AUC values are 0.5
+ shogun-buildbot	build #95 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/95  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #97 of deb3 - modular_interfaces started, including [e2ce7e783ee19cecfaabfc1e0262b2ad1fae9772]
+ blackburn	heiko: yes it is easy to get with classifier I work with
+ wiking	sonney2k: we are trying to call std::getline right?
+ blackburn	tree lasso that is - makes w=0 at some pointt
+ wiking	mm no...
+ wiking	well then i really wonder
+ heiko	blackburn, no idea of that
+ blackburn	heiko: I will check if direction is set correct
+ shogun-buildbot	build #90 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/90
+ shogun-buildbot	build #96 of deb2 - static_interfaces started, including [ee792cd1b55347ae3a36c1d5d8a6cf6c3f337596]
+ wiking	blame meeee
+ heiko	if not, you could add debug outputs for the results of each fold
+ heiko	then youll see if there is something wrong
+ blackburn	heiko: what do I see is
+ blackburn	yes I enabled it before
+ blackburn	AUC is better on other values
+ heiko	you mean you optimize another criterion?
+ heiko	and then compute AUC for result?
+ wiking	oh ok this is not my fault ;)
+ heiko	I remember that there were some errors in the evaluation classes some time ago, but I did not use all of them so maybe some of them are still in there
+ heiko	blackburn, this was due to the changes in the labels
+ heiko	remember?
+ heiko	I never use AUC, so perhaps there is a problem or so
+ heiko	with the transition to Binary/blabla labels
+ blackburn	heiko: https://gist.github.com/3071792
+@sonney2k	wiking, how about the following: you copy the freebsd code for getline into CAsciiFile::getline in the #ifdef __MACH__
+ wiking	sonney2k: or just #ifdef __MACH__ || FREEBSD
+ wiking	?
+@sonney2k	and then change it to #if defined(__MACH__) || defined(FREEBSD)
+ heiko	blackburn that seems correct
+@sonney2k	wiking, the getline function is wrong in MACH It seems
+ heiko	could you give me the data?
+ heiko	then Ill have a look
+ blackburn	heiko: sure
+@sonney2k	or maybe not
+ heiko	blackburn, might take a while, currently fixing other bugs
+@sonney2k	it is actually correct :D
+ blackburn	heiko: let me check it now then :)
+@sonney2k	wiking, so yes just  #if defined(__MACH__) || defined(FREEBSD)
+ blackburn	first of all I am going to check whether optimization direction is correct
+ wiking	sonney2k: ok
+ shogun-buildbot	build #96 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/96  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #98 of deb3 - modular_interfaces started, including [ee792cd1b55347ae3a36c1d5d8a6cf6c3f337596]
+ wiking	sonney2k: ok compiles fine... i'll push the change in a sec
+@sonney2k	wiking, great :D
+@sonney2k	heiko, please fix this http://shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/90/steps/compile/logs/warnings%20%282%29 :)
+ shogun-buildbot	build #18 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/18
+ shogun-buildbot	build #19 of cyg1 - libshogun started, including [ee792cd1b55347ae3a36c1d5d8a6cf6c3f337596]
+ heiko	sonney2k, I will, does it block something?
+ wiking	sonney2k: ok it's there
+ wiking	sonney2k: now let's set up the buildslave
+@sonney2k	heiko, nope - but easy to fix
+ heiko	sonney2k, ok
+ CIA-18	shogun: Viktor Gal master * r7b3ee5a / src/configure : Fix configure script for FreeBSD - http://git.io/0s6MxA
+ CIA-18	shogun: Viktor Gal master * r97763bb / src/configure : gcc compiler version check - http://git.io/PG_hyw
+ CIA-18	shogun: Viktor Gal master * r69d4274 / src/shogun/io/AsciiFile.cpp : Fix getline function definition for FreeBSD - http://git.io/hXGOeg
+ CIA-18	shogun: Viktor Gal master * r643ee74 / src/shogun/io/AsciiFile.cpp : True fix for getline under FreeBSD - http://git.io/YB1YDw
+ CIA-18	shogun: Soeren Sonnenburg master * r28c06ce / (src/configure src/shogun/io/AsciiFile.cpp): Merge pull request #629 from vigsterkr/fbsd - http://git.io/kaC6xw
+ wiking	letssee if it compiles alright ;)
+@sonney2k	wiking, hmmhh for these you should next time really use git commit --amend
+@sonney2k	so that it is just one commit instead of 4
+@sonney2k	(and the push with --force thoug)
+@sonney2k	h
+@sonney2k	wiking, alright buildslave:
+@sonney2k	wiking, did you already run buildslave  create-slave
+ wiking	tried
+@sonney2k	wiking, send me some password you like
+ wiking	it told me that i need to give more info
+ wiking	basedir> <master> <name> <passwd>
+ wiking	i guess apart from master i can give whatever i want ;)
+@sonney2k	lets call it shogun-freebsd as user
+@sonney2k	password - your choice :D
+ blackburn	heiko: ok Z is set corrrect
+ wiking	and what's the master?
+ blackburn	heiko: but print_result produces something wrong I guess
+@sonney2k	wiking, www.shogun-toolbox.org
+ wiking	ok
+@sonney2k	wiking, alright so now what do we want to build on that machine?
+@sonney2k	just libshogun or other stuff too?
+ wiking	sonney2k: mmm i haven't tried other stuff
+@sonney2k	wiking, I would suggest to start with libshogun...
+ heiko	blackburn, so the model selection works but the printing is wrong
+ wiking	thus i guess i dont have the dependencies installed for everything
+ blackburn	heiko: I guess so
+ heiko	you could do a
+ heiko	best_parameters.print()
+ heiko	or print_tree or so
+ heiko	forgot the name
+ wiking	sonney2k: ok i've edited the files under ./info
+ shogun-buildbot	build #19 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/19
+ wiking	sonney2k: so i guess it's time to start the buildbot for me?
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Remote host closed the connection]
+ wiking	sonney2k: ah yeah 2 things! 1) configure script should be run like this: ./configure --cc=gcc46 --cxx=c++46
+ wiking	2) instead of make it should call gmake
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ shogun-buildbot	build #91 of deb1 - libshogun started, including [7b3ee5ae63d2dcde25cc70e4074d75ecd11b0f98, 97763bbc134688dc412b6c735fa076d85e8448b9, 69d42744dff01bf9208151d829fa7e204926227d, 643ee74dc7f43c93dc27c7be62c7349079dc17b5, 28c06ce21772e79529bf3caa39f8b484bae0dcff]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Remote host closed the connection]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	wiking, alright
+@sonney2k	wiking, fire it up
+ wiking	ok going
+ shogun-buildbot	build #92 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/92
+ shogun-buildbot	build #101 of deb3 - modular_interfaces started, including [7b3ee5ae63d2dcde25cc70e4074d75ecd11b0f98, 97763bbc134688dc412b6c735fa076d85e8448b9]
+ shogun-buildbot	build #20 of cyg1 - libshogun started, including [7b3ee5ae63d2dcde25cc70e4074d75ecd11b0f98, 97763bbc134688dc412b6c735fa076d85e8448b9, 69d42744dff01bf9208151d829fa7e204926227d, 643ee74dc7f43c93dc27c7be62c7349079dc17b5, 28c06ce21772e79529bf3caa39f8b484bae0dcff]
+@sonney2k	wiking, when it works it should be listed here http://shogun-toolbox.org/buildbot/buildslaves
+ wiking	yep
+ wiking	but something went wrong ;)
+@sonney2k	wiking, authentification problem
+@sonney2k	did you use shogun-freebsd1 as name?
+@sonney2k	wiking, when you vim buildbot.tac
+@sonney2k	look at slavename
+@sonney2k	it should be 'shogun-freebsd1'
+ wiking	oh no
+ wiking	it's just shogun-freebsd
+ wiking	but i'l change
+ wiking	ok
+@sonney2k	yeah change it and buildslave start again
+@sonney2k	http://shogun-toolbox.org/buildbot/buildslaves
+@sonney2k	there we go
+@sonney2k	shogun-buildbot, force build "bsd1 - libshogun" initial
+ shogun-buildbot	build #0 of bsd1 - libshogun started, including []
+ shogun-buildbot	build #0 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	wiking, does it do anything?
+@sonney2k	wiking, it should checkout the sources via git
+@sonney2k	~200 MB
+@sonney2k	that will take a while on the first test...
+ wiking	yep
+ wiking	it's checking out now the submodule
+ blackburn	sonney2k: farmer
+ shogun-buildbot	build #0 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/0
+ wiking	eh
+@sonney2k	blackburn, ?
+ blackburn	sonney2k: you're growing a farm of bots :)
+ shogun-buildbot	build #20 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/20
+ wiking	sonney2k: ok this won't work
+ wiking	cd src && ./configure --cc=gcc46 --cxx=c++46 --interfaces= --prefix=`pwd`/build'
+ wiking	shouldn't it be cd source/src & ./configure --cc=gcc46 --cxx=c++46 --interfaces= --prefix=../../build
+ wiking	?
+ wiking	mm
+ wiking	actually i dont know
+ wiking	i have a bsd1_-_libshogun dir under which there are 2 dirs: build and source
+@sonney2k	wiking, do you have /bin/bash ?
+ wiking	but well ... it tried under /usr/home/wiking/shogun-buildbot/bsd1_-_libshogun/build
+ wiking	sonney2k: nono, freebsd doesn't have that
+ wiking	:)
+ wiking	by default
+ wiking	i have /usr/local/bin/bash
+@sonney2k	ok that is the reason then
+ wiking	but try rather /usr/bin/env bash
+ wiking	;)
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Remote host closed the connection]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ wiking	but i guess a /bin/sh would be sufficient as well
+@sonney2k	wiking, please restart the slave
+@sonney2k	buildslave stop
+@sonney2k	buildslave start
+ wiking	ok
+ blackburn	sonney2k: do you mind to output .o files to shogun/build dir?
+@sonney2k	blackburn, ugh not so easy
+ wiking	sonney2k: restarted...
+ blackburn	sonney2k: do you mind me to try?
+@sonney2k	blackburn, we have to change the makefile and everything
+@sonney2k	shogun-buildbot, force build "bsd1 - libshogun" initial
+ shogun-buildbot	build #1 of bsd1 - libshogun started, including []
+ shogun-buildbot	build #1 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	blackburn, if I was you I would rather do the doc or other important stuff now
+ blackburn	heh
+@sonney2k	blackburn, that is some huge undertaking
+ blackburn	is it really so hard?
+ wiking	ok now it's running afaik
+@sonney2k	wiking, yeah looks good
+ CIA-18	shogun: Heiko Strathmann master * re1db78e / (2 files): removed compiler warning - http://git.io/MRu-zg
+ CIA-18	shogun: Heiko Strathmann master * r3e19962 / src/shogun/statistics/HSIC.cpp : fixes, gamma test should work now - http://git.io/cjtv4Q
+ CIA-18	shogun: Heiko Strathmann master * r76ba56d / src/shogun/statistics/HSIC.h : comment update - http://git.io/17Vy4A
+ CIA-18	shogun: Heiko Strathmann master * r564e0bb / examples/undocumented/libshogun/statistics_hsic.cpp : added test for HSIC gamma based test - http://git.io/C6CzCA
+ CIA-18	shogun: Heiko Strathmann master * rf842ad6 / (5 files in 2 dirs): Merge pull request #631 from karlnapf/master - http://git.io/KsKfGQ
+ heiko	blackburn, did you already found the error?
+@sonney2k	wiking, now please continue with the other pull requests :D
+ blackburn	heiko: not really
+ blackburn	I stopped with getting proper results for now
+ blackburn	:D
+ wiking	sonney2k: alrighty
+ blackburn	heiko: print_result of CVEvaluation prints last evaluation result I am afraid
+@sonney2k	wiking, at some point we could add more to the freebsd buildbot, like static and dynamic interfaces
+@sonney2k	maybe not all of them (you probably don't have csharp/java or?)
+ wiking	sonney2k: java i do
+ wiking	but not mono
+ heiko	really?
+ heiko	so not the best result
+ heiko	Ill check the code
+ shogun-buildbot	build #97 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/97  blamelist: Soeren Sonnenburg <sonne@debian.org>, Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #93 of deb1 - libshogun started, including [e1db78e59c60dc0111d049dca777eb19762d7e03, 3e19962f1031075d3c4404d50d0b7a4ad36f465f, 76ba56d9a2dc191cfbbcdb6534c62b1912c803e6, 564e0bbab9c410e51319c054b15ead0087e58793, f842ad6f54c515880bf9e4c3b6ac387dc0d1dcb4]
+ blackburn	heiko:
+ blackburn	first.py:33: RuntimeWarning: [WARN] FeatureBlockLogisticRegression does not support locking. Autolocking is skipped. Set autolock flag to false to get rid of warning.
+ blackburn	  cross_validation.evaluate().print_result()
+ blackburn	0.500000
+ blackburn	it does print 0.5
+ blackburn	and I get 0.78 actually
+ heiko	oh blackburn, looking at your code thats no surprise
+ heiko	you apply the best parameters to the model *after* you print
+ blackburn	what did I do wrong?
+ heiko	change the two lines
+ heiko	cross_validation.evaluate().print_result()best_parameters.apply_to_machine(lr)
+ blackburn	ohhh I see
+ shogun-buildbot	build #1 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1
+ blackburn	heiko: my bad, thanks
+ heiko	no worries :)
+ shogun-buildbot	build #93 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/93
+ shogun-buildbot	build #103 of deb3 - modular_interfaces started, including [e1db78e59c60dc0111d049dca777eb19762d7e03]
+ shogun-buildbot	build #2 of bsd1 - libshogun started, including [e1db78e59c60dc0111d049dca777eb19762d7e03, 3e19962f1031075d3c4404d50d0b7a4ad36f465f, 76ba56d9a2dc191cfbbcdb6534c62b1912c803e6, 564e0bbab9c410e51319c054b15ead0087e58793, f842ad6f54c515880bf9e4c3b6ac387dc0d1dcb4]
+ shogun-buildbot	build #21 of cyg1 - libshogun started, including [e1db78e59c60dc0111d049dca777eb19762d7e03, 3e19962f1031075d3c4404d50d0b7a4ad36f465f, 76ba56d9a2dc191cfbbcdb6534c62b1912c803e6, 564e0bbab9c410e51319c054b15ead0087e58793, f842ad6f54c515880bf9e4c3b6ac387dc0d1dcb4]
+ blackburn	heiko: it must be funny but it is the first time I use your framework :D
+ heiko	blackburn, really? well, hope it works :D
+ shogun-buildbot	build #21 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/21  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ heiko	Its good when people use it because errors are found
+@sonney2k	that's crazy
+ blackburn	heiko: with my road sign shit I just get proper C and nothing more
+@sonney2k	https://www.youtube.com/watch?v=tvxJs_4m0ZE
+ heiko	its better that you find them instead poeple that try to use shogun
+ blackburn	sonney2k: back to youtube?
+@sonney2k	wiking, can you install glpk on that machine
+ heiko	errrr
+ heiko	sonney2k, have a look at the last error
+ heiko	ah
+ blackburn	heiko: I will use it in my next dirty deals for sure
+ heiko	thats windows
+ heiko	nice
+ heiko	blackburn, yeah :D
+@sonney2k	wiking, quite a bit of stuff is not found - like libjson, superlu, arpack, nlopt, glpk, snappy, bzip2, lzma
+ shogun-buildbot	build #2 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/2
+ CIA-18	shogun: Soeren Sonnenburg master * r7cfd299 / src/shogun/io/AsciiFile.cpp : fix unsigned / signed comparison warning - http://git.io/kogVNg
+ wiking	sonney2k: let's see
+@sonney2k	wiking, if it is easy please install these things
+ wiking	sonney2k: that'll require some ./configure changes imo
+ wiking	sonney2k: e.g. bzip2 is installed ;)
+ wiking	it's part of the system
+@sonney2k	wiking, not the executable
+@sonney2k	the bzip2 headers
+ wiking	as well
+@sonney2k	shogun has support for compressing / uncompressing such stuff
+ wiking	btw arpack96 is good enough?
+ wiking	or arpack-ng would be better?
+@sonney2k	wiking, then have a look at configure.log in that machine
+ blackburn	arpack-ng?
+ blackburn	wiking: 96 should be ok
+@sonney2k	wiking, it is called arpack 3.1.1 here
+ wiking	blackburn: ARPACK-NG is a collection of Fortran77 subroutines designed to solve
+ wiking	large-scale eigenvalue problems. It is a fork of the Rice University
+ wiking	ARPACK, and is jointly-maintained by Debian, Octave, and Scilab.
+ shogun-buildbot	build #102 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/102  blamelist: Soeren Sonnenburg <sonne@debian.org>, Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #104 of deb3 - modular_interfaces started, including [3e19962f1031075d3c4404d50d0b7a4ad36f465f, 76ba56d9a2dc191cfbbcdb6534c62b1912c803e6, 564e0bbab9c410e51319c054b15ead0087e58793, f842ad6f54c515880bf9e4c3b6ac387dc0d1dcb4]
+ wiking	sonney2k: ok then that's arpack-ng ;)
+ blackburn	wiking: ok
+ blackburn	I should get rid of it
+ blackburn	:D
+@sonney2k	blackburn, yoyo!
+ blackburn	sonney2k: what?
+@sonney2k	shogun-buildbot, force build "cyg1 - libshogun" wtf?
+ shogun-buildbot	build #22 of cyg1 - libshogun started, including []
+ shogun-buildbot	build #22 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	heiko, ^ lets retry - my guess it that it was somehow still running while we were killing / restarting the buildmaster
+ heiko	sonney2k, yeah, I though I had broken something again :)
+@sonney2k	heiko, can you do anything about the current crashers?
+ heiko	sonney2k, blackburn, has something changed in context of threads and kernel machines?
+@sonney2k	the real ones I mean
+ heiko	Currently investigating
+@sonney2k	heiko, why? waht?
+ heiko	I have the suspiction that subsets are used /set/unset from multiple threads
+ heiko	which *will* crash
+ heiko	and might explain the error where assertion fails  that there is a different number of labels
+ heiko	any changes in that recently?
+@sonney2k	blackburn,^?
+ blackburn	hm
+@sonney2k	I didn't change anything there
+ blackburn	what did I change is zeroing of result vector
+ blackburn	in case of batch evaluation
+@sonney2k	yeah that was OK I think
+ heiko	ok Ill check a bi tmore
+@sonney2k	blackburn, I don't understand though what we had there initially
+ blackburn	sonney2k: we had no sgvector before here I guess
+@sonney2k	blackburn, yeah but then we should have had the same error...
+ blackburn	sonney2k: if there was calloc before - no
+@sonney2k	            float64_t* output=SG_MALLOC(float64_t, num_vectors);
+@sonney2k	            memset(output, 0, sizeof(float64_t)*num_vectors);
+@sonney2k	that was there before
+ blackburn	sonney2k: then the bug we introduced
+@sonney2k	I actually
+@sonney2k	for some reason I had in mind that sgvector uses CALLOC
+@sonney2k	well
+ shogun-buildbot	build #22 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/22
+@sonney2k	heiko, well try to reproduce it with #threads = 1
+ shogun-buildbot	build #103 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/103  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #98 of deb2 - static_interfaces started, including [e1db78e59c60dc0111d049dca777eb19762d7e03, 3e19962f1031075d3c4404d50d0b7a4ad36f465f, 76ba56d9a2dc191cfbbcdb6534c62b1912c803e6, 564e0bbab9c410e51319c054b15ead0087e58793, f842ad6f54c515880bf9e4c3b6ac387dc0d1dcb4]
+@sonney2k	evaluation_cross_validation_locked_comparison is the only one crashing now
+ heiko	yeh
+ heiko	sonney2k, how to manually set num threads
+ blackburn	heiko: .parallel.set_num_threads(1)
+ heiko	thanks
+ heiko	ok its not thread related
+ shogun-buildbot	build #104 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/104  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #94 of deb1 - libshogun started, including [7cfd2994914132c032d2a729d9a3185657cb57d3]
+ shogun-buildbot	build #98 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/98  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #94 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/94
+ shogun-buildbot	build #99 of deb2 - static_interfaces started, including [7cfd2994914132c032d2a729d9a3185657cb57d3]
+ shogun-buildbot	build #105 of deb3 - modular_interfaces started, including [7cfd2994914132c032d2a729d9a3185657cb57d3]
+ shogun-buildbot	build #3 of bsd1 - libshogun started, including [7cfd2994914132c032d2a729d9a3185657cb57d3]
+ shogun-buildbot	build #23 of cyg1 - libshogun started, including [7cfd2994914132c032d2a729d9a3185657cb57d3]
+ shogun-buildbot	build #99 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/99  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ blackburn	http://www.johndcook.com/blog/2012/07/07/wrong-and-unnecessary/
+ blackburn	sonney2k: that bot thing becomes too verbose I think
+ shogun-buildbot	build #3 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/3
+ shogun-buildbot	build #23 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/23
+ heiko	blackburn, it was you!
+ heiko	I knew it
+ heiko	you are evil! ;)
+ blackburn	heiko: what did I do?
+ heiko	why did you comment out lines 268 ... from KernelMachine?
+ heiko	that breaks apply(CFeatures*)
+ blackburn	damn
+ heiko	and since this example of mine is the only test where this is covered it fails
+ blackburn	it was mistake of mine cause I did that only for test
+ heiko	its alright
+ heiko	Ill put it in again
+ blackburn	 I didn't mean to break your heart
+ blackburn	:D
+-!- blackburn [~blackburn@81.28.187.0] has quit [Quit: Leaving.]
+ heiko	lol ;)
+-!- blackburn [~blackburn@81.28.187.0] has joined #shogun
+ CIA-18	shogun: Heiko Strathmann master * r96f7942 / src/shogun/evaluation/CrossValidation.cpp : added some debug messages - http://git.io/69KaSw
+ CIA-18	shogun: Heiko Strathmann master * r1bc6e55 / src/shogun/evaluation/ContingencyTableEvaluation.cpp : added a proper error message if number of labels are different - http://git.io/yhgktg
+ CIA-18	shogun: Heiko Strathmann master * rc593061 / (3 files in 2 dirs): Merge pull request #632 from karlnapf/master - http://git.io/sQBk3Q
+ CIA-18	shogun: Heiko Strathmann master * r94a6183 / src/shogun/machine/KernelMachine.cpp : removed /* */ to make locked evaluation example work again - http://git.io/IJSdXQ
+ shogun-buildbot	build #95 of deb1 - libshogun started, including [1bc6e550a01be7d531c422edf108dd7cb8236faa]
+ shogun-buildbot	build #95 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/95
+ shogun-buildbot	build #96 of deb1 - libshogun started, including [96f79427c669926dca226b44fba02559a67fac5b, 94a618324be3c5f4d6791372f849904a2e40edfa, c593061648fcc2f3b8908509074d0e8eb702211d]
+ CIA-18	shogun: Sergey Lisitsyn master * r3da93b3 / src/shogun/lib/IndexBlockTree.cpp : Removed root feature from G/ind - http://git.io/ZqwmwQ
+ CIA-18	shogun: Sergey Lisitsyn master * rf39aa5c / src/shogun/lib/slep/slep_logistic.cpp : Commented out gradient and objective value debug prints - http://git.io/mfPotQ
+ shogun-buildbot	build #4 of bsd1 - libshogun started, including [1bc6e550a01be7d531c422edf108dd7cb8236faa]
+ CIA-18	shogun: Sergey Lisitsyn master * rc23a3c1 / src/shogun/modelselection/GridSearchModelSelection.cpp : Made evaluation direction verbose - http://git.io/T00Urw
+ shogun-buildbot	build #24 of cyg1 - libshogun started, including [1bc6e550a01be7d531c422edf108dd7cb8236faa]
+ blackburn	heiko: I can haz a few commits too
+ shogun-buildbot	build #96 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/96
+ shogun-buildbot	build #106 of deb3 - modular_interfaces started, including [1bc6e550a01be7d531c422edf108dd7cb8236faa]
+ heiko	blackburn, say what could be the reason that an example fails during make tests
+ heiko	but works when I run it alone?
+ blackburn	heiko: puzzles?
+ heiko	whats that?
+ blackburn	interesting
+ blackburn	I mean you ask me for puzzle solve
+ blackburn	:D
+ heiko	hehe
+ heiko	amazing
+ heiko	runs with valgrind
+ heiko	but not without
+ blackburn	heiko: I can't mind any reason
+ blackburn	ah no
+ blackburn	that is not so interesting
+ blackburn	it happens often
+ heiko	and no leak
+ heiko	why is that?
+ heiko	actually many many libshogun examples are failing locally here
+ heiko	with that problem
+ heiko	why is it?
+ blackburn	with which problem
+ blackburn	?
+ heiko	/home/heiko/Desktop/shogun/shogun/examples/undocumented/libshogun/modelselection_grid_search_string_kernel.cpp
+ heiko	for example
+ heiko	yeah
+ heiko	valgrind makes it run
+ heiko	but it doesnt without
+ blackburn	heiko: segmentation fault or what?
+ heiko	and I get strange CMap assertion errors
+ heiko	WTF
+ heiko	thats my commetn
+ shogun-buildbot	build #105 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/105  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #100 of deb2 - static_interfaces started, including [1bc6e550a01be7d531c422edf108dd7cb8236faa, 96f79427c669926dca226b44fba02559a67fac5b, 94a618324be3c5f4d6791372f849904a2e40edfa, c593061648fcc2f3b8908509074d0e8eb702211d]
+ shogun-buildbot	build #4 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/4
+ shogun-buildbot	build #5 of bsd1 - libshogun started, including [96f79427c669926dca226b44fba02559a67fac5b, 94a618324be3c5f4d6791372f849904a2e40edfa, c593061648fcc2f3b8908509074d0e8eb702211d]
+ heiko	sonney2k, any idea? an example runs fine with valgrind(no leaks, no errors), but assertion fails without valgrind
+ heiko	sonney2k, also, many examples fail here while they dont on the buildbot
+ heiko	I have 64bit, does anybody else have?
+ heiko	blackburn? ^
+ blackburn	heiko: 64 here
+ heiko	and make tests works?
+ blackburn	let me try
+ shogun-buildbot	build #5 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/5
+ shogun-buildbot	build #24 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/24
+ shogun-buildbot	build #25 of cyg1 - libshogun started, including [96f79427c669926dca226b44fba02559a67fac5b, 94a618324be3c5f4d6791372f849904a2e40edfa, c593061648fcc2f3b8908509074d0e8eb702211d]
+ shogun-buildbot	build #100 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/100
+ shogun-buildbot	build #107 of deb3 - modular_interfaces started, including [96f79427c669926dca226b44fba02559a67fac5b, 94a618324be3c5f4d6791372f849904a2e40edfa, c593061648fcc2f3b8908509074d0e8eb702211d]
+ heiko	blackburn, sonney2k, what do you think of gnu-intend ?
+ blackburn	heiko: never tried but I don't mind to reformat everything
+ heiko	I think that would be an idea, esp. doing it automatically
+ blackburn	heiko: all examples passed
+ heiko	strange!
+ heiko	here, no
+ heiko	do you  have trace-mallocs enabled?
+ heiko	blackburn, ^
+ blackburn	no
+ heiko	mmh
+ heiko	that might be the reason
+ heiko	Ill disable it
+ blackburn	hm CMap?
+ blackburn	I guess it is
+ heiko	yeh
+ heiko	yeah its CMap
+ heiko	runs when I deactivate trace-mallocs
+ heiko	but the valgrind things is even more strange
+ heiko	blackburn, also your example all fail when trace-mallocs is on
+ heiko	do you use CMap?
+ blackburn	no
+ blackburn	trace-mallocs does
+ blackburn	heiko: which mine?
+ heiko	in the embeddings
+ heiko	mmh
+ heiko	Ill recompile and tell you
+ blackburn	argh
+ blackburn	shouldn't be actually
+ shogun-buildbot	build #25 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/25
+ shogun-buildbot	build #106 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/106  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #97 of deb1 - libshogun started, including [3da93b3ce0d4cec8552087c5c8b91c9426cfc06a, f39aa5cb80d23744188634d098881456de6763f4, c23a3c167b150ab6bd0922665e72b5d16fb4992f]
+ shogun-buildbot	build #97 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/97
+ shogun-buildbot	build #108 of deb3 - modular_interfaces started, including [3da93b3ce0d4cec8552087c5c8b91c9426cfc06a, f39aa5cb80d23744188634d098881456de6763f4]
+ shogun-buildbot	build #26 of cyg1 - libshogun started, including [3da93b3ce0d4cec8552087c5c8b91c9426cfc06a, f39aa5cb80d23744188634d098881456de6763f4, c23a3c167b150ab6bd0922665e72b5d16fb4992f]
+ shogun-buildbot	build #6 of bsd1 - libshogun started, including [3da93b3ce0d4cec8552087c5c8b91c9426cfc06a, f39aa5cb80d23744188634d098881456de6763f4, c23a3c167b150ab6bd0922665e72b5d16fb4992f]
+ heiko	blackburn,
+ heiko	./converter_localtangentspacealignment
+ heiko	./converter_hessianlocallylinearembedding
+ heiko	./converter_kernellocaltangentspacealignment
+ heiko	./converter_linearlocaltangentspacealignment
+ heiko	try make tests with --enable-trace_mallocs
+ blackburn	will do
+ shogun-buildbot	build #6 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/6
+ shogun-buildbot	build #26 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/26
+ heiko	will go now, see you tomorrow! bye
+-!- heiko [~heiko@host86-181-154-192.range86-181.btcentralplus.com] has left #shogun []
+@sonney2k	blackburn, so do things fail for you when trace mallocs is on?
+ blackburn	running
+ blackburn	sonney2k: yeah they fail here
+@sonney2k	well ok lets see then
+@sonney2k	blackburn, about KernelMachine.cpp
+@sonney2k	line 263
+@sonney2k	I think it should do init() even if kernel is COMBINED...
+@sonney2k	let me change that
+ shogun-buildbot	build #107 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/107
+ shogun-buildbot	build #101 of deb2 - static_interfaces started, including [3da93b3ce0d4cec8552087c5c8b91c9426cfc06a, f39aa5cb80d23744188634d098881456de6763f4, c23a3c167b150ab6bd0922665e72b5d16fb4992f]
+ CIA-18	shogun: Soeren Sonnenburg master * r3702954 / src/shogun/machine/KernelMachine.cpp : init(lhs,data) even for combined kernel in apply() - http://git.io/-ocBHw
+@sonney2k	blackburn, about the bots - what do you suggest?
+ blackburn	sonney2k: no idea, what can I suggest?
+ shogun-buildbot	build #108 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/108
+ shogun-buildbot	build #109 of deb3 - modular_interfaces started, including [c23a3c167b150ab6bd0922665e72b5d16fb4992f]
+ shogun-buildbot	build #101 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/101
+ shogun-buildbot	build #98 of deb1 - libshogun started, including [3702954a9ef3a0418a7ce4103e2551206191d1fd]
+@sonney2k	blackburn, well we can make the notify us on basically anything or not, e.g. start of the build end of the build
+@sonney2k	only when things fail
+@sonney2k	or when things go from fail -> success
+@sonney2k	etc
+ shogun-buildbot	build #98 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/98
+ shogun-buildbot	build #102 of deb2 - static_interfaces started, including [3702954a9ef3a0418a7ce4103e2551206191d1fd]
+ shogun-buildbot	build #7 of bsd1 - libshogun started, including [3702954a9ef3a0418a7ce4103e2551206191d1fd]
+ shogun-buildbot	build #27 of cyg1 - libshogun started, including [3702954a9ef3a0418a7ce4103e2551206191d1fd]
+ blackburn	sonney2k: I'd like to see notifications only when state changes
+@sonney2k	blackburn, I think we should also get notified as long as things are still broken
+ blackburn	yeah may be
+@sonney2k	otherwise people start to relax even though stuff is broken
+@sonney2k	blackburn, we can have different notifications in IRC and via email btw
+@sonney2k	blackburn, so for IRC you want success -> failure, failure -> success, failure only right?
+@sonney2k	not started, finished, success, exception?
+ blackburn	sonney2k: yeah
+ blackburn	success -> success is not of interest
+ blackburn	exception and not started is rather for you :)
+ shogun-buildbot	build #7 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/7
+@sonney2k	blackburn, nope
+@sonney2k	no one notices if sth is not starting...
+ shogun-buildbot	build #102 of deb2 - static_interfaces is complete: Failure [failed test octave_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/102  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #110 of deb3 - modular_interfaces started, including [3702954a9ef3a0418a7ce4103e2551206191d1fd]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Remote host closed the connection]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	sonney2k: do you mind to change to openmp next week?
+ blackburn	n4nd0: can you invest some time?
+ blackburn	next week, again
+@sonney2k	blackburn, if you can get rid of pthreads and make sure everything is at same speed sure
+ blackburn	sonney2k: no way to make it in one commit but I can start
+ n4nd0	blackburn: tell me
+ blackburn	n4nd0: I'd ask you to help me with openmping
+ n4nd0	blackburn: the only thing I know is that it is something related to multithreading :)
+ blackburn	quite easy
+ n4nd0	blackburn: but it would be cool to learn about it!
+ blackburn	you just declare pragma omp with some parameters
+ n4nd0	blackburn: mmm ok, so tell me more in particular what needs to be done and so
+ blackburn	n4nd0: we have a few classes using pthreads
+ blackburn	all one need is to get it serial first
+ blackburn	and then declare OMP pragma before 'for' statement
+ blackburn	sonney2k: so ok to start?
+ n4nd0	blackburn: has something been ported already so I can take a look?
+ blackburn	n4nd0: yeah it was somewhere in my branches
+ blackburn	I hope I didn't lost it
+ blackburn	yeaaah I didn't!
+ blackburn	would be hard to merge probably now
+ blackburn	let me try
+ blackburn	n4nd0: are you busy right now?
+@sonney2k	blackburn, I prefer one commit for pthread -> openmp - it doesn't really help us to cause new trouble/dependencies
+ blackburn	sonney2k: are you kidding?
+@sonney2k	and I really don't know if we can change *everything* to be as fast as it was with pthreads
+@sonney2k	blackburn, no
+@sonney2k	http://www.legoturingmachine.org/
+ blackburn	it helps us
+ blackburn	lesser code is better
+@sonney2k	blackburn, of course but the whole purpose of parallelizing things is that it gets faster
+ blackburn	sonney2k: openmp *can't* be slower
+@sonney2k	and I failed back then with openmp
+ blackburn	with proper options
+@sonney2k	haha
+@sonney2k	create a branch for that and push it / and keep it regularly in sync
+ blackburn	sonney2k: I already tested CDistance and openmp is even slightly faster
+@sonney2k	but one push to master for that
+ blackburn	hmmm ok I don't mind separate branch
+@sonney2k	that is no guarantee that it works on the other stuff too
+ n4nd0	blackburn: yeah sorry, I am trying to buy plane tickets to Spain
+ blackburn	heh
+ n4nd0	blackburn: I will be back here in a few minutes
+ blackburn	going to spain?
+ n4nd0	blackburn: some days in August yeah
+@sonney2k	blackburn, I recall doing the ocas parallelization with openmp and it was just slow
+@sonney2k	all CPUs had 100% load
+@sonney2k	but no speedup
+ blackburn	sonney2k: did you use nowait, dynamic schedule?
+ blackburn	with different scheduling routines I've got different results
+@sonney2k	no idea - did that about 7 years ago...
+@sonney2k	blackburn, but I really think that now that n4nd0, pluskid etc have some .pdf - documentation is much more important right now
+ blackburn	wellllllll
+ blackburn	try to push them then :D
+@sonney2k	blackburn, they did the work already
+@sonney2k	so we are waiting for your shogun-doc git repo to merge the stuff
+ blackburn	ok I'll come up with template and start to merge then
+@sonney2k	thanks
+ blackburn	sonney2k: but I remember you didn't like the book idea
+ blackburn	what has changed?
+@sonney2k	what?
+@sonney2k	I said that for a book it needs some person pushing it for probably 2 years
+ blackburn	who is that person then?
+@sonney2k	no idea? you?
+ blackburn	:D
+@sonney2k	but this here is about to have *some* documentation that is more user friendly
+@sonney2k	blackburn, if you manage to get the others into the boat then it might be possible to keep it up-to-date
+@sonney2k	otherwise what we have (documentation in the code) is the only thing that will remotely be up-to-date
+ blackburn	sonney2k: should tutorial be submodule of shogun?
+ shogun-buildbot	build #12 of nightly_all is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/12
+ n4nd0	blackburn: all right, I am all yours now :)
+ n4nd0	I hate buying plane tickets by the way...
+ blackburn	n4nd0: hmm
+ blackburn	n4nd0: as sonney2k denied pushing to master I should think how should we proceed
+ n4nd0	blackburn: ok
+ n4nd0	blackburn: we can have a branch where we work
+ n4nd0	blackburn: I can checkout yours maybe
+ blackburn	n4nd0: you may help me with benchmark
+ n4nd0	blackburn: sure
+ n4nd0	blackburn: what plan do you have in mind?
+ blackburn	n4nd0: I need some snippet to test performance of Kernel and Distance now
+ n4nd0	blackburn: any kernel? to compare with and without multithreading or?
+ blackburn	meanwhile I'll try to merge conflicts from my earlier work
+ blackburn	n4nd0: just with 1,2,4 threads, Linear and Euclidean I think
+ blackburn	but a few times
+ blackburn	to make sure it is stat. significant :D
+ shogun-buildbot	build #17 of nightly_default is complete: Failure [failed updatedoc]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/17
+@sonney2k	blackburn, you can use a remote branch just not master
+@sonney2k	blackburn, re tutorial makes sense
+ blackburn	sonney2k: yes sure
+ shogun-buildbot	build #15 of nightly_none is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/15
+ shogun-buildbot	build #103 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/103
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Ping timeout: 245 seconds]
+--- Log closed Mon Jul 09 00:00:17 2012

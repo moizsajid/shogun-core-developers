@@ -1,0 +1,339 @@
+--- Log opened Thu Sep 27 00:00:17 2012
+-!- in3xes_ [~in3xes@122.174.90.177] has quit [Ping timeout: 252 seconds]
+ shogun-buildbot	build #115 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/115
+-!- blackburn [~blackburn@188.168.14.95] has joined #shogun
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has joined #shogun
+-!- blackburn [~blackburn@188.168.14.95] has quit [Quit: Leaving.]
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has quit [Ping timeout: 265 seconds]
+-!- heiko1 [~heiko@p4FED538D.dip.t-dialin.net] has joined #shogun
+-!- heiko1 [~heiko@p4FED538D.dip.t-dialin.net] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~blackburn@188.168.4.185] has joined #shogun
+-!- heiko1 [~heiko@p4FED538D.dip.t-dialin.net] has joined #shogun
+-!- heiko1 [~heiko@p4FED538D.dip.t-dialin.net] has quit [Ping timeout: 248 seconds]
+-!- heiko1 [~heiko@p4FED538D.dip.t-dialin.net] has joined #shogun
+ heiko1	blackburn around?
+ blackburn	heiko1: hey, yes
+ heiko1	I have another problem with c++ (many these days)
+ heiko1	I want to make a subclass of a templated class
+ heiko1	in particular, subclass of CSTreamingDeanseFeatures<T>
+ heiko1	template <class T>
+ heiko1	class CStreamingDenseDataGenerator: public CStreamingDenseFeatures<T>
+ heiko1	but that doesnt work
+ heiko1	a) I cannot access members of CStreamingDenseFeatures in methods of CStreamingDenseDataGenerator<T>
+ heiko1	b) shogun doesnt recognise the new class as generic so compiling class_list.cpp fails
+ heiko1	any ideas?
+ heiko1	blackburn, weird problem
+ blackburn	hmm
+ blackburn	yeah pretty weird
+ heiko1	man no idea  :)(
+ heiko1	:(
+-!- ptizoom [55d25a64@gateway/web/freenode/ip.85.210.90.100] has joined #shogun
+ blackburn	heiko1: about a) - does it compile?
+ heiko1	yes
+ heiko1	only b) fails to compile
+ heiko1	oh sorry
+ heiko1	no
+ heiko1	complains that the member elements are not known
+ heiko1	ah but I can avoid this using
+ heiko1	CStreamingDenseDataGenerator<T>::member_name
+ heiko1	still b)
+ heiko1	in class list, generic classes are instanciated via this switch thing
+ heiko1	that is automatically generated for generic classes
+ heiko1	but for this subclass, htis doesnt happen
+ blackburn	did you instantiate your new class?
+ blackburn	in cpp
+ ptizoom	hi, I am looking into associating PDL and Shogun (by replacing numpy). I am progressing slowly...I have some framework (which is not yet compiling), but is it possible to have a development git-branch ?
+ blackburn	ptizoom: I am unsure I got what you mean
+ blackburn	dev git branch of shogun?
+ ptizoom	blackburn: is shogun under the git?
+ blackburn	well, yes
+ blackburn	but you may commit everything you want in your fork
+ heiko1	blackburn, how do you mean that?
+ ptizoom	is it easy to get a writting branch from the project?
+ heiko1	ptizoom, that takes a while, but as blackburn said, you can just push everything into your fork and then send pull-requests. We then review these, give feedback, and evtl. merge
+ heiko1	blackburn, its an error in the class_list.py script
+ heiko1	I tuned it manually and now it compiles
+ blackburn	ptizoom: yeah pretty easy
+ blackburn	ah heiko1 answered
+ blackburn	:)
+ blackburn	heiko1: how does class_list.py check whether it is a template?
+ heiko1	blackburn, currently checking
+ ptizoom	heiko1: cool
+ heiko1	blackburn, is there any problem with subclassing templated classes?
+ heiko1	I not get weird errors
+ heiko1	for example when trying to create an instance I get
+ heiko1	undefined reference to `shogun::CStreamingDenseDataGenerator<double>::CStreamingDenseDataGenerator()'
+ heiko1	which is totally weird since the definition is there
+ heiko1	why is c++ alway such a horror when it comes to certain things
+ blackburn	heh
+ heiko1	this is so annoying, I am wasting my time with this stupid stuff where all I want is a generic subclass
+ heiko1	cant be that difficult
+ blackburn	so it fails to find implementation?
+ heiko1	iyes
+ blackburn	can you paste the code somewhere?
+ heiko1	yes, will do
+ heiko1	http://pastebin.com/QSqaGBte
+ heiko1	http://pastebin.com/FRCFrbMc
+ heiko1	first error you get should be class_list.cpp
+ heiko1	I think its related to pure virtual functions
+ heiko1	and that inheritance of templated classes doesn not give superclasses elements
+ heiko1	(which would explain the pure virtual methods and the non-accessability of superclass members)
+ heiko1	blackburn, any ideas?
+ blackburn	a minute
+ heiko1	blackburn, leaving now, if you would find something that was amazing :)
+ blackburn	heiko1: sorry got distracted
+ heiko1	no worries
+ blackburn	let me check now, I'll let you know
+ heiko1	cool, thx
+ heiko1	ill check back in 15 mins in case something is missing to test it
+ blackburn	heiko1: I think you have to instantiate using
+ blackburn	template class CStreamingDenseDataGenerator<bool>;
+ blackburn	etc
+ blackburn	in .cpp
+ blackburn	see DenseFeatures.cpp for example
+-!- audy [~audy@heyaudy.com] has quit [Changing host]
+-!- audy [~audy@unaffiliated/audy] has joined #shogun
+ heiko1	blackburn, no that doesnt work
+ heiko1	have you tried it?
+ heiko1	blackburn, compiler complains about non-pure virtual methods
+ blackburn	hmm do you have some pure virtual methodds around?
+ blackburn	I can't see any
+ heiko1	no
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+ heiko1	it complains about all the pure virtual methods from CStreamingFetaures that are imeplemented in CStreamingDenseFeatures
+ heiko1	but these are for some reason not visible in the subclass
+ blackburn	heiko1: did you try forward declaration of streaming dense feats?
+ heiko1	blackburn, what is that?
+ blackburn	template <class ST> class CStreamingDenseFeatures;
+ blackburn	before definition in *.h
+ heiko1	ah sorry ok, Ill try
+ blackburn	yeah C++ is pain..
+ heiko1	blackburn, no doesnt change anything
+ blackburn	damn
+ heiko1	but makes sense since the header is included above
+ heiko1	yeah man, c++ and OO is so annoying sometimes
+ heiko1	no interfaces, no generics
+ heiko1	I need these all the time :D
+ heiko1	blackburn, Ill update the listings, have you tried to compile them?
+ blackburn	no, not yet
+ blackburn	let me try then
+ heiko1	would be nice ofyou
+ blackburn	base/class_list.cpp:414:103: error: expected type-specifier before 'CStreamingDenseDataGenerator'
+ blackburn	is that you get?
+ heiko1	yes
+ heiko1	you can get around that
+ heiko1	via searching for CStreamingDenseDataGenerator in class_list.cpp
+ heiko1	and then cut the line and replace it by a block that is similar to the other templated classes, e.g. CDenseFeatures
+ heiko1	with a switch over the types
+ blackburn	heh yeah but we should rather fix class_list thing
+ heiko1	no
+ blackburn	http://www.youtube.com/watch?v=_cG7ZVBXQII&feature=player_detailpage watch that video meanwhile
+ blackburn	:D
+ heiko1	it doesnt solve the problem untimately
+ heiko1	cut the line
+ heiko1	static CSGObject* __new_CStreamingDenseDataGenerator(EPrimitiveType g) { return g == PT_NOT_GENERIC? new CStreamingDenseDataGenerator(): NULL; }
+ heiko1	and replace it by a block that you can find from line 753 ...
+ heiko1	lol the video is great .)
+ blackburn	but why does it treat your class as not templated?
+ heiko1	I think its because of the templates doing something wrong
+ heiko1	blackburn, there is another problem even before the class_list
+ heiko1	if you add
+ heiko1	template class CStreamingDenseDataGenerator<bool>; in the last line of the .cpp file
+ heiko1	it doesnt compile already
+ blackburn	lol! you've got to make it one line
+ heiko1	due to these pure virtual function
+ heiko1	?
+ blackburn	 32 template <class T> class CStreamingDenseDataGenerator: public CStreamingDenseFeatures<T>
+ blackburn	this way
+ blackburn	not two liner
+ blackburn	class_list solved then
+ heiko1	what???
+ heiko1	argh
+ blackburn	okay lets get to undefined reference problem
+ heiko1	since python is line based
+ blackburn	not a python but the class_list.cpp.py thing
+ heiko1	do you now also get the undefined references?
+ blackburn	yeah
+ heiko1	These can be solved by adding the lines
+ blackburn	work work sleep then work
+ blackburn	:D
+ heiko1	template class CStreamingDenseDataGenerator<bool>;
+ heiko1	etc
+ heiko1	but then another error appears
+ blackburn	okay let me get to next error in our funny journey
+ heiko1	what do you think of this one?
+ blackburn	features/StreamingDenseDataGenerator.cpp:16:35: error: type 'shogun::CStreamingDenseDataGenerator<bool>' is not a direct base of 'shogun::CStreamingDenseDataGenerator<bool>'
+ heiko1	yeah
+ heiko1	that
+ blackburn	hhhaha
+ blackburn	okay do not blame C++, it is you :)
+ blackburn	check your constructor carefully
+ blackburn	you kinda calling it itself again
+ blackburn	however other errors stay :D
+ heiko1	aaaa
+ heiko1	no
+ heiko1	i already fixed the others
+ heiko1	copy paste -.-
+ blackburn	hehe
+ heiko1	man
+ heiko1	thanks a lot
+ heiko1	guess i have been starring to the monitor too much
+ blackburn	lets dance north korean style
+ blackburn	kim jong style
+ blackburn	:D
+ heiko1	would never have found this
+ heiko1	yeah, go :D
+ heiko1	yep works now
+ blackburn	I absolutely love this country btw, would love to visit they
+ blackburn	but too scary
+ blackburn	:D
+ heiko1	why do you love it?
+ blackburn	it is like they freezed soviet union in 60s
+ blackburn	so funny and crazy
+ heiko1	soyou like that retroish style :)
+ heiko1	you should get a lomography camera then :)
+ blackburn	hah one friend of mine has a few
+ heiko1	http://microsites.lomography.com/stores/gallery-stores/east-london
+ heiko1	my girlfriend has a a few
+ heiko1	they make cool phoos
+ heiko1	tos
+ blackburn	his photos look like this: http://cs9220.userapi.com/u596778/146498181/z_8d525488.jpg
+ heiko1	yeah
+ heiko1	ohoh
+ heiko1	there are more errors
+ heiko1	warnings:
+ heiko1	inline-Funktion >>shogun::EFeatureType shogun::CStreamingDenseFeatures<T>::get_feature_type() const [with T = long double]<< verwendet, aber nirgendwo definiert
+ heiko1	bla used but not defined
+ blackburn	hahahha
+ blackburn	haha
+ blackburn	that's why you didn't paste
+ blackburn	errors
+ blackburn	:D
+ heiko1	and these are exactly the pure virtual methods that are imeplemented in CStreamingDenseFeatures
+ heiko1	you got it :)
+ blackburn	hmm
+ blackburn	aber nirgendwo definiert!
+ blackburn	:D
+ heiko1	thats: but nowhere defined :)
+ blackburn	I know only what GmbH is
+ blackburn	gesselschaft mit beschraenkter haftung!
+ heiko1	what is also strange: have a look at CStreamingDenseFeatures
+ blackburn	obschestvo s ogranichennoy otvetstvennostyu
+ heiko1	there is an element current_sgvector
+ blackburn	not that shorter in russian, lol
+ heiko1	but I cannot access that from my new class, compile error
+ heiko1	Russion looks mess
+ heiko1	y
+ heiko1	and its beschr?????nkter )
+ blackburn	yeah, I thought ae works too
+ heiko1	yeah it does
+ blackburn	lets see updated code then
+ heiko1	I will create another pastebin
+ blackburn	heiko1: btw I am now developing the ideal machine learning environment (TM)
+ heiko1	http://pastebin.com/JiM2S6vU
+ blackburn	check one idea
+ heiko1	http://pastebin.com/mMhQVMtG
+ heiko1	Ill check
+ blackburn	heiko1: https://gist.github.com/3795078
+ heiko1	btw I renamed the variable to current_vector in my code-base
+ blackburn	briefly - all the things that happen to 'context' variables are going to be serialized
+ blackburn	but that's all transparent and you don't care about that
+ heiko1	but thats python only or?
+ blackburn	yeah sure
+ blackburn	such madness can't happen in any normal language
+ heiko1	:)
+ blackburn	do you like the idea?
+ blackburn	my other extension is
+ blackburn	with operation('reading files') as context:context.train_data = numpy.loadtxt('train.csv',delimiter=",",skiprows=1)context.test_data = numpy.loadtxt('test.csv',delimiter=",",skiprows=1)
+ blackburn	argh
+ blackburn	with operation('reading files') as context:
+ blackburn	context.train_data = numpy.loadtxt('train.csv',delimiter=",",skiprows=1)
+ blackburn	context.test_data = numpy.loadtxt('test.csv',delimiter=",",skiprows=1)
+ blackburn	context.train_data is going to be saved and then serialized to file
+ blackburn	after with block
+ blackburn	I am thinking about a way to load it from serialized automatically as well
+ heiko1	yeah I mean, thats all the magic of pickle
+ heiko1	nice, like it
+ blackburn	yes, it is easy
+ blackburn	the thing I am trying to reach
+ heiko1	though its not really shogun-ish since only works in one binding
+ blackburn	is transparency of such operations like measuring time
+ blackburn	or serialization
+ heiko1	transparency?
+ blackburn	or rather implicit way
+ blackburn	I mean I want to save everything without calling anything
+ heiko1	yeah, thats great use
+ blackburn	have you seen patterns for ML article?
+ heiko1	no
+ heiko1	where ?
+ blackburn	http://arkitus.com/PRML/
+ heiko1	doing that all the time anyway :)
+ blackburn	yes, thats the spirit
+ blackburn	features/streaming/StreamingDenseDataGenerator.cpp:75:68: error: invalid conversion from 'const char*' to 'int32_t {aka int}' [-fpermissive]
+ blackburn	../shogun/base/Parameter.h:206:21: error:   initializing argument 1 of 'shogun::TParameter* shogun::Parameter::get_parameter(int32_t)' [-fpermis
+ blackburn	that's what I get
+ heiko1	ah year
+ heiko1	I added stuff
+ heiko1	wait, I will push that quicklly
+ blackburn	heiko1: btw are you using vim?
+ heiko1	no, why?
+ blackburn	just curious
+ blackburn	I argue with my team lead at job every day :D
+ heiko1	blackburn, you can just comment that line  75
+ blackburn	I am a vim guy, he says sth like GUI rocks
+ heiko1	no I actually use eclipse
+ heiko1	like browsing around in the code by mouse
+ blackburn	I see
+ blackburn	looks like it appears to compile then
+ heiko1	yeah
+ heiko1	but change something and compile again:
+ heiko1	warnings
+ blackburn	yeah, I get quite a lot warnings
+ heiko1	these are strange
+ heiko1	because the methods are all implemented in superclass
+ heiko1	(in fact, thats why I derived)
+ blackburn	probably we have some other glitch around there
+ blackburn	gangnam style!
+ blackburn	woop woop woop woop
+ heiko1	?
+ blackburn	:D
+ heiko1	code works apart from these warnings btw :)
+ blackburn	can't see nothing wrong
+ blackburn	walking kim jong style
+ heiko1	:D
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	wiking: around?
+ blackburn	n4nd0 entered room kim jong style
+ n4nd0	haha why?
+ blackburn	http://www.youtube.com/watch?v=_cG7ZVBXQII&feature=player_detailpage
+ n4nd0	blackburn: any news about your interview?
+ blackburn	n4nd0: no, nothing yet
+ blackburn	they have to come up with a reject message :D
+ n4nd0	I bet you don't believe that ;)
+ blackburn	no I really believe I am not that cool :)
+-!- heiko1 [~heiko@p4FED538D.dip.t-dialin.net] has left #shogun []
+ wiking	n4nd0: yes
+ n4nd0	wiking: how is it going using the SO framework?
+ n4nd0	blackburn: do you know if the post-gsoc post came eventually to life?
+ n4nd0	post-gsoc post haha
+ n4nd0	funny name
+ blackburn	you mean t-shirt thing?
+ blackburn	iirc it should arrive before 30th
+ n4nd0	no no
+ n4nd0	the post
+ n4nd0	sonney2k asked for help for a post and I sent him by mail one
+ n4nd0	a couple of weeks ago he said he'd started fixing it
+ wiking	n4nd0: i've got convergence with bmrm
+ blackburn	ahh
+ blackburn	heh
+ blackburn	well no idea
+ n4nd0	wiking: really? I think you should actually get the same solution as with PrimalMosek
+ wiking	yeah
+ wiking	my problem is/was really the memory consumption
+ wiking	of mosek
+ n4nd0	oh sorry I misunderstood. for some strange reason I thought I read that it didn't converge with bmrm
+ n4nd0	I don't know if I screw sth up with my code using mosek
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 240 seconds]
+-!- blackburn [~blackburn@188.168.4.185] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 248 seconds]
+--- Log closed Fri Sep 28 00:00:17 2012

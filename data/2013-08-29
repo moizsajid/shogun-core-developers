@@ -1,0 +1,1092 @@
+--- Log opened Thu Aug 29 00:00:35 2013
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 245 seconds]
+-!- travis-ci [~travis-ci@ec2-54-224-40-163.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/10723750
+-!- travis-ci [~travis-ci@ec2-54-224-40-163.compute-1.amazonaws.com] has left #shogun []
+-!- hushell [~hushell@c-98-232-178-161.hsd1.or.comcast.net] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- travis-ci [~travis-ci@ec2-54-225-5-139.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/10725189
+-!- travis-ci [~travis-ci@ec2-54-225-5-139.compute-1.amazonaws.com] has left #shogun []
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving.]
+-!- foulwall [~user@2001:da8:215:6901:a071:8f2f:8c28:627a] has joined #shogun
+ foulwall	ping sonne|work sonne|osx sonney2k
+-!- sonne|osx [~sonne@f053046168.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- hoijui [~hoijui@dslb-088-074-118-145.pools.arcor-ip.net] has joined #shogun
+-!- sonne|osx [~sonne@89.204.139.63] has joined #shogun
+ sonne|osx	foulwall: hey
+ sonne|osx	foulwall: please don't always hide from us - be in IRC :)
+ foulwall	sonne|osx, my irc client did not do auto reconnect:(
+ sonne|osx	foulwall: well use one that does :)
+ sonne|osx	foulwall: anyway
+ sonne|osx	foulwall: do you remember the multi class demo from the beginning?
+ sonne|osx	foulwall: we just realized that this is still using the old code david did. Please convert it to your framework and get rid of davids old code
+ sonne|osx	gsomix__: moin moin!
+ foulwall	sonne|osx, ok, I'll rewrite them this afternoon, but I'll finish the mldata downloading first. I'll send a pull request on mldata downloader this afternoon.
+ gsomix__	sonne|osx, hey.
+ sonne|osx	foulwall: ok thanks!
+ sonne|osx	gsomix__: now that the ascii stuff works what would you want to do next?
+ gsomix__	sonne|osx, protobuf
+ sonne|osx	gsomix__: ok so how much do you know already about it?
+ sonne|osx	gsomix__: maybe I just explain quickly
+ sonne|osx	gsomix__: you need to define a .proto file
+ sonne|osx	that is similar to a struct in C
+ gsomix__	sonne|osx, will be fine. please, explain.
+ sonne|osx	where you define what is to be saved
+ sonne|osx	then this file can be compiled into C code
+ sonne|osx	and for saving you will then fill the structs provided in this C code
+ sonne|osx	and then there is some function that gives you a byte array
+ sonne|osx	that you can then dump to disc
+ sonne|osx	as you can see the problem is that you need basically everything extra in memory
+ sonne|osx	so it is not meant to store e.g. a full SGMatrix at once
+ sonne|osx	but rather chunks of the matrix
+ sonne|osx	anyway
+ sonne|osx	lets start with a simple protobuf file for a vector
+ sonne|osx	you have 2 fields (for now)
+ sonne|osx	{ int64 length = 1; repeated double vector = 2; }
+ sonne|osx	the 1 and 2 here are identifiers
+ sonne|osx	you then get the protobuf tools
+ sonne|osx	and compile that file with protoc
+ sonne|osx	and then just try for once to fill in the data
+ sonne|osx	gsomix__: after that is done you are basically ready and we will define protobuf files for all of what CFile supports (yes for all datatypes like int etc).
+ gsomix__	sonney2k, ok, got it.
+ gsomix__	sonne|osx,
+ sonne|osx	gsomix__: later we can make things more efficient
+ sonne|osx	by saving multiple chunks
+ sonne|osx	i.e. instead of saving the whole vector
+ sonne|osx	you save say only a 1MB chunk of the vector
+ sonne|osx	and then append another etc
+ sonne|osx	for that to work you need a header
+ sonne|osx	that says how big the chunk is
+ sonne|osx	and another header saying how big the vector really is
+ sonne|osx	and well it makes sense to have another header saying which format version this is
+ sonne|osx	so we can change things later if we want
+ sonne|osx	gsomix__: ok?
+ gsomix__	sonne|osx, ok. need little time for comprehension :)
+ gsomix__	simple protobuf file for vector vector first
+ sonne|osx	well ask whe you have Qs
+ sonne|osx	oki gtg be back soon
+-!- sonne|osx [~sonne@89.204.139.63] has quit [Quit: sonne|osx]
+-!- foulwall` [~user@2001:da8:215:6901:47b:de83:2dac:7945] has joined #shogun
+-!- foulwall [~user@2001:da8:215:6901:a071:8f2f:8c28:627a] has quit [Ping timeout: 264 seconds]
+ sonne|work	gsomix__: RE
+ gsomix__	sonne|work, ?
+ sonne|work	gsomix__: RE == back
+ sonne|work	gsomix__: so questions?
+ gsomix__	many, many sonne's...
+ gsomix__	sonne|work, not yet
+-!- hoijui [~hoijui@dslb-088-074-118-145.pools.arcor-ip.net] has quit [Quit: Leaving]
+-!- foulwall` [~user@2001:da8:215:6901:47b:de83:2dac:7945] has quit [Ping timeout: 264 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: hushell :develop * 578f0f9 / / (19 files): https://github.com/shogun-toolbox/shogun/commit/578f0f973da81899df634f5bcbb90b84e2f267c0
+ shogun-notifier-	shogun: fix initialization bugs of factorgraph stuffs
+ shogun-notifier-	shogun: Fernando Iglesias :develop * fe9d502 / / (19 files): https://github.com/shogun-toolbox/shogun/commit/fe9d5022d517dc431a8cb53a9dd8401b5182c599
+ shogun-notifier-	shogun: Merge pull request #1476 from hushell/dev_bugs
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fix initialization bugs of factorgraph stuffs
+ shogun-buildbot	build #1559 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1559  blamelist: hushell <hushell@hushell-U510.(none)>
+ shogun-buildbot	build #1560 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1560  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- foulwall` [~user@2001:da8:215:6901:47b:de83:2dac:7945] has joined #shogun
+-!- foulwall` [~user@2001:da8:215:6901:47b:de83:2dac:7945] has left #shogun []
+-!- foulwall` [~user@2001:da8:215:6901:47b:de83:2dac:7945] has joined #shogun
+ shogun-buildbot	build #1644 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1644
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has quit [Quit: Leaving.]
+ shogun-buildbot	build #1023 of rpm1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/1023  blamelist: hushell <hushell@hushell-U510.(none)>
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:8181:8528:e5a1:bac7] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	good morning guys
+ shogun-buildbot	build #1344 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1344  blamelist: hushell <hushell@hushell-U510.(none)>
+ shogun-buildbot	build #1645 of deb3 - modular_interfaces is complete: Failure [failed install test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1645  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- van51 [~van51@ppp-94-66-64-167.home.otenet.gr] has joined #shogun
+-!- foulwall` [~user@2001:da8:215:6901:47b:de83:2dac:7945] has quit [Ping timeout: 264 seconds]
+ shogun-buildbot	build #1024 of rpm1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/1024  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #1345 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1345  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- HeikoS [~heiko@nat-176-200.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	sonne|work: around?
+ sonne|work	HeikoS: y
+@HeikoS	sonne|work: so if we do a connection flight
+@HeikoS	its as cheap as 534 return p.P.
+@HeikoS	over minneapolis
+@HeikoS	but takes quite a bit longer
+@HeikoS	oh
+@HeikoS	just found another cheap one
+@HeikoS	direct
+ lisitsyn	HeikoS: what's the route for you?
+@HeikoS	lisitsyn: london -> SFO
+ lisitsyn	ah directly
+@HeikoS	sonne|work: so there is one for 544 pounds directly london sfo
+ lisitsyn	I will have KUF -> SVO -> JFK -> SFO
+ lisitsyn	:D
+@HeikoS	LHR->SFO 1035->1335        SFO->LHR 13:00->7:10       for 544 each
+@HeikoS	lisitsyn: oh man
+ lisitsyn	HeikoS: but that's just 1000$
+ lisitsyn	both back and forth
+@HeikoS	lisitsyn: stressfull :)
+@HeikoS	ah cool
+@HeikoS	thats good
+ lisitsyn	yeah really cheap
+ lisitsyn	I guess moscow -> sfo is way too long way
+ sonne|work	HeikoS: don't get it ... what is the total? FLight I looked up where about 700-800 back and forth :)
+@HeikoS	sonne|work: so if you would be in london LHR by 9 everythign is fine
+@HeikoS	sonne|work: 544 return each
+ lisitsyn	HeikoS: do you want to share a flight?
+ sonne|work	HeikoS: return means LHR->SFO & SFO->LHR?
+@HeikoS	sonney2k: yes, that are 636 euros
+@HeikoS	expedia
+@HeikoS	sonne|work: a flight to london should be cheap, less than 100
+ sonne|work	ok so I would maybe pay 300 or so to get to LHR and back
+@HeikoS	sonne|work: no thats much less
+@HeikoS	I fly to Germany often, its usually under 100 euros for two people
+ lisitsyn	HeikoS: lucky you
+@HeikoS	sonne|work: so go together or seperate?
+@HeikoS	sonne|work: also fine with seperate that might be cheaper
+ lisitsyn	I go to us embassy *by train* and it is more than 100euros for me alone
+ lisitsyn	:D
+@HeikoS	lisitsyn: oh man sweet
+ lisitsyn	HeikoS: not really :) that's too much
+ lisitsyn	HeikoS: comparing to your london - germany trips for 100 euros
+@HeikoS	lisitsyn: for two :D
+ lisitsyn	yeah
+ lisitsyn	HeikoS: unhealthy prices
+@HeikoS	lisitsyn: but keep in mind its very close
+@HeikoS	by car would be just 5 hours
+ sonne|work	HeikoS: well book this flight, give me the details and I try to get the same one!
+ lisitsyn	HeikoS: hmm true
+ sonne|work	HeikoS: it is friday to friday right?
+@HeikoS	sonne|work: I will send you the dates
+ sonne|work	HeikoS: I cannot go earlier (no more holidays)
+@HeikoS	sonne|work: not sure what you mean, shall I book for me only?
+ sonne|work	HeikoS: ???
+ sonne|work	HeikoS: you book for you
+ sonne|work	from fr -> fr
+ sonne|work	and then I book the same flight when I have the details
+@HeikoS	I see,
+ lisitsyn	HeikoS: when will you arrive?
+ sonne|work	lisitsyn: I hope there will still be seats so you could join aswell
+@HeikoS	sonne|work: arriving on sat is also fine right? (flight is at 1300)
+ sonne|work	no
+ sonne|work	Friday evening is the first pool party & reception
+ lisitsyn	sonne|work: oh moscow -> london is not cheap
+@HeikoS	sonne|work: return sorry
+ sonne|work	HeikoS: these are the events you get to know most people
+@HeikoS	sonne|work: was a typo I meant return
+ sonne|work	HeikoS: I think when we leave friday evening we will be back on saturday evening
+@HeikoS	ok
+@HeikoS	sonne|work: lisitsyn Ill send you a meail with the flight dates soon to double check, and if you give OK I will book
+ sonne|work	you know kids... 1 week is already very long
+ lisitsyn	HeikoS: I think I'll go separate - I checked moscow -> london and it is already way too expensive
+ sonne|work	HeikoS: please in messenger I dont' read mail at work
+@HeikoS	ok
+ lisitsyn	HeikoS: moscow -> new york is better for me
+ sonne|work	lisitsyn: how much is it to go to SFO for you?
+ lisitsyn	sonne|work: 1000$
+ sonne|work	lisitsyn: ok about the same
+ lisitsyn	sonne|work: that's samara->moscow->new york->san francisco
+ lisitsyn	and back
+ sonne|work	lisitsyn: try to be in SFO around 13:30 :)
+@HeikoS	18 October 2013 
+@HeikoS	LHR 10:35 -> SFO 13:35
+@HeikoS	UNITED 900
+ sonne|work	so we can all share the same flight
+ lisitsyn	sonne|work: yes that's what I wanted to ask
+@HeikoS	I will book now
+ sonne|work	err car
+ lisitsyn	sonne|work: friday 13:30
+ lisitsyn	right?
+ sonne|work	lisitsyn: yes
+ sonne|work	what heiko just posted
+ lisitsyn	ok thanks let me find something
+@HeikoS	and reutnr
+@HeikoS	25 October 2013
+@HeikoS	SFO 13:00 -> LHR 07:10 (arrives 26 October)
+@HeikoS	UNITED 900
+@HeikoS	sorry UNITED 901
+@HeikoS	I found this on expedia
+ sonne|work	HeikoS: I wouldn't mind to go back later in the day
+@HeikoS	ok checking
+ sonne|work	if there is a flight of course
+@HeikoS	1805?
+ sonne|work	sounds good
+@HeikoS	arrives 1215 next day sat
+ sonne|work	k
+@HeikoS	18 October 2013
+@HeikoS	LHR 10:35 -> SFO 13:35
+@HeikoS	UNITED 900
+@HeikoS	25 October 2013
+@HeikoS	SFO 18:05 -> LHR 12:15 (arrives 26 October)
+@HeikoS	Lufthansa 9379 Operated by UNITED AIRLINES
+@HeikoS	both direct
+ sonne|work	lufthansa even?
+@HeikoS	yep
+@HeikoS	operated by united
+@HeikoS	same price
+@HeikoS	544
+@HeikoS	expedia special price
+@HeikoS	ok booking
+@HeikoS	canellation insurance? :)
+ lisitsyn	I can go lufthansa but it is ~40K roubles
+ lisitsyn	like 1300$
+@HeikoS	ok i booked
+ sonne|work	cheapest flight here is txl->fra->sfo with lufthansa
+ sonne|work	696 EUR
+@HeikoS	hey cool I can choose seats
+ sonne|work	HeikoS: found the flight
+ sonne|work	823 with lufhansa over london
+@HeikoS	from berlin?
+ sonne|work	yes
+@HeikoS	sounds good
+ sonne|work	yes agreed
+@HeikoS	Ill send you a screen which seat I chose
+@HeikoS	41G
+@HeikoS	in both flights
+@HeikoS	ok sweet
+ sonne|work	HeikoS: I cannot book just now. Need to do some logistics with parents, gf, kids first
+@HeikoS	sonne|work: ok
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ sonne|work	HeikoS: email me the details and I will hopefully book tonight
+@HeikoS	sent to you and lisitsyn
+ sonne|work	HeikoS: kthx
+ lisitsyn	HeikoS: thanks
+ lisitsyn	HeikoS: sonne|work: I am having troubles with finding a flight that arrives before you
+@HeikoS	lisitsyn: if you arrive one day earlier you can stay at my place
+ lisitsyn	HeikoS: what place?
+ sonne|work	lisitsyn: when would you arrive?
+@HeikoS	I live in London remember?
+ lisitsyn	HeikoS: ahh you mean london
+ lisitsyn	sonne|work: most of the flights arrive to SFO evening
+ lisitsyn	let me check london
+ lisitsyn	HeikoS: wait wait
+ lisitsyn	how can I stay in london
+ lisitsyn	:D
+ lisitsyn	HeikoS: come on they won't let me in haha
+@HeikoS	lisitsyn: ah those bastards :)
+@HeikoS	I once slept a night at heatthrow airport
+@HeikoS	that was pretty unconfortable :D
+ sonne|work	lisitsyn: exact time?
+ lisitsyn	sonne|work: either 19 or 21
+ sonne|work	that is too late
+ lisitsyn	sonne|work: there is a flight by delta that arrives 12:28
+ sonne|work	take that one
+ lisitsyn	but it is +300$
+ sonne|work	you would miss the reception
+ lisitsyn	ohh
+ lisitsyn	really?
+ sonne|work	or go a day earlier
+ lisitsyn	that's bad
+ sonne|work	lisitsyn: yeah there is a pool party on friday evening
+ lisitsyn	sonne|work: oh this one is supposed to have 19hrs waiting in JFK
+ sonne|work	haha so stranded in JFK - worse than LHR :D
+@HeikoS	hehe
+ lisitsyn	well I can go out
+ lisitsyn	I guess
+ lisitsyn	but yes that's too much
+ lisitsyn	HeikoS: I can arrive to heathrow by 08:00
+@HeikoS	lisitsyn: that sounds good
+@HeikoS	heathrow is not too bad in fact
+ lisitsyn	HeikoS: how much your flight cost?
+@HeikoS	544 return from london
+ lisitsyn	544 pounds?
+@HeikoS	yes
+ lisitsyn	argh that would be quite a lot
+@HeikoS	lisitsyn:  you should totally move to europe ;)
+ lisitsyn	300 + 300 + 844
+ lisitsyn	HeikoS: that's $ cost
+@HeikoS	although travelling home is tough than
+@HeikoS	wow
+@HeikoS	lisitsyn: whats the alternative?
+ lisitsyn	HeikoS: arrive evening by aeroflot from moscow through new york
+ lisitsyn	arriving at 19:38
+@HeikoS	lisitsyn: what about going one day earlier?
+ lisitsyn	HeikoS: yes possible
+ sonne|work	lisitsyn: so then you rent the car and pick us up at the airport :D
+ lisitsyn	sonne|work: no driver license
+ sonne|work	lisitsyn: or you just take a cab
+ lisitsyn	sonne|work: are u sure 19:39 is already too late?
+ lisitsyn	I mean I arrived to the hotel in berlin like ~23 and it was ok
+@HeikoS	lisitsyn: the problem is the party aleady is over then
+@HeikoS	you need some time from the airport etc
+@HeikoS	maybe rest
+ lisitsyn	HeikoS: ~1hr I guess
+ lisitsyn	no?
+ lisitsyn	hmm no
+ lisitsyn	:)
+@HeikoS	haha :)
+@HeikoS	as you like
+@HeikoS	lisitsyn: would be sad if you missed that
+@HeikoS	its the reason why you go there
+@HeikoS	so better go one day ealier
+ lisitsyn	HeikoS: yeah makes sense
+ lisitsyn	HeikoS: well I can arrive late night of 17th
+ lisitsyn	and just walk down to the hotel :D
+@HeikoS	lisitsyn: yep, have a nice sleep and then we already arrive
+ lisitsyn	HeikoS: do you think I can check in night of 18th?
+ lisitsyn	Check-In TimeAnytime after 3:00 pm. Valid ID and credit card required.
+ lisitsyn	argh
+@HeikoS	?
+ lisitsyn	HeikoS: I can't check in night between 17th and 18th
+@HeikoS	why?
+ lisitsyn	HeikoS: Check-In TimeAnytime after 3:00 pm. Valid ID and credit card required.
+ lisitsyn	sonne|work: ha there are rooms in wild palms still
+ lisitsyn	HeikoS: oh found one
+ lisitsyn	HeikoS: arrives 16:22
+ lisitsyn	oh shit
+ lisitsyn	23 hrs in JFK
+ lisitsyn	:D
+ lisitsyn	HeikoS: bingo!
+ lisitsyn	lufthansa
+ lisitsyn	arrives 12:20
+ lisitsyn	argh 14 hrs in frankfurt
+@HeikoS	lisitsyn: ?
+ lisitsyn	HeikoS: all the flights that fit the time have some crazy waiting times so far
+@HeikoS	ah shit
+ lisitsyn	HeikoS: searching :)
+ lisitsyn	HeikoS: okay catch it
+ lisitsyn	oh wonderful wonderful
+ lisitsyn	KUF -> FRA -> SFO
+ lisitsyn	12:20
+ lisitsyn	HeikoS: and just one transfer
+@HeikoS	that sounds good
+@HeikoS	nice
+@HeikoS	how much?
+ lisitsyn	HeikoS: 1300$
+@HeikoS	thats fine
+@HeikoS	isnt it?
+@HeikoS	how much do we get again?
+ lisitsyn	HeikoS: no idea :)
+ lisitsyn	HeikoS: I am ok to cover it anyway
+@HeikoS	lisitsyn: should work out fine though
+ lisitsyn	HeikoS: I have no idea how does it work
+ lisitsyn	and not sure it is easy to transfer money to ?ussia :)
+ lisitsyn	so in the worst case I pay by myself but I am ok
+ lisitsyn	lunch time
+@HeikoS	enjoy :D
+ lisitsyn	HeikoS: ok then I'll buy it once I get visa
+@HeikoS	lisitsyn: I have a problem with swig can you help me?
+ lisitsyn	HeikoS: for sure
+@HeikoS	basically first question: how to do templates?
+@HeikoS	I mean RealBlabla
+@HeikoS	I did this
+@HeikoS	#ifdef USE_FLOAT64
+@HeikoS	    %template(RealOperatorFunction) COperatorFunction<float64_t>;
+@HeikoS	#endif
+@HeikoS	but I get
+@HeikoS	Mathematics.i:25: Error: Template 'COperatorFunction' undefined.
+ lisitsyn	HeikoS: I think some include is missed
+@HeikoS	%include <shogun/mathematics/logdet/OperatorFunction.h>
+@HeikoS	#ifdef USE_FLOAT64
+@HeikoS	    %template(RealOperatorFunction) COperatorFunction<float64_t>;
+@HeikoS	#endif
+@HeikoS	same error
+@HeikoS	do I need to include something else than the class?
+ lisitsyn	HeikoS: Mathematics_includes.i too IIRC
+@HeikoS	ok
+@HeikoS	ehm
+@HeikoS	well its in there
+ lisitsyn	HeikoS: oohh I think you have to push lambday a bit to structurize things in logdet
+@HeikoS	lisitsyn: really?
+ lisitsyn	I think there should be logdet/solver
+ lisitsyn	logdet/operator
+@HeikoS	so is it possible to have a non-templated child class inheriting from a templated one?
+ lisitsyn	may be like that
+@HeikoS	lisitsyn: ok will do
+@HeikoS	yeah the solvers should be in math itself
+-!- van51 [~van51@ppp-94-66-64-167.home.otenet.gr] has quit [Quit: Leaving.]
+ lisitsyn	HeikoS: do you think that's the problem?
+@HeikoS	operator too
+@HeikoS	lisitsyn: no idea really
+@HeikoS	I dont do this swig stuff often
+@HeikoS	so a problem
+ lisitsyn	HeikoS: okay let me check it
+@HeikoS	COperatorFunction<float64_t>   ->  CRationalApproximation   -> CLogRationalApproximationCGM
+@HeikoS	this is an inheritence thing going on
+ lisitsyn	that looks okay
+ lisitsyn	in features we have the same thing
+@HeikoS	the CRationalApproximation fixes the template upon inheritance
+@HeikoS	ok
+ lisitsyn	HeikoS: ahh didn't you forget
+ lisitsyn	namespace?
+@HeikoS	ah
+@HeikoS	yes
+@HeikoS	where to put it?
+@HeikoS	testing
+@HeikoS	yep that did it :)
+ lisitsyn	HeikoS: \o?
+ lisitsyn	argh
+ lisitsyn	I am a pirate lol
+ lisitsyn	\o/
+ lisitsyn	the favourite thing of wiking
+@HeikoS	hehe
+@HeikoS	/home/heiko/Desktop/shogun/shogun/src/shogun/mathematics/logdet/OperatorFunction.h:141: Warning 320: Explicit template instantiation ignored.
+@HeikoS	any idea about this one?
+ lisitsyn	HeikoS: ouhm
+@HeikoS	template class COperatorFunction<bool>;
+@HeikoS	template class COperatorFunction<char>;
+@HeikoS	its those guys
+ lisitsyn	wait wait
+ lisitsyn	why in h?
+ lisitsyn	HeikoS: I think it is .cpp
+ lisitsyn	see dense features
+@HeikoS	ok
+@HeikoS	yep solved it
+@HeikoS	lisitsyn: how chan I check for two #ifdef?
+@HeikoS	just type it twice?
+ lisitsyn	HeikoS: #if defined(BLA) && defined(SHHH)
+@HeikoS	thanks
+@HeikoS	lisitsyn: do you know whether USE_COMPLEX64 is defined?
+ lisitsyn	HeikoS: no I don't know due to latest changes
+@HeikoS	wiking: shogun just used my local installation for compiling rather than the local files :(
+@HeikoS	had to delete them by hand
+ sonne|work	HeikoS: file a bug assign it to wiking and tag it cmake
+ sonne|work	HeikoS: I had this issue too IIRC
+ lisitsyn	andreas had it
+ sonne|work	so everyone :D
+@HeikoS	lisitsyn: still there?
+@HeikoS	another swig issue:
+@HeikoS	cc1plus: warning: unrecognized command line option "-Wno-c++11-narrowing" [enabled by default]
+@HeikoS	/home/heiko/Desktop/shogun/shogun/build/src/interfaces/python_modular/modshogunPYTHON_wrap.cxx:9726:108: error: 'CKernelRidgeRegression' is not a member of 'shogun'
+@HeikoS	/home/heiko/Desktop/shogun/shogun/build/src/interfaces/python_modular/modshogunPYTHON_wrap.cxx:9726:140: error: 'self' was not declared in this scope
+@HeikoS	/home/heiko/Desktop/shogun/shogun/build/src/interfaces/python_modular/modshogunPYTHON_wrap.cxx:9726:163: error: expected primary-expression before '*' token
+@HeikoS	/home/heiko/Desktop/shogun/shogun/build/src/interfaces/python_modular/modshogunPYTHON_wrap.cxx:9726:164: error: 'data' was not declared in this scope
+@HeikoS	/home/heiko/Desktop/shogun/shogun/build/src/interfaces/python_modular/modshogunPYTHON_wrap.cxx:9726:175: error: expression list treated as compound expression in initializer [-fpermissive]
+ lisitsyn	HeikoS: ja
+@HeikoS	I get loads of those
+@HeikoS	after
+@HeikoS	/usr/include/python2.7/numpy/npy_deprecated_api.h:11:2: warning: #warning "Using deprecated NumPy API, disable it by #defining NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION"
+ lisitsyn	HeikoS: can you paste da line?
+@HeikoS	?
+@HeikoS	da line?
+@HeikoS	from /home/heiko/Desktop/shogun/shogun/build/src/interfaces/python_modular/modshogunPYTHON_wrap.cxx:6027:
+ lisitsyn	yeah am speaking like west side nigga
+ lisitsyn	:D
+ lisitsyn	jk
+@HeikoS	and I gets 100s of those ya
+ lisitsyn	HeikoS: this one
+ lisitsyn	modshogunPYTHON_wrap.cxx:9726
+@HeikoS	gedit crashes haha
+ lisitsyn	HeikoS: use vim or nano or whatever
+ lisitsyn	they'll handle that
+@HeikoS	yes doing
+@HeikoS	SWIGINTERN shogun::CRegressionLabels *shogun_CKernelRidgeRegression_apply__SWIG_0(shogun::CKernelRidgeRegression *self,shogun::CFeatures *data=NULL){
+@HeikoS	            return self->apply_regression(data);
+@HeikoS	/home/heiko/Desktop/shogun/shogun/build/src/interfaces/python_modular/modshogunPYTHON_wrap.cxx:9726:108: error: 'CKernelRidgeRegression' is not a member of 'shogun'
+@HeikoS	lisitsyn: this has to do with my changes to Mathematics.i though
+@HeikoS	should I paste the content maybe?
+ lisitsyn	HeikoS: really?
+ lisitsyn	so w/o your changes it works?
+@HeikoS	https://gist.github.com/karlnapf/6378049
+@HeikoS	lisitsyn: yes
+@HeikoS	if you replace yours with those youll get the error
+@HeikoS	probably syntax or something stupud
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+ lisitsyn	HeikoS: haven't catched it yet
+@HeikoS	seems almost like forgotten {
+@HeikoS	in namespace
+ lisitsyn	HeikoS: I'd expect that
+ lisitsyn	but all the namespaces are enclosed
+ lisitsyn	pickle27: hey there
+ pickle27	lisitsyn: hey
+@HeikoS	lisitsyn: what happens if you compile that?
+ lisitsyn	HeikoS: I haven't checked
+@iglesiasg	hey pickle27! I wrote just a very minor comments in the pull request
+@iglesiasg	pickle27, just to avoid some possible doxygen warnings
+ pickle27	iglesiasg: I saw, I'll make those changes today
+@iglesiasg	pickle27, good, thank you :)
+ pickle27	iglesiasg: made those changes
+@iglesiasg	pickle27, cool. We let travis finish and merge then
+ pickle27	iglesiasg: okay cool, I'll be back on later on!
+@iglesiasg	pickle27, all right, see you!
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has left #shogun []
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:8181:8528:e5a1:bac7] has quit [Quit: Ex-Chat]
+-!- foulwall [~zhengyang@114.255.40.7] has joined #shogun
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:48d3:5035:94d7:36e3] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@HeikoS	iglesiasg: there?
+@iglesiasg	HeikoS, yeah
+@HeikoS	iglesiasg: do you know whether this voting system you used allows multiple votes per person?
+@HeikoS	I would like 2 :)
+@iglesiasg	HeikoS, I am not sure
+@iglesiasg	HeikoS, I could check it in some minutes if you like
+@HeikoS	and people would have to vote for two different names
+@HeikoS	would be nice, currently writing an email to set this up
+@iglesiasg	HeikoS, all right, I am taking care of another thing right now but will check pretty soon!
+@HeikoS	thanks!
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+@iglesiasg	HeikoS, I found this
+@iglesiasg	HeikoS, The voter will receive an email containing a unique vote ticket and a series of links to vote and display the results of the survey. Naturally a voter can only vote once.
+@iglesiasg	HeikoS, but there is something about multiple choices
+-!- sonne|osx [~sonne@89.204.137.49] has joined #shogun
+@iglesiasg	HeikoS, OK, so it seems it works fine
+@iglesiasg	HeikoS, I just did a test survey and invited you too.
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:48d3:5035:94d7:36e3] has quit [Quit: Ex-Chat]
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:a8ba:617a:d7c8:e097] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- sonne|osx [~sonne@89.204.137.49] has quit [Quit: sonne|osx]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 98a36cc / INSTALL: https://github.com/shogun-toolbox/shogun/commit/98a36ccbda41b39a3b6c67cbd7b995f9b339fd5d
+ shogun-notifier-	shogun: update install for cmake
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:a8ba:617a:d7c8:e097] has quit [Quit: Ex-Chat]
+-!- van51 [~van51@ppp-94-66-64-167.home.otenet.gr] has joined #shogun
+ shogun-buildbot	build #1561 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1561  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 29f75f2 / src/shogun/mathematics/logdet/ (8 files): https://github.com/shogun-toolbox/shogun/commit/29f75f2082021342b031ef367cd8664a46a8ea37
+ shogun-notifier-	shogun: move external type definitions to new cpp files
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 495f4b9 / src/shogun/mathematics/logdet/ (4 files): https://github.com/shogun-toolbox/shogun/commit/495f4b967973ca59fb55cc4898364d865d80a9e9
+ shogun-notifier-	shogun: put definitions into namespace
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 82f9a91 / src/shogun/mathematics/logdet/ (8 files): https://github.com/shogun-toolbox/shogun/commit/82f9a91e59ece852c7f095ffe84c23e13475897f
+ shogun-notifier-	shogun: Merge pull request #1494 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: move external type definitions to new cpp files
+ shogun-buildbot	build #1928 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1928  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1929 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1929
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:8ddd:e10b:a80:45e7] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:8ddd:e10b:a80:45e7] has quit [Client Quit]
+ shogun-buildbot	build #1562 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1562  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:4582:9b04:f3dc:4e3a] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	HeikoS, did you see the poll?
+@HeikoS	iglesiasg: hi
+@HeikoS	yes I did
+@HeikoS	thanks for that
+@HeikoS	iglesiasg: so I will ask you to do two polls soon
+@HeikoS	one accept/reject the shogun satzung
+@HeikoS	and one with the names of all members of the foundation
+@HeikoS	will send details then
+@iglesiasg	HeikoS, ok
+@HeikoS	iglesiasg: can you currently compile shogun?
+@HeikoS	I got this weird error compi?ling a unit test
+@iglesiasg	HeikoS, latest develop?
+@HeikoS	yep
+@iglesiasg	HeikoS, let me try
+@HeikoS	ProbingSampler unit test
+@iglesiasg	HeikoS, mm I didn't get any error here
+@iglesiasg	let me see if I can run that test
+@HeikoS	iglesiasg: do you have eigen installed or bundled by cmake?
+@iglesiasg	HeikoS, funny thing is that ./shogun-unit-test --gtest_filter=Probing*
+@iglesiasg	doesn't run any test
+@HeikoS	iglesiasg: ah you dont have colpack installed
+@iglesiasg	HeikoS, aah ok. It must be that yeah
+@HeikoS	iglesiasg: could you install and try?
+-!- sonne|osx [~sonne@f053046168.adsl.alicedsl.de] has joined #shogun
+@iglesiasg	HeikoS, about Eigen I bundle it, the version in my system is older than the required
+@iglesiasg	HeikoS, apt-get for colpack?
+ shogun-buildbot	build #1025 of rpm1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/1025  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@HeikoS	http://cscapes.cs.purdue.edu/download/ColPack/ColPack-1.0.9.tar.gz
+@HeikoS	no apt-get :)
+@iglesiasg	:(
+@HeikoS	only if no hassle for you
+@iglesiasg	HeikoS, is it installed in travis?
+@HeikoS	iglesiasg: I dont know, think not
+@iglesiasg	HeikoS, how do I specify for Shogun where to find colpack?
+@iglesiasg	do we have finpack for it in cmake?
+@HeikoS	iglesiasg: shogun detects automagically
+@HeikoS	you just need a local installation
+@iglesiasg	HeikoS, I am building colpack at the moment
+@iglesiasg	HeikoS, I will need to run cmake in Shogun afterwards, right?
+@HeikoS	yep
+ shogun-buildbot	build #1346 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1346  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #62 of osx1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/62
+@iglesiasg	HeikoS, compiling again :)
+@iglesiasg	#define HAVE_COLPACK 1 in my config.h
+ shogun-notifier-	shogun: Kevin :develop * 1a88d4c / src/shogun/ (18 files): https://github.com/shogun-toolbox/shogun/commit/1a88d4c56f558e088f85408076c9c1b7ded57c7e
+ shogun-notifier-	shogun: added more setter and getters to ICA base class and cleaned up the classes
+ shogun-notifier-	shogun: Kevin :develop * df3e8c5 / src/shogun/converter/ica/ (6 files): https://github.com/shogun-toolbox/shogun/commit/df3e8c561ce42d19b811bd46630b755b19b91070
+ shogun-notifier-	shogun: added some descriptions for doxygen in ICA classes
+ shogun-notifier-	shogun: Fernando Iglesias :develop * e7cce11 / src/shogun/ (18 files): https://github.com/shogun-toolbox/shogun/commit/e7cce11dbe17dd75110b7a3dc74ad92fe3e36ba5
+ shogun-notifier-	shogun: Merge pull request #1490 from pickle27/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: added more setter and getters to ICA base class and cleaned up the class...
+@iglesiasg	HeikoS, ping
+ shogun-buildbot	build #1647 of deb3 - modular_interfaces is complete: Failure [failed install test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1647  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	iglesiasg: pong
+@iglesiasg	HeikoS, error in ProbingSampler_unittest.cc here
+@HeikoS	iglesiasg: uh could you remind me how to tell python that I installed shogun locally?
+@HeikoS	iglesiasg: ah thats good
+@iglesiasg	HeikoS, an error that is good mmm
+@iglesiasg	:P
+@HeikoS	iglesiasg: yes since that means its not weird stuff
+@HeikoS	iglesiasg: so I export LD_LIBRARY_PATH, PYTHONPATH, what else=?
+@iglesiasg	just kidding :)
+@iglesiasg	HeikoS, something related to these python directories
+@iglesiasg	I don't remember their name mmm
+ shogun-buildbot	build #1563 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1563  blamelist: Kevin <kevinhughes27@gmail.com>
+@iglesiasg	HeikoS, dist-packages
+ shogun-buildbot	build #63 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/63  blamelist: Kevin <kevinhughes27@gmail.com>
+@iglesiasg	HeikoS, but what is it exactly you are trying to do? Tell python where your shogun because you cannot install with sudo?
+-!- van51 [~van51@ppp-94-66-64-167.home.otenet.gr] has quit [Quit: Leaving.]
+@HeikoS	iglesiasg: ah I got all weird errors
+@HeikoS	installing with sudo again
+@HeikoS	iglesiasg: not its because shogun gets confused with includes when there is a local install
+@iglesiasg	HeikoS, aham
+@HeikoS	I had compile errors caused by installed headers being different to the source ones
+@iglesiasg	HeikoS, there is one variable inside python that has to be modified IIRC
+ shogun-buildbot	build #64 of osx1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/64  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Kevin <kevinhughes27@gmail.com>
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+ shogun-buildbot	build #1564 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1564  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Kevin <kevinhughes27@gmail.com>
+ shogun-buildbot	build #1026 of rpm1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/1026
+@HeikoS	iglesiasg: still there?
+@iglesiasg	HeikoS, indeed
+@HeikoS	iglesiasg: man I get annoyed
+@HeikoS	from modshogun import
+@HeikoS	ImportError: libshogun.so.14: cannot open shared object file: No such file or directory
+@HeikoS	with anything I do
+@HeikoS	I compiled and installed to /usr/local
+@iglesiasg	HeikoS, let me check one thing
+@HeikoS	ah the file is not there
+@HeikoS	but why
+@HeikoS	cmake tells me the file is up to date
+@HeikoS	while its not there
+@HeikoS	that is weird
+@iglesiasg	HeikoS, does your PYTHONPATH include the dist-packages directory inside your Shogun installation?
+@HeikoS	iglesiasg: yes its in /usr/local
+@HeikoS	but the libshogun.so is not there
+@HeikoS	cmake doesnt install it
+@HeikoS	-- Up-to-date: /use/local/lib/libshogun.so.14.0
+@HeikoS	-- Up-to-date: /use/local/lib/libshogun.so.14
+@HeikoS	-- Up-to-date: /use/local/lib/libshogun.so
+@HeikoS	argh
+@HeikoS	use
+@HeikoS	haha
+@HeikoS	man I am stupid :D
+@iglesiasg	why?!
+@HeikoS	all this hacking, its not made for me
+@HeikoS	"use/local ....
+@iglesiasg	hahaha
+@iglesiasg	subtle thing
+@iglesiasg	I didn't notice either
+ shogun-buildbot	build #1347 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1347  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	man I get those problems all day
+@HeikoS	haha
+@HeikoS	sorry for complaining loudly here ;)
+@iglesiasg	we are here for this :)
+-!- lambday [67157e4c@gateway/web/freenode/ip.103.21.126.76] has joined #shogun
+ lambday	HeikoS: hi
+ lambday	what problems did we face for swig typemaps?
+@HeikoS	lambday: some minor things, see my PR
+@HeikoS	lambday: I am just to code up a small python example
+@HeikoS	I wrote interface files
+@HeikoS	want to test it :)
+ lambday	HeikoS: awesome! :D
+@HeikoS	lambday: yep lets see :)
+@HeikoS	interfaces are tricky
+@HeikoS	lambday: we definitely need to provide some std cases so that people dont have to instanciate all these classes
+@HeikoS	ok I will try it out now
+ lambday	HeikoS: so, for the abstract base classes, if we tell the compiler to create with specific types in the header, it creates problem?
+@HeikoS	lambday: btw the unit test for the probing sampler doesnt work
+@HeikoS	lambday: no we need a convienience constructor which we just give a matrix which sets up default configurations
+ lambday	HeikoS: doesn't work? :-/
+@HeikoS	without any classes
+@HeikoS	lambday: compile error
+@HeikoS	ProbingSampler test
+ lambday	errr...
+@HeikoS	some eigen static compile error
+@HeikoS	not detected by travis
+@HeikoS	since no colpack on there
+ lambday	uh?
+@HeikoS	its the eigen version that comes with cmake bundle
+@HeikoS	and my local one too
+@HeikoS	iglesiasg: could reproduce it
+ lambday	but the guarded the whole test with #ifdef #endif
+ lambday	for colpack :-/
+ lambday	not sure HeikoS last night I tested on the machine that sonne|osx gave access to, and it worked.. I'll check into it
+ lambday	HeikoS: could you please try installing colpack and see what it says? :(
+@HeikoS	lambday: I have colpaclk installed
+@HeikoS	its not a colpack problem
+@HeikoS	the guards work fine
+@HeikoS	its an eigen problem
+ lambday	errr....
+ lambday	clueless
+@HeikoS	lambday: let me finish this and then tell you more details
+@HeikoS	lambday: dont worry :)
+ lambday	HeikoS: alright :)
+ lambday	so, I should add new tests as libshogun tests in undocumented, right? or as unit-tests....(I wanna add tests for the ozone data)'
+ lambday	libshogun *examples*
+-!- van51 [~van51@ppp-94-66-64-167.home.otenet.gr] has joined #shogun
+ shogun-buildbot	build #1648 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1648
+@HeikoS	lambday: what?
+@HeikoS	lambday: which class computes the number of shifts again?
+ lambday	HeikoS: RationalApproximation iirc
+ lambday	checking again
+ lambday	oh no, number of shifts is a user input
+@HeikoS	num shifts are a parameter of CLogRational ...
+ lambday	wait :-/
+@HeikoS	lambday: is there a method to compute the number?
+@HeikoS	I remember the eliptic curve functions
+ lambday	yes its in one of the unit-tests
+@HeikoS	ah no there was this error bound thing
+ lambday	yes that has to be user input
+ shogun-buildbot	build #1649 of deb3 - modular_interfaces is complete: Failure [failed install test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1649  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Kevin <kevinhughes27@gmail.com>
+@HeikoS	should be possible to automate this (optional)
+@HeikoS	or in fact default should be automatic and user provides accuracy
+@HeikoS	lambday: some other things: could you structure the logdet classes a bit
+ lambday	HeikoS: https://github.com/shogun-toolbox/shogun/blob/develop/tests/unit/mathematics/logdet/RationalApproximation_unittest.cc#L143
+@HeikoS	lambday: in fact, most things can go into own folders
+@HeikoS	lambday: such as operators/ solvers/ etc
+ lambday	HeikoS: yes they should..
+@HeikoS	subfolders in mathematics
+ lambday	HeikoS: alright, I will do that...
+ lambday	yes that would be better
+@HeikoS	lambday: but wait until I submitted the python example
+ lambday	alright
+@HeikoS	otherwise interfaces will break
+@HeikoS	this way we can detect that
+@HeikoS	lambday: just realising how much work you did there, all these classes ... :D
+ lambday	:D
+ lambday	but I am a bit concerned about the performance
+ lambday	in many places I could have used const type& but I used pass-by-val
+@HeikoS	lambday: for what type of arguments?
+ lambday	and I am most concerned about the performance of cg solvers..
+@HeikoS	well see
+ lambday	SGVector<T> mostly
+@HeikoS	lambday: nice that you have all these checks
+@HeikoS	no segfaults if something is NULL
+ lambday	those are the ones I am worried about
+@HeikoS	lambday: should be fast
+@HeikoS	but if you can change a few, thats useful
+@HeikoS	but later
+@HeikoS	first things have to work
+ lambday	yes
+ lambday	HeikoS: so, I should add the ozone example in example/libshogun/undocumented/., right?
+ lambday	oops
+ lambday	undocumented/libshogun
+@HeikoS	lambday:
+@HeikoS	 ** On entry to DSTEMR parameter number  8 had an illegal value
+ lambday	really
+ lambday	!
+ lambday	lanczos
+ lambday	wait checking
+@HeikoS	lambday:  let me push the interfaces
+ lambday	HeikoS: you meant this one?  https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/mathematics/logdet/LanczosEigenSolver.cpp#L134'
+ lambday	okay
+@HeikoS	lambday:
+@HeikoS	https://github.com/shogun-toolbox/shogun/pull/1496
+@HeikoS	here is how this looks
+ lambday	chekcing
+@iglesiasg	 hushell, what is the next thing to do in the FactorGraph model??
+@HeikoS	lambday: whats this error, have you seen that?
+ lambday	HeikoS: nope!
+@HeikoS	lambday: I bet thats colpack
+ lambday	8th param in DSTEMR?
+@HeikoS	thats what it prints
+ lambday	that cannot be colpack, that's lapack!
+@HeikoS	what? :)
+ lambday	and where I used it for, it just takes the length of an SGVector
+ lambday	:-/
+ lambday	how can that be illegal when I already initialized it with a std::vector<T>::size()
+@HeikoS	lambday: why are you using lapack there?
+@HeikoS	max eigenvalue?
+@HeikoS	why lapack?
+ lambday	HeikoS: that's for the triangular eigensolver
+ lambday	yes yes
+@HeikoS	eigen cannot do that?
+ lambday	HeikoS: because eigen3 didn't have anything for that
+@HeikoS	what matrix is that again?
+ lambday	yes it cannot :(
+ lambday	any psd matrix
+@HeikoS	how large?
+ pickle27	wiking: around?
+ lambday	for lanczos, we do CG iterations, and we put two params as main diagonal and subdiagonal as another matrix (lanczos T-matrix) which is a tridiagonal matrix
+@HeikoS	lambday: if this is a dense matrix, how does lapack do it? iteratively or ?
+ lambday	HeikoS: depends on the number of iteration
+@HeikoS	ok
+ lambday	HeikoS: no idea! I took that as a blackbox
+@HeikoS	i remember
+@HeikoS	lambday: since for dense matrices that are not too large, computing all eigenvalues is not that much more expensive that just one
+@HeikoS	so could also compute all and take the maximum, but this depends on matrix size
+ lambday	yes....
+ lambday	but this worked awesome with all the machines I tried it in
+ pickle27	wiking: nvm think I found my mistake, was playing with cmake!
+ lambday	HeikoS: where does it give error exactly? for modular interface?
+ lambday	dstemr is awfully accurate
+ lambday	HeikoS: yes I thought of that, but when we can manage with two vectors of size 1000xsizeof(double), why should we use 1000x1000xsizeof(double) matrix, right?
+@HeikoS	lambday: yeah maybe you are right
+@HeikoS	Ill try a bit further
+ lambday	1000=number of iteration (and therefore the default dim for Lanczos T-matrix)
+@HeikoS	ok
+ lambday	HeikoS: if it gives error, we need to test it more
+ lambday	:(
+ lambday	may be something I missed
+ lambday	:(
+ lambday	the typemaps looks awesome, although I didn't fully get how it works
+ lambday	and yeah, since we don't need internal complex linear operators, we don't need to expose them to modular typemaps
+ lambday	just the directlinearsolvercomplex
+ lambday	:)
+ shogun-buildbot	build #1348 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1348  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Kevin <kevinhughes27@gmail.com>
+ lambday	I was watching these video lecture series by Alexander Stepanov, man he is really against virtual methods! :-/
+ shogun-buildbot	build #1646 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1646  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@HeikoS	lambday: why?
+ lambday	HeikoS: he's convinced that its slow and there is better way to do it (for that I need to watch the whole series)
+ lambday	in fact he says that he hasn't seen a really good example where OOP can *really* be a lifesaver
+ lambday	:-/
+@HeikoS	lambday: and the alternative is?
+ lambday	I have no idea :(
+ lambday	I gotta watch the whole series and then may be I can say something.. but is it slow?
+ lambday	I mean, I am not so sure how does compile treats virtual functions
+@HeikoS	lambday: these are issues for the compiler architects :)
+@HeikoS	-c:16: RuntimeWarning: [WARN] In file /home/heiko/Desktop/shogun/shogun/src/shogun/mathematics/logdet/LanczosEigenSolver.cpp line 145: Some error occured while computing eigenvalues!
+ lambday	but to me, its obviously the cleaner way to do it - specially with the situation like this that we have for log-det
+@HeikoS	matrix is identity 10x10
+@HeikoS	lambday: yeah dont worry about virtual methods
+ lambday	HeikoS: it says it doesn't converged??
+@HeikoS	lambday: coding time also counts
+@HeikoS	lambday: this is the error I get
+@HeikoS	warning rather
+@HeikoS	I still get a reasonable result from the log-det sampler
+ lambday	HeikoS: that is probably because I set the default convergance cond for all CG based solver to be 1e-6
+ lambday	:(
+@HeikoS	but thats identity matrix
+ lambday	on residual'
+ lambday	hmmm
+ lambday	ummm
+ lambday	doesn't the warning say anything else?
+ lambday	wait checking
+ lambday	if (info==0)
+ lambday	errrr
+ lambday	do you have cblas installed?
+ lambday	it seems the dstemr you have isn't right... for some reason!
+-!- HeikoS [~heiko@nat-176-200.internal.eduroam.ucl.ac.uk] has quit [Remote host closed the connection]
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:4582:9b04:f3dc:4e3a] has quit [Quit: Ex-Chat]
+-!- HeikoS [~heiko@nat-176-200.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	lambday: sorry computer crash
+ lambday	HeikoS: np :)
+ lambday	HeikoS: I am worried that the lapack you have does the right thing!
+ lambday	because info should NOT be non-zero!
+@HeikoS	lambday: we will find loads of those
+ lambday	that's helpful actually
+@HeikoS	lambday: indeed
+ lambday	HeikoS: where do you have liblapack.so?
+@HeikoS	there are more problems in fact
+ lambday	HeikoS: more? :( like?
+@HeikoS	/usr/lib/liblapack.so.3
+ lambday	and not /usr/lib64/atlas/liblapack.so??
+ lambday	I am not the guy to ask but sergey can may be say something!
+ lambday	and if it turns out that it depends on atlas so we should guard it with proper #ifdefs
+@HeikoS	lambday: do you have latest source compiled?
+@HeikoS	lambday: with python bindings?
+ lambday	no
+ lambday	wait I am testing
+@HeikoS	lambday:
+@HeikoS	https://gist.github.com/anonymous/6381240
+@HeikoS	this is a little script that gives wrong results, maybe I have done something wrong in setting the thing up
+@HeikoS	lambday: but maybe first add the automatic num_shifts
+ lambday	HeikoS: so, inside the RationalApproximation class
+ lambday	alright
+@HeikoS	first thing to do is to make a very simply example work
+@HeikoS	lambday: and the shifts are crucial for that
+ lambday	testing
+ lambday	HeikoS: in one unit-test, I did that
+@HeikoS	lambday: yeah I know, then you can use that code
+ lambday	HeikoS: so, I should add a python modular example that does the same thing, right?
+ lambday	(btw this is the example, https://github.com/shogun-toolbox/shogun/blob/develop/tests/unit/mathematics/logdet/RationalApproximation_unittest.cc#L107)
+@HeikoS	lambday: nono, lets wait with the examples
+@HeikoS	add a method to the corresponding class
+@HeikoS	and the user specified num shifts should be optional
+ lambday	HeikoS: alright...
+@HeikoS	if you make a method that returns needed number of shifts or so
+@HeikoS	then user can even check that and the decide what to do
+@HeikoS	lambday: next thing is to make my gist work
+@HeikoS	it returns the wrong result
+@HeikoS	lambday: there should also be a unit test for this case
+@HeikoS	that is in the python example
+ lambday	HeikoS: I will test...
+ lambday	HeikoS: do you think it gives wrong result because of the lapack eigensolver thing?
+@HeikoS	lambday:  no thats another problem
+@HeikoS	lambday: this happened when I passed a all zeros matrix
+@HeikoS	or all ones
+@HeikoS	lambday: which is ok not to work, but there should be a check for these cases
+ lambday	HeikoS: aaaarghhh! I think the shifts computation method doesn't work then eig_max/eig_min=1
+@HeikoS	lambday: so maybe add on your list "unit test for stupid borderline cases" :)
+ lambday	heheh yes I will
+@HeikoS	lambday: yeah, this should be catched and a proper message should be output
+@HeikoS	since users as me are doing stupid things all the time :D
+ lambday	yes point noted
+ lambday	HeikoS: could you please try with a different diagonal matrix and test if that at least works?
+@HeikoS	lambday: Ill update the gist
+ lambday	alright
+@HeikoS	https://gist.github.com/karlnapf/6381345
+@HeikoS	this one uses random positive numbers on the diagonal
+ lambday	this too gives poor result?
+ lambday	any warnings on the way?
+ lambday	for non-convergance?
+@HeikoS	wrong result
+@HeikoS	no warnings/errors
+@HeikoS	oh CStatistics also give wrong results for a bit larger matrices
+ lambday	the direct one?
+@HeikoS	yes
+ lambday	HeikoS: upto rational approximation of f(A)*v, everything is really accurate
+ lambday	after that, things lose their shines :(
+@HeikoS	lambday: well get there, maybe I did something wrong in the script
+@HeikoS	have a look
+@HeikoS	for matrix size 10, CStatistics and sum(log(diag)) is the same
+@HeikoS	but the log-det estimator is off
+ lambday	HeikoS: logdetestimator does the mean for you, right?
+@HeikoS	lambday: but the shifts are set arbritary, this is the first thing to do
+@HeikoS	lambday: yes
+ lambday	yeah I should change that
+ lambday	HeikoS: will do it by tomorrow
+-!- van51 [~van51@ppp-94-66-64-167.home.otenet.gr] has quit [Read error: Connection reset by peer]
+ lambday	HeikoS: how much does it deviate?
+@HeikoS	lambday: there is something wrong its completely off
+@HeikoS	not just inaccurate
+ lambday	HeikoS: I can test this same thing with cpp, right?
+@HeikoS	lambday: yes, best would to make unit tests from it
+@HeikoS	lambday: but again, shifts might cause this, currently playing with them
+ lambday	alright
+ lambday	HeikoS: safe is 20+ I think
+ lambday	but it should not be *completely* off
+-!- van51 [~van51@ppp-94-66-64-167.home.otenet.gr] has joined #shogun
+ lambday	HeikoS: I noticed few such cases with gaussian samplers... where the solvers just refused to converged and we got awfully off results
+@HeikoS	oh, speaking of it
+@HeikoS	the normal sampler produces something even more weird
+@HeikoS	with the probing sapler there is also something wrong
+@HeikoS	it is way to fast with it
+@HeikoS	even for 10000 samples
+@HeikoS	whereaus the gaussian sampler takes a while
+ lambday	that's weird! probing sampler gives #colors sampler per log-det-sample where normal samplers give 1 sample vector per log-det sample
+ lambday	both relies on randgen
+ lambday	argh I should add more and more tests.. HeikoS you will have a bunch of tests by tomorrow
+@HeikoS	lambday: it will be a very good idea to create more tests around this
+@HeikoS	lambday: its also very good that you tested every module seperately
+@HeikoS	lambday: now we just need to make sure things work well together
+ lambday	HeikoS: that's why its weird that we get these errors :(
+@HeikoS	lambday: so if you turn the pyton example into a unit tests that works, thats already a lot
+ lambday	HeikoS: upto rational approximation of f(A)*v things just work perfect!
+ lambday	HeikoS: yes I will do that
+@HeikoS	lambday: then we can do multiple ones for all these different cases
+@HeikoS	and then. ozone :)
+@HeikoS	my mcmc code is ready, just need the python function to compoute the log-det :)
+ lambday	yes that's the final target
+@HeikoS	would be great if that worked by next week since I will present this at a workshop soon
+ lambday	HeikoS: that's gonna be a part of shogun too?
+@HeikoS	https://sites.google.com/site/lgm2013ice/
+@HeikoS	lambday: no not yet, maybe next gsoc
+ lambday	HeikoS: whoa!
+ lambday	HeikoS: will add these tests by tomorrow
+@HeikoS	lambday: cool!
+ lambday	theoretically, this should not be the base
+@HeikoS	I will be there tomorrow to help you on that
+ lambday	so must be some technical silly mistake
+@HeikoS	leaving to germany on the weekend though
+@HeikoS	lambday: yeah I am sure it is, it always is
+@HeikoS	its good that we run into those now, not later
+ lambday	HeikoS: next week you guys are going to US, right? :)
+ lambday	HeikoS: yes :-/
+@HeikoS	no thats oct
+ lambday	okay
+ lambday	I starred your gists.. you will have the tests by tomorrow
+@HeikoS	sweet
+@HeikoS	ok I will go home now
+@HeikoS	see you tomorrow!
+ lambday	HeikoS: see you, man! :)
+-!- HeikoS [~heiko@nat-176-200.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- lambday [67157e4c@gateway/web/freenode/ip.103.21.126.76] has quit []
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has joined #shogun
+-!- van51 [~van51@ppp-94-66-64-167.home.otenet.gr] has quit [Quit: Leaving.]
+@sonney2k	lisitsyn, do you recall what I said how expensive the flight is?
+ lisitsyn	sonney2k: which flight?
+ lisitsyn	sonney2k: your?
+ lisitsyn	66* something IIRC
+@sonney2k	lisitsyn, yeah no probably not
+@sonney2k	I currently only find flights for 950EUR
+ lisitsyn	that's in log right?
+ lisitsyn	whoa
+ lisitsyn	why
+@sonney2k	if I want to be on the same plane like heiko
+ lisitsyn	sonne|work: sonne|work823 with lufhansa over london
+@sonney2k	looks like it got more expensive now
+@sonney2k	:/
+ lisitsyn	sonney2k: what if not on the same plane?
+@sonney2k	ahh no that was not taking the same flight back when I posted this
+@sonney2k	lisitsyn, the cheapest I can get is I guess around 700
+ lisitsyn	sonney2k: the cheapest for me is 1K$ and the one that fits the time is 1.3K$
+@sonney2k	well if 2 stops and 20 hour flight it would be 689
+@sonney2k	but actually cheapest is now 813
+ lisitsyn	eur?
+@sonney2k	so I guess 950 is OK
+@sonney2k	yes EUR
+ lisitsyn	sonney2k: we have 1100 per person or?
+@sonney2k	let me check how much I paid last time
+ lisitsyn	1000?
+ lisitsyn	I don't rembmer
+@sonney2k	lisitsyn, I think only 2200$ total
+@sonney2k	we can try to get a bit more
+@sonney2k	last year chris was coming from US -> cheap
+@sonney2k	*argh*
+-!- gsomix_ [~gsomix@109.169.146.219] has joined #shogun
+ lisitsyn	sonney2k: whereto do they transfer the money?
+ lisitsyn	the PO thing?
+@sonney2k	actually last year I paid 876
+@sonney2k	lisitsyn, well in the end to me
+ lisitsyn	and you to transferred to chris?
+@sonney2k	lisitsyn, no idea how to get it to you
+@sonney2k	lisitsyn, yes
+ lisitsyn	haha
+ lisitsyn	yes
+ lisitsyn	that's a real problem
+ lisitsyn	sonney2k: it can be paypal
+@sonney2k	lisitsyn, well I could go to an ATM in the us and give it to you in cash
+ lisitsyn	if it works for you
+ lisitsyn	yeah that's the easiest way
+ lisitsyn	if it works for you
+@sonney2k	ok so I will book this expensive bitch
+@sonney2k	next year we have to book more early
+@sonney2k	I think we could have saved 300 EUR in total
+@sonney2k	which is about what the server costs :/
+-!- gsomix__ [~gsomix@178.45.41.63] has quit [Ping timeout: 245 seconds]
+ lisitsyn	sonney2k: but we can't spend the money other way right?
+@sonney2k	lisitsyn, what do you mean?
+ lisitsyn	sonney2k: we can use it only for flight tickets I mean
+@sonney2k	lisitsyn, yes
+@sonney2k	woah they added 17 EUR for paying with credit card and another 17 for issuing ticket
+ lisitsyn	sonney2k: hah that's very sowjetische
+ lisitsyn	sonney2k: why credit card is additional cost? would they instead like to see you in person and have your cash? :D
+-!- HeikoS [~androirc@90.204.242.124] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	good evening comrades
+ pickle27	evening
+@iglesiasg	we should find out what's happening with Kyle's machine
+ pickle27	yeah see if he can paste for us
+@iglesiasg	it is because C++11 I think
+@sonney2k	I guess so too
+@sonney2k	he has been suffering for a bit too long :D
+@sonney2k	actually :/
+@iglesiasg	sonney2k, I just got an email to accept your answer in the mailing list
+@iglesiasg	wtf
+@sonney2k	iglesiasg, nah
+@sonney2k	I switched my main machine
+@sonney2k	now all settings are gone
+@sonney2k	I am finally back to work on a desktop
+@sonney2k	notebooks suck :D
+@iglesiasg	sonney2k, haha
+@iglesiasg	powerful machine?
+@sonney2k	yeah
+@sonney2k	better than our new buildbot
+@sonney2k	and it was idling here
+@iglesiasg	why can it be that C++11 is not been recognized?
+@iglesiasg	is there anyone around using gcc 4.4.7?
+@sonney2k	iglesiasg, I think our old buildbot
+@sonney2k	4.4.5 even
+@iglesiasg	sonney2k, this one http://shogun-toolbox.org/buildbot/?
+@sonney2k	one of them - I think slave3
+@sonney2k	yes slave3
+@sonney2k	the problem is that c++11 features got slowly introduced by compilers
+@sonney2k	so they did support only a bit of it at some point
+@iglesiasg	sonney2k, but the thing I find weird is that I don't see these lines in Kyle's log
+@iglesiasg	-- Performing Test _HAS_CXX11_FLAG
+@iglesiasg	-- Performing Test _HAS_CXX11_FLAG - Failed
+@iglesiasg	-- Performing Test _HAS_CXX0X_FLAG
+@iglesiasg	-- Performing Test _HAS_CXX0X_FLAG - Success
+@iglesiasg	maybe he didn't paste them though
+@sonney2k	well CXX0X found - maybe someone used a CXX11 feature under the CXX0X brand
+@iglesiasg	sonney2k, where do you see CXX0X found in Kyle's log?
+@iglesiasg	what I pasted above is from the buildbot
+@sonney2k	-- Performing Test _HAS_CXX0X_FLAG - Success
+@sonney2k	ahh
+@sonney2k	iglesiasg, ok lets see what he says
+@iglesiasg	yep
+--- Log closed Fri Aug 30 00:00:37 2013

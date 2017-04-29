@@ -1,0 +1,857 @@
+--- Log opened Sat Apr 21 00:00:15 2012
+--- Day changed Sat Apr 21 2012
+ wiking	https://github.com/shogun-toolbox/shogun/pull/475
+ CIA-64	shogun: Viktor Gal master * r68d1090 / doc/Doxyfile : Show inherited functions in the class documentation - http://git.io/Spcrfw
+ CIA-64	shogun: Soeren Sonnenburg master * rdc284a5 / doc/Doxyfile :
+ CIA-64	shogun: Merge pull request #475 from vigsterkr/master
+ CIA-64	shogun: Show the inherited functions in the doxygen doc - http://git.io/D5zEYQ
+ gsomix	ok, homework is finished
+ gsomix	I just will have watched this video before I fall asleep: http://www.youtube.com/watch?v=VznlDlNPw4Q
+ gsomix	hehe
+ gsomix	good night, guys
+@sonney2k	wiking, do you understand why the apply() function from CMulticlassMachine is not visible in CLibSVMMulticlass?
+@sonney2k	causing these errors: http://shogun-toolbox.org/buildbot/builders/octave_static/builds/691/steps/test_1/logs/stdio
+@sonney2k	I don't get it...
+ wiking	mmm lemme check
+@sonney2k	hierarchy is a bit deep : Machine -> MulticlassMachine -> KernelMulticlassMachine -> MulticlassSvm -> LibSVMMulticlass
+ wiking	mmm
+ wiking	i don't even see apply() in shogun/classifier/svm/LibSVMMulticlass.h
+@sonney2k	it is not in LibSVMMulticlass
+@sonney2k	it is in MulticlassMachine
+ wiking	oh yeah
+ wiking	i see now
+ wiking	ah ok
+ wiking	virtual CLabels* apply();
+@sonney2k	but all do class MulticlassSVM : public KernelMulticlassMachine
+@sonney2k	yeah
+@sonney2k	so it should be visible...
+ wiking	lol this is really weird
+@sonney2k	wiking, it is crazy
+@sonney2k	if I define the apply() function in LibSVMMulticlass and just let it call CKernelMulticlassMachien::apply() then it works
+@sonney2k	wiking, here is the (subtle!) reason 23.9 in c++ faq http://www.parashift.com/c++-faq-lite/strange-inheritance.html
+ wiking	"It means you're going to die.
+ wiking	:D
+ emrecelikten	:D
+ wiking	hahaha
+ wiking	so you'll need using
+ wiking	aaah
+ wiking	so this is what all the clang error is with hidding
+@sonney2k	wiking, actually the better fix is to remove apply(int) from LibSVMMulticlass
+ wiking	"../shogun/lib/Array.h:134:30: note: hidden overloaded virtual function 'shogun::CArray<long double>::get_name' declared here
+ wiking	                inline virtual const char* get_name() const { return "Array""
+ wiking	and such
+@sonney2k	it should go in MulticlassMachine
+@sonney2k	then all would be good again
+ wiking	ah not this one
+ wiking	so like this one:
+ wiking	"ib/Array3.h:308:30: warning: 'shogun::CArray3<long long>::get_name' hides overloaded virtual function [-Woverloaded-virtual]
+ wiking	                inline virtual const char* get_name() { return "Array3"; }"
+ wiking	:>
+@sonney2k	wiking, CArray and friends are obsolete and scheduled for removal by gsomix :)
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- Netsplit *.net <-> *.split quits: naywhayare
+-!- Netsplit over, joins: naywhayare
+ CIA-64	shogun: Soeren Sonnenburg master * r949fd1d / (2 files in 2 dirs):
+ CIA-64	shogun: workaround fix that fixes compile error of multiclass examples
+ CIA-64	shogun: real fix should remove apply(int) from MulticlassSVM (and move it
+ CIA-64	shogun:  MulticlassMachine) instead - http://git.io/8bilYg
+@sonney2k	nite
+-!- Netsplit *.net <-> *.split quits: naywhayare
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- Netsplit over, joins: naywhayare
+-!- emrecelikten [~emre@176.40.238.20] has quit [Ping timeout: 245 seconds]
+-!- PhilTillet [~Philippe@157.159.42.154] has joined #shogun
+-!- hpsoar_ [7c108901@gateway/web/freenode/ip.124.16.137.1] has joined #shogun
+-!- hpsoar_ [7c108901@gateway/web/freenode/ip.124.16.137.1] has quit [Quit: Page closed]
+-!- PhilTillet [~Philippe@157.159.42.154] has quit [Ping timeout: 264 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- vikram360 [~vikram360@117.192.160.121] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- vikram360 [~vikram360@117.192.160.121] has quit [Ping timeout: 240 seconds]
+-!- vikram360 [~vikram360@117.192.191.63] has joined #shogun
+-!- vikram360 [~vikram360@117.192.191.63] has quit [Ping timeout: 240 seconds]
+-!- vikram360 [~vikram360@117.192.191.63] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- blackburn [~qdrgsm@188.168.2.179] has joined #shogun
+ blackburn	lol I've been sleeping for 17 hrs
+ blackburn	what did I miss?
+ wiking	ahhaha
+ wiking	rebase :>
+ wiking	blackburn: apparently there's going to be 8 slots used
+ wiking	for this years gsoc of shogun
+ blackburn	wiking: is it supposed to be a surprise for me? ;)
+ wiking	hehehe dunno
+ n4nd0	blackburn: 17 hours!?! that must be a record man
+ blackburn	n4nd0: yeah but my sleep time has been tightly upper bounded with 4 hrs/day this week :D
+ n4nd0	hehe
+ n4nd0	blackburn: how did school stuff go anyway, everything good?
+ blackburn	yeah I passed this shity optics
+ blackburn	NO MORE OPTICS
+ n4nd0	cool
+ n4nd0	do they give the grades so fast?
+ blackburn	n4nd0: yes it is pass/fail exam
+ n4nd0	ok, I see
+ blackburn	2 days, 9 hours remaining!
+ gsomix	blackburn, "rabotatchs"
+ blackburn	wrong
+ gsomix	okay :(
+-!- pluskid [~pluskid@111.120.90.75] has joined #shogun
+ n4nd0	pluskid: hey! I think I didn't tell you, but thank you for the reference to the video in the mailing list
+ pluskid	n4nd0, u r wel~ :)
+ n4nd0	I think it is good
+ pluskid	it seems my last patches have caused a lot of warnings/errors, and sonney2k helped me to fix many, I should also thank him!
+ pluskid	sonney2k, sonne|work, around?
+-!- PhilTillet [~Philippe@157.159.42.154] has joined #shogun
+-!- gsomix [~gsomix@83.234.54.246] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+ n4nd0	sonney2k: I got some results with the CT stuff
+@sonney2k	n4nd0, I am listening :)
+@sonney2k	pluskid, yeah well I guess it would have been better to compile for all interfaces and run make check-examples for such intrusive things
+ n4nd0	sonney2k: I have not made yet the comparison of just the distance functions
+ n4nd0	sonney2k: but the one with the whole KNN
+ pluskid	sonney2k, OK, I'll remember this
+ n4nd0	sonney2k: for the whole KNN, JL is still faster
+ pluskid	for the apply(int) issue, putting the "using" statement in MulticlassSVM will solve the problem
+ pluskid	but there are other problems
+ pluskid	I'm trying to fix them
+@sonney2k	n4nd0, so then we know that there are other problems
+@sonney2k	pluskid, I am not happy about the using thing
+ pluskid	sonney2k, why?
+ n4nd0	sonney2k: yeah, there must a bottleneck somewhere else
+@sonney2k	pluskid, I mean the apply(int) function is not necessary in libsvmmulticlass
+@sonney2k	so why not move it into multiclassmachine
+ pluskid	sonney2k, there *is* one apply(int) in multiclassmachine
+ pluskid	which is marked as unimplemented
+@sonney2k	n4nd0, well compare the distance functions then the raw tree query /construction times and then we know
+ n4nd0	sonney2k: but I think we cannot forget that JL uses internally float and so on
+@sonney2k	pluskid, yeah but you can directly implement it
+@sonney2k	there
+@sonney2k	not in *svm kernelmulticlass*
+@sonney2k	n4nd0, yeah float should give speedup factor 2
+ n4nd0	sonney2k: do you think that if making a profile of the code and comparing the total time in JL's distance function with the total time in our distance function gives a fair comparison of them?
+ blackburn	I'm currently moving things to multiclass
+ blackburn	(just FYI)
+ pluskid	blackburn, moving things like LaRank ?
+ blackburn	yes
+@sonney2k	pluskid, so what do you think?
+ pluskid	sonney2k, you mean an apply(int) for a *generic* multiclass machine?
+ pluskid	Is it possible?
+@sonney2k	pluskid, you have an apply() in there for a generic multiclass machine
+@sonney2k	so apply(int) should be possible int he same way
+ blackburn	yes it is possible
+ pluskid	It is possible if we built on top of apply() or apply(Features *)
+ pluskid	but
+ pluskid	hmm...
+ pluskid	let me think
+ pluskid	I'm a little confused
+ pluskid	so apply(num i), here i should indicate the index in the training samples, right?
+-!- harshit_ [~harshit@182.68.43.52] has joined #shogun
+ harshit_	hi everyone :)
+ blackburn	hi
+@sonney2k	pluskid, blackburn most important though is to get the buildbot happy again
+@sonney2k	seems like multiclass is totally borken now
+ pluskid	sonney2k, working hard on that
+ blackburn	sonney2k: why?
+ pluskid	but in one-vs-one strategy, only a subset of the training samples are used to train each pair
+@sonney2k	no idea
+@sonney2k	check the buildbot logs
+ blackburn	ah I see
+ blackburn	should be easy to fix
+ blackburn	kernel is not initialized hmm
+ pluskid	blackburn, what do you mean?
+ blackburn	pluskid: it fails on assertion m_kernel
+ blackburn	in gmnp
+ blackburn	and larank
+ blackburn	I'll try to fix it
+ pluskid	ok, thank you
+ pluskid	sonney2k, I think I figured out why "apply(int) in MulticlassMachine is possible", I'll try to fix this
+* wiking wonders if there's a reason why nobody is putting out an example train/test set for latent svm :O
+ blackburn	wiking: no dataset at all?
+ wiking	nothing
+ wiking	there's no such thing as
+ wiking	example.train and example.test
+ wiking	so that there are the features out of box
+ wiking	and u would just need to run the classifier on it
+ wiking	everybody talks about using this and that dataset
+ wiking	but then what they expect u to do is download the dataset, redo the whole feature extraction
+ wiking	etc etc
+@sonney2k	wiking, email the people
+@sonney2k	that's why I usually did
+ blackburn	yeah may be they will share?
+ blackburn	n4nd0: could you please add some doc for jl covertree to avoid warnings?
+ n4nd0	blackburn: sure
+@sonney2k	n4nd0, btw how much faster did it get with the distance trick?
+ n4nd0	sonney2k: give me a moment to give you a more less accurate answer, I actually didn't compare that explicitily :P
+-!- harshit_ [~harshit@182.68.43.52] has quit [Ping timeout: 265 seconds]
+-!- Netsplit *.net <-> *.split quits: naywhayare, PhilTillet, pluskid
+ blackburn	sonney2k: modular multiclass is totally ok
+@sonney2k	blackburn, good to hear
+@sonney2k	then I guess setting the kernel is gone for these multiclass machines in the static interface
+ blackburn	yeap
+-!- Netsplit over, joins: PhilTillet, pluskid, naywhayare
+@sonney2k	blackburn, so git log shogun/ui and then diff and all good :)
+ blackburn	sonney2k: how can it help?
+ blackburn	I don't think it is such a explicit regression
+ pluskid	all back again
+ blackburn	owh
+-!- harshit_ [~harshit@182.68.43.52] has joined #shogun
+ blackburn	sonney2k: I was right - requires some patching at GUIClassifier.cpp:613
+ n4nd0	sonney2k: mmmm it is actually taking more time after the trick ...
+ PhilTillet	pluskid, I think we were moved in some kind of parallel universe :o
+ pluskid	PhilTillet, yes, and it seems they never noticed this
+ PhilTillet	yes :)
+ pluskid	I'm wondering what the IRC log will say after a while
+ PhilTillet	:p
+ blackburn	hah wtf?
+ blackburn	split caused some msg misses?
+ PhilTillet	yes there was something like a split :p
+ PhilTillet	pluskid and I were moved to a parallel universe
+ n4nd0	sonney2k: it depends on the datasets, for one with vectors of dimension 10 the trick makes a bit slower
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: Lost terminal]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	sonney2k: for the second dataset is like half time after the trick
+ pluskid	blackburn, since both of us are working on multiclass, I would like to issue small pull requests
+ blackburn	pluskid: what do you want to fix?
+ pluskid	here's one moving apply(int) from multiclassSVM to multiclassMachine
+ pluskid	in the pull request I just issued
+ pluskid	so you have fixed all the other errors?
+ pluskid	PhilTillet, it seems to be this: http://en.wikipedia.org/wiki/Netsplit
+ blackburn	pluskid: no havin' a luv time with uninitialized kernel issue
+ pluskid	blackburn, you will do it? or I will do it?
+ blackburn	pluskid: I will
+ pluskid	blackburn, thanks!
+ PhilTillet	pluskid, indeed
+ pluskid	are there any other errors to fix?
+ pluskid	python_modular is OK now in my local box
+ blackburn	pluskid: modular is ok
+ blackburn	static is broken
+ pluskid	hmm
+ blackburn	pluskid: can you please rebase your patch once I commit my changes?
+ blackburn	it would be really hard to merge it right now
+ pluskid	blackburn, OK
+ pluskid	blackburn, tell me after you commit
+ blackburn	ok
+ blackburn	pluskid: I actually renamed libsvmmulticlass
+ blackburn	to multiclasslibsvm
+ blackburn	and moved things
+ pluskid	hmm
+ pluskid	that makes merging complicated
+ blackburn	yes
+ pluskid	I'll handle it
+ pluskid	since my changes here are much simpler
+-!- harshit_ [~harshit@182.68.43.52] has quit [Quit: Leaving]
+ blackburn	pluskid: hmm if you revert classifier.i and classifier/svm changes it would be easy
+ pluskid	blackburn, but that's almost all my changes :p
+ pluskid	however, don't worry, I'll deal with the merging
+ blackburn	no, multiclass machine is the most important I thought
+ blackburn	and multiclass svm
+ pluskid	yes
+ blackburn	I didn't modify it that much so it will ease merging
+ pluskid	hmm
+ blackburn	hah using stuff is something surprising for me
+ pluskid	using is removed now :)
+ blackburn	yes
+ pluskid	apply(int) is moved to multiclassMachine
+ n4nd0	see you later guys!
+ blackburn	see you
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ pluskid	cu
+ blackburn	pluskid: hopefully fixed static issue - will try right now
+ pluskid	blackburn, bless ^_^
+ blackburn	dman
+ blackburn	failed
+ blackburn	attempt #3
+ blackburn	oh
+ blackburn	that's painful
+ pluskid	hmm
+ pluskid	basically, what's causing errors?
+ blackburn	pluskid: separating things
+ blackburn	pluskid: static handles it as SVM
+ pluskid	"it" means multiclassSVM?
+ blackburn	yes
+ pluskid	that would be painful
+ blackburn	yay!
+ blackburn	pluskid: that works I think
+ pluskid	blackburn, cool!
+-!- vikram360 [~vikram360@117.192.191.63] has quit [Ping timeout: 248 seconds]
+ blackburn	pluskid: I haven't thought it would be so intrusive hehe sorry
+ pluskid	blackburn, me too
+ pluskid	I totally forgetten about other interfaces
+ CIA-64	shogun: Sergey Lisitsyn master * r17ff86c / (41 files in 11 dirs): A bunch of multiclass fixes and improvements - http://git.io/oF9EBQ
+ blackburn	pluskid: rebase your fix please
+ pluskid	blackburn, ok
+ blackburn	oh damn I shouldn't remove using
+ blackburn	sh
+ blackburn	okay we have to wait for your fix to make it compileable
+ pluskid	ok
+ pluskid	I'll try to be fast
+ shogun-buildbot	build #764 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/764  blamelist: blackburn91@gmail.com
+ pluskid	checking local compilation
+ blackburn	oh
+ blackburn	hehe
+ pluskid	shogun-buildbot is faster than me, haha
+ blackburn	I fucked up a little
+ CIA-64	shogun: Sergey Lisitsyn master * r9b94e78 / src/shogun/ui/GUIClassifier.cpp : Fix for GUIClassifier include - http://git.io/e8JmYw
+ pluskid	it seems each time I checked out a new branch, all file's timestamp is updated by git, and the whole thing needs to be compile again
+ blackburn	pluskid: hmm really? here it needs to be recompiled each time *.h is changed
+ blackburn	shogun-buildbot: I am so so sorry I didn't mean to break your heart
+ blackburn	:D :D
+ pluskid	I haven't checked carefully, but it seems the compile time becomes long each time when I check out to another branch
+ blackburn	pluskid: I think it related to *.h changes
+ pluskid	can shogun-buildbot talk? :)
+ blackburn	pluskid: no, I am crazy - that's all ;)
+ pluskid	blackburn, hmm, not sure, will check the next time
+ pluskid	blackburn, I remember seeing him talk, maybe my memory is confused...
+ blackburn	pluskid: all he answers is 'What you say!'
+ pluskid	blackburn, oh, maybe that's what I saw
+ blackburn	pluskid: I hope you use --disable-optimizations
+ shogun-buildbot	build #765 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/765
+ pluskid	blackburn, in ./configure ?
+ pluskid	why?
+ blackburn	pluskid: much faster to compile
+ pluskid	blackburn, thanks!
+ pluskid	my laptop really compiles slow
+ pluskid	I've already disabled all but python_modular interfaces
+ blackburn	pluskid: -00 instead of -O3
+ blackburn	however interfaces would be slow still
+ pluskid	hmm
+ blackburn	a lot of generated code there
+ blackburn	you also may use ccache
+ pluskid	ccache?
+ blackburn	and make -j2
+ blackburn	or even -j4
+ pluskid	I won't do that
+ pluskid	I tried make -j before
+ pluskid	whole GUI dead
+ blackburn	ahh
+ blackburn	not enough ram I guess
+-!- vikram360 [~vikram360@117.192.191.63] has joined #shogun
+ blackburn	hehe
+ pluskid	only 2G here
+ pluskid	I really miss the 8G PC in my lab
+ pluskid	and the 256G-mem server...
+ blackburn	you should buy new one with gsoc money hehe
+ pluskid	haha, I guess I will be in school again after this summer, and hopefully there are powerful computers there
+ pluskid	finished compiling
+ pluskid	runing make check-examples
+ blackburn	shit
+ blackburn	I forgot lbshogun example
+ pluskid	hmm
+ blackburn	pluskid: so is your fix ready?
+ pluskid	yes
+ blackburn	rebased?
+ pluskid	yes
+ blackburn	nice
+ pluskid	I'll issue the pull request
+ pluskid	wait a minute
+ pluskid	btw: classifier_libsvmmulticlass.cpp:4:52: fatal error: shogun/classifier/svm/LibSVMMulticlass.h: No such file or directory
+ pluskid	shall I fix it here, or you fix?
+ pluskid	you fix, since you can push directly to the shogun repo
+ CIA-64	shogun: Sergey Lisitsyn master * r0edfe54 / (3 files): Libshogun example fix - http://git.io/dTd5sw
+ blackburn	pluskid: I fixed
+-!- karlnapf [~heiko@dhcp-169-206.internal.eduroam.ucl.ac.uk] has joined #shogun
+ blackburn	ok so I'll merge once you update your pr
+ blackburn	karlnapf: hey there
+ karlnapf	blackburn, hi :)
+ pluskid	blackburn, see the pull request
+ blackburn	karlnapf: we are having crazy -> multiclass transition this time
+ karlnapf	blackburn, just saw a bit
+ karlnapf	whats happening?
+ CIA-64	shogun: Chiyuan Zhang master * rbde47e7 / (4 files in 2 dirs): Move apply(int) from MulticlassSVM to MulticlassMachine - http://git.io/Bz5Gog
+ CIA-64	shogun: Sergey Lisitsyn master * rc473349 / (4 files in 2 dirs): Merge branch 'multiclass-fix2' of git://github.com/pluskid/shogun - http://git.io/m01e2A
+ blackburn	karlnapf: we moved all multiclass svms to shogun/multiclass
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ karlnapf	oh wow
+ karlnapf	but I guess thats good
+ blackburn	pluskid: I hope it will work this time :)
+ pluskid	blackburn, hope, too
+ blackburn	karlnapf: yes as preparations for gsoc multiclass project
+ pluskid	shogun-buildbot, come up
+ karlnapf	all hail the buildbot :)
+ blackburn	pluskid: I think it is some coffee/tea/vodka time
+ blackburn	it would take a while
+ pluskid	hmm
+ blackburn	pluskid: I prefer vodka so see you a little later :D
+ pluskid	blackburn, cu
+ karlnapf	blackburn, bye
+ blackburn	karlnapf: bye :)
+ blackburn	however I am not going to vodka right now (april,23 is the vodka day heh) so brb in hour or so
+-!- pluskid [~pluskid@111.120.90.75] has quit [Ping timeout: 240 seconds]
+-!- pluskid [~pluskid@173.254.214.60] has joined #shogun
+-!- PhilTillet [~Philippe@157.159.42.154] has quit [Ping timeout: 240 seconds]
+-!- vikram360 [~vikram360@117.192.191.63] has quit [Read error: Connection timed out]
+-!- vikram360 [~vikram360@117.192.191.63] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	uh
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Read error: Operation timed out]
+ CIA-64	shogun: Sergey Lisitsyn master * r4799988 / examples/undocumented/libshogun/classifier_multiclasslibsvm.cpp : Finally fixed multiclasslibsvm example - http://git.io/8ZNaHQ
+ blackburn	DAMN
+-!- vikram360 [~vikram360@117.192.191.63] has quit [Ping timeout: 252 seconds]
+ CIA-64	shogun: Sergey Lisitsyn master * r08e238f / src/shogun/ui/GUIClassifier.cpp : Fixed static interface multiclass handling - http://git.io/5dZiMA
+ blackburn	fixed finally
+ blackburn	pluskid: okay it seems buildbot will be happy this time
+ pluskid	congrats!
+ blackburn	pluskid: do you want new task? :)
+ pluskid	but buildbot seems be asleep? :p
+ blackburn	yeah a littl
+ blackburn	e
+ pluskid	blackburn, haha, what's it?
+ blackburn	no idea - but I can always suggest something
+ pluskid	for example?
+ blackburn	hmm if you want an example I have to think about and get an idea hehe
+ blackburn	pluskid: it actually depends on what you would like to do
+ pluskid	blackburn, haha, that then depends on what idea I'm finally assigned (if I can luckily get one slot)
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ pluskid	I have relatively wide interests, though
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Client Quit]
+ blackburn	tight situation hehe
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ pluskid	btw, other than machine learning related topics, I'm really interested in getting automatic ref-counting in shogun, but that would be a *really* huge project
+ pluskid	and I'm not sure everybody likes it :p
+ blackburn	pluskid: yes it is a good thing but it would override your main project right?
+ pluskid	blackburn, yes
+ pluskid	and such intrusive thing is really better to be tried in seasons where not so many people are working together
+ pluskid	otherwise, merging would be a nightmare, haha
+ blackburn	yeap
+-!- gsomix [~gsomix@85.26.234.22] has joined #shogun
+ gsomix	hello
+-!- karlnapf [~heiko@dhcp-169-206.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 245 seconds]
+ blackburn	pluskid: what do you think about DAG multiclass svm training?
+ blackburn	shit again
+ blackburn	it failed
+ pluskid	blackburn, I have no idea about this
+ pluskid	any reference?
+ pluskid	or brief description?
+ blackburn	hmm I am not aware of any good
+ blackburn	the idea is clear - it is just a tree classifier
+ pluskid	hmm
+ pluskid	but where comes the tree structure?
+ pluskid	pre-defined?
+ blackburn	yes
+ pluskid	by the user?
+ blackburn	yes exactly
+ blackburn	if you have classes 1,2,3,4 you would have something like
+ blackburn	(1,2,3,4)
+ blackburn	(1,2)      (3,4)
+ blackburn	(1)       (2)           (3)         (4)
+ pluskid	I see
+ blackburn	so there you would need to define 3 classifiers
+ blackburn	1,2 vs 3,4
+ blackburn	and two 1 vs 2 and 3 vs 4
+ pluskid	a binary tree
+ blackburn	yeap
+ pluskid	I can do this, but is this really useful?
+-!- vikram360 [~vikram360@117.192.183.59] has joined #shogun
+ blackburn	yes it can be pretty useful
+ blackburn	this approach constructs sth like lg K classifiers
+ pluskid	hmm, maybe, but preparing a structure as the input can be a lot of work for the user
+ pluskid	yes, it would be more efficient than OvR or OvO
+ pluskid	though the performance might drops
+ blackburn	this is not obvious for me actually
+ pluskid	hmm
+ blackburn	imagine classes lying at
+ blackburn	(+-1,+-1)
+ blackburn	how would OvR look like/
+ blackburn	?
+ pluskid	what do you mean by +-1 ?
+ blackburn	(1,1) (1,-1) (-1,1) (-1,-1)
+ pluskid	hmm, tree structure could be good in this example
+ pluskid	as long as the tree is correctly constructured
+ pluskid	:)
+ blackburn	heh right
+ pluskid	anyway, I think this is a worsewhile task for now
+ pluskid	let the user to think about the tree structure, I will not care about that, haha
+ pluskid	time to sleep now, cu tomorrow
+ blackburn	ah it is late already
+ blackburn	heh good night
+ pluskid	nite
+-!- pluskid [~pluskid@173.254.214.60] has quit [Quit: Leaving]
+-!- karlnapf [~heiko@dhcp-169-206.internal.eduroam.ucl.ac.uk] has joined #shogun
+ CIA-64	shogun: Sergey Lisitsyn master * rd453d98 / src/shogun/ui/GUIClassifier.cpp : Fixed mkl applying in static - http://git.io/WrTxTA
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has joined #shogun
+ shogun-buildbot	build #699 of r_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/699
+ shogun-buildbot	build #721 of cmdline_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/721
+ shogun-buildbot	build #700 of octave_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/700
+-!- karlnapf [~heiko@dhcp-169-206.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 248 seconds]
+ shogun-buildbot	build #687 of python_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/687
+ blackburn	sonney2k: we are happy people again
+ shogun-buildbot	build #512 of java_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/java_modular/builds/512
+ PhilTillet	Compiling spree
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has quit [Quit: Leaving]
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has joined #shogun
+ gsomix	shogun-buildbot, good work!
+ shogun-buildbot	What you say!
+ gsomix	^^''
+ shogun-buildbot	build #535 of octave_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/535
+ shogun-buildbot	build #522 of csharp_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/csharp_modular/builds/522
+ shogun-buildbot	build #503 of ruby_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/503
+ wiking	hahahahaha
+ wiking	we saw that shogun-buildbot
+ wiking	:>
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ gsomix	n4nd0, hi
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 248 seconds]
+-!- blackburn [~qdrgsm@188.168.2.179] has quit [Ping timeout: 245 seconds]
+-!- karlnapf [~heiko@host86-181-81-47.range86-181.btcentralplus.com] has joined #shogun
+ karlnapf	hi
+ karlnapf	sonney2k, around?
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+ karlnapf	blackburn, hi
+ blackburn	karlnapf: hey
+ karlnapf	I got a problem, perhaps you can help me
+ blackburn	yes I read you message
+ blackburn	but I didn't get the problem yet
+ karlnapf	pretty strange
+ blackburn	let me try to do that once again
+ karlnapf	Ill send you a little program which demonstrates the problem
+ karlnapf	http://pastebin.com/A0ijwE7Q
+ karlnapf	now have a look at the output
+ karlnapf	in conjunction with the method
+ karlnapf	TParameter::new_sgserial
+ karlnapf	in Parameter.cpp
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has quit [Ping timeout: 245 seconds]
+ blackburn	karlnapf: so the problem is that you need to have DynamicObjectArray in that map?
+ karlnapf	I need to serialise a CDynamicObjectArray<CSGObject>
+ karlnapf	but the new_sgserializable method returns NULL
+ karlnapf	so I get this Warning
+ blackburn	but it just reads from that generated map right?
+ karlnapf	and I cannot load
+ karlnapf	which generated map?
+ karlnapf	class_list.cpp
+ karlnapf	?
+ blackburn	yes
+ karlnapf	yes
+ blackburn	new_sgserializable just find in that map
+ karlnapf	But its not as trivial as just adding it
+ blackburn	karlnapf: btw don't you think it should be a stl map there?
+ karlnapf	since I kind of need a type
+ karlnapf	No, I want to have SG_REF/UNREF
+ karlnapf	Otherwise I will get mad with memory problems
+ karlnapf	Thats why we have these containers
+ blackburn	I mean new_sgserializable does search using comparison with each key
+ blackburn	no, not instead of dynobjarray
+ karlnapf	ah ok
+ karlnapf	in the class list
+ blackburn	instead of new_sgserializable?
+ karlnapf	well I dont care actually :)
+ blackburn	that looks fucking awful for me
+ blackburn	however it is not the problem now
+ karlnapf	but, yes you are right
+ blackburn	karlnapf: I think if you add it to interfaces/modular/SGBase.i or so
+ blackburn	it would work
+ karlnapf	mmh, but this is before the inferfaces
+ karlnapf	I cannot run any of my libshogun serialization examples
+ blackburn	class_list is constructed before?
+ blackburn	ahhhhh
+ wiking	ASDF!@#
+* wiking getting maaaad!
+ blackburn	karlnapf: but that classlist map is based on names listed in interfaces..
+ karlnapf	yes
+ karlnapf	mmmh
+ karlnapf	oh no
+ blackburn	no?
+ karlnapf	I think its not possible to have generic arrays which can have a CSGObject as type
+ karlnapf	because this generic type could again be an array
+ blackburn	why?
+ blackburn	ahaha
+ karlnapf	and then we cannot map these types to interfaces
+ karlnapf	Each generic type has a single type in interfaces
+ karlnapf	and you cannot do that recursively
+ karlnapf	 :(
+ blackburn	sounds bad
+ karlnapf	and thats exactly why CList is not generic
+ karlnapf	fuck, I always wondered why that was
+ karlnapf	goodbye type safety in CSGObject arrays :(
+ blackburn	karlnapf: can't you have dynobjarray of csubset there?
+ karlnapf	yes, but I need to change DynamicObjectArray to a non-generic type
+ karlnapf	like CList
+ karlnapf	but then you only know that your elements are CSGObject*
+ karlnapf	not of which type
+-!- karlnapf [~heiko@host86-181-81-47.range86-181.btcentralplus.com] has quit [Ping timeout: 260 seconds]
+@sonney2k	blackburn, hmmhh I think it is ok to have SGObject in there - it is a YMMV case to have these templated stuff and type safety or just SGObject and casts
+@sonney2k	I recall that karlnapf did prefer the first variant
+@sonney2k	and me the second
+ blackburn	sonney2k: I do not get you
+ blackburn	which problem it is?
+@sonney2k	CDynamicObjectArray being templated
+@sonney2k	vs. just using SGObject's as elements
+ blackburn	I am ok with it but how to solve this problem?
+@sonney2k	just remove templates
+@sonney2k	and use SGObjects
+@sonney2k	solved
+ blackburn	sonney2k: the only thing I do not like is new_sgserializable code
+@sonney2k	(1 million typecasts required then...)
+ blackburn	where?
+@sonney2k	where SGObjectArray is used
+-!- karlnapf [~heiko@host86-181-81-47.range86-181.btcentralplus.com] has joined #shogun
+@sonney2k	karlnapf, hmmhh is it soo bad to use SGObjects in there?
+@sonney2k	I know you have to typecast everywhere
+@sonney2k	but that's it
+ karlnapf	sonney2k, no
+ karlnapf	but do you remember that we discussed this about a year ago?
+@sonney2k	karlnapf, yes I just told blackburn that this is a YMMV case
+@sonney2k	either templates and no cast and assuming SG_REF/UNREF will work
+@sonney2k	or casting everythwere and knowing that SG_REF/UNREF work
+@sonney2k	you were favoring the first variant me the latter
+ karlnapf	I remember :)
+@sonney2k	it is still like this I guess :)
+ karlnapf	But the SGREF/UNREF is not so bad
+@sonney2k	because I wrote CList - and that uses the other way
+ karlnapf	but its impossible so serialise generic arrays where the elements are CSGObjects
+ karlnapf	well
+@sonney2k	I am fine with anything that works
+ karlnapf	did not see that these days
+-!- emrecelikten [~Anubis@176.40.238.20] has joined #shogun
+ karlnapf	I think I will change it to be non-generic
+@sonney2k	ok
+ karlnapf	lot of work, but shouldnt be too hard
+@sonney2k	not a lot of work
+ karlnapf	then type-safety is lost
+ karlnapf	yes I am using this thing in the parameter trees everywhere
+ karlnapf	but anyway
+ karlnapf	its easy so change :)
+@sonney2k	just remove the template and then do the missing casts (follow compiler errors)
+ karlnapf	yes, will do that
+@sonney2k	thx
+ karlnapf	btw then the new subset stuff should finally work
+ karlnapf	Ill have diner now, see you
+ blackburn	sonney2k: multiclass things are working again, I guess you know?
+@sonney2k	I have to modify the baby stroller now to add some board for the older child
+@sonney2k	cu
+ blackburn	heh
+@sonney2k	blackburn, yeah I've read the log
+@sonney2k	s
+@sonney2k	blackburn, no idea what you changed though
+ blackburn	sonney2k: interface handling
+@sonney2k	didn't read any patches - can you give me an update?
+ blackburn	it handled all the things with cast to kernel machine
+ blackburn	and now it checks whether it is a kernel multiclass machine
+@sonney2k	I see
+ blackburn	before it was something like
+ blackburn	casting and then calling the method
+@sonney2k	yeah I think everything in that function was svm
+ blackburn	it compiles but addresses to some unexistent method
+ blackburn	yes now it can be or svm either mc svm
+@sonney2k	makes sense
+@sonney2k	alright stroller is waiting...
+@sonney2k	brb
+@sonney2k	blackburn, btw - I have one question - shouldn't KernelMulticlassMachine not better be renamed to MulticlassKernelMachine?
+ blackburn	sonney2k: I have no idea
+ blackburn	actually yes
+ blackburn	sonney2k: but is it really worth such refactoring?
+ blackburn	both sounds ok I think
+ blackburn	sonney2k: hmm I think we need to stay it as it is
+ blackburn	reason:
+ blackburn	both kernelmulticlassmachine and linearmulticlassmachine are descendants of multiclassmachnie
+ blackburn	if it is multiclasskernelmachine it would look like it is a descendant of kernelmachine but that is not true
+@sonney2k	blackburn, good argument!
+* sonney2k returns from the stroller job :)
+@sonney2k	blackburn, this is how it looks like (in theory) http://www.buggyboard.info/image.php?src=buggies/354/X3Gimage2.jpg
+ blackburn	sonney2k: hehe so what did you change?
+@sonney2k	blackburn, I added this buggy board
+@sonney2k	attach some connectors to the orig strolley
+@sonney2k	stroller
+ blackburn	to the bottom?
+ blackburn	what is the purpose?
+@sonney2k	http://www.kinderpods.com/images/images_big/KT100260_5.jpg
+@sonney2k	that's the purpose
+ blackburn	ah
+ blackburn	heh
+ blackburn	nice
+@sonney2k	1 kid standing on it while the other can rest :D
+@sonney2k	only problem might be that the old one is not tall enough to see anything - but still I guess it is exciting if you don't have to walk :D
+ blackburn	heh yeah would be exciting still to see around
+ blackburn	sonney2k: can't new_sgserializable in shogun/base/class_list.cpp.templ be  faster?
+ wiking	yeees
+ wiking	https://github.com/kjmillerCURIS/spl/tree/fc487837aa5774d4811ad1696f09da9d28cc49d2/multi_spl/AlternateConvexSearch/test
+ wiking	!!!
+ blackburn	wiking: the dataset?
+ wiking	yep!
+ blackburn	even code is here
+ wiking	yeah i give a fuck about that one
+ wiking	of course now the problem is that it's a structural svm :D
+ wiking	hahaha
+ wiking	anyways i can mod i hope the data set
+ wiking	these are the kind of code that drives me fucking nuts. in the src hardcoded: kernelFile = '/afs/cs.stanford.edu/u/rwitten/projects/multi_kernel_spl/data/allkernels_info.txt'
+ wiking	;)
+ wiking	good to know that stanford uses ads :D
+@sonney2k	blackburn, yes of course
+@sonney2k	binary search at least
+ blackburn	sonney2k: I suggest to patch it to gsomix :)
+ blackburn	wiking: I always laugh on such paths
+@sonney2k	blackburn, well it is not really that important isn't i?
+@sonney2k	I mean when in serialization loading the data is slow not determining the class name or?
+@sonney2k	otherwise gsomix's hashmap is the thing to use
+ blackburn	sonney2k: heh right but doing some different patches could be fun
+ blackburn	and some not beautiful code there heh
+ blackburn	sonney2k: okay next question while you are around
+ blackburn	Copyright/Written
+ blackburn	what is separation?
+ blackburn	what is the reason to keep both in new file's copyrights?
+@sonney2k	blackburn, lots of stuff is copyright tu berlin / fraunhofer / max-planck
+@sonney2k	even though I've written it
+ blackburn	but new?
+@sonney2k	for new files it doesn't matter
+ blackburn	does this copyright prolongate?
+@sonney2k	I mean I even prefer giving the copyright to the students
+@sonney2k	I mean they can choose a (gpl compatible) license and use their code and release it under some other license if they want
+ blackburn	yeap
+@sonney2k	from this year on :)
+@sonney2k	last year it was all (C) fraunhofer, tu, max-planck
+ blackburn	I was thinking about some more general like Shogun team or so
+ blackburn	but it makes no sense ,right?
+@sonney2k	blackburn, for new ones you mean?
+ blackburn	sonney2k: yes
+ blackburn	sonney2k: and what about prolongation?
+@sonney2k	you mean 2010->2011->2012?
+ blackburn	yes
+ blackburn	if it is 1999-2008
+ blackburn	should we update it to 2012?
+ blackburn	or start new copyright
+@sonney2k	start new
+ blackburn	ok
+@sonney2k	I am usually to lazy to update these things... but in principle the rule would be everyone who touches a files also has a (C) line in there
+ blackburn	sonney2k: I will prepare some list of classes we need to doc
+ blackburn	for our doc madness :D
+ blackburn	and some assignments I think
+ gsomix	http://cs10363.userapi.com/u105967609/-14/y_6342d09d.jpg
+ blackburn	kugelshreiber lol
+@sonney2k	blackburn, 'dostoprimetschatchelnosti' is better or what?
+ blackburn	sonney2k: LOL
+ blackburn	sonney2k: recall me how to say it in german then?
+ blackburn	I bet it is not shorter ;)
+@sonney2k	sehenswuerdigkeiten :D
+ blackburn	lol
+ blackburn	that is not easier to spell
+ blackburn	I'd say harder however I am able to
+ blackburn	hmmm my connection sucks
+ blackburn	time for rest a little more heh
+ blackburn	see you
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Quit: Page closed]
+ gsomix	math homework - done => time to sleep
+ gsomix	good night, guys
+@sonney2k	cu all
+-!- gsomix [~gsomix@85.26.234.22] has quit [Ping timeout: 244 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+@sonney2k	n4nd0, so how big where the data?
+@sonney2k	dims and number of examples I mean
+ n4nd0	sonney2k: in both cases I used 10k vectors for training, 10k vectors to classify
+ n4nd0	in one of the examples the dimension is 10
+ n4nd0	in the other one is larger
+ n4nd0	for the one that is larger, KNN after the trick (x-y)? = x? + y? ...
+ n4nd0	was faster
+ n4nd0	for the other, it turned out to be slower
+ n4nd0	sonney2k: for the larger one, the dimension is exactly equal to 580
+ n4nd0	sonney2k: what do you think?
+@sonney2k	n4nd0, what exactly did you compare?
+@sonney2k	KNN + covertree runtime?
+ n4nd0	yes
+@sonney2k	I fail to see how it possibly can be faster - except if one has to do ||x-y|| for very few pairs of (x,y)
+ n4nd0	maybe the bound in the distance helped
+ n4nd0	but also, I think I don't really get why doing the decomposition should be that effective
+ n4nd0	when doing ||x-y|| I understand that the fact that it makes it to be "slow" to compute is that one needs to traverse the whole vector (providing that no bound is used)
+ n4nd0	but doing the decomposition we don't save this since it is still required to compute the part 2?x?y
+ n4nd0	do you see my point? There must be something I am not thinking correctly
+@sonney2k	n4nd0, you can apply the bound to ||x||^2 too btw
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has joined #shogun
+ n4nd0	yeah, I can do thtat
+ n4nd0	that*
+ n4nd0	mmm no wait, I don't think so
+ n4nd0	since we do
+ n4nd0	x^2 + y^2 - 2?x?y
+@sonney2k	ok
+ n4nd0	we cannot be sure about the bound before 2?x?y is computed since it has a negative sign
+ n4nd0	agree?
+@sonney2k	yes
+ n4nd0	anyway, what about what I asked ^?
+ n4nd0	why should this trick makes things much faster?
+@sonney2k	n4nd0, problem is you need to do some systematic evaluation - with all the unsure factors it is hard to come to any conclusion
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has quit [Quit: Leaving]
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has joined #shogun
+@sonney2k	n4nd0, because one just has to compute \sum_i x_i y_i instead of \sum_i (x_i - y_i)*(x_i-y_i)
+@sonney2k	see a lot less operations
+ n4nd0	ok
+@sonney2k	and one can use *fast* blas routines
+ n4nd0	not a good idea to think of it in terms of O(?) notation
+@sonney2k	not at all
+@sonney2k	n4nd0, but you should really time things seperately, just computing distance matrix (element by element) with JL's impl / this one / old one
+ n4nd0	sonney2k: with systematic evaluation the thing that you suggest is to test the modules individually, e.g. test how *just* the different distance functions perform
+ n4nd0	ok, you already answered :D
+@sonney2k	then cover tree construction times in shogun's JL covertree
+@sonney2k	and in JLs covertree
+@sonney2k	and query
+@sonney2k	only then we will know
+ n4nd0	sonney2k: I am a bit unsure about testing the distance function
+@sonney2k	why?
+ n4nd0	sonney2k: since this is called from the cover tree construction or query
+ n4nd0	I think the idea would be to count how many times it is called building the cover tree + querying it
+ n4nd0	later do a test that calls the different distance functions this number of times
+@sonney2k	n4nd0, well then accumulate the time that is spend in computing the distance in there
+@sonney2k	just have 3 variables
+@sonney2k	1 construction time (excludes distance comput)
+@sonney2k	2 distance comput
+@sonney2k	3 query time (w/o distance comput)
+ n4nd0	aham, I like the idea, I didn't consider it at all
+* n4nd0 is taking notes
+@sonney2k	n4nd0, please give this a shot ... and I am very interested in seeing these results
+@sonney2k	n4nd0, ahh btw if you use atlas - where did you get it from?
+ n4nd0	sonney2k: yeah
+ n4nd0	mm I don't know what you mean
+@sonney2k	which atlas library did you use and did you compile it your own?
+ n4nd0	this is the atlas library I have installed
+ n4nd0	libatlas-base-dev                              3.8.4-3build1
+ n4nd0	but I didn't do anything special to do this
+ n4nd0	I am sorry, but I don't get your question :S
+@sonney2k	n4nd0, atlas shipped with ubuntu / debian is orders of magnitude slower than what you can get when compiling it your own
+@sonney2k	to do so (on ubuntu / debian) do
+@sonney2k	cd /tmp
+@sonney2k	apt-get source atlas
+@sonney2k	cd atlas-*
+@sonney2k	fakeroot ./debian/rules custom
+@sonney2k	then you get a new package that you can install which is optimized for your system
+ n4nd0	interesting
+@sonney2k	it really makes a *HUGE* difference
+ n4nd0	cool, I am doing it right now
+@sonney2k	it is like enabling optimizations like sse or so
+@sonney2k	anyways I have to sleep now - looking forward to see the results
+@sonney2k	cu
+ n4nd0	good night
+ PhilTillet	n4nd0, that trick with dot(x-y,x-y) is interesting :p
+ PhilTillet	I had not really understood the point either :p
+ n4nd0	so the idea is that in order to compute the Euclidean distance between two points
+ n4nd0	something like
+ n4nd0	||x-y||
+ PhilTillet	yes I get it now
+ n4nd0	ok
+ PhilTillet	:p
+ n4nd0	it is already implemented in GaussianKernel if you are interested in any case
+ PhilTillet	I mean, when I implemented gaussian kernel for GPU
+ PhilTillet	i didn't understant that trick
+ PhilTillet	:p
+ PhilTillet	so I didn't use it
+ n4nd0	haha ok
+ PhilTillet	O(.) is misleading
+ PhilTillet	:p
+ n4nd0	yeah, for this example it doesn't explain it
+ n4nd0	one has to go a bit more to the # operations
+ PhilTillet	yep :p
+ PhilTillet	after all, I guess n is still 3times faster than n
+ PhilTillet	than 3n*
+ PhilTillet	XD
+ PhilTillet	I think algorithmics can be a trap
+ PhilTillet	cause a lot of implementation stuffs have to be taken into account :p
+ n4nd0	well, it is from *theoretical* CS
+ n4nd0	I like it quite a lot anyway
+ PhilTillet	yes
+ PhilTillet	:D
+ PhilTillet	both are super useful
+--- Log closed Sun Apr 22 00:00:19 2012

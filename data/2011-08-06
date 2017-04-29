@@ -1,0 +1,122 @@
+--- Log opened Sat Aug 06 00:00:09 2011
+@sonney2k	blackburn, do you know what java.io.OjectOutputStream is?
+ CIA-87	shogun: Soeren Sonnenburg master * r7013309 / (2 files in 2 dirs):
+ blackburn	sonney2k: it is byte output stream able to write/read objects
+ CIA-87	shogun: derive java modular classes from Serializable and add dummy
+ CIA-87	shogun: write/readObject functions - http://bit.ly/nsIyiM
+ CIA-87	shogun: Soeren Sonnenburg master * rf27d051 / (40 files in 9 dirs): Merge branch 'master' of github.com:shogun-toolbox/shogun - http://bit.ly/pD6nk7
+@sonney2k	blackburn, because I managed to do the changes
+@sonney2k	to java modular
+@sonney2k	the problem now is how to use shogun's self.save_serializable() with these streams
+ blackburn	you probably should pull before commit hehe
+@bettyboo	crazy
+ blackburn	sonney2k: OutputStream is a base class for output (write) byte streams
+ blackburn	it is able to write bytes, not some chars
+ blackburn	any *OutputStream is an facade or so
+ blackburn	e.g. ObjectOutputStream to write objects
+@sonney2k	so chars would work as well - currently I need to create some temporary file with this on disc - then load this and then I could stream the stuff java stylequestion is whether I should create a temporary file or
+@sonney2k	not
+@sonney2k	this would involve some new io thingy that does everything in memory
+ blackburn	hmm why you want to make temporary file?
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Read error: Connection reset by peer]
+@sonney2k	blackburn, to dump the object in there - it is all filename based currently
+ blackburn	if you want to use chars you could use OutputStreamWriter class
+ blackburn	it is designed to be adapter between char and byte streams
+ blackburn	sonney2k: so when you want to serialize object it is stored in file and after some interface load it?
+@sonney2k	blackburn, in shogun you can just write somesgobject.save_serializable(someserializablefile)
+ blackburn	how could it work with java?
+@sonney2k	someserializablefile can be xml dump of shogun objects, ascii file, hdf5, json ...
+@sonney2k	I don't understand the question
+@sonney2k	how not?
+@sonney2k	if one implements serializable interface
+ blackburn	of course it will
+ blackburn	I mean how could you use it
+ blackburn	in java write/readObject
+@sonney2k	and then the writeObject/readObject functions (which I would make to work by just doing sgobject.save_serializable(serializableasciifile('/tmp/x') then load that with java and write in this out stream)
+@sonney2k	same with loading
+ blackburn	okay, got it
+@sonney2k	I only meant one could save i/o if one does this immediately in memory avoiding the tmp file
+ blackburn	yes, I would say it is better
+@sonney2k	yeah but not implemented right now
+ blackburn	I see
+@sonney2k	so I will first do the file bases solution and then we can improve later (no user visible change...)
+ blackburn	I'll make a try to make distances parallel now
+@sonney2k	enjoy...
+@sonney2k	I need sleep
+@sonney2k	cu
+@bettyboo	kiss
+ blackburn	see you
+ blackburn	ahah
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+ CIA-87	shogun: Sergey Lisitsyn master * r86e9ed9 / (2 files): Made CDistance parallel - http://bit.ly/pDx1gD
+ blackburn	okay sleep now
+-!- blackburn [~blackburn@188.122.237.5] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.122.237.5] has joined #shogun
+-!- f-x [~user@117.192.222.6] has joined #shogun
+ f-x	sonney2k: hey, are you free?
+-!- f-x [~user@117.192.222.6] has quit [Remote host closed the connection]
+-!- f-x [~user@117.192.222.6] has joined #shogun
+-!- f-x [~user@117.192.222.6] has quit [Ping timeout: 260 seconds]
+-!- f-x [~user@117.192.222.6] has joined #shogun
+-!- blackburn [~blackburn@188.122.237.5] has quit [Ping timeout: 255 seconds]
+-!- blackburn [~blackburn@188.122.237.5] has joined #shogun
+ CIA-87	shogun: Sergey Lisitsyn master * r74f775f / (2 files): Made Isomap Heap-Dijkstra parallel - http://bit.ly/oEUrW6
+-!- blackburn [~blackburn@188.122.237.5] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.122.237.5] has joined #shogun
+ blackburn	SG_FREE(sonney2k) :D
+-!- blackburn [~blackburn@188.122.237.5] has quit [Quit: Leaving.]
+-!- heiko [~heiko@134.91.55.30] has joined #shogun
+-!- heiko [~heiko@134.91.55.30] has quit [Remote host closed the connection]
+-!- heiko [~heiko@134.91.55.30] has joined #shogun
+ heiko	sonney2k, it is not possible to use templates with two parameters right? class_list.cpp instanciates always with one type
+-!- heiko [~heiko@134.91.55.30] has quit [Quit: Leaving.]
+-!- f-x [~user@117.192.222.6] has quit [Ping timeout: 260 seconds]
+-!- f-x [~user@117.192.213.25] has joined #shogun
+-!- blackburn [~blackburn@188.122.237.5] has joined #shogun
+ f-x	sonney2k: could we make index_t unsigned int? (it's signed int now) and also including the typedef in common.h would be very convenient
+@sonney2k	f-x, making it unsigned int will probably cause a couple of issues
+@sonney2k	f-x, so it is timing wise a bad idea when we want a release in 3-4 weeks.
+@sonney2k	but it certainly should be in common.h
+ CIA-87	shogun: Alesis Novik master * r94d79dc / src/shogun/clustering/GMM.cpp : Some fixes and checking for illegal use. - http://bit.ly/nhDOdU
+ CIA-87	shogun: Soeren Sonnenburg master * re1eac74 / src/shogun/clustering/GMM.cpp :
+ CIA-87	shogun: Merge pull request #269 from alesis/gmm
+ CIA-87	shogun: Some fixes and checking for illegal use. - http://bit.ly/oz3gvd
+ f-x	then is it ok to use size_t? because replacing with index_t would cause some incompatibilites (that could be dealt with if i replace size_t with uint32_t but i don't like that)
+@sonney2k	f-x, size_t is a dangerous choice
+@sonney2k	because you don't know if it is 32 or 64 bit
+@sonney2k	f-x, I am just reading your patch - why didn't you move substring to SGIO ?
+ f-x	sonney2k: because i would need to rewrite the IO functions to use it
+@sonney2k	I mean these are only isolated helper functions
+@sonney2k	no
+ f-x	sonney2k: you mean i should move substring to SGIO but not do the get_vector_* modifications now?
+@sonney2k	yes
+ f-x	we should make AsciiFile buffered later on too, but it seems using the buffer is slower on my computer, and faster on yours and John's
+ f-x	so i want to wait for some more testing
+@sonney2k	f-x, but it was not really slower... I mean we were talking 1 mu sec or so
+ f-x	sonney2k: that's right, but again the improvement also is just 1 mu sec, so I was kind of hesitant to replace a thing like AsciiFile
+@sonney2k	f-x, yeah but you compared agains GNU getline...
+ f-x	anyway i have the buffered readers more or less ready
+ f-x	sonney2k: yes
+ f-x	okay, so it would make a huge difference on OS X
+ f-x	for which the flimsy version is implemented
+@sonney2k	f-x, anyway - so move it to SGIO
+ f-x	ok
+@sonney2k	and then we will see :)
+@bettyboo	:^)
+ f-x	sonney2k: is it better if i make substring a class and include the functions as member functions?
+ f-x	or is it ok the way it is?
+ f-x	the only difference would be s.float_of_substring() instead of float_of_substring(s)
+ f-x	etc
+@sonney2k	f-x, no don't make it a class
+@sonney2k	serialhex, around?
+@sonney2k	serialhex, if so time to rub-rub-ruby?
+ f-x	sonney2k: is including <string> in SGIO allowed? or should it be avoided?
+@sonney2k	would be great if you could avoid it
+@sonney2k	(like all std:: stuff)
+@sonney2k	f-x, blackburn sry but I need to sleep *again*
+@sonney2k	cu
+ blackburn	see you :)
+ blackburn	SG_FREE(sonney2k);
+ f-x	sonney2k: see ya
+-!- f-x [~user@117.192.213.25] has quit [Remote host closed the connection]
+--- Log closed Sun Aug 07 00:00:20 2011

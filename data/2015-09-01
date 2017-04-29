@@ -1,0 +1,71 @@
+--- Log opened Tue Sep 01 00:00:00 2015
+-!- PirosB3 [~pirosb3@host95-110-dynamic.252-95-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host95-110-dynamic.252-95-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 260 seconds]
+ shogun-buildbot	build #923 of nightly_none is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_none/builds/923
+ shogun-buildbot	build #1044 of nightly_default is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1044
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 240 seconds]
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 250 seconds]
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- Arnei [83ad216a@gateway/web/freenode/ip.131.173.33.106] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 256 seconds]
+-!- cgo [864c368c@gateway/web/freenode/ip.134.76.54.140] has joined #shogun
+-!- cgo [864c368c@gateway/web/freenode/ip.134.76.54.140] has quit [Client Quit]
+ Arnei	Anybody around who might help me out? I think i managed to install shogun as well as the modular python interface under ubuntu 14, but i can't get python to find the shogun modules.
+ lisitsyn	hey
+ lisitsyn	Arnei: install like with 'make install'?
+ Arnei	exactly that
+ Arnei	Lots of people suggest setting PYTHONPATH in the .bashrc file, but that does not seem change anything
+ lisitsyn	Arnei: sorry back
+ lisitsyn	Arnei: what happens when you do 'import modshogun'?
+ Arnei	it tells me that there is "no module named modshogun"
+ lisitsyn	okie
+ lisitsyn	Arnei: what did you do to compile python_modular interface?
+ Arnei	I cloned the shogun-toolbox from github, build it via cmake with the command "cmake -DPythonModular=On -DCMAKE_INSTALL_PREFIX="$HOME/shogun-install".." and then ran "make install". That's roughly it.
+@wiking	PYTHONPATH + LD_LIBRARY_PATH is your friend
+ Arnei	i tried setting that in the .bashrc, but to no avail
+ Arnei	to be more precise: export LD_LIBRARY_PATH="$HOME/shogun-install/lib:$LD_LIBRARY_PATH"
+ Arnei	export PYTHONPATH=$HOME/shogun-install/lib/python2.7/dist-packages:$HOME/shogun/examples/undocumented/python_modular:$PYTHONPATH
+ lisitsyn	shogun-install or shoguninstall?
+ lisitsyn	LD_LIBRARY_PATH is the second step
+ lisitsyn	first you need to make it detectable by python
+ lisitsyn	this is done via PYTHONPATH
+ lisitsyn	I guess your path is not yet correct
+ Arnei	aaah, i'm stumbling over the obvious again. Thanks, i'll see if correcting the paths will sort it out
+ Arnei	Okay, i copy&pasted the paths from the filemanager, they should be correct now. But there still is "no module named modshogun"
+ lisitsyn	Arnei: if you're setting .bashrc it could be that you didn't update it yet
+ lisitsyn	if you haven't restarted bash, do 'source ~/.bashrc'
+ Arnei	I've done that, but it changed nothing. Is 'source ~/.bashrc' supposed to give any feedback?
+@besser82	Arnei, source ~/.bashrc ; echo $?   ---->  returns 0 if no error...
+ Arnei	Sorry, i'm pretty new to Linux in general. At least i'm getting a 0.
+ lisitsyn	Arnei: did that help?
+ lisitsyn	wiking: besser82: guys?
+ Arnei	Nope, still nothing
+ lisitsyn	Arnei: is modshogun.so in the directory you pointed?
+ Arnei	Yes, it is
+ lisitsyn	Arnei: what if you do PYTHONPATH=this/directory/we/are/talking/about python -c 'import modshogun'?
+ Arnei	PYTHONPATH=$HOME/arwilken/shogun-install../lib/python2.7/dist-packages python -c 'import modshogun'
+ Arnei	ImportError: No module named modshogun
+ lisitsyn	and ls "$HOME/arwilken/shogun-install../lib/python2.7/dist-packages" shows you modshogun.so?
+ Arnei	it ... actually doesn't. wired, that is the location i found via the filemanager. and that is precisely the path it gave me.
+ Arnei	*weird, not wired^^
+ Arnei	oh wait, it does. nevermind
+ Arnei	although it shows me "_modshogun.so", but i suppose that is what you meant
+@wiking	mijauuuuu
+-!- rajul [~rajul@node-41i.pool-101-108.dynamic.totbb.net] has joined #shogun
+ Arnei	Okay, somehow exchanging "$HOME" with "/home" did the trick. Looks like the imports work now.
+ Arnei	Thanks a lot for your help and your patience :)
+-!- Arnei [83ad216a@gateway/web/freenode/ip.131.173.33.106] has quit [Quit: Page closed]
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 264 seconds]
+@wiking	anybody knows a good distributed cache for c/c++
+-!- rajul [~rajul@node-41i.pool-101-108.dynamic.totbb.net] has quit [Quit: Leaving]
+-!- rajul [~rajul@node-41i.pool-101-108.dynamic.totbb.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 250 seconds]
+-!- rajul [~rajul@node-41i.pool-101-108.dynamic.totbb.net] has quit [Ping timeout: 252 seconds]
+-!- rajul [~rajul@node-xho.pool-125-24.dynamic.totbb.net] has joined #shogun
+--- Log closed Wed Sep 02 00:00:02 2015

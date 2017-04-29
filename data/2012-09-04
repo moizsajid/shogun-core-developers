@@ -1,0 +1,495 @@
+--- Log opened Tue Sep 04 00:00:17 2012
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 244 seconds]
+-!- in3xes [~in3xes@122.174.90.190] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-ctuxzlkkkvjbytlm] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-ctuxzlkkkvjbytlm] has left #shogun ["Leaving"]
+-!- in3xes [~in3xes@122.174.90.190] has quit [Remote host closed the connection]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+@sonney2k	blackburn, morning
+ blackburn	sonney2k: morgen
+ blackburn	sonney2k: or even ?????? ????!
+ blackburn	:D
+@sonney2k	so we are ready right? all that is left is run the make release script
+ blackburn	sonney2k: can you take a look on content_sensor.py in msplicer?
+@sonney2k	blackburn, unfixable...
+ blackburn	sonney2k: I didn't manage to get it back to work
+ blackburn	sonney2k: ah okay then we should be ready
+@sonney2k	jonas/gunnar did hardcore changes but never cared to update msplicer (actually model retraining needed...)
+@sonney2k	blackburn, make release is running...
+ blackburn	sonney2k: okay nice
+ blackburn	sonney2k: what are working hours for you?
+ blackburn	8.00 - 17.00?
+@sonney2k	about that
+@sonney2k	not before 8:30 though
+ blackburn	I see
+ blackburn	I now understand why you get tired so 'early'
+ blackburn	here most of developers get to job not before than 10.30 :D
+@sonney2k	argh out of mem error compiling octave...
+@sonney2k	do they have kids?
+ blackburn	sonney2k: yes, 70% of them have
+@sonney2k	*argh* I have to run make release from home... that just takes too long. so feel free to craft some announcement email etc
+@sonney2k	or even edit the website :)
+ blackburn	sonney2k: what is ETA?
+ blackburn	I will kruft an announcement
+-!- uricamic [~uricamic@2001:718:2:1634:4ca0:3e01:7cc:a330] has joined #shogun
+ sonne|work	when I am home... not so early today
+ blackburn	sonne|work: want to read announcement?
+ sonne|work	blackburn: I don't mind
+ sonne|work	blackburn: btw did you fix static tests yet?
+ blackburn	argh
+ blackburn	completely missed
+ blackburn	sonne|work: draft of an announcement is in your mail
+ sonne|work	I would then say I run make release tonight once you fixed the static tests :)
+ blackburn	sonne|work: yes makes senes
+ blackburn	it is easy to fix
+ blackburn	sonne|work: ahh we were asked to update features table
+ sonne|work	we don't have it
+ sonne|work	on the new website
+ sonne|work	actually they should edit the google document and we need to tweak our script...
+ blackburn	sonne|work: did you like the announcement? :)
+ sonne|work	blackburn: I didn't receive anything yet
+ blackburn	ehm
+ blackburn	my gmail went crazy
+ sonne|work	?
+ sonne|work	ok received
+ sonne|work	will send you  an update
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ yoo	hi all
+ blackburn	hi
+ yoo	how are you
+ yoo	it has been a week almost !
+ blackburn	heh fine, what about you?
+ blackburn	yoo: we are preparing for release btw
+ yoo	blackburn: nice
+ yoo	blackburn: last week I came here to report a bug with MKL. With basic example, it seems that with p-norm >= 1, somthg wrong appended. Did som1 reproduce it ?
+ blackburn	yoo: no not really
+ yoo	could it be usefull that I re-share the code to reproduce the bug ?
+ sonne|work	yoo: what happens?
+ blackburn	yoo: yes please
+ blackburn	okay I have to go to university
+ yoo	sonne|work: hi. here is a sample code http://pastebin.com/E8rvpVPx
+ sonne|work	yoo: what is the problem?
+ yoo	sonne|work: the problem is when p-norm is >= 1. then depending on the order you call the cker->append(kernel) method then the results chenge and are wrong
+ sonne|work	yoo: which solver?
+ yoo	for example, in this case poly kernel should be assign to a small weight but placing it at the first place give 80% of the weights
+ yoo	MKLMulticlass (based on GMNPSVM Multiclass SVM ?)
+ sonne|work	yoo - does that happen with p-norm = 2 too?
+ yoo	sonne|work: yes
+ yoo	what other mkl solver can I test ?
+ sonne|work	you don't happen to have cplex?
+ yoo	no I dont have cplex
+ yoo	could it be a normalization step missing ?
+ sonne|work	yoo: well try with 3 gaussian kernels first
+ sonne|work	(instead of your linear / poly)
+ sonne|work	then you will know
+ yoo	p=1 weights=[0.689040809888890382,0,0.310959190111109618]
+ yoo	p=1.5 weights=[0.807664115129075988,0.372230937235915327,0.130329256359283385]
+ yoo	p=1.5 (again and changing the order) weights=[0.760197211045205989,0.350354701974430915,0.256375284234867218]
+ sonne|work	please use p=2 for testing here
+ yoo	p=2 weights=[0.920187257990366603,0.347798092036156359,0.179699464128804831] (3 gaussian kernels)
+ yoo	p=2 weights=[0.882496058989740262,0.333552157868777399,0.33157753821490854] (another run, changing kernels order)
+ sonne|work	yoo: so what worries you is that changing order of kernels doesn't change weights in the same way right?
+ yoo	yes, and first kernel always get almost 0.9
+ sonne|work	yoo: it may happen though that weights change - however objective should not change. so either run things with debug output
+ sonne|work	or print the objective at the end
+ yoo	objective ?
+ sonne|work	yoo: if you put that first kernel last?
+ yoo	that's what I have done in the previous example (p=2)
+ yoo	I tried also with 20 kernels and the first one get 0.8 and all the others 0.01
+ yoo	even when I place the last kernel in the first place, he get 0.8%
+ sonne|work	yoo: please run
+ sonne|work	compute_mkl_primal_objective()
+ sonne|work	compute_mkl_dual_objective()
+ sonne|work	and print these numbers (after mkl got trained)
+ yoo	compute_mkl_primal_objective() or compute_mkl_dual_objective() are not in the MKLMulticlass class ?
+ sonne|work	ah mkl multiclass...
+ yoo	yea (..) testing things on digits
+ sonne|work	yoo: then no idea - you should ask alex when he is around (or directly per mail + cc mailinglist)
+ yoo	allright. thx.
+ yoo	could you give me his mail ?
+ sonne|work	Alexander Binder <alexander.binder@tu-berlin.de>
+-!- CIA-27 [cia@cia.vc] has quit [Ping timeout: 272 seconds]
+ sonne|work	hey CIA come back
+ sonne|work	!
+-!- CIA-35 [cia@cia.vc] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+ blackburn	argh QA go crazy
+-!- n4nd0 [~androirc@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	Release day!
+ sonne|work	it is
+ sonne|work	n4nd0: think about how to improve the website...
+ n4nd0	Ok
+ sonne|work	n4nd0: the front page is mostly OK I would say but the rest needs some thought
+ blackburn	some guys insulted my gf on street, was hunting for them a hour ago :D
+ sonne|work	blackburn: hope they won't have a chance to do that again :-D
+ blackburn	sonne|work: I am not a big fan of street fighting so I hope too
+ sonne|work	blackburn: see your mail
+ sonne|work	gtg now
+ blackburn	sonne|work: yes
+ blackburn	I saw am intue ago
+-!- n4nd0 [~androirc@s83-179-44-135.cust.tele2.se] has quit [Remote host closed the connection]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- uricamic [~uricamic@2001:718:2:1634:4ca0:3e01:7cc:a330] has quit [Quit: Leaving.]
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+-!- blackburn [~blackburn@188.168.4.73] has joined #shogun
+ blackburn	here I come
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Ping timeout: 245 seconds]
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+-!- puffin444 [180317bb@gateway/web/freenode/ip.24.3.23.187] has joined #shogun
+ puffin444	sonney2k, am I holding the release up?
+ puffin444	blackburn, how is the release going?
+-!- zxtx [~zv@2602:306:32c1:5960:f4e3:a663:fc46:15e9] has joined #shogun
+-!- heiko [~heiko@host86-168-139-43.range86-168.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-168-139-43.range86-168.btcentralplus.com] has left #shogun []
+ n4nd0	puffin444: I think all the examples are fixed
+ n4nd0	jus the msplicer application is not working quite well
+ n4nd0	but sonney2k said it is kind on "unfixable" right now
+ puffin444	n4nd0, will this be a rc or is this an actual release?
+ n4nd0	actual release I think
+ puffin444	as in going gold
+-!- puffin444 [180317bb@gateway/web/freenode/ip.24.3.23.187] has quit [Quit: Page closed]
+ blackburn	sonney2k: ping
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Quit: Page closed]
+@sonney2k	blackburn, back!
+ blackburn	sonney2k: okay last things to do
+ blackburn	do not make release yet - I am checking tester ow
+@sonney2k	blackburn, hurry up...
+ blackburn	just a few minutes
+ blackburn	I am done with mail though
+ blackburn	okay octave static
+@sonney2k	blackburn, ok 5 minutes then we start no matter what
+ blackburn	sonney2k: strangely it works here
+ blackburn	but not on buildbot
+@sonney2k	blackburn, what does not work
+@sonney2k	?
+ blackburn	sonney2k: http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/518/steps/test%20octave_modular/logs/stdio
+ blackburn	cannot create instance, etc
+ blackburn	no errors like that here
+@sonney2k	blackburn, that is octave modular or?
+ blackburn	sonney2k: static
+@sonney2k	no
+@sonney2k	modular
+@sonney2k	running tests
+ blackburn	ehm
+ blackburn	ah
+@sonney2k	blackburn, well fix it - but I am running make prepare release again......
+ blackburn	sonney2k: nevermind it is a developer stuff
+ blackburn	and only two developers care about that actually
+ blackburn	so just do it
+@sonney2k	blackburn, did you commit any changes?
+ blackburn	sonney2k: when?
+ blackburn	no commits today
+@sonney2k	blackburn, so it is the state of yesterday?
+ blackburn	yes
+@sonney2k	blackburn, no fixes in static interfaces right?
+@sonney2k	nah whatever - it won't get better than that.
+ blackburn	sonney2k: do you think modular octave is broken at all?
+ blackburn	I thought only tester
+@sonney2k	blackburn, no
+@sonney2k	make check-examples works it seems
+ blackburn	then I don't care
+ blackburn	sonney2k: can you give me twitter acc?
+@sonney2k	hmmhh my make release script is still b0rken
+@sonney2k	yes (not from here though)
+@sonney2k	I am at c-base.org
+@sonney2k	public wlan...
+@sonney2k	lots of haXX0rs
+ blackburn	where are you?
+ blackburn	:D
+@sonney2k	google c-base :)
+@sonney2k	the hidden starship beneath Berlin
+ blackburn	no I mean where are you hiding as you have to use some wlan?
+@sonney2k	sitting at the river spree with lots of nerds it seems
+ blackburn	is it a good weather in berlin? I wouldn't want to be outside here now :)
+ blackburn	sonney2k: can I update news still?
+@sonney2k	yeah about 18 C or so
+ blackburn	or late?
+@sonney2k	blackburn, we have to increase data version btw!
+@sonney2k	to 0.4
+ blackburn	where is it set?
+ blackburn	:D
+ blackburn	ahh I remember
+@sonney2k	blackburn, how much do you want to change in NEWS?
+ blackburn	sonney2k: add a line
+@sonney2k	blackburn, then do it *right away*
+ blackburn	and change version
+@sonney2k	do do do
+@sonney2k	hurry up man
+ blackburn	aaaaaah where is the data version?
+ blackburn	is it mentioned anywhere?
+ blackburn	do we have to increase parameter version?
+ blackburn	okay no
+ blackburn	nevermind
+ blackburn	:D
+@sonney2k	NEWS first line
+ blackburn	yes yes
+ blackburn	sonney2k: here
+ CIA-35	shogun: Sergey Lisitsyn master * r6f2b362 / src/NEWS : Increased data version and mentioned yoo in news - http://git.io/ndAtSw
+ CIA-35	shogun: Soeren Sonnenburg master * r601c72a / src/ChangeLog : updated changelog - http://git.io/sUlDow
+ CIA-35	shogun: Soeren Sonnenburg master * rc3d2cb3 / (4 files): updated reference documentation - http://git.io/x3GdVg
+ blackburn	sonney2k: what is going on?
+@sonney2k	blackburn, few more minutes
+@sonney2k	make update-webpage is running
+@sonney2k	blackburn, what was the name of the math latex thing?
+ blackburn	sonney2k: mathjax
+ blackburn	sonney2k: sooooo?
+@sonney2k	uploading takes time...
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+@sonney2k	blackburn, alright - checkout shogun-toolbox.org
+@sonney2k	blackburn, I will put the new site live though...
+ blackburn	nice
+@sonney2k	blackburn, we need to update NEWS before 3 am
+ blackburn	sonney2k: why?
+ blackburn	sonney2k: I talked to some of scikits team
+ blackburn	they are releasing just now too
+@sonney2k	blackburn, gunnar is here (for a visit from NY)
+ blackburn	in germany?
+ blackburn	send hello
+@sonney2k	blackburn, we are just installing a new buildslave for centos
+ blackburn	:)
+@sonney2k	yes sitting here too
+@sonney2k	release party you know ;-)
+ blackburn	gute nacht gunnar :)
+@sonney2k	blackburn, gunnar says hi too :D
+-!- zxtx [~zv@2602:306:32c1:5960:f4e3:a663:fc46:15e9] has quit [Ping timeout: 246 seconds]
+ blackburn	sonney2k: if you get some champagne please convince him to make me his PhD student :D
+ blackburn	sonney2k: so can I send announce?
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Remote host closed the connection]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	shogun-buildbot, force build "rpm1 - libshogun"
+ shogun-buildbot	build #0 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #0 of rpm1 - libshogun is complete: Failure [failed git]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/0
+@sonney2k	blackburn, no - I want to make the new website live before
+ blackburn	sonney2k: how much time it would require?
+@sonney2k	shogun-buildbot, force build "rpm1 - libshogun"
+ shogun-buildbot	build #1 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	Hey! build rpm1 - libshogun #1 is complete: Retry [retry exception slave lost]
+ shogun-buildbot	Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/1
+ shogun-buildbot	build #2 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ blackburn	sonney2k: any progress? :)
+@sonney2k	blackburn, http://shogun-toolbox.org/
+@sonney2k	we should fix the website though...
+ blackburn	sonney2k: what's wrong?
+@sonney2k	well buildbot / doc links don't work NEWS file is still wrong blah
+ blackburn	I see
+ blackburn	let me know when I can send an announcement :)
+-!- bern4rd [533886e2@gateway/web/freenode/ip.83.56.134.226] has joined #shogun
+ bern4rd	Hi sonney2k , is the sqlite3 database working good now?
+@sonney2k	bern4rd, did you fix it up?
+ bern4rd	yes, the same night you told me
+@sonney2k	blackburn, so docs should work again http://shogun-toolbox.org/doc/en/latest/
+@sonney2k	bern4rd, didn't know...
+ bern4rd	my fault, I didnt tell you.
+@sonney2k	blackburn, buildbot too
+ blackburn	sonney2k: sooooo?
+@sonney2k	blackburn, click around on the website and notify me about issues
+@sonney2k	n4nd0, and you too!
+ n4nd0	sonney2k: all right
+@sonney2k	try to download shogun etc this stuff
+ blackburn	sonney2k: news are old still
+@sonney2k	bern4rd, how do I update the NEWS thing?
+@sonney2k	heh
+ n4nd0	weblog doesn't show anything here but I think that is normal, the draft page was like that too
+ blackburn	sonney2k: can you remove mobile version thing?
+ bern4rd	write the xml with the new in the folder and the next time someone uses /home url will be loaded
+@sonney2k	bern4rd, how?
+@sonney2k	blackburn, bern4rd any idea where that mobile version thing is?
+ shogun-buildbot	build #2 of rpm1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/2
+ bern4rd	no, was in nuvio template, I suppose is for a mobile application, or a special web for mobile devices
+ n4nd0	blackburn: should we worry about these failures?
+ blackburn	oh
+ bern4rd	the search box was also in nuvio template
+ CIA-35	shogun: Soeren Sonnenburg master * r2064bf4 / (Makefile src/NEWS): update news for 2.0.1 - http://git.io/aC9KzQ
+ n4nd0	sonney2k: the link available in the contact tab links to the home page, I guess it should go to shogun-toolbox.org/irclogs
+ bern4rd	I didnt change them because i didnt know if you want to do anything with that or can be removed from the html
+ blackburn	sonney2k: what is rpm1? it fails
+@sonney2k	n4nd0, no it is new buidbot for redhat (we just set up!)
+ n4nd0	sonney2k: the link is called "available", it was not clear ^
+ n4nd0	sonney2k: better then :)
+@sonney2k	bern4rd, how do I create the XML for the news file?
+ blackburn	sonney2k: !!! release!
+ blackburn	:D
+ bern4rd	you have several models in /data/news/
+ bern4rd	this is the last new : https://github.com/shogun-toolbox/shogun-web/blob/master/news/2012/2012-09-01
+@sonney2k	bern4rd, yeah but how do I create that file?
+ bern4rd	Is just a text file
+@sonney2k	bern4rd, so?
+ bern4rd	you dont need special names, but anyway i am using the date
+@sonney2k	bern4rd, I thought this is generated from the NEWS file?
+ bern4rd	you mean the news file with all the news that is in github?
+ shogun-buildbot	build #412 of deb2 - static_interfaces is complete: Failure [failed test octave_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/412  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ bern4rd	i am missunderstanding anythin
+@sonney2k	blackburn, please point bern4rd to the NEWS file
+ blackburn	bern4rd: https://github.com/shogun-toolbox/shogun/blob/master/src/NEWS
+ bern4rd	No, I am not using that file.
+ bern4rd	Did you want to modify the NEWS file, and upload the database?
+ bern4rd	I mean to only modify the github file
+ blackburn	sonney2k: announcement?
+ shogun-buildbot	build #413 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/413
+ blackburn	sonney2k: !!!
+ shogun-buildbot	build #3 of rpm1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/3  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ blackburn	sonney2k: I can't wait so much :)
+@sonney2k	bern4rd, blackburn sorry got disconnected
+ blackburn	sonney2k: announcement!
+@sonney2k	so how do I get the NEWS file converted?
+ blackburn	shall I send it?
+ blackburn	I have to go sleep
+ n4nd0	sonney2k: I am here too :(
+@sonney2k	n4nd0, did you say anything?
+ n4nd0	I was just joking :)
+ blackburn	I am sending it!
+ blackburn	you have last seconds to answer
+ blackburn	:D
+@sonney2k	bern4rd, how did you create all the files in news/ ?
+ bern4rd	I have created the files in shogun-web with your NEWS file. But I did it manually.
+@sonney2k	bern4rd :(
+@sonney2k	that is what I was looking for
+@sonney2k	*manually*
+@sonney2k	not a good thing
+@sonney2k	we need this automatically...
+@sonney2k	anyway will do it manually now too
+@sonney2k	bern4rd, when I just update the 2012-09-01 file - will it work?
+ bern4rd	Yes, I understand now what you mean. When I arrive to Stockholm (Friday) I will try to change it to do it automatically. But I remember not all the news had the same format, and is better to parse something with xml format for example that parse from normal text files
+ bern4rd	yes
+@sonney2k	bern4rd, hmmhh they should all have the same format
+@sonney2k	at least for the last years they should have the same
+ bern4rd	I saw that you changed the time-zone to Berlin zone, I hope it wont be a problem
+@sonney2k	why?
+ bern4rd	yes the last years yes, the problem in the format is at the beginning
+@sonney2k	bern4rd, well then just parse the first ones...
+ bern4rd	oks.
+ blackburn	okay I can't wait longer
+ blackburn	:)
+@sonney2k	hmmh website broken
+ blackburn	gott!
+ blackburn	wtf?
+@sonney2k	hmmhh http://shogun-toolbox.org/page/about/information works
+@sonney2k	but not the / url
+@sonney2k	bern4rd, any idea why http://shogun-toolbox.org/page/home/ fails but all other pages work?
+@sonney2k	template error?
+@sonney2k	let me enable debug
+ bern4rd	There is a problem in the server
+@sonney2k	bern4rd, http://shogun-toolbox.org/page/home/
+@sonney2k	please have a look
+@sonney2k	what did I do wrong in the news file?
+ blackburn	sonney2k: something unclosed I guess
+ bern4rd	yes
+ bern4rd	in the file you modified, there is any problem
+ blackburn	give me that file I'll fix it!!
+ blackburn	:D
+ bern4rd	28:51
+ bern4rd	line and column
+@sonney2k	bern4rd, the & ?
+ blackburn	sonney2k: it is a special symbol
+ blackburn	try &amp
+ blackburn	works
+ blackburn	I am announcing then
+ blackburn	n4nd0: can you please post to twitter?
+ blackburn	http://permalink.gmane.org/gmane.comp.ai.machine-learning.shogun/3060
+-!- heiko [~heiko@host86-168-139-43.range86-168.btcentralplus.com] has joined #shogun
+ blackburn	heiko: we've kinda released
+ heiko	blackburn, just saw the mail!
+ heiko	nice work!
+ n4nd0	blackburn: from my account? or from shogun's?
+ n4nd0	I don't have shogun's account password
+ blackburn	n4nd0: check mail you have
+ heiko	I love this epic "new features" list
+ blackburn	heiko: yeah pretty big
+ blackburn	heiko: sonney2k is setting up a website
+ blackburn	heiko: are you in timeline with your thesis?
+ heiko	blackburn, of course not :D
+ heiko	I am late and working all day
+ heiko	want to hand in on thrusday and deadline is friday
+ blackburn	heiko: ohh
+ heiko	but it will be fine
+ blackburn	okay nice
+ heiko	I will send it to you once its done :)
+ blackburn	n4nd0: thanks
+ blackburn	heiko: I will read it! :)
+ heiko	the NIPS paper is also accepted btw :)
+ blackburn	oh so you have a nips paper?
+ blackburn	lucky one ;)
+ blackburn	I have ???????????? ?????? paper
+ blackburn	and nothing more
+ blackburn	okay congrats with release I have to go sleep
+ blackburn	let's try to spread news about release tomorrow :)
+ n4nd0	blackburn: :)
+ n4nd0	good night!
+ blackburn	good night guys
+ heiko	good night!
+-!- blackburn [~blackburn@188.168.4.73] has quit [Quit: Leaving.]
+@sonney2k	so did blackburn announce?
+ heiko	sonney2k, yes he just did
+@sonney2k	k
+@sonney2k	had to say bye to gunnar
+@sonney2k	heiko, btw we just discussed the 'e.V.' thing
+ heiko	sonney2k, aha! what came out?
+@sonney2k	and one likely situation is that I visit him in NY
+@sonney2k	he likes it
+@sonney2k	heiko, question is - do we need some notar or something at the meeting?
+ heiko	no
+ heiko	we dont
+@sonney2k	I mean we can easily get >7 people in a room and decide about the satzung etc
+ heiko	one thing that nobody is sure about is if the meeting can be done online
+@sonney2k	bern4rd, btw download links are not available for shogun-data!
+ heiko	physically in a room?
+@sonney2k	only for shogun src code
+@sonney2k	heiko, yes... gunnar said there are quite a bit of shogun users in NY :D
+ heiko	sonney2k, well this is nice then
+ heiko	If you want, I can set up a document once I am finished with uni stuff here
+ bern4rd	true, i'll add it
+ heiko	sonney2k, what do you think about the email of the KDE president?
+@sonney2k	heiko btw when did you edit NEWS?
+@sonney2k	just now?
+ heiko	he kind of said they usually discourage people from starting a e.V. because of the workload
+ heiko	sonney2k, just tried a few minutes ago
+@sonney2k	heiko, yeah seen that
+@sonney2k	heiko, please try again...
+@sonney2k	(though it is automatically updated...)
+@sonney2k	heiko, how much work is it really?
+@sonney2k	I thought one needs 'just' yearly rechenschaftsbericht?
+ heiko	sonney2k, the documents are easy, yes that yearly thing
+@sonney2k	I mean writing the satzung is a one time thing
+ heiko	and we need to take care of money and stuff
+@sonney2k	but then?
+@sonney2k	what does one have to do?
+ heiko	and getting the "geminn?tzig" from the finanzamt is kind of hard
+ heiko	gemeinn?tzig
+@sonney2k	heiko, which is not a burning topic though
+@sonney2k	heiko, for this year we should route the money through you -
+ heiko	true
+@sonney2k	is that OK?
+ heiko	yeah thats fine
+@sonney2k	heiko, I will need you bank account, address and everthing...
+@sonney2k	for google
+@sonney2k	otherwise that won't work out
+ heiko	I think its fine, I will check with my ensurance but I think its ok
+@sonney2k	heiko, please do ASAP ... I am not even sure if it is not too late yet
+ heiko	well, ok
+ heiko	tomorrow then
+ n4nd0	sonney2k: can we upload photos to twitter?
+ heiko	sonney2k, still same error on webpage
+@sonney2k	heiko, regarding e.V. we need to find out what one has to do...
+ heiko	I already checked
+ heiko	Write the Satzung
+@sonney2k	heiko, what did you change?
+@sonney2k	heiko, ok that one is clear
+ heiko	just added
+ heiko	Framework for statistical hypothesis testing with algorithms for kernel  based two-sample and independence testing by Heiko Strathmann
+@sonney2k	heiko, no that is too late
+ heiko	apart from that we  need to do the meeting
+@sonney2k	you have to put it in shogun git NEWS
+ heiko	sonney2k, ah ok, no chaning of existing news?
+ heiko	ok
+@sonney2k	exactly
+ heiko	sonney2k, I sent you thi page with all the templates
+ n4nd0	good night guys
+ heiko	good night n4dn0
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+@sonney2k	I should better head home too... weill be back in a few minutes once in train...
+@sonney2k	brb
+ heiko	ok
+--- Log closed Wed Sep 05 00:00:17 2012

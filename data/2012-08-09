@@ -1,0 +1,569 @@
+--- Log opened Thu Aug 09 00:00:17 2012
+ shogun-buildbot_	build #290 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/290  blamelist: iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot_	build #291 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/291  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+ shogun-buildbot_	build #48 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/48
+ shogun-buildbot_	build #54 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/54
+ shogun-buildbot_	build #44 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/44
+-!- zxtx [~zv@ool-457e7550.dyn.optonline.net] has joined #shogun
+-!- pluskid [~pluskid@111.120.36.226] has joined #shogun
+ pluskid	hi sonney2k
+@sonney2k	pluskid, hi
+@sonney2k	pluskid, not sure if you have seen but we are still fighting with your patch to work/compile on all interfaces
+ pluskid	sonney2k: oh, the buildbot seems flooding me by sending lots of emails, so I didn't read them all
+ pluskid	maybe I should have a look at the latest buildbot output
+@sonney2k	yeah well for a reason - all your fault ;-)
+@sonney2k	pluskid, no seriously you did add a python_modular example that didn't work
+@sonney2k	so I tried to fix this
+@sonney2k	which creates problems in java_modular (of course :(
+ pluskid	sonney2k: http://www.shogun-toolbox.org/buildbot/builders/ this is the latest result right?
+@sonney2k	pluskid, look at waterfall
+@sonney2k	pluskid, but what I wanted to ask - you have a TreeMachine in multiclass that is templated
+@sonney2k	is that really needed
+@sonney2k	pluskid, but maybe let me explain a bit more first
+ pluskid	ah, that would be good
+@sonney2k	many modular interfaces dont' support templates at all
+@sonney2k	(python, ruby, ...)
+@sonney2k	so that means for them one has to add an extra line in the corresponding swig .i interface file %template ...
+@sonney2k	so if templates are not *required* or avoid code duplication don't use them
+@sonney2k	next
+ pluskid	hmm, I see
+ pluskid	next?
+@sonney2k	if we have objects / structs that are not derived from SGObject we currently only have a workaround solution to get java and csharp modular to compile
+ pluskid	maybe I should take a look at how to convert the tree-machine into non-template
+@sonney2k	why? because we support serialization of native shogun objects
+@sonney2k	and so we need the functions in SGObjects to be available basically in all classes/structs - which of course they are not
+ pluskid	so if the template base class is ignored by SWIG, the inheritance chain will break, right?
+@sonney2k	so we currently have a workaround macro in an .i file where we add SERIALIZABLE_DUMMY(struct)
+@sonney2k	pluskid, for swig to work we need to include all .h's from the inheritance chain (in the right order!)
+ pluskid	sonney2k: ah, I see
+@sonney2k	pluskid, if one is a template in between we have to add %template to make it visible
+ pluskid	sonney2k: I'll try to remove the template. Luckily there are only two tree machines
+@sonney2k	pluskid, anyway maybe we can resolve this quickly - but I need your help:
+@sonney2k	I added these lines to Multiclass.i:
+@sonney2k	%include <shogun/multiclass/tree/BalancedConditionalProbabilityTree.h>
+@sonney2k	%include <shogun/multiclass/tree/ConditionalProbabilityTree.h>
+@sonney2k	%include <shogun/multiclass/tree/RandomConditionalProbabilityTree.h>
+@sonney2k	%include <shogun/multiclass/tree/RelaxedTree.h>
+@sonney2k	%include <shogun/multiclass/tree/RelaxedTreeNodeData.h>
+@sonney2k	%include <shogun/multiclass/tree/RelaxedTreeUtil.h>
+@sonney2k	%include <shogun/multiclass/tree/TreeMachine.h>
+@sonney2k	%include <shogun/multiclass/tree/TreeMachineNode.h>
+@sonney2k	%include <shogun/multiclass/tree/VwConditionalProbabilityTree.h>
+@sonney2k	pluskid, do we really need all of them to be visible from the interfaces? or are some of them just for internal use?
+ pluskid	sonney2k: VwConditionalProbabilityTree cannot work properly because it seems the Vw in shogun isn't working properly, maybe I should remove this one
+ pluskid	to make the template work, maybe all of them are needed
+ pluskid	except RelaxedTreeUtil.h
+@sonney2k	pluskid, heh - RelaxedTreeUtil.h is to simple to cause trouble :D
+ pluskid	sonney2k: so what's the trouble here?
+ pluskid	I cannot understand the java_modular compile error
+ pluskid	sonney2k: shall we expand with %template the superclass for RelaxedTree and ConditionalProbabilityTree for SWIG?
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 252 seconds]
+@sonney2k	pluskid, I am just compiling it locally here...
+@sonney2k	pluskid, which of the classes above are not derived from SGObject?
+ pluskid	all derived from SGObject
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+ pluskid	sonney2k: maybe have a look at TreeMachineNode.h ?
+ pluskid	it seemed I got some compile error of the class_list so I play a trick in the syntax of class derivation to avoid it being detected by the script
+@sonney2k	pluskid, if you don't prefix your class with C then it will not be included in class list - also you can add the IGNORE_IN_CLASS_LIST (or so define)
+@sonney2k	pluskid, RelaxedTreeUtil is not derived from sgobject
+@sonney2k	pluskid, why not?
+ pluskid	sonney2k: It is just a util, like a struct
+@sonney2k	ok then we %ignore it
+@sonney2k	pluskid, ok so now we have these
+@sonney2k	../../shogun/multiclass/tree/ConditionalProbabilityTree.h:43: Warning 401: Nothing known about base class 'CTreeMachine< ConditionalProbabilityTreeNodeData >'. Ignored.
+@sonney2k	../../shogun/multiclass/tree/ConditionalProbabilityTree.h:43: Warning 401: Maybe you forgot to instantiate 'CTreeMachine< ConditionalProbabilityTreeNodeData >' using %template.
+@sonney2k	../../shogun/multiclass/tree/RelaxedTree.h:34: Warning 401: Nothing known about base class 'CTreeMachine< RelaxedTreeNodeData >'. Ignored.
+@sonney2k	../../shogun/multiclass/tree/RelaxedTree.h:34: Warning 401: Maybe you forgot to instantiate 'CTreeMachine< RelaxedTreeNodeData >' using %template.
+@sonney2k	so I guess it needs TreeMachine to be included first and node data too
+ pluskid	sonney2k: so to make it work, we will use %template here, right?
+ pluskid	yes, TreeMachine, and NodeData and then use %template
+ pluskid	sonney2k: btw: CondProbTreeNodeData is in the ConditionalProbabilityTree.h file
+@sonney2k	pluskid, any ideas for a name?
+ pluskid	TreeMachineWithXXXNodeData?
+@sonney2k	pluskid, so
+@sonney2k	    %template(TreeMachineWithConditionalProbabilityTreeNodeData) CTreeMachine<ConditionalProbabilityTreeNodeData>;
+@sonney2k	    %template(TreeMachineWithRelaxedTreeNodeData) CTreeMachine< RelaxedTreeNodeData>;
+ pluskid	sonney2k: yeah, does it work now?
+@sonney2k	pluskid, of course not o_O
+ pluskid	sonney2k: why?
+@sonney2k	pluskid, ohh it is getting better
+@sonney2k	../../shogun/multiclass/tree/ConditionalProbabilityTree.h:43: Warning 401: Nothing known about base class 'CTreeMachine< ConditionalProbabilityTreeNodeData >'. Ignored.
+@sonney2k	../../shogun/multiclass/tree/ConditionalProbabilityTree.h:43: Warning 401: Maybe you forgot to instantiate 'CTreeMachine< ConditionalProbabilityTreeNodeData >' using %template.
+ pluskid	strange, we've instantiated it
+ pluskid	sonney2k: oh, maybe we should put  ConditionalProbabilityTreeNodeData in a separate header file
+@sonney2k	pluskid, maybe order of includes is wrong
+* sonney2k checks
+ pluskid	and include that header file
+ pluskid	then use %template
+ pluskid	then include conditionalprobabilitree.h
+@sonney2k	if I move it up to relaxedtreenode include
+@sonney2k	then I get
+@sonney2k	../../shogun/multiclass/tree/ConditionalProbabilityTree.h:43: Warning 401: Base class 'CTreeMachine< ConditionalProbabilityTreeNodeData >' undefined.
+@sonney2k	Multiclass.i:73: Warning 401: 'CTreeMachine< ConditionalProbabilityTreeNodeData >' must be defined before it is used as a base class.
+ pluskid	sonney2k: sorry, the family is calling me for the lunch, I'll see you later
+@sonney2k	pluskid, kids are waking up here so I will have to stop too ... I will commit what I have maybe you can get it to work...
+ CIA-18	shogun: Soeren Sonnenburg master * r4b11e44 / (5 files in 2 dirs): add a couple of missing %templates to Multiclass.i - http://git.io/C6Gvew
+ pluskid	sonney2k: shall I compile with java_modular to test this?
+ pluskid	sonney2k: is there something wrong with the git repo?
+ pluskid	sonney2k: I get a very long list of applying many patches that are not created by me when I rebase on upstream/master
+ shogun-buildbot_	build #292 of deb3 - modular_interfaces is complete: Failure [failed test java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/292  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	pluskid: see the new buildbot error running java tests.
+ pluskid	sonney2k: I'm getting some trouble with the git repo
+@sonney2k	the eEuclidean example needs to be renamed
+@sonney2k	pluskid: what trouble ?
+ pluskid	sonney2k: I run rebase against upstream/master
+ pluskid	then it shows a huge amount of patches being applied
+ pluskid	I guess something is wrong here
+-!- n4nd0 [~nando@31.Red-2-137-62.dynamicIP.rima-tde.net] has joined #shogun
+ pluskid	hi n4nd0
+ n4nd0	hey pluskid
+ n4nd0	that was fast :)
+ pluskid	haha
+ pluskid	n4nd0: will you fetch and rebase the latest shogun git repo
+ pluskid	to see do you get any trouble?
+ n4nd0	pluskid: sure
+ pluskid	thanks
+ pluskid	I'm seeing something strange here, but not sure it is bad or ordinary
+ n4nd0	pluskid: what kind of thing?
+ n4nd0	any interface in particular?
+ pluskid	n4nd0: I run git rebase
+@sonney2k	pluskid: no idea..  maybe someone forgot to rebase and someone merged such pr
+ pluskid	it says a large amount of patches are being made
+ pluskid	usually it only apply patches that I made locally
+ n4nd0	pluskid: aham
+@sonney2k	hmmm.
+ n4nd0	I could rebase without problems
+ pluskid	n4nd0: OK
+ pluskid	then I'll check my repo
+ pluskid	maybe the easiest thing is to do a new clone from github
+ n4nd0	no idea
+ n4nd0	pluskid: have you googled the error?
+ pluskid	n4nd0: no error, just some strange things
+ n4nd0	ok
+ n4nd0	sonney2k: btw, I asked you yesterday for any reference on risk functions for hm-svm
+ n4nd0	do you know something about it?
+ n4nd0	so far I have just found a Ph.D. thesis: Regularized bundle methods for large-scale learning problems with an
+ n4nd0	application to large margin training of hidden Markov models
+@sonney2k	n4nd0: it is the right part in rhetoric unconstrained formulation
+@sonney2k	scratch rhetoric
+@sonney2k	typing on mobile here
+-!- uricamic [~uricamic@2001:718:2:1634:3078:70c3:e281:1376] has joined #shogun
+ pluskid	sonney2k: I fixed the java euclidian error. Does the output of the buildbot of java mean we are getting tree machine OK there?
+ n4nd0	sonney2k: sorry I didn't get it, should I look for rhetoric unconstrained formulation? scratch unconstrained?
+@sonney2k	pluskid: there is still a warning
+@sonney2k	n4nd0:???
+ n4nd0	yeah that's how I reacted when I read
+ n4nd0	<@sonney2k> n4nd0: it is the right part in rhetoric unconstrained formulation
+ n4nd0	<@sonney2k> scratch rhetoric
+ n4nd0	:D
+@sonney2k	I said scratch rhetoric
+@sonney2k	remove this word
+ n4nd0	oh shit
+ n4nd0	I am retarded
+ n4nd0	sonney2k: sorry
+ pluskid	sonney2k: ah, I finally find it, I will try to compile it locally
+@sonney2k	touchpad typing on mobile is not exactly easy :-/
+ n4nd0	yeah, I understand. My bad I didn't understand
+@sonney2k	pluskid: thanks
+ shogun-buildbot_	build #55 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/55
+-!- nickon [~noneedtok@d54C2DD90.access.telenet.be] has joined #shogun
+-!- nickon [~noneedtok@d54C2DD90.access.telenet.be] has quit [Client Quit]
+ n4nd0	sonney2k: around?
+-!- n4nd0 [~nando@31.Red-2-137-62.dynamicIP.rima-tde.net] has quit [Ping timeout: 240 seconds]
+-!- n4nd0 [~nando@31.Red-2-137-62.dynamicIP.rima-tde.net] has joined #shogun
+-!- n4nd0 [~nando@31.Red-2-137-62.dynamicIP.rima-tde.net] has quit [Client Quit]
+-!- n4nd0 [~nando@31.Red-2-137-62.dynamicIP.rima-tde.net] has joined #shogun
+ CIA-18	shogun: Chiyuan Zhang master * re1a50de / (2 files): renaming java modular: euclidian => euclidean - http://git.io/xHS8hw
+ CIA-18	shogun: Chiyuan Zhang master * r490741f / (4 files in 2 dirs): fix template class of CPT in java modular. - http://git.io/nvFyDg
+ CIA-18	shogun: Soeren Sonnenburg master * rd699fc5 / (6 files in 3 dirs): Merge pull request #698 from pluskid/multiclass - http://git.io/WEcyAQ
+-!- n4nd0 [~nando@31.Red-2-137-62.dynamicIP.rima-tde.net] has quit [Ping timeout: 268 seconds]
+-!- n4nd0 [~nando@31.Red-2-137-62.dynamicIP.rima-tde.net] has joined #shogun
+-!- n4nd0 [~nando@31.Red-2-137-62.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+ shogun-buildbot_	build #293 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/293
+ pluskid	:q
+-!- pluskid [~pluskid@111.120.36.226] has quit [Quit: Leaving]
+-!- blackburn [~blackburn@109.226.80.43] has joined #shogun
+@sonney2k	shogun-buildbot_, hurray!
+ shogun-buildbot_	What you say!
+ wiking	sonney2k: apart from the minor changes u suggested any other requests?
+@sonney2k	wiking, well make sure that current svm ocas gives the same result as the updated one
+ wiking	sonney2k: i'll try to define a test for it :D
+ shogun-buildbot_	build #45 of nightly_all is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/45
+ wiking	what was the class name for generating random data by heiko?
+ wiking	i thought that it's in statistics...
+ shogun-buildbot_	build #49 of nightly_none is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/49
+ blackburn	wiking: it is in features IIRC
+ wiking	mmm let me check
+ wiking	mmm i guess it's going to be DataGenerator.h
+ blackburn	yeah
+ wiking	let's see how it works :)
+ wiking	sonney2k: any ideas how svmocas would deal with an input of two normally distributed data?
+ wiking	i mean standard distrib..
+@sonney2k	wiking, ?
+@sonney2k	it will separete the data :D
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@109.226.80.43] has joined #shogun
+ wiking	yeah 'm just checking it's performance now
+ CIA-18	shogun: Sergey Lisitsyn master * r5e63792 / (8 files in 3 dirs): Added multitask ROC evaluation - http://git.io/PJW7fA
+ blackburn	wiking: my self-education made me to dense sift :D
+ blackburn	I actually do not think it could be a way for huge data
+ wiking	mmm
+ wiking	any ideas how i could unit test this
+ wiking	because with ROC i get value of 0.4168 -> 0.5532
+ wiking	imho i should create the vectors, otherwise with random ones i won't be able to be deterministic enough
+@sonney2k	wiking, what?
+@sonney2k	I don't get it
+@sonney2k	though for random stuff you should seed the rng
+ wiking	sonney2k: well i've used the datagenerator of heiko
+ wiking	then i've basically divided the generated matrix into two equally sized feature set
+ wiking	i.e. train/test
+ wiking	the same amount of each vector in both of the sets
+ wiking	then i've ran training and test on those features with ocas
+ wiking	and now i'm using ROCEvaluation for checking the classification
+ wiking	and the result varies a lot
+ wiking	so i was wondering how else i could test svmocas
+ wiking	since this doesn't seemed to be too deterministic
+@sonney2k	wiking, well you should seed the rng
+@sonney2k	otherwise it cannot be deterministic
+@sonney2k	and also use *two* gaussians that don't have same mean
+@sonney2k	otherwise you will just get about 50% accuracy
+ wiking	as far as i understood
+ wiking	datagenerator will generate that
+ wiking	Takes each m samples from two distributions p and q, where each element * is standard normally distributed, except for the first dimension of q, * where the mean is shifted by a specified value.
+ wiking	that's what generate_mean_data(...) does
+ wiking	heh ok this should work
+@sonney2k	wiking, how many dims?
+@sonney2k	if this is low dim you should get 100% acc
+@sonney2k	roc 1.0
+ wiking	sonney2k: i've tried with dim = 10
+ wiking	it's now 0.7684
+ wiking	with a given seed
+ blackburn	what are means of gaussians?
+ wiking	ok
+ wiking	here's a utest for SVMOcas
+ wiking	let's see how u like it :))
+ blackburn	wiking: two nonoverlap gaussians should have roc 1.0..
+ wiking	blackburn: ok check the code where i've done then a mistake :)
+ wiking	https://github.com/shogun-toolbox/shogun/pull/700
+ blackburn	wiking: generate_mean_data does some strange thing
+ blackburn	pretty strange
+ blackburn	wiking: in matlab it would be
+ blackburn	X = randn(dim,2*m)
+ blackburn	X(0,m:2*m) += mean_shift
+ blackburn	ehh
+ wiking	blackburn: can u try to run this unittest on your machine
+ wiking	just to see if it's the same at least :)
+ blackburn	wiking: I am not surprised
+ blackburn	with 0.7
+ blackburn	because it is the same gaussian
+ blackburn	except first variable
+ blackburn	just check code of data generator generate mean data
+ wiking	pfff
+ blackburn	see what I mean?
+ blackburn	so the only mistake is to use that method :)
+ wiking	adf
+ wiking	asdf!@#$
+ CIA-18	shogun: Sergey Lisitsyn master * r4286ace / (5 files): A few doc improvements for task api - http://git.io/a34bRQ
+ CIA-18	shogun: Sergey Lisitsyn master * r443f89f / doc/tutorial : Updated tutorial submodule - http://git.io/ZW0Lig
+-!- gsomix [~gsomix@109.169.158.254] has joined #shogun
+ gsomix	good day
+ wiking	blackburn: ideas?
+ blackburn	wiking: thou shalt use da second method
+ wiking	:>
+ blackburn	generate_sym_mix_gauss
+ blackburn	and actually you should compare not the auc
+ blackburn	but the solution
+ blackburn	it should coincide
+ blackburn	wiking: ah generate_sym_mix_gauss is random mixture :D
+ CIA-18	shogun: Sergey Lisitsyn master * r10a0961 / (5 files): A few doc improvements for malsar based multitask algorithms - http://git.io/ib6FlQ
+ wiking	blackburn: is there any simple generator in shogun? or shall we add one? :)))
+ blackburn	wiking: no, datagenerator is the only
+ wiking	maybe then i should extend it with a new fucntion
+ wiking	to be able to generate n gaussians
+ blackburn	yes
+-!- heiko1 [~heiko@host86-178-85-194.range86-178.btcentralplus.com] has joined #shogun
+ blackburn	heiko1: hey
+ heiko1	blackburn, hi
+ blackburn	heiko1: have you ever heard of success of applying svms to boolean domain?
+ heiko1	boolena domains?
+ heiko1	like boolean functions?
+ blackburn	yeah, features are {0,1}^d
+ heiko1	not direct
+ heiko1	but perceptrons have been studien well in that context
+ heiko1	actually, I think except for xor and the complent, perceptrons can already learn all boolean functions
+ blackburn	heiko1: what is easy to google is a dnf kernel - it appears pretty often
+ blackburn	but latest is 2005
+ heiko1	mmh
+ blackburn	doesn't sound like a success story :D
+ heiko1	I mean this topic is like ultra old
+ heiko1	so what do you want to do?
+ blackburn	heiko1: I have bit features
+ blackburn	now I am learning just a linear svm
+ heiko1	I see
+ blackburn	but linear is not enough I guess
+ heiko1	you can linearly discriminate all boolean functions  but xor
+ heiko1	so you weould need a kernel
+ heiko1	a kernel that for example allows to distinguish the xor set (plus all others) is (x1, x2, x1*x2)
+ blackburn	heiko1: yeah, dnf kernel does that
+ heiko1	but then you are fine
+ heiko1	in this feature space all booleans are linearly distinguishable
+ blackburn	super slow, I thought of better way
+ heiko1	I see
+ blackburn	:D
+ blackburn	dataset is like 40K
+ blackburn	road signs that is, again
+ blackburn	:D
+ gsomix	thunderstorm!
+ heiko1	and the how long does liblinera take?
+ blackburn	heiko1: well kind of 5 minutes
+ blackburn	heiko1: one problem I don't know how to approach
+ blackburn	is
+ blackburn	it is defined as -1 + 2^same1(x,y)
+ heiko1	but you dont have kernel parameters
+ heiko1	isnt 5 mins fine then=?
+ heiko1	I suspect this is training time
+ heiko1	what is apply time?
+ blackburn	heiko1: yeah but liblinear is linear
+ blackburn	with kernel it is kind of infinity
+ blackburn	or I am doing something wrong
+ heiko1	what if you dont use a kernel but manually construct new features? What dimension are you in?
+ blackburn	heiko1: 512 bits
+ heiko1	mmh, too many
+ blackburn	13407807929942597099574024998205846127479365820592393377723561443721764030073546976801874298166903427690031858186486050853753882811946569946433649006084096 is pretty long
+ heiko1	what about Gaussian kernel? :)
+ heiko1	on original features
+ blackburn	well I guess it would be the same slow
+ heiko1	or waht about feature selection before that, I guess the important things are happening in a few dimensions only
+ blackburn	heiko1: any idea how to normalize -1+2^bignumber?
+ heiko1	no
+ blackburn	or rather how to avoid overflow
+ blackburn	:D
+ blackburn	heiko1: does it mean with kernel mapping to linearly separable space I don't have to use C at all?
+ heiko1	ehm what?
+ blackburn	heh
+ blackburn	you said boolean functions are linearly separable
+ heiko1	What I meant is that you probably dont need all these dimensions
+ blackburn	no, before
+ heiko1	14/16 are linearly separable in  2 dimenions
+ blackburn	I mean if kernel maps to space where features are linearly separable
+ blackburn	do I have to regularize at all?
+ heiko1	I see
+ heiko1	if the data is 100% separable
+ heiko1	do dont really need to do that
+ heiko1	however
+ heiko1	(since the test error is 0 anyway)
+ heiko1	but you still get a better margin with reg.
+ blackburn	yeah
+ heiko1	so more robustness
+ blackburn	PROGRESS:       nan    -nan seconds remaining    -nan seconds total
+ blackburn	lol
+ blackburn	probably I would have to wait a few lives more
+ heiko1	hehe :)
+ blackburn	will try to learn on subset
+ heiko1	do some feature selection
+ heiko1	throw away pointless dimensions
+ heiko1	if that wont help, the problem is unsolvable anyway (which I guess it isnt since my brain can solve it :D)
+ blackburn	heiko1: well even dropping 50% of features will speed up it only twice
+ heiko1	sorry, I meant not features in shogun sense
+ heiko1	but dimensions of data
+ heiko1	with that number
+ heiko1	you can probably drop all but a few thousand or eeven hundred
+ blackburn	probably my kernel is just wrong
+ blackburn	omfg
+ blackburn	my features are wrong :D
+ blackburn	I forgot to remove bitwise stuff
+ blackburn	so I learn on 4K dimension features with kernel = const
+ blackburn	:D
+ heiko1	ehm ,what? :)
+ blackburn	heiko1: I forgot to remove my map 01010101 -> [0,1,0,1,0,1,0,1]
+ heiko1	and now it works?
+ blackburn	no idea it is slow even after reducing :(
+ heiko1	try a PCA
+ blackburn	heiko1: will do
+ heiko1	and look at the Eigenspectrum, that will tell you how much it works
+ blackburn	heiko1: eigenspectrum of features?
+-!- gsomix [~gsomix@109.169.158.254] has quit [Ping timeout: 245 seconds]
+ blackburn	heiko1: wait, how can I do PCA of boolean features
+ blackburn	oops
+ heiko1	the eigenspectrum of the covariance matrix
+ blackburn	my kernel is -1.0 constantly
+ blackburn	:D
+ heiko1	lol :)
+ blackburn	good kernel
+-!- alexlovesdata [~binder@194.95.174.230] has joined #shogun
+-!- alexlovesdata [~binder@194.95.174.230] has left #shogun []
+-!- alexlovesdata [~binder@194.95.174.230] has joined #shogun
+-!- Jo____ [c3b2a844@gateway/web/freenode/ip.195.178.168.68] has joined #shogun
+ Jo____	Hello, trying to use the liblinear/libsvm module and have a question if anyone has time for it.
+ blackburn	Jo____: sure, ask
+ Jo____	I'm doing document classification, like sports/economy/etc. I'm fully aware how to achieve this but there's a quirk I'm having issues with. probability output.
+ blackburn	well we don't compute probabilities right there actually
+ blackburn	so you solve multiclass problems, right?
+ Jo____	So far I've used liblinear, this limits me to logic regression, in svm there's more options but not sure of "best practices".
+ Jo____	It's in essence a multiclass problem yes.
+ blackburn	probabilistic output can be a problem there..
+ Jo____	Further down the pipe these values are needed though so not an option to eliminate it regardless of how good the classifier gets :(
+ blackburn	heiko1: what would you say there?
+ heiko1	Jo, so you just want to get probability for multiclass SVM right?
+ Jo____	Pretty much yes.
+ heiko1	we dont have this in shogun yet
+ heiko1	however, you can compute that by hand
+ heiko1	let me find you a paper where this is described, I have one somewhere
+ Jo____	ok, thanks!
+ heiko1	Milgram, J., Cheriet, M., Sabourin, R., and Others (2006). "One Against One" or "One Against
+ heiko1	All": Which One is Better for Handwriting Recognition with SVMs? Strategy
+ heiko1	you would have to fit sigmoids to all involved binary svms in order to get binary probabilities
+ heiko1	and with this paper you can combine these to get multiclass probabilities
+ heiko1	Its on my todo list to implement into shogun
+ heiko1	(at least the sigmoid fitting)
+ heiko1	is it urgent?
+ Jo____	Ok I'll give it an read for sure, think alot of people would apriciate that too.
+ Jo____	Isn't it always but not to worry will work around. In the original liblinear/libsvm package there's some support though right?
+ heiko1	sorry phone 2min
+ Jo____	np random people taking time to help me with my little issues, grateful.
+-!- gsomix [~gsomix@95.67.164.157] has joined #shogun
+ heiko1	re
+ heiko1	yeah I know that this is needed :)
+ heiko1	blackburn, do you think its instantly possible to do this within the current framework?
+ blackburn	heiko1: I do not really know what's the way
+ heiko1	I mean computing apply() on all data and then access all svm scores (not just the sign) to estimate a probability which is then saved in the label
+ heiko1	this is first step
+ blackburn	problem is the confidence
+ blackburn	is not a vector
+ heiko1	second step is (when this is done for all machines in OvO or OvR
+ blackburn	for each feature vector I mean
+ heiko1	what?
+ heiko1	Currently, in apply() one can collect all svm scores right?
+ heiko1	for all data
+ blackburn	yes, it is done
+ blackburn	but they are lost later
+ heiko1	ok
+ heiko1	once one has these
+ heiko1	(for a single svm)
+ heiko1	one can estimate a probability using this plat sigmoid fitting algo
+ heiko1	this is then stored per machine per datum
+ heiko1	possible?
+ blackburn	yeah I think so
+ heiko1	and then once all this is done, these can easily combined to one multiclass probability for all data
+ heiko1	Ok, I will have a look later
+ heiko1	blackburn, did you see this guy wanting to have MKL weights in each cross-validation fold saved?
+ blackburn	yes
+-!- uricamic [~uricamic@2001:718:2:1634:3078:70c3:e281:1376] has quit [Quit: Leaving.]
+ blackburn	heiko1:
+ blackburn	 28 ????????uint8_t* avec = ((CDenseFeatures<uint8_t>*)lhs)->get_feature_vector(i,alen,afree);
+ blackburn	 29 ????????uint8_t* bvec = ((CDenseFeatures<uint8_t>*)rhs)->get_feature_vector(i,blen,bfree);
+ blackburn	find mistake :D
+ heiko1	no diea
+ blackburn	heiko1: i,i :(
+-!- gsomix_ [~gsomix@80.234.28.153] has joined #shogun
+ heiko1	ah
+ heiko1	lol
+ heiko1	Is it working then now blackburn? :D
+-!- gsomix [~gsomix@95.67.164.157] has quit [Ping timeout: 265 seconds]
+ blackburn	heiko1: it says 37 minutes remaining - that's why I hate kernel methods :D
+ heiko1	whats that for? 37 minutes :)
+-!- gsomix_ [~gsomix@80.234.28.153] has quit [Ping timeout: 244 seconds]
+ blackburn	heiko1: to train on 4300 feature vectors :(
+ blackburn	something is totally wrong here
+ blackburn	ah yes it is a brain related problem
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+ blackburn	terrible brain damage of mine I'd say :D
+ blackburn	but I must say one can cast DenseFeatures<float64_t> to DenseFeatures<uint8_t> and it works *somehow*
+ alexlovesdata	:D blackburn
+ blackburn	alexlovesdata: may be you know how to handle binary descriptors in recognition?
+ alexlovesdata	you discover denoising by compression ?!
+ blackburn	alexlovesdata: no I mean it doesn't fail neither runtime nor compilation
+ alexlovesdata	whta means: to handle binary descriptors?
+ alexlovesdata	integer math?
+ blackburn	alexlovesdata: well I am trying to make FREAK work with road signs
+ alexlovesdata	the normal way is to do convex relaxation from the hypercube edges to the linear domain\
+ blackburn	alexlovesdata: so I have 512 bit features
+ blackburn	alexlovesdata: earlier I was just mapping each bit to float (1.0 or 0.0) and learn a linear model
+ alexlovesdata	you can encode the 512 bit in one float
+ alexlovesdata	val_i=i/512
+ blackburn	alexlovesdata: ehmm?
+ alexlovesdata	so a proper machine can use the value for learning
+ blackburn	8 floats you mean?
+ alexlovesdata	I mean 512 bit encode a numerical value range
+ blackburn	alexlovesdata: do you think it have a chance to work as feature?
+ alexlovesdata	you can assign each possible number a float value
+ alexlovesdata	then you have a one dim ... or N-dim feature
+ alexlovesdata	in which each dim captures one bit range
+ alexlovesdata	as you said eg N=512/32 or whatever
+ alexlovesdata	so that the range covered by one float is reasonable
+ alexlovesdata	it is one form of embedding the thing
+-!- gsomix [~gsomix@109.169.230.254] has joined #shogun
+ gsomix	thunderstorm - horses 1:0
+ gsomix	:(
+ alexlovesdata	with N=512/32 each dim encodes a value range of 2^32 or so
+ blackburn	alexlovesdata: so you suggest to construct floats from bits
+ blackburn	and use it as features?
+ alexlovesdata	why not ?!
+-!- Jo____ [c3b2a844@gateway/web/freenode/ip.195.178.168.68] has quit [Ping timeout: 245 seconds]
+ alexlovesdata	N should be large enough so that it is reasonably separable
+ blackburn	alexlovesdata: sounds like something crazy actually :)
+ alexlovesdata	crazy things often come out of my mind ... O:-)
+ alexlovesdata	we can talk about Pascal VOC later
+ alexlovesdata	maybe mid of next week?
+ alexlovesdata	I need to code some experimental heatmap stuff
+ blackburn	alexlovesdata: yeah, I don't mind
+ alexlovesdata	right now
+ blackburn	I will try that 'embedding' now
+ blackburn	alexlovesdata: no that works worse than just bits as features
+ heiko1	blackburn, what about the online pdf of the tutorial, any news on that?
+ blackburn	heiko1: well no, I don't have any news
+ heiko1	k
+ heiko1	sonney2k, ^
+ blackburn	alexlovesdata: 15% accuracy lossss
+ blackburn	alexlovesdata: no, with a few keypoints it is surprisingly pretty near
+ blackburn	alexlovesdata: I did 0/1 to kind of ++/-- mapping - works surprisingly well
+-!- alexlovesdata [~binder@194.95.174.230] has quit [Ping timeout: 245 seconds]
+-!- alexlovesdata [~binder@194.95.174.230] has joined #shogun
+ alexlovesdata	which kernel did you use?
+ blackburn	alexlovesdata: no kernel
+ alexlovesdata	I mean after the recoding
+ alexlovesdata	or what classification method?
+ blackburn	linear crammer-singer
+ alexlovesdata	so linear
+ blackburn	yes sure
+ alexlovesdata	why linear???
+ alexlovesdata	I would say this is always the worst choice
+ blackburn	I won't be able to try anything with kernels
+ alexlovesdata	not even explicit mappings?
+ blackburn	trainset is pretty large
+ blackburn	ah with explicit mapping I should try
+ heiko1	blackburn, or anyoidy else, is there an online (latex) generator for doxygen comments? such as online latex renderes?
+ blackburn	heiko1: no I don't know any
+-!- alexlovesdata [~binder@194.95.174.230] has left #shogun []
+ CIA-18	shogun: Heiko Strathmann master * r5832250 / src/shogun/mathematics/Statistics.h : fixed some warnings and documentation updates in doxygen latex - http://git.io/-ECQlw
+ CIA-18	shogun: Heiko Strathmann master * r8948ff2 / src/shogun/statistics/TwoDistributionsTestStatistic.h : fixed a warning - http://git.io/kGMxUw
+ CIA-18	shogun: Heiko Strathmann master * r7b2a2b8 / (2 files in 2 dirs): Merge pull request #701 from karlnapf/master - http://git.io/5q7oIw
+-!- heiko1 [~heiko@host86-178-85-194.range86-178.btcentralplus.com] has left #shogun []
+-!- n4nd0 [~nando@31.Red-2-137-62.dynamicIP.rima-tde.net] has joined #shogun
+ n4nd0	nice, I see that the buildbot is healthy again
+ n4nd0	sonney2k, blackburn: should I do something else about the PR before it gets merged?
+ blackburn	n4nd0: I don't know , let me check
+ n4nd0	I updated it and rebased master yesterday IIRC
+ blackburn	n4nd0: oh so you did matrix list structure?
+ blackburn	did add
+ n4nd0	yes
+ n4nd0	the captain told me to do it :)
+ blackburn	it is pretty huge to review ^(
+ n4nd0	I think that sonney2k has already reviewed it
+ blackburn	yeah sure
+ n4nd0	I am eager to see it merged :)
+ blackburn	it can't be merged :D
+ blackburn	need to be rebased
+ n4nd0	whatever :P
+ blackburn	let me know when it is rebased
+ n4nd0	I am still looking for some application of this I have done
+ blackburn	yeah would be nice to have some example
+-!- n4nd0 [~nando@31.Red-2-137-62.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+ CIA-18	shogun: Sergey Lisitsyn master * rc3843f9 / (2 files): Reformatted HKM - http://git.io/ihRbwg
+ shogun-buildbot_	build #300 of deb3 - modular_interfaces is complete: Failure [failed test ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/300  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot_	build #301 of deb3 - modular_interfaces is complete: Failure [failed test ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/301  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ CIA-18	shogun: Sergey Lisitsyn master * rdf8cd27 / (14 files in 6 dirs): A few warning fixes - http://git.io/PY8W8g
+ shogun-buildbot_	build #302 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/302
+ CIA-18	shogun: Sergey Lisitsyn master * r356cfcf / src/shogun/transfer/multitask/MultitaskCompositeMachine.cpp : Fixed MultitaskCompositeMachine train locked - http://git.io/5Ff7Vw
+--- Log closed Fri Aug 10 00:00:17 2012

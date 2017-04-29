@@ -1,0 +1,457 @@
+--- Log opened Tue Feb 04 00:00:43 2014
+ shogun-buildbot	build #427 of precise - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/427  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Parijat Mazumdar <mazumdarparijat@gmail.com>
+-!- HeikoS [~androirc@2.219.252.217] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~androirc@2.219.252.217] has quit [Client Quit]
+-!- iglesiasg [524ae0a7@gateway/web/freenode/ip.82.74.224.167] has quit [Quit: Page closed]
+ shogun-buildbot	build #168 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/168  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Parijat Mazumdar <mazumdarparijat@gmail.com>
+ shogun-buildbot	build #164 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/164  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Parijat Mazumdar <mazumdarparijat@gmail.com>
+ shogun-buildbot	build #179 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/179  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Parijat Mazumdar <mazumdarparijat@gmail.com>
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- thoralf [~thoralf@91-65-139-223-dynip.superkabel.de] has quit [Ping timeout: 248 seconds]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Ping timeout: 272 seconds]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+--- Log closed Tue Feb 04 07:34:54 2014
+--- Log opened Tue Feb 04 07:54:15 2014
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 13 nicks [2 ops, 0 halfops, 0 voices, 11 normal]
+-!- Irssi: Join to #shogun was synced in 7 secs
+ sonne|work	lisitsyn, wiking - do you have the bootstrap valgrind thing somewhere?
+@wiking	sonney2k: just a sec
+@wiking	sonne|work: ^
+@wiking	besser82: mmm seems that patch wasn't really working out :(
+@wiking	set(MEMCHECK....
+@wiking	sonne|work: this is how it would look like with lisitsyn's xslt: http://buildbot.shogun-toolbox.org/memcheck/test.html
+@wiking	sonne|work: currently i'm just looking into how we can use the xslt from the httpd server
+ lisitsyn	wiking: I can make it collapsing in/collapsing out
+ lisitsyn	and add other info as well
+ lisitsyn	but a bit later
+@wiking	lisitsyn: sonne|work could tell you the requirements :)
+@wiking	lisitsyn: i'm just executing :P
+* wiking wonders who's handling http requests http://buildbot.shogun-toolbox.org/memcheck/
+ sonne|work	lisitsyn: yes please more details about the actual error would be nice and of course some summary - I mean how many leaks in total etc
+@wiking	twistd or nginx
+ sonne|work	wiking: twistd
+ sonne|work	wiking: lisitsyn - in any case we need this list to be down to 0
+@wiking	sonne|work: lemme check how we can hack twisted
+@wiking	sonne|work: or maybe the easier way so that we can actually upgrade buildbot that i add an extra task to memcheck job
+@wiking	sonne|work: after uploading it'll run the xslt over the uploeded xml and done..
+ sonne|work	wiking: yes exactly
+ sonne|work	do it as extra task and put the script on the buildbot
+@wiking	what's the command to execute something on buildmaster and not on slave ? :)
+ sonne|work	wiking: urgs - then do it on fatbot
+@wiking	sonne|work: do we want then the xml on master at all?
+@wiking	sonne|work: since we can just upload the generated html then
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Ping timeout: 265 seconds]
+@wiking	MasterShellCommand
+ sonne|work	wiking: indeed we don't need it
+-!- votjakovr [~votjakovr@188.134.46.30] has joined #shogun
+@wiking	sonne|work: i've got this from kevin: "I want to be able to run demos of the changes to the shogun site that I am working on so that I can get feedback from everyone easily."
+@wiking	anyhow his account is done
+@wiking	once i know what other access he needs i'll do it asap
+ sonne|work	wiking: thanks
+@wiking	besser82: ping?
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ besser82	wiking:  pong!
+@wiking	besser82: ok so the MEMORYCHECK_COMMAND_OPTIONS works good
+@wiking	besser82: only thing is that it overwrites the default command options
+@wiking	i've tried everything
+@wiking	LIST(APPEND MEMORYCHECK_COMMAND_OPTIONS "...")
+@wiking	SET(MEMORYCHECK_COMMAND_OPTIONS "${MEMORYCHECK_COMMAND_OPTIONS} ..."_
+@wiking	s/_/)/g
+@wiking	but neither of them worked :<
+ besser82	wiking:  How about with CTEST_  prefixed?!?
+@wiking	if i set somehow the MEMORYCHECK_COMMAND_OPTIONS then i loose all the default options
+@wiking	besser82: been there done that :)
+@wiking	same
+ besser82	wiking:  that sucks :(
+@wiking	i mean within CMakeLists
+@wiking	when i do MESSAGE(${MEMORYCHECK_COMMAND_OPTIONS})
+@wiking	or MESSAGE(${CTEST_MEMORYCHECK_COMMAND_OPTIONS})
+@wiking	it does not exist
+ besser82	wiking:  /back
+ besser82	wiking:  lemme investigate about that a bit...
+@wiking	besser82: and it's all the same if i do this in CTestConfig.cmake
+@wiking	besser82: according to github search the only way to solve this is basically put there all the commands i want
+@wiking	i.e. the default ones as well
+ besser82	wiking: not so good...  :(
+ besser82	wiking: perhaps there is a way to workaround that...
+@wiking	besser82: mmm maybe but seems people on github couldn't find it either
+@wiking	let me know if u have some soluton
+@wiking	until then i'll go with the above mentioned one
+ besser82	wiking:  I'll do  :)
+@wiking	no fucking way
+@wiking	MemCheck command: /usr/bin/valgrind "-q" "--tool=memcheck" "--leak-check=yes" "--show-reachable=yes" "--workaround-gcc296-bugs=yes" "--num-callers=50" "--error-exitcode=-1" "--suppressions=/home/wiking/shogun/configs/valgrind.supp" "/home/wiking/shogun/build/examples/undocumented/libshogun/base_load_file_parameters"
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 264 seconds]
+@wiking	1/1 MemCheck #56: libshogun-base_load_file_parameters ...   Passed    2.24 sec
+@wiking	56: process test output now: libshogun-base_load_file_parameters libshogun-base_load_file_parameters
+@wiking	The following tests passed: libshogun-base_load_file_parameters
+@wiking	100% tests passed, 0 tests failed out of 1
+@wiking	Total Test time (real) =   2.30 sec
+@wiking	-- Processing memory checking output:
+@wiking	Memory checking results:
+@wiking	Memory Leak - 3
+@wiking	Potential Memory Leak - 6
+-!- adrin [~adrin@guest-202.mpi-inf.mpg.de] has joined #shogun
+@wiking	HOW?!
+@wiking	why has it passed?!
+@wiking	seems ctest has some problems :,
+@wiking	ah ok no it's valgrind
+@wiking	wooohooo  56 - libshogun-base_load_file_parameters (Failed)
+ sonne|work	wiking: well or grep for the numbers and fail in a shell script :D
+@wiking	done
+@wiking	it cannot handle -1 as a return code
+@wiking	i mean valgrind
+@wiking	only positive
+@wiking	but none the less return 1 will trigger as failed in ctest
+@wiking	now it's  only the generation of the thm
+@wiking	html
+ sonne|work	\o/
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :develop * 25c1e4f / CMakeLists.txt: https://github.com/shogun-toolbox/shogun/commit/25c1e4fb40953277c3a69e3d4862b78cab22ea1f
+ shogun-notifier-	shogun: Fix MEMORYCHECK_COMMAND_OPTIONS in order to return 1 if error occurs
+@wiking	lets see how this works out...
+@wiking	The following tests FAILED:
+@wiking	  6 - libshogun-classifier_gaussian_process_binary_classification (Failed)
+@wiking	 37 - libshogun-regression_gaussian_process_simple_exact (Failed)
+@wiking	 56 - libshogun-base_load_file_parameters (Failed)
+@wiking	 57 - libshogun-base_load_all_file_parameters (Failed)
+@wiking	ok seems almost done
+@wiking	as these are only the true leaks :P
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 272 seconds]
+-!- adrin [~adrin@guest-202.mpi-inf.mpg.de] has quit [Quit: Leaving]
+@wiking	most probably we'll have to move this task to the debian-sid bot as that one has a newer valgrind that can return error for under mems as well
+ sonne|work	wiking: I don't mind...
+ sonne|work	wiking: we actually didn't just have some leaks but uninited mem access too
+-!- votjakovr [~votjakovr@188.134.46.30] has quit [Quit: WeeChat 0.4.0]
+@wiking	sonne|work: i know that's why i'm saying that we'll have to move as with the current valgrind we cannot trigger error in ctest -> no read bot
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+ besser82	sonne|work:  Yeah!  12 MBit/s upload since today :D  http://www.speedtest.net/result/3281497079.png
+@wiking	besser82: what was the cmd line arg u mentioned yesterday for valgrind ?
+@wiking	trying to figure out whether 3.8 has that?
+@wiking	besser82: what's the valgrind version in fc18/
+@wiking	?
+ besser82	wiking:  `--errors-for-leak-kinds=[definite,possible]`
+-!- adrin [~adrin@guest-202.mpi-inf.mpg.de] has joined #shogun
+@wiking	besser82: is there something similar for uninited mem access ?
+@wiking	:)
+ besser82	wiking:  `--undef-value-errors=no|yes`  afaik...
+ besser82	wiking:  FC18 is EOL  :)
+ besser82	wiking:  FC19 has 3.8.1
+ besser82	wiking:  FC20 is 3.9.0
+@wiking	besser82: --undef-value-errors should be yes by default
+ besser82	wiking:  then unfortunately there isn't any option for that, yet...
+ besser82	wiking:  if you need FCxx-tarball lemme know; I can provide prestine ones  ;)
+@wiking	nah i'm trying to force that option
+@wiking	but tha already exist in 3.7
+@wiking	we'll see if that makes any difference
+@wiking	if no then there's no option for it unfortunately
+ shogun-buildbot	build #428 of precise - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/428
+-!- lambday [67157e4f@gateway/web/freenode/ip.103.21.126.79] has joined #shogun
+-!- lambday [67157e4f@gateway/web/freenode/ip.103.21.126.79] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot	build #168 of debian wheezy - memcheck is complete: Failure [failed memory check generate html]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/168  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@wiking	shogun-buildbot: force build --branch=develop 'debian wheezy - memcheck'
+ shogun-buildbot	build #169 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #169 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/169  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #169 of debian wheezy - memcheck is complete: Failure [failed memory check generate html]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/169
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+@wiking	shogun-buildbot: force build --branch=develop 'debian wheezy - memcheck'
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@wiking	shogun-buildbot: force build --branch=develop 'debian wheezy - memcheck'
+ shogun-buildbot	build #170 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #170 of debian wheezy - memcheck is complete: Failure [failed memory check generate html]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/170
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@wiking	shogun-buildbot: force build --branch=develop 'debian wheezy - memcheck'
+ shogun-buildbot	build #171 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #171 of debian wheezy - memcheck is complete: Failure [failed memory check generate html]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/171
+ shogun-buildbot	build #165 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/165  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@wiking	shogun-buildbot: force build --branch=develop 'debian wheezy - memcheck'
+ shogun-buildbot	build #172 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #172 of debian wheezy - memcheck is complete: Failure [failed memory check generate html]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/172
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@wiking	shogun-buildbot: force build --branch=develop 'debian wheezy - memcheck'
+ shogun-buildbot	build #173 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #173 of debian wheezy - memcheck is complete: Failure [failed memory check generate html]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/173
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@wiking	shogun-buildbot: force build --branch=develop 'debian wheezy - memcheck'
+ shogun-buildbot	build #174 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #174 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/174
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+@wiking	sonne|work: ok so it's done
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has joined #shogun
+@wiking	shogun-buildbot_: force build --branch=develop 'debian wheezy - memcheck'
+ shogun-buildbot_	build #175 forced
+ shogun-buildbot_	I'll give a shout when the build finishes
+@wiking	sonne|work: a html is being generated + the job fails if there's a leak/uninit mem error
+ shogun-buildbot_	build #180 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/180  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ sonne|work	wiking: hmmhh looks like the output is only from the last test? http://buildbot.shogun-toolbox.org/memcheck/20140204-1208.html
+ sonne|work	it would be nice to see the actual errors...
+@wiking	sonne|work: for the actual errors talk with lisitsyn
+@wiking	sonne|work: that was a test so that i see that the xsltproc + html upload works
+@wiking	sonne|work: now it's generating the report on the whole test set
+ shogun-buildbot_	build #175 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/175
+@wiking	sonne|work: there u go
+@wiking	failed list
+@wiking	 10 - unit-MalsarClusteredTest (Failed)
+@wiking	 12 - unit-KMeans (Failed)
+@wiking	 36 - unit-Serialization (Failed)
+@wiking	 38 - unit-MLDataHDF5File (Failed)
+@wiking	 51 - unit-MulticlassOCASTest (Failed)
+@wiking	136 - unit-SGObject (Failed)
+@wiking	139 - unit-SerializationAscii (Failed)
+@wiking	140 - unit-SerializationHDF5 (Failed)
+@wiking	141 - unit-SerializationJSON (Failed)
+@wiking	142 - unit-SerializationXML (Failed)
+@wiking	148 - libshogun-classifier_gaussian_process_binary_classification (Failed)
+@wiking	179 - libshogun-regression_gaussian_process_simple_exact (Failed)
+@wiking	198 - libshogun-base_load_file_parameters (Failed)
+@wiking	199 - libshogun-base_load_all_file_parameters (Failed)
+ sonne|work	woah!
+ sonne|work	wiking: please add these as entrance tasks...
+ sonne|work	wiking: and excellent that it works now :))
+@wiking	i think some of them are false positive
+ sonne|work	btw MulticlassOCASTest is failing on OSX simply due to a bug like this
+@wiking	as some of them are due to some thing in eigen
+ sonne|work	Uninitialized Memory Conditional (66)
+@wiking	yeah that's for sure not a false positive
+ sonne|work	lisitsyn: I need to see the actual error though - nevertheless it is nice to see how to easily reproduce the issue
+ lisitsyn	sonne|work: ok
+ lisitsyn	sonne|work: will full log work?
+ lisitsyn	I can do that a bit later tomorrow
+ lisitsyn	otherwise simple <xsl:value-of select="Log">
+ lisitsyn	can help here
+@wiking	ok done
+@wiking	lot of entrance examples generated
+@wiking	i mean entrance issues
+ sonne|work	wiking: thanks
+ sonne|work	so now only mentors / ideas list / proposal and done
+ sonne|work	and of course we should try to get buildbots green to the extend possible - otherwise we don't see what we or students break
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- HeikoS1 [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has joined #shogun
+ HeikoS1	sonne|work: around? or sonney2k ?
+ sonne|work	HeikoS1: yes?
+ HeikoS1	sonne|work: just redoing this bill and was wondering if you had the old document floating around?
+ sonne|work	what are you redoing exactly?
+ HeikoS1	the invoice itself
+ HeikoS1	since they want us to do that
+ HeikoS1	they sent the 2012 one
+ HeikoS1	there is a list of things on there
+ HeikoS1	and then the pdfs attached
+ sonne|work	well I submitted it online this time that is the issue
+ HeikoS1	sonne|work: did you see that?
+ sonne|work	no
+ sonne|work	will never do that with their online form again but only locally
+ HeikoS1	I see, did you mention anything else than in the pdf with the receipts?
+ sonne|work	yes sure
+ HeikoS1	sonne|work: Ill just write one up from the receipts
+ sonne|work	students / mentor stipedn
+ sonne|work	HeikoS1: write sth up and send it to me then
+ sonne|work	so I can check
+ HeikoS1	ok
+ sonne|work	we should get 8x 500$ for students + ~2000$ for the summit
+@wiking	btw shouldnt we release this thing publicly? or only after when the e.V. is done...?
+ sonne|work	wiking: what thing?
+@wiking	sonne|work: accounting for each year
+ sonne|work	wiking: for e.V. we need to do a tax decl.
+@wiking	although i have no clue what are the reqs for a .de e.V. but for example mozilla foundation publishes on the end of each year the accounting of the fundation
+@wiking	namely that google just dumped them like another 10M+ USD :P
+ sonne|work	hehe
+@wiking	but none the less maybe it would be a good thing to do as well... just to assure the openness...
+ sonne|work	wiking: and show how tiny we are :D
+@wiking	well that's alright
+@wiking	https://static.mozilla.com/moco/en-US/pdf/Mozilla_Audited_Financials_2012.pdf :)
+ sonne|work	kind of an empire already :D
+@wiking	hehehe yeah
+@wiking	funnny that they even have investments in hedge funds
+@wiking	and goverment bonds :)
+@wiking	'On 20 December 2011 Mozilla announced that the contract was once again renewed for at least three years to November 2014, at three times the amount previously paid, or nearly US$300 million annually'
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+ HeikoS1	sonne|work, sonney2k still around? did you just add the rax rate onto the prices or did you substract before?
+ sonne|work	add
+ HeikoS1	sonney2k: dont know what that means, but I just added it
+ HeikoS1	sonne|work: the PO number stayed the same I guess, Ill send you the new one in a minute, pls double check things
+-!- zxtx [~zv@98.223.196.32] has quit [Ping timeout: 272 seconds]
+-!- zxtx [~zv@129-79-241-148.dhcp-bl.indiana.edu] has joined #shogun
+-!- dsockwel1 [~twgs@199.167.199.97] has joined #shogun
+-!- dsockwell [~twgs@199.167.199.97] has quit [Read error: Operation timed out]
+-!- zxtx [~zv@129-79-241-148.dhcp-bl.indiana.edu] has quit [Ping timeout: 250 seconds]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Ping timeout: 250 seconds]
+-!- HeikoS1 [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@nat-160-138.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-160-138.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 245 seconds]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+-!- zxtx [~zv@129-79-241-148.dhcp-bl.indiana.edu] has joined #shogun
+-!- thoralf [~thoralf@91-65-138-171-dynip.superkabel.de] has joined #shogun
+ thoralf	Hey.
+@wiking	yo
+@wiking	thoralf: so we should just open a new issue or?
+ thoralf	wiking: Yes, this would be perfect.
+@wiking	something like 'purge SGRefObject and SGDynamicRefObjectArray'
+@wiking	ok i'm on it
+@wiking	ok done
+@wiking	thnx
+ thoralf	Do you agree that we should remove the two other guys from the code base?
+@wiking	thoralf: if they are not referenced
+@wiking	then we should just go ahead and remove
+@wiking	thoralf: but it'll be a good entrance task :)
+@wiking	thoralf: somebody will do it for sure
+@wiking	as it's quite easy
+ thoralf	Okay. ;)
+@wiking	time shall not be wasted on such small issues since gsoc is approaching :)
+@wiking	thoralf: https://github.com/shogun-toolbox/shogun/issues/1759
+@wiking	any idea of it's status, is it still valid or it's obsolete?
+ thoralf	I'll check.
+@wiking	woah
+@wiking	we have a looot of bugz
+@wiking	thoralf: thnx for confirming!
+@wiking	if u think plz mark it as an entrance task
+@wiking	we are for sure going to have some structured hacking this year as well
+@wiking	..
+ thoralf	wiking: I don't have permissions on shogun to change labels.
+ thoralf	At least I don't see buttons to achieve this...
+@wiking	woah?!
+@wiking	how come?!
+@wiking	lemme check your permissions
+@wiking	hahaha crazy fuck
+@wiking	sonney2k: ping?1
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ thoralf	wiking: I never cared about getting these permissions... ;)
+@wiking	thoralf: done
+@wiking	thoralf: yeah but we care because the more people the more distributed we can work :)
+@wiking	anyhow you should be able to do tagging etc...
+ thoralf	Haha, that's why I didn't care... but thanks. :)
+@wiking	and btw directly push into the repo :)
+@wiking	glhf :)
+* thoralf feels honored.
+@wiking	yeah wait for the moment when u start doing issue cleanups :D
+* thoralf is not afraid of you doing cleanups.
+* thoralf is afraid of you make me doing the cleanups. :D
+ thoralf	wiking: https://github.com/shogun-toolbox/shogun/pull/1813 <-- I did a few tests to (empirically) confirm that my fix didn't change the results.
+ thoralf	Shall we merge?
+ thoralf	Michal wrote "otherwise I think that it can be merged now."
+@wiking	you can push the merge button :)
+@wiking	if u feel it's ok
+@wiking	lisitsyn: here?
+ lisitsyn	wiking: yes
+ thoralf	My first merge.  Woah. :D
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Thoralf Klein :develop * 6023aec / src/shogun/structure/DualLibQPBMSOSVM.cpp: https://github.com/shogun-toolbox/shogun/commit/6023aec3a096b138de89e56571bda60c02a3a6fd
+ shogun-notifier-	shogun: DualLibQPBMSOSVM::train_machine: True exit status if one of the stopping conditions is met.
+ shogun-notifier-	shogun: Thoralf Klein :develop * 3e004ab / tests/unit/structure/DualLibQPBMSOSVM_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/3e004aba2211b7b7dc4e8238ada3d8ebc1779316
+ shogun-notifier-	shogun: libbmrm: Added unittest to prove that DualLibQPBMSOSVM has a problem if the buffer size is exceeded.
+ shogun-notifier-	shogun: Thoralf Klein :develop * fced4e0 / src/shogun/structure/libbmrm.cpp,src/shogun/structure/libbmrm.h: https://github.com/shogun-toolbox/shogun/commit/fced4e0144c303728c75bd2667ab7184fea1c920
+ shogun-notifier-	shogun: libbmrm: Changes fix memory errors; added prober bounds checking (at least assertions).
+ shogun-notifier-	shogun: Thoralf Klein :develop * 81ae3f5 / src/shogun/structure/libbmrm.cpp: https://github.com/shogun-toolbox/shogun/commit/81ae3f524056e979e73df6344475f17baa44d12c
+ shogun-notifier-	shogun: libbmrm: Overworking history handling.  Growing history on demand.
+ shogun-notifier-	shogun: Thoralf Klein :develop * 4d93565 / src/shogun/structure/libbmrm.cpp: https://github.com/shogun-toolbox/shogun/commit/4d93565e5a3cfc9b15c854b76ec37528c902e0c8
+ shogun-notifier-	shogun: libbmrm: Checking for integer overflow when allocating memory for matrix.
+ shogun-notifier-	shogun: Thoralf Klein :develop * d52d373 / src/shogun/structure/libbmrm.cpp: https://github.com/shogun-toolbox/shogun/commit/d52d373e1bb4b5cb44f6391e96655a15c9b36c43
+ shogun-notifier-	shogun: libbmrm: Changed how to controll debugging output in libbmrm.
+@wiking	lisitsyn: so i've been reading this http://gplv3.fsf.org/wiki/index.php/FAQ_Update
+@wiking	lisitsyn: basically we can do what i was saying the other day
+@wiking	lisitsyn: once we have the new framework, i.e. the modular thingy
+@wiking	lisitsyn: then we can create a 'package' of gpl modules
+ lisitsyn	oh alright
+@wiking	and there we can put all the stuff that we cannot release under bsd
+ lisitsyn	I don't mind training part to be gpl
+@wiking	'In order to use the GPL-covered plug-ins, the main program must be released under the GPL or a GPL-compatible free software license, and that the terms of the GPL must be followed when the main program is distributed for use with these plug-ins'
+@wiking	bsd is a GPL-compatible license
+ lisitsyn	but I really do want to be able to give_me_fking_fast_and_reliable_shogun_classifier()
+@wiking	so basically this way if somebody doesn't mind gpl stuff they can use the whole thing as is
+-!- zxtx [~zv@129-79-241-148.dhcp-bl.indiana.edu] has quit [Ping timeout: 272 seconds]
+@wiking	if somebody wants bsd only ... well he/she has to go around it
+ lisitsyn	yeah good
+@wiking	i.e. reimplement the thing with bsd license
+@wiking	but none the less if we can at least get the core of shogun to be bsd
+@wiking	then we are already half way done
+@wiking	and just put together a gpl package
+@wiking	and voila
+@wiking	so we should be good
+@wiking	but to be able to do this
+@wiking	we need like 6-7 more people to sign the form
+@wiking	as they are really big contributors
+@wiking	these are: Sebastian Henschel, Shashwat Lal Das, Jonas Behr, Baozeng Ding, Christian Widmer, puffin444, Alesis Novik, Andre Noll, Alexander Zien, Justin Patera, Alexander Binder, Michal Uricar,
+@wiking	lol
+@wiking	src/shogun/classifier/vw/* is in BSD
+ shogun-buildbot_	build #71 of deb4 - python3 is complete: Failure [failed python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/71  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ thoralf	File "/home/buildslave/deb4_-_python3/build/src/.doxy2swig.py", line 212, if prot <> 'public':
+ thoralf	Not related to my PR, right?
+@wiking	hheheh
+@wiking	let's check :)
+@wiking	but ithink yes
+@wiking	as it was green before
+@wiking	thoralf: what was the PR number?
+@wiking	1813 ?
+@wiking	right
+@wiking	amazing
+@wiking	:D
+ thoralf	https://github.com/shogun-toolbox/shogun/pull/1813
+@wiking	shogun-buildbot_: force build --branch=develop 'deb4 - python3'
+ shogun-buildbot_	The build has been queued, I'll give a shout when it starts
+@wiking	thoralf: it'll fix itself dont worry :) (idle
+@wiking	7 pending0
+@wiking	it's just the stupid way buildbot is now building these prs
+@wiking	i mean commits
+@wiking	we'll se after 7 builds
+@wiking	wtf is up :)
+ thoralf	That's why you should never release after 4pm. ;)
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+@wiking	thoralf: if u do a multiclass test
+@wiking	thoralf: u could create gaussian blobs and then just do a multiclass over the
+@wiking	m
+@wiking	;)
+ thoralf	That's right.
+@wiking	check tests/unit/features/DataGenerators_unittest.cc for examples
+ thoralf	But it's basically a test for the solvers that they behave sane if #cp-buffer < #needed-iterations.
+@wiking	hehe
+@wiking	yeah i get that part
+ thoralf	You think I could have avoided the helper-methods for creating dummy-data, right?
+@wiking	yep
+@wiking	although we should create helper functions
+@wiking	within utest
+ thoralf	It's accidently somehow pathological... I dunno why. :)
+@wiking	as i'm sure other utest would/will need gaussian blobs
+ thoralf	Anyway, I've created an example who to use parametrized tests.
+@wiking	that's great
+ thoralf	https://github.com/shogun-toolbox/shogun/pull/1854
+ thoralf	It wasn't that easy - gtest seems to be a bit picky.
+@wiking	w8 for travis
+@wiking	and if it's all good merge it
+ thoralf	No hurry.
+@wiking	thoralf: btw python3 bot went back to be green... ;)
+ shogun-buildbot_	build #72 of deb4 - python3 is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/72
+ shogun-buildbot_	build forced [ETA 12m44s]
+ shogun-buildbot_	I'll give a shout when the build finishes
+ shogun-buildbot_	build #170 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/170  blamelist: Thoralf Klein <thoralf.klein@zib.de>, Thoralf Klein <thoralf@fischlustig.de>
+ thoralf	The PR contains way more issues than just the test, because I accidently squashed them.  So it's not that obvious and I recommend someone reviewing it...
+ thoralf	If it's too bad, I'll try to isolete the changes.
+ shogun-buildbot_	Hey! build deb4 - python3 #73 is complete: Success [build successful]
+ shogun-buildbot_	Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/73
+ thoralf	shogun-buildbot_: Thanks! :)
+ shogun-buildbot_	build #171 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/171  blamelist: Thoralf Klein <thoralf.klein@zib.de>, tklein23 <tklein23@users.noreply.github.com>, Thoralf Klein <thoralf@fischlustig.de>
+ thoralf	Impressing -- we have individual builds that take more than 30 minutes?
+ shogun-buildbot_	build #166 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/166  blamelist: Thoralf Klein <thoralf.klein@zib.de>, tklein23 <tklein23@users.noreply.github.com>, Thoralf Klein <thoralf@fischlustig.de>
+--- Log closed Wed Feb 05 00:00:45 2014

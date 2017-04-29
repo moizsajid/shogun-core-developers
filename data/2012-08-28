@@ -1,0 +1,282 @@
+--- Log opened Tue Aug 28 00:00:17 2012
+-!- romi_ [~mizobe@201-0-61-96.dsl.telesp.net.br] has joined #shogun
+-!- romi_ [~mizobe@201-0-61-96.dsl.telesp.net.br] has quit [Remote host closed the connection]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Client Quit]
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ yoo	hi
+ yoo	I have a question about mkl classification
+ yoo	using p-norm mkl and the example below
+ yoo	http://pastebin.com/CZY9NbYs
+ yoo	with p=1 no problem
+ yoo	with p>1 I get different results according of orders the kernels are "append" to CombinedKernel
+ yoo	regardless to the order the kernels are added, the first kernel always get a big weight ...
+ n4nd0	yoo: what classifier are you using?
+ n4nd0	it looks like there are some bugs with MKL and SVMLight
+ yoo	I am using MKLMulticlass
+ yoo	Could you confirm me the "bug" I get running the code below
+ yoo	http://pastebin.com/CZY9NbYs
+ yoo	despite those results, I dont know if its a real bug
+ yoo	Is there another mkl multiclass machine than CMKLMulticlass ?
+ n4nd0	give me a sec
+ yoo	Maybe CMKLMulticlass support only 1-norm ?
+ n4nd0	I am not sure about that, I have never used this part of the project but I am checking
+ yoo	thanks
+ n4nd0	about other MKL multiclass classes
+ n4nd0	I think there is an MKLMulticlassGradient and MKLMulticlassGLPK
+ n4nd0	did you see those?
+ n4nd0	yoo: in the doc of MKLMulticlass, it says that it is a class for L1-norm - so yes, I guess it is only for L1-norm
+ yoo	yes but MKLMulticlassGradient and MKLMulticlassGLPK are helpers for MKLMulticlass
+ n4nd0	yoo: aham, I understand
+ yoo	mmmh
+ n4nd0	however there are some things related about pnorm begin >= 1
+ n4nd0	being, sorry
+ yoo	in the MKLMulticlass norm
+ yoo	void CMKLMulticlass::set_mkl_norm(float64_t norm) { pnorm=norm; if(pnorm<1 ) SG_ERROR("CMKLMulticlass::set_mkl_norm(float64_t norm) : parameter pnorm<1"); }
+-!- n4nd0_ [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Quit: Page closed]
+-!- n4nd0_ is now known as n4nd0
+ n4nd0	yeah ok so the norm shouldn't be less than 1
+ n4nd0	but your problem was with norm greater than 1 right?
+ yoo	yes of course
+ n4nd0	I think it should work fine with pnorm>=1
+ yoo	:)
+ n4nd0	mmm
+ yoo	allright could you just run the code I sent you, set p-norm with p=1.5 for example
+ n4nd0	sure
+ n4nd0	let's see
+ yoo	and then change the order of the kernels
+ yoo	"the order you call cker->append_kernel()"
+ yoo	and tell me if you get correct results : meaning same weights with different corresponding orders
+ n4nd0	ok
+ yoo	(thanks :p )
+ n4nd0	there was a compile error btw, line 21 missing a "
+ yoo	certainly when passing code to pastebin
+ yoo	yes, because you need to set your path to shogun example data
+ n4nd0	yeah, the weights are different
+ n4nd0	firs time
+ n4nd0	weights=[0.772121228165275508,0.355850164735586394,0.228543243936139867]
+ n4nd0	second
+ n4nd0	weights=[0.807646890960066477,0.372222999073939242,0.13038554325345969]
+ n4nd0	and I just switched two calls to append
+ yoo	thats strange
+ n4nd0	I certainly don't know
+ n4nd0	I don't know much about MKL apart from what the acronym means :S
+ yoo	because linear kernel give poor results but when you place it in the first position, it takes 80% of weights ..
+ yoo	I am not very used to it too
+ yoo	maybe I can come back later. Could you keep the attached code and ask to people who wrote the code ?
+ n4nd0	have you checked that the other parts of your example are correct?
+ n4nd0	for example, I am not very sure if I understand why before each call to append_kernel you call append_feature_obj?
+ yoo	yes I think this part is correct. append_features is called for each kernel since the features could be different for each kernels.
+ yoo	from doc "It keeps pointers to the added sub-features and is especially useful to  combine kernels working on different domains (c.f. CCombinedKernel) and to  combine kernels looking at independent features."
+ n4nd0	I see
+ n4nd0	but the thing is that for the kernels you are using, all of them use the same features
+ n4nd0	then I am not really sure why to append the same features several times
+ yoo	because you need CCombinedFeatures object ?
+ yoo	if not : segfault " Number of features/kernels does not match - bailing out "
+ n4nd0	aham ok, you are probably right
+ yoo	but one more time, I am not an expert ..
+ n4nd0	me neither
+ n4nd0	take a look at python_modular example though
+ n4nd0	mkl_multiclass_modular.py
+ yoo	ok i'll do that right now
+ yoo	give me a minute
+ n4nd0	as you can see there the features are not given in the constructor to the individual kernels
+ n4nd0	maybe that doesn't make a difference but let's better be sure
+ yoo	and they test p-norm with p =1.5 or 2.0
+ n4nd0	true
+ yoo	but I can see : feats_train.append_feature_obj(subkfeats_train)
+ n4nd0	yes
+ yoo	3 time fr each kernel
+ yoo	what d you mean "he features are not given in the constructor to the individual kernels" ?
+ yoo	oh I see
+ yoo	!
+ n4nd0	I have run the test like that
+ n4nd0	and it seems that the weights still vary
+ n4nd0	if one changes the order of them
+ n4nd0	of the kernels I mean
+ yoo	yes me too
+ yoo	did you run it in python or c++ ?
+ n4nd0	C++
+ n4nd0	have you tried changing them in python?
+ yoo	not yet
+ n4nd0	let me know when you have
+ yoo	is there a get_kernel_weights method in python ?
+ n4nd0	yeah sure
+ n4nd0	if you are using it from libshogun interface, it should be available from python modular
+ n4nd0	yoo: did you find any problem trying it?
+ yoo	here is the code if you want to test it
+ yoo	http://pastebin.com/VGMCb2UY
+ yoo	change the path to inputs
+ n4nd0	so what did you find?
+ yoo	the same pb ..
+ yoo	work well only with 1-norm
+ n4nd0	mmmm
+ n4nd0	I have just tested it in python
+ n4nd0	changing the other of the kernels introduced
+ yoo	and ?
+ n4nd0	using 1.5 norm
+ n4nd0	the weights do not change
+ n4nd0	sometimes there's a small variation in the last weight
+ n4nd0	but it is about e-13 so I guess that is normal
+ yoo	but they should right ? if you change the order
+ yoo	values should stay the same in different ordrers
+ n4nd0	well I guess they are given in that ascending order
+ yoo	no way
+ yoo	they are given in the order you ve called append
+ yoo	just try with 1-norm, you will see
+ n4nd0	ok
+ n4nd0	lol this is a funny one
+ n4nd0	when I change the norm from 1.5 to 1
+ n4nd0	SystemError: [ERROR] glpk.h from GNU glpk not included at compile time necessary here
+ yoo	ouch
+ yoo	dont get that
+ yoo	outputs are
+ yoo	[ 0.97250202  0.02749798  0.        ]
+ yoo	[ 0.97250202  0. 0.02749798     ]
+ yoo	works fine
+ n4nd0	for which example?
+ n4nd0	norm 1 you mean right?
+ yoo	yes
+ n4nd0	aham
+ n4nd0	yeah what I said about the ascending order is probably stupid
+ n4nd0	sonney2k: ping
+ n4nd0	sonney2k: do you know something about a problem using MKL with norm>=1?
+ n4nd0	it looks like yoo gets different weights depending on the order he includes the subkernels
+ yoo	http://pastebin.com/CZY9NbYs and http://pastebin.com/VGMCb2UY for reproducing in c++/python
+ CIA-52	shogun: Sergey Lisitsyn master * rb630803 / (8 files in 3 dirs): Renamed L1L2 to L12 - http://git.io/japeKA
+ yoo	n4nd0: could you keep me inform if you have news on this issue ? (thereisnoknife@gmail.com)
+ n4nd0	yoo: ah so you are the HM-SVM guy too! :)
+ n4nd0	yeah sure
+ n4nd0	but probably they will say something about this here at the chat
+ n4nd0	it will be in the logs
+ n4nd0	but I'll tell you if I see any answer about it posted
+-!- blackburn [~blackburn@188.168.5.210] has joined #shogun
+-!- heiko1 [~heiko@host86-176-252-249.range86-176.btcentralplus.com] has joined #shogun
+ yoo	blackburn: hi
+ yoo	blackburn: I have not finished the compilation procedure of shogun using cmake, it turns out there is severals macro to handle
+ blackburn	yoo: macro like?
+ yoo	blackburn: I have encountered pbs testing mklmulticlass as you can see in the chat logs, have you already experienced smthg similar ?
+ heiko1	blackburn, how to use this python script you sent around for extracting code?
+ yoo	-DUSE_*
+ heiko1	could you give me your call?
+ blackburn	yoo: yes I've seen
+ blackburn	heiko1: hmm let me remember
+ blackburn	heiko1: python % -s [since_date] -b [end of gsoc date]
+ n4nd0	heiko1: where is that script?
+ heiko1	blackburn, which format is the date?
+ heiko1	and do I have to put my name somewhere?
+ blackburn	heiko1: oops
+ blackburn	n4nd0: heiko1: http://inspirated.com/2011/08/23/tarball-generator-for-git-commits
+ n4nd0	thanks
+ blackburn	?     ??????????????                    ?????
+ blackburn	oops I was cleaning my kboard
+-!- blackburn1 [~blackburn@188.168.4.151] has joined #shogun
+-!- blackburn [~blackburn@188.168.5.210] has quit [Ping timeout: 244 seconds]
+ heiko1	damn it doesnt work
+ heiko1	strange error messages
+ n4nd0	too bad
+ n4nd0	shouldn't there be something built in git to extract a patch?
+ heiko1	n4nd0 does it work for you?
+ n4nd0	didn't try
+ heiko1	argh, always this messy stuff ;)
+ yoo	n4nd0: yes I am testing most of the training machines and get used to those
+-!- blackburn [~blackburn@188.168.3.80] has joined #shogun
+-!- blackburn2 [~blackburn@188.168.128.97] has joined #shogun
+ n4nd0	heiko1: I have downloaded the tar.gz and it is empty...
+-!- yoo_ [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+-!- blackburn1 [~blackburn@188.168.4.151] has quit [Ping timeout: 240 seconds]
+ heiko1	blackburn, did the script work for you?
+ heiko1	I get tar error messages
+ heiko1	Think I am too stupid to use it
+ n4nd0	but isn't it the tar.gz empty?
+ blackburn2	heiko1: well I used it last year but no I didn't try yet
+ heiko1	blackburn, I see
+ heiko1	n4nd0 which download?
+ heiko1	I use the once from sergeys mail
+ n4nd0	aah I was checking the one from the link he sent
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Ping timeout: 245 seconds]
+ n4nd0	I don't have that one from the mail
+ heiko1	Ill send it
+-!- blackburn [~blackburn@188.168.3.80] has quit [Ping timeout: 244 seconds]
+ n4nd0	thanks
+ n4nd0	it seems that I completely ignored that mail :O
+ blackburn2	heiko1: it must be the same
+ heiko1	blackburn, any updates on the release? I feel bad for having so little time currently ... :(
+ blackburn2	heiko1: I would say we are mostly ready
+ heiko1	blackburn, nice, I will add a few things today which I discussed with Arthur ....
+ heiko1	still the serialisation is missing right?
+ blackburn2	heiko1: I am missing its status to be honest
+ blackburn2	what is wrong with serialization?
+ heiko1	blackburn, memory leaking :)
+ heiko1	reference counts not being stored
+ heiko1	examples failing
+ blackburn2	super :D
+ heiko1	(leaking=failing in this case)
+ yoo_	have to go, see you later
+ heiko1	n4nd0, blackburn got it :)
+ heiko1	(the git extract)
+ heiko1	the script fails if the git log ist is empty
+ heiko1	this can be checked with git log --author= ....
+-!- yoo_ [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+ n4nd0	heiko1: how did you do?
+ n4nd0	I get
+ heiko1	I had a typo in my name before
+ n4nd0	tar: *: Cannot stat: No such file or directory
+ n4nd0	tar: Exiting with failure status due to previous errors
+ n4nd0	test.tar.gz created
+ heiko1	yes
+ n4nd0	so we have to use our git name
+ heiko1	git log --author='Heiko Strathmann <heiko.strathmann@gmail.com>'
+ heiko1	if this works, plug it into the script
+ heiko1	oh
+ heiko1	and you have to delete line 35 in the script
+ heiko1	process.wait()
+ heiko1	this causes a deadlock
+ blackburn2	haha sorry I thought it is working
+ heiko1	Ill send an example to the list
+ heiko1	n4nd0, blackburn, see mail
+ n4nd0	heiko1: thanks!
+ blackburn2	thanks
+ n4nd0	nice
+ n4nd0	heiko1: are you going to upload that as code sample?
+ heiko1	n4nd0, just asking myself that :)
+ heiko1	there have been many emails on the list
+ heiko1	but I deleted all of them :)
+ n4nd0	haha
+ n4nd0	it looks like some people just submitted this
+ n4nd0	I think I will submit this
+ n4nd0	and some simpler example
+ blackburn2	probably nobody takes care of that
+ n4nd0	like the things we prepare for python_modular
+ blackburn2	:D
+ heiko1	oh n4nd0
+ heiko1	sorry
+ heiko1	I did read your question wrong
+ heiko1	yes you can submit that
+ heiko1	We all did that last year
+ n4nd0	ok
+ heiko1	but where?
+ heiko1	(thought you were asking that)
+ n4nd0	heiko1: in melange
+ n4nd0	in the page of your project
+ n4nd0	just press edit there
+ n4nd0	heiko1: the script didn't create the tar.gz for me directly, I had to give it an output like /home/....../gsoc.tar.gz
+ heiko1	n4nd0, edit?
+ heiko1	ah found it
+-!- blackburn2 [~blackburn@188.168.128.97] has quit [Quit: Leaving.]
+ n4nd0	exactly :)
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@188.168.5.212] has joined #shogun
+-!- blackburn1 [~blackburn@83.234.54.19] has joined #shogun
+-!- blackburn [~blackburn@188.168.5.212] has quit [Ping timeout: 256 seconds]
+ CIA-52	shogun: Heiko Strathmann master * r3ec005c / (13 files in 5 dirs): Merge pull request #760 from karlnapf/master (+6 more commits...) - http://git.io/Bp_IEA
+ CIA-52	shogun: iglesias master * r68061ea / (2 files): * fix compile errors in libshogun hmsvm mosek examples - http://git.io/OoSJJw
+ CIA-52	shogun: Sergey Lisitsyn master * rc35b5ed / (2 files): Merge pull request #759 from iglesias/master - http://git.io/-LMimQ
+-!- heiko1 [~heiko@host86-176-252-249.range86-176.btcentralplus.com] has left #shogun []
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- blackburn1 [~blackburn@83.234.54.19] has quit [Quit: Leaving.]
+--- Log closed Wed Aug 29 00:00:17 2012

@@ -1,0 +1,135 @@
+--- Log opened Tue Jun 09 00:00:01 2015
+-!- HeikoS [~heiko@0545361e.skybroadband.com] has quit [Ping timeout: 256 seconds]
+-!- shaochuan [~shaochuan@2601:9:5002:e340:d869:eee7:26db:709f] has joined #shogun
+-!- shaochuan [~shaochuan@2601:9:5002:e340:d869:eee7:26db:709f] has quit [Ping timeout: 265 seconds]
+ shogun-buildbot	build #1015 of nightly_default is complete: Failure [failed test notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1015
+-!- pickle27_ [~kevin@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+ pickle27_	yo
+ pickle27_	wtf is up with notebooks
+-!- shaochuan [~shaochuan@2601:9:5002:e340:d869:eee7:26db:709f] has joined #shogun
+-!- shaochuan [~shaochuan@2601:9:5002:e340:d869:eee7:26db:709f] has quit [Ping timeout: 256 seconds]
+-!- pickle27_ [~kevin@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 246 seconds]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- HeikoS [~heiko@0545361e.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- besser82 [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has joined #shogun
+-!- besser82 [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+ guiniol	HeikoS: what exactly do you want to see for the error? I usually just get a segfault
+@HeikoS	guiniol: thats enough but your system specs are important
+@HeikoS	guiniol: we migth ask you to print debugging symbols
+@HeikoS	but that later
+ guiniol	ok
+ guiniol	I tried with the develop branch this morning and I get a "ImportError: bad magic number in 'modshogun': b'\x03\xf3\r\n'"
+ guiniol	my cmake was: 'cmake .. -DPythonModular=ON  -DCMAKE_INSTALL_PREFIX=~/local'
+ guiniol	by system specs, you mean the python version, gcc version, etc?
+ guiniol	what else would be needed?
+ guiniol	HeikoS: issue #2851 opened
+@HeikoS	guiniol: thanks, I wil lcheck soon
+ guiniol	sure
+ guiniol	no worries
+ CaBa	good CEST-morning :)
+ CaBa	well... noon :P
+ CaBa	aka my morning :P
+-!- HeikoS [~heiko@0545361e.skybroadband.com] has quit [Quit: Leaving.]
+ CaBa	is the develop branch supposed to build? :P
+@wiking	CaBa: yes
+ CaBa	wiking: interesting. doesn't seem to for me...
+ CaBa	http://pastebin.com/raw.php?i=z3aW73wT
+@wiking	oooooh
+@wiking	that is most interesting
+@wiking	CaBa: i've just ran
+@wiking	a build and it was good
+@wiking	:S
+-!- HeikoS [~heiko@laptop-net.gatsby.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ CaBa	wiking: on what system? what compiler?
+ CaBa	wiking: seems to work with GNU..
+ CaBa	wiking: hm. not. compiling works with GNU, however, linking the library doesn't. missing symbols from google::protobuf
+ CaBa	wiking: are you missing a dependency in the cmake file there?
+ CaBa	actually protobuf is there...
+ CaBa	ok, my mistake, i was building 4.0.0 with gcc... building HEAD doesn't work with GNU either
+ CaBa	ok, same trouble no matter what... building 4.0.0 works with clang, not with GNU (linker fails with protobuf), building from git doesn't work with either GNU or clang, both failing with errors in base/Version.cpp
+ CaBa	wiking: the python segfault issue is now described under #2852
+-!- ephas [89dea0c1@gateway/web/freenode/ip.137.222.160.193] has joined #shogun
+ ephas	Hi, has anyone got any examples for feature selection using the Python interface?
+ CaBa	there is no dynamically linked cmdline interface that i could use to test the dylib, right?
+-!- HeikoS [~heiko@laptop-net.gatsby.ucl.ac.uk] has quit [Ping timeout: 256 seconds]
+@besser82	CaBa, cmdline interface links dynamicly
+@besser82	CaBa, it's called "static", because interface-code is hand-written
+@besser82	CaBa, and not generated during build  ;)
+ CaBa	besser82: ok. in that case, my dylib seems to work, since the cmdline works, too
+ CaBa	besser82: thus, i really seem to have a problem with the python binding in particular
+ CaBa	besser82: just wanted to verify whether my dylib is functional. thanks for the clarification
+@besser82	CaBa, np. you're welcome
+@besser82	CaBa, You are on Mac, rye?
+ CaBa	besser82: yes, here's my trouble: https://github.com/shogun-toolbox/shogun/issues/2852
+ CaBa	is there no documentation for RealFeatures?
+@besser82	CaBa, sry... I unfortunately cannot help you really with Mac-related issues...  :(
+ CaBa	besser82: no problem... i'm playing around on a linux vm as long as it doesn't work on the mac...
+@besser82	CaBa, Try fedora, if you don't need svm^light urgently
+@besser82	CaBa, everything works out of box in there
+@besser82	CaBa, so you can install everything through package-manager
+ CaBa	besser82: already have my testbed running on debian right now, so far i'm good
+@besser82	CaBa, okie  =)
+ CaBa	besser82: what's the idea of left-hand and right-hand side features passed to kernels?
+@besser82	CaBa, erm... no idea...  :/
+@besser82	CaBa, I'm basically into SVM
+ CaBa	besser82: well i'm talking about SVM kernels
+ CaBa	besser82: for example the GaussianKernel() constructor takes two features objects - left and right
+@besser82	CaBa, Ahh... I see...  :P
+@besser82	CaBa, That is if you have two describing (similar) models and want to get the linear output between them, e.g.
+@besser82	or on of those models is finer grained and you want to improve prediction-output of the other one
+@besser82	you can use the finer-grained left-hand and the other one right-hand then
+-!- HeikoS [~heiko@laptop-net.gatsby.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ CaBa	besser82: hm. if that's not the case i just pass the same features twice?
+@besser82	CaBa, or just right-hand
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Wu Lin :develop * a048cca / src/shogun/machine/gp/ (2 files): https://github.com/shogun-toolbox/shogun/commit/a048ccaf320d8dbd930f3b44df992167cc711e03
+ shogun-notifier-	shogun: using SGMatrix to represent inducing points
+ shogun-notifier-	shogun: Wu Lin :develop * 0b5da4c / src/interfaces/modular/Kernel.i,src/interfaces/modular/Kernel_includes.i: https://github.com/shogun-toolbox/shogun/commit/0b5da4cb115f381ade2423e9751bafbe173411d8
+ shogun-notifier-	shogun: update the i files
+ shogun-notifier-	shogun: Wu Lin :develop * 87147bf / src/shogun/machine/ (3 files): https://github.com/shogun-toolbox/shogun/commit/87147bfbd551a55bb5c50b61c93971ae84ca0ea5
+ shogun-notifier-	shogun: update
+ shogun-notifier-	shogun: Wu Lin :develop * f89466f / src/shogun/machine/gp/ (2 files): https://github.com/shogun-toolbox/shogun/commit/f89466f6a15629624987754f159c284125151863
+ shogun-notifier-	shogun: update gpr and gpc
+ shogun-notifier-	shogun: Wu Lin :develop * b714158 / src/shogun/machine/gp/SingleFITCLaplacianBase.cpp: https://github.com/shogun-toolbox/shogun/commit/b714158f136517c4fe5ed568db681dc5303ed547
+ shogun-notifier-	shogun: update comments
+ shogun-notifier-	shogun: Wu Lin :develop * 10a8e55 / src/shogun/machine/gp/ (2 files): https://github.com/shogun-toolbox/shogun/commit/10a8e55211d45eda90819c703315acd4f062e828
+ shogun-notifier-	shogun: update comments
+ shogun-buildbot	build #3434 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3434  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #3435 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3435
+ shogun-buildbot	build #1031 of FCRH - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/1031  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #1006 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1006  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #2696 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2696  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #16 of FC22 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC22%20-%20libshogun/builds/16  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #2653 of deb3 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2653  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+@HeikoS	lisitsyn: hi
+ lisitsyn	HeikoS: hey
+@HeikoS	lisitsyn: http://arxiv.org/abs/1506.02564
+@HeikoS	lisitsyn: looking forward to your feedback ;)
+ lisitsyn	HeikoS: oh cool
+ lisitsyn	Kamiltonian :)
+@HeikoS	lisitsyn: indeed :O)
+@HeikoS	kernels everywhere! :
+ lisitsyn	HeikoS: can I ask you to shoot an idea to some problem?
+ shogun-buildbot	build #641 of deb4 - python3 is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/641  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+ CaBa	sonney2k: are there any resources about the spectrum rbf kernels/
+@HeikoS	lisitsyn: sure
+-!- travis-ci [~travis-ci@ec2-54-147-192-16.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/66076649
+-!- travis-ci [~travis-ci@ec2-54-147-192-16.compute-1.amazonaws.com] has left #shogun []
+ lisitsyn	HeikoS: I have x1,x2,...,xn \in R^n
+ lisitsyn	what would you use to encode it as a vector in say R^an? The 'a' is like 2-3, not much more than that
+@wiking	HeikoS: lol Zoltan is from hungary as well. say szia to him next time u meet him :P
+-!- HeikoS [~heiko@laptop-net.gatsby.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 265 seconds]
+-!- shaochuan [~shaochuan@2601:9:5002:e340:d869:eee7:26db:709f] has joined #shogun
+-!- shaochuan [~shaochuan@2601:9:5002:e340:d869:eee7:26db:709f] has quit [Ping timeout: 256 seconds]
+--- Log closed Wed Jun 10 00:00:03 2015

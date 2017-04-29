@@ -1,0 +1,784 @@
+--- Log opened Thu May 03 00:00:37 2012
+ CIA-113	shogun: Soeren Sonnenburg master * r52b1bf0 / (34 files in 13 dirs):
+ CIA-113	shogun: split up SG* datatypes into separate files
+ CIA-113	shogun: - fix includes accordingly
+ CIA-113	shogun: - drop direct access to do_free component of sgvector
+ CIA-113	shogun: - add some ref counting to sgvector - http://git.io/r5cjJw
+@sonney2k	gsomix, could be
+@sonney2k	ignore the class for now
+@sonney2k	gsomix, you can do that by putting a IGNORE_IN_CLASSLIST in front of class
+@sonney2k	half way through sgvector again - yay!
+ gsomix	sonney2k, I'm testing new CSet.
+ gsomix	I am amazed at own slow speed of work. :(
+-!- sonney2k [~shogun@7nn.de] has quit [Ping timeout: 276 seconds]
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+ gsomix	sonney2k, it seems, that new CSet works right.
+ gsomix	tomorrow I'll replace old by new.
+ gsomix	time to sleep, 3am at my clock
+ gsomix	I have the physical culture classes at 8am, oh
+ gsomix	good night guys
+ gsomix	sonney2k, do not forget about sleep. :)
+-!- av3ngr [av3ngr@nat/redhat/x-csnenpsdsbtyljfc] has joined #shogun
+-!- vikram360 [~vikram360@117.192.167.99] has quit [Ping timeout: 246 seconds]
+-!- vikram360 [~vikram360@117.192.161.225] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has left #shogun ["Leaving"]
+ wiking	http://9gag.com/gag/4055786
+ wiking	:D
+-!- vikram360 [~vikram360@117.192.161.225] has quit [Ping timeout: 246 seconds]
+-!- mode/#shogun [+o sonney2k] by ChanServ
+@sonney2k	gsomix, yeah... with kids you hardly get any
+* sonney2k continues with sgvector
+ CIA-113	shogun: Soeren Sonnenburg master * r9d458c8 / (29 files in 10 dirs): remove destroy / free vectro functions - http://git.io/M73D9w
+ shogun-buildbot	build #809 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/809  blamelist: sonne@debian.org
+-!- gsomix [~gsomix@188.168.5.30] has quit [Ping timeout: 244 seconds]
+-!- vikram360 [~vikram360@117.192.161.225] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+ sonne|work	wiking: btw you can of course use float based features w/ shogun pretty efficiently
+-!- av3ngr [av3ngr@nat/redhat/x-csnenpsdsbtyljfc] has quit [Quit: That's all folks!]
+ wiking	sonne|work: who said that not?
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- vojtech [9320543b@gateway/web/freenode/ip.147.32.84.59] has joined #shogun
+ sonne|work	vojtech: hi
+ sonne|work	I have a question about libqp ...
+ sonne|work	shouldn't we integrate pr_loqo into it?
+ sonne|work	and also liblinear's tron?
+ sonne|work	could uricamic do this?
+-!- vikram360 [~vikram360@117.192.161.225] has quit [Ping timeout: 256 seconds]
+-!- vikram360 [~vikram360@117.192.190.128] has joined #shogun
+-!- Marty28 [~marty@cable-158-181-78-199.cust.telecolumbus.net] has joined #shogun
+ vojtech	sonne: hi
+ vojtech	what is the point of integrating pr_loqo to libqp?
+ vojtech	I guess you already have pr_loqo in Shogun
+ vojtech	I don't know what is tron
+ vojtech	I want to say, integrating pr_loqo to libqp is good for libqp to become more comprehensive but the benefit for Shogun is not so big
+ sonne|work	vojtech: well it is
+ vojtech	to save time it may be more efficient to implement things which are not in none of the packages
+ sonne|work	we can have the very same interface for pr_loqo and other solvers
+ sonne|work	so one could choose in shogun which solver from libqp to choose
+-!- Marty28 [~marty@cable-158-181-78-199.cust.telecolumbus.net] has quit [Quit: Colloquy for iPad - http://colloquy.mobi]
+ sonne|work	I mean with some standard interface it is easy
+ sonne|work	now it is not really nice due to a completely different interface
+ vojtech	I think the problem is that the user will need to decide which specific solver he/she wants anyway because each of the solver is design fo a specific QP problem
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ vojtech	ok, but to have a similar interface in all these solvers is reasonable
+ sonne|work	vojtech: yes but having a similar interface makes it easy to switch solvers
+ sonne|work	otherwise it is a lot of work
+ vojtech	ok, will look at pr_loqo and think if it is reasonable to integrate it and if yes me or Michal will do it
+ sonne|work	cool!
+ sonne|work	vojtech: ahh tron is this here http://shogun-toolbox.org/doc/en/current/Tron_8h_source.html - http://shogun-toolbox.org/doc/en/current/Tron_8cpp_source.html
+ sonne|work	they use it to solve L2 regularized L2 loss svm or L2R logist loss problems
+ sonne|work	it is based on truncated newton I think
+ sonne|work	so I think this could also be in libqp
+ vojtech	wait a second, it seems that TRON stands for trust region Newton method but this method is for minimization of a generic smooth functions, i.e. it is not Quadratic Programming
+ vojtech	am I right?
+ sonne|work	yes
+ sonne|work	but if you have an unconstrained qp problem - one could use it
+ sonne|work	with some smooth loss
+ sonne|work	finally there is one more solver in shogun which I think would be nice to have in libqp
+ sonne|work	the one in gpdtsolve.cpp
+ vojtech	hmm, but if libqp should be library for quadratic programming I'm not sure that integrating general problem solvers is a good idea.
+ vojtech	whta is gpdtsolve.cpp ?
+ sonne|work	vojtech: one could use it for qp problems with smooth loss function inside libqp
+ sonne|work	so it makes sense
+ sonne|work	of course it can do more but we would not provide more interfaces than that
+ sonne|work	GPDT - Gradient Projection Decomposition Technique
+ vojtech	aha, you mean to write an instance of TRON for optimizing QP
+ sonne|work	yes
+ vojtech	ok, this may be a good idea
+ sonne|work	gpdt is from here http://dm.unife.it/gpdt/
+ sonne|work	and also in shogun
+ vojtech	I need to read about the algorithm to figure out if its is useful for unconstrained QP
+ sonne|work	it is used to solve subproblem of chunking svm training
+ sonne|work	so should be similar to pr loqo
+ sonne|work	in the way which problems it can solve
+ sonne|work	but I heard the talk from these guys and they claimed that it was a lot faster
+ sonne|work	it is from 2005 or so ...
+ sonne|work	in the file gpdtsolve.cpp
+ sonne|work	they have a class QPproblem
+ sonne|work	which you give alphas and stuff and then call problem.gpdtsolve() to get the solution
+ sonne|work	s/alphas/kernel
+ sonne|work	so that might also be a nice addition
+ sonne|work	vojtech: I am saying that because wiking and others all need qp solvers
+ sonne|work	and if we can come up with some nice class interface that itself can use libqp on the lower level things become a lot easier for everyone
+ vojtech	I'll put it to my todo list.
+ vojtech	but we need to decide priorities
+ sonne|work	and it is actually very cool to have
+ sonne|work	yes
+ wiking	eeey vojtech is here!!!
+ sonne|work	in any case this should not be too much work
+ sonne|work	maybe 1-2 weeks for all the solvers I mentioned
+ vojtech	I think  Michal should first finish hist work on bundle methods
+ vojtech	in the remaining time he can work on libqp extension
+ vojtech	is it ok?
+ sonne|work	yes - but we will need to come up with some interface even for that
+ sonne|work	I mean there is fernando doing general SO problems
+ sonne|work	so defining a general framework where one can define the argmax function etc
+ sonne|work	so michaels bmrm should fit in there
+ sonne|work	so we have to communicate a bit
+ vojtech	I think the interface for SO and bundle method is more less clear
+ sonne|work	and I really hope we can continue with libqp afterwards
+ sonne|work	vojtech: did you discuss with nico goernitz (mentor for SO stuff - he is  a PhD student in Klaus' group) about it?
+ vojtech	these methods need two functions, one evaluating the objective and one computing the subgradient
+ vojtech	I did not
+ sonne|work	not sure if michael / you will have time to continue after gsoc :)
+ vojtech	why not
+ sonne|work	maybe you should be in the loop then
+ sonne|work	basically fernando, nico, michael, you
+ vojtech	I'll be on holidays the next week. otherwise I'm online
+ sonne|work	ok
+ sonne|work	vojtech: alright nice talking to you
+ sonne|work	vojtech: ahh btw any news from ICML/
+ sonne|work	?
+ vojtech	yes, unfortunately bad news from ICML
+ vojtech	we overlooked one paper which does similar thing
+ vojtech	but this is life
+ sonne|work	which one?
+ vojtech	http://ai.stanford.edu/~chuongdo/papers/proximal.pdf
+ vojtech	in the mean time we discovered very nice method for SO
+ vojtech	as you know the current (cutting plane based) solvers require excessively long time if regularization goes to 0
+ vojtech	the method we implemented does not have such problem at all
+ vojtech	you can easily train without regularization, which is sometimes very useful
+ sonne|work	wow
+ vojtech	the only shortcoming is that currently it works for problems with up to 1000-2000 paramaters
+ vojtech	but we work on removing the problem
+ sonne|work	hehe
+ vojtech	we already submitted a paper about this to ICPR
+ vojtech	I can send you a copy as the convergence figures are quite impresive
+ sonne|work	why not :)
+-!- uricamic [~uricamic@2001:718:2:1634:f2de:f1ff:fecf:a6a5] has joined #shogun
+-!- vikram360 [~vikram360@117.192.190.128] has quit [Ping timeout: 246 seconds]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ sonne|work	alright food time
+ blackburn	hey vojtech
+-!- vojtech [9320543b@gateway/web/freenode/ip.147.32.84.59] has left #shogun []
+ blackburn	hehe
+ blackburn	https://lh3.googleusercontent.com/-IFLsH-qGV0s/T6GnqeE0P2I/AAAAAAAAGsg/inaAy0MVP5I/w497-h373/doorsign.jpg
+ sonne|work	heh
+ blackburn	sonne|work: about your recent commit
+ blackburn	so is there memory leaks now?
+-!- eric___ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric___	hi all
+ blackburn	hi
+-!- vikram360 [~vikram360@117.192.181.161] has joined #shogun
+ eric___	wiking: I am wondering if you have any crossvalidation cpp example using multiclass svm ?
+ wiking	eric___: we have a problem with that
+ wiking	or at least me for sure
+ wiking	i still need to debug it because i'm getting segfaults
+ eric___	wiking: can I help ?
+ blackburn	wiking: what is this segfault in?
+ eric___	wiking: other thg: For now we only have Confusion matrix to evalute classifier ?
+ eric___	wiking: I mean multiclass kernel machine
+ blackburn	eric___: which evaluations do you need?
+ wiking	blackburn: heheh i'm running it from java so i really don't know now where does it segfaults
+ wiking	the only thing i see that the jvm crashed
+ wiking	*crashes
+ blackburn	wiking: blind search humm
+ wiking	blackburn: trying now with a small cpp example...
+ blackburn	python would work too
+ wiking	blackburn: yes true
+ wiking	eric___: you can have an accuracy + confusion matrix
+ wiking	but yeah i agree that we would need more
+ wiking	let me know your list of request
+ wiking	and then it can be included as part of an improvement of evaluation
+ eric___	Roc Fmeasure would be nice
+ wiking	afaik there's such thing
+ blackburn	we have roc but multiclass..?
+ wiking	eric___: shogun/evaluation/ROCEvaluation.h
+ wiking	afaik a per class accuracy and Fmeasure would be great to have
+ wiking	s/afaik/imho/
+ blackburn	right
+ blackburn	easy to do btw
+ wiking	blackburn: yeah i didn't say that it was rocket science ;)
+ eric___	I meant automatic pairwise ROC (etc..) for multiclass
+ eric___	blackburn:  agree
+ blackburn	eric___: pairwise ROC? is it so easy to analyze it?
+ blackburn	one could die in hell of graphs :)
+ blackburn	wiking: they study rocket science in my university - sounds easy too :D
+ wiking	blackburn: i know that's why i told that ;)
+ eric___	wiking: could you let me know your advancement, problems, with multiclass crossvalidation ? If you need help ..
+ wiking	eric___: hehehe yeah if u give me 2 hours i'll let u know
+-!- vojtech [9320543b@gateway/web/freenode/ip.147.32.84.59] has joined #shogun
+ eric___	wiking: btw for your evaluation of latent svm on action recognition you may indicate me which database you need me to process
+ wiking	eric___: well i thought u have data :)
+ wiking	already
+ wiking	:>
+ blackburn	wiking: I lost you fMRI link :(
+ eric___	I have some, but I focus for now on visual speech
+ wiking	eric___ hahahah last time you were checking video sequence, no?
+ wiking	blackburn: www.oasis-brains.org
+ blackburn	thanks
+ eric___	yea film sequence of speaking people
+ eric___	Hollywood database
+ wiking	aaaaha
+ wiking	and u wanna show who's speaking on the video stream?
+ blackburn	really?
+ eric___	wiking: exactly
+ eric___	wiking: I have also salsa dataabse : http://www.tsi.telecom-paristech.fr/mm/actualites/
+ wiking	cool what are your features?
+ blackburn	damn is it feasible to solve?
+ wiking	i mean in case of the hollywood db
+ eric___	I implemented histogram of oriented optical flow
+ eric___	with some gradient information
+ blackburn	eric___: hmm thanks for idea - I'm working on road sign recognition and thought - why not to use flow here? ;)
+ eric___	blackburn: np
+ eric___	blackburn: but for what I have read, road sign recognition is more based on color and digits recognition (using ANN) ?
+ blackburn	eric___: I use svms
+ blackburn	and HOG
+ eric___	blackburn: ok, but digits recognition should be a good way.
+ blackburn	it is my bachelor thesis actually :)
+ blackburn	eric___: too late to change paradigm for me
+ eric___	blackburn: svm/hog were used for pedestrian detection, isnt it ?
+ eric___	blackburn: dalal, triggs ?
+ blackburn	eric___: right
+ blackburn	eric___: works pretty well for signs too
+ blackburn	I have 97.5% accuracy on GTRSB
+ eric___	blackburn: do you use opncv ?
+ blackburn	eric___: no only shogun and python clue code
+ eric___	blackburn: GTRSB ?
+ blackburn	I still have some ideas to try like different color spaces
+ eric___	blackburn: yes color is very important in this case
+ blackburn	eric___: GTSRB sorry
+ blackburn	http://benchmark.ini.rub.de/
+ eric___	blackburn: working on red channel could be nice, .. for europe :p
+ blackburn	eric___: no, Hue is prefferable there
+ blackburn	eric___: there are blue info signs as well
+ wiking	mmm we can parse libsvm files right?
+ eric___	blackburn: thx for the database, I send it to a colleague which could be very interested
+ blackburn	eric___: how fast optical flow is being computed?
+ eric___	its very slow usually, but for me in vga, using integral image and small region of interest (from facedetector), it run in realtime 40fps on corei5
+ blackburn	oh that's bad
+ blackburn	eric___: I thought of implementing a detector based on flow but it would be hard I think
+ blackburn	color is important but I am still unsure it would work well
+ eric___	blackburn: there are some ways to do faster, I didnt investigate this part too mauch, I only use farneback opencv implementation
+ eric___	blackburn: a detector based only on flow ?
+ blackburn	eric___: yeah why not?
+ eric___	blackburn: what are your training data ?
+ eric___	blackburn: sequences ?
+ blackburn	eric___: I should think about it heh just some idea
+ blackburn	I mean road sign should be visible on flow
+ eric___	blackburn: I thing there is somthg but more a way to make the road sign detection easier than to recognize a road sign
+ blackburn	it seems it is not that difficult to recognize it
+ eric___	97.5% accuracy is only for detection right ?
+ blackburn	eric___: no this dataset involves no detection
+ blackburn	recognition
+ eric___	ok and you use multiclasssvm from shogun ?
+ blackburn	eric___: yes
+ eric___	then you need multiclass crossvalidation from wiking too :p
+ eric___	I ll be around, see you.
+ blackburn	eric___: I did some simple manual xval
+ blackburn	C is the only parameter I had to validate
+ eric___	right
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Ping timeout: 245 seconds]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ CIA-113	shogun: Soeren Sonnenburg master * re2748d0 / (24 files in 7 dirs):
+ CIA-113	shogun: remove most of the destroy/free_vector calls
+ CIA-113	shogun: that should fix compilation - http://git.io/gUQW2g
+ shogun-buildbot	build #810 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/810
+ sonne|work	at least something :)
+ eric___	sonne|work: why remove most of the destroy/free_vector calls ?
+ sonne|work	eric___: when things will work again it will be sufficient to say SGVector a(len);
+ sonne|work	and a will be automagically cleaned up
+ sonne|work	so no longer a need for destroy/free* functions
+ sonne|work	in the same way one does not have to copy 'a' but just pass it around to other functions
+ sonne|work	(if one doesn't intend to modify the content of a in a non-compat way)
+ wiking	hahahah apparently i've done a course in "3D data in urban environments". how fucking good that course must have been
+ blackburn	wiking: what is this course about?
+ wiking	do i know? :D
+ blackburn	heh
+ sonne|work	blackburn, wiking - if anyone wants to start fixing sgvector double frees and leaks - feel free!
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+ wiking	sonne|work: ok let's see the new commits with valgrind
+ sonne|work	wiking: for the current crashers I would assume gdb is good enough
+-!- vikram360 [~vikram360@117.192.181.161] has quit [Ping timeout: 265 seconds]
+ cronor	Hey, i tried shogun once class (LibSVMOneClass) and can't find any documentation. Are the output labels +1 for normal points and -1 for outliers? I assumed this and tried varying C from 10^-2 to 10^3 and can't see any difference in the results
+ eric___	sonne|work: I would like gradually help/contribute to your lib, feel free to ask for help. I should have time for that this summer.
+ sonne|work	cronor: you get real valued outputs
+ sonne|work	eric___: what type of stuff is of interest to you ?
+ sonne|work	we need all help we can get :D
+ sonne|work	eric___: for example one relatively simple task is to add a couple of functions to SGVector, e.g. operator overloading to do a+b, a-b etc
+ blackburn	but please delegate it to CMath
+ blackburn	sonne|work: yeah I'll fix a bunch
+ sonne|work	blackburn: actually no - these functions should go away from CMath
+ blackburn	sonne|work: do you think so?
+ blackburn	I do not
+ sonne|work	I mean be moved to sgvectro
+ sonne|work	yes of course
+ blackburn	I have to disagree
+-!- pluskid [~pluskid@li379-10.members.linode.com] has joined #shogun
+ sonne|work	filling vectors, adding them belongs to vectors
+ blackburn	yes
+ sonne|work	not CMath
+ blackburn	but dot, +, matrix mult
+ blackburn	should be shared
+ sonne|work	yes in SGVector
+ sonne|work	the same function we had in CMath should be moved to sgvector
+ blackburn	I do not like it that much..
+ blackburn	sonne|work: but what about lightweight vector?
+ blackburn	weren't you wishing to do that
+ sonne|work	much later
+ sonne|work	I dont' really understand why you want to keep that cluttered CMath cluttered...
+ blackburn	sonne|work: we should measure overhead
+ sonne|work	not yet
+ sonne|work	we first should get things working with all the stuff
+ blackburn	sonne|work: no I want to make that low level available
+ sonne|work	and not just SGVector but matrix, string, sparse, ...
+ sonne|work	blackburn: where?
+ blackburn	sonne|work: in some class like cmath
+ sonne|work	and for what purpose
+ sonne|work	but why?
+ blackburn	sonne|work: to do these operations w/o sgvectors
+ blackburn	one layer is pointers and another is sgvectors
+ sonne|work	blackburn: have a look at SGVector *now*
+ sonne|work	it has functions that will operate on double*, int
+ sonne|work	that is what I am talking about
+ blackburn	sonne|work: yes and it shouldn't be like that
+ sonne|work	why not?
+ blackburn	sonne|work: I see it as different layers..
+ sonne|work	me too
+ sonne|work	but CMath is a mess
+ sonne|work	why not have all the max /min functions that operate on double* / int (so in fact vectors) in SGVector instead
+ blackburn	sonne|work: yes should be separated
+ sonne|work	just move I mean
+ sonne|work	no more
+ sonne|work	no overhead no nothing
+ blackburn	no SGVector should have only methods that do something on SGVectors
+ sonne|work	but much easier to understand / find the function
+ blackburn	it can be SGVectorDriver :D
+ sonne|work	why?
+ sonne|work	I don't understand why you would want a separate VectorMath class
+ blackburn	sonne|work: because I find strange that SGVector has any methods
+ blackburn	that do something on pointers
+ blackburn	I am ok to have any methods there
+ blackburn	that fill sgvector
+ sonne|work	blackburn: where would you put the vector related functions from CMath then?
+ blackburn	or anything
+ blackburn	sonne|work: just somewhere under SGVector
+ sonne|work	that is what I am saying
+ blackburn	sonne|work: not in CMath but some VectorMath class (no idea about naming)
+ sonne|work	ok I don't agree on that
+ blackburn	sonne|work: ok so you want to opearte on pointers
+ blackburn	why would you think about sgvector?
+ sonne|work	and I don't see any conflict / problem to have static functins in SGVector that work on standard ptrs
+ sonne|work	because I am dealing with vectors
+ blackburn	sonne|work: yes it can be true but I still have something I don't like there
+ blackburn	sonne|work: however it is not any impacting design decision
+ blackburn	can be changed at some point
+-!- vikram360 [~vikram360@117.192.181.161] has joined #shogun
+-!- vojtech [9320543b@gateway/web/freenode/ip.147.32.84.59] has quit [Quit: Page closed]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Remote host closed the connection]
+ blackburn	sonne|work: I think we should measure how slower it is to compute kernel w/ refcounting
+ sonne|work	sure - feel free
+ blackburn	sonne|work: is it the main of possible bottlenecks?
+ blackburn	distances/kernel - what else?
+ sonne|work	feature vectors in general
+ blackburn	sonne|work: dotfeatures?
+ sonne|work	some yes
+ sonne|work	gtg
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+ eric___	sonne|work: i am back, operator overloading (or..) is definitely not a problem for me. I egt into shogun since a couple weeks, so I will be able to fully understand the mechanism in a couple more weeks. I will fork shogun and let you know what can I do.
+@sonney2k	eric___, we have lots of other unfinished stuff so feel free to propose sth :)
+@sonney2k	pluskid, seeing how SGVector works now I start to like the idea of having automagic refcounting...
+ pluskid	sonney2k: haha! that's cool!
+ pluskid	sonney2k: but we should figure out whether this works with SWIG, which I'm not quite familiar with
+@sonney2k	pluskid, yeah I guess it is too much too ask to do this before this GSoC so we can only start this in september or later...
+ pluskid	sonney2k: as a leader, you are right on this issue :D
+ pluskid	sonney2k: but otherwise, I personally like RAII (which is why auto-refcounting is implement-able) very much, and think it is one of the core feature of C++ over C/Java etc. http://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization
+@sonney2k	pluskid, haha
+-!- uricamic [~uricamic@2001:718:2:1634:f2de:f1ff:fecf:a6a5] has quit [Quit: Leaving.]
+ CIA-113	shogun: Soeren Sonnenburg master * rf4d8694 / src/NEWS : move next release date to ~september'12 - http://git.io/m_CFYg
+ CIA-113	shogun: Soeren Sonnenburg master * r1c8b9b0 / (21 files): Adjust static examples to not do SGVector refcounting. - http://git.io/muaIoQ
+@sonney2k	I agree :)
+@sonney2k	got to leave train
+@sonney2k	anyone wishing to fix the new sgvector crashes - now would be a good time :)
+-!- n4nd0 [~n4nd0@193.147.77.214] has joined #shogun
+ n4nd0	wiking, hey!
+ wiking	yoyo
+ wiking	who's the exams going?
+ n4nd0	pse, so so
+ n4nd0	still lot of work to do, but I hope it will be ok :)
+ n4nd0	wiking, what about your papers, everything ok?
+ wiking	n4nd0: got it accepted
+ wiking	\o/
+ n4nd0	wow awesome, congrats!
+ n4nd0	wiking, I see on the logs that you wanted to discuss something
+ wiking	thnx well it's about so fw but there' already an email about it
+ n4nd0	ok
+ wiking	so it's ok we'll see where it brings us, and moreover work now on your exams ;)
+ n4nd0	yes, but I enjoy taking rests and getting up to date with shogun too :)
+ wiking	:p procrastinator!
+ n4nd0	:-O
+-!- gsomix [~gsomix@188.168.2.163] has joined #shogun
+ gsomix	hi all
+ gsomix	uff, I'm home
+ gsomix	*at :D
+ gsomix	sonney2k, sonne|work how are you?
+-!- karlnapf [~heiko@host86-176-4-24.range86-176.btcentralplus.com] has joined #shogun
+-!- pluskid [~pluskid@li379-10.members.linode.com] has quit [Quit: Leaving]
+ karlnapf	sonney2k, around?
+ karlnapf	or anybody else?
+-!- blackburn [~qdrgsm@188.168.2.65] has joined #shogun
+ wiking	yes
+ wiking	gsomix karlnapf sonney2k is on his way home...
+ karlnapf	wiking hi
+ wiking	hey hey
+ karlnapf	how is it going? :)
+ n4nd0	hi!
+ karlnapf	n4nd0, hi, alright there?
+ wiking	uf busy busy
+ karlnapf	yeh same here
+ blackburn	hey there
+ blackburn	gsomix could you please proceed with sgvector fixes?
+ karlnapf	blackburn hi
+ blackburn	karlnapf: hey how are your exams?
+ karlnapf	hey blackburn, yes going along, just had one
+ karlnapf	now got 2/7
+ blackburn	n4nd0: hey did you try to implement so labels?
+ blackburn	karlnapf: 7 exams?
+ blackburn	they must be crazy
+ blackburn	I had one today too
+ karlnapf	pretty much, yes :)
+ karlnapf	what did you have?
+ karlnapf	I just did supervised learning
+ blackburn	karlnapf: should sound like political science I think
+ blackburn	hah happy you study machine learning
+ karlnapf	and tuesway was probabilistic and unsupervised learning
+ karlnapf	yeh, pretty cool
+ karlnapf	had to derive some SVM related stuff today in the exam
+ blackburn	dual?
+ karlnapf	yes
+ blackburn	I should be able to pass that exam too ;)
+ karlnapf	wasnt too hard
+ karlnapf	however, unsupervised learning was hard
+ blackburn	I had problems with gradient of crammer-singer dual
+ karlnapf	whatever :D
+ blackburn	karlnapf: what is unsupervised course about?
+ karlnapf	coursely: PCA, PPCA&FA, EM in all its variants, time-series (HMM, SSM etc), graphical model and junction tree algo, bayesian modelselection and GP
+ blackburn	i am dim reduction expert :D
+ karlnapf	we mostly did Gaussian stuff
+ blackburn	huh crazy
+ blackburn	too much things
+ karlnapf	yes, this was an insane course
+ karlnapf	I also worked so many nights for the coursework back in december
+ blackburn	karlnapf: I am on the way to start writing thesis :D
+ karlnapf	these gatsby people want to defend their standards so they put up hard exams
+ karlnapf	wow, cool
+ karlnapf	whats the title?
+ blackburn	hmm
+ blackburn	let me recall
+ blackburn	"Development and analysis of road sign recognition algorithms based on support vector machines"
+ blackburn	sth like that
+ blackburn	it was translation
+ karlnapf	ah nice that thing
+ n4nd0	blackburn, not yet
+ karlnapf	youre writing in Russian?
+ blackburn	in english I'd call it in other words
+ karlnapf	sad, I will never be able to reed it :)
+ blackburn	I am not able to write in english :(
+ blackburn	not because of my skills
+ n4nd0	blackburn, I will see wait first what do we get in UML by next week as Nico suggested
+ karlnapf	blackburn, say I got a little problem and would like to have someones opinion
+ karlnapf	For my statistical tests I need to do bootstrapping
+ n4nd0	gtg now guys
+ n4nd0	see you later
+ blackburn	n4nd0: ok UML is nice
+ blackburn	see you
+ karlnapf	n4nd0 bye
+ karlnapf	which means mixing the two sets of samples and computing the statistics
+ blackburn	karlnapf: I never tried bootstrapping so far :(
+ blackburn	so?
+-!- n4nd0 [~n4nd0@193.147.77.214] has quit [Quit: Ex-Chat]
+ karlnapf	so I will need to merge two sets of features
+ blackburn	yeah
+ blackburn	I had similar problem at some point
+ karlnapf	I would like to treat them via a single feature interface
+ blackburn	hmmm I'd like to have a class
+ karlnapf	so I would like to create CFeatures(CFeatures*a, CFeautre*b)
+ karlnapf	but without copying the data
+ blackburn	karlnapf: can be more general
+ karlnapf	how would you do that?
+ blackburn	hmmm
+ blackburn	karlnapf: the problem is that we can't keep types here :(
+ karlnapf	year
+ blackburn	karlnapf: UnitedDotFeatures would work too I think
+ karlnapf	however, in my case, the types of the features WILL be the same
+ blackburn	yes but this united class
+ blackburn	what interface does it provide?
+ karlnapf	get_feature_vector is what I need
+ karlnapf	need to compute kernel values on them
+ blackburn	karlnapf: then dot features
+ blackburn	however get_feature_vector is absent
+ karlnapf	But how can they do this merging?
+ karlnapf	mmmh
+ blackburn	karlnapf: hmm just keep the list of underlying feature instances and override all dotfeatures operations
+ blackburn	karlnapf: should be pretty easy I think
+ blackburn	karlnapf: no forget not so easy
+ karlnapf	mmmh
+ blackburn	but feasible still
+ karlnapf	so you mean to implement a new class ?
+ karlnapf	did not really get you
+ blackburn	karlnapf: yes sure
+ karlnapf	But why base it on dot features, I would rather base it on CFeatures
+ blackburn	karlnapf: yes exactly what I was talking about
+ karlnapf	kk
+ blackburn	karlnapf: the problem is still here
+ blackburn	karlnapf: if you base it on cfeatures
+ blackburn	how can you use svm on top of it or anything?
+ karlnapf	yes, its not very flexible
+ karlnapf	One would need a united version of *every* feature class
+ blackburn	karlnapf: I think there is other way though
+ blackburn	karlnapf: UnionConverter?
+ karlnapf	like?
+ blackburn	inherited from converter
+ blackburn	returns CFeatures
+ blackburn	karlnapf: would need specialization here
+ karlnapf	Converter class has no documentation, I cannot see what it does ;)
+ blackburn	karlnapf: haha
+ blackburn	nothing
+ blackburn	just takes features
+ eric___	wiking: I am going home, I will work on my datasets tonight, let me know about multiclass crossvalid plz ! cya
+ blackburn	and gives features
+ karlnapf	MMh I like the other variant more
+ blackburn	karlnapf: latter one?
+ karlnapf	UnionFeatures
+ karlnapf	and then derive it for every type when needed
+ karlnapf	I mean its just append features
+ blackburn	karlnapf: UnionConverter sounds better for me actually
+ karlnapf	but how do you want to do that, the interface only accepts one instance of CFeatures
+ blackburn	karlnapf: we can extend it ;)
+ karlnapf	still, when you want to merge features in-place, you will have to have another class that encapsulates multiple features
+ blackburn	karlnapf: ah in place sure..
+ karlnapf	otherwise, I would just append the feature matrices, but i dont wanna do that
+ blackburn	karlnapf: UnitedDotFeatures then
+ karlnapf	kk
+ wiking	eric___: will u be around?
+ blackburn	no need to implement any other
+ karlnapf	yes, I will start with that one
+ blackburn	karlnapf: all the necessary API is provided with dot
+ wiking	eric___: tongiht?
+ karlnapf	however, any feature class that should be available for the MMD-tests will have to implement this
+ blackburn	karlnapf: why/
+ karlnapf	string features for example
+ karlnapf	graph kernel possibly
+ karlnapf	all no dot-features
+ karlnapf	argh, get_feature_vector is an abstract method
+ karlnapf	I cannot call it from CUnionFeatures
+ blackburn	karlnapf: there is other method you can call
+ blackburn	get_computed_dot_feature_vector
+ blackburn	naming is awful!
+ blackburn	karlnapf: use it
+ blackburn	more general btw
+ blackburn	works for sparse as dense
+ karlnapf	mmh, but not for non-vector data
+ karlnapf	and that is one of the strengths of the kernel-two-sample-tests
+ blackburn	karlnapf: damn :(
+ karlnapf	I fear there will have to be a separate class for any feature class
+ blackburn	should be an elegant way..
+ blackburn	yeah I don't like it
+ karlnapf	MMh, well I will try to put most of the stuff to a base class
+ blackburn	karlnapf: would be possible with multiple inheritance but you know
+ karlnapf	yeh, but thats nasty anyway, even if we would do it :)
+ blackburn	karlnapf: ok I have to go - I'll try to think about it
+ karlnapf	blackburn, ok, thanks for the chat :)
+ karlnapf	take care
+ blackburn	see you
+ karlnapf	Ill write to the list
+ blackburn	sure makes sense
+@sonney2k	karlnapf, I dont' understand the problem
+ karlnapf	sonney2k, hi
+ karlnapf	well I have this method that computes something on the base of two feature objects
+ karlnapf	now I want to merge these two and permute and recompute
+ karlnapf	more like: merge, permute, split, recompute
+ karlnapf	and all that in-place
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Ping timeout: 246 seconds]
+@sonney2k	karlnapf, I assume this is for numerical features only?
+ karlnapf	no should work on all
+ karlnapf	also string
+@sonney2k	so what you shuffle around are vectors not elements of vectors right?
+ karlnapf	yes
+ karlnapf	features
+ karlnapf	could be non-vectorfeatures
+@sonney2k	and why do you need 2 separate feature objects for that?
+@sonney2k	why isn't one sufficient?
+@sonney2k	gsomix, hi - sgvector at least compiles now
+@sonney2k	breakage all over the place though
+ karlnapf	well you got two sets of samples that you want to test whether they are from the same source
+@sonney2k	karlnapf, btw sgvector sharing stuff should work now - except that lots of stuff needs fixes
+ karlnapf	its natural to have two feature objects for that
+ karlnapf	sonney2k, wow cool :)
+@sonney2k	karlnapf, why not use combined features for that then?
+@sonney2k	I mean you use 2 feature objects - put them into combined features and add a subset to that
+@sonney2k	and voila
+ karlnapf	does that treat these 2 objects as one? for example the indices translate?
+@sonney2k	no that is sth you would have to implement
+ karlnapf	you can only access complete feature objects
+ karlnapf	not the elements themselves
+@sonney2k	yeah actually that doesn't make sense/work
+@sonney2k	because you need access to the actual type
+ karlnapf	yes, thats the problem
+ karlnapf	I am currently thinking of just forcing a user to provide only 1 feature object where first half is one class and second half is the other
+ karlnapf	that would solve everything while being a bit unfriendly
+@sonney2k	well you can add a convenience function for that...
+ karlnapf	But then the features would have to be copied
+ karlnapf	I want to stay in place
+@sonney2k	karlnapf, for sparse/strings it would not matter
+ karlnapf	but for large matrices it would
+@sonney2k	because you are just resizing one array and moving ptrs
+@sonney2k	only for simplefeatures it would
+ karlnapf	The nicest thing would be to have a class that you can give multiple feature objects of the same type, and then this class would translate the get_feature_vector()-like method to the underlying list of feature objects
+ karlnapf	But its tricky
+@sonney2k	but users are free to create the object in one go or use the convenience function
+@sonney2k	karlnapf, yeah but that you would need to do type specific
+@sonney2k	so for simple/sparse/string...
+ karlnapf	yes
+ karlnapf	so you are for copying, and if that doesnt fit, user can create feature object in one go?
+ karlnapf	aka convenience method or produce in one go
+@sonney2k	the other alternative is to have a function in simple/sparse/string that gets as parameter the second feature object and a Subset
+@sonney2k	and you do the access from there
+@sonney2k	that would also be fast
+ karlnapf	oh yes, that sounds nice
+ karlnapf	like get_feature_vector(CFeatures* extension, CSubset* overall_subset, index_t idx) ?
+@sonney2k	yes but probably a different function name
+ karlnapf	would only work for one additional feature object though
+@sonney2k	maybe get_feature_vector_from_joint_features ;-)
+ karlnapf	lol :) the names are getting longer and longer here
+@sonney2k	karlnapf, or you have a DynamicObjectArray there
+@sonney2k	and make the function static
+ karlnapf	yes
+ karlnapf	however, then, on every access, all the lenths of the feature objects would have to be accessed, so its a bit slower
+@sonney2k	karlnapf, well you could create a mapping table for that
+@sonney2k	like for every index -> ptr to object & subindex
+@sonney2k	but yes one more memory access
+@sonney2k	or 2 even
+ karlnapf	mmh, do you think its worth the effort? I will only need two joint feature objects, but perhaps later seombody else will need that?
+ karlnapf	Also more complicated to call
+@sonney2k	I also don't have a use case for that yet
+@sonney2k	so IMHO simple things first
+ karlnapf	ok then I will stick with the two elements case and see what happens :)
+@sonney2k	heh - I would do the same
+ karlnapf	sonney2k, just found another problem with this
+ karlnapf	I am interfacing the features via the kernel
+ karlnapf	kernel method of kernel
+ karlnapf	thats why I wanted to have a separate object, now I remember
+ karlnapf	So I think it will be copying in the con. method or creating one feature object for the user
+-!- davePrime [40fb4a0c@gateway/web/freenode/ip.64.251.74.12] has joined #shogun
+@sonney2k	karlnapf, in this case really the only other alternative is to derive a class from each feature object and override the getter in there
+@sonney2k	your uninon features won't work
+ karlnapf	sonney2k, yes I realised that
+ karlnapf	that would be too much work for this little problem in my eyes
+ karlnapf	I mean, not only overriding the getters
+ karlnapf	but also the results of some other methods would change
+ karlnapf	along with a huge amount of subclasses
+ karlnapf	I enforce this all features being in one object and then fiddle around with the indices in my test, that all works out of the box now
+ CIA-113	shogun: Soeren Sonnenburg master * r2d8d9bc / (88 files in 13 dirs): remove SGVector& -> use SGVector instead - http://git.io/4nvrUA
+@sonney2k	yeah. with helper functions this is actually not too bad
+@sonney2k	heheh http://www.thenextgalaxy.com/
+ karlnapf	machine learning takes over the world :)
+-!- nickon [~noneedtok@d54C1F8A8.access.telenet.be] has joined #shogun
+ karlnapf	oh this is in london :)
+ gsomix	receiving of data submodule is so slow... =___=
+-!- davePrime [40fb4a0c@gateway/web/freenode/ip.64.251.74.12] has quit [Ping timeout: 245 seconds]
+@sonney2k	yeah its big
+-!- eric___ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Ping timeout: 245 seconds]
+ blackburn	sonney2k: why did you do that ^
+ shogun-buildbot	build #227 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/227
+ blackburn	karlnapf: what is difficult in tr?
+ karlnapf	blackburn, what?
+ blackburn	trace
+ karlnapf	nothing
+ karlnapf	just asking if somebody needs it
+ karlnapf	if yes i will do this now and the other person can use it
+ blackburn	karlnapf: I am confused if I understand it right :/
+ karlnapf	I am just suggesting to add a method get_trace to kernel
+ blackburn	for(int i=0; i<N; i++) trace+=matrix[i*N+i]?
+ blackburn	ahh
+ blackburn	to kernel
+ blackburn	I see now
+ blackburn	karlnapf: is it only for square kernel matrices?
+ karlnapf	yes
+@sonney2k	http://bits.blogs.nytimes.com/2012/05/03/microsoft-taps-yahoo-scientists-for-new-york-research-lab/?src=twrhp
+ blackburn	A*A makes sense too at some point
+@sonney2k	there we have it
+@sonney2k	JL is now at M$
+ blackburn	sonney2k: phew
+@sonney2k	blackburn, do what?
+ blackburn	sonney2k: removed const and &
+@sonney2k	because it is no longer
+@sonney2k	ref counts
+ blackburn	hmmmmm so does it refs on call?
+ blackburn	function call
+@sonney2k	every time it is passed around yes
+-!- davePrime [40fb4a0c@gateway/web/freenode/ip.64.251.74.12] has joined #shogun
+@sonney2k	(done in copy constructor)
+ blackburn	sonney2k: I did not expect it
+ blackburn	sounds cool
+ davePrime	.
+ blackburn	have to get to other thing again, see you
+@sonney2k	...
+ davePrime	If anyone has time to answer this beginner question, I'd appreciate it. The shogun website says that shogun "interfaces to Matlab(tm), R, Octave and Python", and the table says that "Language Bindings" are available in C# and Java. What's the difference between an "interface" and a "language binding" here?
+ davePrime	Feel free to ignore if you don't have time, but thanks for reading.
+ karlnapf	davePrime, hi
+ karlnapf	it all basically means that you can access shogun methods from any of these languages
+ karlnapf	and interface and language binding should be the same thing
+ karlnapf	what is it that you want to do?
+ davePrime	hi karlnapf. i want to write a java program that uses the shogun api for a classification problem
+ karlnapf	davePrime, that is possible, have a look at the examples to get started, try to run one of them would be the first step
+ karlnapf	if you have any problems, just ask here or the mailing list
+ karlnapf	if you are using automatic parameter selection, you should use the current git instead of the latest release (there is a bug)
+@sonney2k	karlnapf, except that this week nothing will work on git master...
+@sonney2k	sgvector transition
+ karlnapf	sonney2k, true, sorry
+ karlnapf	davePrime, so start with the latest release to get stuff working. then you might change later
+ davePrime	all right, thanks karlnapf, thanks for the info. i'm still not sure I get why the website is worded the way it is (for some reason, it greatly emphasizes the matlab, r, octave, and python interfaces), but i guess that doesn't really matter. again, thanks for the info.
+ karlnapf	davePrime, that is because the other interfaces are new and the website hasnt changed
+ karlnapf	python is the "main"-interface though, most complete in terms of examples
+ davePrime	makes sense.
+ karlnapf	however ,java should work
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ gsomix	sonney2k, CSet - done.
+-!- nickon [~noneedtok@d54C1F8A8.access.telenet.be] has quit [Read error: Connection reset by peer]
+@sonney2k	gsomix, great
+ CIA-113	shogun: Soeren Sonnenburg master * r786790d / (4 files in 3 dirs): overload assignment operator and add GC debug output for sgvector - http://git.io/PPQjzA
+@sonney2k	gsomix, can I merge it already?
+@sonney2k	gsomix, and btw how fast is it now?
+@sonney2k	gsomix, I had some minor comments
+ gsomix	sonney2k, it's fast as standart hashmap. from O(1+a) to O(n) for insert
+ gsomix	sonney2k, there is some space for optimization, of course. but later, in spare time.
+@sonney2k	gsomix, ok
+@sonney2k	btw one thing
+@sonney2k	it would be nice if we can serialize these things too
+-!- davePrime [40fb4a0c@gateway/web/freenode/ip.64.251.74.12] has quit [Quit: Page closed]
+@sonney2k	for that to work everything must be of either some sgvector type or use SGObjects or int/float
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- karlnapf [~heiko@host86-176-4-24.range86-176.btcentralplus.com] has quit [Ping timeout: 276 seconds]
+ gsomix	sonney2k, hmm. It seems, that HashSetNode should be SG class, right?
+@sonney2k	gsomix, what does it do?
+@sonney2k	gsomix, anyway we can merge this first then you can improve...
+@sonney2k	it is 1000x better than old CSet
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ gsomix	sonney2k, okey. just last testes...
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ gsomix	sonney2k, okay, you can merge it.
+ CIA-113	shogun: Evgeniy Andreev master * r7c05227 / (3 files): CHashSet -> CSet - http://git.io/gWZqJw
+ CIA-113	shogun: Evgeniy Andreev master * rb225c47 / (2 files in 2 dirs): fixes for transition - http://git.io/tJaS2g
+ CIA-113	shogun: Evgeniy Andreev master * rf1050ea / examples/undocumented/libshogun/library_hashset.cpp : minor fixes - http://git.io/qb5PFg
+ CIA-113	shogun: Evgeniy Andreev master * r84311ca / src/shogun/lib/Set.h : fixes in codestyle - http://git.io/spGLAw
+ CIA-113	shogun: Soeren Sonnenburg master * r392ab41 / (5 files in 3 dirs):
+ CIA-113	shogun: Merge pull request #495 from gsomix/CSet
+ CIA-113	shogun: CHashSet -> CSet - http://git.io/k0aUFw
+ gsomix	sonney2k, thanks.
+@sonney2k	gsomix, please think about serialization ... the other thing you could do is this Array -> Dynarray transition
+* sonney2k goes to bed now
+@sonney2k	cu all
+ gsomix	sonney2k, aha.
+ gsomix	sonney2k, good night
+ gsomix	physics labs at 8am, oh
+ gsomix	good night
+--- Log closed Fri May 04 00:00:37 2012

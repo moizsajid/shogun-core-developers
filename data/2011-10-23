@@ -1,0 +1,115 @@
+--- Log opened Sun Oct 23 00:00:34 2011
+-!- blackburn [~blackburn@188.122.252.220] has joined #shogun
+ blackburn	sonney2k: how it is going? :)
+ CIA-3	shogun: Sergey Lisitsyn  * re74284b / (16 files in 5 dirs): Improved arpack wrapper, introduced LLTSA - http://git.io/4v9b7Q
+ CIA-3	shogun: Sergey Lisitsyn  * r1ca6b60 / (3 files): Added references to LLTSA and NPE, updated NPE impl - http://git.io/h7eGGg
+ CIA-3	shogun: Sergey Lisitsyn  * r0358e2e / data : Updated data - http://git.io/V2hNMg
+ CIA-3	shogun: Sergey Lisitsyn  * rf236e25 / applications/faces/faces_embedding.py : Added faces dimreduction and clustering application - http://git.io/zZtOqA
+ CIA-3	shogun: Sergey Lisitsyn  * re7b34f1 / src/shogun/converter/DiffusionMaps.cpp : Removed normalization from DiffusionMaps - http://git.io/lC4Q7A
+ CIA-3	shogun: Sergey Lisitsyn  * rbf0bf48 / (2 files): Added warning of LLTSA and NPE are hardly applicable to very high-dimensional data - http://git.io/GJrTpQ
+@sonney2k	blackburn, fine
+ blackburn	sonney2k: I did a lot of things today :)
+@sonney2k	the orange people will implemt the python buffer protocol
+ blackburn	nice
+@sonney2k	and maybe will add some wrappers such that all of shogun's machine's can be used in their framework
+@sonney2k	the other way round is difficult (their code is python...)
+@sonney2k	so the buffer protocol is what will help us to e.g. use their data loading etc routines
+@sonney2k	blackburn, then I talked to some llvm/clang guy
+ blackburn	about?
+@sonney2k	and we discussed how to reduce memory requirements in compilation
+@sonney2k	clang requires only 1/2 of what gcc needed btw
+ blackburn	hmm
+@sonney2k	so in the end I now have a plan and will try to split up the file
+ CIA-3	shogun: Soeren Sonnenburg  * r89c91c4 / (src/shogun/io/InputParser.h src/shogun/io/SimpleFile.h): fix compiler errors occurring with clang - http://git.io/JPH_Fg
+ blackburn	nice
+@sonney2k	blackburn, I also talked to the opencv guy (gary bradski)
+@sonney2k	they have some new input features they call 'orb'
+@sonney2k	so it makes sense to add some example based on these (or the more general concept)
+ blackburn	sonney2k: orb? what is it?
+@sonney2k	blackburn, then we long discussions with all the science guys
+@sonney2k	about basically everything
+@sonney2k	was great
+@sonney2k	blackburn, sth like sift
+ blackburn	I see :)
+ blackburn	sonney2k: have you kicked chris?
+ blackburn	:D
+@sonney2k	in what respect
+ blackburn	in ass
+ blackburn	:D
+@sonney2k	I told him that you want to talk to him
+@sonney2k	he said no time :)
+@sonney2k	over
+@sonney2k	well he said in november again
+@sonney2k	he will fly to NY from here
+@sonney2k	and so is pretty busy...
+ blackburn	yeah I know
+ blackburn	okay will try to finish paper by myself :D
+ blackburn	sonney2k: how soon will you fly to berlin again?
+@sonney2k	tomorrow
+ blackburn	sonney2k: I have integrated pics: http://dl.dropbox.com/u/10139213/shogun/faceswclustering.png
+ blackburn	sonney2k: you should like it :D
+@sonney2k	network is slow :(
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+ blackburn	sonney2k: it is embedding by diffusion maps and clustering by kmeans
+@sonney2k	I have the figure now
+@sonney2k	the example is not perfect but mostly works
+@sonney2k	I mean she is smiling in the upper left
+@sonney2k	but this should be on the right side
+@sonney2k	maybe you can make it more simple ?
+@sonney2k	just same expression in face and then turn head to the left ..middle...right?
+ blackburn	sonney2k: it depends on method applied
+ blackburn	sonney2k: I have no time to take more photos more precisely :)
+ blackburn	sonney2k: treat it as demo
+@sonney2k	but certainly nice :)
+ blackburn	sonney2k: two new methods available: LLTSA and NPE
+ blackburn	unfortunately they involves crazy complex task
+ blackburn	e.g. for pics 200x200 it requires to solve 40000x40000 *generalized* eigenproblem
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes__ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 260 seconds]
+-!- in3xes__ [~in3xes@180.149.49.227] has quit [Quit: Leaving]
+ blackburn	sonney2k: still around?
+@sonney2k	yes
+ blackburn	sonney2k: I would need kernels between images
+ blackburn	essentially I would need to have kernels between say 20x20 and 40x30 images
+ blackburn	I hope to come up with any idea of that kernel
+ blackburn	but
+ blackburn	we need ImageFeatures or so
+ blackburn	right?
+@sonney2k	no you could use gaussian kernel on bytefeatures
+ blackburn	sonney2k: eh?? how to store images of different sizes in bytefeatures?
+@sonney2k	why not scale them to some standard size alwyas?
+ blackburn	sonney2k: do you think it is always possible?
+@sonney2k	why not?
+ blackburn	sonney2k: it leads to losing information
+ blackburn	e.g. if we have 200x150 pic
+ blackburn	and 20x15
+ blackburn	if we resize 200->20 we will lose too much
+ blackburn	but I'm pretty sure there is a way to define kernel between it
+@sonney2k	then scale them all to some reasonable size - say 50x50 or so
+ blackburn	sonney2k: so do you think it is the only way?
+ blackburn	sonney2k: are you against image features?
+@sonney2k	blackburn, you mean 2d features?
+@sonney2k	that have arbitrary sizes?
+ blackburn	sonney2k: yeah generally yes
+@sonney2k	like stringfeatures?
+ blackburn	yes
+@sonney2k	well it will just explode the wrapped code even more :)
+ blackburn	ehhh how?
+@sonney2k	another feature class for arbitrary types...
+@sonney2k	I got to reboot
+@sonney2k	brb
+ blackburn	sonney2k: ok
+ blackburn	sonney2k: I'm pretty sure it would have ~4 types
+ blackburn	I don't think anybody wants to have float64_t 2d features
+@sonney2k	blackburn, well I don't mind
+ blackburn	sonney2k: yokay
+ blackburn	okay*
+ blackburn	:D
+ blackburn	sonney2k: I don't want to resize images because I've got to make some classifying on roadsigns dataset
+ blackburn	and pictures are pretty bad
+ blackburn	resizing could make it even worse
+ blackburn	sonney2k: is it true "ich bin ein berliner" is a right german?
+ blackburn	:)
+--- Log closed Mon Oct 24 00:00:40 2011

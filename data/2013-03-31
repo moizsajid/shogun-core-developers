@@ -1,0 +1,72 @@
+--- Log opened Sun Mar 31 00:00:18 2013
+ shogun-buildbot	build #339 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/339
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- tp199911 [~thomas@cust-122-150-108-94.dyn.as47377.net] has joined #shogun
+-!- tp199911 is now known as ZeThomas
+ ZeThomas	hey I have some trouble making a custom kernel
+ blackburn	ZeThomas: hey what is the problem?
+ ZeThomas	I basically have my own object types, and defined a function that gives the k(.,.) values on two of those
+ blackburn	alright
+ ZeThomas	I am able to then make a shogun kernel by subclassing one, and populating the matrix myself
+ blackburn	are you using python btw?
+ ZeThomas	but I am now at loss as to how I would use apply() on my SVM(Light), since it asks for a feature object
+ ZeThomas	yes, modshogun
+ blackburn	there is a feature of swig called directors
+ blackburn	basically you define your own kernel
+ blackburn	and shogun uses your python code to compute values
+ blackburn	(it would be good if you wouldn't like to populate whole matrix)
+ ZeThomas	(i only populate upper triangle ofcourse :) )
+ ZeThomas	oh, ok, how do I do this exactly then?
+ blackburn	ZeThomas: first 1) configure with --enable-swig-directors
+ blackburn	2) https://github.com/shogun-toolbox/shogun/blob/master/examples/undocumented/python_modular/kernel_director_linear_modular.py
+ blackburn	ZeThomas: most interesting for you is class at line 15
+ ZeThomas	blackburn: so I recompile
+ ZeThomas	?
+ blackburn	ZeThomas: yes
+ blackburn	ZeThomas: so you don't use shogun features to store the data right?
+ ZeThomas	no, indeed
+ blackburn	ZeThomas: alright then everything would look like in that example
+ blackburn	except lines 19 and 20
+ blackburn	ZeThomas: so you define a class that implements def kernel_function(self, idx_a, idx_b):
+ ZeThomas	so after the recompile, I get a class named DirectorKernel that I subclass?
+ blackburn	ZeThomas: exactly
+ blackburn	ZeThomas: if you pass that class as kernel to svmlight
+ blackburn	it will call the code you write
+ ZeThomas	and how do I train/test?
+ blackburn	ZeThomas: well you may add any methods you'd need to handle that
+ blackburn	ZeThomas: you may also use DummyFeatures(N)
+ blackburn	where N is the number of vectors
+ blackburn	ZeThomas: so the workflow would be
+ blackburn	1) set data on your kernel and init the kernel with kernel.init(DummyFeatures(n_train_vectors),DummyFeatures(n_train_vectors))
+ blackburn	2) train the machine
+-!- lambday [3ba2174d@gateway/web/freenode/ip.59.162.23.77] has joined #shogun
+ blackburn	3) set your kernel for testing somehow and call kernel.init(DummyFeatures(n_train_vectors),DummyFeatures(n_test_vectors))
+-!- ZeThomas [~thomas@cust-122-150-108-94.dyn.as47377.net] has quit [Ping timeout: 252 seconds]
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- ZeThomas [~thomas@cust-190-150-108-94.dyn.as47377.net] has joined #shogun
+ ZeThomas	hey sorry, I got disconnected
+ ZeThomas	ok, wait, I'm still a bit confused; do I manually provide the (upper) Gram matrix?
+ ZeThomas	and 2) (how) do I call apply() on my svm, and can I still extract the values from the result (get_values())?
+ blackburn	ZeThomas: yes everything related to svm stays the same
+ blackburn	ZeThomas: about first q - you do provide a function that computes k(idx_a,idx_b)
+ blackburn	where idx_a and idx_b are in [0,n_train_vectors] when training
+ blackburn	and idx_b is in [0,n_test_vectors] when testing
+-!- ZeThomas [~thomas@cust-190-150-108-94.dyn.as47377.net] has quit [Ping timeout: 245 seconds]
+ lambday	blackburn: hi..
+ blackburn	lambday: hey
+ lambday	I was was writing a unit test for sparse matrix cholesky factorization... what could be a good test case?
+ blackburn	lambday: well you may check if after factorization L*LT is still the original matrix
+ lambday	blackburn: umm... yes
+ lambday	well, actually it permutes the original matrix before factorization so that it results in sparser factors...
+ lambday	so, P -1 * L * LT * P will give original matrix
+ blackburn	lambday: yeah or that
+ lambday	blackburn: hmm .. thanks.. :)
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Ping timeout: 245 seconds]
+-!- lambday [3ba2174d@gateway/web/freenode/ip.59.162.23.77] has quit []
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- cwidmer [0447bed4@gateway/web/freenode/ip.4.71.190.212] has joined #shogun
+-!- lambday [b613104d@gateway/web/freenode/ip.182.19.16.77] has joined #shogun
+-!- lambday [b613104d@gateway/web/freenode/ip.182.19.16.77] has quit [Client Quit]
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Quit: Page closed]
+-!- cwidmer [0447bed4@gateway/web/freenode/ip.4.71.190.212] has quit [Quit: Page closed]
+--- Log closed Mon Apr 01 00:00:18 2013

@@ -1,0 +1,111 @@
+--- Log opened Sun Oct 02 00:00:52 2011
+ blackburn1	oh I was wrong with that extension
+-!- blackburn1 [~blackburn@188.168.4.116] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.168.3.99] has joined #shogun
+-!- blackburn [~blackburn@188.168.3.99] has quit [Ping timeout: 260 seconds]
+-!- blackburn [~blackburn@188.168.14.11] has joined #shogun
+@sonney2k	blackburn, which extension?
+ blackburn	sonney2k: I still trying to get my kernel LTSA work right
+@sonney2k	ok
+ blackburn	sonney2k: we can't disable pthreads?
+@sonney2k	?
+ blackburn	sonney2k: no --disable-pthreads option
+@sonney2k	I see
+@sonney2k	indeed...
+ blackburn	sonney2k: have you seen a cool feature I added? now possible to set target dimensionality to -1 and it will be reduced by 1
+@sonney2k	isn't hat confusing?
+ blackburn	I don't know, is it?
+@sonney2k	well you need to document it at least
+ blackburn	oh
+ CIA-3	shogun: Sergey Lisitsyn master * r246ccf6 / src/shogun/preprocessor/DimensionReductionPreprocessor.cpp : Fixed wrong destruction of DR preprocessor base class - http://git.io/STWLGA
+ CIA-3	shogun: Sergey Lisitsyn master * r51eeb3d / (7 files): Improved multithreading codestyle, fixes some structure - http://git.io/xdq67Q
+ blackburn	sonney2k: last one commit reduced LoC related to multithreading VERY much
+@sonney2k	blackburn, so it is not using that weird syntax but just { } are enough?
+@sonney2k	blackburn, the only problem I see is that it is unreadable - I mean you have like 20 args
+@sonney2k	and it is totally unclear which one is for what
+ blackburn	sonney2k: not more unreadable than it was :D
+@sonney2k	well before it at least said start_idx=0
+@sonney2k	now it says 0 somewhere hidden among those args...
+ blackburn	sure, but INFINITY lines of .x=y is crazy too
+@sonney2k	no
+@sonney2k	it helps to understand what you do and you could do that on the same line too
+ blackburn	it is just parameters passing, I think it is ok
+ blackburn	not the main readability problem :)
+ blackburn	e.g. DSYEVR routine have 22 args and it is not that difficult to read
+ blackburn	for me at least
+@sonney2k	blackburn, if there is a bug in creating this structure there it is very difficult to figure out which arg is the right one
+@sonney2k	I consider any function with more than a handful of args 'broken by design'
+ blackburn	sonney2k: are you suggesting to revert the commit above? :)
+ blackburn	I spent a hour doing that :D
+@sonney2k	I am suggesting to add the .x annotation
+@sonney2k	otherwise reverting is better yes
+ blackburn	sonney2k: it is supported only by C99 standard
+@sonney2k	before I had a chance to understand it - now I don't
+ blackburn	sonney2k: I will send a bomb to berlin :)
+@sonney2k	we have enough terrorist :)
+ blackburn	spent too much time on that
+@sonney2k	one more doesnt' make a difference
+ blackburn	terrorist? do you have any?
+@sonney2k	why not use the C99 syntax?
+ blackburn	sonney2k: produce warnings
+@sonney2k	argh
+@sonney2k	why is C99 stuff not in C++ ?!!
+ blackburn	sonney2k: that is the problem, yeah
+@sonney2k	then we cannot use it :(
+@sonney2k	hmmhh, maybe we should rethink the whole threading strategy
+@sonney2k	I mean wouldn't it be possible to create some class for this business
+@sonney2k	(templated I guess)
+@sonney2k	and then add the usual functionality in there like the start/end things
+ blackburn	sonney2k: well yes, all of them contain some index start,step,stop
+@sonney2k	I mean we have this appearing 20 or more times now
+@sonney2k	it is getting #W$$!?!#?@
+ blackburn	sonney2k: a LOT of work
+@sonney2k	also we always solve the start the threads / join the threads / deal with error handling
+@sonney2k	but wisely spent
+@sonney2k	my suggestion would be to have start, end always in there and some templated thing called user_data or so
+@sonney2k	that contains the struct with required metadata for the task
+ blackburn	sonney2k: how to revert commit?
+@sonney2k	git revert <id>
+@sonney2k	then push again
+ CIA-3	shogun: Sergey Lisitsyn master * r15ebd97 / (7 files):
+ CIA-3	shogun: Revert "Improved multithreading codestyle, fixes some structure"
+ CIA-3	shogun: This reverts commit 51eeb3d7aeaebeb41297d6db822a073d03679e6b. - http://git.io/-pXtNQ
+ blackburn	sonney2k: yes, it could be one more bug-generating thing
+ blackburn	I would better stay it as it was
+@sonney2k	blackburn, I guess you should open a trac ticket for this
+ blackburn	sonney2k: for what?
+@sonney2k	for this threading class
+@sonney2k	I guess it will need a couple of iterations to be worth anything
+ blackburn	,
+ blackburn	?
+@sonney2k	if we have to write 50 LoC to use that class it is not really an improvement
+@sonney2k	alright - I will torture myself today with installing windows 7 again
+@sonney2k	I hope I manage to do this somehow
+@sonney2k	I never ever considered that this could be impossible when I have 2 harddrives...
+ blackburn	hah
+ blackburn	it would be impossible to install win7 to the second partition
+ blackburn	I Imagine what is the problems with multiple anything
+@sonney2k	blackburn, well osx installed w/o problems to any harddrive
+@sonney2k	even external usb drives
+@sonney2k	and linux same thing
+ blackburn	no way to install win7 to flash drive :D
+@sonney2k	the problem is that I have to open up my notebook
+@sonney2k	remove one harddisk
+@sonney2k	and then install on the other
+@sonney2k	and then pray that it works when I connect both of them
+ blackburn	sonney2k: does you notebook have two slots?
+@sonney2k	blackburn, I removed the dvd drive
+ blackburn	crazy
+@sonney2k	and connected a sata drive there
+@sonney2k	well when you have kids you suddenly have too many photos/movies
+@sonney2k	and of course I was hoping to get shogun to run on cygwin / osx
+ CIA-3	shogun: Sergey Lisitsyn master * r9698ed3 / (4 files): Some necessary improvements from the reverted commit - http://git.io/eKzzgQ
+ blackburn	hah
+@sonney2k	alright - if I won't be online in a few hrs - windows 7 killed my linux install
+@sonney2k	cu
+ blackburn	okay see you
+-!- Guest56770 [~sonne@f053040237.adsl.alicedsl.de] has joined #shogun
+-!- Guest56770 [~sonne@f053040237.adsl.alicedsl.de] has quit [Ping timeout: 248 seconds]
+-!- blackburn [~blackburn@188.168.14.11] has quit [Ping timeout: 252 seconds]
+-!- blackburn [~blackburn@188.168.5.143] has joined #shogun
+--- Log closed Mon Oct 03 00:00:57 2011

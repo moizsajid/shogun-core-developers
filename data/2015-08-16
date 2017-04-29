@@ -1,0 +1,268 @@
+--- Log opened Sun Aug 16 00:00:38 2015
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 246 seconds]
+-!- shaochuan [~shaochuan@2601:647:4600:fac5:ad6a:8155:1173:d382] has joined #shogun
+-!- shaochuan [~shaochuan@2601:647:4600:fac5:ad6a:8155:1173:d382] has quit []
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Client Quit]
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- PirosB3 [~pirosb3@host23-116-dynamic.183-80-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+ shogun-buildbot	build #1032 of nightly_default is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1032
+-!- lupinix_ [~quassel@v22014041761818086.yourvserver.net] has joined #shogun
+-!- lupinix [~quassel@fedora/lupinix] has quit [Ping timeout: 255 seconds]
+-!- PirosB3 [~pirosb3@host225-72-dynamic.252-95-r.retail.telecomitalia.it] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has quit [Quit: Freedom. Friends. Features. First.  [https://getfedora.org/]]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- lupinix_ is now known as lupinix
+-!- lupinix is now known as Guest50843
+-!- Guest50843 [~quassel@v22014041761818086.yourvserver.net] has quit [Quit: http://quassel-irc.org - Chat comfortably. Anywhere.]
+-!- lupinix_ [~quassel@v22014041761818086.yourvserver.net] has joined #shogun
+-!- lupinix_ [~quassel@v22014041761818086.yourvserver.net] has quit [Client Quit]
+-!- lupinix_ [~quassel@v22014041761818086.yourvserver.net] has joined #shogun
+-!- lupinix_ [~quassel@v22014041761818086.yourvserver.net] has quit [Client Quit]
+-!- lupinix_ [~quassel@v22014041761818086.yourvserver.net] has joined #shogun
+-!- lupinix_ is now known as lupinix
+-!- lupinix [~quassel@v22014041761818086.yourvserver.net] has quit [Changing host]
+-!- lupinix [~quassel@fedora/lupinix] has joined #shogun
+-!- PirosB3 [~pirosb3@host225-72-dynamic.252-95-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+@besser82	lisitsyn, ping?
+ lisitsyn	besser82: pong
+ lisitsyn	whta's up?
+@besser82	lisitsyn, just the discussion 'bout those properties-classes...
+@besser82	lisitsyn, I'm afraid, that won't help too much...  :(
+ lisitsyn	besser82: yeap
+@besser82	lisitsyn, we really need to go plugin-style...
+@besser82	... with polymorphism
+ lisitsyn	yes that would be fastest to compile but I don't see any cool API with that
+@besser82	lisitsyn, that's the problem...
+@besser82	lisitsyn, we possibly need some real well-though factories...
+@besser82	lisitsyn, and API will stay so-so...
+ lisitsyn	it would be something ugly and string based
+@besser82	atleast patially, yes  :(
+@besser82	but swig will be nice and small
+@besser82	and api from linker's pov will stay rock-solid
+@besser82	otherwise we might use enums for parameters?
+@besser82	lisitsyn, ^
+@besser82	any other ideas?
+@besser82	As far as I can see, Octave-mod will start blowing memory on Fedora's builders in very short time
+@besser82	Takes ~8GBytes of RAM even with '-g1' and not using '-pipe'
+ lisitsyn	besser82: enums won't work for plugins :)
+@besser82	lisitsyn, depends  ;)
+ lisitsyn	unless parameters of plugins are known before the plugin
+ lisitsyn	like its generic for any plugin
+ lisitsyn	but that's not really the case
+@besser82	my_svm = new CSVM(SVM_TYPE_ENUM,...)
+ lisitsyn	but then you have headers for all plugins?
+@besser82	nope...
+ lisitsyn	I mean that's not plugin then
+@besser82	but at least a generic class
+@besser82	like CSVM
+ lisitsyn	yes but if your class adds one more parameter
+ lisitsyn	toomba_yumba
+ lisitsyn	you can't access it :)
+@besser82	which can be resolved as well  ;)
+ lisitsyn	how?
+@besser82	like having a std::map as member of base class  ;)
+ lisitsyn	enum doesn't work still
+@besser82	which holds pointers to whatever additional data / functions
+@besser82	Why?
+ lisitsyn	because you'd have to put all possible parameters into that enum
+ lisitsyn	like before developing any plugin
+@besser82	that's not what I mean...
+@besser82	I'm thinking of an enum describing which type of svm will be used...
+ lisitsyn	uh why?
+ lisitsyn	string is ok here
+@besser82	okie
+ lisitsyn	strings are dynamic while it would put all types statically
+@besser82	erm... yes, that's true
+@besser82	:P
+ lisitsyn	like inversed abstraction :)
+@besser82	hehe
+@besser82	but parameters might come from a std::map as well
+@besser82	std::map<string, void**>
+ lisitsyn	yes but rather map<string, any>
+@besser82	does this work?
+ lisitsyn	that works but ugly
+ lisitsyn	:D
+ lisitsyn	I mean you would do
+@besser82	void** is more un-ugly  :P
+ lisitsyn	no void** is the ugliest ugly :)
+ lisitsyn	you need to store type
+@besser82	but takes a <any> pointer to <any> pointer  :P
+ lisitsyn	ugly is that you have to do
+ lisitsyn	svm.get("C").as_float()
+ lisitsyn	any stores type and supports safe casts
+@besser82	Yay!  so we kan use boost::any  :P
+ lisitsyn	yes or better our own any :D
+ lisitsyn	cause boost::any is uber slow
+@besser82	Is it?
+ lisitsyn	besser82: it's type check is based on string comparison
+ lisitsyn	of RTTI typenames
+ lisitsyn	there is a better way
+@besser82	That's fscking rock-solid...  ;)
+ lisitsyn	besser82: anyway that doesn't really matter, api is the most important
+ lisitsyn	and with strings we force users to explicitly provide types
+@besser82	ERm... Do we?
+ lisitsyn	yes
+ lisitsyn	??? get(std::string);
+ lisitsyn	what's the return type? :)
+@besser82	Any!
+@besser82	:P
+ lisitsyn	yes it is possible
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Wu Lin :develop * e0b776b / src/shogun/optimization/ (2 files): https://github.com/shogun-toolbox/shogun/commit/e0b776b2d975610c138dd8d165386ba4b51c09c2
+ shogun-notifier-	shogun: add base class for wrapped minimizer
+ shogun-notifier-	shogun: Wu Lin :develop * e4c9817 / src/shogun/optimization/lbfgs/ (2 files): https://github.com/shogun-toolbox/shogun/commit/e4c98176c527ab0ebd2f2a474c77c15f547b32bb
+ shogun-notifier-	shogun: added lbfgs wrapped minimizer
+ shogun-notifier-	shogun: Wu Lin :develop * c45b744 / tests/unit/optimization/lbfgs/ (2 files): https://github.com/shogun-toolbox/shogun/commit/c45b7446bbc5599e0cb7060c869b0d92f5af0629
+ shogun-notifier-	shogun: added unit tests
+ shogun-notifier-	shogun: Wu Lin :develop * 3fea081 / src/shogun/optimization/ (2 files): https://github.com/shogun-toolbox/shogun/commit/3fea0817609b54039a7d456bff744aeff119c4b3
+ shogun-notifier-	shogun: clearn header files and comments
+ shogun-notifier-	shogun: Wu Lin :develop * edc9c26 / src/shogun/optimization/ (2 files): https://github.com/shogun-toolbox/shogun/commit/edc9c26a3d866201c6551eac3328e261385db25b
+ shogun-notifier-	shogun: remove the useless helper class
+ shogun-notifier-	shogun: Wu Lin :develop * f4a0c26 / src/shogun/optimization/lbfgs/ (2 files): https://github.com/shogun-toolbox/shogun/commit/f4a0c2604aa85ab0e472601fe2a4a0c805285012
+ shogun-notifier-	shogun: update the lbfgs class
+@besser82	Commit galore!!!  :P :P :P
+ lisitsyn	hah
+ lisitsyn	but when someone gets SVM's C
+ lisitsyn	he expects float
+ lisitsyn	so he needs to code he needs float
+ lisitsyn	like as_float
+ lisitsyn	or whatever
+@besser82	nope...  I just found sth...  ;)
+@besser82	http://codereview.stackexchange.com/questions/20058/c11-any-class
+@besser82	might be useful ^_^
+ lisitsyn	yes in C++ it is easy
+ lisitsyn	you just write float C = svm.get("C");
+ lisitsyn	all implicit casts happen there
+ lisitsyn	but in python/java/blabla
+@besser82	we wouldn't need to get to have that ugly API...
+@besser82	We can provide a factory valid for all *SVM
+ lisitsyn	yes it is not a problem at all
+ shogun-buildbot	build #340 of trusty - libshogun - viennacl is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/340  blamelist: Wu Lin <yorker.lin@gmail.com>
+@besser82	so have all important shiatz in header of factory
+ lisitsyn	problem is how to pass data
+ lisitsyn	parameters and stuff
+ shogun-buildbot	build #3464 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3464  blamelist: Wu Lin <yorker.lin@gmail.com>
+@besser82	lisitsyn, as class-member?
+ lisitsyn	btw opencv has cv::Mat
+ lisitsyn	which is not typed
+ lisitsyn	you need to know its type
+ lisitsyn	people live with that :D
+@besser82	cv::Mat == void   :P
+ lisitsyn	yes kind of
+ shogun-buildbot	build #341 of trusty - libshogun - viennacl is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/341
+@besser82	void with return-value  :P
+ lisitsyn	big decorator on top of void*
+@besser82	lol
+ shogun-buildbot	build #3465 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3465
+ lisitsyn	besser82: in dynamic language like python we can do some magic
+ lisitsyn	so that svm.get("C") is transformed into float
+ lisitsyn	but not in java
+-!- PirosB3 [~pirosb3@host140-248-dynamic.23-79-r.retail.telecomitalia.it] has joined #shogun
+ lisitsyn	although in java you know the type you expect
+ lisitsyn	so why care?
+ lisitsyn	just a bit of additional verbosity
+-!- travis-ci [~travis-ci@ec2-54-144-119-235.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Wu Lin's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/75842993
+-!- travis-ci [~travis-ci@ec2-54-144-119-235.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #40 of FC22 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC22%20-%20libshogun/builds/40  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #1055 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/1055  blamelist: Wu Lin <yorker.lin@gmail.com>
+@besser82	lisitsyn, as I'm thinking / saying ;)
+@besser82	and in Python it doesn't matter as well...
+@besser82	There any var can be anything
+@besser82	a = "Shitty string"
+@besser82	b = 1
+ shogun-buildbot	build #1033 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1033  blamelist: Wu Lin <yorker.lin@gmail.com>
+@besser82	c = {b, a}
+@besser82	d = a
+@besser82	a = b
+@besser82	b = d
+@besser82	What has which type?  :P
+@besser82	lisitsyn, ^
+ shogun-buildbot	build #2678 of deb3 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2678  blamelist: Wu Lin <yorker.lin@gmail.com>
+ lisitsyn	besser82: well it doesn't matter until it meets the point it is used as float
+ lisitsyn	like ok so I need to double the C
+ lisitsyn	C *= 2
+ lisitsyn	kaput
+@besser82	lol, yes...
+@besser82	but that's like stupid...  noone would do so...
+@besser82	... because everyone expects 'C' to be float / double
+ lisitsyn	yes
+ lisitsyn	but with strings we need to force them to write that
+ lisitsyn	I don't think it is a big deal
+ lisitsyn	but not beautiful
+@besser82	me neither...
+@besser82	but why strings...
+@besser82	We can have a CSVM_Class having 'float C {0.0};'-member
+@besser82	which is pretty generic through all types of SVM
+@besser82	so no need for strings on that
+ lisitsyn	there is always a parameter that is not common for all svms
+@besser82	which can be in the class as well
+@besser82	but kept uneval'ed when not needed
+ lisitsyn	ok then I have new
+ lisitsyn	megablaster svm
+ lisitsyn	which has the megascore parameter
+ lisitsyn	it doesn't work until you add it to the base class ;)
+@besser82	okie...  Then let's add it...  void* megascore
+ shogun-buildbot	build #663 of deb4 - python3 is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/663  blamelist: Wu Lin <yorker.lin@gmail.com>
+ lisitsyn	will you change api all the time plugin is released? :)
+@besser82	we now change API everytime some bug is fixed...  :P
+ lisitsyn	I don't say it is very bad but it is quite opposite to the idea of plugins
+@besser82	then we need std::map<std::string,<any>>
+@besser82	but it wouldn't be too much to enhance API with new plugins
+ lisitsyn	any = need to cast parameters into expected type
+@besser82	so more shiatz...  :(
+ lisitsyn	no good solution :)
+@besser82	so enhancing api from time to time would be the better alternative
+ lisitsyn	we need to pick less bad
+@besser82	so changing API  ;)
+ lisitsyn	like adding new parameters = changing api?
+@besser82	yes
+ lisitsyn	yeah why not
+@besser82	so let's-a-do-it  =)
+@besser82	Will jot down my 'tack-weld' tomorrow
+ lisitsyn	heh
+@besser82	so we have lib / templates for doing da plugin-stuff
+ lisitsyn	not really lib but well I think we have some understanding how to do that
+@besser82	I'm actually writing on it since a few weeks
+@besser82	That should give us all we need to do stuff pretty quick in shogun
+@besser82	like 'tack-weld' provides plugin-registry and all needed stuff
+@besser82	and is abled to handle several different types / classes of plugins
+@besser82	like plugins doing svm, other doing $other stuff
+@besser82	we should split off linalg and all stuff as well
+@besser82	interfacing maths through plugin too
+ lisitsyn	maybe we don't really need to interface math
+@besser82	so we can easily switch between interfaces
+ lisitsyn	ahh
+ lisitsyn	like cpu gpu as plugins?
+ lisitsyn	maybe an overkill
+ lisitsyn	we have just two of them
+@besser82	nope should be easy to do  ;)
+ lisitsyn	cant see it being that dynamic
+@besser82	we have linalg, atlas / blas and Vienna
+@besser82	and now we build with conditionals, depending on what's there during compile
+@besser82	so doing this abstractly shouldn't be a big deal
+@besser82	It think I have plan to do it dynamic...  =)
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Read error: Connection reset by peer]
+-!- shaochuan [~shaochuan@2601:647:4600:fac5:9ce2:455c:900c:66cd] has joined #shogun
+ lisitsyn	you'd need to talk to lambday :)
+ lisitsyn	ok time to do some stuff, see you later
+@besser82	lisitsyn, a'ight!  'til then!  C ya
+ shogun-notifier-	shogun: Wu Lin :develop * 033e60a / tests/unit/neuralnets/NeuralNetwork_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/033e60a892fbeaab412b87fb03fb6276e001bbf8
+ shogun-notifier-	shogun: bug fixed
+ shogun-notifier-	shogun: Bj?rn Esser :develop * 228eb3f / tests/unit/neuralnets/NeuralNetwork_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/228eb3f8274a045b5a0aae58031233b43dd1d76c
+ shogun-notifier-	shogun: Merge pull request #2886 from yorkerlin/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: bug fixed
+ shogun-buildbot	build #1056 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/1056  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #41 of FC22 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC22%20-%20libshogun/builds/41  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #2679 of deb3 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2679  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #1057 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/1057  blamelist: Bj?rn Esser <bjoern.esser@gmail.com>
+ shogun-buildbot	build #42 of FC22 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC22%20-%20libshogun/builds/42  blamelist: Bj?rn Esser <bjoern.esser@gmail.com>
+ shogun-buildbot	build #1034 of precise - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1034
+ shogun-buildbot	build #664 of deb4 - python3 is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/664  blamelist: Wu Lin <yorker.lin@gmail.com>, Bj?rn Esser <bjoern.esser@gmail.com>
+ shogun-buildbot	build #2680 of deb3 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2680  blamelist: Bj?rn Esser <bjoern.esser@gmail.com>
+-!- PirosB3 [~pirosb3@host140-248-dynamic.23-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+--- Log closed Mon Aug 17 00:00:39 2015

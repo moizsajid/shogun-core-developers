@@ -1,0 +1,766 @@
+--- Log opened Sat Apr 04 00:00:28 2015
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 255 seconds]
+-!- AlexLuya [~alex@2403:d400:1000:1:9c0:327f:39e7:fd1c] has joined #shogun
+-!- AlexLuya [~alex@2403:d400:1000:1:9c0:327f:39e7:fd1c] has quit [Quit: Leaving]
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 272 seconds]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Bj?rn Esser :bugfix/python_modular_swig3 * 2067632 / examples/undocumented/python_modular/ (2 files): https://github.com/shogun-toolbox/shogun/commit/2067632151fee2c60d239a2c4dbc4fdcfb34ae6d
+ shogun-notifier-	shogun: fix failing test when building with swig 3.X
+ shogun-notifier-	shogun: Bj?rn Esser :bugfix/python_modular_swig3 * 6e632cb / src/shogun/lib/memory.cpp: https://github.com/shogun-toolbox/shogun/commit/6e632cb3228102f516210bcbcacfde9bd8e821d9
+ shogun-notifier-	shogun: fix segfault when building with 3.X in 2 python_modular-tests
+ shogun-notifier-	shogun:   * python_modular-evaluation_cross_validation_multiclass_storage
+ shogun-notifier-	shogun:   * python_modular-evaluation_multiclassovrevaluation_modular
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has quit [Remote host closed the connection]
+-!- nszceta [~nszceta@5ED05E57.cm-7-1b.dynamic.ziggo.nl] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+@besser82	lisitsyn, g'morning!  :D
+@lisitsyn	besser82: hey
+@besser82	lisitsyn, you can read gdb output? :P
+@lisitsyn	lldb yes
+@besser82	lisitsyn, that basically the same I think ;)
+@lisitsyn	not really the same but in some essential parts yeah
+@besser82	lisitsyn, I just have some disturbing segfault left with swig3
+@lisitsyn	so not all segfaults are gone yet?
+@besser82	lisitsyn, all but just one
+@lisitsyn	I see
+@besser82	lisitsyn, 2 tests are segfaulting...  both related to evaluation-multiclass-bullshit  :P
+@besser82	lisitsyn, http://fpaste.org/207167/
+@besser82	lisitsyn, and both are caused by shogun::sg_generic_free<shogun::SGMatrix<double>
+@lisitsyn	ha
+@besser82	lisitsyn, vhat? ^^
+@lisitsyn	this could be not swig
+@besser82	lisitsyn, only with swig 3.x
+@lisitsyn	ah
+@besser82	lisitsyn, on swig 2.0.12 all is fine over there
+@besser82	lisitsyn, so I'm basically a bit puzzled about the why...
+@besser82	lisitsyn, and where and however
+@besser82	lisitsyn, that's the last shiatz with da swig3
+@besser82	lisitsyn, everything else ist pretty
+@besser82	lisitsyn, with just doing that stupid one-liner-patch in swig :P
+@lisitsyn	besser82: I am glancing over the code
+@besser82	lisitsyn, okie :D
+@besser82	lisitsyn, I didn't see anything obvious though
+@besser82	lisitsyn, hit me, when rdy ;)
+@lisitsyn	besser82: these inplace ctors look pretty suspicious
+@besser82	lisitsyn, where exactly?
+@lisitsyn	in CCrossValidationMulticlassStorage
+@besser82	lisitsyn, cpp?  which line number?
+@lisitsyn	besser82: see dtor at 34
+@lisitsyn	and init at 64
+@lisitsyn	they look like dangerous
+@besser82	lisitsyn, like the SG_FREE parts?
+@besser82	lisitsyn, or the SG_UNREF?
+@lisitsyn	besser82: I am more concerned about
+@lisitsyn	m_conf_matrices[i].~SGMatrix<int32_t>();
+@lisitsyn	and new (&m_fold_ROC_graphs[i]) SGMatrix<float64_t>();
+@besser82	lisitsyn, how to fix that shit?
+@besser82	lisitsyn, that one fixed and swig3-stuff is done :D
+@lisitsyn	besser82: don't know :)
+-!- nszceta [~nszceta@5ED05E57.cm-7-1b.dynamic.ziggo.nl] has quit [Quit: My Mac has gone to sleep. ZZZzzz...]
+@besser82	lisitsyn, no ideas?  :(
+@besser82	lisitsyn, I'll recompile with -O0 and check output again :P
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@besser82	lisitsyn, trying again with src/shogun/evaluation/CrossValidationMulticlassStorage.cpp:41 commented out...  let's see the outcome...
+@lisitsyn	besser82: ok I am back sorry
+@lisitsyn	besser82: should work
+@lisitsyn	the question is why
+@besser82	lisitsyn, think so too...
+@besser82	lisitsyn, there is nothing real problematic found be me so far
+@besser82	~SGMatrix<T> just calls SGReferencedData::unref()
+@lisitsyn	besser82: either it wasn't initialized
+@lisitsyn	or it is freed twice
+@besser82	lisitsyn, or?
+@besser82	lisitsyn, freeing twice shouldn't be the problem
+-!- PirosB3 [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has joined #shogun
+@lisitsyn	besser82: I see a flaw here anyway
+@lisitsyn	dtor is called always
+@lisitsyn	but this thing is initialized *sometimes*
+@besser82	lisitsyn, and not always?
+@lisitsyn	yeah
+@besser82	lisitsyn, mhhh...  that might be the problem then...
+@lisitsyn	besser82: line 36
+@besser82	lisitsyn, so we need some fscking conditional around or make sure it is always initialized
+@lisitsyn	if (compute_ROC && m_fold_ROC_graphs)
+@lisitsyn	could you try that?
+@lisitsyn	and lines 44, 52
+@besser82	lisitsyn, just a sec... ;)
+@lisitsyn	I was kind of lamer doing that code
+@lisitsyn	:D
+@besser82	lisitsyn, Remeber me to smack you on next SG_Workshop  :P
+@lisitsyn	right
+@besser82	lisitsyn, recompiling...  just a few minutes
+@besser82	lisitsyn, problem is not double free'ing...
+@besser82	lisitsyn, must be some other problem...
+@besser82	lisitsyn, let's wait for the build-job finishing
+@besser82	lisitsyn, hah!
+@besser82	lisitsyn, do we have some option / method in SG to determine whether the ptr has already been unref()'ed?
+@lisitsyn	besser82: what ptr?
+@lisitsyn	sgobject or sgmatrix?
+@besser82	lisitsyn, CDynamicObjectArray*  :P
+@besser82	lisitsyn, so should be sgobject, rye?
+@lisitsyn	yes
+@besser82	lisitsyn, CDynamicObjectArray* m_binary_evaluations get's unref'ed by calling swig's `_wrap_delete_CrossValidationMulticlassStorage`
+@lisitsyn	yes
+@lisitsyn	m_binary_evaluations
+@lisitsyn	line 60
+@besser82	lisitsyn, yes...  and later we are free'ing the unref'ed shiatz...  :P
+@besser82	*BOOM*
+@besser82	brb in ~ 15 minutes..., lisitsyn
+@lisitsyn	why?
+@lisitsyn	I don't get where do we free unrefed thing
+-!- nszceta [~nszceta@5ED05E57.cm-7-1b.dynamic.ziggo.nl] has joined #shogun
+@besser82	lisitsyn, re
+@besser82	lisitsyn, _wrap_delete_CrossValidationMulticlassStorage calls shogun::CSGObject::unref on CDynamicObjectArray* m_binary_evaluations
+@besser82	lisitsyn, and later on the dtor of CrossValidationMulticlassStorage
+@besser82	lisitsyn, http://fpaste.org/207198/
+@besser82	lisitsyn, the whole class get's unref'ed
+@besser82	lisitsyn, better paste: http://fpaste.org/207199/81510451/
+@besser82	lisitsyn, complete func:  http://fpaste.org/207200/51190142/
+-!- nszceta [~nszceta@5ED05E57.cm-7-1b.dynamic.ziggo.nl] has quit [Remote host closed the connection]
+-!- nszceta [~nszceta@5ED05E57.cm-7-1b.dynamic.ziggo.nl] has joined #shogun
+-!- nszceta_ [~nszceta@95.211.152.2] has joined #shogun
+-!- nszceta [~nszceta@5ED05E57.cm-7-1b.dynamic.ziggo.nl] has quit [Ping timeout: 256 seconds]
+@besser82	lisitsyn, ?
+@besser82	lisitsyn, are you dead, man?
+@besser82	lisitsyn, I found it, I think...
+@lisitsyn	besser82: I atent dead!
+@besser82	lisitsyn, I see :P
+@lisitsyn	ok back
+@besser82	lisitsyn, so CSGObject::unref() invokes `delete this`
+@lisitsyn	hmm yes
+@lisitsyn	so?
+@besser82	lisitsyn, so SG_UNREF(Object*) frees the whol object
+@lisitsyn	you're talking about that storage object, right?
+@besser82	lisitsyn, nope
+@besser82	lisitsyn, or yes
+@besser82	lisitsyn, the object swig unrefs
+@lisitsyn	hmm okay
+@besser82	lisitsyn, and that looks like the whole class to me
+@lisitsyn	besser82: I am not sure I get the problem
+@besser82	lisitsyn, the problem is: the shiats blows-up when calling the destructor...
+@lisitsyn	yes
+@besser82	lisitsyn, or immediatly after...
+@besser82	lisitsyn, lemme check which of the two deletes is causing the blow...
+@lisitsyn	besser82: I don't get the two deletes thing
+@lisitsyn	why there are two delets?
+@besser82	lisitsyn, whether the delete[] m_fold_ROC_graphs
+@besser82	lisitsyn, or the UNREF-delete of the class itself...
+@besser82	lisitsyn, done by swig
+@besser82	lisitsyn, it's definetly ../src/shogun/evaluation/CrossValidationMulticlassStorage.cpp:41
+@besser82	lisitsyn, SG_FREE(m_fold_ROC_graphs);
+@besser82	lisitsyn, and that blows
+@lisitsyn	besser82: any idea why swig interferes with that?
+@besser82	lisitsyn, no real idea...  :(
+@lisitsyn	so you commented out
+@lisitsyn	41
+@lisitsyn	and it works?
+@besser82	lisitsyn, yes
+@lisitsyn	besser82: did you try to check whether m_fold_ROC_graphs is not null at line 36?
+@besser82	lisitsyn, yes
+@lisitsyn	still fails?
+@lisitsyn	unless you comment free?
+@besser82	lisitsyn, yes
+@besser82	lisitsyn, and reproducible with 2.0.12
+@besser82	lisitsyn, so it's genereal problem now
+@besser82	*general
+@besser82	reproducible wit hswig 2.0.12
+@besser82	lisitsyn, ^  ;(
+@lisitsyn	ok I see
+@besser82	lisitsyn, I try direct delete[] on that line now
+@besser82	lisitsyn, let's see what happenes then :P
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 265 seconds]
+@lisitsyn	besser82: delete[] would kaboom
+@besser82	lisitsyn, yes seen now too  :P
+@lisitsyn	you can't delete[] what is malloc
+@besser82	lisitsyn, dammit, yes!
+@besser82	lisitsyn, so that's the reason for da boom :P
+@lisitsyn	why?
+@besser82	lisitsyn, you just said it...  ;)
+@lisitsyn	but SG_FREE is free
+@lisitsyn	and SG_MALLOC is malloc
+@besser82	lisitsyn, nope
+@lisitsyn	I am looking at code in memory.cpp and it is ;)
+@besser82	template<> void sg_generic_free<type >(type* ptr)                                                      $
+@besser82	{                                                                                                      $
+@besser82	        delete[] ptr;                                                                                  $
+@besser82	}
+@lisitsyn	oh
+@lisitsyn	really?
+@besser82	yes!
+@besser82	dammit
+@besser82	there was da shaitz cooking @
+@lisitsyn	oh
+@lisitsyn	gosh
+@besser82	lisitsyn, me too  :P
+@lisitsyn	so we have specialized mallocs
+@lisitsyn	for sgmatrices
+@besser82	lisitsyn, yes
+@besser82	lisitsyn, but no free()'s
+@besser82	lisitsyn, lemme fix that
+@besser82	lisitsyn, as it always and only happenes with SGMatrix
+-!- besser82 [~besser82@fedora/besser82] has left #shogun ["Verlassend"]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+@lisitsyn	besser82: you can kill lines 38,39,46,47,54,55,73,74,81,82,93,94
+@lisitsyn	as they are called with new[] and delete[] anyway
+@besser82	lisitsyn, no replacement?
+@besser82	lisitsyn, ok I see ^^
+@lisitsyn	these in plcae news and explicit destructor calls were made for case
+@lisitsyn	when malloc/free is used
+@lisitsyn	but at some point someone introduced these specialized mallocs..
+@lisitsyn	I didn't even knew about that :D
+@besser82	lisitsyn, leeme do test run...
+@lisitsyn	I think this should fixi t
+@besser82	lisitsyn, commented lines 38,39 and uncommented the SG_FREE()
+@besser82	lisitsyn, let's see where it goes...
+@lisitsyn	besser82: 46,47 could fail then
+@lisitsyn	:D
+@besser82	lisitsyn, nope... that shit is untested  :P
+@besser82	lisitsyn, will apply same sscheme to evaluation_multiclassovrevaluation_modular
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- PirosB3 [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+@lisitsyn	besser82: so this fixes shiatz or?
+@besser82	lisitsyn, yes, shit now works, no segfault  :D
+@lisitsyn	I see
+@besser82	lisitsyn, so delete[] tried to recursively kill all stuff in ptr
+@lisitsyn	yes
+@lisitsyn	tried to delete already deleted shiatz
+@besser82	lisitsyn, but stuff was already delete[]'ed :D
+@besser82	lisitsyn, and that goes *BOOM*
+@lisitsyn	KAWABANGA
+@lisitsyn	besser82: btw older swig doesn't work on my machine asw ell
+@lisitsyn	as well*
+@lisitsyn	its yosemite shitz
+@besser82	lisitsyn, so apple fsked it up  :D
+@lisitsyn	besser82: oh
+@lisitsyn	I think I know the answer
+@lisitsyn	fscking shitze
+@lisitsyn	besser82: I think cmake detected wrong python
+@lisitsyn	besser82: you probably can help with that
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 248 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Bj?rn Esser :bugfix/python_modular_swig3 * 2b6c88d / src/shogun/evaluation/ (2 files): https://github.com/shogun-toolbox/shogun/commit/2b6c88d7ff2e94a83d8b75593090100764c828e7
+ shogun-notifier-	shogun: don't call delete[] twice on SGMatrix-instances
+@besser82	lisitsyn, gimme output from cmake plz ---> fpaste.org
+ shogun-notifier-	shogun: Bj?rn Esser :develop * 2067632 / examples/undocumented/python_modular/ (2 files): https://github.com/shogun-toolbox/shogun/commit/2067632151fee2c60d239a2c4dbc4fdcfb34ae6d
+ shogun-notifier-	shogun: fix failing test when building with swig 3.X
+ shogun-notifier-	shogun: Bj?rn Esser :develop * 2b6c88d / src/shogun/evaluation/ (2 files): https://github.com/shogun-toolbox/shogun/commit/2b6c88d7ff2e94a83d8b75593090100764c828e7
+ shogun-notifier-	shogun: don't call delete[] twice on SGMatrix-instances
+ shogun-notifier-	shogun: Bj?rn Esser :develop * 203d5c3 / / (4 files): https://github.com/shogun-toolbox/shogun/commit/203d5c305127cb0a9dc8cd773063b792f76e30f1
+ shogun-notifier-	shogun: Merge pull request #2698 from shogun-toolbox/bugfix/python_modular_swig3
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fix segfaults when calling delete[] twice on SGMatrix-instances and fix minor issues with swig 3.X
+@lisitsyn	besser82: do you know how to make cmake to output what python it found?
+@besser82	lisitsyn, it should show that in messages displayed...
+@besser82	lisitsyn, just paste and I'll try to figure out :P
+@lisitsyn	besser82: I think I have some interesting lines
+@lisitsyn	besser82: http://fpaste.org/207220/42815795/
+@lisitsyn	I think this thing is totally messed
+@lisitsyn	I have python installed with homebrew
+ shogun-buildbot	build #267 of trusty - libshogun - viennacl is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/267  blamelist: Bj?rn Esser <bjoern.esser@gmail.com>
+@besser82	lisitsyn, I see...
+@besser82	lisitsyn, and that is detected, but not the correct libs  :(
+@besser82	lisitsyn, lemme think a few minutes...
+@besser82	lisitsyn, which python do you want to use?
+@besser82	lisitsyn, system's or homebrew's?
+@lisitsyn	besser82: I think we should use the one that is called with 'python'
+@lisitsyn	in command line
+@besser82	lisitsyn, allrighty...  homebrews
+@lisitsyn	there must be some consistency
+@lisitsyn	you know :)
+@lisitsyn	it is easy to find a fix for that
+@lisitsyn	I mean workaround
+@lisitsyn	but for users we need a real fix
+-!- travis-ci [~travis-ci@ec2-54-89-18-89.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Bj?rn Esser's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/57157605
+-!- travis-ci [~travis-ci@ec2-54-89-18-89.compute-1.amazonaws.com] has left #shogun []
+@besser82	lisitsyn, cmake -DPYTHON_INCLUDE_DIR:PATH=/usr/local/include/python${X.X} -DPYTHON_LIBRARY:FILEPATH=/usr/local/lib/libpython${X.X}.dylib -DPYTHON_PACKAGES_PATH:PATH=/usr/local/lib/python${X.X}/site-packages
+@besser82	lisitsyn, replace ${X.X} with real version  :P
+@besser82	lisitsyn, that's not so easy to fix that in real
+@besser82	lisitsyn, because that would require a hell of checking...
+@lisitsyn	besser82: I don't have /usr/local/include/python
+@lisitsyn	it is in /usr/local/Cellar/python
+@lisitsyn	so this could be easier
+@besser82	lisitsyn, then use this one  ;)
+@besser82	lisitsyn, nope...  because of libs
+@besser82	lisitsyn, cmake takes the first libs found, which match the {major, minor}-version...
+@besser82	lisitsyn, and my bindings goes *BOOM* :P
+-!- PirosB3 [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has joined #shogun
+@lisitsyn	besser82: okay I adjusted this thing manually
+@lisitsyn	lets see if it fails
+@lisitsyn	I think it won't
+@besser82	lisitsyn, I think all should work ^^
+@besser82	lisitsyn, build with "patched" swig 3  and run the tests, plz  ;)
+@lisitsyn	besser82: I can finally kaggle
+@lisitsyn	:D
+@lisitsyn	I hope
+@besser82	lisitsyn, hehe  :D
+@lisitsyn	besser82: ja ja ja
+@lisitsyn	ja
+@lisitsyn	>>> import modshogun
+@lisitsyn	>>> modshogun.KMeans()
+@lisitsyn	KMeans
+@besser82	lisitsyn, strike!
+@besser82	lisitsyn, python_modular-tests?  with swig3?  :P
+@lisitsyn	checking
+-!- travis-ci [~travis-ci@ec2-54-197-139-24.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Bj?rn Esser's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/57157904
+-!- travis-ci [~travis-ci@ec2-54-197-139-24.compute-1.amazonaws.com] has left #shogun []
+@lisitsyn	besser82: like 99% works
+@lisitsyn	apart from libraries like hdf5 etc
+@lisitsyn	they are just missed so that's ok
+@lisitsyn	besser82: bingo :)
+@besser82	lisitsyn, Yay!  =)
+@besser82	lisitsyn, do you have an knowledge about json-c`
+@besser82	?
+@lisitsyn	not really
+@besser82	lisitsyn, damn :(
+@lisitsyn	what's it you want to know?
+@besser82	lisitsyn, json-c 0.12 fscked up basically json-serializion in sg :(
+@lisitsyn	heh interesting
+@besser82	lisitsyn, http://fpaste.org/207224/81603901/
+@besser82	lisitsyn, UAIFileTest is fscked-up, too --->  http://fpaste.org/207225/81604661/
+ shogun-notifier-	shogun: Bj?rn Esser :develop * 3adb24b / .gitignore: https://github.com/shogun-toolbox/shogun/commit/3adb24bbe5e1a6e5221b473cf479acd4bf9fd998
+ shogun-notifier-	shogun: updated gitignore
+ shogun-buildbot	build #268 of trusty - libshogun - viennacl is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/268  blamelist: Bj?rn Esser <bjoern.esser@gmail.com>
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-197-139-24.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Bj?rn Esser's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/57162694
+-!- travis-ci [~travis-ci@ec2-54-197-139-24.compute-1.amazonaws.com] has left #shogun []
+-!- HeikoS [~heiko@dab-ntm1-h-55-3.dab.02.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@besser82	HeikoS, Hey!
+-!- nszceta_ [~nszceta@95.211.152.2] has quit [Quit: My Mac has gone to sleep. ZZZzzz...]
+-!- PirosB3 [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+@HeikoS	besser82: hi!
+@HeikoS	lisitsyn: hi!
+@HeikoS	lisitsyn: just checking out the manual stuff, pretty cool that it works now
+@lisitsyn	HeikoS: yaeap
+@besser82	HeikoS, finally fixed the problem with SWIG3 :D
+@HeikoS	besser82: really? amazing!
+@HeikoS	besser82: saw the PR but didnt yet look in detail
+@lisitsyn	HeikoS: yeah and I found the reason
+@HeikoS	but cool
+@HeikoS	put it in the news
+@lisitsyn	why mac fails
+@besser82	HeikoS, https://github.com/swig/swig/pull/372  ;)
+@HeikoS	lisitsyn: why was it?
+@lisitsyn	HeikoS: cmake linking to wrong python
+@besser82	HeikoS, the PR in Shogun was just minor stuff
+@HeikoS	lisitsyn: ah cool
+@HeikoS	besser82, lisitsyn amazing guys, this means mac is now working finally?
+@HeikoS	the way to macports and homebrew is ready then :)
+@lisitsyn	HeikoS: there is a workaround to fix that
+@lisitsyn	but we didn't fix it yet
+-!- PirosB3 [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has joined #shogun
+@besser82	HeikoS, real fix need some real deep work into CMake stuff...
+@lisitsyn	but this seems to be easier than to understand why it crashed
+@HeikoS	besser82: ok?
+@HeikoS	lisitsyn: cool
+@HeikoS	good progress then
+@HeikoS	amazingf
+@HeikoS	lisitsyn: so about the manual stuff
+@lisitsyn	I have hard times remembering - crazy errors in debugger - check whether the library is correct
+@HeikoS	the tabs are global now
+@lisitsyn	yes?
+@HeikoS	lisitsyn: can we only have them in examples?
+@besser82	HeikoS, I can look into it...  but that might take some time
+@lisitsyn	yeah probbaly
+@HeikoS	or you think they should be everywhere?
+@HeikoS	I mean eventually, all examples will be in one folder
+@HeikoS	so we can just check that and only add tabs if needed
+@lisitsyn	that's adjustable with template I guess
+@HeikoS	let me check
+@HeikoS	lisitsyn: ah yeah of course
+@HeikoS	Ill do it
+@lisitsyn	HeikoS: if you find a way to parametrize what languages we support
+@lisitsyn	then it would be prettier
+@HeikoS	how do you mena?
+@HeikoS	like not hard-coded?
+@lisitsyn	yeah
+@HeikoS	we can just easily load this from a text file
+@HeikoS	and create it with cmake?
+@lisitsyn	I don't know how to pass them into jinja
+@lisitsyn	no that's too much
+@HeikoS	how you wanna do it?
+@lisitsyn	passing them to jinja is enough
+@lisitsyn	but I didn't found a way to pass a list to jinja there
+@HeikoS	I see
+@HeikoS	what about just building the string you pass?
+@lisitsyn	HeikoS: building what string?
+@HeikoS	lisitsyn: I guess I did not see what you meant
+@HeikoS	passing to jinja=?
+@HeikoS	where?
+@lisitsyn	HeikoS: ok let me explain the problem
+@lisitsyn	in template we have all these divs for python octave java
+@HeikoS	<script>
+@HeikoS	$('#python-tab').on('show.bs.tab', function (e) {
+@HeikoS	    $('ul[id^=tabs] a[href^=#python]').tab('show');
+@HeikoS	});
+@HeikoS	this stuff?
+@lisitsyn	and in our sgexample extension we have get_supported_languages
+@lisitsyn	yes
+@lisitsyn	if we template that
+@lisitsyn	would be better
+@lisitsyn	like #language-tab
+@HeikoS	I see
+@HeikoS	I agree
+@HeikoS	but not too bad for now?
+@HeikoS	as languages do not really change severely
+@lisitsyn	yeah
+@HeikoS	lisitsyn: do you know how to do if-then-else in template?
+@HeikoS	then we could mark the example pages somehow
+@HeikoS	so that page.html only is active if example page?
+@lisitsyn	iirc it is like if endif
+@HeikoS	lisitsyn: ok
+@HeikoS	lisitsyn: and how to check whether page is example?
+@HeikoS	can one like check from which folder it comes?
+@HeikoS	or mark the .rst somwhow?
+@lisitsyn	hmm don't know
+@lisitsyn	there are some globals
+@lisitsyn	http://sphinx-doc.org/templating.html
+@lisitsyn	HeikoS: looks like should be possible to do via that stuff
+@HeikoS	yeah should be
+@HeikoS	nbut still dont know how to mark
+@lisitsyn	not clear for me too
+@HeikoS	{% if example %}
+@HeikoS	{% endif %}
+@HeikoS	and all the stuff in between
+@HeikoS	but how to define exam?ple?
+@lisitsyn	yeap
+@lisitsyn	hmm
+@HeikoS	http://stackoverflow.com/questions/13209597/override-html-page-template-for-a-specific-sphinx-document
+@HeikoS	pagename
+@HeikoS	may
+@HeikoS	but thats "knn" here
+@lisitsyn	HeikoS: then we should force names
+@lisitsyn	:)
+@HeikoS	pagename (relative doc path of each file)
+@HeikoS	lisitsyn: mmmg
+@HeikoS	that path does it right=?
+@HeikoS	if pagename.split(os.sep)[1] == "examples"
+@lisitsyn	hmm
+@lisitsyn	should work?
+@HeikoS	lisitsyn: trying
+@HeikoS	lisitsyn: any idea on this:
+@HeikoS	lisitsyn: we currently have in the .rst file:
+@HeikoS	.. sgexample:: ../code/knn.sg
+@HeikoS	  :language: python
+@HeikoS	  :start-after: ![load_data]
+@HeikoS	  :end-before: ![load_data]
+@HeikoS	but we really want:
+@HeikoS	.. sgexample:: knn.sg
+@HeikoS	sorry
+@HeikoS	we want
+@HeikoS	\snippet knn load_data
+@lisitsyn	HeikoS: what's this 'language' for?
+@HeikoS	lisitsyn: useless
+@lisitsyn	ok
+@HeikoS	just need it to overwrite it later
+@HeikoS	maybe do something before sphinx comes in?
+@HeikoS	or also do it with sphinx?
+@HeikoS	also it would be good to have a command for referecing a shogun class
+@HeikoS	(this should be easier)
+@HeikoS	you know, just to make the .rst files shorter and nicer looking
+@lisitsyn	HeikoS: I am not sure I get the idea
+@HeikoS	lisitsyn: check the rst file
+@lisitsyn	HeikoS: okay language can be removed
+@lisitsyn	now you want to remove start-after
+@lisitsyn	and end-before
+@lisitsyn	right?
+@HeikoS	there are like 5 lines
+@HeikoS	would be cool to have just 1
+@lisitsyn	okay
+@lisitsyn	.. sgexample:: examples/knn.sg load_data
+@lisitsyn	HeikoS: like that?
+@HeikoS	lisitsyn: yeah
+@HeikoS	lisitsyn: really much cleaner
+@HeikoS	and also
+@lisitsyn	ok let me do that
+@HeikoS	.. sgclass CEuclideanDistance
+@HeikoS	lisitsyn: once we have that, we are basically ready to structure the thing a bit
+@HeikoS	and put a build process around it
+@HeikoS	that translates examples etc
+@HeikoS	lisitsyn: ok got the tabs working for example pages
+@HeikoS	lisitsyn: pushed
+@lisitsyn	cool
+@lisitsyn	HeikoS: I am trying to get this thing to work
+@lisitsyn	one liner
+@lisitsyn	I broke start-before thing somehow :D
+@lisitsyn	ah
+@lisitsyn	start-after
+@lisitsyn	:D
+@lisitsyn	okie
+@lisitsyn	done
+@HeikoS	haha
+@HeikoS	pushed?
+@lisitsyn	not yet
+@lisitsyn	in a minute
+@HeikoS	gogogog :)
+@HeikoS	lisitsyn: btw will you join these video meetings?
+@lisitsyn	HeikoS: if available
+@HeikoS	I did this with gunnar a few times and it really helps focussing
+@HeikoS	goal is still this hackathon and funding for a software engineer
+@HeikoS	we are applying to an nsf grant atm
+@HeikoS	lisitsyn: but anyways
+@HeikoS	send the push ;)
+@lisitsyn	`HeikoS
+@lisitsyn	done
+@lisitsyn	oneliner now
+-!- PirosB3 [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+@HeikoS	lisitsyn: one thing I realise
+@HeikoS	lisitsyn: do you have this whitespace on the knn example html page?
+@HeikoS	there is like a margin when the tabs are visible
+@HeikoS	lisitsyn: ah beautiful with the one-liner
+@HeikoS	lisitsyn: how hard is an ..sgclass ?
+@lisitsyn	hmm nothing strange I see
+@lisitsyn	what should sgclass do?
+@HeikoS	lisitsyn: link to
+@HeikoS	http://www.shogun-toolbox.org/doc/en/latest/
+@HeikoS	link to the class API doc
+@lisitsyn	I think we should capture shogun classes automatically
+@HeikoS	yeah exactly so that people dont paste links
+@lisitsyn	both in text and code
+@HeikoS	as the link location might change
+@HeikoS	ah you mean
+@HeikoS	we just write
+@lisitsyn	yeah
+@HeikoS	"CKNN" and then its done automagically?
+@lisitsyn	and javascript
+@HeikoS	cool
+@HeikoS	even better so the .rst is super clean then
+@lisitsyn	should be possible
+@HeikoS	how to do that?
+@lisitsyn	hmm let me think
+@HeikoS	lisitsyn: I mean scraping would be best
+@lisitsyn	HeikoS: I'll think about it
+@HeikoS	so any C++ Shogun name should be extracted
+@HeikoS	also the enums
+@lisitsyn	yes
+@lisitsyn	and methods
+@lisitsyn	:D
+@HeikoS	yes
+@lisitsyn	methods is harder
+@HeikoS	lisitsyn: we could just scrape
+@lisitsyn	but should be possible
+@HeikoS	CKNN::train
+@HeikoS	so that the context will be known
+@lisitsyn	HeikoS: ok I'll do that a bit later
+@lisitsyn	HeikoS: I think I know good way to do that
+@HeikoS	kk
+@lisitsyn	HeikoS: in sphinx I will add some code to glance over all text
+@HeikoS	lisitsyn: cool
+@lisitsyn	and replace C*
+@HeikoS	lisitsyn: so what else is missing?
+@HeikoS	plots?
+@lisitsyn	with <p id="sg3423423">C*</p>
+@HeikoS	lisitsyn: scikit learn has these cool plots
+@HeikoS	lisitsyn: shall we just not do them and rather link to notebook?
+@lisitsyn	then $('p[id^=sg])') and so on
+@HeikoS	Think that might be better
+@HeikoS	lisitsyn: yeah got it
+@lisitsyn	HeikoS: i think we should overshogun sklearn
+@lisitsyn	I want web plots
+@HeikoS	lisitsyn: hehe
+@HeikoS	lisitsyn: so how to do that?
+@lisitsyn	possible
+@HeikoS	lisitsyn: keep in mind examples are extracted from meta language
+@lisitsyn	hmm
+@lisitsyn	plots are done from python
+@lisitsyn	;)
+@HeikoS	yeah
+@lisitsyn	that's it
+@HeikoS	but where is the code coming from?
+@lisitsyn	not get it
+ shogun-notifier-	shogun: Wu Lin :develop * 33ae686 / / (7 files): https://github.com/shogun-toolbox/shogun/commit/33ae68616cc7578c4b95de9772dbbe118eb0f961
+ shogun-notifier-	shogun: update the ARD kernels
+ shogun-notifier-	shogun: Wu Lin :develop * 2c8c39e / src/shogun/kernel/GaussianARDKernel.h: https://github.com/shogun-toolbox/shogun/commit/2c8c39ec01bfccedd93cdea827c9046a899e156f
+ shogun-notifier-	shogun: fix a typo
+ shogun-notifier-	shogun: Wu Lin :develop * 15e36ea / tests/unit/kernel/GaussianARDKernel_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/15e36ea0fbeda3606b19df07dda26ef7288483ba
+ shogun-notifier-	shogun: add another use case
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 071ab37 / / (7 files): https://github.com/shogun-toolbox/shogun/commit/071ab37a055820f2eb77e7904e01688568f261fa
+ shogun-notifier-	shogun: Merge pull request #2796 from yorkerlin/ardkernel
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: update the method for ARD kernels
+@HeikoS	lisitsyn: btw wu is writing amazing code these days
+@HeikoS	lisitsyn: could we also have a wikipedia link thing?
+@HeikoS	lisitsyn: do you think that is a good idea?
+@HeikoS	or weblink in general?
+@HeikoS	these are hard-links I guess?
+@lisitsyn	HeikoS: wikipedia? where to?
+@HeikoS	lisitsyn: like for more reference on the algorihtm
+@HeikoS	we should have a unified way to provide further reading
+@HeikoS	like
+@HeikoS	wiki, papers, scikit-.learn docs etc
+@lisitsyn	ah
+@HeikoS	should be under "references" at bottom of page
+@HeikoS	but automatically created
+@lisitsyn	yeah we can do that as well
+@HeikoS	so that we can change the way this looks
+@HeikoS	without changing all files
+@lisitsyn	yes sure
+@HeikoS	I dont want to touch this ever again, everything should be done automatically ;)
+@HeikoS	lazy
+@lisitsyn	this is good
+@lisitsyn	HeikoS: well
+@lisitsyn	should be easy to do
+@lisitsyn	I think I have some understanding of these directives now
+@HeikoS	lisitsyn: btw do you have this whitespace margin issue?
+@HeikoS	lisitsyn: not whitespace, margin
+@lisitsyn	can you show me screenshot?
+@HeikoS	lisitsyn: a good idea would also be to document the code a bit more
+@HeikoS	yeah coming
+@HeikoS	lisitsyn: mail sent
+ shogun-buildbot	build #269 of trusty - libshogun - viennacl is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/269  blamelist: Wu Lin <yorker.lin@gmail.com>
+@lisitsyn	what margin you're talking about?
+@lisitsyn	left/right?
+ shogun-buildbot	build #270 of trusty - libshogun - viennacl is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/270  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+@lisitsyn	there is no margin like that you have here
+@lisitsyn	but code snippets are too wide for some reason
+@HeikoS	mmh
+@HeikoS	there is white space between the content of the example page and the menu on the left
+-!- nszceta [~nszceta@95.211.152.2] has joined #shogun
+@lisitsyn	yeah
+@lisitsyn	strange
+@HeikoS	lisitsyn: this is not there at the mainpage
+@HeikoS	goes away
+@lisitsyn	cause by tabs then
+@lisitsyn	caused*
+@HeikoS	yeah
+@HeikoS	lisitsyn: do you think we should a a quick documentation about the sphinx plugin?
+@lisitsyn	HeikoS: don't know
+@lisitsyn	probably
+@lisitsyn	and more error checking
+@lisitsyn	sorry have to go
+@lisitsyn	I'll check these issues a bit later
+@HeikoS	lisitsyn:  ok bye
+-!- travis-ci [~travis-ci@ec2-54-197-139-24.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/57173003
+-!- travis-ci [~travis-ci@ec2-54-197-139-24.compute-1.amazonaws.com] has left #shogun []
+-!- nszceta [~nszceta@95.211.152.2] has quit [Quit: My Mac has gone to sleep. ZZZzzz...]
+-!- curiousguy13 [~curiousgu@122.162.129.17] has joined #shogun
+-!- HeikoS [~heiko@dab-ntm1-h-55-3.dab.02.net] has quit [Quit: Leaving.]
+@besser82	lisitsyn, wiking: yo?
+@besser82	lisitsyn, wiking: I have a small question / discussion...
+@lisitsyn	besser82: whats up
+@besser82	lisitsyn, Would be fine with me updating the requirement on json-c to 0.12?
+@besser82	lisitsyn, there have been a bunch of changes in api...
+@lisitsyn	besser82: what's version in ubuntu 14.04?
+@besser82	lisitsyn, 0.11  :(
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+@besser82	lisitsyn, but who cares about ubuntu?
+@besser82	lisitsyn, Fedora rulez da world!  =)
+@lisitsyn	besser82: hmm can we link statically?
+@besser82	lisitsyn, yes, we can
+@lisitsyn	can we bundle it?
+@lisitsyn	like download sources
+@besser82	lisitsyn, -DBUNDLE_JSON=ON  :P
+@besser82	lisitsyn, option is in cmake
+@lisitsyn	build and do static link
+@besser82	lisitsyn, and Fedora Engineering will kick my ass...
+@lisitsyn	ain't good?
+@besser82	lisitsyn, forbidden items:
+@besser82	lisitsyn, 1. BUNDLED LIBS
+@besser82	lisitsyn, 2. STATIC LINKING
+@lisitsyn	we need an option then
+@besser82	lisitsyn, what option?
+@lisitsyn	like do normal way
+@lisitsyn	or forbidden :)
+@besser82	lisitsyn, with normal way I need update req. to 0.12
+@besser82	lisitsyn, and rewrite some parts of SerializationJSON
+@besser82	lisitsyn, to use the new api
+@besser82	lisitsyn, and shogun will be future proof =)
+@besser82	lisitsyn, so what shall we do?
+@besser82	lisitsyn, upgrade shogun stuff?
+@lisitsyn	hmm I am ok with updating probably
+@besser82	lisitsyn, we need upgrade :P
+@lisitsyn	well it would be best
+@lisitsyn	to make it work with zero changes on ubuntu and mac
+@besser82	lisitsyn, Fedora is the only dist with real fully featured shogun ^^
+@lisitsyn	these are majorities by user
+@lisitsyn	s
+@besser82	lisitsyn, then bring them to fedora  ;)
+@besser82	lisitsyn, What Ubuntu?
+@lisitsyn	last lts
+@besser82	lisitsyn, Use Fedora
+@besser82	lisitsyn, Fully feature shogun out of box + ML-Community  ;)
+@besser82	lisitsyn, that's not with ubuntu-crap :P
+@lisitsyn	I don't want any further restrictions as we already nearly impossible to install :)
+@besser82	lisitsyn, are we?
+@besser82	lisitsyn, on Fedora all looks fine but JSON  :P
+@lisitsyn	yeah users struggle quite a lot
+@besser82	lisitsyn, They need to use Fedora :P
+@besser82	lisitsyn, sudo yum install shogun
+@besser82	lisitsyn, sudo yum install ${lang}-shogun
+@besser82	lisitsyn, done
+@lisitsyn	we need sudo apt-get install shogun
+@lisitsyn	and brew install shogun
+@besser82	lisitsyn, you can doooooooooooooooo it!  :D
+@lisitsyn	unless we have it working
+@lisitsyn	it sucks
+@besser82	lisitsyn, I probably can start working on ppa
+@besser82	lisitsyn, end of next week or so
+@lisitsyn	besser82: sounds cool
+@besser82	lisitsyn, so we have "sudo apt-get install shogun" on the most lame OS ever, just before MacOSX  :P
+@besser82	lupinix, jetzt sag doch auch mal was :P
+ lupinix	tach besser82 :P
+* lupinix votes for fedora
+@besser82	lupinix, about why it's the best to have shogun on Fedora exclusive  ^^
+@besser82	lisitsyn, ^ see?
+ lupinix	besser82: don't forget redhat enterprise/centos ;)
+@besser82	lupinix, WIP ^^
+@lisitsyn	someone on RHEL?
+@besser82	lupinix, For RHEL / CentOS / SL 5+  :D
+@besser82	lisitsyn, Not only RHEL... CentOS, SL and Oracle, too
+@besser82	lisitsyn, so we cover all premium OS around...  ;)
+@lisitsyn	premium haha
+@lisitsyn	lol
+@besser82	lisitsyn, why lol?
+@besser82	lisitsyn, ok... Oracle is crap
+@lisitsyn	I have no idea who's using that
+@lisitsyn	:D
+@besser82	lisitsyn, but the others are pretty good
+@besser82	lisitsyn, people like me?
+@besser82	lisitsyn, amazon...
+@besser82	lisitsyn, cisco
+@besser82	lisitsyn, SAP
+@besser82	lisitsyn, other $big_money_corporates
+@lisitsyn	heh
+@lisitsyn	okaokay
+@besser82	lisitsyn, if we have the rpms, we can get easy into those and collect da $$$
+@besser82	lisitsyn, for the SHOGUN YMIOP ltd.
+@besser82	YMIOP == Your Money In Our Pockets
+@besser82	lisitsyn, ^
+@lisitsyn	haha I see
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- HeikoS [~heiko@05453a2b.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@lisitsyn	HeikoS: hey
+@HeikoS	lisitsyn: hey!
+@HeikoS	nice mail
+@HeikoS	needed
+@lisitsyn	HeikoS: need to optimize multiclass classification for log loss
+@lisitsyn	need to predict probabilities
+@HeikoS	lisitsyn: aha?
+@lisitsyn	suggestions? :)
+@HeikoS	lisitsyn: dont have too much time right now, wanna send me an email?
+@HeikoS	lisitsyn: there should be known methods for that?
+@lisitsyn	HeikoS: ah sorry
+@lisitsyn	in shogun
+@lisitsyn	lets talk later then
+@HeikoS	lisitsyn: no worries ,just went online to check something, but now leaving again for dinner
+@HeikoS	lisitsyn: sure!
+@HeikoS	lisitsyn: get back to me on this, i am interested!
+@lisitsyn	HeikoS: kaggle ;)
+-!- HeikoS [~heiko@05453a2b.skybroadband.com] has quit [Client Quit]
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 265 seconds]
+-!- HeikoS [~heiko@05453a2b.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+--- Log closed Sun Apr 05 00:00:29 2015

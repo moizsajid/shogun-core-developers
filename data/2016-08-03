@@ -1,0 +1,140 @@
+--- Log opened Wed Aug 03 00:00:49 2016
+-!- sanuj [~sanuj@117.203.8.128] has joined #shogun
+ sanuj	wiking, `#cmakedefine HAVE_JINJA2 @JINJA2_FOUND@` is not setting HAVE_JINJA2
+ sanuj	i'm using
+ sanuj	#define HAVE_JINJA2 @JINJA2_FOUND@
+ sanuj	http://public.kitware.com/pipermail/cmake/2011-March/043464.html
+ sanuj	even #define is not able to set it
+@wiking	sanuj, i explained in that PR
+@wiking	that you should SET
+@wiking	a variable
+@wiking	IF(JINJA2_FOUND)
+@wiking	set(HAVE_JINJA2 1)
+@wiking	ENDIF()
+ sanuj	wiking, okay thanks
+ sanuj	!!
+@wiking	i mean
+@wiking	there are like
+@wiking	50 examples
+@wiking	in that CMakeLists.txt file
+@wiking	that does the very same thing
+@wiking	it's ok if you dont know
+@wiking	but it's not that ok that you dont follow something that is in the code itself
+@wiking	these are my 2 cents
+ sanuj	wiking, i didn't know
+@wiking	yaeh that's fine
+ sanuj	so there is
+ sanuj	IF (CURL_FOUND)
+ sanuj	SET(HAVE_CURL 1)
+@wiking	again the problem is there are like million of these particular examples
+@wiking	in that file
+ sanuj	and then in config.h.in
+ sanuj	#cmakedefine HAVE_CURL 1
+@wiking	yeah
+@wiking	like that
+@wiking	exactly
+ sanuj	wiking, cool
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+-!- sanuj [~sanuj@117.203.8.128] has quit [Ping timeout: 258 seconds]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+@wiking	c4goldsw, how's going?
+ c4goldsw	wiking I'm good, how are you?
+@wiking	good good
+@wiking	working on scijs :)
+ c4goldsw	scijs?
+@wiking	i.e. creating shogun a javascript interface
+ c4goldsw	Oh cool!
+@wiking	and be able to use javascript for you data science tasks
+@wiking	:)
+@wiking	i thought it's bs
+@wiking	but then when i twitted yesterday abou tit
+@wiking	people went crazy about it :)
+@wiking	so that's good
+@wiking	:)
+ c4goldsw	Where would it run from?
+@wiking	nodejs
+ c4goldsw	Ah, ok.
+@wiking	nono no way i wanna do ML in browser
+@wiking	:))))
+ c4goldsw	Haha, good.
+@wiking	it's just that instead of R or python
+@wiking	why not JS?
+ c4goldsw	Fair enough - that would provide a good entry point for a lot of web dev people who want to muddle around.
+ c4goldsw	Just redid the LARS clean up patch (after Heikos comments).  I'm about to send in a PR for a templated LDA.
+ c4goldsw	Well, not templated, but it can support different floating point types.
+@wiking	that's great!
+ c4goldsw	wiking Do you do Kaggle competions?  Just curious.  I've started getting into it myself.
+@wiking	hehe not really
+@wiking	no time
+@wiking	and quite frankly
+@wiking	most of the solutions there are very bruteforce ones
+@wiking	i rarely saw an elegant solution
+ c4goldsw	Interesting - I'll keep that in mind.
+-!- sanuj [~sanuj@117.203.8.128] has joined #shogun
+@wiking	i mean usually i see
+@wiking	people generating
+@wiking	KAZIILIONS of features
+@wiking	and then do usually extreme boosting
+@wiking	:)
+ sanuj	wiking, for my tags jinja PR, shall i add a test in python_modular to check if things work. (it works on my local)
+@wiking	is it possible to add a meta example for testing this?
+ sanuj	wiking, do meta examples test python etc?
+ sanuj	i think they only do cpp integration testing currently
+@wiking	fuck yeah
+@wiking	:(
+@wiking	yeah then lets have a fixture for python
+ sanuj	wiking, okay!
+@wiking	thnx
+ sanuj	lisitsyn, there?
+ lisitsyn	sanuj: yeap
+ sanuj	lisitsyn, shogun-base.i when generated looks like https://gist.github.com/sanuj/a85986fb35052de761ac251496e90e90
+ sanuj	lisitsyn, we still have not decided what to do with shogun templates
+-!- sanuj [~sanuj@117.203.8.128] has quit [Ping timeout: 276 seconds]
+-!- sanuj [~sanuj@117.203.8.128] has joined #shogun
+ sanuj	wiking, what happens to data that is returned in python_modular integration tests?
+ sanuj	is it necessary to return something?
+@wiking	what do yo umean?
+ sanuj	wiking, every modular test has a function that returns something
+ sanuj	is it saved somewhere like it is done for the new meta integration tests??
+@wiking	the data that is being used for python_modular
+@wiking	or any modular tests
+@wiking	are in the data submodule
+@wiking	just like in case of the meta examples
+ sanuj	okay, let me see
+ sanuj	wiking, so it's in data/testsuite/python2-tests
+ sanuj	how is the data generated for the very first time
+ sanuj	or for my tags modular test, shall i just test that it compiles?
+@wiking	what do you mean generated for the first time?
+@wiking	i mean i'm not so sure if i can follow what you mean here
+@wiking	for python_modular tests the data residing in data submodule is being used
+@wiking	see for example
+@wiking	~/shogun/examples/undocumented/python_modular/classifier_multiclassliblinear_modular.py
+ sanuj	wiking, what i mean is, suppose i just added a test called tags_params_modular.py which has a function which returns some data
+@wiking	doesn't need to return data
+@wiking	it just should run an exit 0
+ sanuj	okay
+@wiking	i mean in tags cars
+@wiking	i mean in tags case
+@wiking	you just wanna create an object
+@wiking	where you do .sets() and .gets()
+@wiking	check that what you set is the same that you get
+ sanuj	wiking, yep, so no worrying about data then
+@wiking	and texit
+@wiking	*exit
+@wiking	you just want to test the tags part
+@wiking	and for that you dont really need that
+@wiking	*data
+@wiking	just to be able to use the tags backend from modular interface
+ sanuj	wiking, so it will only fail if it doesn't compile?
+ sanuj	if i check for equality in the test, and if it's not equal
+ sanuj	then how to make it fail?
+@wiking	no
+@wiking	it will fail
+@wiking	if there's a problem with the generated interface
+-!- sanuj [~sanuj@117.203.8.128] has quit [Ping timeout: 244 seconds]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- sanuj [~sanuj@117.203.8.128] has joined #shogun
+-!- lambday [6a3311c4@gateway/web/freenode/ip.106.51.17.196] has quit [Ping timeout: 250 seconds]
+-!- sanuj [~sanuj@117.203.8.128] has quit [Remote host closed the connection]
+--- Log closed Thu Aug 04 00:00:51 2016

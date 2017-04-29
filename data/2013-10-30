@@ -1,0 +1,557 @@
+--- Log opened Wed Oct 30 00:00:03 2013
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- heiko [~androirc@97e0a10b.skybroadband.com] has quit [Read error: Connection reset by peer]
+-!- zxtx [~zv@129-79-241-133.dhcp-bl.indiana.edu] has quit [Ping timeout: 272 seconds]
+-!- FSCV_ [~FSCV@50.7.50.60] has quit [Quit: Leaving]
+-!- zxtx [~zv@c-98-223-198-47.hsd1.in.comcast.net] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Read error: Connection reset by peer]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+@wiking	ok
+@wiking	sorry
+@wiking	guys
+@wiking	who ever are the core developers
+@wiking	i'm shutting down your
+@wiking	ipython sessions
+@wiking	currently one cannot create new ones
+@wiking	as we ran out of memory
+@wiking	besser82: do something ;)
+@wiking	no more resources on fatbot
+ besser82	wiking: on it  ;)
+ besser82	wiking: puiterwijk has taken nirik WIP, currently....
+-!- sonne|osx [~sonne@82.113.106.92] has joined #shogun
+ sonne|osx	hey goat moaning!
+@wiking	besser82: r u using your container?
+ sonne|osx	wiking: no
+ sonne|osx	woopsi
+ sonne|osx	not enough memory to ..
+@wiking	yeah...
+ sonne|osx	Sorry, not enough free memory to start your container
+@wiking	trying to fix some stuff
+ besser82	wiking: currently not... u can purge it safely...
+ sonne|osx	wiking: well
+ sonne|osx	$ ps auxw | grep ipython | wc -l
+ sonne|osx	83
+ sonne|osx	no wonder...
+ sonne|osx	poor fatbot
+-!- sonne|osx [~sonne@82.113.106.92] has quit [Remote host closed the connection]
+@wiking	we need to find out a way to stop container ... :S
+-!- sonne|osx [~sonne@82.113.106.92] has joined #shogun
+ sonne|osx	$ ps auxw | grep ipython | wc -l
+ sonne|osx	83
+ sonne|osx	wiking: btw what does the the number of users in github mean?
+@wiking	?
+@wiking	where what?
+ sonne|osx	on fatbot
+ sonne|osx	$ ps auxw | grep ipython | wc -l
+ sonne|osx	83
+ sonne|osx	wiking: and on github
+ sonne|osx	applications
+ sonne|osx	it says 9 users
+@wiking	aaah
+ sonne|osx	is that in total 9 people logged in or currently
+@wiking	that 9 users has registered to cloud via github
+@wiking	total
+ sonne|osx	wiking: we don't know how many via g+ right?
+ sonne|osx	wiking: or do we have any kind of stats for cloud.*
+@wiking	sonne|osx: lemme check
+@wiking	there should be something about g+ as well
+@wiking	but i can tell u how many registered users there are all together atm
+ sonne|osx	wiking: and?
+@wiking	just a sec
+@wiking	31
+ sonne|osx	woah
+ sonne|osx	no wonder then
+@wiking	but i dont know how to handle timeouts
+@wiking	as basically the whole interaction is in a different session (ipython)
+ sonne|osx	wiking: so we have tons of dead clients?
+@wiking	sonne|osx: well we just have some containers that i dont know whether active or not
+-!- sonne|osx [~sonne@82.113.106.92] has quit [Quit: sonne|osx]
+@wiking	besser82: do you still have the container running?
+@wiking	besser82: as in worst case what we can do is to mount up an nfs
+@wiking	besser82: container = fedora cloud instance
+@wiking	besser82: btw what was the amount of ram in it?
+ sonne|work	wiking: how does now shut down a container then?
+ besser82	wiking: I don't have the container running
+ besser82	wiking: 8 GB afaik
+ besser82	wiking: but I can request another 8GB if needed
+ besser82	wiking: I actually can request non-persistant storage in insane amounts as well
+@wiking	sonne|work: well now i've added the logout button to request a docker container shutdown
+@wiking	sonne|work: but i dont believe people will push that button so often
+@wiking	;)
+@wiking	besser82: is it running now?
+ besser82	wiking: no, i'm logged in but it is not running
+ sonne|work	wiking: what does this mean - will it erase everything I did then?
+@wiking	sonne|work: noup
+@wiking	sonne|work: it's just shuts down the container
+ sonne|work	wiking: cool
+@wiking	sonne|work: but it still exists...
+@wiking	so whenever u log back in
+@wiking	everything will be there as u left it
+@wiking	besser82: what does it mean not running?
+ sonne|work	wiking: could we then `just' monitor if a client has 0 load for ~1hr or sth and then shut it down?
+@wiking	besser82: see u logged in again... if u dont use it plz logout as we really need the resources
+@wiking	sonne|work: yeah that's what i was wondering about as well
+@wiking	sonne|work: couldn't find yet a definitive solution for it
+@wiking	but trying
+ besser82	wiking: allright I will / not-running means: cluster tab shows "stopped"
+@wiking	besser82: hence we cannot connect to it now?
+@wiking	right?
+ besser82	wiking: ???
+@wiking	besser82: to the fedora instance
+ sonne|work	wiking: or we put some time limit on every instance now forcing these shutdowns
+@wiking	sonne|work: i guess from the cgroup stats we can find out a lot of thing... and create a heuristic to shutdown the container
+ besser82	actually you can, but there's nothing but some 1.5 gbytes free hdd and 8GB ram
+ sonne|work	wiking: I mean just put a limit of 1 hour for now
+@wiking	besser82: nfs?
+@wiking	sonne|work: i think that should be feasible with cgroups
+ besser82	wiking: there's nothing but some 1.5 gbytes free hdd and 8GB ram
+@wiking	https://wiki.archlinux.org/index.php/cgroups
+ besser82	wiking: so you need some nfsclient, right?
+@wiking	besser82: yep
+@wiking	sonne|work: https://wiki.archlinux.org/index.php/cgroups
+ besser82	wiking: let me setup
+@wiking	sonne|work: let's try to find a rule
+ sonne|work	wiking: even ulimit /limits.conf has a time limit
+ besser82	wiking: will be avail ~10:00 UTC
+ sonne|work	hmmhh actually cpu time limit
+@wiking	sonne|work: docker uses cgroups
+ sonne|work	don't see wall time
+ sonne|work	wiking: yeah but it says more flexible than limits.conf stuff
+@wiking	sonne|work: yeah you can limit like everything
+ sonne|work	cpu.rt_runtime_us
+@wiking	sonne|work: it's more finegrained than ulimit
+ sonne|work	nah sth else :/
+@wiking	sonne|work: ID                  IMAGE                            COMMAND                CREATED             STATUS              PORTS
+@wiking	b0ed635c7a09        vigsterkr/shogun-python:latest   /bin/sh -c ipython n   43 minutes ago      Up 43 minutes       49244->8888
+@wiking	this is a docker statistics
+@wiking	so we can get information about when it was created
+@wiking	and when it was last time started
+@wiking	so it would be quite easy to do some kind of a scheduler that check STATUS
+@wiking	and shuts down everything that is longer than 60 minutes
+ sonne|work	good enough then
+@wiking	ok i'll then add this garbage collector to the app
+@wiking	and add a note line about this hard limit to the cloud site
+ sonne|work	I guess we can later add some .js & knob on the website to ask for another 60 mins
+@wiking	sonne|work: yeps.... i'll just check if i can do this whole thing within the webapp
+@wiking	sonne|work: i dont know if it's possible there somehow to do a loop or something :P
+@wiking	sonne|work: so should i shutdown containers now that are running longer than 60 mins?
+ sonne|work	yes
+@wiking	done
+ sonne|work	wiking: did any remain?
+@wiking	yes
+@wiking	3
+ sonne|work	heh
+ sonne|work	I guess we had 30 people trying it out -> then out of memory
+@wiking	indeed
+@wiking	sonne|work: should i add a counter there? :D
+@wiking	sonne|work: ok maybe it's even easier
+ sonne|work	wiking: nah
+@wiking	sonne|work: i add a simple js there that counts down
+@wiking	mmm
+@wiking	yeah it's not the best if one closes the tab :P
+ sonne|work	wiking: can't you extract the time the thing runs and display it?
+@wiking	sonne|work: yes but if one closes a tab...?
+ sonne|work	wiking: would be nice if the container shuts down immediately then
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:c525:6c15:48eb:b728] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	morning
+ sonne|work	moing iglesiasg
+@wiking	besser82: nfs?
+@wiking	sonne|work: would it b safe just to have an url like http://cloud.shogun-toolbox.org/purge
+@wiking	which if called would stop all the timeouted containers?
+@wiking	of course this way everybody could call this function ... but then again we dont really care as the it would only stop containers that run out of time
+@wiking	so i dont really see a big security issue there
+@wiking	and then i just crontab a curl command for every 30 mins...
+ sonne|work	wiking: I would do this using a cron job locally
+ sonne|work	wiking: and rather use this mechanism to display the runtime in minutes of the current container!
+@wiking	?
+@wiking	"10:27 < sonne|work> wiking: and rather use this mechanism to display the runtime in minutes of the current container!" what?
+ sonne|work	wiking: I mean when you can do sth like /purge
+ sonne|work	wiking: you can do a /minutes-available url just returning some digits
+@wiking	sonne|work: of the current session?
+ sonne|work	wiking: we can then use .js to display this
+ sonne|work	wiking: yes
+@wiking	sonne|work: ok but that still does not solve the whole thing...
+@wiking	sonne|work: as we are not only monitoring the current sessions
+@wiking	but all of them
+ sonne|work	wiking: I don't understand what you mean - I thought there is just one session per user?
+@wiking	yes
+@wiking	but i want to monitor all the sessions
+@wiking	and do the purging at once
+ sonne|work	wiking: sure but that you you can do locally in some shell script
+@wiking	sonne|work: but i dont want to do that in a shell script
+ sonne|work	wiking: the other thing is just some potentially valuable notification for the user
+@wiking	as it's hacky
+ sonne|work	wiking: why not?
+ sonne|work	you mean url is not?
+@wiking	because it's much easier to do within the webapp
+@wiking	to do the purging
+ sonne|work	wiking: pretty weird - I guess you can run the /purge thing only locally - I mean just don't expose this to the outside
+@wiking	anybody know
+@wiking	how to convert this into seconds with python
+@wiking	2013-10-30T10:41:47.265306601+01:00
+@wiking	?
+ sonne|work	wiking: strptime()
+@wiking	mmm i think this is a standard ISO format
+@wiking	i hoped that there's a ctor for this :P
+ sonne|work	wiking: doesnt' look ISO but rather java like
+@wiking	ISO 8601
+@wiking	Return a string representing the date and time in ISO 8601 format, YYYY-MM-DDTHH:MM:SS.mmmmmm
+@wiking	including timezone
+ sonne|work	wiking: http://stackoverflow.com/questions/969285/how-do-i-translate-a-iso-8601-datetime-string-into-a-python-datetime-object#969324
+ sonne|work	datetime.datetime.strptime( "2007-03-04T21:08:12", "%Y-%m-%dT%H:%M:%S" )
+ sonne|work	import dateutil.parser
+ sonne|work	yourdate = dateutil.parser.parse(datestring)
+ sonne|work	wiking: the last one seems good for you
+@wiking	sonne|work: http://cloud.shogun-toolbox.org/seconds-available
+@wiking	done
+ thoralf	sonne|work, wiking: I tried to log into the shogun cloud service, but github tells me it wants 7 different rights.
+ thoralf	Are all of them neccessary?
+@wiking	thoralf: tried to change the scope
+@wiking	thoralf: but there's no such
+@wiking	http://developer.github.com/v3/oauth/#scopes
+@wiking	sonne|work:                 Due to high demand and low available resources we had to introduce a time limit per session to 60 minutes.<br/>
+@wiking	                If you would like to have more time please don't hesistate to contact us!<br/>
+@wiking	                Thank you for your understanding
+ thoralf	wiking: I see.  Thank you.
+@wiking	ok?
+@wiking	ok
+ sonne|work	wiking: excellent so now we just need some way to embed this into the website
+@wiking	yeah well some js hacker should do that ;)
+ sonne|work	wiking: yes cool! YOu could add
+@wiking	i'm just writing an email as well
+ sonne|work	wiking: no problem with jquery
+ sonne|work	but no idea how to do load some extra .js in the ipython notebooks
+@wiking	sonne|work:
+@wiking	update for the cloud:
+@wiking	"Due to high demand and low available resources we had to introduce a time limit of 60 minutes per session."
+@wiking	we are currently trying to find ways to extend our service. we basically do not have enough resources of our own to serve this level of demand, hence if you could help us out with more CPU/MEMORY, please contact us!
+@wiking	cheers,
+@wiking	viktor
+@wiking	sonne|work: can this go on the mailing list?
+ sonne|work	sure
+ sonne|work	wiking: you could add in the description: Note that simply restarting your session will give you extra 60 minutes with you continuing where you left. All your work is saved.
+@wiking	yeh indeed
+@iglesiasg	wiking, hey! So did Shogun cloud get many users?
+@wiking	iglesiasg: well it's getting fair amount
+@wiking	it's not like ddos
+@wiking	but we had to introduce some limits already
+@iglesiasg	yeah, I just checked the timer thingy
+@iglesiasg	but it is cool that people are using, breat
+@iglesiasg	great*
+@wiking	heheh yeah if u dont use it
+@wiking	plz log out ;)
+@wiking	that'll give us an extra slot ;P
+@iglesiasg	haha yeah sure
+@wiking	we can serve like 15 slots at once
+@iglesiasg	I always log out ;)
+@iglesiasg	going to check just in case..
+@iglesiasg	yep, logged out indeed
+@wiking	cool thxn
+ sonne|work	wiking: I thought ddos was not possible because of out of memory messages right?
+@wiking	sonne|work: well the app container can still be ddos-ed
+@wiking	;)
+@wiking	but from my point
+@wiking	nobody actually running anything in the cloud ;P
+@wiking	they just log in
+@wiking	and then that's it
+@wiking	besser82: ping
+@wiking	hehhe there's only one active session now after the crontab
+ besser82	wiking: pong!
+ besser82	wiking: i'm on das nfs-thing...
+@wiking	besser82: u can just readd my public key
+@wiking	and i can do it
+ besser82	wiking: will do in 5 minutes
+ besser82	wiking: pub-key
+ besser82	wiking: but i got disrupted by some customer who wanted me to take his $$$  ;)
+@wiking	64 bytes from 209.132.184.157: icmp_req=9 ttl=49 time=136 ms
+@wiking	mmm
+@wiking	that nfs will be interesting :P
+@wiking	but it's worth a shot
+ besser82	wiking: looks like it will have some lag...
+ besser82	wiking: you should be able to log in within the next 30 sec.
+ besser82	wiking: rsa-key added
+ besser82	wiking: fedora-ca is up and running again
+@wiking	k
+@wiking	thnx
+@wiking	ok now i need to find a way to do this
+ sonne|work	wiking: yeah sure that is all I would do too :)
+ sonne|work	and then at some point I would come back...
+-!- HeikoS [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	sonne|work, wiking, iglesiasg, besser82, lisitsyn, naywhayare, thoralf http://herrstrathmann.de/ blog entry
+ sonne|work	hey HeikoS
+ sonne|work	HeikoS: I didn't manage to do this full gsoc blog yet
+@HeikoS	hi
+@HeikoS	sonne|work: dont worry, at least we have something now
+ sonne|work	I blogged however about the cloud on twitter & g+ & my blog
+ sonne|work	and then about the release
+@HeikoS	thats good
+@HeikoS	its good to do things in waves I guess
+ sonne|work	so > 100k people should have seen it
+ sonne|work	well we don't do things properly marketing wise
+ sonne|work	we should do it snowden way
+ sonne|work	I mean one big bummer
+@HeikoS	hehe
+ sonne|work	and then updates all the time
+ sonne|work	iglesiasg: could you please make the videos the default when you click on events?
+@iglesiasg	let me try
+@iglesiasg	sonne|work, test it plase
+@iglesiasg	please or whatever :D
+ sonne|work	iglesiasg: haha
+ sonne|work	excellent
+@iglesiasg	HeikoS, nice post!
+@wiking	heheh no active docker container
+@wiking	we killed them all
+@wiking	:DDD
+ sonne|work	wiking: can we put things further - I mean I have this 'open in new window' thing
+ sonne|work	wiking: could we add run interactively in the cloud?
+@wiking	meaning?
+ sonne|work	wiking: and this would then open this particular notebook in the cloud?
+@wiking	sonne|work: you mean via the website?
+@wiking	so like
+ sonne|work	wiking: yes when you click on an example in the gallery
+@wiking	hahaha
+@wiking	good luck creating it
+@wiking	:)
+ sonne|work	it says open a new window
+@wiking	sorry but that's just insane amount of work
+ sonne|work	errm why that?
+@HeikoS	guys, btw its sooo cool to show people shogun on my phone/tablet
+@HeikoS	while having coffee
+ sonne|work	all it needs is to know which notebook to open
+@wiking	sonne|work: ok so you want to fire up a new container after authing + open within ipython that give ipynb
+ sonne|work	exactly
+@wiking	the first part is more or less done
+@wiking	but how the fuck do you do opening the notebook
+ sonne|work	no idea how to tell ipython open that particular notebook
+@wiking	within that given ipython session
+@wiking	so
+@wiking	tehre you go
+@wiking	that's why it's not easy
+@iglesiasg	I am afraid that the link to Tapkee's demo is broken
+@iglesiasg	http://www.shogun-toolbox.org/page/documentation/demo/
+@iglesiasg	last one in the list
+ sonne|work	iglesiasg: could you please fix it
+ sonne|work	ahh no you cannot :/
+ sonne|work	it just needs a data checkout / link on fatbot
+ sonne|work	wiking: well we can start with the poor mans solution - it gives you the file open thing from ipython
+@wiking	glhf
+@wiking	aintnotime sorry
+@wiking	:(
+@iglesiasg	sonne|work, I downloaded the words.dat file in 7nn
+@iglesiasg	and put it into shogun-demo/static/data/tapkee
+@iglesiasg	but didn't work out
+ sonne|work	iglesiasg: IIRC data should be in root folder
+-!- pickle27 [~Kevin@207.164.79.50] has joined #shogun
+-!- pickle27 [~Kevin@207.164.79.50] has quit [Ping timeout: 264 seconds]
+-!- FSCV [~FSCV@50.7.50.60] has joined #shogun
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:c525:6c15:48eb:b728] has quit [Quit: Ex-Chat]
+-!- sonne|osx [~sonne@89.204.137.96] has joined #shogun
+-!- zxtx [~zv@c-98-223-198-47.hsd1.in.comcast.net] has quit [Ping timeout: 245 seconds]
+-!- sonne|osx [~sonne@89.204.137.96] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@f053043051.adsl.alicedsl.de] has joined #shogun
+-!- zxtx [~zv@129-79-241-148.dhcp-bl.indiana.edu] has joined #shogun
+-!- HeikoS [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has left #shogun []
+@sonney2k	besser82, script time
+@sonney2k	besser82, sent!
+@sonney2k	lisitsyn, lisitsyn1 where can I get the transparent faces from?
+@sonney2k	lisitsyn, the .png's seem to not be in the files
+@sonney2k	data dirs I mean
+@sonney2k	lisitsyn, forget it found it :D
+ lisitsyn1	sonney2k: mit cbcl faces dataset
+ lisitsyn1	sonney2k: it has license issues though :D
+@sonney2k	it is a demo
+ lisitsyn1	oh then it is ok
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+ besser82	sonney2k: besser82@fedoraproject.org
+@sonney2k	lisitsyn, ok http://demos.shogun-toolbox.org/dimred/tapkee/ works now
+@sonney2k	lisitsyn, but only words_embedding is done on-the-fly
+@sonney2k	lisitsyn, the rest seem just to be some static stuff
+@sonney2k	lisitsyn, so in case you have some time...
+ lisitsyn1	sonney2k: what shall I do then?
+ besser82	sonney2k: Which is the actual license of your scrubbing-script?  Can I assume GPLv3+?
+-!- HeikoS [~heiko@97e0a10b.skybroadband.com] has joined #shogun
+@sonney2k	besser82, sure
+@sonney2k	HeikoS, I am going to add open in cloud or so to the notebooks
+ besser82	sonney2k: allrighty! Just properly credited that in my spec-file  ;)
+ HeikoS	sonney2k: very nice idea
+@sonney2k	besser82, c'mon just use it
+@sonney2k	besser82, I will use that for debian too
+ besser82	sonney2k: already on it  ;)
+ besser82	sonney2k: but it phukes-up the build  :(  Need to fix some CMakeLists.txt afterwards...
+ besser82	CMake Error at examples/undocumented/libshogun/CMakeLists.txt:115 (add_executable):
+ besser82	  Cannot find source file:
+ besser82	    /home/besser82/rpmbuild/BUILD/shogun-3.0.0/examples/undocumented/libshogun/classifier_mkl_svmlight_modelselection_bug.cpp
+ besser82	soney2k:  ^^^
+ besser82	sonney2k:  ^^^
+ besser82	sonney2k:  will make needed mods to script and share it with you  ;)
+-!- FSCV [~FSCV@50.7.50.60] has quit [Quit: Leaving]
+-!- HeikoS [~heiko@97e0a10b.skybroadband.com] has left #shogun []
+@sonney2k	besser82, yeah we need to remove examples requiring svmlight too
+* sonney2k sighs
+@sonney2k	lisitsyn, well of course make it compute the embedding on-the-fly like it is doing for words
+ besser82	sonney2k: there you go with the working script  :D  --->  http://ur1.ca/fymm2
+ besser82	sonney2k: now preserves timestamps, too  ;)
+ lisitsyn1	sonney2k: ah okay I'll check
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun-demo: Soeren Sonnenburg :master * 71df65d / demos/dimred/__init__.py,settings.py,util/data.py: https://github.com/shogun-toolbox/shogun-demo/commit/71df65d43f593e3369e38b8b87bef64ef5e9c0bc
+ shogun-notifier-	shogun-demo: fix tapkee paths
+@sonney2k	besser82, heh cross distribution release script :D
+ besser82	sonney2k: yes  :D
+ besser82	sonney2k: I think it some synergy effect in Linux-world  :-P
+ besser82	sonney2k: But there's still one thing it need to fix....  the unit-tests....
+ besser82	sonney2k: I hope we won't need that script for next 3.X.X release anymore  :D
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- new_lido [~walid@41.218.172.216] has joined #shogun
+@sonney2k	besser82, kind of bug #1 in ubuntu indeed
+ besser82	sonney2k: ????
+@sonney2k	besser82, https://bugs.launchpad.net/ubuntu/+bug/1
+ besser82	sonney2k: ahh  :D
+ besser82	sonney2k: here's an updated script to fix the modules without SVM^%{your_favourite_swear} ---> http://ur1.ca/fymuk
+ shogun-notifier-	shogun-demo: Soeren Sonnenburg :master * 44bee1b / / (7 files): https://github.com/shogun-toolbox/shogun-demo/commit/44bee1be4cdf99038f9b06ef2e03fe37046eb24b
+ shogun-notifier-	shogun-demo: enable toy data set loading + minor fixes
+@sonney2k	iglesiasg, lisitsyn do you have a sec?
+@sonney2k	could you go to http://demos.shogun-toolbox.org/clustering/kmeans/
+@sonney2k	and then to toy data
+@sonney2k	and click dump at the bottom?
+@sonney2k	or thoralf or lisitsyn1 or whoever is awake
+ lisitsyn1	sonney2k: yes let me
+@sonney2k	lisitsyn1, hurray
+@sonney2k	I fixed toy data loading
+ lisitsyn1	sonney2k: yes worked here
+@sonney2k	now if we had some coool data sets we could actually do cool stuff
+@sonney2k	lisitsyn, then cluster with say 50 clusters
+ lisitsyn1	sonney2k: I am a bit confused with 'dump' naming
+@sonney2k	or 100 if you want :)
+ lisitsyn1	dump is something 'out', right?
+@sonney2k	yeah load would make more sence :)
+ lisitsyn1	but it is 'load'
+ lisitsyn1	okay
+@sonney2k	lisitsyn, yeah well it is loaded from disk and then dumped into your webbrowser
+@sonney2k	I also kind of think that the cluster solution should go away when you load toy data etc
+ besser82	sonney2k: another fix in tha house, cmon  :D ---> http://ur1.ca/fymwu
+@iglesiasg	I can try too
+@iglesiasg	+1 to load instead of dump too :)
+ lisitsyn1	cryptic scripts coming around
+@sonney2k	besser82, parse error heaven :-]
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+ shogun-notifier-	shogun-web: Soeren Sonnenburg :master * f06a835 / templates/overlay.html,templates/subpage.html: https://github.com/shogun-toolbox/shogun-web/commit/f06a835d2a05ed5948dc2a6ea4a028eb1f033030
+ shogun-notifier-	shogun-web: mention the cloud(tm)
+ besser82	sonney2k: dafuq! seen it: examples/undocumented/libshogun/evaluation_cross_validation_locked_comparison.cpp:15:44: schwerwiegender Fehler: shogun/classifier/svm/SVMLight.h: Datei oder Verzeichnis nicht gefunden
+ besser82	 #include <shogun/classifier/svm/SVMLight.h>
+ lisitsyn1	hahah german compile errors look scary
+ lisitsyn1	AUSWEIS BITTE
+ besser82	lisitsyn: HABEN SIE GETRUNKEN?  XD
+ besser82	lisitsyn1: HABEN SIE GETRUNKEN?  XD
+ lisitsyn1	besser82: haha
+ lisitsyn1	I can guess the meaning
+ besser82	lisitsyn1: :D  That's actually the second question of police after "AUSWEIS BITTE"....  ;)
+ lisitsyn1	besser82: and how many times have you heard that? ;)
+ besser82	lisitsyn1: didn't count, but mst have been 100+ :-P
+ lisitsyn1	besser82: what do they do to you if you are deadly drunk in DE?
+ besser82	lisitsyn1: put you in jail for one night...
+ lisitsyn1	besser82: hah I see
+ besser82	lisitsyn1: and if that happenes 2 or 3 times you are sent to medical/psychologic examination to check if you are legitable to keep your driver's license
+ lisitsyn1	besser82: uhmm even if you weren't driving drunk?
+ besser82	lisitsyn1: yes, because you possibly could
+ lisitsyn1	haha what a police state
+ besser82	lisitsyn1: I guess every country has it's idioms  ;)
+ besser82	lisitsyn1: go to "Kreml" and shout "I'm Gay and want to marry!"  ;-P
+ besser82	lisitsyn1: let's look what happenes next  XD
+ besser82	sonney2k: ?ffne die Augen, das compiled wie die Sonne  ;)   --->  http://ur1.ca/fyn2v
+ lisitsyn1	besser82: welllllllll
+ besser82	lisitsyn1: BUSTED!!!!
+ lisitsyn1	besser82: heh  welllllll
+ lisitsyn1	it is not that simple :D
+ lisitsyn1	gay issue is just about having something to hate
+ lisitsyn1	because it is easier to control someone who hates stuff around
+ besser82	lisitsyn1: that's right  ;)
+-!- lisitsyn1 [~lisitsyn@80.252.20.67] has left #shogun []
+-!- lisitsyn1 [~lisitsyn@80.252.20.67] has joined #shogun
+ lisitsyn1	oops
+ besser82	lisitsyn1: I just thought gov has taken you down for that  ;P
+ besser82	lisitsyn1: XD
+ lisitsyn1	besser82: I have been saying worse things about gov
+ lisitsyn1	:D
+ besser82	lisitsyn1: Wait for NSA to report  :-P
+ lisitsyn1	besser82: I already was rejected for us visa :D
+ besser82	lisitsyn1: What did you do?
+ lisitsyn1	besser82: ah well nothing they just believe everyone is going to escape to the us
+ lisitsyn1	besser82: like I am young not married software engineer
+ besser82	lisitsyn1: ahhh.  that's a reason for uncle sam  ;)
+ lisitsyn1	a good catch for immigrant
+ lisitsyn1	besser82: officer said it would be better 'if you were married'
+ lisitsyn1	oh okay let me marry then lol
+ besser82	lisitsyn1: and take your wife with you  ;)
+ lisitsyn1	besser82: your state was much better in that sense :D
+ lisitsyn1	I didn't have to pass any interview or whatever
+ lisitsyn1	here is my 80 EUR here is my docz and here is my visa then
+ besser82	lisitsyn1: coming into Germany is actually much easier than getting a visa for any other state ;)
+ lisitsyn1	I like this workflow more
+ lisitsyn1	with us it was fill in 4332-page form
+ lisitsyn1	come to moscow to pass interview
+ lisitsyn1	fail interview
+ lisitsyn1	and go f yourself
+ lisitsyn1	:D
+ besser82	lisitsyn1: and pay the bill anyways ;)
+ lisitsyn1	yes indeed
+ lisitsyn1	besser82: and nearly the same money to get to the capital and back
+ besser82	lisitsyn1: Go and get yourself a German passport ;)
+ besser82	lisitsyn1: 6 weeks US, no visa needed  ;)
+ lisitsyn1	besser82: oh let me first live there for how much? 9 years?
+ lisitsyn1	:D
+ besser82	lisitsyn1: no, come here, goto "Einb?rgerungsamt" and tell Grandpa had a German Sherphard  :D
+ besser82	lisitsyn1: no, come here, goto "Einb?rgerungsamt" and tell Grandpa had a German Sherphard  :D
+ lisitsyn1	lisitsyn1: haha
+ lisitsyn1	oops
+ lisitsyn1	:D
+ lisitsyn1	besser82: haha
+ shogun-notifier-	shogun-web: Soeren Sonnenburg :master * 15326bd / shogun.sqlite,static/css/style.css,templates/overlay.html: https://github.com/shogun-toolbox/shogun-web/commit/15326bd085ae658cc739a7b920530e9d8d81288e
+ shogun-notifier-	shogun-web: fix overlay
+ besser82	lisitsyn1: pay the 28,90 EUR and get the German passport within 10 days  :-P
+ lisitsyn1	besser82: oh easy peasy
+ besser82	lisitsyn1: Yes
+@sonney2k	lisitsyn, still around?
+@sonney2k	lisitsyn1, ^
+ lisitsyn1	sonney2k: yes
+ lisitsyn1	sonney2k: kick other me please
+@sonney2k	if so could you please open the website again
+ lisitsyn1	I feel your pain typing 1 at the end
+-!- lisitsyn was kicked from #shogun by sonney2k [lisitsyn]
+ lisitsyn1	thanks
+ lisitsyn1	:D
+ lisitsyn1	okay
+ lisitsyn1	website
+@sonney2k	and then reload
+@sonney2k	then click some thumb
+@sonney2k	I mean notebook thumb
+@sonney2k	do you still have 2 scroll bars?
+ lisitsyn1	sonney2k: only vertical one
+@sonney2k	a single one?
+ lisitsyn1	yes
+@sonney2k	perfect
+@sonney2k	lisitsyn1, and on top some overlay thing to click for cloud and new window right?
+ lisitsyn1	sonney2k: yeah
+ lisitsyn1	sonney2k: why don't you use bootstrap for that btw?
+ besser82	sonney2k: here's the everything-works-as-expected-version of the scrubbing-script:  http://ur1.ca/fyn6o
+ lisitsyn1	sonney2k: I mean modal window
+ lisitsyn1	it is a component in bootstrap
+@sonney2k	besser82, heh
+ besser82	sonney2k: even testsuite runs fine  ;)
+@sonney2k	lisitsyn1, no idea about bootstrap so all handmade kongfu
+ lisitsyn1	sonney2k: uhh you should try it one day then! ;)
+ lisitsyn1	sonney2k: that's just a matter of a few divs with specified class
+@sonney2k	man I like the demos / notebook & stuff
+@sonney2k	it is really sexy
+@sonney2k	business
+ lisitsyn1	sonney2k: haha ENTERPRISE
+@sonney2k	we should extend them
+@sonney2k	more and more and more
+@sonney2k	and it is all so easy to do even
+ lisitsyn1	yeah and somebody should take care of code meanwhile
+ lisitsyn1	:D
+--- Log closed Thu Oct 31 00:00:04 2013

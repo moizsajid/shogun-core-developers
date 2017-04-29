@@ -1,0 +1,470 @@
+--- Log opened Sun Mar 01 00:00:40 2015
+-!- HeikoS [~heiko@2.221.116.151] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@lisitsyn	HeikoS: yeah you get it right I think :)
+@lisitsyn	HeikoS: the other thing - you know why the pointer is null
+@HeikoS	because the thing was freed?
+-!- vortex_ape [~vortex_ap@120.59.205.250] has joined #shogun
+@lisitsyn	no I mean
+@lisitsyn	if you have some wrapper for the thing that is potentially absent
+@lisitsyn	you can check whether it is absent
+@lisitsyn	and then if it is absent you can log something
+@HeikoS	I sewe
+@HeikoS	see
+@HeikoS	cool thing
+@HeikoS	lisitsyn: what about this: https://github.com/shogun-toolbox/shogun/wiki/GSoC_2015_plugin
+@lisitsyn	HeikoS: some very common use case is to find something in collection
+@HeikoS	description is too short
+@HeikoS	timeline, waypoints, entrance tasks, suggested reading, examples etc
+@lisitsyn	HeikoS: oh yeah let me extend it
+@lisitsyn	will do it tomorrow
+@HeikoS	cool
+@HeikoS	lisitsyn: and this one would also be good to have  adescription for
+@HeikoS	https://github.com/shogun-toolbox/shogun/wiki/GSoC_2015_project_parameters
+@HeikoS	with your new ideas for that
+@lisitsyn	ok
+@lisitsyn	HeikoS: good
+@HeikoS	btw did you look at this user guide thing?
+@lisitsyn	sorry not yet
+@HeikoS	https://github.com/karlnapf/shogun_manual
+@lisitsyn	looks interesting
+@HeikoS	we should get this before gsoc
+@HeikoS	and the meta examples too
+@lisitsyn	HeikoS: get like get merged?
+@HeikoS	so that every student can write like 1 entry each week, and translate 3 minimal examples
+@HeikoS	lisitsyn: yes, and easy to extend
+@HeikoS	meta examples are in
+@HeikoS	I am currently editing the travis file to include it in the build
+@HeikoS	no idea how to change buildbot
+@lisitsyn	hmmm I thought someone knows how to change buildbot
+@lisitsyn	I guess only wiking
+@HeikoS	lisitsyn: just emailed wiking :)
+ kingsley	Do you happen to know if anyone has tried optimizing the hyperparameters passed to machine learning algorithms (like the number of trees to be used by a random forest) with pre-existing non-linear optimization code like gradient descent or integer programming?
+ kingsley	I'd like to think that a guided search of hyperparaemters would be more efficient than guessing, trial and error.
+@lisitsyn	HeikoS: ^ I think you're expert here ;)
+@HeikoS	kingsley: for sure
+@lisitsyn	kingsley: people like to model performance as gaussian processes
+ kingsley	HeikoS: Please elaborate.
+@lisitsyn	that's how MOE and hyperopt work
+@HeikoS	kingsley: what people often do is to use stochastic black box optimisers for example, see cma
+@HeikoS	kingsley: or look up bayesian optimisation, which is also about this idea
+@lisitsyn	https://github.com/Yelp/MOE
+@lisitsyn	https://github.com/hyperopt/hyperopt
+@lisitsyn	https://github.com/JasperSnoek/spearmint
+@HeikoS	where the idea is to put a gaussian process on the surface of the function your are optimising, and then use information theoretic ideas to select the next point to look at using a exploration-exploitation tradeoff
+ kingsley	OK, you have given me much to think about.
+@HeikoS	kingsley: would be a cool thing to have for Shogun
+ kingsley	I'll check them out.
+@lisitsyn	HeikoS: btw
+@HeikoS	discrete case is another thing
+@HeikoS	much much harder to do
+@lisitsyn	I was curious about MOE
+@lisitsyn	have you seen how it works?
+@lisitsyn	wanted to ask you whether we can do the same in shogun
+@HeikoS	MOE uses bayesian optimisation
+@HeikoS	I invited Matthew Hoffman to give a talk here at UCL on Friday
+@lisitsyn	yes with GPs
+@HeikoS	http://mlg.eng.cam.ac.uk/hoffmanm/
+@lisitsyn	so can we do this with shogun and if not what is missed?
+@HeikoS	lisitsyn, kingsley https://github.com/mwhoffman/pybo
+@HeikoS	thats the way to do this
+ kingsley	HeikoS and lisitsyn: Thank you very much for saving me from re-inventing the wheel.
+@HeikoS	lisitsyn: would be cool to use MOE in shogun, what do you think?
+@lisitsyn	HeikoS: yes or do the same thing with our own GPs
+@HeikoS	lisitsyn: though its not parallelisable
+@lisitsyn	that's why I am asking ;)
+@HeikoS	lisitsyn: cma is better in that respect
+@HeikoS	we could use our own gps sure
+@HeikoS	but why do that?
+@HeikoS	people have done it, its just a matter of plugging things together
+@HeikoS	the bayesian thing is hard to parallelise
+@HeikoS	cma is easier to
+@HeikoS	based on particles
+@lisitsyn	what's cma?
+@lisitsyn	covariance matrix adaptation?
+@HeikoS	yep
+@HeikoS	that works very nicely
+@HeikoS	I use it for some things sometimes
+@HeikoS	lisitsyn: though the thing is
+@HeikoS	cma is a one-guy library and also method
+@HeikoS	whereas bayesina optimisation is a large field with lots of excellent people doing research on
+@HeikoS	and yelp is a kind of plus too
+@lisitsyn	we should have both
+@lisitsyn	HeikoS: interfacing with MOE is easy
+@HeikoS	lisitsyn: thats cool
+@HeikoS	we should do that
+@HeikoS	its important
+@HeikoS	but next year
+@HeikoS	thats part of making model-selection easier and offer full pipelines
+@HeikoS	but we are not there yet
+@HeikoS	need other things first
+@lisitsyn	I'd do that in a few hours I guess
+@HeikoS	maybe
+@HeikoS	yeah cool thing in fact
+@HeikoS	though I wonder... maybe you should spend these hours on something else currently??
+@HeikoS	we have so many things that are not working properly
+@lisitsyn	yes :)
+@lisitsyn	I just mean it is not a big deal to interface with that
+@lisitsyn	they have a few examples
+@HeikoS	hyperparameters are not really an issue currently
+@HeikoS	yeah I have seen
+@HeikoS	 but then we need
+@HeikoS	cmake options
+@HeikoS	a build
+@HeikoS	tests
+@HeikoS	etc
+@HeikoS	so not sure
+@HeikoS	whether its a good time now
+@HeikoS	hackathon thing
+@HeikoS	actually
+@lisitsyn	no it is not :)
+@HeikoS	that'd be cool
+@lisitsyn	do you think hackathon thing is possible still?
+@HeikoS	yes
+@lisitsyn	HeikoS: UK won't let me in :D
+@HeikoS	but I cannot do this alone
+@HeikoS	we need:
+@HeikoS	1.) BSD
+@HeikoS	2.) foundation
+@HeikoS	3.) user guide
+@HeikoS	without that it will not work
+@HeikoS	oh and
+@HeikoS	0.) installation
+@HeikoS	lisitsyn: why wont they let you in?
+@lisitsyn	HeikoS: cold war :)
+@lisitsyn	well actually this list is doable
+@HeikoS	lisitsyn: it IS doable!
+@lisitsyn	HeikoS: there is a wisdom I've learnt at some point
+@HeikoS	which is?
+@lisitsyn	to develop something it is usually enough to set up a cycle
+@lisitsyn	when you change, compile and test
+@lisitsyn	and to make people use software you just have to make it installable :)
+@HeikoS	hehe
+@HeikoS	yes
+@lisitsyn	even with scarce functionality
+@lisitsyn	it will be used
+@lisitsyn	if it just works
+@lisitsyn	you know people use VW so much
+@HeikoS	yes I agree
+@HeikoS	it is cool
+@HeikoS	shogun is not installable
+@HeikoS	people fail all the time
+@HeikoS	half my institude tried it
+@HeikoS	institute
+@lisitsyn	haha
+@HeikoS	smart people you know
+@lisitsyn	yeah that's the priority one thing
+@HeikoS	not linux experts but know things
+@HeikoS	but they just are overwhealmed
+@HeikoS	so the install project is a must
+@lisitsyn	we can even have two students on that
+@HeikoS	if we dont get a student for that, I refuse to do GSoC :D
+@lisitsyn	you're still phd
+@lisitsyn	student I mean
+@HeikoS	I cannot do it
+@lisitsyn	:)
+@lisitsyn	why? :D
+@lisitsyn	admin?
+@lisitsyn	:)
+@HeikoS	I dont know these things
+@lisitsyn	ah
+@HeikoS	also no time
+@lisitsyn	yeah sure :)
+@HeikoS	viktor could do it
+@lisitsyn	I am not student and corporate slave
+@HeikoS	but he also doesnt have time
+@HeikoS	you could do it
+@HeikoS	but also no time
+@HeikoS	so we need a student who somehow knows
+@lisitsyn	remember I am not a student  :)
+@HeikoS	I do
+@lisitsyn	good time to sleep
+@HeikoS	same here
+@HeikoS	good night!
+@lisitsyn	HeikoS: I'll extend these gsoc ideas tomorrow
+@lisitsyn	see you! gntie
+-!- vortex_ape [~vortex_ap@120.59.205.250] has quit [Ping timeout: 246 seconds]
+-!- vortex_ape [~vortex_ap@120.59.77.110] has joined #shogun
+-!- vortex_ape [~vortex_ap@120.59.77.110] has quit [Quit: Leaving]
+-!- HeikoS [~heiko@2.221.116.151] has quit [Ping timeout: 245 seconds]
+-!- HeikoS [~heiko@2.221.116.151] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@2.221.116.151] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@2.221.116.151] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- rajul [~rajul@node-wns.pool-125-24.dynamic.totbb.net] has joined #shogun
+-!- HeikoS [~heiko@2.221.116.151] has quit [Quit: Leaving.]
+-!- curiousguy13_ [~curiousgu@120.59.228.160] has quit [Ping timeout: 256 seconds]
+-!- curiousguy13_ [~curiousgu@59.177.205.235] has joined #shogun
+-!- prakhar2511 [~prakhar25@202.78.172.162] has joined #shogun
+-!- rajul [~rajul@node-wns.pool-125-24.dynamic.totbb.net] has quit [Ping timeout: 272 seconds]
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has quit [Remote host closed the connection]
+-!- rajul [~rajul@node-wns.pool-125-24.dynamic.totbb.net] has joined #shogun
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has joined #shogun
+-!- kshitijk [~kshitijk@115.249.18.25] has joined #shogun
+-!- rajul [~rajul@node-wns.pool-125-24.dynamic.totbb.net] has quit [Read error: Connection reset by peer]
+-!- rajul [~rajul@node-6gf.pool-180-180.dynamic.totbb.net] has joined #shogun
+-!- prakhar2511 [~prakhar25@202.78.172.162] has quit [Ping timeout: 255 seconds]
+-!- kshitijk [~kshitijk@115.249.18.25] has quit [Ping timeout: 256 seconds]
+-!- prakhar2511 [~prakhar25@202.78.172.162] has joined #shogun
+-!- kshitijk [~kshitijk@115.249.18.25] has joined #shogun
+-!- kshitijk [~kshitijk@115.249.18.25] has quit [Ping timeout: 244 seconds]
+-!- prakhar2511 [~prakhar25@202.78.172.162] has quit [Ping timeout: 240 seconds]
+-!- kshitijk [~kshitijk@115.249.18.25] has joined #shogun
+-!- joergkurtwegner [~joergkurt@d54c5db3e.access.telenet.be] has joined #shogun
+ joergkurtwegner	hi, does anyone have a clean ubuntu 14.04 install routine?
+-!- joergkurtwegner [~joergkurt@d54c5db3e.access.telenet.be] has quit [Client Quit]
+-!- joergkurt [~joergkurt@178.162.199.93] has joined #shogun
+ joergkurt	ping is online...
+-!- sonne|osx [~sonne@f049254171.adsl.alicedsl.de] has joined #shogun
+-!- smallgraph [~textual@vpn-cl-194-80.scc.kit.edu] has joined #shogun
+ joergkurt	hi, I am looking for a clean ubuntu install instruction for python-modular, will be back in 2-3h
+-!- curiousguy13_ [~curiousgu@59.177.205.235] has quit [Ping timeout: 245 seconds]
+-!- kshitijk [~kshitijk@115.249.18.25] has quit [Ping timeout: 264 seconds]
+-!- vortex_ape [~vortex_ap@59.177.140.38] has joined #shogun
+ joergkurt	with clean I mean fresh Ubuntu14.04 in VirtualBox and then a native from GIT source, if all dependencies are properly defined in the install docu, all should just compile through, I guess we neeed some refinement on this process, since my naive attempt does not work right away
+-!- curiousguy13_ [~curiousgu@120.59.226.121] has joined #shogun
+-!- kingsley_ [~kingsley@174-21-235-71.tukw.qwest.net] has joined #shogun
+-!- kingsley [~kingsley@174-21-171-80.tukw.qwest.net] has quit [Ping timeout: 255 seconds]
+@lisitsyn	joergkurt: hey
+-!- smallgraph [~textual@vpn-cl-194-80.scc.kit.edu] has quit [Ping timeout: 256 seconds]
+ joergkurt	hoi
+@lisitsyn	joergkurt: looks like you've already installed shogun :)
+@lisitsyn	I mean from you mail I see you've run an example and it worked
+ joergkurt	nope, its compiled, but not running :(
+@lisitsyn	what do you mean?
+@lisitsyn	what if you run python and write 'from modshogun import KMeans'?
+ joergkurt	import works, kinda busy right now, can I get back to you in 2h...?
+ joergkurt	sorry, just have to do something else ...will get back to it later...
+@lisitsyn	joergkurt: sure. but if import works probably everything is probably ok anyway :)
+ joergkurt	ok, lets figure it later :)
+-!- kshitijk [~kshitijk@115.249.18.25] has joined #shogun
+-!- prakhar2511 [~prakhar25@202.78.172.162] has joined #shogun
+ joergkurt	ok, my bet, it works, I was kinda expecting distance_tanimoto_modular.py returns some console printout, its not
+ joergkurt	so, seems to works just fine, one other question
+ joergkurt	if loading a dat set like feats_train=RealFeatures(CSVFile(train_fname))
+ joergkurt	how can I get this into a python object I can also process on the Python side, and vice versa?
+ joergkurt	Second question, how can I load a sparse file, and which formats are accepted, also for usage in Python?
+-!- vortex_ape [~vortex_ap@59.177.140.38] has quit [Ping timeout: 264 seconds]
+@lisitsyn	ok first
+@lisitsyn	joergkurt: what do you mean python object?
+@lisitsyn	I am not sure I get what you want to do with that
+-!- kshitijk [~kshitijk@115.249.18.25] has quit [Ping timeout: 250 seconds]
+-!- exploreshaifali [~shaifali@182.70.196.201] has joined #shogun
+ joergkurt	maybe I just dont know all details, the CSVFile is loaded, how to I access the elements in this object?
+ joergkurt	feats_train=RealFeatures(CSVFile(train_fname)), aka how does a data object look like and what are access functions?
+ joergkurt	since its SWIG I assume the data is staying at the C++ side and Python is just pointing to it
+@lisitsyn	joergkurt: yes
+@lisitsyn	joergkurt: it depends what you want to do
+@lisitsyn	simple access like per vector is easy
+@lisitsyn	use get_feature_vector
+@lisitsyn	if you want to change data you'd probably have to get vector, modify it and set_feature_vector
+ joergkurt	the fecture vector requires an index, so do I need to do this element-wise?
+@lisitsyn	joergkurt: that's the index of vector
+@lisitsyn	so vector-wise
+ joergkurt	iterator or loop 0length ?
+ joergkurt	vector is here a feature, right? (not an instance)
+@lisitsyn	might be confusing but it is an instance :)
+@lisitsyn	or example
+@lisitsyn	joergkurt: you can access whole matrix as well
+@lisitsyn	get_feature_matrix
+@lisitsyn	http://shogun-toolbox.org/doc/en/latest/classshogun_1_1CDenseFeatures.html
+ joergkurt	(checking...)
+ joergkurt	vectors=features
+ joergkurt	features=instances
+ joergkurt	right?
+@lisitsyn	joergkurt: example is feature vector
+@lisitsyn	its components are features
+@wiking	morning
+@lisitsyn	wiking: hmm morning.. are you in us? :D
+@wiking	heheh no
+@wiking	actually it's middle of night here
+-!- prakhar2511 [~prakhar25@202.78.172.162] has quit [Ping timeout: 246 seconds]
+@lisitsyn	wiking: looks like you've been having busy times lately?
+@wiking	yes
+@wiking	soon over
+ joergkurt	is there an overview about data formats, especially sparse ones, have seen libSVM is supported...
+@lisitsyn	joergkurt: http://shogun-toolbox.org/doc/en/4.0.0/classshogun_1_1CLibSVMFile.html
+@lisitsyn	that's for libsvm
+@lisitsyn	joergkurt: hdf5 and protobuf are also supported
+-!- iglesiasg [~iglesias@524B8E0B.cm-4-4c.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@lisitsyn	iglesiasg: who's there
+ joergkurt	hdf5 support spare and dense right?
+ joergkurt	sparse and dense?
+@lisitsyn	joergkurt: looks like only dense
+ joergkurt	imports SparseFEatures.h
+ joergkurt	ehm, includes
+-!- prakhar2511 [~prakhar25@202.78.172.162] has joined #shogun
+ joergkurt	probably last question for today, if I wanna bind from C++ directly, any algorithm and property parser available, or do we need to hard bind all algorithms and algo properties?
+@lisitsyn	joergkurt: something like using classifier based on some configuration file?
+ joergkurt	yes, something just defining data+config file
+@lisitsyn	if yes then the answer is no but sounds like a feature request
+ joergkurt	:)
+@iglesiasg	lisitsyn: surprise! xD
+@lisitsyn	iglesiasg: how is it going?
+@iglesiasg	lisitsyn: very well, with you?
+ joergkurt	kinda factory pattern on C++ side or compiler-compiler for some to be defined algo+property language
+ joergkurt	BTW, where are you folks from?
+@lisitsyn	joergkurt: yeah I'll think about it and describe as an issue
+@lisitsyn	joergkurt: different places
+@lisitsyn	I am from the most wild country in the world
+ joergkurt	me:German:nowBelgium
+@lisitsyn	joergkurt: you're close to iglesiasg which is now in netherlands
+@iglesiasg	yep, me:Spanish:inNL :)
+ joergkurt	ah, hi, iglesiasg, hoe gaat het?
+@iglesiasg	het gaat heel goed, en met jou?
+ joergkurt	ah, hola :)
+@iglesiasg	hahaha hola, hola
+ joergkurt	hihi :P
+@iglesiasg	where is Belgium are you?
+@iglesiasg	in*
+ joergkurt	living in Mechelen (between Brussels and Antwerp), working in Beerse/Turnhout (Janssen Pharma)
+@lisitsyn	you have bad weather there, do you?
+ joergkurt	never :P
+-!- prakhar2511 [~prakhar25@202.78.172.162] has quit [Ping timeout: 250 seconds]
+@lisitsyn	though I am not a person to speak about bad weather :D
+ joergkurt	lisisyn-whats the wildest country?
+@lisitsyn	joergkurt: this big bear to the east of you
+ joergkurt	russia?
+@lisitsyn	yeap
+ joergkurt	ah, cool, some of our developers are from Russi ...
+ joergkurt	Russia
+@lisitsyn	joergkurt: somehow bad environment produces good math and software guys :)
+ joergkurt	(best dev of the world, honestly!)
+ joergkurt	ok, sold now, we will integrate shogun as soon as we get to it ;)
+@lisitsyn	haha
+@lisitsyn	joergkurt: what do you want to apply it to?
+ joergkurt	where are you located (please tell me StPetersburg ;)
+@lisitsyn	joergkurt: unfortunately moscow :)
+ joergkurt	hihi, ok :P
+ joergkurt	kinda big compute ML stuff, with tendency to multi-class and MKL
+@lisitsyn	joergkurt: svms?
+ joergkurt	...possible...its still cubic, and we will see if it can handle our data sizes
+@lisitsyn	joergkurt: shogun is good but we lack ease of installation and may be better API
+@lisitsyn	but if you push us enough and tell us what's better be fixed it would be fixed ;)
+ joergkurt	never mind, so far things look good
+@lisitsyn	joergkurt: one thing is that we have pointer based api
+@lisitsyn	but that's going to be fixed soon
+ joergkurt	right now we are aiming at writing single train-test instances and just wanna call them via algoXZY with parameter setting XYZ
+ joergkurt	then we fetch the results and estimate profiling (time,space) and scientific performance
+@lisitsyn	I see
+-!- exploreshaifali [~shaifali@182.70.196.201] has quit [Quit: Leaving]
+ joergkurt	ok, will poke around a bit more and sketch some plans ... we will need a while ... ttyl
+ joergkurt	cheers, moving out now ... have a nice weekend
+-!- joergkurt [~joergkurt@178.162.199.93] has quit [Quit: WeeChat 1.1.1]
+-!- kshitijk [~kshitijk@115.249.18.25] has joined #shogun
+-!- prakhar2511 [~prakhar25@202.78.175.199] has joined #shogun
+-!- curiousguy13_ [~curiousgu@120.59.226.121] has quit [Ping timeout: 246 seconds]
+-!- exploreshaifali [~shaifali@182.70.196.201] has joined #shogun
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has joined #shogun
+-!- iglesiasg [~iglesias@524B8E0B.cm-4-4c.dynamic.ziggo.nl] has quit [Ping timeout: 246 seconds]
+-!- curiousguy13_ [~curiousgu@59.177.203.40] has joined #shogun
+-!- smallgraph [~textual@scc-wkit-clx-208-236.scc.kit.edu] has joined #shogun
+ smallgraph	Hi, I'm trying to build shogun from the develop branch and I get errors on "symbol(s) not found for architecture x86_64" for several methods (first is "shogun::CGaussianARDFITCKernel::CGaussianARDFITCKernel()") when linking libshogun.dylib. Building from master worked fine and I'm working on Yosemite with clang 3.5.0. Did anyone had those problems before?
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has quit [Ping timeout: 246 seconds]
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has joined #shogun
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has quit [Ping timeout: 246 seconds]
+-!- joergkurt [~joergkurt@2a02:1810:1c19:ea00:b9e8:4dc2:fd9:1e69] has joined #shogun
+ joergkurt	feature questions: I see numeric, boolean, and String as features, if we want other nominal features they are represented as?
+-!- prakhar2511 [~prakhar25@202.78.175.199] has quit [Ping timeout: 246 seconds]
+ joergkurt	rephrasing question, in CDense the types are listed bool, 8bit, etc
+ joergkurt	http://www.shogun-toolbox.org/doc/en/latest/classshogun_1_1CDenseFeatures.html
+ joergkurt	what are the equivalent sparse features being allowed in CSparse
+ joergkurt	http://www.shogun-toolbox.org/doc/en/latest/classshogun_1_1CSparseFeatures.html
+ joergkurt	if I interpret this correctly the template allows largely numeric, and boolean as input
+ joergkurt	this means all integers are in a numeric relationship, right? Nominal classes are not allowed as input space, just as multiclass labels for prediction?
+-!- sonne|osx [~sonne@f049254171.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- smallgraph [~textual@scc-wkit-clx-208-236.scc.kit.edu] has quit [Quit: Textual IRC Client: www.textualapp.com]
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- joergkurt [~joergkurt@2a02:1810:1c19:ea00:b9e8:4dc2:fd9:1e69] has quit [Quit: WeeChat 1.1.1]
+-!- kshitijk [~kshitijk@115.249.18.25] has quit [Ping timeout: 255 seconds]
+-!- abinashm [uid66179@gateway/web/irccloud.com/x-hkeeqnqajahrlnip] has joined #shogun
+-!- prakhar2511 [~prakhar25@202.78.172.162] has joined #shogun
+-!- exploreshaifali [~shaifali@182.70.196.201] has quit [Quit: Leaving]
+-!- smallgraph [~textual@p4FDCCD96.dip0.t-ipconnect.de] has joined #shogun
+-!- PirosB3 [~pirosb3@host72-217-dynamic.42-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+ smallgraph	Hi, can someone help me, please? I'm having problems to compile shogun.
+-!- sonne|osx [~sonne@f049254171.adsl.alicedsl.de] has joined #shogun
+-!- rajul [~rajul@node-6gf.pool-180-180.dynamic.totbb.net] has quit [Quit: Leaving]
+-!- sonne|osx [~sonne@f049254171.adsl.alicedsl.de] has quit [Client Quit]
+-!- sonne|osx [~sonne@f049254171.adsl.alicedsl.de] has joined #shogun
+-!- kshitijk [~kshitijk@115.249.18.25] has joined #shogun
+-!- kshitijk [~kshitijk@115.249.18.25] has quit [Ping timeout: 246 seconds]
+-!- exploreshaifali [~shaifali@182.70.164.213] has joined #shogun
+-!- HeikoS [~heiko@2.221.116.151] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- exploreshaifali [~shaifali@182.70.164.213] has quit [Quit: Leaving]
+-!- f0z [67157d4e@gateway/web/freenode/ip.103.21.125.78] has joined #shogun
+ f0z	hey
+ f0z	Can anybody guide me through how debugging is done in shogun?
+ f0z	Any...body?
+ f0z	@lisitsyn Do you mind?
+@lisitsyn	f0z: hey
+ f0z	hey
+@lisitsyn	f0z: well, we mostly use gdb and valgrind
+@lisitsyn	what do you want to debug?
+ f0z	No no
+ f0z	I am not talking about that
+ f0z	I am talking about SG_DEBUG flags and the likes
+@lisitsyn	sg_debug is basically a printf
+@lisitsyn	that shows something is the level is set to debug
+-!- abinashm [uid66179@gateway/web/irccloud.com/x-hkeeqnqajahrlnip] has quit [Quit: Connection closed for inactivity]
+@lisitsyn	if you are asking how to see sg_debug messages then the answer is
+@lisitsyn	just get global io
+@lisitsyn	anyshogunobject->io
+@lisitsyn	and call set_loglevel
+@lisitsyn	anyshogunobject->io->set_loglevel(MSG_DEBUG)
+ f0z	what's the default state?
+@lisitsyn	iirc it is msg_info
+@lisitsyn	so only SG_INFO are shown
+ f0z	so this isssue
+ f0z	https://github.com/shogun-toolbox/shogun/issues/2723
+ f0z	I get how to compute the avg. gradient and all
+ f0z	i mean absolute value
+ f0z	but do I have to put explicitly that info somewhere using these flags?
+@lisitsyn	hmm not sure I get the question
+@lisitsyn	but currently SG_INFO is used here
+@lisitsyn	so the gradient stuff should be output as info as well
+ f0z	by SG_DEBUG or SG_INFO? the latter one right?
+@lisitsyn	SG_INFO yeah
+@lisitsyn	it is not debug info I think as watching at gradients is normal for neural networks training
+-!- prakhar2511 [~prakhar25@202.78.172.162] has quit [Ping timeout: 246 seconds]
+ f0z	thanks@@
+ f0z	i meant thanks!!!
+@lisitsyn	you're welcome :)
+ smallgraph	yeah, if I can't see those numbers change I nearly die because of impatience^^
+ smallgraph	lisitsyn, do you also have time for my question?
+@lisitsyn	smallgraph: sure
+ smallgraph	I'm trying to build from develop branch but get this error:
+ smallgraph	Linking CXX shared library libshogun.dylib
+ smallgraph	Undefined symbols for architecture x86_64:
+ smallgraph	  "shogun::CGaussianARDFITCKernel::get_parameter_gradient(shogun::TParameter const*, int)", referenced from:
+ smallgraph	      vtable for shogun::CGaussianARDFITCKernel in GaussianARDFITCKernel.cpp.o
+@lisitsyn	smallgraph: oh
+@lisitsyn	should be easy to fix
+@lisitsyn	smallgraph: let me update and reproduce
+ smallgraph	well the method is there, so I don't see why the compiler does not generate it
+@lisitsyn	smallgraph: could be due to no eigen available
+@lisitsyn	do you have eigen3?
+ smallgraph	ok, no, not yet^^
+ smallgraph	Oh, I did install it, but cmake did not find it^^
+ smallgraph	let me check why
+@lisitsyn	smallgraph: could be the reason
+-!- HeikoS [~heiko@2.221.116.151] has quit [Quit: Leaving.]
+-!- f0z [67157d4e@gateway/web/freenode/ip.103.21.125.78] has quit [Ping timeout: 246 seconds]
+ smallgraph	ok, now it finds it and compiles but it still dosen't find OpenCL
+ smallgraph	thanks :)
+-!- sonne|osx [~sonne@f049254171.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- curiousguy13_ [~curiousgu@59.177.203.40] has quit [Ping timeout: 264 seconds]
+-!- smallgraph [~textual@p4FDCCD96.dip0.t-ipconnect.de] has quit [Quit: My Mac has gone to sleep. ZZZzzz...]
+-!- curiousguy13_ [~curiousgu@120.59.227.130] has joined #shogun
+-!- sonne|osx [~sonne@f049254171.adsl.alicedsl.de] has joined #shogun
+-!- vortex_ape [~vortex_ap@120.59.74.178] has joined #shogun
+-!- sonne|osx [~sonne@f049254171.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@f049254171.adsl.alicedsl.de] has joined #shogun
+-!- PirosB3 [~pirosb3@host72-217-dynamic.42-79-r.retail.telecomitalia.it] has joined #shogun
+-!- xAndreLopesx [ThrashIRC@179.34.60.135] has joined #shogun
+-!- xAndreLopesx [ThrashIRC@179.34.60.135] has left #shogun []
+--- Log closed Mon Mar 02 00:00:41 2015

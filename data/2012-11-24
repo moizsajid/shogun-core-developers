@@ -1,0 +1,476 @@
+--- Log opened Sat Nov 24 00:00:15 2012
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ shogun-buildbot	build #183 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/183
+-!- ptizoom [~christian@79-71-89-182.dynamic.dsl.as9105.com] has quit [Quit: Ex-Chat]
+-!- ptizoom [~christian@79-71-89-182.dynamic.dsl.as9105.com] has joined #shogun
+ wiking	anybody around?
+ wiking	blackburn: ping
+ blackburn	wiking: re
+ blackburn	wiking: what's up?
+ wiking	gmnp
+ wiking	why is it ported this way into shogun
+ wiking	now it's like aimed to be used for kernel machine
+ blackburn	wiking: uhm?
+ blackburn	can it be used for anything else?
+ wiking	yes
+ wiking	it's a general
+ wiking	qp soler
+ wiking	solver
+ blackburn	didn't know
+ blackburn	well
+ blackburn	may be it is not that cool for other problems
+ wiking	well it's just solves this problem
+ wiking	min 0.5*alpha'*H*alpha + c'*alpha
+ wiking	subject to  sum(alpha) = 1,  alpha(i) >= 0
+ blackburn	wiking: so you mean it can be used for your problems?
+ blackburn	is it still state-of-the-art?
+-!- zxtx [~zv@ool-45750cfe.dyn.optonline.net] has quit [Ping timeout: 244 seconds]
+@sonney2k	wiking, isn't it in libqp nowadyas anyways?
+ blackburn	sonney2k: ha, JL works on C api for VW
+ blackburn	even better
+ blackburn	we don't have to do anything just wait :D
+ wiking	sonney2k: ?
+ wiking	sonney2k: i don't know i mean i've just seen at vojtech's page that he used to release
+ wiking	different gmnp versions
+ wiking	i mean with different optimizers
+ wiking	but maybe it has been the past
+ wiking	and now he has a good reason why not to push forward gmnp releases
+ wiking	and that's why they decided to use libqp as well for the bmrm stuff with uricamic
+ wiking	anyhow
+ wiking	i'll just fucking push this stuff because i'm already ready with this
+ wiking	althoguth the implementation could be cleaner...
+ wiking	anybody up for reviewing
+ wiking	?
+@sonney2k	blackburn, I know - there was hope shashwat could do this but he is busy with real life
+ wiking	great sonney2k here u go then
+ wiking	do a review
+ blackburn	review what?
+ wiking	the new code
+ blackburn	wherE?
+ wiking	just a sec
+ blackburn	haha
+ wiking	booom
+-shogungit:#shogun- [shogun] vigsterkr opened pull request #833: Introduction of a new non-convex bundle method risk minimization algorithm (master...so-dev)  https://github.com/shogun-toolbox/shogun/pull/833
+ blackburn	do you take vodka? what makes you productive?
+ wiking	oh shit
+ wiking	waith
+ wiking	i think this wont compile
+ wiking	i'll have to push an extra commit
+ blackburn	#if 0
+ blackburn	wtf?
+ wiking	where is it stuck?
+ wiking	blackburn: sorry i had to make some debugging
+ blackburn	well I mean
+ blackburn	does it work to define 0?
+ blackburn	:D
+ wiking	it works to comment out something
+ wiking	;)
+ blackburn	hmm
+ wiking	ah that shit has been removed already
+ wiking	so don't worry
+ blackburn	okayface
+ wiking	but still wait
+ wiking	because there's one compiling bug
+ wiking	but yeah it's not only about ncbm
+ wiking	it's as well some optimization of libbm*
+ wiking	it's a very weird matlab -> c code
+ wiking	so it still has to be cleaned up imho
+ blackburn	wiking: can you cleanup my code too? ;)
+ wiking	heheh
+ wiking	think about where should we put all these optimizers
+ wiking	like libbmrm etc
+ blackburn	just put somewhere
+ blackburn	:D
+ blackburn	nobody uses our shit anyway lol
+ wiking	:D
+ wiking	ok
+ blackburn	wiking: https://github.com/shogun-toolbox/shogun/tree/master/src/shogun/optimization
+ blackburn	why not here?
+ wiking	well we could
+ wiking	but currently the stuff there
+ wiking	are all external stuff
+ blackburn	feel free to move
+ blackburn	I wanted
+ wiking	ok i've pushed the fixing commit
+ blackburn	then I get back to my alco addiction and sank in vodka
+ wiking	:>>>
+ wiking	ok if anybody has time for this
+ wiking	do a review and then apply the patch
+ blackburn	I have
+ blackburn	wiking: #if 0 is still here
+ wiking	where?
+ wiking	mmm there's a problem now with gcc
+ wiking	in travis
+ wiking	so wait
+ blackburn	wiking: did you get a moment to check tapkee before?
+ wiking	none :(*
+ wiking	sorry
+ wiking	was working on this
+ blackburn	no problem just meant it is still actual :)
+ wiking	yeah will do
+ wiking	how's the stuff with
+ wiking	tsnr?
+ blackburn	I have doubts with some design things
+ blackburn	t-sne
+ wiking	yeah that shit
+ blackburn	hmm
+ wiking	implemented?
+ blackburn	well not yet
+ wiking	i'd be keen to try that
+ blackburn	I keep this in mind
+ blackburn	wiking: how great is your openmp experience?
+ wiking	not sooo great
+ wiking	tried it like
+ blackburn	I have some hard times with it
+ wiking	in 2004-5
+ wiking	no wait
+ wiking	2007-8
+ wiking	what's the problem
+ wiking	?
+ blackburn	https://github.com/lisitsyn/tapkee/blob/master/tapkee/routines/multidimensional_scaling.hpp wiking for example loop in lines 74-87 is slower when parallel
+ wiking	ok
+ wiking	gcc fails
+ wiking	whyyyyyyyy
+ wiking	why you nooo want to see
+ wiking	/home/travis/builds/shogun-toolbox/shogun/src/shogun/structure/libppbm.cpp:596: undefined reference to `shogun::clean_icp(shogun::ICP_stats*, shogun::bmrm_return_value_T&, shogun::bmrm_ll**, shogun::bmrm_ll**, double*&, double*&, double*&, bool*&, unsigned int, double*&, unsigned int*&, unsigned int)'
+ wiking	?!
+ wiking	and only gcc fails with it
+ blackburn	heh
+ wiking	maybe because it's and inline function?
+ blackburn	yeah can be
+ blackburn	I feel it makes no sense to inline function defined in .cpp
+ blackburn	am I wrong?
+ wiking	why not?
+ wiking	ok here's an attempt
+ wiking	let's see what travis does
+ blackburn	okay how can one inline a function
+ blackburn	if it have no implementation available
+ blackburn	has* argh
+ wiking	inline man
+ wiking	it should act as if a macro
+ wiking	almost
+ blackburn	yes
+ blackburn	but how if you have no impl around?
+ wiking	but the syntax is 'nicer'
+ blackburn	you have only pointer to that function in lib
+ blackburn	can't get code back
+ wiking	clang has no problem with it
+ wiking	btw
+ wiking	;)
+ blackburn	clang is smart
+@sonney2k	wiking, whcih line has the problem?
+ wiking	evaluation_cross_validation_multiclass_mkl
+ wiking	there's a problem in this one
+ wiking	are we aware of this?
+@sonney2k	wiking, yes
+@sonney2k	there are IIRC 3 valgrind errors in examples
+ wiking	ok i'm just saying
+@sonney2k	wiking, I meant in your code though :)
+ wiking	ah well in general
+@sonney2k	the compile error?
+ wiking	no i hope that's going to be fixed now
+ wiking	but like the stuff i did with uricamic's implementation for example
+@sonney2k	wiking, what was it?
+@sonney2k	did you have an inline functions that was not defined in a .h?
+ wiking	it was defined
+ wiking	but not implemented
+@sonney2k	yeah then your bad
+ wiking	yeah it seems gcc doesn't like it
+ wiking	sonney2k: noup
+ wiking	it's gcc's bad
+@sonney2k	yeah it's not standard
+ wiking	clang had no problem with it
+ wiking	anyhow it's fixed
+@sonney2k	believe me clang has problems with other code
+ wiking	i wouldn't say it's non standard ...
+@sonney2k	it is
+@sonney2k	inline (by standard) has to be in .h
+ wiking	mmm
+@sonney2k	definition and implementation
+ wiking	i doubt this very much
+ wiking	afaik c++ standard has no such clause
+ wiking	it's really a matter of compiler implementation
+@sonney2k	http://stackoverflow.com/questions/3992980/c-inline-member-function-in-cpp-file
+ wiking	again
+ wiking	this is not in c++ standard
+ wiking	it's the matter of compiler
+ wiking	afaik vc++ would act very different as well
+ wiking	anyhow it's fixed now and works with both gcc and clang
+ wiking	hence i saved some code lines :)
+ wiking	but i have a feeling that all this stuff should be taken out from structure
+ wiking	and create an abstract class for this stuff
+ wiking	that would look nicely
+ wiking	this way people will not realise that they can have these solvers by themselves
+ wiking	as it's too much tied to structure ....
+ blackburn	to SO you mean?
+@sonney2k	wiking, one step at a time
+ wiking	yep
+@sonney2k	wiking, we should get your patch in first and then define such RiskMinimizer framework
+ wiking	to SO
+ wiking	as really these can be solved for anything in form of 1/2\lambda ||w||^2 + R(w), where now with NCBM we can solve non-convex risk as well
+ wiking	so like in my case
+ wiking	latent so svm is: 1/2 ||w||^2 + c/n \sum max_{y',h'} (w*psi(x,y',h') + loss(y,y',h')) - c/n \sum max_h (w*psi(x,y,h))
+ wiking	and now the good thing with ncbm
+ wiking	that i dont care about the problem not being convex
+@sonney2k	wiking, well feel free to start CRiskMinimizer in shogun/optimization!
+ wiking	but yeah as i said earlier
+ wiking	sonney2k: heheh i have to produce a paper in 5 days
+ wiking	so maybe next year ;)
+ wiking	but this can already be part of 2.1.0 release ;P
+ wiking	just to have some valueable contribution for that release
+ blackburn	wiking: you run macosx right?
+ blackburn	can you try to compile git://github.com/lisitsyn/tapkee.git?
+ wiking	letmecone
+ wiking	clone
+ wiking	error
+ blackburn	cool
+ wiking	ok wait
+ wiking	i think header paths are not ok
+ wiking	is there like a configure script?
+ blackburn	argh
+ blackburn	no
+ blackburn	you know it is immature
+ wiking	ok compiling
+ wiking	i dont have openmp
+ wiking	so let's see how it handles it
+ blackburn	it is ok I don't use it yet
+ wiking	oh shit
+ wiking	lapack
+ wiking	:D
+ wiking	yeah dude
+ wiking	u need a configure script
+ wiking	;)
+ wiking	configure.ac and friends
+ blackburn	of course I need
+ blackburn	wiking: I templated everything to random access iterator - do you think it is reasonable?
+ blackburn	instead of forcing indexing 0,...,N-1 I mean
+ blackburn	I probably know what sonney2k thinks about that
+ blackburn	:D
+ wiking	hehehe
+ wiking	well yeah then there's a lot of R-B tree operation involved
+ wiking	so think twice if u need that really
+ wiking	if not then try to use other containers
+ blackburn	R-B?
+ blackburn	why?
+ wiking	red-black tree
+ blackburn	where?
+ wiking	that's behind std::vector for example
+ wiking	check c++ lib implementation
+ wiking	and u'll see
+ blackburn	for what?
+ wiking	ah no
+ wiking	i'm stupid
+ blackburn	red black is only in map
+ blackburn	and set
+ wiking	and set
+ blackburn	(as I thought)
+ blackburn	you confused me quite a lot :D
+ wiking	still
+ wiking	u stl smart
+ wiking	although i myself tend to throw things
+ wiking	at random
+ blackburn	it is not really stl related
+ blackburn	I mean do you think
+ wiking	and my first choice is really always std::vector :D
+ blackburn	having ability to change the type
+ blackburn	of data you operate on
+ blackburn	is a good thing
+ blackburn	i.e. writing a callback that operates on your structs not 0,...,N-1
+ blackburn	see what I mean?
+ wiking	aaah
+ blackburn	I thought it is useful
+ wiking	well
+ wiking	depends
+ blackburn	but now I am unsure
+ wiking	if it doesn't give u too much of a headache to handle this
+ wiking	then it's usuful
+ wiking	as you give more freedom for the users of the library
+ blackburn	it is done already so the question is whether to get rid of it or not
+ blackburn	:D
+ wiking	i wouldn't
+ blackburn	one thing I will get instantly is easier parallelization
+ wiking	sonney2k: still here?
+ wiking	blackburn: what would you inherit CBMRM from?
+ blackburn	what is CBMRM?
+ blackburn	:D
+ wiking	bundle method risk minimization
+ wiking	or CRiskMinimizer as sonney2k suggested
+ blackburn	I have no special vision on that actually
+ wiking	mmm fuck i need to resolve some stuff with my stash
+ wiking	argh i hate this :(
+ blackburn	stash if useful to waste code
+-!- zxtx [~zv@ool-45750cfe.dyn.optonline.net] has joined #shogun
+ wiking	oh fuck
+ wiking	how can i reset a file?
+ blackburn	wiking: reset to?
+ wiking	i've realised
+ wiking	it's a bit complicated
+ wiking	so if you want to undo changes to a files by a patch
+ wiking	then you have to first
+ wiking	git reset file
+ wiking	and then
+ wiking	git checkout file
+ blackburn	yes
+ blackburn	wiking: my openmp impl is 6 times slower :D
+ wiking	heheh that cna happen
+ wiking	too much of a context change unfortunately
+ blackburn	I don't want to write pthreads code again
+ wiking	well that wouldn't help u
+ wiking	i mean what u can do with pthreads
+ wiking	you can do with openmp as well
+ blackburn	yeah but openmp is less explicit and takes time to get into it
+ blackburn	so I am in trouble hmm
+ wiking	another pr
+ wiking	boom
+-shogungit:#shogun- [shogun] vigsterkr opened pull request #834: Template specialization for add_to_dense_vec in DenseFeatures (master...master)  https://github.com/shogun-toolbox/shogun/pull/834
+ blackburn	okay
+ blackburn	that one is easy
+-shogungit:#shogun- [shogun] lisitsyn pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/49682e5e5390...c250bb9beb21
+-shogungit:#shogun- shogun/master bfdff65 Viktor Gal: Template specialization for add_to_dense_vec in DenseFeatures
+-shogungit:#shogun- shogun/master c250bb9 Sergey Lisitsyn: Merge pull request #834 from vigsterkr/master...
+ shogun-buildbot	build #670 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/670
+ wiking	yey the buildbot agrees with the patch
+ blackburn	wiking: have you seen boost.graph?
+ wiking	yeps
+ blackburn	wiking: http://www.boost.org/doc/libs/1_52_0/libs/graph/doc/dijkstra_shortest_paths_no_color_map.html I feel dizzy
+ blackburn	10 template parameters oh my f
+ wiking	yeah
+ wiking	usually a graph lib is like that
+ blackburn	ohh
+ wiking	once i've implemented some basic graph stuff
+ wiking	and then u realise that if u want to support funky algos
+ wiking	you'll end up fucked up
+ blackburn	sure
+ wiking	"weighted, directed or undirected graph"
+ wiking	yep
+ wiking	this part makes it really complicated already
+ wiking	to support this all
+ wiking	but boost is really cool
+ wiking	but sometimes of course overhyped
+ wiking	like for example
+ wiking	all the people in quantitative finance use boost
+ blackburn	why?
+ wiking	well that's the thing
+ blackburn	or rather what for?
+ wiking	HFT
+ wiking	high frequency trading
+ blackburn	well still what is the place for boost here?
+ wiking	a) portability of the library
+ wiking	b) has some really handy threadpooling
+ wiking	as well as memory managment
+ blackburn	ah that part
+ wiking	as well as shared pointers
+ wiking	so all these stuff that makes your coding easier
+ blackburn	that's quite reasonable
+ wiking	and they want c++
+ wiking	as it's the fastest
+ wiking	i mean c/c++
+ wiking	and as they do high frequency trading
+ wiking	speed is everything there
+ blackburn	why do you know that stuff?
+ blackburn	:)
+ wiking	http://www.boost.org/doc/libs/1_35_0/libs/statechart/doc/faq.html#HardRealtime
+ wiking	this is handy as well
+ wiking	if we could make some of our algos
+ wiking	possible to set time
+ wiking	i mean hard real-time requiremtn
+ wiking	i'm sure shogun would be used ;)
+ wiking	why do i know these stuff
+ wiking	because i'm thinking about getting job in the sector
+ blackburn	I wouldn't mind as well :D
+ wiking	it's hard though
+ blackburn	I bet this guys have enough money
+ blackburn	these*
+ wiking	blackburn: http://www.quantfinancejobs.com/jobs/job.aspx?JobID=13550
+ wiking	all the rocket scientist of the future end up working for investment banks ;)
+ wiking	because of the cash
+ blackburn	ah you forgot to say that there is no way to get there
+ wiking	most sought people for these jobs are phds in physics
+ wiking	and there's a little bit of indian maffia involved in the thing
+ wiking	as the best quants out there are indians
+ blackburn	hehe
+ wiking	but yeah
+ wiking	it'd be great if we could do some funky stuff with our learners
+ wiking	and especially classification
+ blackburn	regressors you mean?
+ wiking	nono
+ wiking	so in general
+ wiking	one could set a real time constraint
+ wiking	on the classification
+ blackburn	you mean classify that stuff in 0.0001s?
+ wiking	let's say learning time you dont care about
+ wiking	but you want to be able to set to classify with the learnt model
+ wiking	within given hard deadline
+ wiking	so yeah
+ wiking	if u want it you could set a soft/hard deadline
+ wiking	for that given function call
+ wiking	i think that'd be interesting for a lot of parties
+ blackburn	I see that out of shogun
+ wiking	i mean shogun has the advantage
+ blackburn	oh my these rates are crazy
+ wiking	that thanks to sonney2k it's really trying to as less reseource wasting as much possible
+ wiking	so it's a good basis to start with
+ wiking	but needs some work as far as i can see
+ wiking	to be able to support such things
+ wiking	i dont even know how we could start this
+ wiking	so for example that we have a simple linearMachine
+ wiking	and have it's classifier be able to support it
+ blackburn	wiking: if you are interested we could play with it somewhere in a separate lib
+ wiking	yeah we could make a fork
+ blackburn	just sharing ideas from/with shogun
+ wiking	but how would u do it?
+ blackburn	do what?
+ wiking	well start it
+ wiking	i mean essentially i think if we could do this right
+ wiking	we could merge it in shogun for sure
+ blackburn	I think best way is to use shared ideas
+ blackburn	not code
+ wiking	mm
+ wiking	what was that procject
+ wiking	project
+ wiking	the opencl one
+ blackburn	ehm
+ blackburn	that one french guy is from?
+ wiking	viennacl
+ blackburn	ahh
+ blackburn	yes
+ wiking	mmm
+ wiking	it supports eigen as well
+ blackburn	wiking: yes I am curious now too
+ wiking	we could add SGVector
+ wiking	to support this
+ wiking	btw
+ wiking	why is this
+ wiking	static inline float64_t dot(
+ wiking	const uint64_t* v1, const uint64_t* v2, int32_t n)
+ wiking	{
+ wiking	i mean why a dot product of two uint64 is a flot?
+ wiking	float?
+ wiking	indeed
+ wiking	cant we just have
+ wiking	a non-static
+ blackburn	in shogun everything is float64 :D
+ wiking	T dot(const SGVector<T>& v) const;
+ wiking	?
+ wiking	i mean even more
+ wiking	T operator*(const SGVector<T>& v)
+ wiking	?
+ blackburn	no that's not cool
+ wiking	why?
+ blackburn	int8 * int8?
+ wiking	ah u are staring to worry about overflow?
+ blackburn	wiking: yes a little
+ wiking	because then it's the same with float64
+ wiking	it should return at least floatmax
+ wiking	;P
+ wiking	but ok let's say
+ blackburn	well but with int8 it will happen for sure
+ wiking	something dot(SGVector<T>& asd) const
+ wiking	so that i dont have to call on two
+ wiking	so that one can call directly a dot product
+ wiking	because now a dot product is really stupid
+ wiking	even if both the vectors are in SGVector
+ blackburn	I if i could say it is not
+ blackburn	:D
+ wiking	?
+--- Log closed Sun Nov 25 00:00:02 2012

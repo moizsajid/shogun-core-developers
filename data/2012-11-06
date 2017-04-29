@@ -1,0 +1,265 @@
+--- Log opened Tue Nov 06 00:00:17 2012
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Quit: Page closed]
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Ok, so I still can't get this to work at all, blackburn.  I keep getting the same undefined symbol every single time.  Anytime I try to import modshogun.
+ blackburn	KMcQuisten: workaround time?
+ blackburn	:D
+ KMcQuisten	I've tried to back up to previous commit tags, but I cna't even get them to compile properly to see if they fix the problem
+ blackburn	rm line 4 interfaces/modular/Latent_includes.i
+ KMcQuisten	Righto.  I shall try that
+ blackburn	rm lines 22,28 interfaces/modular/Latent.i
+ blackburn	11-13 as well
+ KMcQuisten	Ok, I'll recompile and give it a shot
+ KMcQuisten	If this works i'll actually get to go home tonight!  woohoo!
+ wiking	blackburn: i wonder what's the difference
+ blackburn	wiking: no idea :D
+ wiking	blackburn: i mean Structure.i _includes.i does the same :)
+ blackburn	yes
+ blackburn	I just want KMcQuisten to go home tonight :D
+ KMcQuisten	Hahaha!  thank you
+ wiking	KMcQuisten: can you do this: in the directory where you've cloned the git repo: ls src/shogun/latent/DirectorLatentModel.cpp.o
+ wiking	after you've compiled of course
+ wiking	just paste here the result
+ KMcQuisten	Sure thing.
+ wiking	or even better: ls src/shogun/latent/DirectorLatentModel.*
+ wiking	;P
+ KMcQuisten	Here's what I get:
+ KMcQuisten	src/shogun/latent/DirectorLatentModel.cpp  src/shogun/latent/DirectorLatentModel.cpp.o  src/shogun/latent/DirectorLatentModel.h
+ wiking	mmm
+ wiking	so there's object
+ wiking	KMcQuisten: what os/arch r u using?
+ KMcQuisten	I'm using Centos 6 on x86_64 architacture
+ wiking	mmm ok
+ blackburn	another one uses centos
+ blackburn	and another gone and another gone
+ wiking	well now u shouldn't have any problems anymore with that class since you've thrown it out from modular interface
+ wiking	but i really wonder what could cause there the problem
+ KMcQuisten	blackburn, what distro do you prefer?
+ wiking	as for both me and blackburn it works w/o the any problems...
+ KMcQuisten	Yeah, iv'e never seen anything like this before
+ blackburn	KMcQuisten: no idea :)
+ wiking	although i'm using python 2.7 as well
+ blackburn	I use ubuntu
+ wiking	but there's nothing fancy/funky about that given class
+ wiking	i.e. if that fails then other classes should fail as well
+ KMcQuisten	Yeah, it should work just like all the other director classes.
+ wiking	indeed
+ KMcQuisten	Uh oh:
+ KMcQuisten	ImportError: /usr/lib/python2.6/dist-packages/_modshogun.so: undefined symbol: _ZN6shogun23CMeanShiftDataGeneratorIdE20set_mean_shift_modelEdi
+ blackburn	hah
+ KMcQuisten	I truly have no idea what the fuck's happening now.
+ blackburn	it is implemented I am sure
+ KMcQuisten	Yeah
+ KMcQuisten	So let's see:  Swig problem, python problem, anything else it could be?
+ blackburn	KMcQuisten: how long has it been since you last updated your git?
+ blackburn	I mean shogun git
+ KMcQuisten	This was with the newest pull.  I can't remember what tag I was on before.
+ KMcQuisten	I did a fresh clone
+ KMcQuisten	I generally pull the newest one every morning
+ blackburn	my guess is that for some reason your .so file is old
+ KMcQuisten	libshogun.so, or _modshogun.so?
+ blackburn	may be both, no idea
+ blackburn	and no idea how can that ever happen but just guess
+ KMcQuisten	Righto.  I'll see what I can do
+ wiking	ls -la /usr/lib/python2.6/dist-packages/_modshogun.so
+ wiking	what's the output
+ KMcQuisten	-rwxr-xr-x   1 root root 27347037 Nov  5 18:11 _modshogun.so
+ blackburn	not old I believe
+ wiking	hehehe
+ wiking	mmm swig is ok
+ wiking	i use 2.0.8 as well
+ wiking	ok
+ wiking	well then i guess it's time for checking the .so
+ wiking	:D
+ wiking	strings /usr/lib/python2.6/dist-packages/_modshogun.so|grep CMeanShiftDataGenerator
+ wiking	:>
+ KMcQuisten	Wll that's a lot of text
+ KMcQuisten	Seems to have found a lot
+ wiking	:(
+ KMcQuisten	Yep, there's the symbol it says it can't find
+ wiking	_ZN6shogun23CMeanShiftDataGeneratorIdE20set_mean_shift_modelEdi
+ wiking	?
+ KMcQuisten	Yep
+ blackburn	okay guys I have low battery need to sleep :)
+ blackburn	see you
+ KMcQuisten	gnight
+-!- blackburn [~blackburn@109.226.125.245] has quit [Quit: Leaving.]
+ KMcQuisten	wiking:  What's it mean that it can't find a symbol that seems to be in the .so
+ KMcQuisten	?
+ wiking	well
+ wiking	that's a really good question :S
+ KMcQuisten	BWA!  Old version of libshogun.so and libshogun.sa in the lib64 folder
+ KMcQuisten	.a
+ KMcQuisten	let's see if getting all those fresh helps
+ KMcQuisten	BOOM!  Headhsot
+ KMcQuisten	Got it!
+ KMcQuisten	Thanks for helping me wad through this blackburn and wiking.  You're lifesavers
+ wiking	:>>.
+ wiking	nw
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+-!- zxtx [~zv@2607:f140:400:1036:54c5:527:37e1:f5c8] has joined #shogun
+-!- ptizoom [~christian@85.210.80.20] has quit [Quit: Ex-Chat]
+-!- ptizoom_ [~christian@85.210.80.20] has joined #shogun
+-!- zxtx [~zv@2607:f140:400:1036:54c5:527:37e1:f5c8] has quit [Ping timeout: 246 seconds]
+-!- ptizoom_ [~christian@85.210.80.20] has quit [Quit: Ex-Chat]
+-!- ptizoom_ [~christian@85.210.80.20] has joined #shogun
+-!- harshit_ [~harshit@120.59.110.194] has joined #shogun
+-!- harshit_ [~harshit@120.59.110.194] has quit [Ping timeout: 252 seconds]
+-!- harshit_ [~harshit@120.59.110.194] has joined #shogun
+-!- ptizoom_ is now known as ptizoom
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+-!- harshit_ [~harshit@120.59.110.194] has quit [Ping timeout: 240 seconds]
+-!- harshit_ [~harshit@120.59.110.194] has joined #shogun
+ wiking	blackburn: have u seen what was the problem of KMcQuisten? :)
+ blackburn	wiking: old binaries as I guessed?
+ wiking	indeed :)
+ wiking	"Old version of libshogun.so and libshogun.sa in the lib64 folder"
+ blackburn	no idea what happened though
+ wiking	well that :)
+ wiking	ietf meeting on future video codec design: http://europa.kradradio.com:8040/ietf_video_codec_wg.opus
+ wiking	;)
+ blackburn	wiking: have you seen link in my twitter?
+ blackburn	about halide language
+-!- zxtx [~zv@173-13-183-134-sfba.hfc.comcastbusiness.net] has joined #shogun
+ wiking	nouyp
+ wiking	haven't seen my twitter feed for a while :(
+ wiking	ah i see
+ wiking	mm interesting
+ wiking	lol error: no type named 'initializer_list' in namespace 'std
+ wiking	i cannot get c++11 work
+-!- zxtx [~zv@173-13-183-134-sfba.hfc.comcastbusiness.net] has quit [Ping timeout: 260 seconds]
+-!- heiko [~heiko@dhcp-166-197.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- zxtx [~zv@173-13-183-134-sfba.hfc.comcastbusiness.net] has joined #shogun
+ wiking	heiko: yo
+ heiko	wiking hi
+ wiking	heiko: do you know what's up with the streaming fw? :)
+ heiko	wiking, it leaks :)
+ wiking	hehe i know
+ heiko	wiking, I did some changes (since it leaked before)
+ wiking	more over it has double-free -s
+ heiko	that I needed for the two-sample test stuff
+ wiking	which makes the code crash on my mac
+ heiko	I will have a look,
+ heiko	any particular code?
+ wiking	mm yeah
+ wiking	i think it was this mkl CV
+ wiking	just a sec
+ wiking	evaluation_cross_validation_multiclass_mkl.cpp
+ wiking	this one crashes on my machine
+ wiking	do u wanna see the backtrace?
+ wiking	heiko: http://pastebin.com/5y0w5JzY
+ heiko	I probably also crashes here
+ wiking	heiko: dunno i mean last time all the buildbots were fine but the code crashed on my machine :(
+ heiko	wow strange
+ heiko	I am currently at work, but I will look into the example later
+ heiko	(and also fix the other memory problems)
+ wiking	mmm
+ wiking	forget that
+ wiking	i've recompiled now the code
+ wiking	it's somewhere else the crash :DDD
+ wiking	it's now here: http://pastebin.com/qgk5ifxm
+ wiking	woah i have an extra day for submitting this paper \o/
+ wiking	the lord is mighty :>
+-!- heiko [~heiko@dhcp-166-197.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 256 seconds]
+ blackburn	wiking: is it more or less ready?
+-!- harshit_ [~harshit@120.59.110.194] has quit [Ping timeout: 248 seconds]
+-!- zxtx [~zv@173-13-183-134-sfba.hfc.comcastbusiness.net] has quit [Ping timeout: 244 seconds]
+ wiking	blackburn: yep it's getting theere :)
+ blackburn	wiking: nice
+ blackburn	wiking: will have an interview this friday
+ blackburn	:D
+ wiking	blackburn: another one? :) comeoooon
+ blackburn	wiking: different job
+ blackburn	appears to be java programmer
+ wiking	noooo don't java :D
+ wiking	make more shogun
+ wiking	:>
+ wiking	r we like out from this doc camp or what? :)
+ blackburn	no idea but I will not get in for sure :)
+ blackburn	wiking: will you go if we are in?
+ wiking	blackburn: it seems i could go yes
+ blackburn	so it could be honeymoon for you and fernando
+ blackburn	or heiko
+ blackburn	:D
+ wiking	lol
+ wiking	my internetz is dying :)
+ wiking	blackburn: did u manage to get that halide compile?
+ wiking	i mean the exampl
+ blackburn	wiking: I didn't try yet
+-!- heiko [~heiko@dhcp-184-134.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- heiko [~heiko@dhcp-184-134.internal.eduroam.ucl.ac.uk] has quit [Remote host closed the connection]
+-!- blackburn [~blackburn@188.168.13.67] has joined #shogun
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+@sonney2k	wiking, I've heard you have resurrected a patient who head-shooted himself?
+@sonney2k	and wiking no news about doc camp yet...
+ n4nd0	what?? is wiking like a doctor?
+ n4nd0	well not even a doctor can do that ... is he like a Jesus? :D
+@sonney2k	n4nd0, yes jesus, lazarus - you name it
+@sonney2k	he is out $deity
+@sonney2k	our
+ wiking	sonney2k: ahhahaha yes :D
+ n4nd0	hehe
+ n4nd0	but what's that?
+ n4nd0	wiking: what did you do?
+ wiking	n4nd0: read yesterday night's logs
+@sonney2k	saving the world was not enough
+ n4nd0	let's see
+@sonney2k	he needs new challenges
+ wiking	we need FAQ
+@sonney2k	wiking, type type type it in :)
+ wiking	sonney2k: aintnotime now :(
+ wiking	but yeah that should be a little more nicely designed
+@sonney2k	wiking, design third
+ wiking	content first :D
+ n4nd0	wiking: got it hehe
+ wiking	n4nd0: yeah that was a good one :>
+ wiking	people with centos having the most problems till now :D
+@sonney2k	wiking, I am on centos too
+@sonney2k	and no issues
+ wiking	sonney2k: hehe i'm just stating the obvious
+@sonney2k	I actually made sure it runs smoothly...
+ wiking	more than 50% of the people since i'm around and trying to help out ppl with their problems are using centos
+ wiking	but anyhow... i guess it's an accident :P
+ wiking	i mean coincidence :P
+ wiking	sonney2k: have u done some visualization of lbp when u were doing libocas?
+ wiking	and somebody should kick the arses of macports people to finally apply the 2.0 patch for macports..
+@sonney2k	wiking, no impl. is incomplete
+ wiking	ok i see
+-!- ptizoom [~christian@85.210.80.20] has quit [Quit: Ex-Chat]
+-!- ptizoom_ [~christian@85.210.80.20] has joined #shogun
+ wiking	mmm i wonder how one could visualize this feature at all ;)
+ wiking	ooh okeeey
+ wiking	sonney2k: still here?
+-!- zxtx [~zv@173-13-183-134-sfba.hfc.comcastbusiness.net] has joined #shogun
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Quit: Page closed]
+ wiking	sonney2k: /Users/wiking/shogun-latent-build/lib/libshogun.13.dylib (compatibility version 0.0.0, current version 0.0.0)
+ wiking	i think this caused his problem
+ wiking	mmm
+ wiking	blackburn: ping
+ wiking	ok that's at least for osx
+ blackburn	wiking: ponggg
+ wiking	shouldn't we like really maintain a proper major and minor version number for libshogun? :)
+ wiking	*picabooo*
+-shogungit:#shogun- [shogun] vigsterkr opened pull request #814: Fix libshogun.dylib compilation on OS X (master...latent)  https://github.com/shogun-toolbox/shogun/pull/814
+-shogungit:#shogun- [shogun] lisitsyn pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/0b17728376c9...ffeff459048e
+-shogungit:#shogun- shogun/master 118d15b Viktor Gal: Fix libshogun.dylib compilation on OS X...
+-shogungit:#shogun- shogun/master ffeff45 Sergey Lisitsyn: Merge pull request #814 from vigsterkr/latent...
+-!- ptizoom_ [~christian@85.210.80.20] has quit [Quit: Ex-Chat]
+-!- ptizoom__ [~christian@85.210.80.20] has joined #shogun
+ shogun-buildbot	build #623 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/623
+ wiking	DUUUUDE
+ wiking	this is LOOOl
+ wiking	blackburn: here?
+ wiking	hehe new eigen
+ blackburn	wiking: well ratherbugfix release
+ wiking	blackburn: have u known about this command of git: git shortlog
+ wiking	?
+ blackburn	no
+ blackburn	looks cool
+ wiking	it's pretty good for creating a changelog file for a release
+ wiking	u can specify the commit as well
+ wiking	so that it only creates the list from that given commit
+-!- zxtx [~zv@173-13-183-134-sfba.hfc.comcastbusiness.net] has quit [Ping timeout: 260 seconds]
+-!- blackburn [~blackburn@188.168.13.67] has quit [Quit: Leaving.]
+--- Log closed Wed Nov 07 00:00:17 2012

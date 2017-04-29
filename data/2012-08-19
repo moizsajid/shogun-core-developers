@@ -1,0 +1,472 @@
+--- Log opened Sun Aug 19 00:00:17 2012
+ blackburn	sonney2k: I think I will add sparse features with implicit normalization
+ blackburn	and mean -> 0
+ blackburn	costly thing however
+ blackburn	[DEBUG] correct=0, total=2150, rejected=0
+ blackburn	omg
+-!- gsomix [~gsomix@178.45.39.145] has quit [Ping timeout: 245 seconds]
+-!- CIA-21 [~CIA@204.152.223.100] has quit [Remote host closed the connection]
+ shogun-buildbot_	build #59 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/59
+ shogun-buildbot_	build #70 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/70
+ shogun-buildbot_	build #55 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/55
+ shogun-buildbot_	build #381 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/381
+-!- emrecelikten [~emre@trir-5d800450.pool.mediaWays.net] has quit [Ping timeout: 244 seconds]
+-!- emrecelikten [~emre@trir-4d0d87fa.pool.mediaWays.net] has joined #shogun
+ shogun-buildbot_	build #391 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/391  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	good morning
+ blackburn	hey
+-!- hoijui [~hoijui@dslb-092-078-182-230.pools.arcor-ip.net] has joined #shogun
+-!- gsomix [~gsomix@178.45.39.145] has joined #shogun
+ gsomix	hi
+ wiking	ho
+ blackburn	n4nd0: so what about risks with hm?
+ blackburn	can I help you?
+ n4nd0	blackburn: I have to take a look to the PR that wiking did
+ blackburn	well he just put risk to so model
+ n4nd0	for what I undestood
+ n4nd0	it should work with that
+ n4nd0	do you remember the name of the PR?
+ blackburn	not really
+ n4nd0	has it already been merged?
+ n4nd0	got it
+ n4nd0	https://github.com/shogun-toolbox/shogun/pull/719
+ blackburn	yes sure
+ n4nd0	I am going to issue a new PR soon and later I will check that
+ n4nd0	this is a small one
+ n4nd0	I just added a new Evaluation class, StructuredAccuracy, to compute accuracy for structured problems
+ blackburn	good thing to have
+ n4nd0	definitely
+ wiking	what's with the risk fuction then?
+ wiking	*function?
+ wiking	blackburn: merge my last pr please
+ wiking	n4nd0: ping me when u have 10 mins to chat
+ blackburn	wiking: CIA died - it is already merged
+ n4nd0	wiking: now is good, tell me
+ wiking	blackburn: lol ok
+ wiking	n4nd0: ok brb in 1 min
+ n4nd0	ok
+ wiking	n4nd0: i need to redesign or soemting structuredmodel
+ wiking	but i need your input/consent
+ wiking	:)
+ n4nd0	ok
+ wiking	btw
+ wiking	check my last PR
+ n4nd0	I have not really looked at the PR yet
+ n4nd0	give some more time then
+ wiking	i've change how PSI is calculated in latent
+ wiking	as this is the only way we can support sparse features
+ wiking	https://github.com/shogun-toolbox/shogun/pull/741
+ wiking	as the SGVector<float64_t> psi (...) both in Structured and LatentModel
+ wiking	could not support sparse features
+ wiking	ok i'll be back in 1 min
+ n4nd0	wiking: but those changes are just in LatentModel
+ n4nd0	wiking, blackburn: I am checking PR 719, I thought that the idea was to move the risk function to the StructuredModel rather than to the children
+ n4nd0	as I see there it is not implemented in CStructuredModel but in CMulticlassModel
+ blackburn	how can that be implemented in structured model?
+ n4nd0	do you remember that conversation we had at midnight some days ago?
+ n4nd0	I think that the conclusion there was that the risk function was dependent on the argmax and the psi
+ wiking	n4nd0: for now yes
+ wiking	n4nd0: that risk function only valid for Multiclass case
+ wiking	that's why it's in multiclass
+ n4nd0	but apart from that, the definition is genereal
+ blackburn	n4nd0: no, subgrad is not general
+ wiking	n4nd0: the risk fucntion for instance for SOlatent svm would be different
+ n4nd0	blackburn: wasn't it too in the definition we saw in that thesis?
+ n4nd0	wiking: that's why I think it should be virtual, but in StructuredModel
+ blackburn	yes, for some models it is
+ shogun-buildbot_	build #392 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/392  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ wiking	n4nd0: and about the psi function: i've just done it in latent model since i don't know how it would effect SO at the moment
+ n4nd0	wiking: ok
+ wiking	n4nd0: it is virtual in structuredModel
+ n4nd0	wiking: let me show you the reference we were talking about
+ n4nd0	well I think there is a mail with that
+ wiking	n4nd0: https://github.com/shogun-toolbox/shogun/pull/719/files#L18R228
+ blackburn	n4nd0: I don't mind it to be general
+ blackburn	but if there is loss of efficiency I don't mind to have some duplicated code
+ wiking	somebody broke java modular :)
+ wiking	i guess it's heiko
+ n4nd0	http://users.cecs.anu.edu.au/~chteo/pub/Teo10_phdthesis.pdf
+ blackburn	I mean if {argmax+subgrad} in multiclass is more efficient than virtual one - we should go this way
+ blackburn	see what I mean?
+ n4nd0	blackburn: why should it be more efficient that way?
+ wiking	n4nd0: which page?
+ blackburn	wiking: Appendix 1
+ n4nd0	wiking: equations A.1 and A.8, pages 103 and 105
+ n4nd0	they are the contribution in the risk of one training example and the subgradient, respectively
+ wiking	ok
+ wiking	but isn't this application specific?
+ wiking	i mean what i understood from uricamic's solver
+ wiking	it pretty much lambda*||w||_2^2 + Risk
+ wiking	i mean it solves this
+ blackburn	hahaha I just noticed the author's name
+ wiking	and as you can see from the risk function of MulticlassModel... it pretty much works only if your SO problem is a multiclass problem
+ blackburn	bad bad word in the middle
+ n4nd0	wiking: aren't the application speficic parts only in the argmax and the psi?
+ wiking	n4nd0: in that risk funciton no
+ wiking	*function
+ blackburn	n4nd0: so you want to implement subgrad in independent fashion as well
+ blackburn	right?
+ wiking	it loops through the various classes
+ n4nd0	wiking: in uricamic's one?
+ wiking	n4nd0: yes
+ n4nd0	wiking: can you point out for me the loops you mean? lines?
+ wiking	line 181
+ wiking	in MulticlassModel.cpp
+ n4nd0	wiking: it looks to me that this part is the argmax
+ wiking	well if yes then chuck it out :)
+ wiking	and replace it with argmax :)
+ wiking	and see if we can get further with the story
+ n4nd0	hehe I guess I should read it completely first
+ wiking	and move the risk function in structredmodel ;)
+ wiking	R({\bf w}) = \sum_{i=1}^{m} \max_{y \in \mathcal{Y}} \left[ \ell(y_i, y) * + \langle {\bf w}, \Psi(x_i, y) - \Psi(x_i, y_i)  \rangle  \right]
+ wiking	this is what the code does apparently
+ wiking	(see the doxygen for virtual float64_t risk(float64_t* subgrad, float64_t* W, TMultipleCPinfo* info=0); in MulticlassModel.h
+ wiking	but let me know when u r through this one as i have other concerns :)
+ n4nd0	tell me about them :)
+ wiking	heheh so ok the following is the story
+ wiking	i need to be able to chuck in extra variables for StructuredModel
+ wiking	for delta_loss
+ wiking	and get_joint_vector...
+ wiking	which would mean that i need to change the function arguments in StructuredModel
+ wiking	but that won't work  :)
+ wiking	i mean i need something like this for example for delta loss
+ wiking	loss(y, yhat, hhat) instead of loss(y1, y2)
+ n4nd0	ok
+ n4nd0	I thought of that
+ wiking	get_joint_feature_vector should be
+ n4nd0	my idea was to put that method in StructuredModel too
+ wiking	get_joint_feature_vector(feat_index, structureddata y, latentdata h)
+ blackburn	n4nd0: btw about coffin integration
+ blackburn	subgrad of models (by Teo)
+ blackburn	is 0 + \phi(x,\overline{y})
+ n4nd0	wiking: just put them in the StructuredModel
+ blackburn	- \phi(x,y)
+ wiking	n4nd0: how? :)
+ blackburn	I mean it is two add_to_dense_vec operations
+ wiking	i can do something like: get_joint_feature_vector(feat_index, structureddata y, latentdata h = NULL)
+ n4nd0	wiking: that's why I didn't do delta_loss and get_joint_feature_vector pure virtual, but unimplemented
+ wiking	and same for delta_loss
+ n4nd0	exactly, that's the spirit :)
+ wiking	?
+ wiking	no comprende
+ n4nd0	mmm
+ n4nd0	what is the problem of making new methods?
+ n4nd0	we have a delta_loss(y1,y2)
+ n4nd0	put another one there delta_loss(y,yhat,hhat)
+ blackburn	wiking: can you convert it to sth like 'add_joint_feature_vector_to_dense_vec'? :)
+ shogun-buildbot_	build #393 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/393  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ wiking	blackburn: which where?
+ blackburn	wiking: I mean now you are using get_joint_feature_vector
+ wiking	n4nd0: and who will call it in your Primal solver?
+ blackburn	oh I will wait you to finish :)
+ wiking	blackburn: which class r u talking about
+ blackburn	wiking: let me check last pr again
+ n4nd0	wiking: aham, so you would like to use the primal solver for your latent problems directly
+ wiking	yes
+ wiking	as well as the dual solver by uricamic
+ n4nd0	wiking: aham, are you sure it can be done like that?
+ wiking	well the only difference is
+ wiking	how you calculate the delta loss and the psi
+ wiking	i.e. psi is based on x,y,h
+ wiking	and not only on x,y
+ wiking	same with the delta loss
+ n4nd0	ok
+ wiking	see here:
+ n4nd0	but even if you include a new parameter latentdata h = NULL
+ n4nd0	how do you plan to make the difference between executing for latent or not?
+ n4nd0	some kind of boolean member?
+ wiking	n4nd0: no
+ wiking	i mean from the fucntion you can tell whether the func arg is set or not
+ wiking	right?
+ wiking	btw i can see that you use only argmax directly from PrimalMosek
+ wiking	right?
+ n4nd0	yes, I think so
+ n4nd0	wiking: and yes, you are right about the thing of the func arg; I am king of retarded...
+ n4nd0	kind* of
+ wiking	mmm
+ wiking	then maybe this would work
+ wiking	but the stupid thing is
+ wiking	mmm
+ wiking	somehow i wanted to hide this behind the function if you know what i mean
+ wiking	so that things are not passed via the function arg
+ wiking	rather you just give an index or something
+ wiking	and everything else is behind the scenes
+ wiking	blackburn: ok check it again
+ wiking	n4nd0: but maybe it'll work what i'm thinking of now
+ blackburn	check what?
+ wiking	as really delta_loss and get_joint_feature_vector is being called in your argmax
+ wiking	blackburn: last pr
+ wiking	blackburn: you were about to comment there something
+ blackburn	I'm kind of lost there
+ wiking	blackburn: this one: https://github.com/shogun-toolbox/shogun/pull/741
+ wiking	?
+ wiking	in this one?
+ blackburn	no in general
+ blackburn	so you compute dense features
+ blackburn	according to position of window
+ blackburn	right?
+ wiking	blackburn: mmm don't mix it now with the application :)))
+ blackburn	but is it so?
+ wiking	blackburn: yeah there is so like that
+ wiking	*it is like that
+ blackburn	it sounds like memory eating thing
+ n4nd0	wiking: ok, so tell me if so when you have ready with what that you were thinking of
+ wiking	n4nd0: well now i'm thinking of creating a class that is actually a direct inheritance of StructuredModel
+ wiking	n4nd0: and add there non-virtual functions for delta_loss and get_psi
+ wiking	n4nd0: and the argmax and basically then the argmax will call the right functions with the right amount of arguments
+ wiking	and then for now i don't touch the StructuredModel
+ wiking	and if that one works out then we'll see later about how we could simplify the thing
+ wiking	i have no better idea now :S
+ n4nd0	it looks like a good idea to me
+ n4nd0	probably those two classes could be merged once we check it works
+ n4nd0	there the PR goes :)
+ blackburn	??????
+ blackburn	merged
+ n4nd0	thank you :)
+ wiking	cia bot die!
+ wiking	and it did apparently
+ shogun-buildbot_	build #394 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/394  blamelist: iglesias <fernando.iglesiasg@gmail.com>
+ blackburn	n4nd0: did you read about CRFs before? is it's argmax hard to implement?
+ n4nd0	blackburn: I have read something about CRFs ues
+ n4nd0	yes*
+ n4nd0	I don't think the argmax is something fancier than Viterbi
+ blackburn	I was pretty excited when I saw CRF based segmentation
+ n4nd0	BUT the thing is that I don't know how CRFs would fit into our SO framework
+ n4nd0	why?
+ blackburn	why not
+ blackburn	?
+ blackburn	what is so different between HM and CRFs?
+ n4nd0	in the paper I read the way of training had nothing to do with the one for HM-SVM I know
+ blackburn	hmm I see
+ shogun-buildbot_	build #395 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/395  blamelist: iglesias <fernando.iglesiasg@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ n4nd0	blackburn: the build was already broken before right?
+ blackburn	yes
+ blackburn	by heiko
+ wiking	neeeeeeedcoffee
+-!- heiko [~heiko@host86-185-9-87.range86-185.btcentralplus.com] has joined #shogun
+ wiking	heiko: broker! :) wazza?
+ heiko	wiking hello
+ heiko	ehm
+ heiko	I didn't do it :D
+ wiking	CRF CRF blackburn will u implement? :)
+-!- pluskid [~pluskid@76.79.79.246] has joined #shogun
+ shogun-buildbot_	build #396 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/396  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- pluskid [~pluskid@76.79.79.246] has quit [Ping timeout: 276 seconds]
+ heiko	shogun-buildot_ status
+ heiko	wiking!
+ heiko	unit-tests!
+ heiko	still dont work
+ heiko	gtest refuses to install
+ heiko	how to I do this?
+ shogun-buildbot_	build #397 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/397  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ wiking	heiko: ahahhaha yeah i told u to ask blackburn
+ wiking	heiko: i dont know wtf is with that shit but the best is that you do the following
+ wiking	sudo cp lib/.libs/libgtest.so* /usr/local/lib
+ wiking	sudo cp lib/.libs/libgtest_main.so* /usr/local/lib
+ wiking	heiko: and then the configure should work finally
+ wiking	i dont know why do they do this at google... i mean to refuse to do a make install :)
+ shogun-buildbot_	build #398 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/398  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- hoijui [~hoijui@dslb-092-078-182-230.pools.arcor-ip.net] has quit [Ping timeout: 265 seconds]
+ shogun-buildbot_	build #399 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/399  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- hoijui [~hoijui@dslb-092-078-182-230.pools.arcor-ip.net] has joined #shogun
+-!- hoijui [~hoijui@dslb-092-078-182-230.pools.arcor-ip.net] has quit [Ping timeout: 260 seconds]
+ n4nd0	 /exit
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- wubino [~wubino@74.61.91.195] has joined #shogun
+-!- puffin444 [180317bb@gateway/web/freenode/ip.24.3.23.187] has joined #shogun
+ puffin444	hey blackburn
+-!- heiko [~heiko@host86-185-9-87.range86-185.btcentralplus.com] has left #shogun []
+ puffin444	hey blackburn, just to let you know, i rebased my repo so its ready to be merged
+ blackburn	puffin444: hey
+ blackburn	okay nice
+-!- heiko [~heiko@host86-185-9-87.range86-185.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-185-9-87.range86-185.btcentralplus.com] has quit [Client Quit]
+ blackburn	wiking: I will if n4ndo not
+ shogun-buildbot_	build #289 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/289  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- wubino [~wubino@74.61.91.195] has left #shogun ["Leaving"]
+-!- hoijui [~hoijui@dslb-092-078-182-230.pools.arcor-ip.net] has joined #shogun
+ wiking	blackburn: :D
+-!- os253 [~os@e180116168.adsl.alicedsl.de] has joined #shogun
+ os253	Hi puffin444
+ puffin444	hello os253
+ os253	is now good for you?I am around all evening.
+ puffin444	yes now is good if its good for you
+ blackburn	oh gaussian team in da house
+ puffin444	yes indeed :)
+ os253	yes, fine here.
+ os253	:-)
+ blackburn	tell me - how much effort is to add GP classifiers?
+ puffin444	honestly not sure. I would have to check GPML.
+ puffin444	Shouldnt require too much though
+ os253	How far is the Laplace code? If that works it's just another likelihood function...
+ puffin444	The laplace code is pretty much done and ready to be merged wt any time.
+ blackburn	about your PR
+ puffin444	yes?
+ blackburn	puffin444: you merged it in some kind of broken way - can you clean it up?
+ puffin444	uh oh what's the problem?
+ blackburn	os253: have you seen puffin444 PR? https://github.com/shogun-toolbox/shogun/pull/707
+ blackburn	puffin444: latest commits include some heiko's ones..
+ blackburn	however may be it is not worth it
+ os253	Then it should be easy. blackburn: do you think classification is useful? Generaly speaking: gps are not that great for classifcation or at least not better than SVMs.
+ blackburn	os253: I am pretty lame in everything about GPs :)
+ blackburn	os253: I am kind of chris widmer representer :D
+ os253	i see
+ puffin444	os253 all the main features mentioned in the project plan have been merged or are ready to be merged
+ blackburn	puffin444: can you change namespace in brent method source?
+ puffin444	At this point any additional feature should be a fairly easy task
+ blackburn	puffin444: I have two general issues I think would be cool to solve
+ blackburn	first is rather mandatory - FITC eigen members
+ puffin444	yes?
+ blackburn	and second is some alternative to nlopt in gradient model selection
+ blackburn	no idea if you have time for that :)
+ puffin444	Well gradient model selection is pretty general
+ blackburn	eigen member is serious issue we need to resolve before release
+ blackburn	members*
+ puffin444	What about FITC eigen membes? Is that the map<vecrorxd> we discussed earlier?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	yes
+ blackburn	so please focus on that before 1st of sept
+ puffin444	okay. So replace those Vectorxd members with map?
+ blackburn	no, replace it with SGMatrix and SGVector
+ blackburn	and map in your code
+ os253	what is the issue with eigen members?
+ blackburn	os253: eigen should not be included and/or exposed in headers to avoid additional dependency
+ puffin444	in .h or also .cpp?
+ blackburn	puffin444: I think I have an idea
+ blackburn	I am going to add as_eigen method
+ blackburn	to both sgvector and sgmatrix
+ os253	I see
+ blackburn	which returns eigen analogue of the matrix
+ blackburn	or the vector
+ blackburn	see what I mean?
+ puffin444	yes.
+ blackburn	oops not possible
+ blackburn	same reason
+ blackburn	:D
+ blackburn	I missed that
+ blackburn	you have to map it manually
+ blackburn	okay just change it to sg* and map in your code before use
+ puffin444	Okay. Can I still use eigen vectors directly in cpp files?
+ blackburn	yes sure
+ puffin444	os253 I am working ona tutorial pagefor gps
+ os253	yes, that would be great. I have looked through the PR yesterday. It seems like a good mix of sticking to the GPML code and adapting it to your framework.
+ blackburn	puffin444: Map<MatrixXd> (m_some_matrix.matrix,m_some_matrix.num_rows,m_some_matrix.num_cols);
+ blackburn	that's what you would have to do
+ os253	I am wondering how to best make sure it will be picked up. What examples do you currently have?
+ blackburn	err missed name
+ os253	It looks like tutorials and examples are the main thing to add.
+ puffin444	I have examples for every msjor feature under libshogun
+ os253	Perhaps the
+ puffin444	I also have a basic graphical example in python
+ puffin444	All the main features have been integrated into the modular interface
+ os253	I'd vote for a python example, just a single one where you use standard GP, GP with ficti (also visusalizing the location of the learnt inducing points).
+ blackburn	puffin444: btw are you going to research GPs further?
+ os253	Lastly the same with student-T. Something like that.
+ puffin444	for graduate school?
+ blackburn	no idea, in general
+ puffin444	I hope to stay and contribute to shogun and flesh the gp code out a bit
+ blackburn	cool
+ puffin444	os253 that should beeasyto do.
+ os253	 puffin444: you almost should stay on, having coded up this chunk is substantial. From that basis it would be easy to carry out novel directions that are more research like.
+ os253	Great, I think a visual python example would be very useful to have.
+ puffin444	Yes I could just build onto the current one I have.
+ puffin444	blackburn, is it possible that the current pr be merged? The only reason I ask is that I have to fix a ton of conflicts each time I have to rebase.
+ os253	that would be great.
+ blackburn	puffin444: ah sure I forgot
+ blackburn	merged
+ blackburn	CIA died so no message
+ puffin444	os253, Do you have any orther questions/concerns?
+ os253	I have a list of small things, but perhaps I can just email them. For example: choice of the number of inducing points.
+ os253	You currently take the same approach than GPML, right? I.e. they are fixed.
+ puffin444	fixed at what point? They are chosen before hyperparameter learning,
+ os253	Or do you have code for choosing an apprpriate number? A simple heuristic may be good enough.
+ puffin444	Oh yes in that case they are fixed.
+ shogun-buildbot_	build #389 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/389  blamelist: puffin444 <walke434@msu.edu>
+ os253	Perhaps one could add this to a python demo for large data. Do you have a suitable datasets with thousands of data points to illustrate the use of the sparse approximation?
+ shogun-buildbot_	build #390 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/390  blamelist: puffin444 <walke434@msu.edu>, root <root@gs12672-vm.sp.cs.cmu.edu>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, puffin444 <walke434@gmail.com>
+ puffin444	No I do not.
+ os253	What datasets are you using at the moment?
+ puffin444	A simple 4 point dataset I use to compare with gpml.
+ os253	Ok. I can send you some suggestion.
+ puffin444	I did this to ensure the hyperparameter learning came up with consistent parameters across gpml and shogun.
+ puffin444	yes.
+ os253	Perhaps best to pick some one can download from a script to avoid having to add it to the repository.
+ n4nd0	blackburn: hey there
+ os253	It would be useful to have a script that can be run, downloads the datasets and processes it alongside some plots.
+ n4nd0	blackburn: when someone publishes a paper, don't you think that the code and data they have used for their results should be provided?
+ os253	I'll send you a list of datasets that are public and can be downloaded.
+ puffin444	I could try that.
+ n4nd0	blackburn: I am quite surprised that I don't manage to find anything about it for the papers I am reading, maybe I am searching wrong :S
+ puffin444	thanks
+-!- gsomix_ [~gsomix@178.45.41.90] has joined #shogun
+ os253	Yes, that would be great. Thanks. I'll send this by tomorrow.
+-!- gsomix [~gsomix@178.45.39.145] has quit [Ping timeout: 244 seconds]
+ os253	If you are around tomorrow we can briefly chat then.
+ os253	I am online all day but not necessarily on IRC.
+ puffin444	sorry blackburn. It looks like I forgot a HAVE_EIGEN somewhere
+ blackburn	n4nd0: yeah kind of open source science
+ blackburn	I believe most cases of not available code means NO CODE
+ blackburn	and no research
+ n4nd0	blackburn: but how can it be possible that there is no code?
+ blackburn	I mean it could turn to be a false research
+ n4nd0	I mean, the results that are published must be checked somehow!
+ blackburn	:D
+ puffin444	os253, I unfortunately will not be available tomorrow.
+ blackburn	no they are not checked by editors
+ n4nd0	blackburn: really?
+ blackburn	n4nd0: well they are checked for consistency or so
+ blackburn	but nobody will try to run your code
+ os253	puffin444: ok -then let's do via email and or at a later time.
+ puffin444	ok.
+ n4nd0	blackburn: I am really surprised
+ n4nd0	when I start writing papers
+ n4nd0	I will offer a link to the code!
+ n4nd0	hehe
+ blackburn	yeah that's how it should be
+ blackburn	puffin444: can you fix it?
+ puffin444	I will try.
+ blackburn	okay thanks
+ puffin444	Can't do it immediately, but i can to it in a few hours
+ blackburn	I will do then
+ blackburn	puffin444: oh.. you added new methods with eigen return type
+ puffin444	uh oh. How can i resolve it?
+ blackburn	the same - return sgvectors/sgmatrices
+ blackburn	and then map
+ puffin444	ok. will do.
+ blackburn	I wish we had some solution for that but I think depending on eigen is wrong
+ puffin444	ok.
+ os253	blackburn: the more code requirew
+ os253	*requires Eigen the more dominant implicit dependencies become anyway. At some point it will make little difference :-)
+ blackburn	os253: yeah that's clear
+ blackburn	I have mixed point on that..
+ blackburn	at some point we won't be able to avoid that
+ os253	true...
+ shogun-buildbot_	build #290 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/290  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ blackburn	shogun-buildbot_: wait a minute wait a minute
+ puffin444	blackburn, should I try to fix the buid in a few hours or are you doing it?
+ blackburn	puffin444: I am doing
+ puffin444	ok.
+ puffin444	Then i will get to work on the mao stuff
+ puffin444	map*
+ shogun-buildbot_	build #391 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/391  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ n4nd0	good night people
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- os253 [~os@e180116168.adsl.alicedsl.de] has quit [Remote host closed the connection]
+-!- blackburn [~blackburn@62.106.106.114] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@62.106.106.114] has joined #shogun
+-!- blackburn1 [~blackburn@31.28.44.3] has joined #shogun
+-!- blackburn [~blackburn@62.106.106.114] has quit [Ping timeout: 252 seconds]
+-!- blackburn2 [~blackburn@109.226.112.41] has joined #shogun
+-!- CIA-36 [cia@198.71.88.9] has joined #shogun
+-!- blackburn1 [~blackburn@31.28.44.3] has quit [Ping timeout: 240 seconds]
+ shogun-buildbot_	build #392 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/392  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot_	build #393 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/393  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ blackburn2	mother fucker
+ blackburn2	will that end?
+ blackburn2	shogun-buildbot_: you are killing me bastard
+ blackburn2	puffin444: I have to ifdef just everything
+ shogun-buildbot_	build #394 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/394
+ shogun-buildbot_	build #315 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/315  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot_	build #291 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/291  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+--- Log closed Mon Aug 20 00:00:17 2012

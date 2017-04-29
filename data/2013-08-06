@@ -1,0 +1,933 @@
+--- Log opened Tue Aug 06 00:00:00 2013
+--- Day changed Tue Aug 06 2013
+@iglesiasg	that is just the README.md
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * b180b08 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/b180b084be7d3b1b7d461a6556da477ad7421d80
+ shogun-notifier-	shogun: On the way to fix octave_modular interface
+ hushell	iglesiasg: yeah :(
+@iglesiasg	hushell, in the clone statement?
+ hushell	iglesiasg: so the clone_MAPInfeence unit-test failed I think
+ hushell	yep
+ hushell	IIRC, clone_ptype failed
+@iglesiasg	hushell, so it looks like you are not initializing the members in the constructors of CMAPInference, right?
+@iglesiasg	for instance after the default constructor
+@iglesiasg	well, not after, in the default constructor
+ hushell	okay, I see in default constructor the pointer member has not been initialized
+ hushell	let me try to fix this
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9874791
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	HeikoS, yeah so it is nicely possible. We just use README.md and then have links to README_DEVELOPER.md via https://help.github.com/articles/relative-links-in-readmes
+@iglesiasg	hushell, well none of the members is initialized, right?
+@HeikoS	sonney2k: yeah this would be cool
+@HeikoS	then its synched *and*  looks nice/easy to access
+@sonney2k	HeikoS, etc ... not really a wiki though
+@sonney2k	you can only edit the text document from git
+@HeikoS	sonney2k: well a list of things/links would already be good
+@HeikoS	sonney2k: ah .... true
+@sonney2k	HeikoS, btw doxygen will also render the README.md etc pages - it also understands markdown syntax
+@sonney2k	so we could have it on the github front page and in our doxygen doc
+@sonney2k	just editing a single file
+ shogun-buildbot	build #1472 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1472  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ hushell	iglesiasg: hmm, a big mistake, now I set them to NULL initially
+@iglesiasg	hushell, did it fix it?
+ hushell	iglesiasg: compiling
+ hushell	iglesiasg: you could close the PR, I'll send new ones
+@sonney2k	iglesiasg, I would just rename log_pdf to log_pdf_single or so to fix this
+@iglesiasg	hushell, all right
+@iglesiasg	sonney2k, but why is it that SGVector sometimes goes to RealVector and sometimes to DoubleMatrix in java?
+@HeikoS	sonney2k: I renamed that thing already
+@iglesiasg	HeikoS, cool!
+@iglesiasg	also the other error that gave problems in java_modular?
+@sonney2k	iglesiasg, no clue
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9875383
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	HeikoS, and the error is gone or?
+@HeikoS	sonney2k: dont know but should
+@HeikoS	name is different now
+@sonney2k	HeikoS, seems not http://shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1472/steps/compile%20java_modular/logs/stdio
+@iglesiasg	I cam compile and check
+@iglesiasg	no need then
+@HeikoS	this error mkaes no sense
+@iglesiasg	sonney2k, HeikoS, it compiled fine there this time
+@HeikoS	buildbot weirdness?
+@sonney2k	shogun-buildbot, force build "deb3 - modular_interfaces" --branch=develop
+ shogun-buildbot	build forced [ETA 38m22s]
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	lets see
+@HeikoS	whoooooooooo
+@HeikoS	we now have a working script that runs and stores and ipython notebook
+@HeikoS	wiking:  ^
+@wiking	\o/
+@sonney2k	HeikoS, where?
+@sonney2k	how ?
+@sonney2k	more details!
+@HeikoS	https://gist.github.com/minrk/6160067
+@HeikoS	I got in contact with one of the devs
+@HeikoS	he updated the old ones for us :)
+@sonney2k	very good
+@HeikoS	just tried it, and it works
+ hushell	iglesiasg: Thanks! clone is good after initialization :)
+@iglesiasg	hushell, good to know
+@HeikoS	so we should integrate this into old system but also cmake
+@sonney2k	HeikoS, so how would we want that to work?
+@HeikoS	sonney2k: my idea is: we have a dir with couple of notebooks
+@sonney2k	run it on buildbot in nightly_default?
+@HeikoS	sonney2k: yes
+@HeikoS	it runs them all and stores resulting ones, and uploads those to our website
+@sonney2k	and then have the python code run to check stuff works and then put this on website somewhere?
+@HeikoS	yep
+@HeikoS	and then on our website, we have a manually created site that lists all of the examples in some order
+@HeikoS	and provides links to the rendered version
+@HeikoS	via http://nbviewer.ipython.org/
+@HeikoS	http://nbviewer.ipython.org/url/herrstrathmann.de
+@HeikoS	pretty easy to use
+@sonney2k	HeikoS, hmhh doesn't work here
+@sonney2k	I always get the error
+@sonney2k	    km = KernelManager()
+@sonney2k	NameError: global name 'KernelManager' is not defined
+@HeikoS	sonney2k: it only works on current git ipython
+@HeikoS	you have 0.13
+@sonney2k	hmmhh
+@HeikoS	but its very easy to install
+@HeikoS	just clone and run setup.py build
+@HeikoS	takes 2 s
+@iglesiasg	HeikoS, I am having a look at the GaussianDistribution unit test that hangs on my machine (and maybe in travis too). It happens in an Eigen statement. What version of eigen do you use?
+@HeikoS	then sudo setup.py install
+@iglesiasg	it looks pretty weird
+@HeikoS	iglesiasg: yeah I had issues with old eigen version
+@HeikoS	iglesiasg: I have 3.1
+@HeikoS	which was released last year
+@iglesiasg	aaham I see
+@iglesiasg	HeikoS, did you just download it from the webpage?
+@HeikoS	iglesiasg: ubuntu
+@iglesiasg	mmm I have that one too
+@iglesiasg	HeikoS,  PPA?
+@HeikoS	gnhcyj8ju!
+@HeikoS	nice
+@HeikoS	thats my root password
+@sonney2k	https://github.com/ipython/ipython.git
+@iglesiasg	hahahaha
+@HeikoS	can I delete that somehow from the logs?
+@sonney2k	lets all ssh to HeikoS machine!
+@HeikoS	sonney2k:  yes
+@sonney2k	HeikoS, better change it NOW
+@HeikoS	just did
+@HeikoS	ah annoying
+@HeikoS	iglesiasg: just because I opened synaptic ;)
+@HeikoS	3.1.0~beta1-1ubuntu1
+@iglesiasg	HeikoS, sorry that I caused that :(
+@HeikoS	dont worry
+@HeikoS	too late
+@HeikoS	still at work
+@HeikoS	so I will go home now :)
+@iglesiasg	dpkg -l | grep next time
+@sonney2k	wiking, when will you have a nice uplink?
+@HeikoS	iglesiasg: I like synaptic :)
+@iglesiasg	hehe ok :)
+@iglesiasg	maybe we should update travis' Eigen as well
+@HeikoS	iglesiasg: yes that would be good
+@iglesiasg	I have the feeling it is continuously dying in there
+@HeikoS	I got problems with the old old version
+@sonney2k	HeikoS, ok the thing runs now
+@HeikoS	but -- cmake will fix that
+@HeikoS	sonney2k: nice
+@sonney2k	HeikoS, how do I get it on a website?
+@iglesiasg	cool then
+@HeikoS	you need to have a fixed http link to the file
+@HeikoS	so upload to shogun - server directory and pass that link to the nbviwer
+@sonney2k	HeikoS, ahh so we can just use the nbviewer then?
+@HeikoS	yes
+@HeikoS	then we need to generate a little script that  creates a website in some fashion
+@sonney2k	which should I upload the run_saved.ipynb?
+@HeikoS	but I think I would do this by hand, i.e. we have a growing list of notebooks somewhere for each category
+@sonney2k	or the one in our dir?
+@HeikoS	sonney2k:  yes
+@HeikoS	no the saved
+@HeikoS	can also be deleted afterwards
+@sonney2k	what is the difference?
+@HeikoS	sonney2k: the saved one contains output
+@HeikoS	sonney2k:  we should not store output in the notebooks
+@HeikoS	oh there is also a script for removing output
+@HeikoS	https://gist.github.com/minrk/3719849
+@HeikoS	which we should call on the existing ones to clean up
+@HeikoS	sonney2k: if we have this list of notebooks, we could then generate a website based on a template
+@HeikoS	that inserts notebooks into categories or whatever
+@HeikoS	like GSoC 2013
+@HeikoS	ok I really gotta go now
+@HeikoS	see you!
+-!- HeikoS [~heiko@nat-160-11.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+@sonney2k	http://nbviewer.ipython.org/url/shogun-toolbox.org/static/notebook/svm_binary_classification_run_saved.ipynb
+@iglesiasg	nice
+@iglesiasg	lot of import errors
+@iglesiasg	I guess that is my thing though
+@iglesiasg	nice! I got unit tests working good again
+ shogun-buildbot	build #1473 of deb3 - modular_interfaces is complete: Failure [failed install test ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1473
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9876746
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has left #shogun []
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9879101
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has left #shogun []
+ hushell	iglesiasg: Do you know why after git commit --amend, git push always say error: failed to push some refs, and I have to use --force
+-!- foulwall [~user@110.16.165.220] has quit [Ping timeout: 264 seconds]
+@iglesiasg	hushell, it tries to prevent you from rewriting past history that is already written in there
+ hushell	iglesiasg: so --force is correct?
+@iglesiasg	hushell, in this case, it is fine
+@iglesiasg	hushell, another possible thing is to delete the remote branch and push again
+@iglesiasg	although I suspect that git push --force might do something like that
+ hushell	iglesiasg: hmm, I prefer to keep every branch currently
+@iglesiasg	hushell, you delete it, and then you push again
+@iglesiasg	without doing --force
+ hushell	iglesiasg: do you think will be okay to put IGNORE_IN_CLASSLIST in front of CMosek?
+ hushell	so it will not be in the clone test
+@iglesiasg	hushell, yeah sure
+@iglesiasg	it is crashing there?
+ hushell	still
+@iglesiasg	oh yeah, I never looked at it at the end
+@iglesiasg	sorry
+ hushell	no matter
+ hushell	I am curious how you prevent LMNNImpl from class_list
+@iglesiasg	hushell, why did you have to remove const in get_factor_type?
+@iglesiasg	hushell, you mean why is LMNNImpl not included in SWIG interfaces?
+ hushell	iglesiasg: I know this is because you add a line in modshogun_ignores.i
+ hushell	but they are not it base/class_list.cpp
+ hushell	but you do not put IGNORE_IN_CLASSLIST in front
+ hushell	iglesiasg: let me check the get_factor_type
+@iglesiasg	hushell, maybe because LMNNImpl is not a SGObject? I have no idea really
+@iglesiasg	hushell, I am just curious about it :)
+@iglesiasg	hushell, and btw, LMNNImpl does not need to be in modshogun_ignores.i, I just don't include it anyway in interfaces/modular/*.i
+@iglesiasg	hushell, it seems  that our SWIG is configured not to compile everything by default, so I just didn't include LMNNImpl anywhere there
+@iglesiasg	just LMNN
+@iglesiasg	all right, time to get to the bed
+@iglesiasg	good night!
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+ hushell	good night!
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- foulwall [~user@110.16.165.220] has joined #shogun
+-!- foulwall [~user@110.16.165.220] has quit [Read error: Connection reset by peer]
+ shogun-buildbot	build #415 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/415
+ shogun-buildbot	build #480 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/480
+ shogun-buildbot	build #425 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/425
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- foulwall [~user@110.16.165.220] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * c64099b / .travis.yml,CMakeLists.txt,cmake/FindOctave.cmake: https://github.com/shogun-toolbox/shogun/commit/c64099bc9a05f9603cc2257eef4475a1359370aa
+ shogun-notifier-	shogun: Travis: fix FindOctave and remove python_static test
+ shogun-notifier-	shogun: Add python interpreter as required
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9887997
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	foulwall, could you please add an option in the dictionary where one can explain the parameters so that one can display some information below (maybe some '?' sign to click that pulls out some help)
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * ad16e5d / src/shogun/ (4 files): https://github.com/shogun-toolbox/shogun/commit/ad16e5d32607a7b2caf4dfdb014c9ae11e5de478
+ shogun-notifier-	shogun: rename get_log_probability_f to get_log_probability_fmatrix to fix java modular compile error
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * a7d019a / CMakeLists.txt,cmake/FindR.cmake,src/interfaces/r_modular/CMakeLists.txt: https://github.com/shogun-toolbox/shogun/commit/a7d019a2b630f4feff05a054d916e3a6df42bdf9
+ shogun-notifier-	shogun: Refactor R detection
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * bdb942b / .travis.yml,cmake/FindR.cmake,src/interfaces/r_modular/CMakeLists.txt: https://github.com/shogun-toolbox/shogun/commit/bdb942bdfef102bf32d8f793cb3abf5b279d7286
+ shogun-notifier-	shogun: Fix R includes and try to force python3 on travis
+ shogun-buildbot	build #1667 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1667  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ foulwall	ok sonney2k
+@wiking	fuck
+@wiking	dont fucking DO THIS!!!
+@wiking	https://github.com/shogun-toolbox/shogun/pull/1370/files#diff-0
+ sonne|work	wiking: haha whats wrong?
+@wiking	realised that travis has preinstalled ruby and python
+@wiking	so somehow now i have to deal with this
+ shogun-notifier-	shogun-data: Zhengyang Liu :master * a4c963e / tapkee/mml.txt,tapkee/words.dat: https://github.com/shogun-toolbox/shogun-data/commit/a4c963e96e51453c33fef9a90ac0f0b247614d13
+ shogun-notifier-	shogun-data: add origin dataset for dimred
+ shogun-notifier-	shogun-data: Soeren Sonnenburg :master * 2a44741 / tapkee/mml.txt,tapkee/words.dat: https://github.com/shogun-toolbox/shogun-data/commit/2a44741e27c4dfa7a35d74f333340ed267a07dcc
+ shogun-notifier-	shogun-data: Merge pull request #11 from ZhengyangL/master
+ shogun-notifier-	shogun-data:
+ shogun-notifier-	shogun-data: add origin dataset for dimred
+@wiking	and apt-get -ing stuff (python and ruby) is a big nono
+@wiking	on travis
+ shogun-notifier-	shogun-demo: Zhengyang Liu :master * 9509e80 / / (8 files): https://github.com/shogun-toolbox/shogun-demo/commit/9509e8039b95775562d5d3444e0fdcddc49c9b00
+ shogun-notifier-	shogun-demo: 1. make k argument available to change for tapkee/words demo. 2.little fixes
+ shogun-notifier-	shogun-demo: Soeren Sonnenburg :master * d1e39eb / / (8 files): https://github.com/shogun-toolbox/shogun-demo/commit/d1e39eb5403ddae80c06172cc4d031a847ebd3d4
+ shogun-notifier-	shogun-demo: Merge pull request #19 from ZhengyangL/master
+ shogun-notifier-	shogun-demo:
+ shogun-notifier-	shogun-demo: interactive tapkee demos
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9889151
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has left #shogun []
+ sonne|work	wiking: but he refers to eigen3?!
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * c2fa818 / tests/unit/machine/gp/LogitLikelihood_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/c2fa818be63cf402060266c61f354c5131e1b695
+ shogun-notifier-	shogun: fix renaming also in unit test
+@wiking	sonne|work: yes
+@wiking	sonne|work: he should do the eigen3 fetcher for cmake
+@wiking	let's fucking freeze *now* hacking with travis and ./configure
+@wiking	plz
+@wiking	otherwise i'll never catch up
+ sonne|work	wiking: well merge your stuff and we can help
+@wiking	sonne|work: the branch is freely writeable by any developer
+ sonne|work	wiking: yes but converting the build bots to use cmake will make the difference
+@wiking	sonne|work: why?
+@wiking	sonne|work: i mean now not even travis runs fine
+@wiking	so why would be good now to even add the buildbots
+@wiking	i prefer to fix at least the compilation on travis
+@wiking	so at least that works
+ sonne|work	what is wrong with travis?
+@wiking	RModular, RubyModular, PythonModular (python3)
+@wiking	and OctaveModular
+@wiking	in these builds
+@wiking	there's still something wrong
+@wiking	not test wise
+@wiking	cmake wise...
+@wiking	either some env variable is missing or something
+ sonne|work	wiking: I am not talking about travis
+@wiking	cmake
+@wiking	mostly these are problems with cmake
+ sonne|work	wiking: I want to convert the buildbots to slowly use this
+@wiking	but can be seen that it's broken on travis
+ sonne|work	first the libshogun based ones
+@iglesiasg	wiking, Travis build freezes all the time because there is a test that does not finish with the version of Eigen in Travis
+ sonne|work	then static and test
+@wiking	iglesiasg: ok good
+@iglesiasg	wiking, not because of the change I am trying to do... but whatever
+@iglesiasg	I am actually trying to fix that
+@wiking	iglesiasg: idontcare ./configure and .travis.yml IS DO NOT FUCKING TOUCH IT
+@iglesiasg	yeah yeah.. I just said whatever
+@wiking	sonne|work: either everything or nothing
+@iglesiasg	let's get more and more commits inside
+@iglesiasg	without seeing what travis said >(
+@wiking	sonne|work: you cant have cmake libshogun but python_modular by ./configure
+ sonne|work	wiking: no that won't work
+ sonne|work	small steps
+ sonne|work	why not?
+@wiking	sonne|work: sorry but there has been just too much changes
+@wiking	there will be missing files ets
+@wiking	etc
+@wiking	like i dont have anymore shogun/lib/config.h in feature/CMake barnch
+@wiking	*branch
+@wiking	that's like one major problem you'll start having...
+ sonne|work	wiking: what do you do instead of config.h then?
+@wiking	sonne|work: i just have a config.h.in
+@wiking	and then cmake will generate it for you
+ sonne|work	yeah but where is the issue?
+@wiking	but not in src/shogun/lib/config.h
+ sonne|work	where then?
+@wiking	it'll be in build/src/shogun/lib/config.h
+@wiking	or something similar
+@wiking	i cannot tell by heart
+@wiking	anyhow... cmake is still not ready
+ sonne|work	but that is not a problem then
+@wiking	it needs fucking tweaking on cmake + travis side
+@wiking	to get it at least to some level
+@wiking	once that's done i can do the rebase
+ sonne|work	well cmake with libshogun  is or not?
+ sonne|work	my migration plan would be
+ sonne|work	1) get libshogun & cmake to run on buildbot
+ sonne|work	2) get static interfaces work with cmake
+ sonne|work	3) do modular
+ sonne|work	and then one by one move the buildbot stuff over
+@wiking	sonne|work: i dont have any static in cmake
+ sonne|work	we cannot stop development just because we are transitioning
+ sonne|work	well it is trivial to add when you already have (parts of) modular
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9889161
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has left #shogun []
+ sonne|work	wiking: only when everything works we can start using travis
+ sonne|work	with cmake
+@wiking	sonne|work: well then good luck cherrypicking
+ sonne|work	so the fixes iglesiasg is doing make sense
+@wiking	from the feature/CMake branch
+@wiking	sonne|work: no it doesn't because it's not right anyways...
+@wiking	but ok
+ sonne|work	wiking: well just explain what the issue is then
+ sonne|work	I mean config.h.in is not an issue
+ sonne|work	it could just be there
+@iglesiasg	wiking, it is not right agree. But it is not like I am trying to fuck up your work doing it
+ sonne|work	wiking: I might be missing sth but you need to explain more then
+@wiking	iglesiasg: a) it's not correct the way you try to do it b) instead of tryign to fix that you are doing wrong, use that energy and gimme a cmake patch that automagically downloads eigen3 (the version you want)
+@wiking	iglesiasg: it's not that hard, i've even showed an example yesterday
+@iglesiasg	wiking, b) sure. I am glad to help you with that
+@iglesiasg	wiking, a) it is in the same way you did the gtest and other things in there, it is just not working yet because I got some details wrong
+@wiking	iglesiasg: it's not the same...
+@iglesiasg	wiking, about b, when is it going to be CMake ready? Even if I do this patch? One day, two days, one week?
+@iglesiasg	wiking, what do we do until then? continue merging all the stuff when travis is hanging up on it?
+@wiking	one of the reason is because it's not working. if it'd be the same it would be working or?
+@iglesiasg	wiking, did you read the part that I got some details wrong?
+@iglesiasg	wiking, the idea is the same (I think)
+@iglesiasg	wiking, wget, unpack, give the flags to configure
+@iglesiasg	wiking, I am getting some directory wrong yeah, and I actually think it is a stupid mistake
+@iglesiasg	but whatever
+@iglesiasg	IMHO I don't think the mistake I have done is stopping you from seeing your changes in cmake
+@iglesiasg	just check the build history in travis and see it by yourself
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * 51d498f / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/51d498f223842c4252544d23dd86df0e23c03352
+ shogun-notifier-	shogun: Travis: switch to virtualenv and pip for python builds
+@iglesiasg	but I mean, I can live without that change... it doesn't pay off for me to have this argument due to it, so I just skip it
+@wiking	iglesiasg: i see it as a double waste time if you try to fix this
+@wiking	iglesiasg: as the energy u use for fixing it could be used much better and it would be more beneficial in a long run
+@wiking	but even in a short one
+@wiking	like within a day...
+@wiking	we are not using travis the right way
+@wiking	and that's mostly my fault
+@wiking	as i did it
+@wiking	but now following this path is purely wrong
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9889590
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has left #shogun []
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9890084
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has left #shogun []
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ shogun-buildbot	build #1668 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1668
+ shogun-buildbot	build #1169 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1169  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * 6340a2e / .travis.yml,CMakeLists.txt,cmake/FindEigen3.cmake: https://github.com/shogun-toolbox/shogun/commit/6340a2e2da2f4577996539e190b26921626749b5
+ shogun-notifier-	shogun: Fix Eigen3 version detection
+ shogun-notifier-	shogun: remove gcc+python_modular builds from travis matrix
+-!- foulwall [~user@110.16.165.220] has quit [Ping timeout: 245 seconds]
+ lisitsyn	haha! mr. agressive wiking
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:18b5:d71d:f59f:b8b6] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ shogun-buildbot	build #1474 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1474  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- hushell [~hushell@c-24-21-169-136.hsd1.or.comcast.net] has quit [Quit: WeeChat 0.3.7]
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * f7abfd0 / CMakeLists.txt: https://github.com/shogun-toolbox/shogun/commit/f7abfd068c0e9bc32df364321dbcd1fc306691d7
+ shogun-notifier-	shogun: require 3.1.2 eigen
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 256 seconds]
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9892726
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has left #shogun []
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * 512d94f / src/shogun/lib/DataType.cpp,src/shogun/lib/DataType.h: https://github.com/shogun-toolbox/shogun/commit/512d94f6a6abb1a1fe43eb22d4dbe65e2347c855
+ shogun-notifier-	shogun: refactored sizeof_ptype, sizeof_stype to make them available from static context
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * a5435a5 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/a5435a543f2265fc4409ac487f33fc72d7e7b663
+ shogun-notifier-	shogun: first parts of copy_ptype with unit tests
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * 883ac63 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/883ac6316c1401812621067b8890205715c6b684
+ shogun-notifier-	shogun: -refactored compare_stype a bit
+ shogun-notifier-	shogun: -added copy_stype method with first bits
+ shogun-notifier-	shogun: -added first unit test for copy_stype
+ shogun-notifier-	shogun: lambday :feature/CMake * 68690e2 / tests/unit/io/Serialization_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/68690e2d868e0bec77db017256f36c05bfacc002
+ shogun-notifier-	shogun: addded unit-tests for serialization
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * b0873e1 / tests/unit/io/Serialization_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/b0873e1a83200071d7ac4cfc145b94e9a3728563
+ shogun-notifier-	shogun: Merge pull request #1162 from lambday/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: addded unit-tests for serialization
+ shogun-notifier-	shogun: lambday :feature/CMake * 8acb5bc / tests/unit/io/Serialization_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/8acb5bc56796bb41c63c884ce6b582a7aeeb3ebb
+ shogun-notifier-	shogun: added more unit-tests serialization for ptype and ctype
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * 24b2ef0 / tests/unit/io/Serialization_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/24b2ef02075a7e1bef2fed30ac6de35a4db13a77
+ shogun-notifier-	shogun: Merge pull request #1163 from lambday/develop
+ shogun-notifier-	shogun: van51 :feature/CMake * 35a2ea0 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/35a2ea0e34d59176a865d3508a687643f02fe155
+ shogun-notifier-	shogun: NNZ: added unit test and fixed get_next_feature()
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * f63dadf / / (2 files): https://github.com/shogun-toolbox/shogun/commit/f63dadf8ce331f02b6695f6a6ed2b4e437ad135d
+ shogun-notifier-	shogun: Merge pull request #1168 from van51/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: NNZ: added unit test and fixed get_next_feature()
+ shogun-notifier-	shogun: Roman Votyakov :feature/CMake * b8b2e6f / src/shogun/regression/gp/ (6 files): https://github.com/shogun-toolbox/shogun/commit/b8b2e6f9cf99a1055429945f5d0ef309dfcba9c1
+ shogun-notifier-	shogun: Fixed recomputing of posterior parameters
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * a640e47 / src/shogun/regression/gp/ (6 files): https://github.com/shogun-toolbox/shogun/commit/a640e473fae1e5e608457e2d0a5cc242c8ca53a7
+ shogun-notifier-	shogun: Merge pull request #1170 from votjakovr/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed recomputing of posterior parameters
+ shogun-notifier-	shogun: lambday :feature/CMake * d8dc5b5 / tests/unit/base/SGObject_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/d8dc5b55611729a83213b460e4984ca959a7ffd5
+ shogun-notifier-	shogun: minor fix for eigen3 check in SGObject_unittest
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * 8181acb / src/shogun/io/SGIO.cpp,src/shogun/io/SGIO.h: https://github.com/shogun-toolbox/shogun/commit/8181acb60da0d7182497d30594223a9297944541
+ shogun-notifier-	shogun: enable location info (as in object / function name printing before SGIO
+ shogun-notifier-	shogun: prints) with config option to disable / show line and file
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * e2142df / src/shogun/io/SGIO.cpp,src/shogun/io/SGIO.h: https://github.com/shogun-toolbox/shogun/commit/e2142df4a17e39d4ec94023be6198c59d370a963
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: added get_width and obtain_from_generic for Chi2 kernel
+ shogun-notifier-	shogun: lambday :feature/CMake * b019018 / src/shogun/ (4 files): https://github.com/shogun-toolbox/shogun/commit/b019018843af6218904f04bfb28a7af25105cfc8
+ shogun-notifier-	shogun: CJobResult added, CDenseMatrixOperator documentation extended
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * dae693c / src/shogun/ (4 files): https://github.com/shogun-toolbox/shogun/commit/dae693c9d4accaf9bdbbc9475b05a2ac35b8766c
+ shogun-notifier-	shogun: Merge pull request #1177 from lambday/feature/log_determinant
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: CJobResult added, CDenseMatrixOperator documentation extended
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * 1f705d4 / src/configure: https://github.com/shogun-toolbox/shogun/commit/1f705d4baba8f87fa007b220191f229edf9b539a
+ shogun-notifier-	shogun: require json-c version >=11
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: in version 0.10 json_object_get_int is b0rken causing shogun
+ shogun-notifier-	shogun: serialization / tests to fail
+ shogun-notifier-	shogun: iglesias :feature/CMake * bf430bc / src/shogun/distance/ (6 files): https://github.com/shogun-toolbox/shogun/commit/bf430bc660897b5419fb7a2527e3fab2a964a57e
+ shogun-notifier-	shogun: Minor changes in Custom, Dense and base distances.
+ shogun-notifier-	shogun: Mainly move a few methods from headers to implementation files.
+ shogun-notifier-	shogun: Fernando Iglesias :feature/CMake * d0e18e5 / src/shogun/distance/ (6 files): https://github.com/shogun-toolbox/shogun/commit/d0e18e515154d0eeace86fa2f90719f58945dc67
+ shogun-notifier-	shogun: Merge pull request #1178 from iglesias/develop
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * 430d49e / / (8 files): https://github.com/shogun-toolbox/shogun/commit/430d49ee93ab6e334a867240ebf2c34dd1aa1b18
+ shogun-notifier-	shogun: Merge pull request #1180 from lambday/feature/log_determinant
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Removed setter for linear operator/vector for CDenseExactLogJob, computation engine added
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * 3b2dd4d / / (3 files): https://github.com/shogun-toolbox/shogun/commit/3b2dd4ddc0f01105dfca6e4048624faa02de7af2
+ shogun-notifier-	shogun: Merge pull request #1181 from tklein23/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Enabled/fixed streaming_onlineliblinear example
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * 58fe6ca / / (4 files): https://github.com/shogun-toolbox/shogun/commit/58fe6ca2a03c4d0e238d4be62b0953d471a16b0b
+ shogun-notifier-	shogun: Merge pull request #1182 from lambday/feature/log_determinant
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: added COperatorFunction base class, one implementation CDenseMatrixExactLog, and a unit-test
+ shogun-notifier-	shogun: lambday :feature/CMake * 409995e / src/shogun/ (12 files): https://github.com/shogun-toolbox/shogun/commit/409995e338ae25d0faf2e62107970f5976bf2c00
+ shogun-notifier-	shogun: minor documentation fixes in log-det framework
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * 4137923 / src/shogun/ (12 files): https://github.com/shogun-toolbox/shogun/commit/413792389e5c94a6fc09b249bc30248c1a9461fc
+ shogun-notifier-	shogun: Merge pull request #1183 from lambday/feature/log_determinant
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: minor documentation fixes in log-det framework
+ shogun-notifier-	shogun: iglesias :feature/CMake * ad6fed6 / src/shogun/distance/ (3 files): https://github.com/shogun-toolbox/shogun/commit/ad6fed6bb703099f6a8b845c7cbde2bf34eb87d6
+ shogun-notifier-	shogun: Add CustomMahalanobisDistance
+ shogun-notifier-	shogun: iglesias :feature/CMake * ccf16f7 / tests/unit/distance/Distance_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/ccf16f7629f1f7107658bdc27d773466ab2939d4
+ shogun-notifier-	shogun: Very simple unit test for CustomMahalanobisDistance
+ shogun-notifier-	shogun: iglesias :feature/CMake * 70d9fca / src/shogun/metric/LMNN.cpp,src/shogun/metric/LMNN.h: https://github.com/shogun-toolbox/shogun/commit/70d9fca923a8f5822f00de50500af98d324f3d74
+ shogun-notifier-	shogun: [WIP] Add LMNN without train method
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * 9ccdc30 / src/shogun/multiclass/KNN.h: https://github.com/shogun-toolbox/shogun/commit/9ccdc3094289093631cf2a5ea710935e3c52c6ec
+ shogun-notifier-	shogun: remove commented out function
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * 29e2882 / src/.version.sh: https://github.com/shogun-toolbox/shogun/commit/29e2882cac5c3c6de8e569c697daebc60d75a232
+ shogun-notifier-	shogun: use the current branch as merge base when creating version strings
+ shogun-notifier-	shogun: Fernando Iglesias :feature/CMake * 384185f / / (6 files): https://github.com/shogun-toolbox/shogun/commit/384185f9c1aeb1f8213e63173f9407e27ea1099d
+ shogun-notifier-	shogun: Merge pull request #1188 from iglesias/feature/metric
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Feature/metric
+ shogun-notifier-	shogun: lambday :feature/CMake * 5bcdd54 / / (25 files): https://github.com/shogun-toolbox/shogun/commit/5bcdd547fab1c0ba3cad5d915d9b67a27e62f29c
+ shogun-notifier-	shogun: params registered, sample modified (log-det), gitignore modified
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * 2aa7804 / / (25 files): https://github.com/shogun-toolbox/shogun/commit/2aa78041e8717f39419c83f6ad8a52b50c0bd928
+ shogun-notifier-	shogun: Merge pull request #1189 from lambday/feature/log_determinant
+ shogun-notifier-	shogun: iglesias :feature/CMake * f366d03 / tests/unit/mathematics/Math_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/f366d03906fe7ad24961157fa442130855ab081e
+ shogun-notifier-	shogun: linspace unit test
+ shogun-notifier-	shogun: Fernando Iglesias :feature/CMake * 27c9a1c / tests/unit/mathematics/Math_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/27c9a1cd0cb53183b7d86c2b6529c16ce1336881
+ shogun-notifier-	shogun: Merge pull request #1193 from iglesias/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: linspace unit test
+ shogun-notifier-	shogun: hushell :feature/CMake * 3142600 / / (33 files): https://github.com/shogun-toolbox/shogun/commit/3142600b5951013bee76e42f4ec7e63b2a5349a4
+ shogun-notifier-	shogun: move risk() from StructuredModel to DualLibQPSOSVM
+ shogun-notifier-	shogun: Fernando Iglesias :feature/CMake * 2135513 / / (33 files): https://github.com/shogun-toolbox/shogun/commit/2135513c8e74c6a40a830036ef469debf27a2ab5
+ shogun-notifier-	shogun: Merge pull request #1185 from hushell/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: move risk() from StructuredModel to StructuredOutputMachine
+ shogun-notifier-	shogun: iglesias :feature/CMake * b83fa92 / .gitignore: https://github.com/shogun-toolbox/shogun/commit/b83fa92d34d5fd6e0689e57e1c37e635ce7f83c4
+ shogun-notifier-	shogun: Update gitignore with files created by unit tests
+ shogun-notifier-	shogun: json files and combined_kernel.weights
+ shogun-notifier-	shogun: iglesias :feature/CMake * 9464e9e / tests/unit/io/Serialization_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/9464e9e5d7d52a9e4f2b912074459fb5dbaac688
+ shogun-notifier-	shogun: Fix typo in file extension: from hfd5 to hdf5
+ shogun-notifier-	shogun: Fernando Iglesias :feature/CMake * e5d5b16 / .gitignore,tests/unit/io/Serialization_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/e5d5b1674cb2cd9e50fd4443ff3ab714019783df
+ shogun-notifier-	shogun: update documentation of gp framework
+ shogun-notifier-	shogun: Fernando Iglesias :feature/CMake * c6e3416 / src/shogun/machine/OnlineLinearMachine.h: https://github.com/shogun-toolbox/shogun/commit/c6e3416ac3cca42514762c974747a47ec2fad158
+ shogun-notifier-	shogun: Merge pull request #1196 from tklein23/double_free_hotfix
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed double-free when using "SGVector<float32_t> OnlineLinearMachine::get_w()"
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * b90b3e3 / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/b90b3e34132352ddddc184851861a4545a5a3931
+ shogun-notifier-	shogun: Fix json version on travis
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * 77e3c59 / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/77e3c595b7fb4d8be48b31f62eb1a1fbcafbbee6
+ shogun-notifier-	shogun: Travis: fix cwd before building
+ shogun-notifier-	shogun: Roman Votyakov :feature/CMake * 7103b5c / src/shogun/machine/gp/ (8 files): https://github.com/shogun-toolbox/shogun/commit/7103b5c9f8650186c6cbe0c8ddbca9f31f0950e1
+ shogun-notifier-	shogun: refactor likelihood models
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * 667f2f3 / src/shogun/machine/gp/ (8 files): https://github.com/shogun-toolbox/shogun/commit/667f2f32640e8348b3f404d9027725b5e653ddf0
+ shogun-notifier-	shogun: Merge pull request #1200 from votjakovr/feature/gp_refactoring
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: refactor likelihood models
+ shogun-notifier-	shogun: Roman Votyakov :feature/CMake * 550de70 / src/shogun/machine/gp/ (3 files): https://github.com/shogun-toolbox/shogun/commit/550de70e7cb7bd017e29267309e58cd6b0f910dc
+ shogun-notifier-	shogun: change default value of the derivative wrt hypers
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * f19478d / src/shogun/machine/gp/ (3 files): https://github.com/shogun-toolbox/shogun/commit/f19478d8e38e5191a72b717cc309fdadcd1f02fa
+ shogun-notifier-	shogun: minor documentation fix in log-det framework
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * c764ec8 / src/shogun/mathematics/logdet/ (2 files): https://github.com/shogun-toolbox/shogun/commit/c764ec8c9285f24a272b3aa610e5aeeb9ce175fe
+ shogun-notifier-	shogun: Merge pull request #1204 from lambday/feature/log_determinant
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: minor documentation fix in log-det framework
+ shogun-notifier-	shogun: Kevin :feature/CMake * ffb662e / src/shogun/mathematics/ajd/ (2 files): https://github.com/shogun-toolbox/shogun/commit/ffb662eb4d8572b73e6ccd64aa3d2066db27f6dd
+ shogun-notifier-	shogun: added base class for AJD and an example of a derived class header
+ shogun-notifier-	shogun: Kevin :feature/CMake * 3c3592a / src/shogun/mathematics/ajd/ (3 files): https://github.com/shogun-toolbox/shogun/commit/3c3592ae10b782195e5f8983259a05285415e4b8
+ shogun-notifier-	shogun: added JADiag.cpp and made some of the other suggested edits
+ shogun-notifier-	shogun: Kevin :feature/CMake * 37cb7ba / src/shogun/mathematics/ajd/JADiag.cpp,src/shogun/mathematics/ajd/JADiag.h: https://github.com/shogun-toolbox/shogun/commit/37cb7ba3a8e423605ea3549163626e6458b6fd55
+ shogun-notifier-	shogun: fixed some minor mistakes so that it builds
+ shogun-notifier-	shogun: Kevin :feature/CMake * f0abf7e / src/shogun/mathematics/ajd/ (3 files): https://github.com/shogun-toolbox/shogun/commit/f0abf7e4a4e803d8d2d05e45f48eae9fe6ed28c4
+ shogun-notifier-	shogun: swithed to cmath for machine eps and changed includes format
+ shogun-notifier-	shogun: Roman Votyakov :feature/CMake * 971d4fb / src/shogun/ (8 files): https://github.com/shogun-toolbox/shogun/commit/971d4fbb6186ca10b168f76f999e474e31918a50
+ shogun-notifier-	shogun: refactor evaluation of posterior and predictive distributions
+ shogun-notifier-	shogun: Heiko Strathmann :feature/CMake * 2c0f087 / src/shogun/ (8 files): https://github.com/shogun-toolbox/shogun/commit/2c0f08749fb47800f8a5ef038b0ada76e585b13c
+ shogun-notifier-	shogun: Merge pull request #1206 from votjakovr/feature/gp_refactoring
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Merge pull request #1208 from lambday/feature/log_determinant
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: bugfixes in log-det framework
+ shogun-notifier-	shogun: Sergey Lisitsyn :feature/CMake * 2664590 / / (4 files): https://github.com/shogun-toolbox/shogun/commit/26645905424e53272b20196fd623d66bcc076db3
+ shogun-notifier-	shogun: Merge pull request #1205 from pickle27/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: added base class for AJD and an example of a derived class header
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * ded6e97 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/ded6e973a11d4cb7b7e023cc80c90f6efc65810b
+ shogun-notifier-	shogun: Merge pull request #1209 from van51/feature/hashing
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Changed CDelimiterTokenizer behavior on consecutive delimiters
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * 0ac043b / src/shogun/lib/external/libocas.cpp: https://github.com/shogun-toolbox/shogun/commit/0ac043b75386152ffca7e7ad985a86c1a6c9d905
+ shogun-notifier-	shogun: don't use reserverd keyword _C
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * 7062837 / src/interfaces/modular/modshogun_ignores.i: https://github.com/shogun-toolbox/shogun/commit/7062837ed457c6765530e430620b2615549d0dfe
+ shogun-notifier-	shogun: ignore evaluate_means to fix csharp compile error
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * e726a47 / src/interfaces/modular/modshogun_ignores.i: https://github.com/shogun-toolbox/shogun/commit/e726a470fe9a9592fc6a8d6f1a74934027efcb32
+ shogun-notifier-	shogun: blacklist also evaluate_variance
+ shogun-notifier-	shogun: Soeren Sonnenburg :feature/CMake * bceddcf / applications/ocr/data/ocr.svm.gz: https://github.com/shogun-toolbox/shogun/commit/bceddcf2fa3173b3cb5a2b3a1724d165e39413cb
+-!- shogun-notifier- was kicked from #shogun by wiking [shogun-notifier-]
+@wiking	i think i fucked up this branch :)
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+ sonne|work	wiking: hurray!
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * b672846 / examples/undocumented/libshogun/CMakeLists.txt: https://github.com/shogun-toolbox/shogun/commit/b6728464de3a00c2f3d7e20fe7e7081ea52d95d0
+ shogun-notifier-	shogun: Rebase the libshogun example list
+@wiking	sonne|work: /home/travis/build.sh: line 141: [: too many arguments
+@wiking	on a line like this
+@wiking	if [ ! -z ${PYTHON_PKG} ] ; then ${PYTHON_PKG} ; fi
+@wiking	any ideas?
+ sonne|work	what?
+@wiking	i have a bash script like this
+@wiking	and i'm getting that error
+@wiking	basically i want it to run the given env variable if set
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9893061
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has left #shogun []
+@iglesiasg	sonne|work, do you happen to know Kilian Weinberger? I just mailed him asking a couple of doubts about his LMNN implementation
+@iglesiasg	I saw you are in his google+ network so that's why I wondered
+ sonne|work	wiking: ahh ok then maybe it is not in the path? you could try
+@wiking	wiking@snf-77841:~$ export LO="ls -la"
+@wiking	wiking@snf-77841:~$ if [ ! -z ${LO} ] ; then ${LO} ; fi
+@wiking	-bash: [: ls: binary operator expected
+ sonne|work	bash -c "$PYTHONPKG"; fi
+@wiking	why/
+@wiking	?
+ sonne|work	ahh sure
+ sonne|work	ls -la is taken as a command
+ sonne|work	so it tries to find "ls -la"
+@wiking	sonne|work: how can i do it
+@wiking	?
+@wiking	i need to execute a long command like source ~/virtualenv/python3.3/bin/activate && pip install numpy scipy --use-mirrors
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9893803
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has left #shogun []
+ sonne|work	wiking: use the bash thing
+ sonne|work	wiking: bash -c "$LO"
+ sonne|work	iglesiasg: yes sure I met him at nips
+@wiking	wiking@snf-77841:~$ export LO="ls -la"
+@wiking	wiking@snf-77841:~$ if [ ! -z ${LO} ] ; then bash -c "${LO}" ; fi
+@wiking	-bash: [: ls: binary operator expected
+ sonne|work	export LO="ls -lad /tmp"$
+ sonne|work	bash -c "$LO"
+ sonne|work	drwxrwxrwt. 17 root root 323584 Aug  6 12:11 /tmp
+ sonne|work	wiking: and $LO also works here
+ sonne|work	not "$LO" of course
+ sonne|work	wiking: ohh I see
+ sonne|work	use if [ ! -z "${LO}" ]
+ shogun-notifier-	shogun: Viktor Gal :develop * d666811 / tests/unit/mathematics/Integration_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/d666811ea0a96f484994e971a9204d7da933b5db
+ shogun-notifier-	shogun: Unit-test should only test modules that are available!
+ shogun-notifier-	shogun: ode for Roman Votyakov
+@wiking	sonne|work: ok that works, lets see...
+@wiking	thnx!
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * 3cdf28a / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/3cdf28afc0540e9b30f09817ef401a00aff605ff
+ shogun-notifier-	shogun: PYTHON_PKG test fix in travis script
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9894219
+-!- travis-ci [~travis-ci@ec2-50-16-141-3.compute-1.amazonaws.com] has left #shogun []
+@wiking	sonne|work: ccache would make faster things on travis? i mean since it would compile shogun always only once... but still the precompiler ccache could make things faster (e.g. eigen headers cached) or?
+ shogun-buildbot	build #1359 of deb2 - static_interfaces is complete: Failure [failed test octave_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1359  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1170 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1170  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@wiking	sonne|work lisitsyn iglesiasg what should we do with external projects, should be bundled them within shogun, i.e. if one chooses to have a library compiled by/with shogun's cmake should that be part of shogun and ship it in <prefix>/include/shogun/third_party/... ? see the case of eigen
+@iglesiasg	what is easiest for the user, which I guess is to bundle them
+@wiking	iglesiasg: imho bundling
+-!- HeikoS [~heiko@nat-179-196.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	iglesiasg: so ship all the headers under shogun/third_party/ and static link the library with libshogun.so
+@wiking	any objections ^ sonne|work ?
+@wiking	iglesiasg: u use ccache right?
+@iglesiasg	yes
+@wiking	iglesiasg: is the clean compilation faster for you?
+@wiking	iglesiasg: i.e. when your ccache is empty?
+@wiking	then w/o ccache
+@wiking	*than
+@iglesiasg	wiking, I think that clean compilation is the same
+@iglesiasg	I have not timed it though
+@wiking	iglesiasg: i hoped that in case of EIGEN3 present it would be a bit faster
+@wiking	wiking@snf-77841:~$ ccache -s
+@wiking	cache directory                     /home/wiking/.ccache
+@wiking	cache hit (direct)                  1043
+@wiking	cache hit (preprocessed)            1517
+@wiking	cache miss                          1122
+@wiking	called for link                      734
+@wiking	preprocessor error                    18
+@wiking	files in cache                       338
+@wiking	cache size                          21.9 Mbytes
+@wiking	max cache size                       1.0 Gbytes
+@wiking	with a clean ccache and a clean compile
+@wiking	so i suppose it should be faster even in this case (having these stats)
+-!- foulwall [~user@110.16.165.220] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9894630
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has left #shogun []
+ shogun-notifier-	shogun: Viktor Gal :develop * 11bd317 / tests/unit/classifier/GaussianProcessBinaryClassification_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/11bd3178b1fe5549c994a6567ebbbf4ab83295f3
+ shogun-notifier-	shogun: Only check modules that are compiled/available part2
+-!- van51 [~van51@ppp-94-66-42-68.home.otenet.gr] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9894723
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #1360 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1360
+ shogun-buildbot	build #1171 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1171  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- van51 [~van51@ppp-94-66-42-68.home.otenet.gr] has quit [Ping timeout: 256 seconds]
+ sonne|work	wiking: what exactly is the question?
+-!- foulwall` [~user@116.114.154.68] has joined #shogun
+-!- foulwall [~user@110.16.165.220] has quit [Ping timeout: 256 seconds]
+ shogun-buildbot	build #1476 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1476  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@wiking	sonne|work: bundled third party libs
+@wiking	sonne|work: i.e. we want to have at least eigen 3.1.2 for shogun... if it's not available in the distro we could give the user the option to tell shogun's make to download and use 3.1.2 eigen... and we could ship this in third_party/...
+ sonne|work	wiking: but why ship it if cmake downloads it?
+-!- lambday [67157c4f@gateway/web/freenode/ip.103.21.124.79] has joined #shogun
+@wiking	sonne|work: well even if it downloads it we have to install it somewhere
+@wiking	sonne|work: and i dont really think it's a good idea to install it to the system
+ sonne|work	wiking: ahh you mean we download and then extract compile somewhere
+ sonne|work	yeah sure create the folder third_party then and do all that in there
+ sonne|work	(on-the-fly)
+@wiking	sonne|work: yeah but when installing?
+@wiking	sonne|work: this is exactly the problem of eigen
+@wiking	it's just a bunch of headers
+@wiking	lets say somebody not only wants to run some c++ examples but as well compile them... i.e. he needs all the shogun headers
+ sonne|work	wiking: errm we don't need eigen3 stuff installed
+@wiking	hence we need to ship all the headers somehow
+ sonne|work	wiking: he will only need shogun headers
+ sonne|work	no eigen
+@wiking	sonne|work: ?
+ sonne|work	wiking: we have no eigen requirements in headers!
+ sonne|work	so only needed at compile time
+@wiking	sonne|work: examples/undocumented/libshogun/converter_diffusionmaps.cpp
+@wiking	why is there HAVE_EIGEN3 then?
+ sonne|work	well libshogun won't hae CDiffusionMaps if EIGEN3 was not availabe at compile time
+@wiking	and if available?
+@wiking	that's what i mean...
+@wiking	we supply eigen3 with cmake during compilation... then ship that libshogun.so/a
+@wiking	and what if somebody will want to develop for that libshogun a binary that needs CDiffusionMaps for example
+@wiking	he should be able to do it as it's in libshogun....
+ sonne|work	wiking: then he can just use it with libshogun
+ sonne|work	wiking: OK?
+@wiking	sonney2k: mmm i dont see that it wont start erroring with the #includes of shogun but lets see
+@wiking	unless we dont ship the eigen headers with shogun
+ sonne|work	wiking: but you would agree that if no header file in shogun uses eigen3 that we are fine?
+@wiking	sonne|work: indeed
+@wiking	if we can do the opaque shit then it should b fine
+ sonne|work	wiking: exaclty
+ sonne|work	that is the plan
+@wiking	ok
+@wiking	then i'll just download and compile shogun with that... and dont add the headers into the install target...
+ sonne|work	we should somehow define clear interfaces and hide all the implementation details to the extent possible
+ sonne|work	wiking: what is problematic would be e.g libglpk.so etc
+ sonne|work	these we would somehow need
+ sonne|work	at runtime
+@wiking	sonne|work: statically compile within libshogun.so?
+@wiking	i mean s/within/into/g
+ sonne|work	didn't manage to do that
+@wiking	mmm ok i'll try
+ sonne|work	suspect that this will be 200MB in size
+@wiking	but now i realised that i completly fucked up the whole travis config
+@wiking	we were using it veeeeryt wrong
+@wiking	there are already precompiled envs for like all python and ruby versions
+@wiking	and as well java
+@wiking	one doesn't need to apt-get it
+@wiking	just it needs some extra care in the config file of traviss
+ thoralf	wiking: But it's working - it can't be that bad. :)
+-!- foulwall` [~user@116.114.154.68] has quit [Ping timeout: 260 seconds]
+ shogun-buildbot	build #1475 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1475  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ sonne|work	thoralf: Amen :D
+ thoralf	sonne|work: I had kind of a bad dream about "non-functional requirements"... and now a deja vu ;)
+ thoralf	sonne|work: "I could refactor it, so it uses 1% less memory!"
+ sonne|work	thoralf: well if it lowers travis' load it is actually good. it crazily often builds shogun...
+ thoralf	sonne|work: Sure, but depends of how much work it is (and how much it saves).
+ thoralf	Anyway, it's not my job to worry about this. :)
+-!- gsomix_ [~gsomix@178.45.86.56] has quit [Ping timeout: 246 seconds]
+ thoralf	One feature hashing question: Is there a way to (a priori/posteriori) estimate a "good" number of dimensions for hashing?
+ thoralf	For example: Having trained classifiers x and y with hashed features of dimensions d_x and d_y...
+ thoralf	Or a measure which tells when the hashed solution is somehow optimal/a good trade-off between time/space/accuracy?
+-!- gsomix_ [~gsomix@95.67.140.176] has joined #shogun
+ sonne|work	thoralf: not really. I guess your best bet is to increase hash size slowly and then you should observe a plateau at some point
+ thoralf	sonne|work: That's what I'm doing, but this is quite expensive.  Especially the plateau appears when I'm too close to the unhashed number of dimensions.
+-!- vgorbati [~vgorbati@91.216.173.29] has joined #shogun
+ sonne|work	thoralf: well hashing only makes things faster not better :)
+ thoralf	sonne|work: I'm aware of that.  But hashing size is yet another parameter to estimate - and estimating makes it too expensive.
+ thoralf	sonne|work: At least I know that I didn't forget something obvious.
+ sonne|work	thoralf: I usually used the biggest possible hash size (for my architecture)
+-!- foulwall [~user@greymonkey.im] has joined #shogun
+@iglesiasg	all right, see you later guys!
+ thoralf	sonne|work: Hehe.  This is at least less expensive then "searching" the right size. :)
+ sonne|work	iglesiasg: cu!
+ thoralf	iglesiasg: Have fun.
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:18b5:d71d:f59f:b8b6] has quit [Quit: Ex-Chat]
+ sonne|work	thoralf: well I only use this when I have hard resource (memory / computation time) limits. So I can set it to the memory limit
+-!- foulwall [~user@greymonkey.im] has quit [Remote host closed the connection]
+-!- foulwall [~user@greymonkey.im] has joined #shogun
+-!- foulwall` [~user@116.114.154.68] has joined #shogun
+-!- foulwall [~user@greymonkey.im] has quit [Ping timeout: 276 seconds]
+-!- foulwall` [~user@116.114.154.68] has quit [Ping timeout: 245 seconds]
+-!- shogun-notifier- [~irker@94.23.237.10] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * fad52d4 / .travis.yml,CMakeLists.txt: https://github.com/shogun-toolbox/shogun/commit/fad52d4bffe62bb97260932bded4631934dd85c2
+ shogun-notifier-	shogun: Refactor travis build config
+ shogun-notifier-	shogun: Require that the pythonlib found has the same version as the interperter
+ shogun-notifier-	shogun: found
+@wiking	btw: the reason our travis builds are slow because there's a hard limit on 5 concurrent builds... if it's higher (like our case) it'll take double time to build on travis
+@wiking	so maybe removing some interfaces would be a good idea
+@sonney2k	wiking, time is not yet the issue IMHO
+@wiking	this is the new way travis looks like
+@wiking	https://travis-ci.org/shogun-toolbox/shogun/builds/9904811
+@wiking	by this refactor we can set allowed failures etc.
+@sonney2k	nice
+@wiking	13c90bac (Fernando Iglesias 2013-07-24 14:12:13 +0200 1) ../modular/Metric.i
+@wiking	why is a symlink commmited to the repo?
+* sonney2k off
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * d109cfa / cmake/FindRubyNArray.cmake: https://github.com/shogun-toolbox/shogun/commit/d109cfa9d7096c5444391070cca5f2cf656fab82
+ shogun-notifier-	shogun: Refactor RubyNarray package detector
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * 0ee7ccd / src/interfaces/python_modular/Metric.i: https://github.com/shogun-toolbox/shogun/commit/0ee7ccd1a756b79a0d2fe51795adc65bd3e9ce7d
+ shogun-notifier-	shogun: this should not be here...
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9904811
+-!- travis-ci [~travis-ci@ec2-23-22-133-41.compute-1.amazonaws.com] has left #shogun []
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- travis-ci [~travis-ci@ec2-54-227-8-185.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9905329
+-!- travis-ci [~travis-ci@ec2-54-227-8-185.compute-1.amazonaws.com] has left #shogun []
+@wiking	anybody knows a non https mirror of eigen?
+-!- vgorbati [~vgorbati@91.216.173.29] has quit [Quit: vgorbati]
+-!- lisitsyn [~lisitsyn@213.87.128.141] has joined #shogun
+-!- lisitsyn [~lisitsyn@213.87.128.141] has quit [Read error: Connection reset by peer]
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has joined #shogun
+-!- vgorbati [~vgorbati@91.216.173.29] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ vgorbati	lisitsyn: hello, are you here?
+ lisitsyn	vgorbati: yes
+ vgorbati	lisitsyn: Is there an implementation of functions like logistic sigmoid, linear function etc. in shogun (I think it is, but I can't find it)?
+ vgorbati	lisitsyn: at least I remember some discussions in chat or email regarding logistic sigmoid function..
+ lisitsyn	vgorbati: hmm I don't really know if there is something modular for that
+ lisitsyn	but that's easy to implement right?
+ vgorbati	lisitsyn: I've found only this: https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/mathematics/Function.h, and this: https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/evaluation/DifferentiableFunction.h (strange that these files seem to be 'disconnected' from each other)
+ lisitsyn	hehe yeah
+ lisitsyn	they are both from GP
+ lisitsyn	but developed by different people
+ vgorbati	lisitsyn: I will need basic interface for differentiable function - like operator() (float64_t x) and derivative(float64_t x) functions, and the existing DifferentiableFunction interface seems to be a bit overcomplicated, while Function interface lacks derivative method:)
+ lisitsyn	vgorbati: what is it for?
+ vgorbati	vgorbati: neural networks. A neuron has its activation function, the most used are logistic sigmoid, tanh and linear, but there can be others, like polynomial etc. I thought, that the same interface for them all will be a good approach
+ vgorbati	oops
+ lisitsyn	vgorbati: ah just add a new class you need then
+ vgorbati	lisitsyn: then there will be 3 different classes for functions:) Ok, I will name my class 'ActivationFunction' :)
+ lisitsyn	that's ok I think
+ vgorbati	lisitsyn: even with functions, that seem to have pretty accurate definition - it's really hard to make a class suitable for all:)
+ lisitsyn	differentiable functio is some model selection related stuff
+ lisitsyn	quite complicated
+ pickle27	iglesiasg: lisitsyn Im having trouble rebasing here, its not fixing the problem
+ lisitsyn	pickle27: what happens?
+ pickle27	Previous HEAD position was 11bd317... Only check modules that are compiled/available part2
+ lisitsyn	pickle27: can't say it tells me much ;)
+ pickle27	lisitsyn: found the problem I think
+ pickle27	iglesiasg: lisitsyn okay fixed it up and made a new pr
+@iglesiasg	pickle27, nice, thank you
+ pickle27	iglesiasg: the diff for Converter.i is a bit weird it should only say I added one line but I now get credit for 3 more
+ pickle27	iglesiasg: wait
+ pickle27	iglesiasg: I did add extra
+ pickle27	let me fix this
+@iglesiasg	pickle27, ok
+ pickle27	iglesiasg: okay there we go
+@iglesiasg	pickle27,  ready?
+ pickle27	iglesiasg: yup!
+@iglesiasg	I would say let's wait for travis
+@iglesiasg	but hey, it doesn't work!
+ pickle27	iglesiasg: kk
+ shogun-notifier-	shogun: Kevin :develop * 035a21d / src/shogun/converter/ica/ (3 files): https://github.com/shogun-toolbox/shogun/commit/035a21d0402da1375871b9ca8eaa21d0fb6de69c
+ shogun-notifier-	shogun: added FFSep ICA algorithm
+ shogun-notifier-	shogun: Kevin :develop * 7c44bb6 / / (10 files): https://github.com/shogun-toolbox/shogun/commit/7c44bb663f5646485cdce854de134be83e198943
+ shogun-notifier-	shogun: ICA methods, added doxygen comment lines, added assert for input to apply, added ffsep unit test, made sobi unit test consitent
+ shogun-notifier-	shogun: Kevin :develop * e050440 / src/interfaces/modular/Converter.i,src/interfaces/modular/Converter_includes.i: https://github.com/shogun-toolbox/shogun/commit/e050440a5c7b337879d7292e1870681c05e69bc7
+@iglesiasg	there we go
+ shogun-notifier-	shogun: some re org and cleanup in Converter.i and Converter_includes.i
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 4aa4f62 / / (10 files): https://github.com/shogun-toolbox/shogun/commit/4aa4f62ee4f923aadd9a18e49ce1e32c9c1a387a
+ shogun-notifier-	shogun: Merge pull request #1372 from pickle27/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: added FFSep ICA algorithm
+@iglesiasg	all right, I am off now for a while. See you!
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- hushell [~hushell@c-24-21-169-136.hsd1.or.comcast.net] has joined #shogun
+ shogun-buildbot	build #1172 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1172
+ shogun-buildbot	build #1173 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1173  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- lisitsyn1 [~lisitsyn@fb2-lo1.global63.net] has joined #shogun
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has quit [Ping timeout: 246 seconds]
+ shogun-buildbot	build #1174 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1174  blamelist: Kevin <kevinhughes27@gmail.com>
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 240 seconds]
+ shogun-buildbot	build #1477 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1477  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Kevin <kevinhughes27@gmail.com>
+ shogun-buildbot	build #1373 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1373  blamelist: Kevin <kevinhughes27@gmail.com>
+@sonney2k	hey gsomix! how is it going?
+-!- HeikoS [~heiko@nat-179-196.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * 76d640b / .travis.yml,CMakeLists.txt,cmake/external/Eigen3.cmake,cmake/external/JSON.cmake: https://github.com/shogun-toolbox/shogun/commit/76d640baf523b9e163ea6b295630d5a005877bcb
+ shogun-notifier-	shogun: Add BUNDLE_EIGEN and BUNDLE_JSON options
+ shogun-notifier-	shogun: download compile as a bundle both of the libraries during compilation of shogun
+ shogun-notifier-	shogun: Dedicated to Fernando
+@wiking	ok so i think cmake is done
+@sonney2k	wiking, then merge man
+@wiking	lets wait for the travis output
+@wiking	at least
+@wiking	but basically from now on we could bundle the whole f*ing dependency into libshogun
+@wiking	oh noooo... jinja2 is missing..
+ shogun-buildbot	build #1478 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1478  blamelist: Kevin <kevinhughes27@gmail.com>
+-!- lambday [67157c4f@gateway/web/freenode/ip.103.21.124.79] has quit [Ping timeout: 250 seconds]
+-!- travis-ci [~travis-ci@ec2-54-227-8-185.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9912412
+-!- travis-ci [~travis-ci@ec2-54-227-8-185.compute-1.amazonaws.com] has left #shogun []
+-!- vgorbati [~vgorbati@91.216.173.29] has quit [Ping timeout: 264 seconds]
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+-!- travis-ci [~travis-ci@ec2-54-227-8-185.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9915180
+-!- travis-ci [~travis-ci@ec2-54-227-8-185.compute-1.amazonaws.com] has left #shogun []
+@wiking	bu
+-!- lisitsyn1 [~lisitsyn@fb2-lo1.global63.net] has quit [Quit: Leaving.]
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has joined #shogun
+@sonney2k	wiking, bu!
+@sonney2k	gsomix_, I just figured out that the data is already in C_ORDER on the disc the csv reader is just wrong
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has quit [Quit: Leaving.]
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * cf0fe33 / / (6 files): https://github.com/shogun-toolbox/shogun/commit/cf0fe33bdd91680a4d39227efeba9f6b1192d880
+@wiking	this should do it
+ shogun-notifier-	shogun: Add Jinja2 detection
+ shogun-notifier-	shogun: fix dependency for shogun when using bundles
+ shogun-notifier-	shogun: install python-jinja2 package and remove libjson package
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@wiking	we need an eigen mirror in the us... travis build servers are there and my server where currently the eigen source resides is in eu...hence slow download
+@sonney2k	gsomix_, ping ping ping
+@sonney2k	gsomix_, something is wrong and I cannot figure it out
+@sonney2k	gsomix_, the C_ORDER works almost but of the 92x92 matrix about 700 entries are wrong
+@sonney2k	no idea why
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * 1293b5a / CMakeLists.txt,cmake/FindJinja2.cmake: https://github.com/shogun-toolbox/shogun/commit/1293b5a019d29ea0cf4097e969bd22a09a2e0aa8
+ shogun-notifier-	shogun: revoke c++11 flags as it utterly breaks bundle compilation
+ shogun-notifier-	shogun: remove debugging output from FindJinja2
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 083a21f / / (4 files): https://github.com/shogun-toolbox/shogun/commit/083a21ff7f8ae745a7dbda005276b18c235beec1
+ shogun-notifier-	shogun: change c/fortran conversion of csv file reader and convert gaussian kernel
+@sonney2k	wiking, I have a server in the US
+@wiking	sonney2k: can u put there this tar.bz2: http://bitbucket.org/eigen/eigen/get/3.1.4.tar.bz2
+@wiking	and give me the url
+@sonney2k	wiking, I have to check first if I have anything running that can serve files
+@wiking	doh /usr/bin/ld: ../../../third_party/libs/json/libjson-c.a(json_object.o): relocation R_X86_64_32S against `.text' can not be used when making a shared object; recompile with -fPIC
+@wiking	../../../third_party/libs/json/libjson-c.a: could not read symbols: Bad value
+@sonney2k	wiking, only some https stuff
+@sonney2k	wiking, omfg why is it not compiled with -fPIC?
+@wiking	sonney2k: dunno... i mean it's json which is not compiled.. but yeah i'm adding now the --with-pic for it's ./configure script
+@wiking	sonney2k: i need that file on http://
+@wiking	w/o ssl
+@sonney2k	wiking, is ftp also fine?
+-!- travis-ci [~travis-ci@ec2-54-234-6-103.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9917837
+-!- travis-ci [~travis-ci@ec2-54-234-6-103.compute-1.amazonaws.com] has left #shogun []
+ shogun-notifier-	shogun: Viktor Gal :feature/CMake * 76a3786 / cmake/external/JSON.cmake: https://github.com/shogun-toolbox/shogun/commit/76a3786a5bd204925f94dc460d7029c00a2bd726
+ shogun-notifier-	shogun: Build JSON bundle with -fPIC
+@wiking	sonney2k: afaik yes
+@sonney2k	wiking, ok then let me install vsftp
+-!- travis-ci [~travis-ci@ec2-54-227-8-185.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9918356
+-!- travis-ci [~travis-ci@ec2-54-227-8-185.compute-1.amazonaws.com] has left #shogun []
+@wiking	mmm we need to change the gmock/gtest version in order to support unit testing :P
+@sonney2k	wiking, why that? What feature is it missing?
+@wiking	/Users/wiking/shogun/build/GoogleMock/src/GoogleMock/gtest/include/gtest/internal/gtest-port.h:499:13: fatal error: 'tr1/tuple' file not found
+@wiking	#   include <tr1/tuple>  // NOLINT ^
+@wiking	that's why
+@wiking	it's fixed in gtest's repo
+@wiking	but not in the 1.6.0 release
+@wiking	which is not so surpriseing
+@wiking	as it was released in 2011
+@wiking	:
+@wiking	:P
+@sonney2k	wiking, try wget ftp://nn7.de/eigen3/3.1.4.tar.bz2
+@sonney2k	wiking, urgs
+@sonney2k	what is tr1/tuple?
+@wiking	tr1 is pre c++11 ;)
+@sonney2k	wiking, but where does this appear?
+@sonney2k	I cannot find it in the shogun tree
+@wiking	sonney2k: in gtest framework
+@sonney2k	wiking, ahh it is inside gtest?
+@sonney2k	wiking, so std=c++11 will fail?
+@wiking	yes
+@wiking	indeed
+--- Log closed Wed Aug 07 00:00:04 2013

@@ -1,0 +1,95 @@
+--- Log opened Wed Dec 07 00:00:16 2011
+-!- blackburn [~blackburn@188.168.128.146] has quit [Quit: Leaving.]
+-!- in3xes [~in3xes@180.149.49.230] has joined #shogun
+-!- k_matsuda [8370b643@gateway/web/freenode/ip.131.112.182.67] has joined #shogun
+ k_matsuda	hi, i considering modshogun ruby bindings to perform MKL.
+ k_matsuda	but i have a problem about ruby binding
+ k_matsuda	i initialiized Modshogun::CombinedKernel.new()
+ k_matsuda	and combined_kernel.append_kernel(individual_kernel)
+ k_matsuda	to perform lerning, Modshogun::MKLClassification.new(); mklsvm.set_kernel(combined_kernel)
+ k_matsuda	and set labels by mklsvm.set_labels(Modshogun::Labels.new([1,-1]))
+ k_matsuda	i expect MKLClassification#get_kernel will return CombinedKernel object
+-!- k_matsuda [8370b643@gateway/web/freenode/ip.131.112.182.67] has quit [Ping timeout: 265 seconds]
+-!- k_matsuda [~k_matsuda@peter.pi.titech.ac.jp] has joined #shogun
+ k_matsuda	sorry, my network is bad...
+ k_matsuda	i initialiized Modshogun::CombinedKernel.new() and combined_kernel.append_kernel(individual_kernel)
+ k_matsuda	to perform lerning, Modshogun::MKLClassification.new(); mklsvm.set_kernel(combined_kernel)
+ k_matsuda	and set labels by mklsvm.set_labels(Modshogun::Labels.new([1,-1]))
+ k_matsuda	i expect MKLClassification#get_kernel will return CombinedKernel object but it return Kernel object.
+ k_matsuda	so, i cannot get weight of individual kernels by CombinedKernel#get_subkernel_weights method.
+ k_matsuda	i try like http://permalink.gmane.org/gmane.comp.ai.machine-learning.shogun/687
+ k_matsuda	but, kernel.get_first_kernel() is not work.
+ k_matsuda	because get_kernel method return Kernel object (not CombinedKernel)
+ k_matsuda	So, what to do get weight of individual kernels?
+ k_matsuda	I use shogun git-head (installed yesterday) and use ruby-1.9.2
+-!- in3xes [~in3xes@180.149.49.230] has quit [Ping timeout: 244 seconds]
+ sonne|work	k_matsuda: I understand the problem
+ sonne|work	you currently can only work around this by saving the combined kernel object
+ sonne|work	problem is simply that swig has no notion of casting objects
+ sonne|work	k_matsuda: actually you can use combined_kernel.KernelToCombinedKernel(generic_kernel_obj)
+ sonne|work	we added that very recently...
+ k_matsuda	thanks for your advice!
+ k_matsuda	i'did like this:
+-k_matsuda:#shogun-   # cast learned Kernel obj to CombinedKernel
+-k_matsuda:#shogun-   casted_kernel = combined_kernel.KernelToCombinedKernel(mklsvm.get_kernel)
+-k_matsuda:#shogun-   w = []
+-k_matsuda:#shogun-   individual_kernel = casted_kernel.get_first_kernel()
+-k_matsuda:#shogun-   while individual_kernel
+-k_matsuda:#shogun-     w << individual_kernel.get_combined_kernel_weight()
+-k_matsuda:#shogun-     individual_kernel = casted_kernel.get_next_kernel()
+-k_matsuda:#shogun-   end
+-k_matsuda:#shogun-   p w
+ k_matsuda	it seems work well...
+ sonne|work	k_matsuda: I think there is even a get_subkernel_weights() function so you don't need the loop
+ k_matsuda	what is as argument for get_subkernel_weights() ?
+ k_matsuda	i tryed that :
+-k_matsuda:#shogun- casted_kernel.get_subkernel_weights(casted_kernel.get_num_subkernels)
+ k_matsuda	but i get :
+-k_matsuda:#shogun- Wrong arguments for overloaded method 'CombinedKernel.get_subkernel_weights'. (ArgumentError)
+-k_matsuda:#shogun- Possible C/C++ prototypes are:
+-k_matsuda:#shogun-     void CombinedKernel.get_subkernel_weights(int32_t &num_weights)
+-k_matsuda:#shogun-     void CombinedKernel.get_subkernel_weights(float64_t **weights, int32_t *num_weights
+ k_matsuda	i'm not familiar to SWIG/Ruby.. i dont know how to reference or pointer for native code.
+ sonne|work	ok that is a bug
+ k_matsuda	I want interface like : float64_t * CombinedKernel::get_subkernel_weight(void)
+ k_matsuda	i use loop of get_first_kernel()/get_next_kernel() a while
+ k_matsuda	very thanks for advice!
+ 15SAAI18M	shogun: Soeren Sonnenburg master * r50fb405 / (2 files): add get/set functions for combined kernel weights (forgotten sgvector transition) - http://git.io/RZrbXA
+ sonne|work	k_matsuda: ok submitted
+ shogun-buildbot	build #384 of cmdline_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/384  blamelist: sonne@debian.org
+ shogun-buildbot	build #359 of python_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/359  blamelist: sonne@debian.org
+ k_matsuda	I leave once, but I'll continue check channel logs, and greatly appreciate every advices.
+-!- k_matsuda [~k_matsuda@peter.pi.titech.ac.jp] has quit [Remote host closed the connection]
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Ping timeout: 265 seconds]
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Quit: Leaving.]
+ 15SAAI18M	shogun: Soeren Sonnenburg master * r2b03faf / src/configure :
+ 15SAAI18M	shogun: disable hmm parallel learning/structures and thus parallel hmm
+ 15SAAI18M	shogun: training/application at all.
+ 15SAAI18M	shogun: this is a temporary workaround to not see crashes and wrong results when
+ 15SAAI18M	shogun: learning - http://git.io/nrr5rw
+ 15SAAI18M	shogun: Soeren Sonnenburg master * r1a2c5b0 / examples/undocumented/libshogun/classifier_mklmulticlass.cpp : adjust example to SGVector style - http://git.io/9jsrVg
+ 15SAAI18M	shogun: Soeren Sonnenburg master * r2c4ee34 / (9 files in 6 dirs): fix other places to work with SGVector - http://git.io/kUNIhQ
+ shogun-buildbot	build #386 of cmdline_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/386
+ shogun-buildbot	build #387 of cmdline_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/387  blamelist: sonne@debian.org
+ shogun-buildbot	build #361 of python_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/361
+ shogun-buildbot	build #362 of python_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/362  blamelist: sonne@debian.org
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Read error: Connection reset by peer]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Read error: Connection reset by peer]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Remote host closed the connection]
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 248 seconds]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Remote host closed the connection]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Remote host closed the connection]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- blackburn [~blackburn@188.168.2.160] has joined #shogun
+ blackburn	sonney2k: forgot to join channel :)
+ blackburn	I guess you are sleeping already
+--- Log closed Thu Dec 08 00:00:19 2011

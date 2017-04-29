@@ -1,0 +1,147 @@
+--- Log opened Sat Jun 02 00:00:41 2012
+ heiko2	hihi
+ heiko2	heiko3
+ heiko3	heiko2: so did you submit?
+ heiko3	nips?
+ heiko2	yes
+ heiko2	its done :)
+ heiko2	lots of work
+ heiko3	congrats
+ heiko3	and exam?
+ heiko2	thanks :)
+ heiko2	exam was nice
+ heiko2	also by arthur btw :)
+-!- heiko1 [~heiko@host86-179-58-219.range86-179.btcentralplus.com] has quit [Ping timeout: 260 seconds]
+ heiko3	hahah exam by supervisor??
+ heiko2	yes, funny isnt it? :)
+ heiko3	that should be unfair a little
+ heiko2	oh, my girl just returned home, gotta go
+ heiko3	heh
+ heiko2	no, he gave me no hints ;)
+-!- heiko3 is now known as blackburn
+-!- heiko2 [~heiko@host86-177-14-77.range86-177.btcentralplus.com] has quit [Ping timeout: 260 seconds]
+ n4nd0	good night!
+ blackburn	nite
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@31.28.59.65] has left #shogun []
+ CIA-9	shogun: Soeren Sonnenburg master * r78f9ac6 / src/configure : fix octave detection for octave 3.6.x (Closes issue #383) - http://git.io/aDihsw
+ CIA-9	shogun: Soeren Sonnenburg master * r8a15088 / src/configure : fix ruby detection in configure - http://git.io/DfZJdw
+ CIA-9	shogun: Soeren Sonnenburg master * r7344caa / (2 files in 2 dirs): add empty define for ignore in class list - http://git.io/jFNJBg
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- blackburn [~blackburn@31.28.59.65] has quit [Ping timeout: 244 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Remote host closed the connection]
+ CIA-9	shogun: Soeren Sonnenburg master * rb921a7d / (2 files in 2 dirs): add proper copyrights in Director* stuff - http://git.io/_GUY1g
+ CIA-9	shogun: Soeren Sonnenburg master * r80b8013 / (src/shogun/lib/Hash.cpp src/shogun/lib/Hash.h): fix compile warning in md5sum - http://git.io/gbxZXQ
+ CIA-9	shogun: Soeren Sonnenburg master * rf0a2a12 / (5 files in 3 dirs): add empty liblinear regressor - http://git.io/e6BGBA
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+ blackburn	haha
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Remote host closed the connection]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Remote host closed the connection]
+-!- gsomix [~gsomix@85.26.235.175] has joined #shogun
+ gsomix	mechanics is full of pain
+ gsomix	depressive lagrangians, suffering hamiltonians and many integrals of fear
+ gsomix	they come to me in dreams
+ gsomix	and organize an orgy of terror
+ blackburn	:D
+ blackburn	well I still feel excited about Lagrange's stuff
+ gsomix	blackburn, my favorite subject is multi-dimensional oscillators
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Afternoon Sergey
+ blackburn	hey
+ blackburn	(its me)
+ blackburn	:)
+ KMcQuisten	I'd guessed :)
+ KMcQuisten	So, any ideas as to what the problem is?
+ blackburn	okayy let me try to guess
+ blackburn	could you please first say what is classifier you do use?
+ blackburn	MKLRegression?
+ KMcQuisten	I'm working with the MKLRegression
+ KMcQuisten	Yes
+ blackburn	let me check the code
+ blackburn	okay and the problem appears only with combined features, right?
+ KMcQuisten	To the best of my knowledge yes.  It worked fine when I gave a single kernel to LibSVR, but I dind't try putting a single kernel into MKLRegression
+ blackburn	let me try to come with some reproducing example
+ blackburn	KMcQuisten: should it look similar to python_modular/kernel_combined_modular.py?
+-!- gsomix [~gsomix@85.26.235.175] has quit [Quit: Ex-Chat]
+-!- gsomix [~gsomix@85.26.235.175] has joined #shogun
+ KMcQuisten	Yes, essentially, but using StringWordFeatures and the CommWordStringKernel in the Comined objects.
+ blackburn	I changed mkl_binclass_modular.py to regression - works
+ blackburn	lets see if stringfeatures change the game
+ blackburn	KMcQuisten: can I ask you to modify some code meanwhile? some simple thing to debug
+ KMcQuisten	Sure
+ blackburn	I just want to know where it wants to stop
+ KMcQuisten	Right
+ KMcQuisten	Just let me know where I need to modify things
+ blackburn	shogun/features/StringFeatures.cpp:264
+ blackburn	replace SG_ERROR with SG_WARNING and try to recompile
+ blackburn	ah and %d after "is" word in msg (I forgot that)
+ KMcQuisten	Ok, done.  Now I'll recompile
+ blackburn	thanks
+ KMcQuisten	Ok, here's what I got.  It looks like we have an index issue:
+ KMcQuisten	Spectrum_MKLselect.py:66: RuntimeWarning: [WARN] Requested feature vector with index 50 while total num is 50   testsvm.train(combfeats) Traceback (most recent call last):   File "Spectrum_MKLselect.py", line 66, in <module>     testsvm.train(combfeats) SystemError: [ERROR] Trying to access string[50] but num_str=50
+ blackburn	hmm
+ blackburn	only 50, but no more, right?
+ KMcQuisten	Yes.  I only put in 50 data points as a toy set.  Let me check with the whole dataset
+ blackburn	wait wait
+ blackburn	ERROR is raised somewhere
+ KMcQuisten	Yes.  I think it's trying to access index 50 on a vector that's 0 indexed with 50 items in ti
+ blackburn	no, that can go for bigger values (it stopped because of the SG_ERROR)
+ KMcQuisten	How is that possible?  If you have a vector of length 50 its highest index is 49.  I get the same kind of error with the full set of 2430 sequences
+ blackburn	I mean it can go for 51, etc
+ KMcQuisten	SystemError: [ERROR] Trying to access string[2430] but num_str=2430
+ KMcQuisten	RIght.  I know i'm not limited to 50 data points
+ blackburn	ok let me find this ERROR
+ blackburn	I tried to combine string and real features btw
+ blackburn	works
+ blackburn	KMcQuisten: could you please replace SG_ERROR with SG_WARNING at line 348 too?
+ KMcQuisten	sure
+ KMcQuisten	I will also try and comine the real and the StringWord
+ KMcQuisten	and see if it works for me too
+ blackburn	what do you combine?
+ blackburn	string and string?
+ KMcQuisten	StringWord and StringWord.   DNA sequences mapped into the unsigned 16bit integers.  In python, it's StringWordFeatures, but in the C++ it's StringFeatures<uint_16>
+ KMcQuisten	not StringFeatures<char>
+ blackburn	ok
+ blackburn	KMcQuisten: okay I managed to reproduce
+ blackburn	two StringWord feautres
+ KMcQuisten	does it work for you?
+ blackburn	no dies on the same error
+ KMcQuisten	That makes me a happy cmaper
+ KMcQuisten	camper
+ KMcQuisten	at least it's reproduceable
+ blackburn	yeah I'll try to figure out what is wrong
+ KMcQuisten	thanks so much!
+ KMcQuisten	I've got plenty of other work and writing to do, so i'll just camp here for a while
+ blackburn	ok sure
+ blackburn	I'll let you know on any progress
+ KMcQuisten	Thank you
+ gsomix	good night guys
+ blackburn	KMcQuisten: hmm as I thought it stopped at 183
+ blackburn	92*2
+-!- gsomix [~gsomix@85.26.235.175] has quit [Ping timeout: 260 seconds]
+ KMcQuisten	What does that indicate?
+ blackburn	some code adds number of feature vectors somehow I guess
+ blackburn	but it is really strange
+ KMcQuisten	What's the significance of the 92 * 2?
+ blackburn	number of feature vectors in test example is 92
+ KMcQuisten	Ah
+ blackburn	and two string word features
+ blackburn	KMcQuisten: good thing I detected a bug :D
+ KMcQuisten	Indeed.  I changed that error to a warning as you asked before and recompiled, got the following:
+ KMcQuisten	Spectrum_MKLselect.py:66: RuntimeWarning: [WARN] Requested feature vector with index 2430 while total num is 2430
+ KMcQuisten	Spectrum_MKLselect.py:66: RuntimeWarning: [WARN] Requested feature vector with index 2431 while total num is 2430
+ KMcQuisten	Spectrum_MKLselect.py:66: RuntimeWarning: [WARN] Requested feature vector with index 2432 while total num is 2430
+ KMcQuisten	Spectrum_MKLselect.py:66: RuntimeWarning: [WARN] Trying to access string[2432] but num_str=2430
+ KMcQuisten	Segmentation fault (core dumped)
+ KMcQuisten	Does the Combinedfeats object adress all the features as thogh they are one long list?
+ blackburn	something like that but I do not understand what is the difference between real+string and string+string
+ CIA-9	shogun: Sergey Lisitsyn master * r3e1dc47 / src/shogun/regression/svr/SVRLight.cpp : Fixed wrong free in SVRLight - http://git.io/n7oILw
+ blackburn	KMcQuisten: okay I'm pretty near I think
+ blackburn	svr bug
+--- Log closed Sun Jun 03 00:00:41 2012

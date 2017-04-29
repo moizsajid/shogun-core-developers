@@ -1,0 +1,192 @@
+--- Log opened Sun Jan 19 00:00:58 2014
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- sonne|osx_ [~sonne@f052018132.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f053035047.adsl.alicedsl.de] has quit [Ping timeout: 260 seconds]
+-!- sonne|osx_ is now known as sonne|osx
+ shogun-buildbot	build #685 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/685
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has joined #shogun
+ parijat	Hi, is there a way to multiply a scalar with a vector (or matrix) without having to iterate over its elements?
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	sonney2k, ping
+ parijat	@iglesiasg: hello
+@iglesiasg	parijat, hey
+ parijat	iglesiasg, regarding KMeans interface, I think the 2nd option suggested by you is better
+@iglesiasg	parijat, all right
+ parijat	iglesiasg, user can then possibly switch between implementations
+@iglesiasg	parijat, yep, indeed
+@iglesiasg	parijat, be sure to test that works once it is done then
+@iglesiasg	parijat, this is, in the same example, first train with one kmeans method, then with another, etc
+@iglesiasg	with the same KMeans instance
+ parijat	iglesiasg, is it possible to implement it in a modular fashion?
+@iglesiasg	parijat, can you elaborate?
+@iglesiasg	do you mean to have the general KMeans class which is the interface
+@iglesiasg	then the other classes with the implementations for each KMeans method?
+ parijat	iglesiasg, I meant keeping separate classes for each implementation of kmeans but showing to user just one class. how can I do it?
+@iglesiasg	parijat, yes, sure it is possible
+@iglesiasg	parijat, I would have a KMeans class that has (among possibly other attributes) one enum attribute to select the KMeans method to use
+@iglesiasg	then the train in this class would basically have a switch statement
+@iglesiasg	that depending on the value of this attribute, basically the train method implemented in one of the other classes
+@iglesiasg	basically calls* (missed that verb :)
+@iglesiasg	and then the idea would be that these other classes need not to be visible from target interfaces (e.g. python_modular, etc)
+@iglesiasg	so in KMeans.cpp you include KMeansElkanImpl.h, KMeansMiniBatchImpl.h, etc
+@iglesiasg	parijat, does that make sense to you?
+ parijat	iglesiasg, yup
+@iglesiasg	it is probably not the only way to do this..
+@sonney2k	iglesiasg, what did you not understand with git bisect?
+@sonney2k	iglesiasg, and hey pong :)
+ parijat	iglesiasg, so basically its 3 (possibly more) to one kind of inheritance structure?
+@iglesiasg	sonney2k, I think I understood it
+@iglesiasg	sonney2k, the thing is that I don't know yet when the tests were actually in good state
+@iglesiasg	sonney2k, I just realized that when I am currently going to a past commit and running the tester, that is comparing with the current version of the data file
+@sonney2k	iglesiasg, I thought you did?
+@iglesiasg	sonney2k, nope
+@iglesiasg	sonney2k, do you see the problem I mean with the data file used in the integration test?
+@iglesiasg	because as I see it right now, this makes a huuuuge pain
+@sonney2k	iglesiasg, no - I don't get it
+@iglesiasg	sonney2k, integration tests used files in shogun/data/testsuite/tests, right?
+@iglesiasg	sonney2k, which are tracked in the data repository
+@sonney2k	yes and?
+@iglesiasg	sonney2k, if one the files in the testsuite has several versions
+@iglesiasg	sonney2k, then say I go back in shogun repository to a past version, and run the tester
+@sonney2k	and?
+@iglesiasg	sonney2k, it might not use the file it should be using for that revision!
+@sonney2k	iglesiasg, well just git submodule update
+@sonney2k	and done
+@iglesiasg	aham, that is indeed more practical than checking by hand what is the corresponding data version
+@sonney2k	iglesiasg, so could you continue trying to figure this out?
+@sonney2k	iglesiasg, I mean you could find out if mmd still works using the buildbot / some build where it actually worked
+@iglesiasg	sonney2k, I continue trying yes
+@iglesiasg	I was using my machine but it is true that the process would be faster in the buildbot
+@iglesiasg	sonney2k, can you remind me how do I ssh to it? :)
+@iglesiasg	I will write it down this time
+@sonney2k	iglesiasg, ssh fatbot.*
+@sonney2k	iglesiasg, but I meant the buildbot.sgtb.eu logs - because there is one where it still works I am sure :)
+@iglesiasg	sonney2k, according to the logs, as we discussed the other day, it is in 2069 where it worked and in 2070 where it started failing
+@iglesiasg	but this makes no sense
+@iglesiasg	since they are the same revision
+@sonney2k	iglesiasg, well checkout some version before 2069 - compile and test locally
+@sonney2k	iglesiasg, if it works start the bisect with good
+@iglesiasg	sonney2k, I checked out 2069, compiled and tested locally
+@sonney2k	and find some version after 2070 that fails
+@iglesiasg	failed
+@iglesiasg	when I realized about the data file issue
+@iglesiasg	so right now I am checking if statistics_linear_time_mmd actually has more than version
+@iglesiasg	the data file
+@sonney2k	ok
+@sonney2k	iglesiasg, well keep trying...
+@iglesiasg	https://github.com/shogun-toolbox/shogun-data/commits/master/testsuite/tests/statistics_linear_time_mmd0.txt
+@iglesiasg	it indeed has more than one version
+@iglesiasg	let me check now that git submodule update goes back to the right onw
+@sonney2k	iglesiasg, I am still messing with the bmrm serialization issue - no idea still. When serializing the MCSOLabels these are ok - but not what comes out of *BMRM.apply()
+@iglesiasg	aham! I see
+@iglesiasg	sonney2k, maybe they are internally created as StructuredLabels instead of MulticlassSO?
+@sonney2k	but only when serializing
+@iglesiasg	I mean in the BMRM code
+@sonney2k	iglesiasg, might be - but still if they are cast by apply()
+@iglesiasg	sure cast, but the problem might be there, who knows
+@iglesiasg	parijat, I don't see right away the inheritance using this approach with enums -- but maybe it makes sense!
+@sonney2k	iglesiasg, it uses m_model->structured_labels_factory
+@sonney2k	and m_model is MulticlassModel
+@iglesiasg	sonney2k, aham, cannot tell you about the factory thingy
+@sonney2k	which gives    return new CMulticlassSOLabels(num_labels);
+@sonney2k	so it looks good
+@iglesiasg	yep
+@sonney2k	iglesiasg, do we have an equivalent C++ example
+ parijat	iglesiasg, let me think carefully what might be best implementation and since Peter will be contributing Elkan's kmeans, let me start working with lloyd's and mini-batch versions only
+@sonney2k	iglesiasg, I would want to iron out that it is a swig thing
+@iglesiasg	sonney2k, I think there is one, yes. Let me check
+@iglesiasg	sonney2k, so_multiclass_BMRM.cpp
+@iglesiasg	and yes, it is a pain that some are called so_ and others structure_
+@iglesiasg	I should have renamed the so_* already :S
+@sonney2k	iglesiasg, well and that some are called BMRM and others bmrm ...
+@iglesiasg	:D
+@sonney2k	iglesiasg, first tests green before that no new pushes
+@iglesiasg	totally agree
+@iglesiasg	sonney2k, but I don't understand! How is it possible that for instance in 2068 the test is fine in the buildbot but not locally?
+@iglesiasg	sonney2k,  I did the git submodule update. Is there something else I am missing?
+@iglesiasg	I am trying now going far before in time, to 2000
+@iglesiasg	gtg, will continue on it later
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has quit [Quit: Page closed]
+-!- gsomix [~gsomix@46.20.65.64] has joined #shogun
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Ping timeout: 260 seconds]
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	sonney2k, ping
+@iglesiasg	sonney2k, sonne|osx, any idea what does this one mean?
+@iglesiasg	http://pastebin.com/YpFJjAWs
+-!- lisitsyn [~lisitsyn@213.87.129.91] has joined #shogun
+-!- lisitsyn [~lisitsyn@213.87.129.91] has quit [Ping timeout: 272 seconds]
+-!- lisitsyn [~lisitsyn@213.87.129.91] has joined #shogun
+-!- lisitsyn1 [~lisitsyn@80.252.20.67] has joined #shogun
+@iglesiasg	lisitsyn, man I don't manage to check out a version where a test actually works locally
+@iglesiasg	it is driving me nuts
+-!- lisitsyn [~lisitsyn@213.87.129.91] has quit [Read error: No route to host]
+-!- pickle27 [~kevin@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+ lisitsyn1	iglesiasg: what's going on? :)
+@iglesiasg	lisitsyn1, these integration tests
+@iglesiasg	fuck yeah!
+@iglesiasg	finally
+@iglesiasg	I found a revision in which the fucking test is fine
+@iglesiasg	that's an step forward indeed
+@sonney2k	iglesiasg, hurray!
+@sonney2k	iglesiasg, which revision is it?
+@iglesiasg	sonney2k, commit c00c71a6cf13ed166dc52bb6395d4ec828741894
+@sonney2k	iglesiasg, so that is the last known working?
+@iglesiasg	sonney2k, not really. That is one that works
+@iglesiasg	there might be other revisions after that one where the test work as well
+@sonney2k	iglesiasg, and the oldest non-working one?
+@sonney2k	you know so far?
+@iglesiasg	sonney2k, nope
+@iglesiasg	sonney2k, but I know no-working ones so I can use git bisect
+@iglesiasg	I know an old one, but it is unknown whether it is the oldest non-working
+@sonney2k	iglesiasg, well which one...
+@sonney2k	iglesiasg, gsomix - found the reason why the structure_multiclass_bmrm.py fails
+@sonney2k	p a
+@sonney2k	MulticlassSOLabels
+@sonney2k	p type(a)
+@sonney2k	<type 'StructuredLabels'>
+@sonney2k	so wtf is going on here...
+ gsomix	hm
+@sonney2k	gsomix, could that have to do with the apply hack you did?
+@sonney2k	gsomix, or is this some swig thing not being aware of the type at that stage?!
+ gsomix	sonney2k, checking...
+@sonney2k	it is not happening in the C++ code
+@sonney2k	gsomix, I think it indeed is a swig thing
+@sonney2k	let me check what happens if I forcefully convert it to MulticlassSOLabels
+ gsomix	sonney2k, I'm not sure that we have this case in LabesFactory
+ gsomix	*LabelsFactory
+@sonney2k	gsomix, no we don't but it is worth a try...
+@sonney2k	gsomix, maybe you know from your swig endeavors - how can we override the type of the object?
+@sonney2k	gsomix, I guess that is what we need in this case
+ gsomix	sonney2k, nope.
+@sonney2k	iglesiasg, why is the MulticlassSOLabels.{h,cpp} not in shogun/labels/ ?
+@sonney2k	gsomix, adding a to_multiclass_so fixes the type and so the example
+@sonney2k	too bad swig cannot magically handle that since this apply here might return various different types
+ gsomix	we have hack for features that do it magically
+@sonney2k	gsomix, yeah but there the type is clear upfront or?
+@sonney2k	gsomix, or not?
+@sonney2k	gsomix, this apply method here just returns CStructuredLabels
+@sonney2k	and these can be CMulticlassSOLabels or anything else derived from CStructuredLabels
+@sonney2k	iglesiasg, should we have a new label type (cf LabelTypes.h) for CMulticlassSOLabels?
+@sonney2k	gsomix, so what is the hack - and could we use it in this case too?
+ gsomix	sonney2k, there is some additional info in features like feat_class and typecode. so I just wrote typemaps that just converts swig's pointers using this info.
+ gsomix	but this is hard coding
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun-data: Soeren Sonnenburg :master * 9ea447e / testsuite/tests/structure_multiclass_bmrm0.txt: https://github.com/shogun-toolbox/shogun-data/commit/9ea447e356fc71ef9a815e9af027893c91cd2a0c
+ shogun-notifier-	shogun-data: add bmrm test data
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 1bfa8cf / / (5 files): https://github.com/shogun-toolbox/shogun/commit/1bfa8cf84396bfbf2609ad4bac4b4af862db4112
+ shogun-notifier-	shogun: add to_multiclass_structured in LabelsFactory and use that for bmrm example / test
+@sonney2k	gsomix, well we could do the same - labels have a LabelType...
+@sonney2k	gsomix, time to do this?
+ gsomix	sonney2k, yep, ok.
+ gsomix	I'm still preparing to exams, but this makes me crazy - so, I will prefer coding tonight.
+-!- pickle27 [~kevin@192-0-136-118.cpe.teksavvy.com] has quit [Quit: Leaving]
+ shogun-buildbot	build #350 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/350  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@iglesiasg	sonney2k, didn't get why having a new label type for MulticlassSOLabels
+ shogun-buildbot	build #36 of deb4 - python3 is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/36  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #2141 of deb3 - modular_interfaces is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2141  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@iglesiasg	sonney2k, I am in the git bisect process, still about 5-6 revisions to test. Will update you tom about it
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+--- Log closed Mon Jan 20 00:00:00 2014

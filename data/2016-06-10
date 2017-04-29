@@ -1,0 +1,372 @@
+--- Log opened Fri Jun 10 00:00:03 2016
+--- Day changed Fri Jun 10 2016
+@lambday	OXPHOS: well, ENABLE_GPULIB thing has to go..
+@lambday	OXPHOS: now we have register_backend thing
+ OXPHOS	but users will have another input ENABLE_GPU_CALCULATION, to ask Shogun to choose from any GPULIB if there is any
+ OXPHOS	ha
+@lambday	if there are two gpu backends, users can only register one
+@lambday	whichever is registered, that is enabled - that should be the principle
+ OXPHOS	will shogun throw errors if user try to register two?
+ OXPHOS	these will all be in cmake right
+@lambday	OXPHOS: well, we should decide that a bit carefully.. say, for a part of his application, he wants to use viennacl.. so he registers that.. then in some later part of the code he wants to use CUDA.. so he registers that
+@lambday	umm.. not sure about that
+@lambday	OXPHOS: shouldn't it be from code itself?
+@lambday	cmake would just find supported libs
+@lambday	well, no.. maybe you have a point
+ OXPHOS	lambday: well if it can be changed..guess a global variable would work?
+@lambday	OXPHOS: global variable for what?
+ OXPHOS	gpubackend
+@lambday	OXPHOS: we already have that inside sg_linalg.m_gpubackend, no?
+@lambday	that's pretty global :D
+ OXPHOS	lambday: yeah you'r right. It is actually global because of sg_linalg. So since there's only one SGLinalg, there IS only one GPUBackend at one time
+@lambday	OXPHOS: in my mind, registering backend was about setting this m_gpubackend..
+@lambday	OXPHOS: but not sure whether a cmake option could be set..
+@lambday	something like, if cmake finds any supported gpu backend, that thing gets registered automatically..
+@lambday	so if there are multiple, there has to be a priority - which one to use as default
+@lambday	but the user should always be able to change this using sg_linalg.register_gpu_backend
+ OXPHOS	there's a problem with current m_gpubackend
+@lambday	OXPHOS: which is?
+ OXPHOS	it can be named whatever
+@lambday	huh?
+ OXPHOS	like whatever library you try to register , it'll stay the same
+ lisitsyn	unique!
+ lisitsyn	ok let me try to fix it
+@lambday	but you changed it to shared ptr, no?
+ OXPHOS	juj?
+ OXPHOS	huh?
+ OXPHOS	i mean
+@lambday	lisitsyn: haha sleeping tiger woke up :D
+ lisitsyn	JA
+ OXPHOS	now GPUBackend.dot() is now #ifdef HAVE_VIENNACL, do blabla; #elif HAVE_CUDA, do blabla
+@lambday	hah my Indian language background always makes me read things exactly as they are spelled :D
+@lambday	if someone says ja, I actually ja instead of ha xD
+@lambday	I actually read**
+ OXPHOS	jo
+@lambday	jabit, jou see
+@lambday	surprisingly, j = h, and j = y
+@lambday	sanskrit doesn't have that :D
+ OXPHOS	wow
+@lambday	hah my Indian language background always makes me read things exactly as they are spelled :D
+ OXPHOS	jeah i know there're several languages(?) in India
+ OXPHOS	never know the difference :)
+@lambday	OXPHOS: neither do we :D
+ OXPHOS	jajaja
+@lambday	I myself know like 3 of them
+@lambday	hah my Indian language background always makes me read things exactly as they are spelled :D
+@lambday	well, 2.67 to be exact
+ OXPHOS	coooool
+ OXPHOS	I have a friend from India who only speaks English
+@lambday	I know, right? B-)
+@lambday	OXPHOS: he's lying
+@lambday	she's lying? :/
+@lambday	ah english needs a gender neutral pronoun
+ OXPHOS	really - she said English is her first language - might not be the only one
+ OXPHOS	we distinguish that in Chinese also. only in written. weird
+@lambday	OXPHOS: I am yet to see an Indian (who stayed in India) whose first language is English..
+ OXPHOS	I'll question her next time;)
+@lambday	OXPHOS: just ask which part of India she's from and I'll tell you her native language ;)
+@lambday	(almost) every state has a different one
+ OXPHOS	so you all speak english
+ OXPHOS	born bilingual
+ OXPHOS	but anyway - it doesn't matter how many gpubackend you try to register now, they will be the SAME one
+ OXPHOS	because the switch between backends is dependent on #ifdef HAVE_GPULIB, which is set at cmake
+@lambday	OXPHOS: no! there can be multiple of those.. but at a given point there can be only one
+@lambday	see what I mean?
+@lambday	so thing to keep in mind - make register_gpu_backend() and register_cpu_backend() thread safe
+@lambday	OXPHOS: ^
+@lambday	very important!
+ OXPHOS	i see
+ OXPHOS	BUT say you're now (supposed to be) using ViennaCL gpubackend and you want to switch to CUDA, how can you do that?
+@lambday	also, I am trilingual actually.. hindi, bengali and english.. a bit punjabi.. can understand gujarati, assamese, oriya, marathi.. xD
+@lambday	OXPHOS: sg_linalg.register_gpu_backend(new CUDABackend()) or something
+ lisitsyn	I am half lingual
+ lisitsyn	:D
+@lambday	ah I see what you mean
+@lambday	OXPHOS: so the pimpl allows you to have only one impl at a time due to those ifdefs
+ OXPHOS	you speak C++, python, bash ...
+@lambday	OXPHOS: when lisitsyn was born, his first words here `std::cout << "hello world!" << std::endl;'
+ lisitsyn	do you know what's the best interview question on sed?
+ OXPHOS	lol
+ OXPHOS	no
+ lisitsyn	do you know some sed?
+@lambday	lisitsyn: you're asking or you're about to tell yourself?
+ lisitsyn	THEN
+ lisitsyn	if he/she knows reject
+ lisitsyn	because he is going to write everything in sed
+ lisitsyn	:D
+ lisitsyn	object relational mapping? sounds like a good sed task
+@lambday	lisitsyn: haha xD
+ OXPHOS	whaaaaat
+ OXPHOS	i can guess the point..
+ OXPHOS	lambday: yeah i think so.. I mean it is "static" actually. there's no CUDABackend(). there's only one GPUBackend() which can work with whatever GPUlibrary Shogun can use.
+ OXPHOS	not whatever the users wants to work with
+@lambday	OXPHOS: yeah I see.. so it doesn't support multiple backends yet..
+@lambday	maybe we should support them later
+ OXPHOS	yes I think this is another branch
+@lambday	OXPHOS: not too hard to change that.. basically what we have to do is to make GPUBackend a base class.. and provide different impls like ViennaCLBackend, CUDABackend etc..
+@lambday	but that's not the focus for now
+ OXPHOS	agree
+ OXPHOS	lambday: we were talking about the GPU_CALCULATION stuff.. so I'll leave it there for now?
+@lambday	maybe we'll never support naked cuda..
+@lambday	:D
+@lambday	OXPHOS: I didn't fully get what you wanted to do with this macro :(
+@lambday	why would this be needed again?
+ OXPHOS	let's say shogun support GPULIB1 and 2. The user has GPULIB1 and 2. The user registered GPULIB1. but for some reason, he doesn't want to use GPUBackend for calculation
+@lambday	OXPHOS: this problem will be solved **if** we allow them to register different backends..
+@lambday	as long as that is not supported, this is not possible
+ OXPHOS	okay so i can just use HAVE_VIENNACL for now
+@lambday	OXPHOS: yeah that should be fine..
+ OXPHOS	not fancy :)
+@lambday	haha
+@lambday	well it's easy to change that you see.
+ OXPHOS	agree
+@lambday	(a) make GPUBackend an abstract base class (b) provide a subclass ViennaCLBackend as a concrete impl.. do the ifdefs there
+@lambday	not in the header though
+@lambday	so ViennaCLBackend would be what you have as GPUBackend for now
+@lambday	pimpl.. and throws error if no viennacl is found
+@lambday	actually you know what, I like this idea!
+ OXPHOS	metoo
+@lambday	so sg_linalg.m_gpubackend would be of type shared_ptr<GPUBackend>, and when the user registers, he does sg_linalg.register_gpu_backend(new ViennaCLBackend())
+ OXPHOS	very "engineering"
+@lambday	now if that bastard doesn't have viennacl in the first place, we fail him in the constructor itself
+@lambday	but it all has to be pimpl
+@lambday	lisitsyn: ^ could you please comment?
+@lambday	OXPHOS: his brain is doing something `unique' at this moment I can imagine
+ OXPHOS	lambday: raw pointer
+ OXPHOS	see whether this works ;)
+@lambday	tag him
+@lambday	then it will xD
+ OXPHOS	lol
+ OXPHOS	so i can do now a. refactor gpubackend class; b. add other SGVector methods; c. add BaseMatrix/CPUMatrix/GPUMatrix..
+ OXPHOS	any priority?
+@lambday	OXPHOS: what do you mean by other SGVector methods
+@lambday	?
+ OXPHOS	like sum/mean
+@lambday	as in mean(), l2norm() etc?
+@lambday	I see
+@lambday	yeah so I'll say, b, c, a
+@lambday	but if lisitsyn replies quickly, then maybe a next if you want
+@lambday	;)
+@lambday	lisitsyn: CAnIdea* idea = new CAnIdea();
+ OXPHOS	jaja
+ OXPHOS	yes the tons of methods in linalg should all be migrated someday
+@lambday	OXPHOS: we only have a few there ;)
+@lambday	OXPHOS: we gotta add many more
+ OXPHOS	lambday: the kilograms of methods ;)
+@lambday	OXPHOS: hah one problem with making GPUBackend an abstract class is that we gotta make the methods virtual.. which is not possible since those are templates
+@lambday	OXPHOS: maybe it is not as straightforward as I thought..
+@lambday	so let's not worry about that now
+@lambday	maybe we can use Any :/
+@lambday	yeah Any would work.. the calls are going through SGLinalg anyway.. so in that we just to recall_type
+@lambday	cool!
+-!- lambday [6d9941c0@gateway/web/freenode/ip.109.153.65.192] has quit [Ping timeout: 250 seconds]
+-!- lambday [6d9941c0@gateway/web/freenode/ip.109.153.65.192] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+-!- lambday [6d9941c0@gateway/web/freenode/ip.109.153.65.192] has quit [Ping timeout: 250 seconds]
+-!- OXPHOS [9d8b1501@gateway/web/freenode/ip.157.139.21.1] has quit [Ping timeout: 250 seconds]
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+-!- sonne|work [~sonnenbu@88.134.176.135] has quit [Quit: Leaving.]
+-!- sonne|work [~sonnenbu@88.134.176.135] has joined #shogun
+-!- sanuj [~sanuj@59.91.134.74] has joined #shogun
+-!- sanuj [~sanuj@59.91.134.74] has quit [Ping timeout: 260 seconds]
+-!- sanuj [~sanuj@59.91.134.74] has joined #shogun
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Client Quit]
+@wiking	Saurabh7: here?
+ Saurabh7	wiking: yes
+ Saurabh7	hi
+@wiking	Saurabh7: ok so
+@wiking	would it be hard to extends for example
+@wiking	the LARS (or any other benchmarks) with mem usage?
+ Saurabh7	wiking: not sure, how would you check for this one ?
+ Saurabh7	if you point me somewher i can do
+ Saurabh7	how done till now
+ Saurabh7	havent*
+ Saurabh7	btw for lars I used a bufer matrix to acces active columns runtiem went form 18 -> 12
+ Saurabh7	I am extending it for inactive colmns too, it should go lower
+@wiking	\p/
+@wiking	ok i'll try to put together a small howto
+@wiking	for measuring mem usage of things
+@wiking	ok?
+@wiking	because actually that'd be interesting as well
+ Saurabh7	yes definetly
+ Saurabh7	wiking: I used this for kmeans once https://pypi.python.org/pypi/memory_profiler
+ Saurabh7	I can try this dunno if its reliable
+@wiking	:S
+-!- HeikoS_mobile [~Mutter@82-132-215-195.dab.02.net] has joined #shogun
+ HeikoS_mobile	wiking: jo
+ Saurabh7	HeikoS_mobile: hi
+ HeikoS_mobile	Saurabh7: Ho
+ HeikoS_mobile	I'm on phone in train
+ Saurabh7	HeikoS_mobile: I used yesterdays idea to remove loops, got good gains
+ HeikoS_mobile	So limited typing
+ HeikoS_mobile	Really?
+ HeikoS_mobile	Great!!
+ Saurabh7	yes
+ HeikoS_mobile	Got some numbers?
+ HeikoS_mobile	Before/after?
+ Saurabh7	yesyes
+ Saurabh7	let me put in the thread ?
+ Saurabh7	Now I ahve to use it for inactive columns aswell
+ Saurabh7	that will remove teh last loop
+ HeikoS_mobile	Cool
+ HeikoS_mobile	Memcpy is fast :)
+ Saurabh7	HeikoS_mobile: Didnt ahve to use memcpy
+ sanuj	HeikoS_mobile, hey
+ sanuj	HeikoS_mobile, when will you have your laptop? we need to merge some PRs today.....
+-!- HeikoS_mobile [~Mutter@82-132-215-195.dab.02.net] has quit [Quit: Mutter: www.mutterirc.com]
+-!- HeikoS_mobile [~Mutter@82-132-215-195.dab.02.net] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+ sanuj	HeikoS_mobile, hey
+-!- HeikoS_mobile [~Mutter@82-132-215-195.dab.02.net] has quit [Remote host closed the connection]
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 260 seconds]
+-!- HeikoS_mobile [~Mutter@82-132-215-195.dab.02.net] has joined #shogun
+ HeikoS_mobile	sanuj: will merge things later today
+ sanuj	HeikoS_mobile, okay!
+ HeikoS_mobile	Saurabh7: can you send me an email with the numbers? Sorry I have a laggy connection
+ HeikoS_mobile	There is still a proven with r and static calls unfortunately, I might just disable it for now if I can't fix
+-!- HeikoS_mobile [~Mutter@82-132-215-195.dab.02.net] has quit [Remote host closed the connection]
+-!- sanuj [~sanuj@59.91.134.74] has quit [Ping timeout: 264 seconds]
+-!- sanuj [~sanuj@117.203.17.165] has joined #shogun
+ sanuj	hey lisitsyn
+ sanuj	got time?
+ arianepaola	hello everyone
+@wiking	hihi
+ arianepaola	hi wiking
+ arianepaola	wiking: did you check the gist, I sent yesterday
+@wiking	mmm sorry remember i'm utc+8
+@wiking	so i think i've missed it
+ arianepaola	no problem
+ arianepaola	I will check in the logs
+@wiking	can you paste again?
+@wiking	https://gist.github.com/anonymous/c3dfeb456656dd3b468fd7bc91b02058
+@wiking	right?
+@wiking	\p/
+ arianepaola	wiking: when you have time, check this gist https://gist.github.com/anonymous/c3dfeb456656dd3b468fd7bc91b0205818:15
+ arianepaola	wiking: the setup.py in the PR overloads functionality from distutils to bootstrap the cmake configuration process and the compilation18:17
+ arianepaola	wiking: the gist just deals with the Python related content in lib. you can test it building shogun manually and then in the build dir: python setup.py bdist
+ arianepaola	arianepaola^^ HeikoS: if you want to check also
+@wiking	this looks awseom
+@wiking	great
+@wiking	what happens on sdist? :)
+ arianepaola	it packs the files
+@wiking	but anyhow this is great stuff!
+ arianepaola	but you can specify with MANIFEST.in
+@wiking	because actually we can add to the repo a setup.py.in
+@wiking	right?
+@wiking	that cmake can generate the right one
+ arianepaola	in the logs, starting 14:41 http://www.shogun-toolbox.org/irclogs/%23shogun.2016-06-09.log.html
+@wiking	(see version)
+@wiking	i'm just wondering what would be the best way to distribute the setup.py
+ arianepaola	the PR with the cmake bootstrap overwrites distutils classes and this gist uses minimal of setuptools to make it work
+ arianepaola	so I have to test line by line and see where each one breaks
+@wiking	and not hardcode the version and stuff in it
+ arianepaola	just put setup.py in the repo
+@wiking	yep but then what do we do with VERSION
+@wiking	now it's hardcoded
+@wiking	ideally it shouldn't be :)
+@wiking	mmm we could use the regexp
+@wiking	that cmake uses
+@wiking	to get the version, right?
+ arianepaola	for the version I had this question yesterday:
+ arianepaola	arianepaolalisitsyn: hi, I have a question regarding src/shogun/lib/versionstring.h
+ arianepaola	arianepaolalisitsyn: is there a way to check if we are using git source? e.g. will the version change for a Release version?
+ arianepaola	arianepaolaI want only to append the info from #define VERSION_REVISION 0x83970a7 when it is a development version
+ arianepaola	if setuptools does not complain, reading the file and a regular expression matching the version should work
+ arianepaola	it depends on when setuptools gets the version, e.g. variable content passed
+ arianepaola	I think at the end when bdist, but then we have to check for sdist
+@wiking	cmake/version.cmake
+@wiking	so as you can see
+@wiking	if there's no .git
+@wiking	then we use NEWS info
+@wiking	to fill out those macros
+ arianepaola	yes
+ arianepaola	then the result goes in src/shogun/lib/versionstring.h, right?
+@wiking	yes
+ arianepaola	regarding cmake generating the setup.py
+ arianepaola	setup.py bootstraps cmake
+ arianepaola	so if it should generate from setup.py.in, it would be: cmake -> setup.py -> cmake -> make -> package
+ arianepaola	if it works to read the versionstring, without setuptools complaining
+ arianepaola	setup.py -> cmake -> make -> package
+ arianepaola	wiking: other idea for version passing to setuptools is to pass the return of a method to version
+ arianepaola	wiking: this method then can check if cmake was run already or not, then run build, for the build step it will just check if cmake was configure to avoid double work
+@wiking	mmm
+@wiking	yeah this is a bit problematic :S
+@wiking	or just we keep rolling the static version line there in setup.py
+@wiking	when we do a release
+@wiking	?
+@wiking	:)
+@wiking	bit ugly because you need to do then the double the work
+@wiking	but i think reading file + regex for a version
+@wiking	should be ok from setuptools or?
+ arianepaola	yes
+ arianepaola	but it depends when setuptools fills in the version
+ arianepaola	so probably it will be versio = get_shogun_version()
+ arianepaola	get_shogun_version():
+ arianepaola	if ran_cmake: return parse_version_string()
+ arianepaola	 else: run_cmake()  + return parse_version_string()
+ arianepaola	^^ wiking: something like this should work
+ arianepaola	wiking: but hey, only setuptools knows :-)
+ arianepaola	I am going to work on this part now
+@wiking	thnx
+@wiking	cool
+@wiking	good work keep up with it!
+ arianepaola	I will update the gist
+ sanuj	lisitsyn, there?
+ lisitsyn	sanuj: yeap
+ sanuj	lisitsyn, can you have a look at this https://github.com/sanuj/shogun/commit/45104a01513eb315f847b5e89815caad11361c29
+ sanuj	this is not working for python
+ lisitsyn	I can't guess anything from what you said :D
+ sanuj	lisitsyn, any tag and get/set are not visible in python
+ sanuj	any, tag*
+ sanuj	it build succesfully (without errors) but above things are not visible in python
+ sanuj	like if i do
+ lisitsyn	ok ok interesting
+ sanuj	lisitsyn, what do you think am I missing?
+ lisitsyn	sanuj: comparing to other template swig things
+ lisitsyn	it looks correct
+ sanuj	lisitsyn, how to debug this?
+ sanuj	lisitsyn, this was working with my prototype
+ lisitsyn	sanuj: are you sure there is nothing in logs?
+ lisitsyn	warnings anything?
+ sanuj	lisitsyn, oh i think i exported the wrong path
+ sanuj	let me check
+ lisitsyn	and please show me how you call that
+ sanuj	lisitsyn, sorry :D
+ sanuj	it was the wrong path
+ sanuj	lisitsyn, call what?
+ arianepaola	wiking: what do you think? https://gist.github.com/arianepaola/96c9255ec9594a1140fd5d655dbada13
+ sanuj	lisitsyn, got  time to chat about some details?
+ arianepaola	wiking: it gets the version now, but strangely it stopped packaging the rest of the modules
+-!- OXPHOS` [9d8b131c@gateway/web/freenode/ip.157.139.19.28] has joined #shogun
+ OXPHOS`	wiking: there?
+-!- HeikoS_mobile [~Mutter@82-132-230-6.dab.02.net] has joined #shogun
+ HeikoS_mobile	sanuj: Saurabh7: back soon
+ HeikoS_mobile	Saurabh7: where are the new times? Couldn't find
+ sanuj	HeikoS_mobile, will be back in 20 mins
+-!- sanuj [~sanuj@117.203.17.165] has quit [Quit: Leaving]
+@wiking	yes
+@wiking	soert of
+-!- HeikoS_mobile_ [~Mutter@82-132-230-6.dab.02.net] has joined #shogun
+-!- HeikoS_mobile [~Mutter@82-132-230-6.dab.02.net] has quit [Ping timeout: 276 seconds]
+-!- HeikoS_mobile_ [~Mutter@82-132-230-6.dab.02.net] has quit [Remote host closed the connection]
+-!- sanuj [~sanuj@117.203.17.165] has joined #shogun
+ arianepaola	wiking: what do you think? https://gist.github.com/arianepaola/96c9255ec9594a1140fd5d655dbada13
+-!- lambday [6d9941c0@gateway/web/freenode/ip.109.153.65.192] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+@wiking	looks good
+@wiking	OXPHOS`: ping
+@wiking	arianepaola: but we should use maybe rather NEWS to do the regex
+@wiking	as the version string into the versionstring.h is being generated from there
+ OXPHOS`	wiking: hey
+ OXPHOS`	wiking: for the comments in linalg
+ OXPHOS`	do you mean we don't have to distinguish CPU/GPU Vector?
+ arianepaola	wiking: versionstring.h is probably less error prone, as cmake runs anyway before
+@wiking	arianepaola: yeah but in this case you wouldnt need to have cmake run prior to this
+@wiking	OXPHOS`: i was just wondering what is the reason for distinguishing
+ OXPHOS`	wiking: Yeah actually I can't think of any now..
+ arianepaola	wiking: I thought that also, but it is needed for the module content
+ arianepaola	package_dir and adata_files
+ arianepaola	can only be generated after run

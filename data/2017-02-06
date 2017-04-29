@@ -1,212 +1,212 @@
 --- Log opened Mon Feb 06 00:00:13 2017
-@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608	01:31
-@sukey	Pull Request #3584 "LinalgRefactor - Apply"  synchronized by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3584	07:40
--!- mikeling [uid89706@gateway/web/irccloud.com/x-kznnvwkxtejgctvi] has joined #shogun	08:28
--!- praisethemoon [~praisethe@197.3.11.178] has joined #shogun	10:37
--!- praisethemoon [~praisethe@197.3.11.178] has quit [Ping timeout: 248 seconds]	11:12
--!- praisethemoon [~praisethe@197.3.11.178] has joined #shogun	12:01
--!- praisethemoon [~praisethe@197.3.11.178] has quit [Changing host]	12:02
--!- praisethemoon [~praisethe@unaffiliated/praisethemoon] has joined #shogun	12:02
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun	12:05
--!- mode/#shogun [+o HeikoS] by ChanServ	12:05
--!- ShellcatZero [~ShellcatZ@cpe-76-93-136-67.san.res.rr.com] has quit [Ping timeout: 245 seconds]	12:07
-@wiking	lisitsyn, pppppppppuuuung	12:30
-lisitsyn	wiking: peng	12:35
-@wiking	ok	12:45
-@wiking	org.shogun-toolbox.* or ml.shogun.*	12:45
-@wiking	as java pkgs?	12:45
--!- praisethemoon [~praisethe@unaffiliated/praisethemoon] has quit [Ping timeout: 248 seconds]	12:56
-CaBa	wiking: heya	12:57
-CaBa	oh	12:57
-CaBa	HeikoS: hey, you happen to be around?	12:58
-@HeikoS	CaBa: hi yes	12:58
-CaBa	HeikoS: remember when we were talking the other day about kernel functions that depend not only on something that cannot be plugged into a CFeature class, but for example index structures and things to speed up the computation of K(x_1, x_2)? And you said one solution would be to precalc the kernel matrix and use CCustomKernel but that that would not support e.g. normalizers?	13:00
-@HeikoS	yes	13:00
-@HeikoS	i remember	13:00
-@wiking	CaBa, yes	13:00
-@wiking	hi	13:01
-@HeikoS	wiking:  my plan for today: write GSoc projects	13:01
-@HeikoS	wiking: you got some bullet points on that?	13:01
-@HeikoS	same projects as last year more or less? ;)	13:01
-CaBa	HeikoS: i know this is dirty, but would this work: use CDenseFeatures<size_t>, 1-dimensional, the size_t value actually being an index for a feature vector... then derive from CKernel, override ::compute(), which then performs lookups according to the size_t feature in the "real" kernel matrix and returns the value. that would be a fully functional kernel, wouldnt it? one that supports subsetting and therefor	13:04
-CaBa	e x-val, normalization during x-val, MKL, etc? no restrictions?	13:04
-@HeikoS	yes that would work	13:06
-@HeikoS	but it is a hack	13:06
-@HeikoS	as your kernel would only work with this very specialized features	13:06
-@HeikoS	generally, if you implement subsetting on kernel and features, then you can do anything you like and it will work	13:07
-@HeikoS	"anything you like" as in override methods in a weird way	13:07
-CaBa	HeikoS: well the features wouldn't be visible to the user - just like in CCustomKernel. The kernel would just take a precomputed matrix in it's constructor.	13:07
-@HeikoS	sure	13:07
-CaBa	HeikoS: it would be kind of a hacky replacement for CCustomKernel that supports normalization	13:08
-@HeikoS	what I mean is that you have the inheritance diagram, and there two leafs (i.e. specialized classes) depend on one another	13:08
-@HeikoS	which is against OOP paradigma	13:08
-@HeikoS	but yeah	13:08
-@HeikoS	I see your need for hacks ;)	13:08
-@HeikoS	would be a cool thing to do as part of a GSoC project on x-validation and modelselection	13:09
-CaBa	my need for hacks? ^^	13:09
-@HeikoS	you seem to have this complicated kernel	13:10
-@HeikoS	btw did you ever think about just not normalising the x-validation kernel matrices?	13:10
-@HeikoS	i.e. just normalise your precomputed kernel matrix?	13:10
-CaBa	sure, but it's a different thing	13:10
-@HeikoS	or is it really crucial?	13:11
-CaBa	i don't know if it's relevant	13:11
-@HeikoS	I could also btw imagine some on-the-fly normalisation that works with custom kernels	13:11
-@wiking	HeikoS, ah man	13:11
-@wiking	i have to remember all those good ideas	13:11
-@wiking	we have in the parking lot	13:11
-@wiking	:D	13:11
-@HeikoS	wiking: yes that is what I am asking :)	13:11
-@HeikoS	wiking: I have a few things	13:11
-@HeikoS	but before I tell them, I wanted to ask to get more coverage	13:11
-@wiking	HeikoS, btw we need to rename our java package... it's either org.shogun-toolbox.* or ml.shogun.*	13:12
-@wiking	as we do not own org.shogun	13:12
-@wiking	i mean shogun.org	13:12
-@HeikoS	uh, nice	13:12
-CaBa	btw - do you know whether per-kernel sqrt-diag normalization is sufficient in MKL to get interpretable subkernel weights? or if other means of normalization are necessary?	13:12
-@wiking	HeikoS, so we need to make a decision here...	13:12
-@HeikoS	CaBa: for xvalidation, you dont need interpretable weights or do you?	13:12
-@HeikoS	wiking: ml.shogun	13:13
-@wiking	ok	13:13
-@HeikoS	CaBa: or just with the final model	13:13
-@wiking	i'll register	13:13
-@wiking	lisitsyn, ^	13:13
-@HeikoS	wiking: cool!	13:13
-@HeikoS	CaBa: because if you just tune parameters using xvalidation, then maybe it is not that important	13:13
-CaBa	HeikoS: that's what i'm wondering - will i just get different betas if i normalize afterwards but the subkernel parameters remain optimal?	13:14
-@HeikoS	CaBa: probably it is worth a try	13:14
-@HeikoS	but I dont know much about MKL	13:15
-@HeikoS	and sonney2k who is the only one who knows, is busy with life	13:15
-CaBa	HeikoS: life is a cool thing to be busy with ;)	13:18
-@HeikoS	CaBa: so just to get you right	13:18
-@HeikoS	CaBa: you want	13:18
-@HeikoS	to use	13:18
-@HeikoS	custom kernel + mkl + cross-validation + kernel normaliser	13:19
-@HeikoS	maybe we can just make this an entrance task	13:19
-@HeikoS	we got some students incoming for GSoC	13:19
-@HeikoS	and this might be a nice non-trivial thing to work out	13:19
-CaBa	that sounds about right	13:19
-@HeikoS	so what we need here is that the kernel normalisation works with the subsetting and the mkl, all on the fly	13:20
-CaBa	well... they hacky replacement for CCustomKernel I had in mind is a 30 min job I guess. But I'm sure you had something clean in mind :D	13:20
-@HeikoS	yes sure, I mean for your purposes, the 30min hack might be ok	13:20
-@HeikoS	but It is good for us to get such things done properly, in case somebody else also wants to use this kind of thing	13:21
-CaBa	The only ting CCustomKernel lacks in that respect might be the normalization. Last time we spoke you said x-val and mkl might just work.	13:21
-CaBa	But I didn't check that I must admit	13:21
-lisitsyn	wiking: ml.shogun if we don't lost it again	13:24
-lisitsyn	:)	13:24
-@wiking	lisitsyn, i've bought it for 5 years :)	13:25
-lisitsyn	org.shogun-toolbox is impossible	13:25
-lisitsyn	would be	13:25
-lisitsyn	org.shogun_toolbox	13:25
-lisitsyn	superfuckingugly	13:25
-@wiking	yes	13:26
-CaBa	SG_REF checks for nullptr, right?	13:31
-@HeikoS	yes	13:32
-@HeikoS	but best read the def	13:32
-CaBa	what's that deprecated info in the wiki? is there a replacement?	13:32
-@HeikoS	?	13:33
-@HeikoS	ah	13:33
-@HeikoS	no :)	13:33
-CaBa	^^	13:33
-@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608	14:10
-mikeling	hi, i got a bunch of undocument warning and failed to build python modular https://pastebin.mozilla.org/8974089	14:41
--!- praisethemoon [~praisethe@197.3.11.178] has joined #shogun	14:56
-mikeling	wiking: ping	15:20
-@wiking	pong	15:22
-mikeling	wiking: after I pull docker image, how could I use python interface?	15:22
-mikeling	on the image i mean	15:23
-@wiking	- docker run -t -d -P -e "JAVA_HOME=/usr/lib/jvm/java-8-oracle" -e "CC=$CC" -e "CXX=$CXX" --name devenv -v $PWD:/opt/shogun shogun/shogun-dev /bin/sh -c "mkdir /opt/shogun/build;bash"	15:23
-@wiking	- docker exec -t devenv /bin/sh -c "cd /opt/shogun/build; cmake -DCMAKE_INSTALL_PREFIX=$HOME/shogun-build -DENABLE_TESTING=ON $CMAKE_OPTIONS .."	15:23
-@wiking	where CMAKE_OPTIONS="-DPythonModular=ON -DTRAVIS_DISABLE_UNIT_TESTS=ON -DTRAVIS_DISABLE_LIBSHOGUN_TESTS=ON"	15:23
-mikeling	and pip install shogun-ml doesn't work, it looks like there is no package named  shogun-ml?	15:24
-@wiking	pip install?	15:26
-@wiking	why do you want pip install when you try a local development	15:26
-mikeling	i just see that on document and want to have a try	15:26
-@wiking	ah forget it	15:27
-@wiking	it needs further fixing	15:27
-@wiking	hopefully 5.1.0 will have it	15:27
-mikeling	ok ;)	15:27
-mikeling	wiking: It says "CMake Error: The source directory "/opt/shogun" does not appear to contain CMakeLists.txt. Specify --help for usage, or press the help button on the CMake GUI."	15:50
-@wiking	ok	15:50
-@wiking	look i'll write this the one time	15:50
-@wiking	docker run -t -i -v <the path to your checked out source>:/opt/shogun shogun/shogun-dev /bin/bash	15:51
-@wiking	(now you are in docker)	15:51
-@wiking	cd /opt/shogun	15:51
-@wiking	mkdir build	15:51
-@wiking	cd build	15:51
-@wiking	cmake .... (all the stuff above)	15:51
-@wiking	make	15:51
-@HeikoS	mikeling: is there anything that is not documented?	15:54
-mikeling	HeikoS: yep, part of warning is in https://pastebin.mozilla.org/8974116	15:55
-@HeikoS	I mean as in documented installation process on our website	15:56
-@HeikoS	these are just warnings	15:56
-mikeling	HeikoS: oh, the pip install shogun-ml doesn't work	15:56
-mikeling	it seems like shogun package is missing	15:56
-@HeikoS	mikeling: I think I dont understands what you are actually doing there. these were just 3 very unrelated things (docker, pip install, cmake)	15:59
-mikeling	HeikoS: because I would like to install the python interface of shogun, after I failed to build it from source code locally, I switch to the pip install but it looks like missing shogun-ml package for it	16:01
-mikeling	and now, I want to use docker to solver my problem	16:01
-mikeling	BTW, the error message is /bin/sh: line 1: 13156 Segmentation fault: 11  /usr/local/bin/doxygen modshogun.doxy when I build python interface locally	16:04
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 240 seconds]	16:05
-mikeling	And here is the Cmake I used " cmake -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Headers  -DPYTHON_LIBRARY=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib  -DPythonModular=ON ../"	16:05
-@wiking	mikeling, ?	16:08
-@wiking	wtf	16:08
-@wiking	i told you how you can do it with the dokcer	16:08
-@wiking	but you can do the same way on your osx	16:08
-@wiking	cmake -DPythonModular=ON  ..	16:09
-@wiking	make	16:09
-@wiking	either way works	16:09
-mikeling	wiking: yeah, I can do the same thing on osx, but it doesn't work for me, at least it failed on locally without docker	16:12
-@wiking	what's the failure?	16:12
-@wiking	btw without your patches	16:12
-@wiking	or with your patches?	16:12
-mikeling	without my pr	16:13
-mikeling	s /bin/sh: line 1: 13156 Segmentation fault: 11  /usr/local/bin/doxygen modshogun.doxy	16:13
-mikeling	without the "s", sorry	16:13
-@wiking	brew info doxygen	16:13
-mikeling	doxygen: stable 1.8.13 (bottled), HEAD	16:14
-@wiking	git git rev-parse HEAD	16:16
-@wiking	?	16:16
-@wiking	but in worst case you can disable doxygen and do it without that	16:17
-mikeling	you mean git rev-parse HEAD?	16:17
-@wiking	yes	16:18
-mikeling	it's 9673755bdb345b3c10fe447425394e4813f06dd8	16:18
-@wiking	mmm i've just ran on my osx	16:18
-@wiking	and i dont get segfault	16:18
-mikeling	and here is my cmake output https://pastebin.mozilla.org/8974123	16:18
-@wiking	-- Found NumPy: version "1.12.0" /usr/local/Cellar/matplotlib/2.0.0/libexec/lib/python2.7/site-packages/numpy/core/include?	16:18
-@wiking	this doesn't look too good	16:19
-mikeling	hmmm, so you think it may case a segfault?	16:20
-@wiking	noup	16:20
-@wiking	bu ti dont understand	16:20
-@wiking	why the numpy is part of matplotlib	16:20
-@wiking	pip list|grep numpy	16:20
-@wiking	?	16:20
-mikeling	it return numpy (1.12.0)	16:20
-@wiking	pip show numpy	16:21
-@wiking	?	16:21
-mikeling	do you think docker can help me solve that segfault?	16:22
-@wiking	with docker you would get exactly the same thing	16:22
-@wiking	what happens on travis	16:22
-@wiking	as it's the same env	16:22
-mikeling	https://www.irccloud.com/pastebin/keyKp2ID/	16:22
-@wiking	yeah i have no idea why it is landing in Location: /usr/local/Cellar/matplotlib/2.0.0/libexec/lib/python2.7/site-packages	16:23
-@wiking	but ok...	16:23
-mikeling	so I just working around this segfault for whole day and no idea why it happened and how to fix it	16:24
-@wiking	brew uninstall doxygen	16:26
-@wiking	and try it w/o that	16:26
-mikeling	ok, let me have a try	16:26
-mikeling	wiking: Oh my mine, it works.......	16:36
-mikeling	after remove doxygen	16:36
-mikeling	thank you very much	16:39
--!- suhas2go [uid201652@gateway/web/irccloud.com/x-ukivykjvzmoynhgd] has joined #shogun	17:08
-@sukey	New branch feature/OutOfSource created on shogun-toolbox/shogun	17:11
-@sukey	New Commit "Remove all none out of source patterns in build" to shogun-toolbox/shogun by vigsterkr: https://github.com/shogun-toolbox/shogun/commit/922e3ab6494917b5767a1d6bb4e5740854c4216e	17:12
--!- ShellcatZero [~ShellcatZ@cpe-76-93-136-67.san.res.rr.com] has joined #shogun	18:10
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun	18:15
--!- mode/#shogun [+o HeikoS] by ChanServ	18:15
--!- travis-ci [~travis-ci@ec2-54-162-62-3.compute-1.amazonaws.com] has joined #shogun	18:15
-travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/198887697	18:15
--!- travis-ci [~travis-ci@ec2-54-162-62-3.compute-1.amazonaws.com] has left #shogun []	18:15
--!- praisethemoon [~praisethe@197.3.11.178] has quit [Ping timeout: 248 seconds]	18:33
--!- mikeling [uid89706@gateway/web/irccloud.com/x-kznnvwkxtejgctvi] has quit [Quit: Connection closed for inactivity]	19:09
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 252 seconds]	21:28
+@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608
+@sukey	Pull Request #3584 "LinalgRefactor - Apply"  synchronized by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3584
+-!- mikeling [uid89706@gateway/web/irccloud.com/x-kznnvwkxtejgctvi] has joined #shogun
+-!- praisethemoon [~praisethe@197.3.11.178] has joined #shogun
+-!- praisethemoon [~praisethe@197.3.11.178] has quit [Ping timeout: 248 seconds]
+-!- praisethemoon [~praisethe@197.3.11.178] has joined #shogun
+-!- praisethemoon [~praisethe@197.3.11.178] has quit [Changing host]
+-!- praisethemoon [~praisethe@unaffiliated/praisethemoon] has joined #shogun
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- ShellcatZero [~ShellcatZ@cpe-76-93-136-67.san.res.rr.com] has quit [Ping timeout: 245 seconds]
+@wiking	lisitsyn, pppppppppuuuung
+ lisitsyn	wiking: peng
+@wiking	ok
+@wiking	org.shogun-toolbox.* or ml.shogun.*
+@wiking	as java pkgs?
+-!- praisethemoon [~praisethe@unaffiliated/praisethemoon] has quit [Ping timeout: 248 seconds]
+ CaBa	wiking: heya
+ CaBa	oh
+ CaBa	HeikoS: hey, you happen to be around?
+@HeikoS	CaBa: hi yes
+ CaBa	HeikoS: remember when we were talking the other day about kernel functions that depend not only on something that cannot be plugged into a CFeature class, but for example index structures and things to speed up the computation of K(x_1, x_2)? And you said one solution would be to precalc the kernel matrix and use CCustomKernel but that that would not support e.g. normalizers?
+@HeikoS	yes
+@HeikoS	i remember
+@wiking	CaBa, yes
+@wiking	hi
+@HeikoS	wiking:  my plan for today: write GSoc projects
+@HeikoS	wiking: you got some bullet points on that?
+@HeikoS	same projects as last year more or less? ;)
+ CaBa	HeikoS: i know this is dirty, but would this work: use CDenseFeatures<size_t>, 1-dimensional, the size_t value actually being an index for a feature vector... then derive from CKernel, override ::compute(), which then performs lookups according to the size_t feature in the "real" kernel matrix and returns the value. that would be a fully functional kernel, wouldnt it? one that supports subsetting and therefor
+ CaBa	e x-val, normalization during x-val, MKL, etc? no restrictions?
+@HeikoS	yes that would work
+@HeikoS	but it is a hack
+@HeikoS	as your kernel would only work with this very specialized features
+@HeikoS	generally, if you implement subsetting on kernel and features, then you can do anything you like and it will work
+@HeikoS	"anything you like" as in override methods in a weird way
+ CaBa	HeikoS: well the features wouldn't be visible to the user - just like in CCustomKernel. The kernel would just take a precomputed matrix in it's constructor.
+@HeikoS	sure
+ CaBa	HeikoS: it would be kind of a hacky replacement for CCustomKernel that supports normalization
+@HeikoS	what I mean is that you have the inheritance diagram, and there two leafs (i.e. specialized classes) depend on one another
+@HeikoS	which is against OOP paradigma
+@HeikoS	but yeah
+@HeikoS	I see your need for hacks ;)
+@HeikoS	would be a cool thing to do as part of a GSoC project on x-validation and modelselection
+ CaBa	my need for hacks? ^^
+@HeikoS	you seem to have this complicated kernel
+@HeikoS	btw did you ever think about just not normalising the x-validation kernel matrices?
+@HeikoS	i.e. just normalise your precomputed kernel matrix?
+ CaBa	sure, but it's a different thing
+@HeikoS	or is it really crucial?
+ CaBa	i don't know if it's relevant
+@HeikoS	I could also btw imagine some on-the-fly normalisation that works with custom kernels
+@wiking	HeikoS, ah man
+@wiking	i have to remember all those good ideas
+@wiking	we have in the parking lot
+@wiking	:D
+@HeikoS	wiking: yes that is what I am asking :)
+@HeikoS	wiking: I have a few things
+@HeikoS	but before I tell them, I wanted to ask to get more coverage
+@wiking	HeikoS, btw we need to rename our java package... it's either org.shogun-toolbox.* or ml.shogun.*
+@wiking	as we do not own org.shogun
+@wiking	i mean shogun.org
+@HeikoS	uh, nice
+ CaBa	btw - do you know whether per-kernel sqrt-diag normalization is sufficient in MKL to get interpretable subkernel weights? or if other means of normalization are necessary?
+@wiking	HeikoS, so we need to make a decision here...
+@HeikoS	CaBa: for xvalidation, you dont need interpretable weights or do you?
+@HeikoS	wiking: ml.shogun
+@wiking	ok
+@HeikoS	CaBa: or just with the final model
+@wiking	i'll register
+@wiking	lisitsyn, ^
+@HeikoS	wiking: cool!
+@HeikoS	CaBa: because if you just tune parameters using xvalidation, then maybe it is not that important
+ CaBa	HeikoS: that's what i'm wondering - will i just get different betas if i normalize afterwards but the subkernel parameters remain optimal?
+@HeikoS	CaBa: probably it is worth a try
+@HeikoS	but I dont know much about MKL
+@HeikoS	and sonney2k who is the only one who knows, is busy with life
+ CaBa	HeikoS: life is a cool thing to be busy with ;)
+@HeikoS	CaBa: so just to get you right
+@HeikoS	CaBa: you want
+@HeikoS	to use
+@HeikoS	custom kernel + mkl + cross-validation + kernel normaliser
+@HeikoS	maybe we can just make this an entrance task
+@HeikoS	we got some students incoming for GSoC
+@HeikoS	and this might be a nice non-trivial thing to work out
+ CaBa	that sounds about right
+@HeikoS	so what we need here is that the kernel normalisation works with the subsetting and the mkl, all on the fly
+ CaBa	well... they hacky replacement for CCustomKernel I had in mind is a 30 min job I guess. But I'm sure you had something clean in mind :D
+@HeikoS	yes sure, I mean for your purposes, the 30min hack might be ok
+@HeikoS	but It is good for us to get such things done properly, in case somebody else also wants to use this kind of thing
+ CaBa	The only ting CCustomKernel lacks in that respect might be the normalization. Last time we spoke you said x-val and mkl might just work.
+ CaBa	But I didn't check that I must admit
+ lisitsyn	wiking: ml.shogun if we don't lost it again
+ lisitsyn	:)
+@wiking	lisitsyn, i've bought it for 5 years :)
+ lisitsyn	org.shogun-toolbox is impossible
+ lisitsyn	would be
+ lisitsyn	org.shogun_toolbox
+ lisitsyn	superfuckingugly
+@wiking	yes
+ CaBa	SG_REF checks for nullptr, right?
+@HeikoS	yes
+@HeikoS	but best read the def
+ CaBa	what's that deprecated info in the wiki? is there a replacement?
+@HeikoS	?
+@HeikoS	ah
+@HeikoS	no :)
+ CaBa	^^
+@sukey	Pull Request #3608 "Clean up KNN"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3608
+ mikeling	hi, i got a bunch of undocument warning and failed to build python modular https://pastebin.mozilla.org/8974089
+-!- praisethemoon [~praisethe@197.3.11.178] has joined #shogun
+ mikeling	wiking: ping
+@wiking	pong
+ mikeling	wiking: after I pull docker image, how could I use python interface?
+ mikeling	on the image i mean
+@wiking	 - docker run -t -d -P -e "JAVA_HOME=/usr/lib/jvm/java-8-oracle" -e "CC=$CC" -e "CXX=$CXX" --name devenv -v $PWD:/opt/shogun shogun/shogun-dev /bin/sh -c "mkdir /opt/shogun/build;bash"
+@wiking	 - docker exec -t devenv /bin/sh -c "cd /opt/shogun/build; cmake -DCMAKE_INSTALL_PREFIX=$HOME/shogun-build -DENABLE_TESTING=ON $CMAKE_OPTIONS .."
+@wiking	where CMAKE_OPTIONS="-DPythonModular=ON -DTRAVIS_DISABLE_UNIT_TESTS=ON -DTRAVIS_DISABLE_LIBSHOGUN_TESTS=ON"
+ mikeling	and pip install shogun-ml doesn't work, it looks like there is no package named  shogun-ml?
+@wiking	pip install?
+@wiking	why do you want pip install when you try a local development
+ mikeling	i just see that on document and want to have a try
+@wiking	ah forget it
+@wiking	it needs further fixing
+@wiking	hopefully 5.1.0 will have it
+ mikeling	ok ;)
+ mikeling	wiking: It says "CMake Error: The source directory "/opt/shogun" does not appear to contain CMakeLists.txt. Specify --help for usage, or press the help button on the CMake GUI."
+@wiking	ok
+@wiking	look i'll write this the one time
+@wiking	docker run -t -i -v <the path to your checked out source>:/opt/shogun shogun/shogun-dev /bin/bash
+@wiking	(now you are in docker)
+@wiking	cd /opt/shogun
+@wiking	mkdir build
+@wiking	cd build
+@wiking	cmake .... (all the stuff above)
+@wiking	make
+@HeikoS	mikeling: is there anything that is not documented?
+ mikeling	HeikoS: yep, part of warning is in https://pastebin.mozilla.org/8974116
+@HeikoS	I mean as in documented installation process on our website
+@HeikoS	these are just warnings
+ mikeling	HeikoS: oh, the pip install shogun-ml doesn't work
+ mikeling	it seems like shogun package is missing
+@HeikoS	mikeling: I think I dont understands what you are actually doing there. these were just 3 very unrelated things (docker, pip install, cmake)
+ mikeling	HeikoS: because I would like to install the python interface of shogun, after I failed to build it from source code locally, I switch to the pip install but it looks like missing shogun-ml package for it
+ mikeling	and now, I want to use docker to solver my problem
+ mikeling	BTW, the error message is /bin/sh: line 1: 13156 Segmentation fault: 11  /usr/local/bin/doxygen modshogun.doxy when I build python interface locally
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 240 seconds]
+ mikeling	And here is the Cmake I used " cmake -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Headers  -DPYTHON_LIBRARY=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib  -DPythonModular=ON ../"
+@wiking	mikeling, ?
+@wiking	wtf
+@wiking	i told you how you can do it with the dokcer
+@wiking	but you can do the same way on your osx
+@wiking	cmake -DPythonModular=ON  ..
+@wiking	make
+@wiking	either way works
+ mikeling	wiking: yeah, I can do the same thing on osx, but it doesn't work for me, at least it failed on locally without docker
+@wiking	what's the failure?
+@wiking	btw without your patches
+@wiking	or with your patches?
+ mikeling	without my pr
+ mikeling	s /bin/sh: line 1: 13156 Segmentation fault: 11  /usr/local/bin/doxygen modshogun.doxy
+ mikeling	without the "s", sorry
+@wiking	brew info doxygen
+ mikeling	doxygen: stable 1.8.13 (bottled), HEAD
+@wiking	git git rev-parse HEAD
+@wiking	?
+@wiking	but in worst case you can disable doxygen and do it without that
+ mikeling	you mean git rev-parse HEAD?
+@wiking	yes
+ mikeling	it's 9673755bdb345b3c10fe447425394e4813f06dd8
+@wiking	mmm i've just ran on my osx
+@wiking	and i dont get segfault
+ mikeling	and here is my cmake output https://pastebin.mozilla.org/8974123
+@wiking	-- Found NumPy: version "1.12.0" /usr/local/Cellar/matplotlib/2.0.0/libexec/lib/python2.7/site-packages/numpy/core/include?
+@wiking	this doesn't look too good
+ mikeling	hmmm, so you think it may case a segfault?
+@wiking	noup
+@wiking	bu ti dont understand
+@wiking	why the numpy is part of matplotlib
+@wiking	pip list|grep numpy
+@wiking	?
+ mikeling	it return numpy (1.12.0)
+@wiking	pip show numpy
+@wiking	?
+ mikeling	do you think docker can help me solve that segfault?
+@wiking	with docker you would get exactly the same thing
+@wiking	what happens on travis
+@wiking	as it's the same env
+ mikeling	https://www.irccloud.com/pastebin/keyKp2ID/
+@wiking	yeah i have no idea why it is landing in Location: /usr/local/Cellar/matplotlib/2.0.0/libexec/lib/python2.7/site-packages
+@wiking	but ok...
+ mikeling	so I just working around this segfault for whole day and no idea why it happened and how to fix it
+@wiking	brew uninstall doxygen
+@wiking	and try it w/o that
+ mikeling	ok, let me have a try
+ mikeling	wiking: Oh my mine, it works.......
+ mikeling	after remove doxygen
+ mikeling	thank you very much
+-!- suhas2go [uid201652@gateway/web/irccloud.com/x-ukivykjvzmoynhgd] has joined #shogun
+@sukey	New branch feature/OutOfSource created on shogun-toolbox/shogun
+@sukey	New Commit "Remove all none out of source patterns in build" to shogun-toolbox/shogun by vigsterkr: https://github.com/shogun-toolbox/shogun/commit/922e3ab6494917b5767a1d6bb4e5740854c4216e
+-!- ShellcatZero [~ShellcatZ@cpe-76-93-136-67.san.res.rr.com] has joined #shogun
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- travis-ci [~travis-ci@ec2-54-162-62-3.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/198887697
+-!- travis-ci [~travis-ci@ec2-54-162-62-3.compute-1.amazonaws.com] has left #shogun []
+-!- praisethemoon [~praisethe@197.3.11.178] has quit [Ping timeout: 248 seconds]
+-!- mikeling [uid89706@gateway/web/irccloud.com/x-kznnvwkxtejgctvi] has quit [Quit: Connection closed for inactivity]
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 252 seconds]
 --- Log closed Tue Feb 07 00:00:14 2017

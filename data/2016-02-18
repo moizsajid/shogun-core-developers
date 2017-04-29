@@ -1,0 +1,180 @@
+--- Log opened Thu Feb 18 00:00:01 2016
+-!- lupinix [~quassel@fedora/lupinix] has quit [Remote host closed the connection]
+-!- lupinix [~quassel@fedora/lupinix] has joined #shogun
+-!- lupinix [~quassel@fedora/lupinix] has quit [Remote host closed the connection]
+-!- lupinix [~quassel@fedora/lupinix] has joined #shogun
+-!- lupinix [~quassel@fedora/lupinix] has quit [Remote host closed the connection]
+-!- lupinix [~quassel@v22014041761818086.yourvserver.net] has joined #shogun
+-!- lupinix [~quassel@v22014041761818086.yourvserver.net] has quit [Changing host]
+-!- lupinix [~quassel@fedora/lupinix] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+-!- besser82 [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has joined #shogun
+-!- besser82 [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+ wiking	besser82: are you around?
+@besser82	wiking, sure
+-!- wiking [~wiking@info2k1.hu] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- mode/#shogun [+o wiking] by ChanServ
+@wiking	ok so question
+@wiking	how would you debug when there are 2 processes with an unnamed pipes
+@wiking	and they are blocked
+@wiking	gdb is just saying me that they are waiting on mutex
+@wiking	i suspect that there's something with the pipe buffer
+@besser82	hmm...  Pipe is access in which way?  Handle-ptr?
+@besser82	and the mutex comes from where?
+@besser82	It hard to get poit to start from, when not knowing about the code...
+@wiking	ah mutexes are some other stories
+@wiking	so it's just
+@wiking	you have
+@wiking	proc1 | proc2
+@besser82	k
+@besser82	So proc1 opens an unnamed pipe?  and proc2 is listening on this?
+@besser82	or is the pipe setup before, like static?
+@wiking	yes
+@wiking	static
+@wiking	i open a pipe with 2 ends
+@wiking	one given to proc1
+@wiking	the other to proc2
+@wiking	that is actually child of proc1
+@besser82	and the pipe is blocked then?
+@wiking	dunno
+@wiking	that's the question
+@wiking	i dont know what's actually happening
+@wiking	the proc1 sent everything on the pipe
+@wiking	and it's doing a wait() on proc2
+@wiking	while proc2 is waiting for data
+@wiking	:)
+@besser82	I see...
+@besser82	Have you tried to set the pipe to be non-blocking?
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@besser82	HeikoS, Yay!  =)
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Bj?rn Esser :develop * d9c0c52 / src/shogun/features/StringFileFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/d9c0c52813efadfaa715fb4f1f74bb29aa6dc726
+ shogun-notifier-	shogun: fix 'comparison of constant ''\012'' with boolean expression is always false [-Wbool-compare]'
+ shogun-notifier-	shogun: Bj?rn Esser :develop * 5eaee7d / src/shogun/optimization/lbfgs/lbfgs.cpp: https://github.com/shogun-toolbox/shogun/commit/5eaee7dd61e0a57fcb0e6293adb0894af0f161da
+ shogun-notifier-	shogun: fix 'statement is indented as if it were guarded by 'if' clause, but it is not [-Wmisleading-indentation]'
+ shogun-notifier-	shogun: Bj?rn Esser :develop * ee0776c / src/shogun/ (2 files): https://github.com/shogun-toolbox/shogun/commit/ee0776cab548cc46bfc0ad280e77a79f74b98077
+ shogun-notifier-	shogun: Merge pull request #2993 from besser82/bugfix/gcc6_warnings
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fix warnings issued by gcc 6
+ shogun-buildbot	build #2761 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2761  blamelist: Bj?rn Esser <me@besser82.io>
+ shogun-buildbot	build #1126 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/1126  blamelist: Bj?rn Esser <me@besser82.io>
+ shogun-buildbot	build #111 of FC22 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC22%20-%20libshogun/builds/111  blamelist: Bj?rn Esser <me@besser82.io>
+@wiking	mmm
+@wiking	what's happening
+@wiking	:)
+@besser82	just a bit of cleaning  =)
+@besser82	stuff I usually do when test-building new releases on fc
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Ping timeout: 240 seconds]
+ shogun-buildbot	build #2753 of deb3 - modular_interfaces is complete: Failure [failed test r modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2753  blamelist: Bj?rn Esser <me@besser82.io>
+-!- travis-ci [~travis-ci@ec2-54-158-90-138.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Bj?rn Esser's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/110098613
+-!- travis-ci [~travis-ci@ec2-54-158-90-138.compute-1.amazonaws.com] has left #shogun []
+@wiking	mmm
+@wiking	how's that possible that i cannot rebase a branch that has been branched off from develop
+@wiking	back in august
+@wiking	and the only thing i've changed is .travis.yaml
+@wiking	lol i know
+@wiking	:D
+ shogun-notifier-	shogun: Viktor Gal :feature/travis_dockerization * 841c301 / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/841c30121d4df3dd2f192c72f24dd826d3104117
+ shogun-notifier-	shogun: Use container-based infrastructure on travis
+ shogun-notifier-	shogun: Fix OSX travis job
+ shogun-notifier-	shogun: the path of #2900
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: dedicated to all those lost souls out there...
+ shogun-notifier-	shogun: Viktor Gal :feature/travis_dockerization * 95788fe / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/95788fe6bcb462747ab90ad9aef8713256ff24b6
+ shogun-notifier-	shogun: Use container-based infrastructure on travis
+ shogun-notifier-	shogun: Fix OSX travis job
+ shogun-notifier-	shogun: the path of #2900
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: dedicated to all those lost souls out there...
+@wiking	:>
+ lisitsyn	wiking: tldr what does it do
+-!- travis-ci [~travis-ci@ec2-54-159-114-8.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/110112403
+-!- travis-ci [~travis-ci@ec2-54-159-114-8.compute-1.amazonaws.com] has left #shogun []
+-!- travis-ci [~travis-ci@ec2-54-204-71-158.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/110113958
+-!- travis-ci [~travis-ci@ec2-54-204-71-158.compute-1.amazonaws.com] has left #shogun []
+ shogun-notifier-	shogun: Viktor Gal :feature/travis_dockerization * db79c7d / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/db79c7daf11c5c3f0255fa91d6e22df8e02f70d9
+ shogun-notifier-	shogun: Use container-based infrastructure on travis
+ shogun-notifier-	shogun: Fix OSX travis job
+ shogun-notifier-	shogun: the path of #2900
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: dedicated to all those lost souls out there...
+ shogun-notifier-	shogun: Viktor Gal :feature/travis_dockerization * 31ed23c / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/31ed23c490360f9268aa6f8bbbac4ea3ce77b509
+ shogun-notifier-	shogun: Use container-based infrastructure on travis
+ shogun-notifier-	shogun: Fix OSX travis job
+ shogun-notifier-	shogun: the path of #2900
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: dedicated to all those lost souls out there...
+ sonne|work	wiking: well that was lisitsyn's force push I am afraid...
+ lisitsyn	what force push?
+ sonne|work	lisitsyn: didn't you git push --force ?
+ lisitsyn	no
+ lisitsyn	its no good
+ lisitsyn	I wanted to but well it is bad
+ lisitsyn	our master was creeped by some gunnar's commit
+ sonne|work	lisitsyn: well sure it is that is why I was thinking that is the explanation
+ lisitsyn	but its gonna stay I guess
+ sonne|work	creeped as in become what?
+ lisitsyn	sonne|work: ahead of develop
+ shogun-notifier-	shogun: Viktor Gal :feature/travis_dockerization * 9c2db41 / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/9c2db41a42a41a4a3e8dcccb4365a7ad5b51137e
+ shogun-notifier-	shogun: Use container-based infrastructure on travis
+ shogun-notifier-	shogun: Fix OSX travis job
+ shogun-notifier-	shogun: the path of #2900
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: dedicated to all those lost souls out there...
+@wiking	:DDDD
+ sonne|work	wiking: which souls are we talking about?
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	te:>
+-!- travis-ci [~travis-ci@ec2-54-159-114-8.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/110116956
+-!- travis-ci [~travis-ci@ec2-54-159-114-8.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	wiking: gsoc aplication looks good now
+@HeikoS	lisitsyn, wiking I had an idea: we will make all GSoC students do a joint project, which is populating the manual
+@HeikoS	every week, they have to add a few items, or improve otherwise
+@HeikoS	thoughts?
+ lisitsyn	sounds good
+@HeikoS	lisitsyn: we should merge this thing soon
+@HeikoS	so that we can accept patches for it
+@HeikoS	lisitsyn: any news on the shogun class doc links?
+ lisitsyn	HeikoS: no, sorry %(
+ sonne|work	HeikoS: the joint project idea might be good actually to form some kind of community feeling
+@HeikoS	sonne|work: exactly
+@HeikoS	Ill put this into our application as well
+@HeikoS	sonne|work: still up for the approx kernel project?
+ sonne|work	it should not require too much time from them and it would be best if they work on the same  section so they have to interact...
+ sonne|work	HeikoS: yes
+@HeikoS	I agree
+@HeikoS	cool, I will write a descriptin soon then
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Client Quit]
+-!- travis-ci [~travis-ci@ec2-54-158-90-138.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/110120407
+-!- travis-ci [~travis-ci@ec2-54-158-90-138.compute-1.amazonaws.com] has left #shogun []
+@wiking	oookey
+@wiking	so
+@wiking	sorry was distrcted
+-!- GandalfTheWizard [~Ethan@112.10.106.204] has quit [Ping timeout: 268 seconds]
+-!- mode/#shogun [+o lisitsyn] by besser82
+-!- mode/#shogun [-o lisitsyn] by ChanServ
+@wiking	fucking chanserv
+@wiking	:D
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 240 seconds]
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Ping timeout: 250 seconds]
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- GandalfTheWizard [~Ethan@112.10.106.204] has joined #shogun
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+--- Log closed Fri Feb 19 00:00:02 2016

@@ -1,0 +1,442 @@
+--- Log opened Tue May 07 00:00:34 2013
+ pickle27	this is what I get now: http://pastebin.com/LHqAyAUv
+-!- sijin [~smuxi@144.214.222.109] has quit []
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has quit [Quit: Leaving]
+-!- gsomix [~gsomix@83.234.54.230] has quit [Ping timeout: 256 seconds]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- gsomix [~gsomix@83.234.54.230] has joined #shogun
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- nube [~rho@116.90.239.3] has quit [Read error: Connection reset by peer]
+-!- nube1 [~rho@116.90.239.3] has joined #shogun
+-!- lisitsyn1 [~blackburn@83.234.54.230] has quit [Quit: Leaving.]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- erlenda [~erlenda@fw-oslo.intelcom.no] has joined #shogun
+-!- nube1 [~rho@116.90.239.3] has quit [Quit: Leaving.]
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- iglesiasg [c1934d18@gateway/web/freenode/ip.193.147.77.24] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- nube [~rho@116.90.239.3] has quit [Ping timeout: 276 seconds]
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- gsomix [~gsomix@83.234.54.230] has quit [Ping timeout: 272 seconds]
+-!- gsomix [~gsomix@83.234.54.230] has joined #shogun
+-!- sumit_ [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- nube [~rho@116.90.239.3] has quit [Ping timeout: 245 seconds]
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- sumit_ [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Ping timeout: 245 seconds]
+-!- van51 [~van51@athedsl-318776.home.otenet.gr] has joined #shogun
+@wiking	sonney2k: yo
+@sonney2k	wiking, what?
+@wiking	sonney2k: ok so i didn't get it the last day
+-!- gsomix [~gsomix@83.234.54.230] has quit [Ping timeout: 272 seconds]
+@wiking	sonney2k: about unit testing random
+@wiking	sonney2k: can i have a test in unit tests where i read a data from data submodule?
+-!- gsomix [~gsomix@83.234.54.230] has joined #shogun
+@wiking	sonney2k: or that should rather be the part of integration test?
+@sonney2k	wiking, don't you think generating say 10 numbers and keeping them in ascii as unit test is sufficient?
+@sonney2k	or even generate 2x 10000 numbers with same seed
+@sonney2k	compare that they are the same
+@sonney2k	and check if the 10000th number is the same
+@wiking	sonney2k: ah nono
+@wiking	sonney2k:  i mean what i do now is this
+@wiking	http://pastebin.com/xL6S0Lpc
+@wiking	this will generate the same numbers
+@wiking	the only 'problem' is that this does not test the arch/os independency
+@wiking	as for sure these 2 vectors are going to be the same
+@wiking	but they are not testing whether they are the same when it's on a different machine ;P
+@wiking	i mean different os/arch
+@wiking	should be of course ... :P
+@wiking	as the implementation is the same :)
+@wiking	but then again we should have a test for this
+@wiking	but we can do that then in the integration test
+-!- gsomix [~gsomix@83.234.54.230] has quit [Ping timeout: 272 seconds]
+@sonney2k	wiking, yeah but if you just store the 10000th number - in some const then you have your test
+@wiking	sonney2k: well that's another option as well
+-!- iglesiasg [c1934d18@gateway/web/freenode/ip.193.147.77.24] has quit [Quit: Page closed]
+ thoralf	Whatever I do, shogun never stops throwing "*** glibc detected ***", "double free or corruption (!prev)".
+ thoralf	gdb tells me the pointer - is there a way to find out, where this pointer has been allocated?
+ thoralf	Using valgrind, gdb, etc.?
+@wiking	thoralf: valgrind it
+ thoralf	wiking: It's a heisenbug. ;)
+ thoralf	wiking: Valgrind does not tell me - instead it says "Address 0xb092b68 is 0 bytes after a block of size 8,184 alloc'd" (in foreign code)
+@wiking	well
+@wiking	with gdb and valgrind you pretty much can find any such bug
+@wiking	;)
+ thoralf	wiking: This claim needs proof... ;)
+@sonney2k	thoralf, compile w/o optimizations enabled then you will see :D
+-!- van51 [~van51@athedsl-318776.home.otenet.gr] has quit [Quit: Leaving.]
+ thoralf	sonney2k: I already compiled with --disable-optimization --enable-debug -O0 -g, etc. ;)
+@sonney2k	thoralf, then you are running multithreaded Iguess
+@wiking	thoralf: this claim has been proven by u running an OS
+@wiking	;)
+@wiking	that has mouse, keyboard, screen, gpu etc
+ thoralf	sonney2k: Yes, looks like.
+ thoralf	How to turn threading off?
+ thoralf	Will mkl->parallel->set_num_threads(1) be enough?
+ thoralf	Okay, seems so.  But at lease it did not change errors.
+@sonney2k	thoralf, how/when are you getting these double frees?
+@sonney2k	with streaming features?
+ thoralf	Yes.
+@sonney2k	argh
+@sonney2k	yes that's all multi threaded
+@sonney2k	there is one thread reading in data
+@sonney2k	trying to keep some buffer full
+@sonney2k	and another doing the learning
+ thoralf	sonney2k: It seems that "anyone" frees the .features in sparsevectors.
+ thoralf	sonney2k: Copying all vectors seems to fix the double-frees, but introduces bigger leaks...
+@sonney2k	thoralf, when we did the conversion from e.g. double* vec, int vec_len -> SGVector
+@sonney2k	we didn't manage to finish this for everything yet
+@sonney2k	IIRC SparseFeatures still uses no SGSparseMatrix
+@sonney2k	which it should
+ thoralf	sonney2k: I've been filling SGSparseMatrix by myself - with vectors from get_vector() ;)
+@sonney2k	no wonder then
+ thoralf	sonney2k: So what's the intended use of the sparse vectors from get_vectors()?
+ thoralf	Am I supposed to copy them?
+ thoralf	copy as-in deep copy
+@sonney2k	thoralf, *intended* is that you create / get a sparse vector and use it / pass it around
+@sonney2k	freeing is done automagically
+ thoralf	sonney2k: Okay, that's what I did.
+-!- nube [~rho@116.90.239.3] has quit [Quit: Leaving.]
+ thoralf	Except that freeing is done automagically by someone else. ;)
+@sonney2k	thoralf, yeah streaming features I guess
+ thoralf	sonney2k: Yes, maybe it's related to this example buffer?
+ thoralf	sonney2k: I initialized the example buffer to 1024 examples - are they freed or reused?
+@sonney2k	thoralf, well each example is a separately allocated
+@sonney2k	so it is just a list with 1k examples
+@sonney2k	and for sure they will be freed once you are done with them
+@sonney2k	thoralf, let me explain in detail how it is supposed to work once transitioned to the SG* structures:
+@sonney2k	the SGVector (or SGSparseVector etc) structures keep an internal reference count
+@sonney2k	so whenever you do SGVector x = y;
+@sonney2k	and y is some SGVector too
+@sonney2k	then we only copy references and size of the vector
+@sonney2k	to decrease refcount one needs to do
+@sonney2k	x=SGVector()
+@sonney2k	which will then assign an empty vector to x
+@sonney2k	decreasing the refcount for y again
+@sonney2k	and if y is no longer used
+@sonney2k	it will be destroyed too
+@sonney2k	now I guess you are seeing things like someone manually SG_FREE'ing the vector
+@sonney2k	and then it will later be destroyed -> boom
+ thoralf	sonney2k: Yeah, thats what I'm thinking.
+@sonney2k	the correct fix is difficult :/
+@sonney2k	maybe you can put NULL to the sgvector after the SG_FREE
+@sonney2k	as workaround
+@sonney2k	but you might suffer from an even more subtle situation:
+@sonney2k	consider you want to have an array of SGVectors
+@sonney2k	SGVector x[17];
+@sonney2k	that is all good
+@sonney2k	but SGVector* x = malloc (...);
+@sonney2k	you get a kaboom
+@sonney2k	b'cause it needs the inplace new[]()  - otherwise the constructor of sgvector is not called
+@sonney2k	and some stuff like refcount is not initialized
+@sonney2k	I tried to make this automatic by using SG_MALLOC - and for that malloc for SGVector is overloaded to call new[]
+@sonney2k	it is not ideal but I don't see a better way
+ lisitsyn	sonney2k: it doesn't look normal to have SGVector*
+ thoralf	sonney2k: shogun/io/streaming/ParseBuffer.h, finalize_example(), SG_FREE is called on ex_ring[i].fv.vector; the same fv.vector, has been passed to InputParser.h, which passes CStreamingSparseFeatures<T>::get_next_example() and current_vector.
+ thoralf	sonney2k: The same reference then gets into SGSparseVector... q.e.d. ;)
+@sonney2k	thoralf, yeah
+@sonney2k	thoralf, if we would rewrite this to use
+ thoralf	sonney2k: But I don't know how to fix ;)
+@sonney2k	some SGSpareseVector buf[1024]
+@sonney2k	then no more free is needed
+@sonney2k	but just a buf[10]=SGSparseVector()
+@sonney2k	to decrease the refcount of vector 10
+ thoralf	sonney2k: current_vector is SGSparseVectorEntry<T>*
+@sonney2k	that has to be refactored
+@sonney2k	it needs to become
+@sonney2k	SGSparseVector
+ thoralf	sonney2k: in fact, current_vector is redundant, since it's the same as current_sgvector.features (only after calling get_vector())
+@sonney2k	sounds like
+-!- sijin [~smuxi@144.214.222.109] has joined #shogun
+ thoralf	sonney2k: But in any case we need to copy the contents of current_vector, since ParseBuffer seems to take care of it (including deallocation).
+@sonney2k	thoralf, doesn't hurt - comparing this copy to a read from disk is like 1000 times faster
+ thoralf	sonney2k: where does the disk read come from?
+@sonney2k	thoralf, streaming features!
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+-!- Zheng [80b4f1e0@gateway/web/freenode/ip.128.180.241.224] has joined #shogun
+ Zheng	Hi, has anyone tried to handle this issue: https://github.com/shogun-toolbox/shogun/issues/1060?
+ Zheng	An entrance issue
+-!- nube [~rho@49.244.79.215] has joined #shogun
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Ping timeout: 245 seconds]
+-!- Zheng [80b4f1e0@gateway/web/freenode/ip.128.180.241.224] has quit [Quit: Page closed]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- van51 [~van51@athedsl-318776.home.otenet.gr] has joined #shogun
+-!- van51 [~van51@athedsl-318776.home.otenet.gr] has quit [Client Quit]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- gsomix [~gsomix@83.234.54.230] has joined #shogun
+ gsomix	hi
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- gsomix [~gsomix@83.234.54.230] has quit [Ping timeout: 255 seconds]
+-!- nube [~rho@49.244.79.215] has quit [Ping timeout: 260 seconds]
+-!- lisitsyn [~blackburn@188.168.3.6] has joined #shogun
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- nube [~rho@49.244.21.43] has joined #shogun
+-!- iglesiasg [d58f3201@gateway/web/freenode/ip.213.143.50.1] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ pickle27	iglesiasg: hey I re-ran after building with no optimization and got this http://pastebin.com/LHqAyAUv
+@iglesiasg	pickle27: hey
+@iglesiasg	I checked the log you pasted last night
+@iglesiasg	let me see this one
+@iglesiasg	pickle27: but it is still the same error I am afraid
+@iglesiasg	vex amd64->IR: unhandled instruction bytes: 0xC5 0xF9 0x57 0xC0 0xE8 0x73 0x4 0xFF
+@iglesiasg	pickle27: isn't it?
+ pickle27	iglesiasg: yeah I saw that there in the middle but there was more upfront I thought might help
+@iglesiasg	pickle27: not really honestly
+ pickle27	iglesiasg: can we re-try the build server and see if it crashes when running the example again
+@iglesiasg	pickle27: I can try to take a look at it in my computer
+ pickle27	iglesiasg: okay. because I don't know what else I can do to debug if I can't replicate the actual crash on my pc
+@iglesiasg	pickle27: both the MLDA code and the example has been merged to upstream develop right?
+ pickle27	iglesiasg: yes it was merged yesterday
+@iglesiasg	pickle27: so I will take a look ASAP and give you and answer in the mailing list
+ pickle27	okay sounds good, thanks!
+@iglesiasg	probably by tomorrow midday
+@iglesiasg	so that is like 15h from now for me
+@iglesiasg	pickle27: I think we are in different time zones :)
+ pickle27	iglesiasg: yeah I've come to notice haha, Europe?
+@iglesiasg	pickle27: yep
+ pickle27	iglesiasg: cool, I'm in Canada
+@iglesiasg	pickle27: nice! I will try to take more care of my English then :P
+@iglesiasg	well are you in English or French speaking area?
+ pickle27	iglesiasg: I'm in an English area, I do speak a bit of french though, whereabouts are you in Europe?
+@iglesiasg	pickle27: right now in Spain, I live in Sweden though
+ pickle27	iglesiasg: neat!
+ thoralf	pickle27: Tried to add --enable-debug --disable-optimization to ./configure?  This should remove the illegal instructions in valgrind.
+@iglesiasg	thoralf: I think he has already tried compiling with the disabel-optimization option
+ thoralf	iglesiasg: Maybe, but as he didn't mention it in his post, I thought it could save him some trial and error. :)
+@iglesiasg	sonney2k suggested doing that yesterday
+ thoralf	iglesiasg: It still looks too familiar to me... ;)
+ thoralf	pickle27: We're wondering if you tried (in shogun/src): make clean; ./configure --enable-debug --disable-optimization
+@iglesiasg	:)
+ votjakovr	Hi guys :) Has anyone run integration tests on local machine? Is regression_gaussian_process_modular.py failed?
+@sonney2k	votjakovr, seems it works: http://shogun-toolbox.org/buildbot/waterfall
+@sonney2k	why?
+@sonney2k	wiking, ubu1 - libshogun buildbot is down
+ thoralf	sonney2k: Cool visualization.
+ votjakovr	sonney2k: Oh, but travis-ci shows an errors.
+@sonney2k	thoralf, what?
+ thoralf	sonney2k: The buildbot/waterfall
+@sonney2k	thoralf, ahh ok
+@sonney2k	wasn't so impressive to me..
+@sonney2k	votjakovr, checking
+@sonney2k	votjakovr, hmmhh the returned label vector is *slightly* different
+@sonney2k	any idea why that could be?
+@sonney2k	any randomness in there?
+@sonney2k	or different numerical libraries?
+@sonney2k	iglesiasg, don't you have ubuntu?
+@iglesiasg	sonney2k: I currently use more arch than ubuntu
+@iglesiasg	sonney2k: why?
+@sonney2k	I wish we could reproduce the travis failure
+@sonney2k	travis runs on ubuntu
+ votjakovr	sonney2k: Nope, when I changed implementation of ExactInferenceMethod, I regenerated test data. And everything is OK on my machine.
+@iglesiasg	lisitsyn uses ubuntu I think
+ votjakovr	sonney2k: And I use Ubuntu 13.04
+@sonney2k	votjakovr, which version of numpy?
+@sonney2k	1.6.1 or .2?
+ pickle27	thoralf: I will try now
+ votjakovr	sonney2k: 1.7.1
+@sonney2k	votjakovr, hmm - labels is generated randomly though
+@sonney2k	votjakovr, I just checked the diff
+@sonney2k	for some reason the 100 dim label vector differs in 3 entries
+@sonney2k	1.144566753132682 vs 1.144566753132681
+@sonney2k	1.15097403962122 vs 1.150974039621219
+@sonney2k	1.447796756701278 vs 1.447796756701277
+-!- madhura [~madhura@59.95.237.64] has joined #shogun
+@sonney2k	wiking, is there any way to specify the numpy version in travis?
+ votjakovr	sonney2k: Yep, I have done the same. But I have no idea why they are different...
+ votjakovr	sonney2k: Maybe some problem with floating point precision
+@sonney2k	votjakovr, me neither and I don't understand how the rest of the output can match perfectly
+@sonney2k	votjakovr, does the algorithm use threads or anything
+@lisitsyn	what's up?
+-!- gsomix [~gsomix@188.168.3.6] has joined #shogun
+ votjakovr	sonney2k: there's just operations with matrices
+@lisitsyn	sonney2k: have you seen? we've got some slots
+@sonney2k	lisitsyn, no I haven't
+@lisitsyn	sonney2k: 8
+ naywhayare	nice!  I was hoping for that many but just like I was told to expect we got only two :)
+@sonney2k	cool
+ gsomix	lisitsyn, sonney2k hey, guys, wuts goin' on?
+@sonney2k	so we only have to unaccept 2 :D
+@lisitsyn	hah yes currently
+@sonney2k	we had 9 last year but used only 8 right?
+@lisitsyn	yes
+@sonney2k	naywhayare, be grateful it's a lot of work
+@iglesiasg	lisitsyn: oh we already got an answer?
+@lisitsyn	iglesiasg: yeah carols is fast this time
+@iglesiasg	I thought it was going to be tom!
+@lisitsyn	I guess it may be changed
+@sonney2k	she wants to be on vacations soon so :)
+@iglesiasg	hehe
+@lisitsyn	oh! I should ask her about delivering t-shirt to you sonney2k
+@lisitsyn	are you ok with it?
+@iglesiasg	8 is a nice number anyway
+@iglesiasg	let's do some vodking
+@lisitsyn	iglesiasg: you know the way
+@iglesiasg	sonney2k: is it a good idea to tweet about this?
+@sonney2k	why not
+ naywhayare	sonney2k: yeah, you are probably right...
+ naywhayare	(well... more than probably. you've done this before :))
+@lisitsyn	twice
+@lisitsyn	:D
+@sonney2k	naywhayare, it really depends on your students/mentors though. with 8 it already is quite a bit of coordination. and if one student/mentor sucks you can easily cope with that
+@sonney2k	when you have 'just' 2 slots
+ naywhayare	yeah; we got a number of good applications though, so it will be tough to choose which two to accept
+ naywhayare	even so, with how busy I tend to be, it's probably a good thing in terms of "work/life balance" (not that I get to know what that is as a grad student...)
+@sonney2k	naywhayare, what we did was ask our top candidates all for patches
+@sonney2k	even already for their project
+@sonney2k	then you select the most engaged
+@sonney2k	and that obviously wasn't the wrong decision
+ naywhayare	that is probably a good idea; a few of our candidates have already taken the initiative and started doing that
+@sonney2k	lisitsyn and heiko are still around :D
+@sonney2k	3 years later now
+@lisitsyn	yeah I am a gsoc child
+@lisitsyn	:D
+@lisitsyn	no, I am here for two years I think
+@sonney2k	lisitsyn, true
+@sonney2k	2011
+@sonney2k	heiko dates back to 2010
+@wiking	1234
+@lisitsyn	wiking: good!
+@wiking	yes keyboard works!
+@wiking	:>
+-!- hoijui [~hoijui@dslb-088-074-109-050.pools.arcor-ip.net] has joined #shogun
+@sonney2k	wiking, get the ubuntu buildbot back to work!
+@wiking	oh
+@wiking	sonney2k: i would if i would access to that machine
+@wiking	it's down and i really have no clue when it's going to be back
+@sonney2k	wiking, hmm!?
+@wiking	the machine
+@wiking	it's down
+@wiking	or somebody took out the utp cable
+@wiking	or i have no clue
+@wiking	anyhow i have no physical access to that machine
+@wiking	so i cannot do anything about it
+@sonney2k	wiking, ohh and could you merge from develop -> master the configure change for swig2.0 or what do we do about master failing?
+@sonney2k	on bsd1?
+@wiking	mmmm
+@wiking	noclue :)
+@wiking	i'll check tonight
+-!- nube [~rho@49.244.21.43] has quit [Ping timeout: 264 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * b466c0d / src/shogun/lib/tapkee/ (11 files): https://github.com/shogun-toolbox/shogun/commit/b466c0dcca4467d7c219619367488b104fc88e1b
+ shogun-notifier-	shogun: Updated tapkee library
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: - Proper non-negativity checks in parameters
+ shogun-notifier-	shogun: - VP-tree neighbors method
+ shogun-notifier-	shogun: - Some minor fixes
+-!- nube [~rho@49.244.128.165] has joined #shogun
+ shogun-buildbot	build #1110 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1110  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+@lisitsyn	oops!
+@lisitsyn	sorry
+@sonney2k	guys punish him!
+@lisitsyn	fixing
+@lisitsyn	my script for auto-conversion of includes failed here
+@iglesiasg	hehe shit happens
+@lisitsyn	iglesiasg: bad you are not in sweden, ice hockey event there
+@lisitsyn	rus-usa right now
+@sonney2k	lisitsyn, ohh cold war!
+-!- travis-ci [~travis-ci@ec2-54-234-229-115.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6966751
+-!- travis-ci [~travis-ci@ec2-54-234-229-115.compute-1.amazonaws.com] has left #shogun []
+* sonney2k sigh
+@sonney2k	we have to kick out 2 students now
+@sonney2k	if anyone has a better idea than throwing a dice... say so
+ thoralf	sonney2k: Random numbers needed? http://xkcd.com/221/
+ thoralf	(off-topic)
+@sonney2k	thoralf, I choose the seed :P
+@sonney2k	and wiking provides the prng
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 542609f / src/shogun/lib/tapkee/neighbors/vptree.hpp: https://github.com/shogun-toolbox/shogun/commit/542609f99d210296a9a9fed81a657914548b29af
+ shogun-notifier-	shogun: Fixed include in vptree
+-!- Zheng [80b422fb@gateway/web/freenode/ip.128.180.34.251] has joined #shogun
+ shogun-buildbot	build #1111 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1111
+@wiking	sonney2k: why so?
+@wiking	sonney2k: u think we wont' get enough slots?
+@sonney2k	wiking, we got 8
+@wiking	aaah it's already decided?
+@wiking	i mean the slots?
+@sonney2k	living behind the moon aren't ya?
+@wiking	i missed that
+@wiking	sorry man
+@wiking	too busy in the last 1 month
+@sonney2k	wiking, yeah we have to kick out 2 students
+@wiking	mmmm
+@wiking	and all those 10 are tops?
+@wiking	i mean super great applications?
+@sonney2k	yes
+ shogun-buildbot	build #925 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/925
+@wiking	mmmm
+@wiking	well if u cannot really prioritize
+@wiking	then let's kick out 3 and 7
+@wiking	:)
+@wiking	i mean i was just your random machine
+@sonney2k	no prime numbers have to stay :D
+@wiking	and i'm totally objective as i dont even know
+ thoralf	Good choice. ;)
+@wiking	the applications
+@wiking	sonney2k: hehehe well u can assign any of the applications to be 3 and 7
+@wiking	:P
+@wiking	haven't defined the order of the applications
+@wiking	but then again
+@wiking	other option is a very stupid one
+@wiking	order them by submission date
+@wiking	and remove the last 2
+@wiking	i mean it's really stupid
+@wiking	but it's another option
+@wiking	oooooor
+@wiking	let's start gathering money for those 2
+@wiking	\o/
+@wiking	go to kaggle
+@wiking	win a competition
+@wiking	and then we can support them
+@wiking	:D
+@wiking	sonney2k: or give me the list and i'll review them for ya ;)
+@wiking	i bet i can find you 2 not so good ones :DDD
+@wiking	even 3 :P
+* wiking is accepting bribes :DDD
+@wiking	sonney2k: or why not to somehow prio them by the entrance
+@wiking	PRs
+@wiking	i bet we can measure there a very nice objective way
+@wiking	ok
+@wiking	retweeted
+@wiking	btw who's not here out of those 10 ppl? :)
+@sonney2k	wiking, a couple :D
+@wiking	heh
+-!- Zheng [80b422fb@gateway/web/freenode/ip.128.180.34.251] has quit [Ping timeout: 245 seconds]
+@wiking	theeere you gooooo
+@wiking	:))))
+@wiking	no IRC no GSOC
+@wiking	:DDD
+@wiking	pretty standard measure :P
+-!- iglesiasg [d58f3201@gateway/web/freenode/ip.213.143.50.1] has quit [Ping timeout: 245 seconds]
+ pickle27	haha good thing I'm on IRC right now lol
+-!- travis-ci [~travis-ci@ec2-54-234-229-115.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6967091
+-!- travis-ci [~travis-ci@ec2-54-234-229-115.compute-1.amazonaws.com] has left #shogun []
+-!- Zheng [80b422fb@gateway/web/freenode/ip.128.180.34.251] has joined #shogun
+-!- thoralf [~thoralf@enki.zib.de] has left #shogun ["Konversation terminated!"]
+-!- hoijui [~hoijui@dslb-088-074-109-050.pools.arcor-ip.net] has quit [Quit: Leaving]
+ pickle27	the people involved in this left but I just re-ran the valgrind after compiling shogun with debugging symbols and got the same result, http://pastebin.com/00rU2vcU
+ pickle27	iglesias is going to try on his machine and see if he can reproduce the error because I can not - the classifier_lda example still runs fine on my system
+@sonney2k	pickle27, what is the issue?
+ gsomix	wiking, hey, you're awesome.
+-!- Zheng [80b422fb@gateway/web/freenode/ip.128.180.34.251] has quit [Quit: Page closed]
+@sonney2k	hmmhh I would wish we could have sprint meetings like scikits https://github.com/scikit-learn/scikit-learn/wiki/Past-sprints
+@sonney2k	like meet once / year in berlin or so
+@sonney2k	and then do a week of coding vodking :D
+-!- poojits [75d35d4a@gateway/web/freenode/ip.117.211.93.74] has joined #shogun
+@wiking	gsomix: :D
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- mona2302 [4e080b1f@gateway/web/freenode/ip.78.8.11.31] has joined #shogun
+-!- mona2302 [4e080b1f@gateway/web/freenode/ip.78.8.11.31] has quit [Quit: Page closed]
+-!- iglesiasg [d58f3213@gateway/web/freenode/ip.213.143.50.19] has joined #shogun
+ iglesiasg	pickle27: hey, I just checked logs
+ iglesiasg	pickle27: for some reason the last pastebin link doesn't open find
+-!- Ingvaras [522c194e@gateway/web/freenode/ip.82.44.25.78] has joined #shogun
+ iglesiasg	oh fine*
+ iglesiasg	pickle27: anyway, if valgrind complains about it, it is a sign that it doesn't run fine in your system ;)
+--- Log closed Wed May 08 00:00:35 2013

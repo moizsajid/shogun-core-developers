@@ -1,0 +1,991 @@
+--- Log opened Sun Apr 08 00:00:19 2012
+ n4nd0	sonney2k: covertree sucks :(
+@sonney2k	?
+@sonney2k	slow?
+ n4nd0	super slow
+@sonney2k	hehe
+ n4nd0	I am testing it with the files Sergey has sent
+ n4nd0	I am just trying to classify 10 vectors
+@sonney2k	so blackburn slowed everything down with covertrees :D
+ n4nd0	the old KNN method takes about 2 second
+@sonney2k	*lol*
+ n4nd0	with covertree ... it's not finishing ...
+ n4nd0	more than a minute now
+ blackburn	sonney2k: no, edrt stuff is faster with covertree
+ blackburn	n4nd0: do you precompute distance matrix there?
+ n4nd0	blackburn: any problem with cover trees for high dimensions?
+ n4nd0	blackburn: no
+ blackburn	n4nd0: no, it depends only on distance
+ blackburn	some intrinsic dimensionality stuff is here
+ blackburn	however it is not of interest there I think
+ n4nd0	I don't know
+ n4nd0	but I think that even the covertree impl. we are using is not super good
+ n4nd0	this result is weird
+ blackburn	not weird
+ blackburn	it computes all distances a few times
+ blackburn	it is time demanding
+ blackburn	however how long does it take to construct a tree?
+ n4nd0	I am going to check that now
+ blackburn	do you separate these processes?
+ n4nd0	I think that the problem is there
+ n4nd0	they are separate
+ n4nd0	construction is in train
+ blackburn	yes
+ blackburn	so how long train takes?
+ n4nd0	I think that the operation that takes a life time is training
+ n4nd0	it is not ending directly :)
+ n4nd0	we are talking about a huge bunch of vectors though
+ n4nd0	but does cover tree performance takes this into account?
+ blackburn	it should be log N
+ n4nd0	I mean, when they say that it is for KNN classification
+ n4nd0	do they take into account construction?
+ blackburn	no, construction is not considered there
+ blackburn	you would need to construct it only once
+ blackburn	n4nd0: I can say that knn (k=10) takes a hour or so to compute outputs with naive quick sort
+ blackburn	on that data
+ blackburn	all vectors I mean
+ n4nd0	using 1000 vectors for training
+ n4nd0	it took 13 seconds to construct the tree
+ blackburn	and 2?
+ blackburn	K
+ n4nd0	k = 8
+ n4nd0	apply takes more time :(
+ blackburn	how much?
+ n4nd0	two times more
+ n4nd0	but the number of vectors is really small
+ blackburn	actually this apply *can't* take more time than qsort one
+ blackburn	I do not understand how can that be
+ blackburn	qsort approach computes distances to each vector
+ blackburn	and covertree computes a few
+ n4nd0	it makes no sense with intuition but
+ n4nd0	there must sth there
+ n4nd0	I am going to try with more vectors fro apply
+ n4nd0	500 for apply and 1000 for training
+ n4nd0	I would expect here the cover tree
+ n4nd0	not taking into account training
+ blackburn	no need to take train time into account
+ n4nd0	is a shit
+ gsomix	good night
+ n4nd0	sorry for the expression :P
+ blackburn	nite
+ n4nd0	gsomix: good night!
+ n4nd0	>>>>> Classification with quick sort took 2.95830392838
+ n4nd0	>>>>> Cover tree construction took 13.0743379593
+ n4nd0	>>>>> Classification with cover tree took 5.47460794449
+ blackburn	n4nd0: haha
+ blackburn	okay 1000 apply?
+ n4nd0	I can tell you
+ n4nd0	6 sec with quick sort
+ n4nd0	15 with cover bush
+ blackburn	??!
+ blackburn	15???
+ n4nd0	just guessing
+ n4nd0	want to make your bet?
+ blackburn	it shouldn't be possible
+ n4nd0	>>>>> Classification with quick sort took 6.00689578056
+ n4nd0	>>>>> Cover tree construction took 13.0408000946
+ n4nd0	>>>>> Classification with cover tree took 10.9036741257
+ n4nd0	^ 1000 in train and 1000 in apply
+ blackburn	2K?
+ blackburn	factor of 2
+ n4nd0	where do you want to end up :P?
+ blackburn	both
+ n4nd0	train as well?
+ blackburn	10.90/5.47
+ blackburn	6.00/2.95
+ blackburn	both ~2
+ blackburn	unbelievable
+ blackburn	justinbeliebable lol
+ n4nd0	>>>>> Classification with quick sort took 12.0923390388
+ n4nd0	>>>>> Cover tree construction took 13.0758159161
+ n4nd0	>>>>> Classification with cover tree took 21.8708460331
+ n4nd0	1000 train, 2000 apply
+ n4nd0	maybe I am doing sth wrong
+-!- gsomix [~gsomix@85.26.233.247] has quit [Ping timeout: 246 seconds]
+ n4nd0	http://snipt.org/uhpf5
+ PhilTillet	Hmm, I can't find any knn c++ example, is there any?
+ blackburn	no
+ PhilTillet	that's why I can't find one :p
+ n4nd0	I think that if we use covertree + opencl support
+ blackburn	n4nd0: all is ok..
+ blackburn	no
+ n4nd0	maybe we can beat quick sort
+ blackburn	n4nd0: nooooooo
+ n4nd0	I was ironic / joking :)
+ n4nd0	I think it must be an error in my integration in KNN
+ blackburn	I just glanced over it
+ blackburn	all seems to be ok
+@sonney2k	no one beats my quicksort :)
+ n4nd0	sonney2k: hahaha
+@sonney2k	it is 100 times faster than qsort() from libc *lol*
+ blackburn	sonney2k: wtf?
+ blackburn	how can that be
+ n4nd0	sonney2k: serious?
+ n4nd0	sonney2k: I think you should tell them ...
+ blackburn	100?
+@sonney2k	no
+@sonney2k	not serious
+@sonney2k	it is faster but not sure how much
+ blackburn	why it is?
+@sonney2k	it is because they do advances stuff
+@sonney2k	advanced
+@sonney2k	I don't
+ n4nd0	that are never used?
+@sonney2k	n4nd0, just benchmark it ... maybe it got fixed by now
+ n4nd0	sonney2k: what is your intuition about the cover tree?
+ blackburn	n4nd0: btw you may use [:,:1000]
+ blackburn	instead of range
+ blackburn	range is a bad thing
+ n4nd0	you think so?
+ n4nd0	I actually changed :1000 to range
+ blackburn	yes, range computes whole range
+ blackburn	why?
+ n4nd0	mmm I don't really know why
+@sonney2k	I think they do quicksort first then switch to bubble for small bin sizes
+ n4nd0	let's focus on doing a toolbox for sorting
+ blackburn	n4nd0: what if you take say 10 features?
+ n4nd0	blackburn: train or apply?
+ blackburn	is covertree faster then?
+ n4nd0	I guess you say for training
+ blackburn	just truncate feature matrices
+ blackburn	rows
+ n4nd0	ah ok
+ n4nd0	sorry
+ n4nd0	I am trying first with the whole bunch of sample
+ n4nd0	samples*
+ n4nd0	but that may take a lot
+ blackburn	it looks like we have shity covertree :)
+ n4nd0	wow
+ n4nd0	we are almost there
+ n4nd0	>>>>> Classification with quick sort took 0.359225988388
+ n4nd0	>>>>> Cover tree construction took 0.405721187592
+ n4nd0	>>>>> Classification with cover tree took 0.390501976013
+ n4nd0	get worse with more samples ...
+ n4nd0	>>>>> Classification with quick sort took 3.57726192474
+ n4nd0	>>>>> Cover tree construction took 0.408113956451
+ n4nd0	>>>>> Classification with cover tree took 4.02059102058
+@sonney2k	n4nd0, try with few training examples and *lots* for testing
+ n4nd0	>>>>> Classification with quick sort took 0.715730905533
+ n4nd0	>>>>> Cover tree construction took 0.00958108901978
+ n4nd0	>>>>> Classification with cover tree took 1.58414793015
+ n4nd0	100 training examples, 100000 test vectors
+ n4nd0	using just 10 features
+ blackburn	100000&
+ blackburn	where did you get so many
+ blackburn	;)
+ n4nd0	haha
+@sonney2k	ok then screw this cover tree - blackburn, gsomix get JL's to work
+ n4nd0	blackburn: I did testdat[:10, :100000]
+ n4nd0	blackburn: none complained :)
+ n4nd0	blackburn: I don't understand why it does not complain
+ n4nd0	blackburn: testdat.shape = (580, 12630)
+ blackburn	n4nd0: it cuts to 100000
+ blackburn	hmm
+ blackburn	okay LLE
+ blackburn	so just takes all
+ blackburn	with 4000 vectors
+ blackburn	0.6s to compute neighborhood matrix
+ blackburn	and with 8000 vector
+ blackburn	1.58s
+ blackburn	kind of wrong asymptotic...
+ blackburn	fuck that
+ blackburn	we really need proper covertree then
+ blackburn	n4nd0: okay postpone this shit for now
+ n4nd0	blackburn: ok
+ n4nd0	blackburn: fuck, I lost time doing the integration :(
+ n4nd0	waste
+ blackburn	n4nd0: no, interface is similar
+ n4nd0	blackburn: at least :)
+ blackburn	would be some patch rather than new reintegration
+ blackburn	it works in that covertree_point_t way as well
+ blackburn	n4nd0: gsomix actually was near to finish that
+ blackburn	I hope he didn't delete that stuff
+ n4nd0	blackburn: let's see
+ blackburn	okay time to got to bed
+ n4nd0	blackburn: curiosity, do you remember what the author of this covertree said?
+ blackburn	n4nd0: hmm? that one we have?
+ blackburn	I found that on github
+ blackburn	I didn't contact him
+ n4nd0	ok
+ n4nd0	yeah
+ n4nd0	time to sleep
+ blackburn	but probably it is a problem
+ blackburn	see you
+ n4nd0	good night people!
+ blackburn	nite
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Quit: Page closed]
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has quit [Quit: leaving]
+* sonney2k starts to watch revision live stream
+-!- flxb [~cronor@e177094201.adsl.alicedsl.de] has joined #shogun
+-!- flxb [~cronor@e177094201.adsl.alicedsl.de] has left #shogun []
+ PhilTillet	good night everybody!
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has quit [Quit: Leaving]
+ shogun-buildbot	build #460 of java_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/java_modular/builds/460
+-!- pluskid [~chatzilla@111.120.42.124] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ pluskid	why is sonney2k  always online? :D
+ pluskid	I'm scanning some of your chatting logs last night
+ pluskid	concerning cover tree, I accidently encounter this implementation the other day: https://github.com/mbrucher/CoverTree/
+ pluskid	The author also has a blog post on this: http://feedproxy.google.com/~r/eifelle/CPPV/~3/eN8ZuHOetUY/
+ pluskid	Maybe you could compare with this implementation to identify where the problem is?
+-!- pluskid [~chatzilla@111.120.42.124] has quit [Quit: ChatZilla 0.9.88.1 [Firefox 11.0/20120312181643]]
+-!- pluskid [~chatzilla@111.120.42.124] has joined #shogun
+-!- pluskid [~chatzilla@111.120.42.124] has quit [Quit: ChatZilla 0.9.88.1 [Firefox 11.0/20120314124128]]
+-!- pluskid [~chatzilla@111.120.42.124] has joined #shogun
+-!- pluskid [~chatzilla@111.120.42.124] has quit [Ping timeout: 252 seconds]
+-!- pluskid [~chatzilla@173.254.214.60] has joined #shogun
+@sonney2k	pluskid, which timezone are you in?
+ pluskid	GMT+8
+ pluskid	sonney2k: I'm in Asia
+@sonney2k	pluskid, so it is sth like 14 hrs at your place?
+ pluskid	12:16 PM actually
+ pluskid	26
+@sonney2k	ahh ok
+ pluskid	are you here for all 24 hours ? :D
+ pluskid	It seems you are always online
+@sonney2k	btw, the buildbot figured out there are a few warnings with your patch
+@sonney2k	http://shogun-toolbox.org/buildbot/builders/octave_static/builds/629/steps/compile/logs/warnings%20%288%29
+ pluskid	OK
+ pluskid	I will fix it
+@sonney2k	pluskid, yeah well znc :)
+@sonney2k	thanks
+@sonney2k	pluskid, if you can come up with some other small patches within the next weeks it would be helpful
+ pluskid	OK, I see
+ pluskid	I will try to find something to work on
+@sonney2k	we don't know #slots yet but we will try to come up with some kind of pre-selection by the end of tomorrow
+ pluskid	if I didn't find interesting small stuffs, I will come and ask here
+@sonney2k	ok gtg
+@sonney2k	cu
+@sonney2k	thanks
+ pluskid	that's cool
+ pluskid	cu
+-!- gsomix [~gsomix@85.26.235.174] has joined #shogun
+ gsomix	good morning :)
+ pluskid	morning
+-!- pluskid [~chatzilla@173.254.214.60] has quit [Remote host closed the connection]
+-!- pluskid [~pluskid@173.254.214.60] has joined #shogun
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has joined #shogun
+ n4nd0	pluskid: hey! I just read your mail, thank you for your findings :)
+ pluskid	n4nd0: :)
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ pluskid	hope the problem could be solved soon
+-!- pluskid [~pluskid@173.254.214.60] has quit [Quit: Konversation terminated!]
+-!- pluskid [~chatzilla@173.254.214.60] has joined #shogun
+ n4nd0	pluskid: but it is tru that it might because of the dataset
+ pluskid	yes, it might be
+ pluskid	but if it is the case
+ pluskid	at least we could figure out cover tree is good for what kind of dataset
+ pluskid	and document that
+ n4nd0	I thought that if we use for our test any of the one referenced here
+ n4nd0	http://hunch.net/~beygel/cover-tree.pdf
+ n4nd0	on the last page
+ n4nd0	cover tree should be better then
+ pluskid	yes, that would be a good try
+ pluskid	they used larger dataset
+ pluskid	5000-point
+ pluskid	as mentioned in the paper
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has quit [Ping timeout: 260 seconds]
+-!- gsomix [~gsomix@85.26.235.174] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+-!- gsomix [~gsomix@85.26.235.174] has joined #shogun
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- hpsoar [7c108901@gateway/web/freenode/ip.124.16.137.1] has joined #shogun
+-!- hpsoar [7c108901@gateway/web/freenode/ip.124.16.137.1] has quit [Client Quit]
+-!- gsomix [~gsomix@85.26.235.174] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+-!- gsomix [~gsomix@85.26.235.174] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.186] has joined #shogun
+ gsomix	blackburn, yo
+ blackburn	gsomix: hi, I'll merge your stuff in a min
+ blackburn	gsomix: as for covertree I have one suggestion
+ blackburn	gsomix: did you delete your covertree modifications? I hope not
+ gsomix	blackburn, I did not delete.
+ blackburn	nice
+ blackburn	see KNN sources
+ blackburn	actually all you would need
+ blackburn	is to change block at KNN.cpp:113
+ blackburn	where covertree is constructed
+ gsomix	blackburn, do you mean KNN in shogun?
+ blackburn	yes
+ blackburn	and 426
+ blackburn	where neighbors are enqueued
+ gsomix	blackburn, and..?
+ blackburn	gsomix: hmm my suggestion is to use your adopted covertree there :)
+ pluskid	blackburn: hi, what's the status of regression support in shogun?
+ pluskid	it seems incomplete?
+ blackburn	as we measured some stuff and it turns that dncrane's covertree is rather slow
+ blackburn	pluskid: in which means?
+ pluskid	for example
+ pluskid	why train_machine() in LinearRidgeRegression protected?
+ pluskid	and LeastSquareRegression is almost empty ?
+ blackburn	pluskid: in shogun machines train delegates all the stuff to virtual protected train_machine()
+ blackburn	oh I see
+ pluskid	I mean, when a method is protected, it cannot be invoked by others
+ blackburn	train can
+ blackburn	that's ok
+ pluskid	oh, train invokes train_machine ?
+ blackburn	yes
+ pluskid	ok
+ blackburn	ahah
+ blackburn	got it
+ blackburn	pluskid: that's ok with leastsquares
+ blackburn	it is LinearRidge with tau = 0
+ pluskid	got it :)
+-!- gsomix [~gsomix@85.26.235.174] has quit [Ping timeout: 246 seconds]
+ blackburn	that would be hard to approach any large scale with it though
+ pluskid	I'm considering to add LARS, if n4nd0 hasn't started to work on it yet
+ CIA-64	shogun: Evgeniy Andreev master * r126a1de / examples/undocumented/python_modular/kernel_custom_modular.py : minor fix - http://git.io/W8JYdw
+ CIA-64	shogun: Evgeniy Andreev master * rc5c7117 / (3 files in 2 dirs): fixed set_triangle_kernel_matrix_from_full in custom kernel - http://git.io/JGPY7Q
+ blackburn	no idea
+ pluskid	mlpack seems to got an implementation of LARS
+ pluskid	with elasticnet
+ CIA-64	shogun: Sergey Lisitsyn master * r79a91ad / src/shogun/evaluation/ClusteringEvaluation.cpp : Merge branch 'normalized-mutual-info' of git://github.com/pluskid/shogun - http://git.io/eSsHvg
+-!- gsomix [~gsomix@85.26.164.224] has joined #shogun
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ pluskid	lapack is horrible...
+ pluskid	where can I find a function list, with doc on which parameters is what?
+ pluskid	for lapack & clbas
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ wiking	happy easter y'all, except blackburn, you'll have it later :P
+ pluskid	what is easter y' ?
+ PhilTillet	lol
+ wiking	:D
+ gsomix	>> except blackburn | and me. I live in a floor lower than blackburn. :]
+ gsomix	*on
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has quit [Ping timeout: 276 seconds]
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has joined #shogun
+-!- V[i]ctor [~victor@host-176-100-246-254.masterbit.su] has joined #shogun
+-!- gsomix [~gsomix@85.26.164.224] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+ CIA-64	shogun: Heiko Strathmann master * rb7b8742 / (21 files in 7 dirs):
+ CIA-64	shogun: Merge pull request #428 from karlnapf/master
+ CIA-64	shogun: subset stacks (+24 more commits...) - http://git.io/u8aL2w
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has quit [Read error: Connection reset by peer]
+ blackburn	pluskid: http://www.netlib.org/lapack/explore-html/index.html
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.186] has quit [Ping timeout: 240 seconds]
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+-!- V[i]ctor [~victor@host-176-100-246-254.masterbit.su] has left #shogun []
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ pluskid	blackburn: thanks!!
+-!- gsomix [~gsomix@188.168.5.161] has joined #shogun
+ shogun-buildbot	build #694 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/694  blamelist: heiko.strathmann@gmail.com
+-!- harshit_ [~harshit@182.68.113.64] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	pluskid: I have not started with LARS yet, I am planning to fix the testsuite so fell free to work on that if you want
+ pluskid	n4nd0: OK, I'm starting on this
+ pluskid	btw: Lapack and blas is really hard to use ...
+ n4nd0	you think so?
+ n4nd0	I am not an expert but I managed to make it work for the couple of things I have used it around here
+ blackburn	I don't think it is :)
+ pluskid	haven't got familiar with it yet
+ pluskid	doing something like matrix multiple
+ pluskid	and solving linear system
+ pluskid	makes me headache
+ n4nd0	matrix multiple?
+ pluskid	C = A * B this easy
+ n4nd0	ah ok multiplication ;)
+ pluskid	ah, yeah
+ pluskid	maybe I need some time to get familiar with its naming convention
+ pluskid	it could be better if their doc are supplied with examples
+ n4nd0	now that we are talking about it
+ pluskid	for example
+ pluskid	in a function for multiplication of two matrices
+ n4nd0	blackburn: what is the main difference between lapack and BLAS?
+ blackburn	n4nd0: BLAS is basic ops
+ n4nd0	I think that lapack includes BLAS but I am not sure about it
+ blackburn	like Ax=b
+ pluskid	Lapack built on BLAS
+ blackburn	and Lapack is solving/etc
+ blackburn	eigenproblems
+ blackburn	factorization
+ blackburn	svd
+ blackburn	etc
+ pluskid	they provide options to indicate that one of the matrix is transposed or not
+ blackburn	BLAS is all about three levels
+ blackburn	vector-vector operations
+ blackburn	like dot
+ pluskid	and you have to indicate the shape (dimension) of the matrix
+ blackburn	that is Level 1
+ pluskid	but I don't know whether the shape should be before transpose or after...
+ blackburn	matrix-vector operations
+ blackburn	Level 2
+ n4nd0	and matrix-matrix level 3
+ n4nd0	:)
+ shogun-buildbot	build #695 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/695
+ blackburn	exactly
+ shogun-buildbot	build #632 of r_static is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/632  blamelist: heiko.strathmann@gmail.com
+ n4nd0	pluskid: I think that options are actually to change the operations like
+ n4nd0	pluskid: if you want to do A*v or A'*v you use the same function but you use an option for that
+ shogun-buildbot	build #654 of cmdline_static is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/654  blamelist: heiko.strathmann@gmail.com
+ pluskid	n4nd0: yes, but in the function, you have to pass the shape (m * n) of A
+ blackburn	pluskid: in the doc they say that sizes are of Op(A)
+ blackburn	so Op(A) is A or A'
+ pluskid	if A is transposed, shall I pass m, n or n, m ?
+ pluskid	OK
+ n4nd0	pluskid: I'd say you pass those parameters before transposed
+ pluskid	I'll read the doc again
+ pluskid	didn't find the detailed doc before blackburn gave me that link
+ n4nd0	pluskid: I have been using this one too http://www.gnu.org/software/gsl/manual/html_node/Level-2-GSL-BLAS-Interface.html
+ pluskid	blackburn: you are right, I should use size of Op(A)
+ pluskid	n4nd0: according to the doc, we should use the size *after* transposed :)
+ shogun-buildbot	build #633 of octave_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/633  blamelist: heiko.strathmann@gmail.com
+ pluskid	n4nd0: the API of GSL-BLAS seems slightly different from what we are using?
+ blackburn	yeah totally different
+ pluskid	it seems GSL is doing some more wrapping
+ pluskid	while the package we are using is straightforward fortran translation
+ blackburn	no we are tied to basic API
+ blackburn	it would stay the same for scalapck
+ blackburn	or cuda lapack
+ blackburn	or any other lapack
+ blackburn	it is standard api while gsl's is not
+ pluskid	OK, I see
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has quit [Remote host closed the connection]
+ shogun-buildbot	build #620 of python_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/620  blamelist: heiko.strathmann@gmail.com
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ shogun-buildbot	build #633 of r_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/633
+ shogun-buildbot	build #655 of cmdline_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/655
+ shogun-buildbot	build #634 of octave_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/634
+ shogun-buildbot	build #621 of python_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/621
+ shogun-buildbot	build #485 of octave_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/485  blamelist: heiko.strathmann@gmail.com
+ n4nd0	benchmarking cover tree with letter subset ...
+ n4nd0	in the paper on cover trees they say cover tree should be about ten times faster here
+ blackburn	n4nd0: btw I checked things
+ blackburn	and in my LLE implementation
+ blackburn	covertree is 3-4 times faster than quicksort
+ blackburn	on a range 4K - 8K 3d vectors
+ n4nd0	mmm
+ n4nd0	something fishy going on here then
+ n4nd0	it sucks
+ n4nd0	>>>>> Classification with quick sort took 51.0038590431
+ n4nd0	>>>>> Cover tree construction took 99.7238249779
+ n4nd0	>>>>> Classification with cover tree took 106.712816
+ blackburn	yeah
+ blackburn	n4nd0: actually gsomix is on the way to integrate JL's
+ n4nd0	that is with 10000 vectors for training and classifcation
+ n4nd0	but I don't understand why is it faster with your tests
+ n4nd0	I am afraid I may have done something wrong :S
+ blackburn	no I don't think so
+ blackburn	pluskid measured distance evaluations and it is computed too often
+ n4nd0	aham
+ n4nd0	it needs to compute distances quite often to apply queries too
+ shogun-buildbot	build #472 of csharp_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/csharp_modular/builds/472  blamelist: heiko.strathmann@gmail.com
+ pluskid	do you see JL's reply in the mailing list?
+ blackburn	did he reply??
+ blackburn	can't see anything
+ pluskid	yes
+ n4nd0	no, I don't
+ pluskid	he said:
+ pluskid	Can you compute the expansion constant spectrum as in the original
+ pluskid	covertree paper?
+ blackburn	did he answer directly?
+ blackburn	expansion constant spectrum? wtf?
+ pluskid	he replied to shogun-list
+ blackburn	:D
+ n4nd0	shouldn't it be here http://news.gmane.org/gmane.comp.ai.machine-learning.shogun?
+ pluskid	I don't know
+ pluskid	maybe the gmane archive has delay
+ pluskid	he replied 3 hours ago
+ pluskid	if you subscribed to the mailing list
+ n4nd0	didn't get in my inbox either
+ pluskid	you should receive one in your inbox
+ blackburn	haha
+ n4nd0	yeah, I am subscribed
+ blackburn	yeah I have subscribed recently
+ pluskid	strange
+ pluskid	anyway
+ blackburn	year ago or so
+ blackburn	:D
+ pluskid	that's what he said
+ pluskid	though I don't understand
+ pluskid	I haven't read the paper
+ blackburn	can you paste 'To'?
+ pluskid	To: Chiyuan Zhang <pluskid@gmail.com>
+ pluskid	Cc: shogun-list@shogun-toolbox.org
+ pluskid	shogun-list doesn't accept CC?
+ blackburn	it does
+ pluskid	who implemented our current cover tree? maybe we can ask him what is the expansion constant spectrum?
+ n4nd0	well, I think the cover tree is taken from somewhere else
+ blackburn	yes
+ pluskid	hmm
+ pluskid	blackburn: you mentioned that gsomix  is merging JL's ?
+ blackburn	yes
+ pluskid	so JL has an official implementation now?
+ blackburn	yes
+ pluskid	cool
+ pluskid	maybe we could wait to see what about that one
+ n4nd0	yes
+ pluskid	since none of us know the internal of how cover tree works
+ n4nd0	I just wanted to check whether the test data was affecting
+ blackburn	JL's one is better anyway
+ pluskid	is JL's implementation publicly available now?
+ blackburn	yes
+ pluskid	I think we should at least reply him in the mail
+ blackburn	yes could you please?
+ pluskid	sure
+ blackburn	because we can't see the email :D
+ pluskid	maybe the mail arrived at my inbox because he also sent to me
+ pluskid	and the shogun-list is super slow
+ pluskid	maybe
+ blackburn	yes could be
+ n4nd0	pluskid: in his web-page there is an implementation of isomap that includes cover tree
+ pluskid	I would say one of us is porting JL's implementation now, if we still have problem with his implementation, we will contact him to try to figure out the problem
+ blackburn	pluskid: yes thanks
+ pluskid	n4nd0: cool, he is still updating his Isomap code!
+ n4nd0	pluskid: I think is another's guy isomap
+ pluskid	n4nd0: ??
+ pluskid	JL is one of the authors of Isomap
+ n4nd0	pluskid: look under application
+ n4nd0	http://hunch.net/~jl/projects/cover_tree/cover_tree.html
+ n4nd0	another's guy isomap's implementation :)
+ n4nd0	I don't really know if that sense makes sense using normal English
+ n4nd0	but I think you got the idea, or?
+ n4nd0	:D
+ pluskid	Oh, I see
+ pluskid	:D
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ blackburn	one great thing about us is we are able to write some meanless things
+ blackburn	while english is foreign for us :)
+ pluskid	english foreign for me, too
+ n4nd0	if some native speaker was here, he/she would probably get a headache :D
+ pluskid	n4nd0: JL's page provided some dataset for cover tree testing, maybe you could try out your KNN on that
+ blackburn	pluskid: yes we know :)
+ blackburn	we have no native speakers there
+ blackburn	at all
+ pluskid	haha
+ blackburn	the only active at the ML native speaker is Evan
+ blackburn	we should consult him about language too as well as git :D
+ pluskid	his IRC id is ?
+ blackburn	I've never seen him there
+ n4nd0	me neither
+ blackburn	pluskid: is it true there is no first/last name separation in china?
+ pluskid	not ture
+ pluskid	but the first/last is reversed
+ blackburn	so Zhang is a?
+ pluskid	actually, I'm always confused
+ pluskid	I'd rather prefer given name vs. family name
+ pluskid	Zhang is family name, Chiyuan is given name
+ blackburn	aha! I see
+ pluskid	English people write Chiyuan Zhang
+ pluskid	but in China, we always use Zhang Chiyuan
+ blackburn	we tend to reverse that stuff too
+ blackburn	in russian
+ pluskid	I don't know which one is first which is last...
+ blackburn	last name is family name I think :)
+ blackburn	we also make use of patronymes there
+ blackburn	that's why "o" letter is in my email address
+ blackburn	pluskid: my brother works for huawei there
+ pluskid	cool!
+ pluskid	huawei is a big company in China
+ blackburn	yeah
+ pluskid	biggest local network device company according to my knowledge
+ blackburn	not only local afaik
+ blackburn	even backbones are constructed with huawei equipment
+ pluskid	wow
+ blackburn	actually they have beaten cisco here I think
+ blackburn	biggest mobile operator, megafon, uses mainly huawei stuff
+ pluskid	here ? means where?
+ blackburn	russia
+ pluskid	wow!
+ pluskid	I didn't know they have made such achievements
+ n4nd0	they have two very big countries then
+ pluskid	can't find "patronymes" in my dictionary
+ blackburn	pluskid: hmm we include father's name
+ n4nd0	I think they say patronymic
+ blackburn	yeah
+ blackburn	probably my bad
+ pluskid	Oh, I see now
+ blackburn	n4nd0: are your middle names related to your family's members?
+ blackburn	:)
+ pluskid	so where are you from n4nd0 ?
+ n4nd0	pluskid: Spain, resident in Sweden
+ n4nd0	blackburn: they are, but it is just a choice
+ n4nd0	I mean, some people say like I will call my son with my father's name
+ blackburn	n4nd0: so Jos? is your father's name?
+ n4nd0	but we don't use patronyms or matronyms
+ n4nd0	blackburn: no, Jos? is the masculin for my grandmother's name
+ blackburn	oooh
+ blackburn	:)
+ n4nd0	blackburn: Fernando is my godfather's
+ pluskid	haha, I heard that in some restaurant at Spain, people can use some kind of Chinese dialect to order dishes :D
+ blackburn	n4nd0: what about third one then?
+ n4nd0	pluskid: probably is they way in which we would speak Chinese :P
+ n4nd0	blackburn: well Iglesias and Garc?a are just surnames, my father's family name and my mother's
+ blackburn	ah!
+ pluskid	but that kind of dialect is very different from our official language, actually, I totally can't understand
+ pluskid	complicated name system!
+ n4nd0	pluskid: aham, it sounds something more serious then what you are talking about
+ pluskid	IRC IDs would be enough :p
+ pluskid	there are many many dialects in Southern China
+ blackburn	pluskid: from which part of chinae you are?
+ blackburn	china*
+ pluskid	around Western
+ pluskid	previously I thought many here would be Germany :)
+ pluskid	as shogun is originally developed from MPI, am I right?
+ blackburn	pluskid: well yes
+ blackburn	Soeren is from Berlin
+ pluskid	blackburn: if you are in Russia, you must be in some similar timezone as me
+ blackburn	pluskid: wow, why?
+ blackburn	we have 9 timezones :D
+ pluskid	er...
+ pluskid	we are using a unified timezone in china
+ pluskid	everywhere is Beijin time
+ pluskid	GMT+8...
+ blackburn	western one is kaliningrad - GMT+1
+ pluskid	big difference
+ blackburn	and eastern is some kamchatka GMT+9 probably
+ blackburn	let me check
+ shogun-buildbot	build #486 of octave_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/486
+ pluskid	never mind
+ pluskid	so what's your local time now?
+ pluskid	it's 23:54 here
+ blackburn	19/55
+ blackburn	19.55
+ blackburn	I'm in GMT+3 timezone
+ blackburn	or +4?
+ blackburn	:D
+ pluskid	hmm, quite different
+ n4nd0	17:55 here
+ pluskid	so you use a dot to separate time in Russia?
+ pluskid	n4nd0: even earlier
+ blackburn	not really
+ blackburn	both are ok I think :)
+ blackburn	: or .
+ pluskid	hmm
+ blackburn	and kaliningrad is +3
+ blackburn	I was wrong
+ blackburn	okay anadyr is +12
+ blackburn	8 timezones still
+ blackburn	would be bad to have night at say 14:30 and day at 3:30 :)
+ shogun-buildbot	build #473 of csharp_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/csharp_modular/builds/473
+-!- pluskid [~chatzilla@173.254.214.60] has quit [Read error: Connection reset by peer]
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-191-201.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- harshit_ [~harshit@182.68.113.64] has quit [Remote host closed the connection]
+-!- pluskid [~chatzilla@111.120.42.124] has joined #shogun
+ pluskid	night
+ n4nd0	good night
+ blackburn	nite
+-!- pluskid [~chatzilla@111.120.42.124] has quit [Client Quit]
+-!- gsomix [~gsomix@188.168.5.161] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+-!- gsomix [~gsomix@188.168.5.161] has joined #shogun
+ gsomix	hi all
+ n4nd0	gsomix: hey!
+ blackburn	hmm am I here?
+ gsomix	yep
+-!- blackburn_ [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+ n4nd0	I will see you later guys
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+ wiking	:>
+ wiking	blackburn_: r u here? :)
+ blackburn_	???
+ blackburn_	yes
+ blackburn_	:)
+ wiking	:D
+ gsomix	blackburn_, ???
+ wiking	anyhow i have to test now mkl :>
+ wiking	blackburn_: any suggestions which mkl to use for multi class case?
+ blackburn_	mkl? whoa that's nice :D
+ blackburn_	I do not know anything about mkl :D
+ wiking	ah ok
+ wiking	i'll have to try how it works for me
+ wiking	i have 3 different sets of features
+ wiking	and seems like a good idea
+ wiking	to use different kernels for different feature sets
+ blackburn_	yeah may be
+ wiking	since i've tried it with only concatenating all the features
+ wiking	but i wonder if it really makes a big difference
+ wiking	if i use mkl
+ wiking	i guess it should :P
+ blackburn_	I think it depends whether they have rather different structure
+ wiking	yeah they doo
+ wiking	one of it is a very sparse feature set... that is coming from text processing
+ wiking	while the other is like a histogram feature from images
+ wiking	until now what i've done is to concatenate them l2-norm them and then use polykernel
+ wiking	and as we know using intersection or jensen shannon kernel for those histogram features are giving me better results...
+ blackburn_	in my experience it is not very good to use any dot product on histograms
+ wiking	yeah...
+ wiking	so i'm thinking about now the mkl
+ wiking	but i guess the only way to see the outcome is to actually try it :>>>
+ wiking	just quite lazy
+ blackburn_	what about structured output latent model multiple kernel learning svm?
+ blackburn_	:D
+ wiking	well
+ wiking	that'd be amazng
+ wiking	:D
+ wiking	i wonder where's alex
+ wiking	i guess he is taking his easter holidays...
+ blackburn_	wiking: afaik it uses gmnp
+ wiking	blackburn_: yeah i've just checked the code
+ wiking	i mean the headers...
+ blackburn_	while gmnp is very good it should be nice too
+ wiking	well i guess now it's time for me to do the coding
+ wiking	the reading in the various features
+ wiking	and then do the setting up of the mkl
+ wiking	and see what i get
+ wiking	;)
+ wiking	ok i need to switch to vpn
+ wiking	brb
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ wiking	re
+ wiking	:)
+ wiking	heheh it's funny to see the amount of members now being decreased of the #shogun channel.... almost back to it's normal 8 members state before the gsoc fever :)
+ blackburn_	yeah
+ blackburn_	however it will increase tomorrow I think
+ wiking	why? :)
+ blackburn_	well it is sunday today
+ wiking	hahahah your are an optimist :>
+ wiking	blackburn_: remember i've mentioned about my patch for mahout a couple of months ago
+ wiking	they've managed to merge it now like 2 days ago....
+ blackburn_	yes
+ blackburn_	oooh fast
+ wiking	took them like 2-2.5 months
+ wiking	and it was like a 5 liner patch... nothing serious ... :(
+ blackburn_	yeah they are serious guys
+ blackburn_	:)
+ wiking	:))))
+* gsomix hates photometrics stuff.
+@sonney2k	ahh nice and quiet :)
+ gsomix	sonney2k, at home? in chat?
+@sonney2k	at home
+@sonney2k	:)
+@sonney2k	kids are asleep and I am going to shogun mode now :)
+ gsomix	^_^
+@sonney2k	gsomix, I see that you patch got merged already? so did you have time to think about what to do next?
+@sonney2k	I mean your preferences?
+ gsomix	sonney2k, I want to work on SG_Vector.
+@sonney2k	gsomix, ok - so then first thing to do is to convert everything from returning copies of SGVector to references
+@sonney2k	i.e. functions doing SGVector foo() should be SGVector& foo()
+@sonney2k	same for input arguments
+ blackburn_	INTRUSIVE
+@sonney2k	next step is then to just copy & paste the ref/unref code from SGObject
+@sonney2k	HIGHLY INTRUSIVE
+@sonney2k	blackburn_, that is why we should do this ASAP
+ blackburn_	sonney2k: ah that is kind of painful
+ blackburn_	penetration lol
+@sonney2k	blackburn_, it is not as bad as last years double* -> SGVector transition though
+ blackburn_	sonney2k: what about typemaps?
+@sonney2k	gsomix, then the next step would be to remove destroy_vector / etc
+ blackburn_	any changes are required?
+@sonney2k	blackburn_, yes sure add a &
+ blackburn_	nothing more?
+@sonney2k	gsomix, and to go through all the code and use the SG_REF / UNREF macro on sgvectors
+ blackburn_	gsomix: what about covertree? :)
+@sonney2k	that is sth we probably all have to help
+@sonney2k	blackburn_, isn't pluskid working on this?
+ blackburn_	sonney2k: no
+ gsomix	blackburn_, in spare time.
+ blackburn_	gsomix: ok
+ n4nd0	sonney2k: he's focusing on LARS I think
+ blackburn_	yes
+ n4nd0	I can work on cover tree if it is ok
+ blackburn_	huh
+ blackburn_	:D
+ blackburn_	why not
+ n4nd0	I don't think I am doing so much with the testsuite
+ blackburn_	gsomix: can you introduce your pretty ready work to n4nd0 ?
+ gsomix	blackburn_, yep. But it's a little ugly. ^_^''
+ blackburn_	gsomix: it doesn't really matter if it is faster
+-!- blackburn_ [5bde8018@gateway/web/freenode/ip.91.222.128.24] has left #shogun []
+ n4nd0	gsomix: what is the state of it?
+-!- blackburn_ [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+ blackburn_	oops
+ gsomix	n4nd0, many functions and global variables. And some stuff for v_array.
+ n4nd0	gsomix: what is the implementation based on? JL's paper or another implementation?
+ gsomix	n4nd0, JL code.
+ gsomix	*JL's
+ n4nd0	the one here right? http://hunch.net/~jl/projects/cover_tree/cover_tree.html
+ n4nd0	first link after the enumerate with 3 points
+ gsomix	n4nd0, yep. templated version.
+ n4nd0	gsomix: ok
+ gsomix	n4nd0, I even think it's better to start anew.
+ n4nd0	gsomix: oh, do you think so?
+ gsomix	it's seems my code contains errors.
+ blackburn_	gsomix: can you remember any pitfalls you have struggled with?
+ gsomix	blackburn_, yep.
+ gsomix	it's related with differences in v_arrays, our ans JC's.
+ gsomix	wait a sec
+ blackburn_	ans sounds a little french ;)
+ gsomix	huh :)
+ gsomix	n4nd0, http://dl.dropbox.com/u/19029407/to_n4nd0.zip
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+ n4nd0	gsomix: cool, that's your implementation so far right?
+ gsomix	n4nd0, yep.
+ n4nd0	gsomix: what did you do more or less? take the methods in JL's code and add template for the point object
+ n4nd0	more changes?
+-!- blackburn_ [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+ gsomix	n4nd0, and formatting. :)
+ gsomix	n4nd0, there are little changes to our v_array support.
+ n4nd0	gsomix: and what's the problem of this implementation?
+ gsomix	n4nd0, memory leaks.
+ gsomix	in push and alloc
+ n4nd0	gsomix: ok
+ n4nd0	but for the rest, is it functional?
+ n4nd0	I mean, is it complete?
+ gsomix	n4nd0, iirc, yes.
+ n4nd0	gsomix: cool then
+@sonney2k	well ask John Langford about the leaks then (with some small example code)
+ gsomix	n4nd0, maybe I'm wrong. Just try to run.
+ n4nd0	gsomix: ok, I will take a look to understand a bit how it works and later run
+ n4nd0	sonney2k: is it v_array better than std::vector too? :)
+@sonney2k	I am not a big fan of any std:: stuff .... simply because std::vector is not even specified to be something contiguous etc
+@sonney2k	so *everything* is better :D
+ gsomix	sonney2k, I will start to work tomorrow.
+ gsomix	At now it's time to optics. :)
+@sonney2k	gsomix, you mean on shogun or some job :)
+ n4nd0	sonney2k: I am a big fan of STL but you are starting to make me doubt about it :O
+ gsomix	sonney2k, shogun, of course.
+@sonney2k	gsomix, ok
+@sonney2k	n4nd0, maybe I am just not knowledgeable enough about it
+ n4nd0	sonney2k: I have never analyzed its efficiency to tell the truth, I think that's the part you critize about it
+ blackburn	actually it is as well efficient afaik
+ n4nd0	criticize*
+@sonney2k	blackburn, where is it specified that vector is contiguous in memory?
+ blackburn	it is not probably however that does not implies it is very uncontiguous :)
+ n4nd0	blackburn: why wouldn't it be contiguous?
+ blackburn	n4nd0: because of resize
+ blackburn	hmm however some says it is
+ blackburn	sonney2k: http://stackoverflow.com/questions/672352/how-is-dynamic-memory-managed-in-stdvector
+ n4nd0	blackburn: this v_array class we have in shogun, have you worked with it?
+ blackburn	n4nd0: yeah had used it somewhere.. any problem?
+ n4nd0	blackburn: yeah, for example the method pop
+ n4nd0	inline T pop() { return *(--end); }
+ n4nd0	shouldn't be a check around there?
+ blackburn	it isnot safe :)
+ n4nd0	because it is meant to be so?
+ gsomix	sonney2k, can I ask you? :)
+@sonney2k	gsomix, please always ask - not ask if you can ask!
+@sonney2k	n4nd0, well speed trade off
+@sonney2k	checks cost quite a bit of performance when you do them *often*
+ gsomix	sonney2k, it's offtop. :) what have you studied in your minor/major courses at the university?
+ blackburn	n4nd0: yeah it tries to be as fast as it could be
+ n4nd0	blackburn: ok
+@sonney2k	gsomix, well major: computer science, minor: physics
+ blackburn	I never knew you studied physics :)
+ gsomix	sonney2k, thanks. :) do you like physics?
+@sonney2k	gsomix, back then yes - now I like machine learning and traffic :D
+ gsomix	I have major in applied math and physics. It's long.
+ gsomix	I cut up to "physics" in my proposal :)
+ gsomix	because blackburn is more a mathematician than I. :3
+@sonney2k	alright guess I've requested 8 slots for gsoc (I think we really have 8 very very good students that applied) and 9 if there was an inf amount of slots available
+@sonney2k	spare time for me now!
+* sonney2k goes watching the revision demo party live stream
+ blackburn	demoscene memories? ;)
+@sonney2k	yeah
+@sonney2k	I am too old :D
+@sonney2k	I mean I went to 'scene' parties since 1993 or so
+ blackburn	sonney2k: really? I was 2 :D
+ n4nd0	blackburn: I doubled your age at that time :P
+ gsomix	now it is clear how the CPU Fire Applet appeared. demoscene! :)
+ blackburn	yeah kind of
+ blackburn	lorenz stuff as well I guess
+ n4nd0	is any of you guys fan of topcoder or programming contests in general?
+ n4nd0	just curious
+ blackburn	oh I do not like that stuff pretty much :)
+ gsomix	n4nd0, just codeforces (russian analog). but I'm not very good in sports programming.
+ n4nd0	I think it is quite fun :)
+ n4nd0	but kind of difficult, lot of good people around there
+@sonney2k	yeah I wrote lorenz at a demoscene party :)
+ blackburn	n4nd0: my main point is that these guys can hardly fit to real programming
+@sonney2k	gsomix, yes...
+ gsomix	n4nd0, http://codeforces.ru/?locale=en this system differs from topcoder. five tasks, two hours.
+ n4nd0	gsomix: I have participated in codeforces ;)
+@sonney2k	blackburn, it is also the reason I know the uint and int operations have same costs
+ gsomix	n4nd0, ah :)
+ blackburn	sonney2k: yeah I know that
+@sonney2k	and all that low level assembly programming stuff
+@sonney2k	anyways have a nice evening
+ gsomix	n4nd0, what is your nickname?
+ blackburn	sonney2k: you too
+* sonney2k party time *yay*
+ n4nd0	gsomix: fj.iglesias
+ blackburn	wow it seems you are finally happy with spare time :)
+ gsomix	n4nd0, thanks.
+ blackburn	(that you have that background)
+ n4nd0	gsomix: I suck at sports programming, but I think it is fun :P
+ PhilTillet	Hello everybodyyyy
+ blackburn	hey
+ PhilTillet	what was the name of that gay video yesterday ?
+ blackburn	azis?
+ PhilTillet	aaah yes
+ PhilTillet	thanks
+ PhilTillet	this is seriously completely wtf music
+ blackburn	music is not as wtf
+ blackburn	but video..
+ PhilTillet	true
+ PhilTillet	Golden WTF Awards.
+ gsomix	wtf music is: http://www.youtube.com/watch?v=W7PxdpBWdwA :)
+ PhilTillet	Jaaaaapaaaaan = WTF
+ PhilTillet	Ok this music is completely f*cked up. XD
+ PhilTillet	Perfect background for coding.
+ gsomix	japan and breakcore :]
+ PhilTillet	http://www.youtube.com/watch?v=Q16KpquGsIc wtf music+video
+ PhilTillet	:D
+ PhilTillet	(japan...)
+ gsomix	One my friend loves this music
+ PhilTillet	:D
+ PhilTillet	me too, I can actually dance it ...
+ PhilTillet	well I could
+ PhilTillet	didn't have time to practice last months..
+ gsomix	I can not imagine how you can dance to this music :)
+ PhilTillet	it's the epilepsy dance
+ gsomix	ou, I prefer something a little more slowly
+ PhilTillet	:D
+ PhilTillet	where are you from gsomix ?
+ gsomix	Russia
+ PhilTillet	Russia is so big
+ PhilTillet	western Russia?
+ gsomix	PhilTillet, yep. Samara city
+ PhilTillet	I see :)
+ shogun-buildbot	build #203 of nightly_none is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/203
+ gsomix	shogun-buildbot, thanks. :)
+ PhilTillet	I love this buildbot
+ PhilTillet	blackburn, i'm pushing the nearest centroid in a few minutes I think :p
+ shogun-buildbot	build #202 of nightly_all is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/202
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+ PhilTillet	blackburn, i've just sent the pull request for nearest centroids
+ blackburn	okay nice
+ PhilTillet	as far as i've tested it, it worked
+ blackburn	I guess wrong branch
+ PhilTillet	ah true, I had some problem with git, i forgot to put it in another branch sorry :/
+ blackburn	it is included to opencl
+ PhilTillet	aaaaaah true
+ PhilTillet	>_<
+ blackburn	yeah better add new branch :)
+ PhilTillet	you are right, i'll fix that
+ blackburn	ok
+ PhilTillet	but it might take some time :D
+ PhilTillet	i wish i was a git expert
+ PhilTillet	okay, done :)
+ PhilTillet	now i must find how to cancel the one on the opencl branch
+ PhilTillet	XD
+ PhilTillet	I think I can't, could you delete that commit in the wrong branch?
+ blackburn	no I can't
+ blackburn	you can
+ blackburn	you can revert it actually
+ PhilTillet	yes
+ PhilTillet	i've just figured it out
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+ PhilTillet	blackburn, what did you mean with "May be it would be better to use matrix there and then construct features" ?
+ blackburn	PhilTillet: you construct features from matrix and then enqueue its feature vectors
+ blackburn	why not to construct matrix and then construct features?
+ PhilTillet	Okay, I'll do that
+-!- genix [~gsomix@188.168.13.216] has joined #shogun
+-!- gsomix [~gsomix@188.168.5.161] has quit [Ping timeout: 264 seconds]
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+ genix	good night, guys
+ PhilTillet	good night :)
+ n4nd0	good night
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 272 seconds]
+-!- blackburn [~qdrgsm@83.234.54.186] has joined #shogun
+--- Log closed Mon Apr 09 00:00:19 2012

@@ -1,0 +1,290 @@
+--- Log opened Mon Nov 18 00:00:29 2013
+ shogun-buildbot_	build #621 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/621
+-!- pickle27 [~kevin@24-212-221-132.cable.teksavvy.com] has joined #shogun
+-!- pickle27 [~kevin@24-212-221-132.cable.teksavvy.com] has left #shogun []
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Ping timeout: 245 seconds]
+-!- gsomix [~Miranda@188.168.2.129] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Ping timeout: 272 seconds]
+-!- Saurabh7 [~Saurabh7@49.248.160.149] has joined #shogun
+-!- Saurabh7 [~Saurabh7@49.248.160.149] has quit [Client Quit]
+-!- new_lido_afk [~walid@41.218.177.153] has quit [Ping timeout: 246 seconds]
+-!- new_lido_afk [~walid@41.218.179.49] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- new_lido_afk is now known as new_lido
+-!- new_lido is now known as new_lido_
+-!- new_lido_ is now known as new_lido
+-!- lisitsyn1 [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Disconnected by services]
+-!- lisitsyn1 is now known as lisitsyn
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+-!- lisitsyn1 [~lisitsyn@80.252.20.67] has joined #shogun
+-!- lisitsyn1 was kicked from #shogun by lisitsyn [lisitsyn1]
+@sonney2k	lisitsyn, you brutalo!
+@lisitsyn	sonney2k: haha
+-!- taylan [d5f4a885@gateway/web/freenode/ip.213.244.168.133] has joined #shogun
+ taylan	Good morning again..
+ taylan	I had an insufficient memory error a couple of days ago, and I tried to reproduce this with libshogun as well..
+ taylan	The grid search tries to allocate 16 GB of memory, which fails of course..
+ taylan	Reproduceing is quite easy, you just need to increase the num_vectors to 20000 and dim_vectors to 7 in  examples/undocumented/libshogun/modelselection_grid_search_kernel.cpp
+ shogun-buildbot_	build #285 of osx1 - libshogun is complete: Failure [failed compile shell]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/285  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ taylan	Does anybody have any pointers for me?
+@lisitsyn	taylan: hey
+@lisitsyn	taylan: I can take a look but not earlier than tomorrow
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+-!- new_lido [~walid@41.218.179.49] has quit [Ping timeout: 252 seconds]
+ taylan	No problem, I think we are allocating a memory for a matrix of size 20Kx20K..
+-!- new_lido [~walid@41.218.179.49] has joined #shogun
+ taylan	which is called from CustomKernel.h
+ taylan	set_full_kernel_matrix_from_full
+@lisitsyn	taylan: oh that's quite possible
+ taylan	well, so we can't in theory handle this, since 20Kx20Kx8 = 3.2 GB
+ taylan	Is there any plan to introduce memory mapped files maybe?
+ taylan	I am not sure if this will resolve the issue though..
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Ping timeout: 272 seconds]
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+@sonney2k	lisitsyn, we shouldn't be using a custom kernel in the first place for that
+@sonney2k	besser82, any cmake news?
+ besser82	sonney2k: not yet will open a PR when ready  ;)
+@sonney2k	taylan, just use     cross->set_autolock(false); then it will work
+@lisitsyn	ahhh autolock
+-!- new_lido is now known as new_lido_afk
+ taylan	sonney2k, thanks for the hint..
+ taylan	can you explain what this does, just to kill my ignorance abit..
+@sonney2k	taylan, not precompute the kernel matrix
+@sonney2k	so things will fit in memory
+ taylan	thanks a lot..and we do precompute for performance reasons?
+@sonney2k	taylan, yes
+-!- taylan [d5f4a885@gateway/web/freenode/ip.213.244.168.133] has quit [Ping timeout: 250 seconds]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :develop * 75fff36 / src/shogun/CMakeLists.txt,src/shogun/multiclass/ScatterSVM.cpp: https://github.com/shogun-toolbox/shogun/commit/75fff36da3b792a9094fa705b80cbc3f86d7b6ac
+ shogun-notifier-	shogun: Add option to build static libshogun
+ shogun-buildbot_	build #2468 of deb1 - libshogun is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2468  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-notifier-	shogun: Viktor Gal :develop * 8ad6baa / CMakeLists.txt,src/shogun/io/protobuf/CMakeLists.txt: https://github.com/shogun-toolbox/shogun/commit/8ad6baabbb6ec470a264b18105d510f22da1d5e0
+ shogun-notifier-	shogun: Properly set -fPIC compiler flag if required
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Ping timeout: 272 seconds]
+@wiking	sonney2k: there u go a libshogun.a with proper fPIC detection
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:5990:491d:e3b5:64e4] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ shogun-buildbot_	build #2469 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2469
+ shogun-buildbot_	build #1953 of bsd1 - libshogun is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1953  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-notifier-	shogun: Viktor Gal :develop * 3607f94 / src/shogun/CMakeLists.txt: https://github.com/shogun-toolbox/shogun/commit/3607f9467147525a76bbabba17b35006d465fb46
+ shogun-notifier-	shogun: The libshogun object set should depend on the bundled libraries
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:5990:491d:e3b5:64e4] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot_	build #290 of precise - libshogun is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/290  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- gsomix [~Miranda@r206-10.smr.ru] has joined #shogun
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-221-101-78.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14133012
+-!- travis-ci [~travis-ci@ec2-54-221-101-78.compute-1.amazonaws.com] has left #shogun []
+-!- iglesiasg [~iglesias@2001:6b0:1:1041:2968:4185:2fac:bdb8] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ shogun-buildbot_	build #329 of FC19 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20libshogun/builds/329
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Ping timeout: 246 seconds]
+-!- hushell [~hushell@c-50-188-141-210.hsd1.or.comcast.net] has quit [Ping timeout: 252 seconds]
+-!- travis-ci [~travis-ci@ec2-107-20-41-97.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14134078
+-!- travis-ci [~travis-ci@ec2-107-20-41-97.compute-1.amazonaws.com] has left #shogun []
+-!- gsomix [~Miranda@r206-10.smr.ru] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+-!- travis-ci [~travis-ci@ec2-54-242-163-71.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14134785
+-!- travis-ci [~travis-ci@ec2-54-242-163-71.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot_	build #116 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/116  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot_	build #1954 of bsd1 - libshogun is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1954  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot_	build #291 of precise - libshogun is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/291  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- new_lido_afk is now known as new_lido
+ shogun-buildbot_	build #114 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/114  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@sonney2k	wiking, nice I can use that for the .deb
+ shogun-buildbot_	build #133 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/133  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- new_lido is now known as new_lido_afk
+@sonney2k	wiking, if you have more cmake time any ideas help wrt building the package w/o the shogun dir available would be much appreciated
+ shogun-buildbot_	build #117 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/117  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot_	build #115 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/115  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@sonney2k	besser82, any news? or should I try my way(tm) ?
+ shogun-buildbot_	build #134 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/134  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- zxtx_ [~zv@c-98-193-83-24.hsd1.il.comcast.net] has quit [Ping timeout: 245 seconds]
+-!- sonne|osx [~sonne@f053040185.adsl.alicedsl.de] has joined #shogun
+ shogun-buildbot_	build #286 of osx1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/286
+-!- zxtx_ [~zv@129-79-241-148.dhcp-bl.indiana.edu] has joined #shogun
+-!- iglesiasg [~iglesias@2001:6b0:1:1041:2968:4185:2fac:bdb8] has quit [Quit: Ex-Chat]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- Saurabh7 [~Saurabh7@49.248.160.149] has joined #shogun
+-!- hushell [~hushell@c-50-188-141-210.hsd1.or.comcast.net] has joined #shogun
+-!- Saurabh7 [~Saurabh7@49.248.160.149] has quit [Ping timeout: 246 seconds]
+-!- hushell [~hushell@c-50-188-141-210.hsd1.or.comcast.net] has quit [Ping timeout: 272 seconds]
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+@wiking	sonney2k: what do u mean w/o shogun dir available?
+@wiking	sonney2k: u mean libshogun src and only the .h files?
+@sonney2k	wiking, yes no src/shogun available but only the installed headers
+@sonney2k	wiking, I looked at the fPIC detection ... there must be a smarter way but I couldn't find it
+@wiking	sonney2k: well this one is better than the previous hardcoded one ;)
+@wiking	but go ahead with a better patch
+@wiking	sonney2k: the problem is that from now on we have to depend to have cmake 2.8.8+
+@sonney2k	wiking, no problem with that
+@sonney2k	wiking, I was searching the web already
+@sonney2k	didn't find any better solution for fPIC
+@wiking	i've just upgraded cmake in precise so that it runs good as well on that bot ...
+@sonney2k	wiking, but I can tell that this won't help for this here https://buildd.debian.org/status/package.php?p=shogun
+@sonney2k	I guess powerpc is also fPIC but no idea about e.g. s390 or sparc or mips
+@wiking	sonney2k: ain't got no access for those archs ;)
+@wiking	so have no idea
+@wiking	shogun-buildbot_: force build --branch=develop 'precise - libshogun'
+ shogun-buildbot_	build forced [ETA 27m35s]
+ shogun-buildbot_	I'll give a shout when the build finishes
+@sonney2k	wiking, well shogun will be built on them so we will see...
+@wiking	/<<PKGBUILDDIR>>/src/shogun/io/SerializableAsciiReader00.cpp:96:35: error: lvalue required as left operand of assignment
+@wiking	wtf is this :)
+@sonney2k	wiking, I fixed this already in git dev
+@wiking	ah ok
+@wiking	http://www.khronos.org/openvx
+@wiking	nize
+@wiking	mmm i'm just importing a 1.9 billion tripplets based rdf dataset
+@wiking	it's just saaaaaaad how bad the hw is ;
+@wiking	:)
+ shogun-buildbot_	build #292 of precise - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/292
+@wiking	ok cool precise is back to being green
+@wiking	let'ssee travis
+@wiking	ohfuck
+@wiking	:>
+@wiking	need to upgrade cmake on travis
+@wiking	:)
+-!- lisitsyn1 [~lisitsyn@80.252.20.67] has joined #shogun
+-!- hushell [~hushell@8-12.ptpg.oregonstate.edu] has joined #shogun
+@wiking	lisitsyn1: seen this one: http://www.khronos.org/openvx
+ lisitsyn1	wiking: yeah seen that in news
+ lisitsyn1	wiking: have you glanced over it?
+@wiking	yep
+ lisitsyn1	I planned to do later
+@wiking	it's really basic building blocks
+ lisitsyn1	anything interesting?
+@wiking	like openmax
+@wiking	well it's gonna be nice
+@wiking	when there are such fpgas or cpu parts
+@wiking	so that u can call those via this api
+@wiking	and have it in one instruction
+@wiking	;P
+@wiking	other than that... i think we should start working on moving things into separate dlls
+@wiking	and have something like a pipeline
+@wiking	gstreamer et. al. style
+ lisitsyn1	wiking: yeash!
+@wiking	let's sketch up
+@wiking	there are input readers
+@wiking	which transform the input into some Feature type
+@wiking	on which we can apply preprocessors
+@wiking	and then those can be piped into some machine
+@wiking	i think i should catch Ed to pin-point us some things to avoid when we would do this
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Roman Votyakov :develop * 70d705a / / (2 files): https://github.com/shogun-toolbox/shogun/commit/70d705aadaeadefd6cbac2dfe1aca830e696baa3
+ shogun-notifier-	shogun: fix fail in FITC when number of latent features is not equal to number of training features
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 8313595 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/8313595d37bef59098be9d716a97c431977ebae2
+ shogun-notifier-	shogun: Merge pull request #1757 from votjakovr/feature/gp_refactoring
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix fail in FITC when number of latent features is not equal to number of training features
+@wiking	yey now somebody fix travis build :)
+ lisitsyn1	wiking: I'd like to talk that out a bit later tihs week ;)
+@wiking	hehehe well fill out doodle
+@wiking	lisitsyn1: http://www.doodle.com/kiz83rkgg3dyzech
+ lisitsyn1	yes
+ lisitsyn1	wiking: that's me robotron mega blaster 3000
+@wiking	yey
+ lisitsyn1	and don't say I have self identity crysis I know
+@wiking	yeah actually stuff like this would be amaazing
+@wiking	/opt/local/lib/gstreamer-1.0/libgsttheora.so
+@wiking	meaning we wouldn't create a big fuckiing bundle
+@wiking	but each component would be a dynloadable stuff
+@wiking	i wonder how swig would actually handle this part :S
+ lisitsyn1	wiking: absolutely no idea about that but I am quite pessimistic
+ lisitsyn1	swig is quite troublesome sometimes you know
+ lisitsyn1	there is nothing else though
+@wiking	lisitsyn1: well apart from swig
+@wiking	actually we are quite prepared to do this
+@wiking	because we have like kazzillion abstract classes
+ lisitsyn1	wiking: yeah
+ lisitsyn1	we should convert to something like d-ptrs everywhere
+ shogun-buildbot_	build #1955 of bsd1 - libshogun is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1955  blamelist: Roman Votyakov <votjakovr@gmail.com>
+@wiking	hehehe
+@wiking	good luck have fun :)
+ lisitsyn1	wiking: haha well that's how it should be done
+@wiking	yeah true
+@wiking	dpointers + gstreamer dynload pipelining
+@wiking	and then we are happy i guess
+@wiking	but then again sonney2k is doing a better approach
+@wiking	by making a deb package
+@wiking	trust me that's like 100% more needed than a fucking usuable sw
+@wiking	:D
+@wiking	but when we do gsoc next year
+@wiking	we should have 2 slots that actually does some sw architecturing on shogun
+@wiking	instead of adding a new component
+ shogun-buildbot_	build #1956 of bsd1 - libshogun is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1956  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ lisitsyn1	wiking: heh students doing sw architectures?
+@wiking	well supoprting
+@wiking	so that let's say we want dpointers
+@wiking	it's not that high IQ stuff to do
+@wiking	but it cannot really be done by only scripting
+ lisitsyn1	wiking: ah well that's easy job yes
+@wiking	so i think a student could do that easily
+@wiking	since it's just a lot of fucking stupid work
+@wiking	actualy
+@wiking	21:51:36,679 [Thread-4] INFO  jenatdb.RdfResourceImporter - Add: 82,450,000 triples (Batch: 46,339 / Avg: 20,118)
+@wiking	oooh yeah
+@wiking	and i have 1.9E9 triplets
+-!- sonne|osx [~sonne@f053040185.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+@wiking	i'm looong way from kanzas :)
+@wiking	kansas toto
+-!- travis-ci [~travis-ci@ec2-75-101-224-235.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14160138
+-!- travis-ci [~travis-ci@ec2-75-101-224-235.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	wiking, is cmake failing on travis due to the cmake .8 requirement?
+@wiking	yepey
+@wiking	sonney2k: there's a backport in this repo
+@wiking	sudo add-apt-repository ppa:kubuntu-ppa/backports
+@wiking	this has 2.8.9 cmake
+@wiking	so that should be added to .travis.yml in a smart way
+@sonney2k	wiking, ok I see.
+@sonney2k	wiking, I thought about what you said above
+@sonney2k	wiking, if I know how to split up shogun I would love to
+@sonney2k	wiking, problem is indeed swig - we cannot split that up at all
+@sonney2k	wiking, we must in the end have just 1 modshogun for swig interfaces
+@sonney2k	nevertheless considering the autotools rule, 1 dir == 1 module is imho the way to go
+@sonney2k	*but*
+@sonney2k	we should have d-ptrs first - otherwise the swig module is a nightmare
+@sonney2k	wiking, lisitsyn1 is the doodle utc?
+@sonney2k	and my time availability is a bit *not sure*
+@sonney2k	for any date :/
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 511f61e / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/511f61eb881fc2f56611dc0a1e9f3283fc6555ab
+ shogun-notifier-	shogun: add ppa for travis and cmake 2.8.9
+@wiking	sonney2k: mm m i've set cet
+@wiking	but then again it switched to utc
+@wiking	:D
+@wiking	so go figue
+@wiking	figure
+ lisitsyn1	go figure timezone
+@sonney2k	wiking, so we are +-12 hrs of?
+@wiking	eh?
+@wiking	+-1
+ shogun-buildbot_	build #118 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/118  blamelist: Roman Votyakov <votjakovr@gmail.com>
+@sonney2k	wiking, ah btw swig supports modules but I had crashes back then in some of the interfaces (it did work in python though but wrapped code size in total was bigger like 2 times)
+@wiking	:S
+@sonney2k	wiking, as in we really had a shogun.Kernel module
+@sonney2k	(that is why the examples are still like this)
+@sonney2k	and a shogun.Features module
+@sonney2k	but since Kernels need to be aware of features you had to make everything known in there
+@sonney2k	that is very difficult to do right
+@wiking	ok build back to green
+@wiking	yey
+ shogun-buildbot_	build #116 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/116  blamelist: Roman Votyakov <votjakovr@gmail.com>
+ shogun-buildbot_	build #1957 of bsd1 - libshogun is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1957  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- travis-ci [~travis-ci@ec2-54-221-91-188.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14162223
+-!- travis-ci [~travis-ci@ec2-54-221-91-188.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot_	build #328 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/328  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- zxtx_ [~zv@129-79-241-148.dhcp-bl.indiana.edu] has quit [Ping timeout: 245 seconds]
+-!- zxtx_ [~zv@129-79-241-148.dhcp-bl.indiana.edu] has joined #shogun
+ lisitsyn1	sonney2k: know ben taskar?
+ lisitsyn1	it seems just died from heart attack
+ shogun-buildbot_	build #135 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/135  blamelist: Roman Votyakov <votjakovr@gmail.com>
+ shogun-buildbot_	build #119 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/119  blamelist: Soeren Sonnenburg <sonne@debian.org>
+--- Log closed Tue Nov 19 00:00:31 2013

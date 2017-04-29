@@ -1,0 +1,316 @@
+--- Log opened Thu Nov 15 00:00:17 2012
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@37.61.179.13] has quit [Quit: Leaving.]
+ shogun-buildbot	build #171 of nightly_default is complete: Failure [failed tutorial]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/171
+ wiking	nooooooooooooooooooooooobuildbot
+ wiking	dont die
+ shogun-buildbot	build #172 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/172
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackburn	wiking: what can we do with your oppan gangnam style solver?
+ wiking	:>
+ wiking	solveit :)
+ blackburn	heeey sexy solver
+ blackburn	oop oop
+ blackburn	oppan
+ wiking	:P
+ wiking	blackburn: new job?
+ blackburn	wiking: yes
+ wiking	blackburn: where to?
+ wiking	and congratz
+ blackburn	http://smartsolutions-123.ru/en/
+ blackburn	thanks
+ wiking	is this the java company?
+ blackburn	wiking: yeah they do java and C#
+ blackburn	wiking: well they fucking write code
+ blackburn	not fixing legacy bugs
+ blackburn	here I fix legacy bugs
+ blackburn	I've been fscking fixing bugs for an year
+ wiking	:>>
+ blackburn	I just want to http://stfuawsc.com/
+ wiking	ahhaha
+ wiking	ohman
+ wiking	this ascii serialization format is not the nicest parsable format
+ blackburn	wiking: ah btw could you please take a look at https://github.com/lisitsyn/tapkee when you have time
+ wiking	ah yeah a friend asked
+ blackburn	may be you could have some thoughts what is wrong
+ wiking	do you know a very efficient method to diagonilze small matrices
+ wiking	but a lot of it
+ blackburn	dense?
+ wiking	small matrix
+ wiking	6x6
+ wiking	so yeah dense matrix
+ wiking	ok what could be wrong with this?
+ wiking	i mean it's just like design wise i should look
+ wiking	or what exactly you would like to talk about?
+ blackburn	wiking: yes, design wise
+ blackburn	sure I don't ask you to find a lowlevel mistake somewhere :)
+ wiking	:>
+ wiking	ok i'll check it
+ blackburn	okay actually what I know about diagonalization
+ blackburn	eigen has bad and mkl has good
+ blackburn	:D
+ wiking	mmm
+ wiking	why we cannot have a serializer like
+ wiking	numpy has
+ wiking	savetxt
+ blackburn	wiking: what's the difference?
+ wiking	well the format? :D
+ wiking	have u seen the output of SerializableAsciiFile
+ wiking	?
+ wiking	:>
+ sonne|work	wiking: we have simple load / save routines
+ sonne|work	serializable* stuff works for much more complex data
+ sonne|work	like saving whole svm incl. kernel & features etc
+ wiking	sonne|work: for sgvector?
+ sonne|work	wiking: for *features
+ wiking	:D
+ sonne|work	but yes this should be moved into sgvector and friends
+ wiking	i just want to save a simple sgvector
+ sonne|work	but we didn't have that at the time
+ sonne|work	basically features were what SGVector etc were before
+ wiking	ok
+ wiking	i'm chechking the code
+ sonne|work	wiking: btw I asked again
+ sonne|work	(not sure if you have seen)
+ sonne|work	answer 'tonight'
+ sonne|work	but that was yesterday
+ wiking	sonne|work: yeah i've seen it
+ sonne|work	no idea
+ wiking	i've even answered
+ sonne|work	heh I went to bed
+ wiking	so yeah i know that around 1pm CET
+ wiking	or somewhere there we should get some mail
+ sonne|work	or not
+ sonne|work	whatever strange handling
+ wiking	:>
+ wiking	sonne|work: why do you set/reset locale?
+ sonne|work	0,1 <-> 0.1
+ sonne|work	in germany it is 0,1
+ sonne|work	in us 0.1`
+ sonne|work	so better use C always
+ wiking	ah got it
+ wiking	lol
+ wiking	../shogun/io/File.h:33:22: error: expected class name
+ wiking	class CFile : public CSGObject
+ wiking	wtf
+ wiking	ok this is fucking hilarious
+ wiking	http://pastebin.com/963ts5Rv
+ wiking	hahah i cannot include File.h in SGVector
+ wiking	it's like a snake biting his own tail
+ wiking	somewhere we need a class CSGObject; ;)
+ wiking	but it's hilarious
+ wiking	whatever i start in the last 3 days nothing works
+ wiking	so i think i shouldnt do anything
+ sonne|work	ahhh
+ sonne|work	that all needs to be in a .cpp file
+ sonne|work	then you can use forward declarations
+ sonne|work	I hate this dependency hell in C++
+ wiking	what all needs to be in a cpp file
+ wiking	i mean yes sure but in order to be able to declare the load/save function for SGVEctor i have to include the header
+ wiking	and now it's extremely fucked up
+ wiking	because no matter where i put the class CSGObject; declaration
+ wiking	i mean in which header
+ wiking	the includes are first
+ wiking	so i have to put it before any include
+ wiking	ok solved it
+-shogungit:#shogun- [shogun] vigsterkr opened pull request #825: Add load/save functionality for SGVector (master...latent)  https://github.com/shogun-toolbox/shogun/pull/825
+ wiking	so here it goes... a bit of a fixing as well of precisions...
+ wiking	oh sorry some shit got left in sgvector...
+ sonne|work	what is the +GET_VECTOR(get_vector, get_int8_matrix, int8_t)
+ sonne|work	68 69
+ sonne|work	 GET_VECTOR(get_vector, get_matrix, uint8_t) ?
+ wiking	?
+ wiking	line 68/69 was there
+ wiking	i've just added GET_VECTOR(get_vector, get_int8_matrix, int8_t)
+ wiking	to support int8_t
+ sonne|work	ahh I see. another transition needed :/
+ sonne|work	we decided to use overloading this GSoC
+ wiking	?
+ blackburn	what?
+ sonne|work	what??
+ wiking	whaaaat?
+ blackburn	WAT
+ blackburn	sonne|work: in germany you also have comma instead of point?
+ sonne|work	yes
+ blackburn	I thought it is used only in ussr :)
+ sonne|work	you have it too :)(
+ blackburn	I don't like that pretty much
+ blackburn	and I don't like cyrillic letters actually
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+ sonne|work	that's the reason russians drink lot of vodka
+-!- n4nd0 [~nando@n150-p8.kthopen.kth.se] has joined #shogun
+-!- n4nd0 [~nando@n150-p8.kthopen.kth.se] has quit [Quit: leaving]
+ wiking	sonne|work: i guess there's still no news :D
+-!- koen2 [9232343c@gateway/web/freenode/ip.146.50.52.60] has joined #shogun
+-!- blackburn [~blackburn@109.226.125.245] has joined #shogun
+-!- koen2 [9232343c@gateway/web/freenode/ip.146.50.52.60] has quit [Ping timeout: 245 seconds]
+ wiking	blackburn: yey
+ wiking	although i haven't been looking for it
+ wiking	but i found a solution for solving nonconvex function with bundiling methods :)
+ wiking	yo anybody
+ wiking	(Fenchel Dual) is only true for convex functions?
+ wiking	well i'll assume this :DD
+ wiking	and let's see where it takes me
+ blackburn	wiking: hey
+ blackburn	non-convex?
+ wiking	aayep
+ wiking	i'm just checking if i can apply the dual form
+ wiking	as for that we have libqp as a solver
+ wiking	or do we have a primal solver for min_w \lambda/2 ||w||^2+max_{j=1..t}{c_j(w)}
+ wiking	i guess this is a no
+ wiking	 :)
+ blackburn	re
+ blackburn	wiking: wat ist da c_j?
+ wiking	c_j(w) = <a_j, w> + b_j
+ wiking	it's a cutting plane basically
+ blackburn	wiking: can't libqp solve this?
+ wiking	well the dual form of it yes
+ wiking	i'm just not sure that the dual that i get with Fenchel Dual theorem stands if that function is non-convex
+ blackburn	I feel stupid
+ wiking	yeah me too
+ wiking	:)))
+ wiking	but i'm just bruteforcing it
+ wiking	blackburn: what's gonna happen with that 2 PR? :)
+ blackburn	wiking: no idea I didn't take a look
+ blackburn	did soeren?
+ blackburn	wiking: why to load sgvector from file?
+ wiking	blackburn: why not
+ wiking	i needed now
+ wiking	:D
+ blackburn	I see
+ blackburn	how do you use it though?
+-shogungit:#shogun- [shogun] lisitsyn pushed 3 new commits to master: https://github.com/shogun-toolbox/shogun/compare/0cdc7eb45a44...2cd18bcf21d4
+-shogungit:#shogun- shogun/master df7368c Viktor Gal: Add load/save functionality for SGVector
+-shogungit:#shogun- shogun/master 887e00d Viktor Gal: Remove commented code from SGVector
+-shogungit:#shogun- shogun/master 2cd18bc Sergey Lisitsyn: Merge pull request #825 from vigsterkr/latent...
+ wiking	jej
+ wiking	if ya wanna save a w of an svm
+ wiking	there a new one
+-shogungit:#shogun- [shogun] vigsterkr opened pull request #826: Fix dual structure solvers to use CMath::sqrt (master...latent)  https://github.com/shogun-toolbox/shogun/pull/826
+-shogungit:#shogun- [shogun] lisitsyn pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/2cd18bcf21d4...097f9c80f031
+-shogungit:#shogun- shogun/master 98b85f6 Viktor Gal: Fix dual structure solvers to use CMath::sqrt
+-shogungit:#shogun- shogun/master 097f9c8 Sergey Lisitsyn: Merge pull request #826 from vigsterkr/latent...
+ wiking	blackburn: here?
+ blackburn	yeh
+ wiking	blackburn: why we only have gmnp_imdm ?
+ blackburn	malozemov demyanov mitchell?
+ wiking	Improved Mitchell-Demyanov-Malozemov
+ blackburn	just random guess - it is the best
+ blackburn	:D
+ blackburn	okay actually I asked myself why
+ blackburn	but I didn't ask vojtech
+ blackburn	may be he was lazy
+ blackburn	may be it is the best approach
+ wiking	because he has other ones as well
+ wiking	in his other
+ wiking	lib
+ wiking	    mdm  ... Mitchell-Demyanov-Malozemov
+ wiking	%    imdm  ... Improved Mitchell-Demyanov-Malozemov (default).
+ wiking	%    iimdm  ... Improved (version 2) Mitchell-Demyanov-Malozemov.
+ wiking	%    kozinec ... Kozinec algorithm.
+ wiking	%    keerthi ... Derived from NPA algorithm by Keerthi et al.
+ wiking	%    kowalczyk ... Based on Kowalczyk's maximal margin perceptron.
+ blackburn	well
+ blackburn	what do you expect from say kozinec?
+ blackburn	I mean they are all nearly the same I believe
+ wiking	oh nothing
+ wiking	i was just wondering why
+ blackburn	ahh
+ blackburn	okay
+ blackburn	I just mean
+ blackburn	not really sure we can speed it up
+ blackburn	or anything
+ blackburn	but yes would be nice to have all of them
+ blackburn	I wanted to implement that even
+ blackburn	copy and paste code I mean
+ wiking	it's just porting basicaly
+ wiking	at first step
+ blackburn	I am afraid it is vojtech's phd related
+ blackburn	if you know what I mean
+ blackburn	:D
+ blackburn	it looks more powerful when you have 6 methods
+ blackburn	and his phd is all about multiclass
+ wiking	:>
+ wiking	ok so now the last question
+ wiking	which is better to use
+ wiking	gnmp or libqp?
+ wiking	as i can see
+ wiking	gnmplib solves almost the same (actually exactly what i need)
+ wiking	libqp is more general
+ wiking	ah ok
+ wiking	no i dont get it
+ blackburn	yeah libqp is more general
+ wiking	:)
+ blackburn	do you think gmnplib solves the same problem?
+ wiking	well not the same problem
+ wiking	but the non-convex thing
+ blackburn	is MC problem non-convex?
+ wiking	well
+ wiking	i have this problem
+ wiking	1/2 ||w||^2 + R(w)
+ wiking	usual bundle problem
+ wiking	and the dual form of this
+ wiking	is actually exactly what gnmplib solves
+ blackburn	hmm I see
+ blackburn	then use it :)
+ wiking	u mean gnmplib?
+ blackburn	but I didn't like gmnp when I use it
+ wiking	i wonder why uricamic used libqp and not gnmplib
+ blackburn	converges for hours
+ wiking	i guess vojtec had a good reason for telling him to use libqp instead of gnmp
+ wiking	;P
+ wiking	or? :)
+ blackburn	yeah he probably knows better
+ blackburn	the prob is 1.0
+ wiking	well actually i'll write both
+ wiking	and one will be able to choose which QP solver to use
+ blackburn	what are you developing?
+ wiking	and we can even compare
+ blackburn	is that latent?
+ wiking	this nonconvex bundle method
+ wiking	well
+ blackburn	oppan gangnam style?
+ wiking	yeah
+ wiking	latent model's formulation is usually nonconvex
+ blackburn	I see
+ wiking	for solving this
+ wiking	usually one uses somekind of an approx
+ wiking	like CCCP
+ blackburn	haha
+ wiking	but this solver would fucking solve it in your face :)
+ wiking	without approxx
+ wiking	:>>
+ wiking	gangnam style shit bro
+ blackburn	how can they name method like that
+ blackburn	CCCP
+ blackburn	damn
+ wiking	blackburn: well yeah
+ blackburn	I have seen that before
+ blackburn	but always laugh
+ wiking	indeed
+ wiking	me too
+ wiking	but that's how it is
+ blackburn	I will call my next method ?????
+ blackburn	or ??????
+ wiking	stalin is cool
+ wiking	;)
+ wiking	ctalnh
+ wiking	almost fonetic of the cyrilic
+ wiking	so that u dont have to use utf8
+ wiking	;)
+ blackburn	CTALNH
+ blackburn	hah
+ blackburn	lol
+ wiking	yeah indeed
+ wiking	mmm shitfuck
+ wiking	i think i had an enlightment moment now :)
+ blackburn	hallelujah
+ blackburn	:)
+ wiking	huh
+ wiking	where the fuck was this paper i was looking for now
+ wiking	:))))
+ blackburn	in journal
+ blackburn	hope that helps!
+ blackburn	:D
+-!- blackburn [~blackburn@109.226.125.245] has quit [Quit: Leaving.]
+--- Log closed Fri Nov 16 00:00:17 2012

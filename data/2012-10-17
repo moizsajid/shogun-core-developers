@@ -1,0 +1,301 @@
+--- Log opened Wed Oct 17 00:00:17 2012
+-!- heiko1 [~heiko@host86-177-117-85.range86-177.btcentralplus.com] has left #shogun []
+-!- blackburn [~blackburn@37.61.180.136] has quit [Quit: Leaving.]
+-!- heiko [~heiko@host86-177-117-85.range86-177.btcentralplus.com] has joined #shogun
+ shogun-buildbot	build #118 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/118
+ shogun-buildbot	build #135 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/135
+-!- adoniscik [~emre@c-67-180-103-118.hsd1.ca.comcast.net] has joined #shogun
+-!- heiko [~heiko@host86-177-117-85.range86-177.btcentralplus.com] has quit [Quit: Leaving.]
+-!- Dave [863ab323@gateway/web/freenode/ip.134.58.179.35] has joined #shogun
+-!- Dave is now known as Guest23074
+ Guest23074	The original LibSVM has support for class weights (to compensate for unbalanced problems). Can Shogun also do that? Couldn't find anything in the documentation though..
+ Guest23074	svm.set_C(c_neg,c_pos)  -- nice :)
+ Guest23074	thx
+ sonne|work	he
+ sonne|work	h
+ Guest23074	:)
+-!- Guest23074 [863ab323@gateway/web/freenode/ip.134.58.179.35] has quit [Quit: Page closed]
+-!- adoniscik [~emre@c-67-180-103-118.hsd1.ca.comcast.net] has quit [Ping timeout: 260 seconds]
+ wiking	somebody review my PR and possibly apply: https://github.com/shogun-toolbox/shogun/pull/794
+ sonne|work	wiking: Operators berween?
+ wiking	sonne|work: yep
+ wiking	but yeah i'll do some extra codes soon
+ wiking	sonne|work: you reckon that SGSparseVectorEntry<T>* is sorted in SGSparsevector by feat_index?
+ wiking	sonne|work: or should we add an option into SGSparseVector to do a sorting....
+ wiking	?
+ sonne|work	wiking: we should assume it is *always* sorted
+ sonne|work	but document that we assume this!
+ wiking	sonne|work: oke
+-!- Dav_ [863ab324@gateway/web/freenode/ip.134.58.179.36] has joined #shogun
+-!- Dav_ [863ab324@gateway/web/freenode/ip.134.58.179.36] has quit [Client Quit]
+-!- blackburn [~blackburn@83.234.54.218] has joined #shogun
+-!- David [863ab324@gateway/web/freenode/ip.134.58.179.36] has joined #shogun
+-!- David is now known as Guest88873
+ Guest88873	Is it correct that there's no CEvaluation subclass that allows setting specific losses for TP,TF,FP and FP ?
+ blackburn	Guest88873: hey, could you please elaborate?
+ blackburn	what do you mean by specific losses?
+ Guest88873	I' like to parameters of an SVM based on its 'loss', where e.g. a false negative is considered 10 times worse than a false positive
+ Guest88873	That would be: Loss = 10*FN +1*FP
+ blackburn	Guest88873: oh got it, unfortunately that wasn't coded yet
+ Guest88873	ok, thx
+ blackburn	Guest88873: we have class computing all fps,tps,fns,tns so it could be easy to combine
+ Guest88873	related question, could I add such a class on the run-time using Python (I think not, but I hope I'm wrong:) )
+ Guest88873	No indeed, it wouldn't be that in C, but adding it in Python would be handier for experiments
+ blackburn	Guest88873: yeah you could but it would require some C++ code again
+ blackburn	Guest88873: we have such classes for structured risk models and kernels
+ blackburn	it is called 'director' classes
+ blackburn	i.e. it has a virtual method in C++ that may be overloaded by python code
+ blackburn	and then used together with all the rest C++ code
+ Guest88873	sounds perfect, I'll check it out
+ Guest88873	thanks!
+ blackburn	Guest88873: I'll add such class and example a little later today
+ Guest88873	Thanks blackburn, that would be nice, since - for the moment - I don't get which classes this concerns and how to do it..
+ wiking	blackburn: when u have time check out https://github.com/shogun-toolbox/shogun/pull/794 ;)
+ blackburn	wiking: yeah wanted to
+ blackburn	will do in 5 mins
+ wiking	okok cool thnx
+ wiking	oh yeah i have a warning supresser fix
+ wiking	blackburn: http://pastebin.com/afyeSf6N
+ wiking	anything against it?
+ blackburn	no, looks ok
+ blackburn	what is the warning?
+ wiking	well clang constantly giving me the warning
+ wiking	when i compile SpareFeatures.cpp
+ blackburn	ohh
+ blackburn	that won't work!
+ wiking	why not?
+ blackburn	I mean it is broken already
+ blackburn	one cannot simply copy array of referenced data
+ wiking	well it's a copy constructor :)
+ wiking	aaah ok
+ wiking	i see
+ wiking	because we store reference counter there in the beginning of that array
+ wiking	right?
+ wiking	orig.sparse_feature_matrix
+ wiking	or why?
+ blackburn	I mean we have to increase ref count of each vector
+ blackburn	here comes da fix
+ wiking	:>
+ blackburn	CIA passed away again
+ wiking	:(
+ wiking	eh
+ wiking	new (&sparse_feature_matrix[i]) SGSparseVector<ST>();
+ wiking	i don't get this :D
+ blackburn	wiking: in-place new shit
+ wiking	so this is equivalent of sparse_feature_matrix[i] = new SGSparseVector<ST>();
+ wiking	?
+ blackburn	wiking: calloc doesn't call constructors
+ blackburn	no
+ blackburn	sparse_feature_matrix[i] is not a pointer it is a memory area already
+ blackburn	wiking: new creates object using memory provided by something, here we provide where to store the object
+ blackburn	another hardcore option to cut off a leg
+ blackburn	we like such things here for a reason I do not understand :D
+ wiking	:>
+ wiking	ah ok
+ wiking	so you basically have this "placement new"
+ blackburn	some of shogun's code should be posted in some pornhub or whatever like that
+ wiking	i.e. to just run a ctor on the already allocated memory
+ blackburn	category 'extreme hardcore'
+ blackburn	yes
+ wiking	http://www.parashift.com/c++-faq-lite/placement-new.html
+ wiking	:D
+ wiking	:DDD
+ wiking	 // Line #3 (see "DANGER" below)
+ wiking	:>
+ wiking	lol "(if you don't know what "alignment" means, please don't use the placement new syntax). You have been warned."
+ blackburn	// here your leg is being cutted off
+ wiking	well yeah
+ wiking	and is it aligned? :)
+ wiking	on all the possible os/arch variations :)
+ blackburn	good question
+ wiking	as i know that osx malloc will give always give u an aligned memory
+ blackburn	does sizeof takes alignment into account?
+ blackburn	I hope it does
+ wiking	but afaik that's only true for osx
+ wiking	i remember when i had troubles with alignment (3 years ago)
+ wiking	aligned memory by malloc was only true for osx
+ wiking	linux and win did not do that
+ blackburn	well actually I know it works now
+ blackburn	on linux :)
+ wiking	good :)
+ blackburn	but better way is to use new[] here
+ wiking	btw
+ wiking	do u know why does it only work (clang_complete)
+ wiking	if u do the include <eigen3/Eigen/Dense>
+ wiking	?
+ blackburn	oh some paths issue
+ wiking	mmm yeah i guess so but why
+ blackburn	well
+ wiking	i cannot get any error out of vim
+ blackburn	/usr/include/eigen3/
+ blackburn	that's the path on my machine IIRC
+ blackburn	not /usr/include/Eigen/
+ wiking	for me it's /opt/local/include/eigen3
+ blackburn	see what I mean?
+ wiking	yeah
+ wiking	but if you put
+ wiking	-I/usr/include/eigen3
+ wiking	in your clang_complete?
+ wiking	.clang_complete
+ blackburn	I didn't try
+ blackburn	did you?
+ wiking	does it work for you
+ wiking	because i've tried
+ wiking	and i get NO errors
+ blackburn	so works seamless?
+ wiking	but still clang complete doesn't want to work with SGVector or SGSparseVector for that matter
+ blackburn	heh
+ blackburn	crazy
+ wiking	could u try plz?
+ blackburn	okay let me try
+ shogun-buildbot	build #555 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/555  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+ blackburn	boom
+ blackburn	wiking: where to put .clang_complete?
+ wiking	blackburn: hahaha have u seen that ? :)
+ wiking	i mean the error
+ wiking	http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/555/steps/test%20libshogun/logs/stdio
+ wiking	it's some crazy shit
+ blackburn	heiko's thing
+ wiking	ah ok
+ wiking	then i ignore
+ blackburn	he got into that forest with an axe
+ wiking	i put .clang_complete right in the root of shogun
+ wiking	shogun/.clang_complete
+ blackburn	in a root or src?
+ blackburn	cause I work from src
+ blackburn	usually
+ wiking	-I./src
+ wiking	-I/Users/wiking/mosek/6/tools/platform/osx64x86/h
+ wiking	-I/opt/local/include
+ wiking	-I/opt/local/include/eigen3
+ wiking	-std=c++11
+ wiking	-stdlib=libc++
+ wiking	it looks like this for me
+ wiking	in the root
+ wiking	not the src
+ wiking	since this way it works as well
+ wiking	for examples
+ wiking	as well
+ blackburn	I see
+ wiking	but u can put it in ./src
+ wiking	the only difference would be then the first -I
+ wiking	and i guess u don't need the last two flags
+ wiking	as that's for c++11 support in clang
+ blackburn	wiking: works
+ wiking	no fucking way :D
+ wiking	so you can do a this->
+ wiking	in SGVector.cpp
+ wiking	and it gives u the list
+ wiking	w/o errors
+ wiking	?
+ blackburn	this-> doesn't work
+ blackburn	hmm
+ wiking	hehehe
+ wiking	then i guess it's the same for u as well
+ blackburn	wiking: some things work
+ wiking	in SGVector.cpp:123
+ wiking	add a line
+ wiking	and put
+ wiking	x.
+ blackburn	no, doesn't work
+ wiking	and u should be able to get a list for SGSparseVector<T>
+ wiking	ah yeah
+ wiking	and what does
+ wiking	:copen
+ wiking	say
+ wiking	?
+ blackburn	clapack not found
+ blackburn	:D
+ wiking	i get
+ wiking	the usual pattern not found
+ wiking	but when i do :copen
+ wiking	there's noooo error at all
+ blackburn	heh
+ wiking	do u have?
+ blackburn	yeah clapack thing
+ blackburn	may be it is the cause
+ wiking	mmmm
+ blackburn	let me fix that
+ wiking	hehehe why don't i get any errors :D
+ blackburn	sitll
+ blackburn	still
+ wiking	yep
+ wiking	same here :)
+ wiking	ok there's a python scrupt
+ wiking	bin/cc_args.py
+ wiking	in clang_complete
+ wiking	it suppose to generate u the right .clang_complete
+ wiking	:)
+ wiking	now i'm gonna try that
+ blackburn	hmm
+ shogun-buildbot	build #556 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/556  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ wiking	ok i have to change that
+ wiking	i mean in configure script
+ wiking	streaming_vw_createcache_modular.py was broken before me right?
+ blackburn	yeah I think so
+ wiking	ok
+ wiking	that python script doesn't help me at all
+ wiking	:(
+ shogun-buildbot	build #557 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/557  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ wiking	mm
+ wiking	let g:clang_use_library = 1
+ wiking	the completion is faster for me
+ wiking	i wonder how can one debug clang_complete
+ wiking	ah ok this is why
+ wiking	"Instead of calling the clang/clang++ tool use libclang directly. This gives
+ wiking	access to many more clang features. Furthermore it automatically caches all
+ wiking	includes in memory. Updates after changes in the same file will therefore be a
+ wiking	lot faster."
+-!- Guest88873 [863ab324@gateway/web/freenode/ip.134.58.179.36] has quit [Ping timeout: 245 seconds]
+ wiking	i'll never find out what's the problem here :D
+-!- adoniscik [~emre@c-67-180-103-118.hsd1.ca.comcast.net] has joined #shogun
+ blackburn	wiking: that option is killing my vim :)
+ wiking	blackburn: does it have python support compiled?
+ wiking	w/o that it won't work
+ blackburn	how can I?
+ blackburn	do tha
+ wiking	i don't know how u can check it if it has python support added
+ wiking	but for the configure of vim you should add something like this
+ wiking	--enable-pythoninterp --with-python=${prefix}/bin/python2.7
+ wiking	or wherever your python interpreter is
+ wiking	can u do this in your vim
+ wiking	:python print "helo"
+ wiking	?
+ wiking	if not then pythoninterp is not enabled
+ wiking	that's why the  g:clang_use_library = 1 does not work
+ wiking	otherwise i have no idea
+ wiking	i had this problem but my vim didn't crash just got an error msg
+ blackburn	I see thanks
+ blackburn	it works
+ wiking	heheh :)
+ wiking	faster? :)
+ blackburn	not yet
+ blackburn	I meant python thing
+ blackburn	oh works
+ blackburn	okay let me try
+ blackburn	argh -> doesn't work for me no matter where
+ wiking	mmm
+ wiking	maybe you need to set the library path
+ wiking	where's your libclang.so?
+ wiking	moreover, do you have one? :)
+ blackburn	I think I have to compile shogun now
+ wiking	no
+ wiking	libclang.so should deal with it
+ wiking	afaik
+ wiking	but try
+ wiking	i might be really wrong ehre :)
+ blackburn	my installed headers are quite different from actual
+ blackburn	so I have to install I think
+-!- mode/#shogun [+o sonney2k] by ChanServ
+ wiking	dude
+ wiking	blackburn: still here?
+ blackburn	wiking: yeao
+ blackburn	yeap
+ blackburn	wiking: I'm watching my parents' flight via flightradar24 :D
+ wiking	blackburn: ehehe
+ wiking	blackburn: i think the new latent so-svm just overexceeds any previously published solver's performance on one of the benchmark datasets :)
+ wiking	both in training time and precision :)
+ blackburn	O_O
+ wiking	nyappp
+ wiking	\o/
+--- Log closed Thu Oct 18 00:00:05 2012

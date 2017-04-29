@@ -1,0 +1,87 @@
+--- Log opened Sun Sep 11 00:00:17 2011
+ shogun-buildbot	build #209 of csharp_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/csharp_modular/builds/209  blamelist: blackburn91@gmail.com
+ shogun-buildbot	build #218 of octave_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/218  blamelist: blackburn91@gmail.com
+ blackburn	 Speicherzugriffsfehler
+ blackburn	I guess it is something like PieceOfShitError?
+ blackburn	:D
+ shogun-buildbot	build #219 of octave_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/219
+ shogun-buildbot	build #198 of ruby_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/198  blamelist: blackburn91@gmail.com
+ shogun-buildbot	build #199 of ruby_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/199
+-!- blackburn [~blackburn@31.28.44.65] has quit [Quit: Leaving.]
+ shogun-buildbot	build #210 of csharp_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/csharp_modular/builds/210
+-!- blackburn [~blackburn@31.28.44.65] has joined #shogun
+@sonney2k	blackburn, yes
+ CIA-3	shogun: Soeren Sonnenburg master * rb1edffb / src/shogun/kernel/LocalAlignmentStringKernel.cpp : use CALLOC instead of MALLOC - http://git.io/Xo1Xag
+ CIA-3	shogun: Soeren Sonnenburg master * r73e9943 / examples/undocumented/python_modular/graphical/svm.py : use axis tight to improve figure - http://git.io/05RWKg
+ blackburn	sonney2k: wow did you fix that?
+@sonney2k	blackburn, did you already commit your fast LLE version?
+ blackburn	sonney2k: yes
+@sonney2k	blackburn, don't know
+ blackburn	sonney2k: I've spent the whole day trying to get packing numbers work nicely, no success yet
+ blackburn	now continued integrating superlu
+@sonney2k	I don't know what packing numbers are
+ blackburn	sonney2k: not important, just told you what is I'm working on :)
+ shogun-buildbot	build #219 of r_static is complete: Failure [failed git]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/219  blamelist: sonne@debian.org
+ shogun-buildbot	build #217 of octave_static is complete: Failure [failed git]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/217  blamelist: sonne@debian.org
+ shogun-buildbot	build #231 of cmdline_static is complete: Failure [failed git]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/231  blamelist: sonne@debian.org
+ shogun-buildbot	build #212 of python_static is complete: Failure [failed git]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/212  blamelist: sonne@debian.org
+ blackburn	sonney2k: local alignment still failing
+@sonney2k	blackburn, with which version did you compare last?
+ blackburn	0.9.0
+@sonney2k	I mean did it work in 0.8.sth?
+ blackburn	sonney2k: I didn't test it
+@sonney2k	blackburn, I guess it might be sufficient to do a git diff agains 0.8
+ shogun-buildbot	build #13 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/13
+ blackburn	sonney2k: lle is really fast now - 223s for 10000 vectors
+ blackburn	but superlu to go
+@sonney2k	so is it up to par to scikits now?
+@sonney2k	or faster?
+ blackburn	sonney2k: much faster
+@sonney2k	how fast is scikits?
+ blackburn	well I didn't test on 10k but on 8k it was 2 times slower
+ blackburn	sonney2k: hidden feature of my impl is parallelization - it can really impact on high-dimensional data
+ blackburn	I got crazy with superlu, kind of complicated thing
+ blackburn	sonney2k: 3k examples:
+ blackburn	SHOGUN Took 9.007753s
+ blackburn	SKLEARN Took 11.569473s
+@sonney2k	about the same
+ blackburn	sonney2k: wait a minute for 6k
+@sonney2k	blackburn, if you write a paper you should have a figure like this showing how much faster your stuff is somewhere (potentially even in shogun docs for dim red stuff)
+ blackburn	I know
+ blackburn	sonney2k: I will improve perfomance with superlu, then it would be faster, may be significantly
+ blackburn	SKLEARN Took 91.296676s
+ blackburn	SHOGUN Took 61.362044s
+ blackburn	sonney2k: ^ not really the same
+ blackburn	and now I turn on parallel things
+ blackburn	SHOGUN Took 50.653053s
+@sonney2k	2 cores?
+ blackburn	yes
+ blackburn	I believe it would be faster on really multiprocessor machine
+@sonney2k	what is the bottleneck currently?
+ blackburn	sonney2k: sparse dot and eigenproblem almost the same
+ blackburn	neighbor searching is fast
+@sonney2k	sparse dot is parallel?
+ blackburn	yes
+@sonney2k	but eigenproblem is not right?
+ blackburn	eigenproblem is not
+@sonney2k	is this with lapack?
+ blackburn	arpack
+@sonney2k	ahh - is arpack much faster?
+ blackburn	yes, twice
+ blackburn	scikits uses arpack too
+@sonney2k	(because there is the parallel scalapack)
+@sonney2k	ok
+ blackburn	sonney2k: arpack could impact from parallel lapack
+ blackburn	it uses lapack ops
+ blackburn	e.g. it provides a pointer to a vector you should product with matrix :)
+ blackburn	or solve the system
+ blackburn	now I'm using LU/Cholesky decomposition from lapack
+ blackburn	it is pretty fast but doesn't take any advantages of matrix being \sparse
+ blackburn	sonney2k: well finally, arpack have parallel version too :)
+ blackburn	P_ARPACK
+ blackburn	no idea how to work with it though
+ blackburn	it lacks any docs
+@sonney2k	nite
+ blackburn	see you
+-!- blackburn [~blackburn@31.28.44.65] has quit [Quit: Leaving.]
+--- Log closed Mon Sep 12 00:00:22 2011

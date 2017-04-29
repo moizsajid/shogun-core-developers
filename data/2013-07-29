@@ -1,0 +1,596 @@
+--- Log opened Mon Jul 29 00:00:12 2013
+--- Day changed Mon Jul 29 2013
+ pickle27	sonney2k: right, I don't see anything about RealFeatures in here though
+@sonney2k	> library(modshogun)
+@sonney2k	Welcome! This is SHOGUN version 2.2.0
+@sonney2k	> x=GaussianKernel()
+@sonney2k	> x
+@sonney2k	An object of class "_p_shogun__CGaussianKernel"
+@sonney2k	Slot "ref":
+@sonney2k	Error in slot(object, what) :
+@sonney2k	  no slot of name "ref" for this object of class "_p_shogun__CGaussianKernel"
+ pickle27	just SGVector and SGMatrix
+@sonney2k	the question is what is this ref slot
+ lisitsyn	sonney2k: I guess that's lispy name for method
+ lisitsyn	they follow some scheme-like thing inside R
+@sonney2k	lisitsyn, for what?
+ lisitsyn	sonney2k: for ref()
+ lisitsyn	member function
+ lisitsyn	whatever
+@sonney2k	what method do we need?
+ lisitsyn	sonney2k: I guess it tries to call ref()
+@sonney2k	pickle27, ahh sure typemaps are just SGVector/SGMatrix stuff
+@sonney2k	pickle27, so whenever you have a function signature
+@sonney2k	foo(SGVector<double> x)
+@sonney2k	you can write foo(c(1,2,3)) from R
+@sonney2k	similar for output
+@sonney2k	(in and out typemaps!)
+@sonney2k	lisitsyn, IDK I tried some minimal R example where I used ref/unref and they *were* called
+@sonney2k	no issues
+ lisitsyn	sonney2k: no I was just guessing so everything can happen
+ pickle27	sonney2k: okay - so then where do I need to be looking for figuring out the RealFeatures problem
+@sonney2k	lisitsyn, bah slotNames(x)
+@sonney2k	[1] "ref"
+@sonney2k	wtf?
+@sonney2k	pickle27, well lets start with some simple example first
+@sonney2k	x=RealLabels(c(1.0,2.2))
+@sonney2k	when this is called
+@sonney2k	pickle27, go to line 36 in swig_typemaps.i
+@sonney2k	you will see a typecheck typemap
+@sonney2k	and a in typemap
+@sonney2k	for SGVector types
+ pickle27	yeah Im there
+@sonney2k	the typecheck typemap well test if the type matches
+@sonney2k	if it does it returns the equiv of true (1) otherwise 0
+@sonney2k	so my first guess is that this always returns 0
+@sonney2k	maybe add some SG_SPRINT there to see the result
+@sonney2k	pickle27, if the typecheck typemap returns 1
+@sonney2k	the in typemap will be reached
+@sonney2k	and that one then just has to assign an appropriate SGVector to $1
+@sonney2k	currently it doesn't  copy the memory and so the simple example (if it would pass the typecheck typemap) woudl just crash
+@sonney2k	since SGVector will at some point deallocate the memory when you exit R
+@sonney2k	and R likely too
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has left #shogun ["Fallen asleep!"]
+ pickle27	sonney2k: so bascially print the result of line 49
+@sonney2k	pickle27, questions?
+ pickle27	i mean 40
+ pickle27	(TYPEOF($input) == r_type && Rf_ncols($input)==1 )
+@sonney2k	pickle27, I am just trying this with all fields
+-!- travis-ci [~travis-ci@ec2-54-243-23-104.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9585748
+-!- travis-ci [~travis-ci@ec2-54-243-23-104.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	pickle27, but then the big issue is to figure out why refcounting doesn't work
+@sonney2k	pickle27, I am not even getting towards the typecheck
+@sonney2k	so one now would have to debug the generated R code
+@sonney2k	pickle27, hmm
+@sonney2k	if I do
+@sonney2k	x=RegressionLabels()
+@sonney2k	> x$set_labels(c(1.0,2.3))
+@sonney2k	> x$get_label(0)
+@sonney2k	[1] 1
+@sonney2k	> x$get_label(1)
+@sonney2k	[1] 2.3
+@sonney2k	it seems alright
+@sonney2k	maybe it `just' doesn't work in the constructor style syntax
+ pickle27	hmm
+@sonney2k	yeah seems like
+@sonney2k	with RealFeatures I get the (expected) crasher when I do
+@sonney2k	> x=RealFeatures()
+@sonney2k	> x$set_features(matrix(c(1,2,3,4,5,6),2,3))
+ pickle27	sonney2k: I get this when I run that
+ pickle27	Error: evaluation nested too deeply: infinite recursion / options(expressions=)?
+@sonney2k	pickle27, there are certainly more issues but maybe it is a start
+* sonney2k Zzzzz.
+ pickle27	wierd this time I got a backtrace
+ pickle27	ahg I hate when I accidently ctrl-l irc
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+@iglesiasg	ok guys, good night!
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+@sonney2k	pickle27, memory corruption!
+ pickle27	sonney2k: I ran it again and I couldn't get another backtrace
+@sonney2k	pickle27, you can fix it easily be copying the memory before gving it sgvector/amtrix
+ pickle27	but it did happen once
+ shogun-buildbot	build #1103 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1103  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ pickle27	sonney2k: fix it in the typemap func?
+ shogun-buildbot	build #1420 of deb3 - modular_interfaces is complete: Failure [failed install test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1420  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ pickle27	okay thats enough for me today, see you all tomorrow
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+-!- nube [~rho@49.244.47.72] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- nube [~rho@49.244.47.72] has quit [Quit: Leaving.]
+ shogun-buildbot	build #472 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/472
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- nube [~rho@116.90.239.3] has left #shogun []
+-!- lisitsyn [~lisitsyn@92-240-133-94.clients.tlt.100megabit.ru] has quit [Quit: Leaving.]
+ gsomix	good morning
+-!- van51 [~van51@ppp-94-66-56-238.home.otenet.gr] has joined #shogun
+ van51	hello
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	good morning to all
+ van51	iglesiasg: good morning :)
+-!- van51 [~van51@ppp-94-66-56-238.home.otenet.gr] has quit [Quit: Leaving.]
+-!- van51 [~van51@94.66.56.238] has joined #shogun
+-!- vgorbati [c3ee5cb1@gateway/web/freenode/ip.195.238.92.177] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ lisitsyn	vgorbati: hey haven't seen you for a while?
+ lisitsyn	how is it going? are you done with your thesis?
+-!- gsomix_ [~gsomix@95.67.137.114] has joined #shogun
+-!- gsomix [~gsomix@109.169.249.121] has quit [Ping timeout: 264 seconds]
+ vgorbati	lisitsyn: hello there) I basically rested all the time:) How is Berlin?
+ vgorbati	lisitsyn: do you mean master's thesis?
+ lisitsyn	vgorbati: berlin is nice indeed :)
+ lisitsyn	vgorbati: well some thesis you were working on
+ vgorbati	lisitsyn: I was working on monograph for my university supervisor (is it a correct word for it?), and yes, I believe it is done now:)
+-!- foulwall [~user@116.114.141.87] has joined #shogun
+-!- van51 [~van51@94.66.56.238] has quit [Quit: Leaving.]
+-!- foulwall [~user@116.114.141.87] has quit [Ping timeout: 240 seconds]
+-!- gsomix_ [~gsomix@95.67.137.114] has quit [Quit: Leaving]
+-!- foulwall` [~user@116.114.141.87] has joined #shogun
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 256 seconds]
+@wiking	mmmm
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- van51 [~van51@ppp-94-66-56-238.home.otenet.gr] has joined #shogun
+-!- foulwall` [~user@116.114.141.87] has quit [Ping timeout: 240 seconds]
+-!- foulwall` [~user@116.114.133.251] has joined #shogun
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Roman Votyakov :develop * c4b0bb6 / tests/unit/machine/gp/ (4 files): https://github.com/shogun-toolbox/shogun/commit/c4b0bb66f22d8895de7bf3a71554ad573c762ee2
+ shogun-notifier-	shogun: add some unit-tests for likelihood models
+ shogun-notifier-	shogun: Roman Votyakov :develop * f8f1b75 / src/shogun/classifier/GaussianProcessBinaryClassification.cpp: https://github.com/shogun-toolbox/shogun/commit/f8f1b751b8e046d9bd9afe3b787abb8bb78763d0
+ shogun-notifier-	shogun: replace eigen3 exp() call with shogun exp() call
+ shogun-notifier-	shogun: Heiko Strathmann :develop * b2727fc / / (5 files): https://github.com/shogun-toolbox/shogun/commit/b2727fc0b20e54d9b6ab6fb9ca556c759fa5b59c
+ shogun-notifier-	shogun: Merge pull request #1325 from votjakovr/feature/gp_refactoring
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Add some unit-tests for likelihood models
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+ shogun-buildbot	build #1104 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1104  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Roman Votyakov <votjakovr@gmail.com>
+@sonney2k	foulwall`, hey there - any news on the README?
+ foulwall`	Hey sonney2k, already finished, and now working on migration for tapkee demos.
+-!- iglesiasg [~Fernando@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+@sonney2k	foulwall`, please send a PR then
+ foulwall`	ok sonney2k
+ van51	heh I thought that the ` after foulwall` was dust on my screen :p
+@sonney2k	van51, heh!
+@sonney2k	van51, so how is it going now?
+ van51	sonney2k: well first of all, the CHashedDocDotFeatures and the converter have identical results
+@sonney2k	van51, btw regarding benoits email - we already use bitmasks right?
+ van51	sonney2k: in the doc features
+@sonney2k	van51, excellent!
+@sonney2k	van51, and speed?
+ van51	sonney2k: in dense/sparse I had switched to just mod
+ van51	sonney2k: for speed I'm not sure, it depends on the normalization
+ van51	sonney2k: I mean unnormalized dot features take a lot time
+@sonney2k	van51, well of course with same normalization
+ van51	sonney2k: but the sparsefeatures returned from the converter are not normalized
+@sonney2k	van51, oh you should add that to the converter too!
+ van51	sonney2k: I tried but it would be the same normalziation. In the dot features we normalize the result, while there we create the entire vector so we would normalize each feature
+ van51	wouldn't
+ van51	dot product result*
+@sonney2k	van51, parse error
+ van51	sonney2k: heh
+ van51	sonney2k: in the dot features we compute the dense dot for instance
+ van51	sonney2k: and we normalize it
+@sonney2k	van51, you jsut normalize each feature by dividing with 1/sqrt(count)
+@sonney2k	van51, sure but in dotfeatures add_to_dense_vec you do the same normalization per feature
+ van51	sonney2k: I tried it with 1/sqrt(doc.size()) and it was giving poor results
+ van51	sonney2k: maybe I missed something
+ van51	sonney2k: I can try it again though
+ van51	sonney2k: btw I wanted to ask you about the CCommUlongKernel with svmLight that you had told me
+ van51	sonney2k: I tried to compare their speed first, but when I used the kernel it segfaulted in a radix_sort method
+ van51	sonney2k: I'm guessing it ran out of memory
+@sonney2k	van51, maybe forgot that you need to use a double?
+@sonney2k	van51, it should give the exact same results
+@sonney2k	van51, hmmhh radix sort should work just fine (at least it did)
+ van51	sonney2k: I'll reproduce it now
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+ shogun-buildbot	build #1421 of deb3 - modular_interfaces is complete: Failure [failed install test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1421  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Roman Votyakov <votjakovr@gmail.com>
+-!- travis-ci [~travis-ci@ec2-54-226-172-147.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9610363
+-!- travis-ci [~travis-ci@ec2-54-226-172-147.compute-1.amazonaws.com] has left #shogun []
+-!- foulwall [~user@116.114.133.251] has joined #shogun
+@sonney2k	pickle27, yes
+@sonney2k	pickle27, let me just add it
+-!- foulwall [~user@116.114.133.251] has quit [Remote host closed the connection]
+-!- foulwall` [~user@116.114.133.251] has quit [Remote host closed the connection]
+-!- foulwall [~user@116.114.133.251] has joined #shogun
+ van51	sonney2k:  this is my valgrind output
+ van51	http://pastebin.com/wcT9rLpj
+ shogun-buildbot	build #1105 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1105  blamelist: Roman Votyakov <votjakovr@gmail.com>
+@sonney2k	van51, hmmhh looks like we broke it :/
+ van51	sonney2k: let me show you my code in case there is something wrong there
+ van51	sonney2k: https://gist.github.com/van51/6105834
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ shogun-buildbot	build #1422 of deb3 - modular_interfaces is complete: Failure [failed install test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1422  blamelist: Roman Votyakov <votjakovr@gmail.com>
+ votjakovr	sonney2k: hi! i've found, that since doxygen 1.7.2 we can use MathJax instead of using prerendered bitmaps for rendering formulas. I think, that with MathJax formulas will be prettier. What do you think about using it?
+@sonney2k	votjakovr, sure!
+@sonney2k	votjakovr, that would speed up things too
+@sonney2k	votjakovr, only issue is that it won't detect errors in the file - I mean if any of us screws up a formula
+ votjakovr	sonney2k: hmm, yep, unfortunately
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * eccafc8 / src/ (4 files): https://github.com/shogun-toolbox/shogun/commit/eccafc84132f31fe5bb2e03372200482710f87a9
+ shogun-notifier-	shogun: add get_copy function to lib/memory to be used from typemaps for clones
+@sonney2k	pickle27, that fixes the crashers etc for me
+@sonney2k	pickle27, I could do
+@sonney2k	x=Regressionlabels()
+@sonney2k	x$set_labels(c(1,2,3))
+@sonney2k	x$set_labels(c(1,2))
+@sonney2k	...
+@sonney2k	and also
+@sonney2k	x=RealFeatures()
+@sonney2k	x$set_feature_matrix(matrix(c(1,2,3,4,5,6),2,3))
+@sonney2k	votjakovr, btw looks like doxygen also supports markdown syntax nowadays
+ votjakovr	sonney2k: oh, yeah, i see
+ pickle27	sonney2k: okay i will merge and see if it works for me soon
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:9ce1:9054:335:9d36] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	hello!
+@sonney2k	iglesiasg, helllo!
+-!- lisitsyn [~lisitsyn@213.87.133.71] has joined #shogun
+ lisitsyn	kevin is a good boy today
+ lisitsyn	pickle27, ;)
+@iglesiasg	lisitsyn,  I will become a good boy soo, I promise :P
+ lisitsyn	van51, votjakovr
+ lisitsyn	haha
+ pickle27	haha
+ lisitsyn	foulwall, hushell
+ lisitsyn	damn this phone typing is not so fast
+@sonney2k	van51, is the normalization working in the converter now?
+ lisitsyn	iglesiasg, how is your marginal deals?
+ foulwall	Hi lisitsyn
+ lisitsyn	largely marginal
+@iglesiasg	lisitsyn, LMNN?
+ lisitsyn	foulwall, hey I just called to say
+ lisitsyn	weekly report ;)
+ foulwall	ok lisitsyn :)
+ lisitsyn	iglesiasg: ja this one
+ lisitsyn	iglesiasg, is it better performance wise now?
+@iglesiasg	lisitsyn, so so. My implementation currently sucks a bit compared to the author's (and it is in Matlab, although with some parts in C)
+@iglesiasg	lisitsyn, no, not yet
+@iglesiasg	lisitsyn, I realized I have to change a sort of big thing now
+@iglesiasg	lisitsyn, well, not that big actually
+@iglesiasg	lisitsyn, you are with phone now, right?
+ lisitsyn	iglesiasg: do you know the bottleneck?
+@iglesiasg	otherwise I can show you
+-!- foulwall` [~user@116.114.133.251] has joined #shogun
+ lisitsyn	iglesiasg: ueah, i can read things though
+ lisitsyn	but not compile shogun
+@iglesiasg	lisitsyn, haha indeed
+@iglesiasg	let me show you then, on moment
+-!- foulwall` [~user@116.114.133.251] has quit [Client Quit]
+@iglesiasg	one*
+@iglesiasg	lisitsyn, https://github.com/iglesias/shogun/blob/feature/lmnn/src/shogun/metric/LMNNImpl.cpp#L135
+@iglesiasg	lisitsyn, so I have that method right now that is computing the difference between every pair of feature vectors, and then computing the outer product of the diff vector with itself
+@sonney2k	foulwall, and where is the README PR ?
+@iglesiasg	lisitsyn, right now that computes N^2 matrices of D^2 elements each one
+@iglesiasg	lisitsyn, it is possible to make that smaller
+ foulwall	sonney2k: sending
+@iglesiasg	lisitsyn, since (x_i-x_j)*(x_i-x_j)' is the same as (x_j-x_i)*(x_j-x_i)'
+@iglesiasg	lisitsyn, but I think that even if I take that into account, it is still something too big to keep in memory (it will still be the order of N^2 matrices)
+ lisitsyn	iglesiasg: yeah quite big thing
+@iglesiasg	lisitsyn, so I think that it is better to compute the outer products on demand; every time one is needed I compute it, even if that migh entail computing the same outer product more than once
+@iglesiasg	lisitsyn, what do you think of doing it on demand?
+@iglesiasg	lisitsyn, I think the author's implementation does it in this way
+ lisitsyn	iglesiasg, would be slower I guess but takes less memory
+ lisitsyn	if you dont have any N2 matrices more it totally makes sense
+@iglesiasg	lisitsyn, then the bottleneck is this method https://github.com/iglesias/shogun/blob/feature/lmnn/src/shogun/metric/LMNNImpl.cpp#L316
+ lisitsyn	are there any more N2 matrices?
+@sonney2k	iglesiasg, sounds like kernel caching
+@iglesiasg	sonney2k, yeah, I thought that caching could help
+@iglesiasg	so I think that for the moment I will modify the code to compute outer products on demand, and later we can see if it pays off to have caching
+@iglesiasg	lisitsyn, what do you mean if there are more N2 matrices?
+ lisitsyn	iglesiasg: I think caching makes sense here
+ lisitsyn	iglesiasg: if thats the only NxN matrix here
+@iglesiasg	lisitsyn, aah ok got it. Yes it is
+@iglesiasg	lisitsyn, but note that it is not only a NxN matrix
+ lisitsyn	then kill it yeah
+@iglesiasg	lisitsyn, it is NxN matrices of DxD elements each (N=number of vectors, D=feature dimension)
+ lisitsyn	oh
+ lisitsyn	heh
+@iglesiasg	because you compute the outer product of the difference of feature vectors
+@iglesiasg	for each pair of feature vectors, you make its difference, and compute the outer product of the difference with itself
+ lisitsyn	yeah thats not something to be in memory
+-!- travis-ci [~travis-ci@ec2-72-44-42-216.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9615083
+-!- travis-ci [~travis-ci@ec2-72-44-42-216.compute-1.amazonaws.com] has left #shogun []
+ lisitsyn	by outer product you mean dger from blas
+ lisitsyn	eight?
+ lisitsyn	right?
+@iglesiasg	lisitsyn, no idea :D
+ lisitsyn	:D
+@iglesiasg	lisitsyn, there are two ways you can multiply a vector with itself
+ lisitsyn	yeah heard sth
+@iglesiasg	lisitsyn, inner product -> you get an scalar (something like x'*x)
+ lisitsyn	this one produces matrix
+@iglesiasg	outer product -> you get a matrix (x*x')
+@iglesiasg	exactly
+ lisitsyn	dger :p
+@iglesiasg	lisitsyn, I am checking dger
+ lisitsyn	ddot and dger
+@iglesiasg	lisitsyn, yeah it seems to be like that
+@iglesiasg	lisitsyn, although they same in the doc that it is x*y' where x has m elements and n elements
+ lisitsyn	iglesiasg, eigen has symmetric rank update
+ lisitsyn	i used that thing in tapkees pca
+@iglesiasg	lisitsyn, symmetric rank update? Do you think that could help me to make it faster?
+@iglesiasg	lisitsyn, right now I get two eigen vectors, make their difference, and then the outer product
+@iglesiasg	lisitsyn, https://github.com/iglesias/shogun/blob/feature/lmnn/src/shogun/metric/LMNNImpl.cpp#L154
+@iglesiasg	that line and the next one
+ lisitsyn	no probably wont help here
+@iglesiasg	lisitsyn, aham. Why do you think so?
+@iglesiasg	just trying to understand it better :)
+ lisitsyn	iirc that rank update is better for multiple calls
+@iglesiasg	lisitsyn, I guess it is a matter of testing it anyway, so I will keep in mind that there is another way of getting the outer product
+ lisitsyn	iglesiasg: it employs symmetricity better somehow
+-!- lisitsyn [~lisitsyn@213.87.133.71] has quit [Remote host closed the connection]
+-!- lisitsyn [~lisitsyn@213.87.133.71] has joined #shogun
+ lisitsyn	oh I get disconnected once turning my phone off
+-!- lisitsyn [~lisitsyn@213.87.133.71] has left #shogun []
+ shogun-buildbot	build #1106 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1106  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ foulwall	ls
+@iglesiasg	Documents Desktop Dropbox
+@iglesiasg	foulwall, :P
+ foulwall	haha iglesiasg
+@sonney2k	van51, minimalchange: https://gist.github.com/sonney2k/6106780
+ pickle27	hahaha I do that too
+ pickle27	except I have this thing where I like to clear my terminals using ctrl-l all the time
+ van51	sonney2k: hey sorry I was helping my grandmother with something
+ pickle27	and then I clear IRC and its annoying
+@iglesiasg	hehe
+ van51	sonney2k: what did you change?
+ van51	the 8-1?
+@sonney2k	van51, yeah
+@sonney2k	like in the python example
+ van51	sonney2k: what is the meaning of start then?
+@sonney2k	van51, where to start
+ van51	sonney2k: :p
+@sonney2k	van51, well this is doing some bitheavy stuff
+@sonney2k	and basically it goes back 8 chars from the start so starting at index 7 is what you want to get 7...0
+ van51	sonney2k: ah I see
+ van51	sonney2k: well I'm going to get some food and work on some stuff later and overnight
+ van51	sonney2k: btw I've also started the document example
+ van51	sonney2k: and I was thinking of making a simple web ui, just to be able to write some lines and test it
+@sonney2k	van51, use the python_modular interface instead and some simple input or so and foulwall can later nicely integrate this
+ van51	sonney2k: ok
+ van51	sonney2k: so I'm off for about an hour
+ van51	cu later
+@sonney2k	van51, btw it might be good to do that for your example too. prototyping with python really is much faster (and debugging too!)
+ van51	sonney2k: I don't know python so I'm trying to avoid it
+ van51	sonney2k: but I guess it's a good time to get to know as well :0
+ van51	:)*
+-!- van51 [~van51@ppp-94-66-56-238.home.otenet.gr] has quit [Quit: Leaving.]
+ pickle27	sonney2k: I tried the new R modular and I ran those samples you posted and they work for me
+ pickle27	sonney2k: it still seams like none of the methods are "binding" though
+ pickle27	whenever I try and use a method I get a not found error
+@sonney2k	pickle27, that must be some swig issue - we have ton's of constructors
+ pickle27	yeah
+@sonney2k	so figuring out which one to use is the task of swig
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 95def24 / src/shogun/machine/gp/InferenceMethod.h: https://github.com/shogun-toolbox/shogun/commit/95def246a179d7a0065c85cd1252e2f6cae136ef
+ shogun-notifier-	shogun: fix typo in doxygen formula
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 3f113b7 / / (16 files): https://github.com/shogun-toolbox/shogun/commit/3f113b7a74d2a0ad54a9a484e93fca6ba9afde4f
+ shogun-notifier-	shogun: add some get_strdup function to avoid compile errors (strdup is not ansi C!)
+@sonney2k	pickle27, back then I totally understood how that R stuff worked but I forgot
+@sonney2k	pickle27, the only thing I remember is that from the R code there are some tests run selecting the appropriate constructor
+ pickle27	sonney2k: and I have no idea how it works
+ pickle27	it sounds like its pretty tough to fix - maybe I'll just push an r_static example for now
+-!- hushell [~hushell@c-24-21-169-136.hsd1.or.comcast.net] has quit [Ping timeout: 276 seconds]
+-!- foulwall` [~user@116.114.133.251] has joined #shogun
+-!- foulwall [~user@116.114.133.251] has quit [Ping timeout: 246 seconds]
+-!- sonney2k [~shogun@7nn.de] has quit [Ping timeout: 246 seconds]
+-!- sonney2k_ [~shogun@7nn.de] has joined #shogun
+-!- sonney2k_ is now known as sonney2k
+-!- mode/#shogun [+o sonney2k] by ChanServ
+@sonney2k	pickle27, well you have to read swig code and the generated wrapper code modshogun.R etc
+@sonney2k	not fun
+ pickle27	sonney2k: doesn't sound like it!
+@sonney2k	iglesiasg, any progress on the failing tests on the buildbot?
+@iglesiasg	sonney2k, unfortunately not, sorry. I have focused on LMNN again since yesterday's eve
+@sonney2k	foulwall`, ohh please don't put images in the repository
+@sonney2k	foulwall`, please put them again under shogun-data/tapkee
+ foulwall`	ok sonney2k , I'll resend
+@sonney2k	foulwall`, it might make sense to not have >1000 files too btw
+@sonney2k	foulwall`, maybe better use a single .zip file with the images in there
+@sonney2k	like faces.zip
+@sonney2k	and mnist.zip
+ foulwall`	I see
+@sonney2k	foulwall`, btw do you have a live demo already for that?
+ foulwall`	let me upload it on nn.7nn.de
+ foulwall`	sonney2k: check this, http://nn.7nn.de:8000/tapkee/entrance .
+@sonney2k	foulwall`, nice!
+ shogun-buildbot	build #1107 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1107  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #1108 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1108  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@iglesiasg	foulwall`, looking cool!
+@iglesiasg	lisitsyn's gf will become worldwide famous eventually thanks to the faces embedding :)
+@sonney2k	iglesiasg, yeah the new lena :)
+@iglesiasg	sonney2k, haha yeah
+@iglesiasg	sonney2k, have you actually seen the original of the Lena's picture?
+ foulwall`	haha :) iglesiasg, I've seen.
+@iglesiasg	it is, let's say, not precisely the one they show in class or in college textbooks :P
+ foulwall`	sonney2k: thanks:D
+@iglesiasg	Lena is Swedish btw :)
+@iglesiasg	poeple are pretty proud in here when they use the picture in class
+-!- travis-ci [~travis-ci@ec2-72-44-42-216.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9618211
+-!- travis-ci [~travis-ci@ec2-72-44-42-216.compute-1.amazonaws.com] has left #shogun []
+-!- gsomix [~gsomix@95.67.137.114] has joined #shogun
+ gsomix	good evening
+ gsomix	report time? :)
+@sonney2k	gsomix, where is your PR?
+ gsomix	sonney2k, with quoting and libsvm reader? not ready yet, I need little time for it.
+@sonney2k	gsomix, no the one that you submitted ~21hrs ago
+@sonney2k	where I wanted some tiny changes
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * a6f59dd / src/configure,src/shogun/io/Parser.cpp: https://github.com/shogun-toolbox/shogun/commit/a6f59dd8e159a0945b75eb2aca45c1e6a11e24b3
+ shogun-notifier-	shogun: use strtod if strtold is not available
+ gsomix	sonney2k, ah, just a moment!
+ gsomix	sonney2k, forgot it. =___= today was little holiday, sorry.
+ gsomix	sonney2k, btw I haven't any warnings related to format on my machine.
+@sonney2k	gsomix, I need to merge yours before I can start to convert examples
+@sonney2k	gsomix, yeah sure 32bit vs 64bit
+@sonney2k	gsomix, so use the 'standard' ones and we will be fine
+ gsomix	sonney2k, aha, indeed.
+ gsomix	sonney2k, btw, can I help with examples&
+ gsomix	*?
+@sonney2k	iglesiasg, wiking, votjakovr, pickle27 anyone here up to doing a doc sprint at google in october?
+@iglesiasg	sonney2k, sure!
+@sonney2k	gsomix, well sure but we are quite a bit behind schedule :/
+ pickle27	probably no for me because I'm hoping to be doing some travelling in Oct
+@sonney2k	it is during oct14-18 http://www.booksprints.net/2013/07/2013-doc-camp-announced/
+@iglesiasg	sonney2k, what should we do to raise our odds of getting in?
+@sonney2k	iglesiasg, IDK
+@sonney2k	we certainly need 4 people that can do a stunt
+ pickle27	sonney2k: looks very cool though, I'd be happy to help I just won
+@iglesiasg	sonney2k, would you be in?
+ pickle27	't be able to be there
+@sonney2k	iglesiasg, HeikoS, me + ??
+@iglesiasg	let's see if wiking and lisitsyn could make it
+@sonney2k	I am not sure I would go ipython-notebook for that
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has joined #shogun
+@iglesiasg	sonney2k, mmm I don't see why not
+@sonney2k	iglesiasg, they aim for a real book
+@iglesiasg	sonney2k, people are doing real books these days based on ipython I think
+@sonney2k	copy & pasting parts from people's thesis would not be that easy then
+@iglesiasg	sonney2k, lol
+@sonney2k	iglesiasg, I think that is our only chance to *finish* a book in 4 days
+@sonney2k	that is what they aim fo
+@sonney2k	are
+@sonney2k	iglesiasg, look at this http://www.booksprints.net/about/
+@iglesiasg	sonney2k, check thhis one: http://camdavidsonpilon.github.io/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers/
+@iglesiasg	sonney2k, http://nbviewer.ipython.org/urls/raw.github.com/CamDavidsonPilon/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers/master/Chapter1_Introduction/Chapter1_Introduction.ipynb
+@iglesiasg	chapter 1 ^
+@iglesiasg	to me that looks like a nice real book
+@iglesiasg	sonney2k, what do you think?
+@sonney2k	iglesiasg, looks *very* cool
+@iglesiasg	indeed, we agree :)
+@sonney2k	iglesiasg, can this be converted to some epub /pdf etc?
+@sonney2k	or is it 'just' web?
+@iglesiasg	sonney2k, no idea, honestly
+-!- van51 [~van51@ppp-94-66-56-238.home.otenet.gr] has joined #shogun
+@iglesiasg	let me have a quick look
+@sonney2k	van51, hey again
+ van51	sonney2k: hi
+@iglesiasg	they say so in the page, no idea how it looks like, let's see
+@sonney2k	iglesiasg, ok then it is pretty clear how to increase our chances - we should have some ideas what our target audience is, structure, running examples and methods we want to use
+@sonney2k	iglesiasg, but issue still remains that we are just a very small org (compared to e.g. KDE)
+@iglesiasg	sonney2k, when is the deadline?
+@sonney2k	iglesiasg, in 3 days
+@iglesiasg	sonney2k, I am thinking, if it is after GSoC ends
+@iglesiasg	shit...
+@sonney2k	or 5?
+@sonney2k	iglesiasg, last year it was like this
+@iglesiasg	I drop the idea then
+@sonney2k	before august 7!
+@sonney2k	if heiko is not around for discussion yeah then indeed
+@iglesiasg	sonney2k, https://dl.dropboxusercontent.com/u/11020840/June82013.pdf
+@iglesiasg	sonney2k, pdf version of the book
+@iglesiasg	sonney2k, IMHO it looks nicer in the browser, but it is still cool I think
+@sonney2k	iglesiasg, I think we have a chance this year
+@sonney2k	iglesiasg, jsut because big data etc is such a big hype
+ gsomix	sonney2k, compiling...
+@sonney2k	so we should try!
+@iglesiasg	sonney2k, yep!
+@sonney2k	iglesiasg, very nice still!!!
+@iglesiasg	so I vote sticking to ipython-notebook :)
+ shogun-buildbot	build #1424 of deb3 - modular_interfaces is complete: Failure [failed compile octave_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1424  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	iglesiasg, sure then we just have to figure out how to integrate big chunks of latex
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 268 seconds]
+@iglesiasg	sonney2k, yes
+@sonney2k	iglesiasg, no idea whether stuff like toc / index / references are possible
+ gsomix	sonney2k, testing...
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has left #shogun ["Fallen asleep!"]
+@sonney2k	shogun-buildbot, force build 'cyg1 - libshogun' --branch=develop
+ shogun-buildbot	build forced [ETA 17m23s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * e6788a0 / src/interfaces/ (2 files): https://github.com/shogun-toolbox/shogun/commit/e6788a07fdb6845a38f92bc55489e80f1c33f7c1
+ shogun-notifier-	shogun: drop get_copy from octave and perl
+-!- travis-ci [~travis-ci@ec2-72-44-42-216.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9620302
+-!- travis-ci [~travis-ci@ec2-72-44-42-216.compute-1.amazonaws.com] has left #shogun []
+ gsomix	sonney2k, done. https://github.com/shogun-toolbox/shogun/pull/1323
+ gsomix	compiling takes many time
+ shogun-notifier-	shogun: Evgeniy Andreev :develop * 5798840 / / (5 files): https://github.com/shogun-toolbox/shogun/commit/5798840ae3254defe789403e3eac001cc665be31
+ shogun-notifier-	shogun: fixed invalid read in Parser, CSVFile constructor is shortened
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * f0ccda8 / / (5 files): https://github.com/shogun-toolbox/shogun/commit/f0ccda88694ea364c7e1b021c7dc2256648b001b
+ shogun-notifier-	shogun: Merge pull request #1323 from gsomix/feature/parser
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed invalid read in Parser, CSVFile constructor is shortened
+ gsomix	sonney2k, so what to do with examples?
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+@sonney2k	gsomix, maybe we should talk how to continue in general?
+@sonney2k	gsomix, it would be nice to have the other ascii formats working
+ gsomix	sonney2k, yep.
+@sonney2k	gsomix, and the stringfeatures/sparsefeatures/densefeatures/matrixfeatures etc cleaned up / supported
+ gsomix	sonney2k, so I'm working on libsvm file format now.
+@sonney2k	I mean this is the first and most important thing to finish
+@sonney2k	gsomix, sounds like I should rather convert the examples
+@sonney2k	while you continue your work
+@sonney2k	gsomix, afterwards I would like us to have some binary format based on protobuf and well there still is reading / writing matlab files
+@sonney2k	which likely is most important for users
+ shogun-buildbot	build #1109 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1109
+ gsomix	sonney2k, aha
+@sonney2k	gsomix, but seriously I think most people will just use ascii and matlab format
+ gsomix	sonney2k, other ascii formats. which?
+@iglesiasg	matlab format please!
+@iglesiasg	gsomix, when are we getting this? Really looking forward to it
+ gsomix	sonney2k, matlab7 file format is last version, right?
+@sonney2k	gsomix, arff then van51 would say vw
+@sonney2k	gsomix, no
+@sonney2k	gsomix, matlab has a couple of formats
+ gsomix	sonney2k, not compatible?
+@sonney2k	gsomix, as I wrote on the ideas page octave supports reading IIRC up to 7.2
+@sonney2k	afterwards they switched to sth hdf5 based
+@sonney2k	so you it would take some time
+@sonney2k	to do this
+ gsomix	sonney2k, I should look into octave source? or there is specs on 7.2?
+ gsomix	I found only 7.0.1
+@sonney2k	gsomix, http://www.mathworks.com/help/pdf_doc/matlab/matfile_format.pdf
+ gsomix	sonney2k, huh! I never imagined that I could find it on mathworks site.
+ gsomix	I mean MATLAB very closed and have not many docs about how it works inside.
+ gsomix	*is very
+@sonney2k	gsomix, it seems not to be the latest format for sure
+ shogun-buildbot	build #1110 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1110  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	gsomix, maybe you can use octave's reader somehow
+@sonney2k	gsomix, only issue is we cannot test this
+@sonney2k	we have no matlab
+@sonney2k	so maybe we just get some .mat file from sb.
+@sonney2k	and also the ascii representation or sth
+@sonney2k	and then you can read/compare
+ gsomix	sonney2k, ok, I can test it on my local machine.
+ gsomix	and I can make .mat with ascii representation too
+ gsomix	I have licensed matlab 2013a at lab.
+ gsomix	sonney2k, I'm not full clear with protobuf now.
+ gsomix	sonney2k, we plan to develop our file format based on protobuf? or so?
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 5733a65 / src/shogun/mathematics/Math.h: https://github.com/shogun-toolbox/shogun/commit/5733a65137c48909c95272fbbc6df57af5a1bb67
+ shogun-notifier-	shogun: define _USE_MATH_DEFINES to get non-standard constant M_PI
+@sonney2k	gsomix, yes it is basically just a binary format / fast & size efficient to store values
+@iglesiasg	have you guys started doing the mid-term evaluation?
+* sonney2k gets hungry
+* sonney2k off -> food
+ gsomix	iglesiasg, nope. I have many work that I promised to finish before midterm.
+@iglesiasg	gsomix, you will make on time! :)
+ shogun-buildbot	build #1423 of deb3 - modular_interfaces is complete: Failure [failed compile octave_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1423  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	shogun-buildbot, force build 'cyg1 - libshogun' --branch=develop
+ shogun-buildbot	build forced [ETA 16m24s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #1111 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1111
+@sonney2k	shogun-buildbot, force build 'cyg1 - libshogun' --branch=develop
+ shogun-buildbot	build forced [ETA 16m24s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #1112 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1112
+@sonney2k	shogun-buildbot, force build 'cyg1 - libshogun' --branch=develop
+ shogun-buildbot	build forced [ETA 16m24s]
+ shogun-buildbot	I'll give a shout when the build finishes
+-!- travis-ci [~travis-ci@ec2-54-226-172-147.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9621665
+-!- travis-ci [~travis-ci@ec2-54-226-172-147.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	iglesiasg, I guess failing unit tests will be the only thing to show why matrixlist is unhappy
+@iglesiasg	sonney2k, yeah, maybe. But valgrinds seems to complain about stuff going on when unref-ing
+@sonney2k	iglesiasg, yeah exactly
+ shogun-buildbot	build #1425 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1425  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@iglesiasg	sonney2k, that confuses me though
+@sonney2k	iglesiasg, why?
+@iglesiasg	sonney2k, where can the bug be if the error arises in the destructor or when un-referencing?
+@sonney2k	some kind of double free
+ shogun-buildbot	build #1113 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1113
+@iglesiasg	evalution submitted
+--- Log closed Tue Jul 30 00:00:53 2013

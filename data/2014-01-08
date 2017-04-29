@@ -1,0 +1,441 @@
+--- Log opened Wed Jan 08 00:00:42 2014
+-!- pickle27 [~kevin@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+ pickle27	hey did you guys see https://github.com/blog/1672-introducing-github-traffic-analytics
+ pickle27	what does shogun traffic look like?
+-!- Saurabh7 [~Saurabh7@117.200.177.85] has joined #shogun
+-!- Saurabh7 [~Saurabh7@117.200.177.85] has quit [Client Quit]
+-!- pickle27 [~kevin@192-0-136-118.cpe.teksavvy.com] has quit [Quit: Leaving]
+ gsomix	good morning
+-!- gsomix [~gsomix@46.20.65.114] has quit [Remote host closed the connection]
+-!- besser82 [~quassel@fedora/besser82] has quit [Remote host closed the connection]
+-!- besser82 [quassel@fedora/besser82] has joined #shogun
+-!- besser82 [quassel@fedora/besser82] has quit [Ping timeout: 240 seconds]
+-!- besser82 [quassel@fedora/besser82] has joined #shogun
+ besser82	sonney2k, sonne|work: ping!
+-!- lisitsyn [~lisitsyn@213.87.139.68] has joined #shogun
+-!- lisitsyn [~lisitsyn@213.87.139.68] has left #shogun []
+-!- gsomix [~gsomix@185.6.237.115] has joined #shogun
+ gsomix	passed
+ besser82	gsomix:  congrats!
+ sonne|work	gsomix: cool!
+ sonne|work	gsomix: so now you are free?
+ sonne|work	besser82: hey!
+ sonne|work	besser82: can you do the include order thing for adrin?
+ sonne|work	besser82: I mean just adding the include?
+ besser82	sonne|work:  working on that; it seems to be a bit more complicated, than just adding that...
+ besser82	sonne|work:  I'm currently tracking the way all includes get stacked into the CMake-vars...
+ besser82	sonne|work:  Since we need to make sure it *always* is the first one
+ sonne|work	yeah. is it not that you can just put it in th einclude_dirs first?
+ sonne|work	besser82: or is cmake reordering things?
+ besser82	sonne|work:  it's mot just cmake; it's way the CMakeLists are setup
+ sonne|work	besser82: not sure what you mean?
+ besser82	sonne|work:  someone who did the include-stuff actually PREpends all the new includes to the global-var
+ sonne|work	besser82: ohh I see
+ besser82	sonne|work:  like set( INCLUDES "newshit" ${INCLUDES})  ;)
+ sonne|work	besser82: that is the way I did it in configure back then
+ sonne|work	maybe
+ sonne|work	don't remember
+ sonne|work	so I guess it is a result of that
+ besser82	sonne|work:  I possibly found a solution...  lemme check...
+ besser82	sonne|work:  but that is not gurateed to work with *all* compilers...
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ sonne|work	besser82: what do you do?
+ besser82	sonne|work:  Trying to inject INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/src ) into toplevel cmake...
+ besser82	sonne|work:  that should make sure they are set *BEFORE* any other include...
+ sonne|work	ok
+ besser82	sonne|work:  looks like it works....
+ besser82	sonne|work:  lemme do some cleanups && push
+ besser82	sonne|work:  shall i push directly to `develop` to use featurebranch && PR?
+ besser82	sonne|work:  s/to/or/
+ besser82	sonne|work:  would actually just be one commit, so easily revertable...
+ besser82	sonne|work:  ready2go!  patch worxxx
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Bj?rn Esser :feature/fix-include-order * f100688 / / (10 files): https://github.com/shogun-toolbox/shogun/commit/f1006885ccad27456a71d75f014aa918b807cc31
+ shogun-notifier-	shogun: fix include-order to fix build when shogun-headers present in system-dirs
+ sonne|work	besser82: errm PR?
+ besser82	sonne|work: here ya go!  https://github.com/shogun-toolbox/shogun/pull/1811
+ sonne|work	besser82: ok lets wait for travis and then we merge :)
+-!- travis-ci [~travis-ci@ec2-54-234-109-127.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Bj?rn Esser's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/16578358
+-!- travis-ci [~travis-ci@ec2-54-234-109-127.compute-1.amazonaws.com] has left #shogun []
+ shogun-notifier-	shogun: Bj?rn Esser :develop * f100688 / / (10 files): https://github.com/shogun-toolbox/shogun/commit/f1006885ccad27456a71d75f014aa918b807cc31
+ shogun-notifier-	shogun: fix include-order to fix build when shogun-headers present in system-dirs
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * f751978 / / (10 files): https://github.com/shogun-toolbox/shogun/commit/f7519783e6366b737a098f06cf3b66f35bf1ae2b
+ shogun-notifier-	shogun: Merge pull request #1811 from shogun-toolbox/feature/fix-include-order
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fix include-order to fix build when shogun-headers present in system-dirs
+ sonne|work	besser82: thanks a lot
+ sonne|work	adrin_: give it a try besser82 likely fixed your issue.
+ besser82	sonne|work:  np  ;)
+ sonne|work	besser82: btw I was messing with debian shogun python package
+ besser82	sonne|work:  kaputt?
+ sonne|work	besser82: it is tough ... trying to build for python 3 / 2 at once
+ besser82	sonne|work:  you simply need different build/-dirs
+ besser82	sonne|work:  like cd build && cmake ..  and cd build-py3 && cmake ...
+ sonne|work	besser82: in debian that is all automagic
+ besser82	sonne|work:  but does python3-interfaces really work?!?
+ besser82	sonne|work:  is it?
+ sonne|work	besser82: gsomix fixed things up - so they should
+ besser82	sonne|work:  with units?
+ besser82	sonne|work:  erm...  testing?
+ sonne|work	might be that we have a few python2 things in notebooks though
+ sonne|work	not tested
+ besser82	sonne|work:  gna
+ besser82	sonne|work:  no tests, no fedora / RHEL
+ besser82	sonne|work:  are you really forced to use all debhelper automagic in debian?!?
+ sonne|work	besser82: gna?
+ sonne|work	besser82: I better do
+ sonne|work	besser82: well notebooks are run at night for python2 but not 3 - actually nothing is run for python3 yet
+ besser82	sonne|work:  gna like damn it  ;)
+ sonne|work	wiking: any chance you have time to set that up?
+ sonne|work	besser82: gna like urgs
+ sonne|work	kk
+ besser82	sonne|work:  set what up?
+ besser82	sonne|work:  nb && stuff for py3?
+ besser82	sonne|work:  Testing stuff is more important  :-P
+ sonne|work	besser82: well our buildbot could just get another py3 test
+ sonne|work	no we have the tests
+ sonne|work	we just need to run everything with py3 installed
+ sonne|work	besser82: I mean there is no difference - you just need to install python3 and compile
+ besser82	sonne|work:  I see;  lemme try that on Fedora buildzzz  ;)
+@wiking	sonne|work: what?
+ sonne|work	question is whether we broke everything
+ besser82	sonne|work:  :D
+ sonne|work	wiking: a separate buildbot test for python3
+ besser82	sonne|work:  That's what scratch builds good for  :-P
+@wiking	sonne|work: it's in travis
+ sonne|work	wiking: can we also have it on the buildbot please so we can compile notebooks too?
+@wiking	sonne|work: no
+@wiking	no time for that sorry
+@wiking	of course if anyboyd else has time for it go for it
+@wiking	but python3 doesnt work at all
+@wiking	it needs extensial amount of work to get it compiling ...
+ sonne|work	wiking: why that? it did work with the configure a year back
+ besser82	wiking:  will it?
+@wiking	sonne|work: it did not ever work
+ besser82	wiking:  swig should do all the needed workz  ;)
+ sonne|work	wiking: it did -  gsomix fixed things up and we had it in release notes IIRC for 2.0
+@wiking	sonne|work: the thing that it compiled does not mean that it worked
+@wiking	yes it compiled
+ sonne|work	wiking: no he could run *all* examples
+@wiking	have u tried running examples?
+@wiking	well see travis bot
+ sonne|work	he fixed up the examples
+ sonne|work	travis py3 bot doesn't run
+@wiking	again. see travis bot's output
+ sonne|work	like not at all
+ sonne|work	not even attempting to compile
+ besser82	sonne|work, wiking: the problem on travis is, that it cannot build e.g. numpy  ;)
+ besser82	sonne|work, wiking: that would need work
+ besser82	sonne|work, wiking: lemme check the py3 stuff with some fedora-scratch-builds  ;)
+ sonne|work	besser82: yeah but on debian / fc we have python3-numpy already
+@wiking	besser82: u mean scipy
+@wiking	besser82: and u mean that it runs out of lines ...
+@wiking	right?
+ besser82	wiking: yes
+@wiking	what's the new empty 'allowed to failed' build doing?
+@wiking	is that clang?
+@wiking	btw the problem is that now it doesn't use the wheel packages
+@wiking	which i dont really get because they are there
+@wiking	so the thing is that this should install numpy and scipy from whl package instead of trying to compile it from src
+@wiking	but this has changed recently seems
+@wiking	as it worked in the past
+@wiking	besser82: any ideas for that?
+@wiking	ok i think i know why
+ besser82	wiking:  compile failes, because the is not FORTRAN-compiler present  ;)
+@wiking	besser82: no it's not that
+@wiking	besser82: as said above i dont want it to compile it from source
+@wiking	i want it to isntalling it from wheel package
+ besser82	wiking:  no idea about that, currently...
+ besser82	wiking:  lemme check after I tried to scratch build on fedora
+ shogun-notifier-	shogun: Viktor Gal :develop * d231b47 / .travis.yml: https://github.com/shogun-toolbox/shogun/commit/d231b47469d3c92b3ca8ae15b30e1aee8b103d8e
+ shogun-notifier-	shogun: Upgrade pip to 1.5 for python3 job
+@wiking	this might do the trick
+@wiking	ok there u go
+@wiking	https://travis-ci.org/shogun-toolbox/shogun/jobs/16581560
+@wiking	and here are the fails:
+@wiking	https://travis-ci.org/shogun-toolbox/shogun/jobs/16581560#L4662
+@wiking	the factor graph error can be fixed with 2to3
+@wiking	as well as mathematics_logdet
+ shogun-notifier-	shogun: Viktor Gal :develop * 56e3fa9 / examples/undocumented/python_modular/ (4 files): https://github.com/shogun-toolbox/shogun/commit/56e3fa953aa630f111178fe96101b1687043c7b1
+ shogun-notifier-	shogun: 2to3 fixes for python examples
+ besser82	wiking:  there is another problem  ;)
+ besser82	wiking:  the tests should be run with some py3 interp
+ besser82	wiking:  currently we are using the py2 interp when running them  ;)
+ besser82	wiking:  and to get all shiatz running with a py3 interp, we need to fix / change some more bits...
+ besser82	wiking:  like da scriptlet in Version.cmake and doxy2swig
+-!- travis-ci [~travis-ci@ec2-50-16-165-187.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/16581556
+-!- travis-ci [~travis-ci@ec2-50-16-165-187.compute-1.amazonaws.com] has left #shogun []
+ besser82	sonney2k, sonne|work:  ^^^
+@wiking	besser82: https://travis-ci.org/shogun-toolbox/shogun/jobs/16583442#L518
+@wiking	besser82: it works on travis
+@wiking	besser82: but as u can see examples fail
+ besser82	wiking:  yes, all errors boil down to "one simply cannot use py3-compiled.so with py2 interp"  :-P
+@wiking	besser82: ?
+ besser82	wiking:  like da stuff about pickle'ing and such
+@wiking	that thing there uses python 3.3 both for interpreter and library
+ besser82	wiking:  nope
+ besser82	wiking:  the is *always* python2 in minimal inst of ubuntu / debian
+@wiking	i guess this is why it says
+@wiking	-- Found PythonLibs: /usr/lib/libpython3.3m.so (found version "3.3.3")
+@wiking	and
+@wiking	-- Found PythonInterp: /home/travis/virtualenv/python3.3_with_system_site_packages/bin/python (found version "3.3.3")
+@wiking	besser82: that travis task is not a minimum installed ubuntu
+@wiking	or debian
+@wiking	it's actually a modded install by travis to have python 3.3
+@wiking	...
+@wiking	so it's not because of different version of python lib and interperter
+@wiking	that's why actually there's an enforcer for this in cmakelists
+ besser82	wiking:  lemme check twice in my setup  ;)
+@wiking	besser82: well regardless of your setup
+@wiking	the thing that fails in that travis task
+@wiking	is not because of what u said ...
+@wiking	it's just because there's a problem currently supporting 3.3 with shogun
+@wiking	besser82: i've been working with this like for 2 months back in summer so i know what were then the problems and they still remains as nobody touched it
+ besser82	wiking:  then we should split off the module to python3_modular  ;)
+ besser82	wiking:  or sth
+ besser82	wiking:  to make use of the `-py3` switch in swig
+@wiking	besser82: u realised that we use that... right?
+ besser82	wiking:  nope, because travis doesn't use verbose make  :(
+ besser82	wiking:  and don't know any specific bits of the cmakelists  ;)
+@wiking	besser82: obviously as there is the max 10000 lines log limit on travis
+@wiking	besser82: git grep "-py3"
+@wiking	or git grep "\-py3"
+ besser82	wiking:  alright seen it  ;)
+@wiking	so it has nothing to do with either of the stuff you've mentioned.... it's just because there are stuff that are not python3 ready both in swig generated interface and some of the scripts (see python_modular integration tests)
+ besser82	wiking:  nevertheless:  doxy2swig will fail with py3, too
+@wiking	besser82: well that's the least of our concerns
+@wiking	as that is some documentation problem and not functional bug
+ besser82	wiking:  and version.cmake, too, when building from release-tarball  ;)
+@wiking	as said
+@wiking	least of our problems concerning python3
+ besser82	wiking:  kk
+@wiking	currently it fails functionally.. until that is not fixed
+@wiking	python3 is just out of the story
+@wiking	now that to support doxy2swig and release tarball
+@wiking	that's like doable within 10 minutes
+@wiking	the others hardly
+-!- lisitsyn1 [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Read error: Connection reset by peer]
+ besser82	wiking:  https://travis-ci.org/shogun-toolbox/shogun/jobs/16583442#L4356 ---> file = BytesIO(str)
+ besser82	wiking:  the pickle problem seem to be caused by "nested" classes....
+ shogun-notifier-	shogun: Bj?rn Esser :feature/improved_python3_support * 45a809e / examples/undocumented/python_modular/structure_dynprog_modular.py: https://github.com/shogun-toolbox/shogun/commit/45a809e3f60dbe37bb39c0a3c463a983f0b8e918
+ shogun-notifier-	shogun: fix structure_dynprog_modular for Python3
+ gsomix	python3 makes me sad
+ besser82	gsomix:  :/  We all want to have support for it, but...
+ besser82	wiking, sonne|work:  ^^^  With that patch structure_dynprog now fails for another, pickle-releated reason  ;)  Shall I merge?!?
+ besser82	wiking, sonne|work:  https://travis-ci.org/shogun-toolbox/shogun/jobs/16587844#L4409
+ sonne|work	gsomix: what do you mean?
+ besser82	sonne|work, wiking: for comparison, prev. build:  https://travis-ci.org/shogun-toolbox/shogun/jobs/16583442#L4356
+ besser82	sonne|work:  I thinks, he moans about non-ffwd-porting  ;)
+ sonne|work	besser82: really just 4 tests fail?!
+ besser82	sonne|work:  nope still 5, but the "fixed" one for another reason  ;)
+ sonne|work	well so few?
+ sonne|work	I am surprised that it basically works
+ besser82	sonne|work:  I'm not; since swigzzz should be able to hack it  ;)
+ besser82	sonne|work:  the only probs with that are now 5 examples / tests, doxy2swig, version.cmake  AFAIK
+ shogun-notifier-	shogun: Bj?rn Esser :develop * 45a809e / examples/undocumented/python_modular/structure_dynprog_modular.py: https://github.com/shogun-toolbox/shogun/commit/45a809e3f60dbe37bb39c0a3c463a983f0b8e918
+ shogun-notifier-	shogun: fix structure_dynprog_modular for Python3
+ gsomix	sonne|work, I mean, something related to python3 support always breaks. that makes me sad
+ sonne|work	gsomix: yeah simply because we didn't enable test runs when you finally got it all working
+ sonne|work	gsomix: but we will now
+ sonne|work	and then it is solved
+-!- travis-ci [~travis-ci@ec2-23-22-190-94.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Bj?rn Esser's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/16587840
+-!- travis-ci [~travis-ci@ec2-23-22-190-94.compute-1.amazonaws.com] has left #shogun []
+ gsomix	sonne|work, so now you are free? | yep, free. but not as free beer :)
+ gsomix	sonne|work, ok then.
+ sonne|work	besser82: sure merge then
+ besser82	sonne|work:  done  :D
+ sonne|work	gsomix: ok free beer then give us matlab :D
+@wiking	besser82: sonne|work there's a problem with swig generated interface and pickle
+-!- adrin_ [~adrin@guest-202.mpi-inf.mpg.de] has quit [Quit: Leaving]
+-!- adrin [~adrin@guest-202.mpi-inf.mpg.de] has joined #shogun
+ besser82	wiking, sonney2k: haha, got that pickle shiatz-reason  ;)
+ besser82	wiking, sonney2k: py3-pickle  == py2 cPickle  ;)
+ besser82	wiking, sonney2k: so py3-pickle != py2 pickle  :-P
+ besser82	wiking, sonney2k:  try to find a workaround  ;)
+ besser82	wiking, sonney2k:  ^^ I'll
+@wiking	besser82: mmm wonder why integration tests never cry about that
+ besser82	wiking: because it is *mostly* compat
+ besser82	wiking: just some corner-cases are not compatible
+ besser82	wiking: and for those I'm digging up a workaround
+ adrin	Hey guys, I just wanted to confirm that the package is successfully compiled on my server. Thanks :-)
+ besser82	adrin:  nice to hear  :D
+ besser82	adrin:  Freut mich  :D
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has joined #shogun
+ adrin	I hope I can give you a hand in near future and pay back.
+ besser82	adrin:  I think with the 2to3ized doxy2swig you helped us a lot  ;)
+ besser82	wiking:  got a pickle workaround, lets see if it works
+@wiking	pr it
+@wiking	and travis will tell
+ adrin	besser82: you're most welcome :-)
+ besser82	wiking:  I'm on it and will push to featurebranch asap  ;)
+ besser82	adrin:  :D
+ sonne|work	adrin: hurray :D
+ sonne|work	besser82: I would always use cPickle then - it is just muuuuch faster
+ adrin	sonne|work: yeah it really does deserve a hurray for me :D
+ besser82	sonne|work: but has some flaws
+ besser82	sonne|work: like no Unpickler.dispatch  ;)
+ besser82	sonne|work: and problems (I assume) with those SVM^shit stuff
+ sonne|work	besser82: no that is just a very complex serialization example
+ sonne|work	besser82: if something breaks then that
+ besser82	sonne|work: 4 in a row?  all related to SVM^shit
+ sonne|work	besser82: relax not all TJ's fault
+ besser82	sonne|work: nuthing about TJ in that particular, just Py3 changes  :-P
+ besser82	sonne|work: It is just suspicious...
+ besser82	sonne|work: I assume this is related to neseted classes, which in fact are a no-go for cPickle  ;)
+ sonne|work	no no
+ sonne|work	should all work
+-!- lisitsyn1 [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ besser82	sonne|work:  ??? ^^^   btw.  Who created pickles with "LATIN-1" encoded strings?!?!?
+ sonne|work	what?
+ besser82	sonne|work:  that `DynProg_example_py.pickle.gz` has latin-1 encoded shit in it  :S
+ besser82	sonne|work:  and what was that about "no no should all work" ?!?
+ sonne|work	besser82: c'mon these are just some legacy crap examples
+ besser82	sonne|work: so we shall purge them?!?
+ sonne|work	no
+ besser82	sonne|work: but?!?
+ sonne|work	well we fix them
+ besser82	sonne|work: hahaha,  guess what I'm doing  :-P
+ sonne|work	but these are like <0.1% of shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Bj?rn Esser :feature/improved_python3_support * 2186913 / examples/undocumented/python_modular/structure_dynprog_modular.py: https://github.com/shogun-toolbox/shogun/commit/2186913d989ad4be0272a58a0aa4a82b17e9cd77
+ shogun-notifier-	shogun: finally Python3ized, hopefully
+ besser82	sonney2k, sonne|work, wiking: let's-a-wait 4 Travis
+ besser82	sonney2k, sonne|work, wiking: that should fix Pickles in one case
+ besser82	sonney2k, sonne|work, wiking: If that w0rkz, I'll adapt that to the other examples as well  ;)
+ besser82	gsomix, adrin:  ^^^
+ besser82	sonney2k, sonne|work, wiking, gsomix, adrin: that thing was a tough maze to solve  ;)
+ besser82	sonney2k, wiking: It failed again  :(  But at least for another reason  ;)
+-!- FSCV [~FSCV@50.7.50.60] has joined #shogun
+ shogun-notifier-	shogun: Bj?rn Esser :feature/improved_python3_support * 1c1a78e / examples/undocumented/python_modular/serialization_svmlight_modular.py: https://github.com/shogun-toolbox/shogun/commit/1c1a78e37de38c23d97d086a563d881145a46b02
+ shogun-notifier-	shogun: hopefully fixed serialization_svmlight_modular
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 252 seconds]
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	sup guys
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+ besser82	iglesiasg:  Heyya!
+ besser82	iglesiasg:  Wassup?  Does da Javazzz run?
+@iglesiasg	besser82, yesterday it didn't seem to compile when BUILD_EXAMPLES is ON
+ besser82	iglesiasg:  try with recent checkout...
+ besser82	iglesiasg:  for me && buildbot && travis it builds
+ besser82	iglesiasg:  me is currently on doing all the left-over stuff for da Python3
+@iglesiasg	besser82, were there changes on that from yesterday?
+ besser82	iglesiasg:  yes
+@iglesiasg	besser82, let me try with current develop then..
+-!- gsomix [~gsomix@185.6.237.115] has quit [Remote host closed the connection]
+-!- gsomix [~gsomix@185.6.237.115] has joined #shogun
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has joined #shogun
+ thoralf	Hey hackers.
+ besser82	thoralf:  Heyya!!!
+ besser82	thoralf:  happy new year!!!
+ thoralf	Oh, yes.  Happy new fear! ;)
+@iglesiasg	besser82, still broken
+@iglesiasg	besser82, now I had BUILD_EXAMPLES=OFF
+@iglesiasg	besser82, https://gist.github.com/iglesias/8322662
+ besser82	iglesiasg:  which SWIG_ver do you use?
+ besser82	sonney2k:  ping?
+ besser82	wiking:  ping?
+@iglesiasg	besser82, 2.0.4
+ besser82	iglesiasg:  might be related to that, possibly...
+@iglesiasg	ok
+ besser82	iglesiasg:  me was trying with 2.0.8 && 2.0.11  which both worked
+@iglesiasg	besser82, I think travis uses ubuntu 12.04 as well
+@iglesiasg	besser82, and this is the SWIG in the repositories I believe
+ besser82	iglesiasg:  lemme check travis...
+ besser82	iglesiasg:  indeed 2.0.4
+ besser82	iglesiasg:  on travis
+ besser82	iglesiasg:  lokks like there is sth. br0k3n on your sys...
+@iglesiasg	besser82, ok.. I can live with that. Not interested at this moment of using java for this :)
+ besser82	iglesiasg:  can you try with a clean VM, plz?
+ besser82	iglesiasg:  kk
+@iglesiasg	besser82, I can try with the OpenJDK and we can find out if it is related to using Oracle Java
+@iglesiasg	although I guess it has nothing to do with that due to the type of error
+@iglesiasg	so I think I will just forget about it
+ besser82	iglesiasg:  buildbot.shogun uses ShitracleJDK  and has no error   ;)
+ besser82	iglesiasg:  If you don't need java atm then let's forget
+ besser82	sonney2k, wiking: what might this shiatz be related to?  https://travis-ci.org/shogun-toolbox/shogun/jobs/16605587#L4622
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 252 seconds]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-50-16-20-105.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Bj?rn Esser's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/16605583
+-!- travis-ci [~travis-ci@ec2-50-16-20-105.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	besser82, what did I miss?
+@sonney2k	Hey thoralf! Happy new year to you too!
+ thoralf	:)
+@sonney2k	HOpe to see you around next monday too!
+ thoralf	sonney2k: In IRC or somewhere in real life?
+ thoralf	Hybrid virtual meeting ;)
+@sonney2k	thoralf, I have to be here doing kids babysitting
+@sonney2k	so no way to escape to c-base or so
+ thoralf	Too bad.  I'll see what I can do. :)
+ thoralf	Would be a good chance to push my other uncommitted changes...
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has joined #shogun
+ pickle27	do we have links to the build bots anywhere? I can never remember how to get to that page
+@sonney2k	pickle27, sure sure
+@sonney2k	pickle27, and hey happy new year too :)
+@sonney2k	pickle27, buildbot.shogun-toolbox.org
+ pickle27	yes happy new year!
+@sonney2k	pickle27, btw we now have the sgt.eu domain too
+ pickle27	maybe we should put a link to that page on the contact page
+@sonney2k	pickle27, so we can do things like  http://sgtb.eu/SVM
+@sonney2k	pickle27, as shortlinks for documentation that you can use in your notebooks for example
+ pickle27	handy!
+@sonney2k	pickle27, I should actually make buildbot.sgtb.eu work too
+@sonney2k	pickle27, voila http://buildbot.sgtb.eu/
+@sonney2k	thoralf, yeah it would be nice to have these all in...
+ pickle27	nice!
+@sonney2k	pickle27, if you have time to help out with the website I can give you access to it
+ pickle27	hmmm I probably won't have time to do much
+@sonney2k	pickle27, then feedback - where you would expect what on the website at least please :)
+ pickle27	I was thinking on the contact page
+ pickle27	anywhere really
+ pickle27	or a new tab for status?
+@sonney2k	pickle27, contact page? what do you suggest?
+@sonney2k	pickle27, and what should status do?
+ pickle27	maybe have a status header after Mailing List and place links to the buildbot and travis CI
+@sonney2k	pickle27, we currently have that under doc: http://sgtb.eu/page/documentation/resources
+ pickle27	ahh then that answers my original question
+@sonney2k	pickle27, well if you cannot find it who can...
+ pickle27	hmmm maybe we should have a documentation tab like we do and a developer tab
+ pickle27	and put that page there
+ pickle27	we might be able to consolidate news and events to make room
+ pickle27	I could mess around on a fork of shogun web
+ pickle27	and take some screens
+ pickle27	there is a way to run the site locally yes?
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	shogun-buildbot, force build 'deb4 - python3'
+ shogun-buildbot	build #0 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ pickle27	just looked at so yeah I'll play around with it
+@sonney2k	pickle27, yeah problem is the content is in a database
+@sonney2k	pickle27, and on the server it is in mysql / locally sqlite
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@sonney2k	and no idea how to convert between them
+ pickle27	I should be able to do some re-org without all the content though
+@sonney2k	pickle27, anything more clean structure wise is highly appreciated
+@sonney2k	pickle27, even if it is just a plan
+ pickle27	okay I'll see what I come up with!
+ pickle27	simple is good too!
+ shogun-buildbot	build #0 of deb4 - python3 is complete: Failure [failed python static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/0
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has quit [Quit: Page closed]
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has quit [Ping timeout: 272 seconds]
+@sonney2k	besser82, alright we have a failing python3 buildbot now so feel free :)
+ shogun-buildbot	build #1 of deb4 - python3 is complete: Failure [failed python static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/1  blamelist: Orion Poplawski <orion@nwra.com>
+ shogun-buildbot	build #2 of deb4 - python3 is complete: Failure [failed python static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/2  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Orion Poplawski :develop * 054852f / cmake/FindOctave.cmake: https://github.com/shogun-toolbox/shogun/commit/054852fe9b573056edca5ca870f34188d6d83799
+ shogun-notifier-	shogun: Octave 3.8.0 does not have libcruft
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 17bf0ff / cmake/FindOctave.cmake: https://github.com/shogun-toolbox/shogun/commit/17bf0ff026f374224d1c2d99312c67b30022333f
+ shogun-notifier-	shogun: Merge pull request #1812 from opoplawski/octave38
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Octave 3.8.0 does not have libcruft
+-!- travis-ci [~travis-ci@ec2-54-234-102-70.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/16616553
+-!- travis-ci [~travis-ci@ec2-54-234-102-70.compute-1.amazonaws.com] has left #shogun []
+--- Log closed Thu Jan 09 00:00:43 2014

@@ -1,0 +1,539 @@
+--- Log opened Wed May 01 00:00:29 2013
+ alibezz	lisitsyn: iglesiasg: how do the embed methods at tapkee_methods.hpp are supposed to work? I mean, in the bigger picture of shogun's architectute?
+-!- Asix3 [~asix3@d47-69-144-148.nap.wideopenwest.com] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ Asix3	Hi! I'm going to try an get an application together for GSOC. I'm wondering if there's any way to search the shogun mailing list
+ Asix3	I've subscribed already, but I'm not sure if there's an archive of past messages
+ Asix3	...and I just found it. Nevermind!
+ shogun-buildbot	build #325 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/325
+ alibezz	lisitsyn: hey, when you specified on step 7 "Add a class CSammonMapping that calls the tapkee library code for sammon mapping (check PR #1015 for example).Add a class CSammonMapping that calls the tapkee library code for sammon mapping (check PR #1015 for example)."
+ alibezz	lisitsyn: you mean a class in src/shogun/converter, right?  i'm assuming so as of now
+ alibezz	=)
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has joined #shogun
+-!- cwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+-!- cwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has quit [Client Quit]
+ Asix3	ok, I've forked shogun from git and cloned it to my system. I've ran ./configure, but 'make' isn't doing anything
+ Asix3	well, it's giving me: make: *** No rule to make target '.config'.  Stop.
+ Asix3	...and it looks like I figured that problem out, too -- sorry!
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- foulwall_ [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- alibezz [~alibezz@177.182.164.8] has quit [Quit: Leaving.]
+-!- alibezz [~alibezz@177.182.164.8] has joined #shogun
+-!- alibezz [~alibezz@177.182.164.8] has quit [Client Quit]
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has left #shogun ["PING 1367380762"]
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has quit [Quit: wencan]
+-!- gsomix [~Miranda@109.169.243.24] has left #shogun ["I'm a happy Miranda IM user! Get it here: http://miranda-im.org"]
+-!- gsomix [~Miranda@109.169.243.24] has joined #shogun
+@sonney2k	lisitsyn, how many proposal do you expect?
+@lisitsyn	sonney2k: at least 30 then
+@lisitsyn	sonney2k: have you seen eveybody gets less proposals this yeat?
+@lisitsyn	year*
+@sonney2k	no where should I have seen this?
+@lisitsyn	sonney2k: mentors list
+@lisitsyn	sonney2k: [GSoC Mentors] Low(er) number of applications this year?
+@sonney2k	lisitsyn, ohh yes replied to the thread
+ gsomix	good morning
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- gsomix [~Miranda@109.169.243.24] has quit [Read error: Connection reset by peer]
+-!- gsomix [~gsomix@109.169.243.24] has joined #shogun
+-!- poojits [75d35d4a@gateway/web/freenode/ip.117.211.93.74] has joined #shogun
+ poojits	Hi lisitsyn, I would like to discuss issue 338. The links you have provided there are broken.
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has joined #shogun
+@lisitsyn	poojits: oh let me try to find out where they are now
+@lisitsyn	poojits: okay the paper link updated but code is kind of lost
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- hushell [43bd6474@gateway/web/freenode/ip.67.189.100.116] has joined #shogun
+ poojits	lisitsyn: thanks, I will have a look.
+-!- poojits [75d35d4a@gateway/web/freenode/ip.117.211.93.74] has quit [Quit: Page closed]
+ hushell	Hello guys I am Shell
+ hushell	Hi Sergey I see your reply I come here before going to bed
+@lisitsyn	hushell: hey
+@lisitsyn	HeikoS: nice to see you here
+@lisitsyn	oops
+@lisitsyn	:D
+@lisitsyn	ok nice to see you both here
+@lisitsyn	hah
+ hushell	nice to meet you guys
+@lisitsyn	hushell: alright just hang there when you are available
+ hushell	I have a short question regarding the Binarylabels::score_to_probabilities()
+@lisitsyn	although you are in a totally different timezone
+@lisitsyn	hushell: what is the question?
+ hushell	yeah I am in UtC-8
+@lisitsyn	haha 12 hours between us
+ hushell	why this function doesn't output anything expect changing the confidences
+@HeikoS	lisitsyn: Hi!
+@lisitsyn	HeikoS: ^ could you please answer?
+@HeikoS	hushell: why should it?
+@HeikoS	the labels have a vector for the scores and one for the confidences
+@HeikoS	this translates scores to confidences
+@HeikoS	why should it do something else?
+@lisitsyn	have to go now
+ hushell	Could you take a look at Eq.(7) in this paper: http://hal.archives-ouvertes.fr/docs/00/10/39/55/PDF/cr102875872670.pdf
+ hushell	it needs the learned parameters
+ hushell	I don't know much about Platt's rescoring, it seems like a calibration
+ hushell	using a sigmoid function
+@HeikoS	looking ...
+@HeikoS	hushell: I see
+@HeikoS	you need the A and B
+@HeikoS	let me quickly check the code
+ hushell	exactly
+@HeikoS	ok, my suggestion then is:
+@HeikoS	to put the sigmoid fitting method into CStatistics
+@HeikoS	as fit_sigmoid(SGVector<float64_t>)
+@HeikoS	this method returns A and B
+@HeikoS	and is called from the binary labels
+@HeikoS	hushell: what do you think of this?
+ hushell	Where is the CStatistics?
+ hushell	So you mean do it in another way
+@HeikoS	hushell: no just make it modular
+@HeikoS	or wait
+ hushell	Ok I found it
+ hushell	documentation is great!
+@HeikoS	since you need the scores *and* the parameters
+@HeikoS	and sigmoid fitting is not likely to happen somewhere else
+@HeikoS	maybe put it into the scores_to_probabilities method
+@HeikoS	dont really know whats best
+@HeikoS	what do you think?
+ hushell	could you explain a bit how the scores_to_probabilities being implemented?
+ hushell	what's the target to fit?
+ hushell	sorry I haven't read this piece of code
+@HeikoS	no worries
+@HeikoS	it does two things: 1) fit a sigmoid via newton search, result is parameters a and b. 2) uses this sigmoid to compute all the probabilities given the scores
+@HeikoS	code is taken from a paper btw
+@HeikoS	have a look at the last lines of the method
+@HeikoS	there are the important parts
+@HeikoS	and also a and b
+ hushell	the algorithm is very clear
+ hushell	so why not just store the a and b
+@HeikoS	not sure about this
+@HeikoS	scores might change
+@HeikoS	and without calling the method again they outdate
+@HeikoS	maybe make a and b optional parameters
+@HeikoS	if they are provided, they are not coimputed
+@HeikoS	via method in CStatistics
+@HeikoS	but you can also precompute yourself and then pass them
+ hushell	that's true it's being call during testing
+@HeikoS	I think thats good
+@HeikoS	do you want to move the code or should I do it?
+-!- poojits [75d35d4a@gateway/web/freenode/ip.117.211.93.74] has joined #shogun
+ hushell	I am not very clear how to do it
+@HeikoS	hushell: dont worry
+ hushell	Seems a good chance to learn
+@HeikoS	I will do it now, give me 10 mins
+ hushell	which function should I call from CStatistics
+@HeikoS	you already have lots of stuff in your PR, lets not make it even more complex :)
+@HeikoS	I will tell you in a bit
+ hushell	Okay let's see how you make it :)
+ hushell	Thanks so much. That's true, many files are involved
+ hushell	It
+ hushell	It
+ hushell	It's my first time to code in such a regular way
+ hushell	I just went through the code, it looks like the targets come from the counting of positives and negatives
+-!- ozan [~ozan@ee-167-250.eee.metu.edu.tr] has joined #shogun
+ hushell	interesting, in Lin
+ hushell	's note he included everything
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- Viksvampire19 [~AndChat49@223.185.83.159] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+@HeikoS	hushell: ok done, I will quickly compile/test/merge and then let you know
+ hushell	Awesome!
+ hushell	Thanks for your help!
+ hushell	I have to go to bed now, talk you later! Have a nice day!
+@HeikoS	hushell: ok good night!
+@HeikoS	have a look at the score_to_prob method
+@HeikoS	there you will see how you can use CStatistics to get the sigmoid parameters
+-!- hushell [43bd6474@gateway/web/freenode/ip.67.189.100.116] has quit []
+-!- abinash [75ef5e6e@gateway/web/freenode/ip.117.239.94.110] has joined #shogun
+-!- saket [0e8b5206@gateway/web/freenode/ip.14.139.82.6] has joined #shogun
+-!- saket [0e8b5206@gateway/web/freenode/ip.14.139.82.6] has quit [Client Quit]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Monique :develop * d9ca1a1 / examples/undocumented/python_modular/inverse_covariance_estimation_demo.py: https://github.com/shogun-toolbox/shogun/commit/d9ca1a1d3e03394af836f09111d0e4e688ba3930
+ shogun-notifier-	shogun: Graphical example for SparseInverseCovariance utility class that estimates sparse inverse covariance by given covariance matrix. Plots a heat map and the graphs of dependency between variables
+ shogun-notifier-	shogun: Monique :develop * 7952ae8 / examples/undocumented/python_modular/inverse_covariance_estimation_demo.py: https://github.com/shogun-toolbox/shogun/commit/7952ae8619d5a405e3341b1d76c99992f932d2b4
+ shogun-notifier-	shogun: remove inverse_covariance_estimation_demo.py from python_modulat directory
+ shogun-notifier-	shogun: monicadragan :develop * e6df0b0 / examples/undocumented/python_modular/graphical/inverse_covariance_estimation_demo.py: https://github.com/shogun-toolbox/shogun/commit/e6df0b04ea00473e6b66dc9e9680d55436df466a
+ shogun-notifier-	shogun:  Graphical example for SparseInverseCovariance utility class that estimates sparse inverse covariance by given covariance matrix. A heat map and the graphs of dependency between variables are plotted.
+ shogun-notifier-	shogun: monicadragan :develop * f77d761 / examples/undocumented/python_modular/graphical/inverse_covariance_estimation_demo.py: https://github.com/shogun-toolbox/shogun/commit/f77d761e9d68f34585dd6c6d1ecf359e1675d721
+ shogun-notifier-	shogun: Refactoring: loop replace
+ shogun-notifier-	shogun: monicadragan :develop * f627b92 / examples/undocumented/python_modular/graphical/inverse_covariance_estimation_demo.py: https://github.com/shogun-toolbox/shogun/commit/f627b92e91381dcfce57c02d063950f7791b088f
+ shogun-notifier-	shogun: Refactoring: loop replace
+ shogun-notifier-	shogun: Heiko Strathmann :develop * fca8ced / examples/undocumented/python_modular/graphical/inverse_covariance_estimation_demo.py: https://github.com/shogun-toolbox/shogun/commit/fca8ced2318976fe1ee7db1f4525dcc6090188da
+ shogun-notifier-	shogun: Merge pull request #1035 from monicadragan/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Issue #863: Add sparse inverse covariance graphical example - dev branch
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 8fed6a8 / / (6 files): https://github.com/shogun-toolbox/shogun/commit/8fed6a8b15b2e46aa3f08e19a0fa5711988ce6e5
+ shogun-notifier-	shogun: -moved sigmoid fitting of BinaryLabels to CStatistics and make BinaryLabels use it
+ shogun-notifier-	shogun: -updated/added unit-tests
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 98048ce / / (6 files): https://github.com/shogun-toolbox/shogun/commit/98048ce69e5d157e64b4117694064f30e88626fb
+ shogun-notifier-	shogun: Merge pull request #1038 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fit sigmoid refactoring
+ shogun-buildbot	build #891 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/891  blamelist: monicadragan <monique@work.(none)>, Monique <monique@work.(none)>
+@HeikoS	this makes no sense buildbot
+ shogun-buildbot	build #892 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/892  blamelist: monicadragan <monique@work.(none)>
+@HeikoS	sonney2k: any idea what causes this?
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+ shogun-buildbot	build #893 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/893
+ shogun-buildbot	build #894 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/894  blamelist: Monique <monique@work.(none)>
+@wiking	uhuuu
+-!- iglesiasg [~nando@n177-p222.kthopen.kth.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@wiking	HeikoS: there was a merge for master?:)
+@HeikoS	wiking: no
+@wiking	mmm i wonder then why bsd bot tries to run on master :(
+@HeikoS	maybe I did something woring, let me check
+@HeikoS	nop
+@HeikoS	https://github.com/shogun-toolbox/shogun/commits/master
+@HeikoS	last commits from apr 04
+@HeikoS	https://github.com/shogun-toolbox/shogun/commits/develop
+@HeikoS	and those I just made are here
+-!- foulwall_ [~foulwall@li379-21.members.linode.com] has quit [Remote host closed the connection]
+-!- Viksvampire19 [~AndChat49@223.185.83.159] has quit [Quit: Bye]
+@wiking	lisitsyn: pong
+-!- abinash [75ef5e6e@gateway/web/freenode/ip.117.239.94.110] has quit [Ping timeout: 245 seconds]
+-!- poojits [75d35d4a@gateway/web/freenode/ip.117.211.93.74] has quit [Ping timeout: 245 seconds]
+-!- ozan [~ozan@ee-167-250.eee.metu.edu.tr] has quit [Quit: Leaving]
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has left #shogun ["QUIT :Leaving."]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- alibezz [~alibezz@177.182.164.8] has joined #shogun
+ alibezz	lisitsyn: ping
+ alibezz	iglesiasg: ping
+@iglesiasg	alibezz: pong
+ alibezz	iglesiasg: i started the implementation of the Sammon mapping. things are going a little slow because of my other tasks, but they're indeed evolving!... hehe i'm sort of basing my implementation on the IsoMap one
+ alibezz	like, seeing how the methods generally work in the lib etc
+ alibezz	do you think it's a good idea?
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has joined #shogun
+@iglesiasg	alibezz: yeah it sounds good indeed
+ alibezz	iglesiasg: an for step 7 of my issue https://github.com/shogun-toolbox/shogun/issues/1025
+@iglesiasg	alibezz: are you using sammong mapping's code from the matlab toolbox for DR?
+ alibezz	i'm writing the class under converter. is it the right thing to do?
+ alibezz	yes i am. i still have some doubts on how to test my implementation
+ alibezz	should i write a little program or does shogun have some prototypes for isomap for example, and so i can easily modify it?
+ alibezz	iglesiasg: sorry i didn't put your tag in the beginning of my messages. hehehe
+@iglesiasg	alibezz: give me some minutes please :)
+ alibezz	iglesiasg: no worries! ;) just wanted to make sure you saw the messages. it's all good!
+-!- harry27 [~ceo@202.3.77.220] has joined #shogun
+-!- harry27 [~ceo@202.3.77.220] has left #shogun []
+-!- cameron__ [~quassel@global-2-1.nat.csx.cam.ac.uk] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@iglesiasg	alibezz: re
+@iglesiasg	alibezz: sorry for the long dealy
+@iglesiasg	delay*
+@iglesiasg	alibezz: so it can be done with a class in converter
+@iglesiasg	alibezz: however, the DR in shogun is provided via tapkee
+@iglesiasg	so implementing sammon mapping in tapkee directly would be a better choice
+@iglesiasg	something similar to what lisitsyn described in the instructions in the github issue
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has joined #shogun
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has quit [Client Quit]
+ alibezz	iglesias: yup. the class just calls the implementation from tapkee
+@iglesiasg	alibezz: aaah ok sorry, all good then
+ alibezz	iglesiasg: but it's gonna take me a while to have it all done. I have to prepare some lectures... hahahahha
+@iglesiasg	hehe I see. No worries
+ alibezz	iglesiasg: the idea of sammon mapping is interesting though
+@iglesiasg	alibezz: aham! I don't really know about it
+@iglesiasg	alibezz: so it tries to minimize the error in the distance between input and projected space I read
+ alibezz	iglesiasg: yup. I'm going to implement using gradient descent, just like in the matlab code.
+ alibezz	iglesiasg: but maybe sgd would perform better. it's something to test in the future
+ alibezz	iglesiasg: how can i test my code? should i write a little program or do they have something for isomap that i can reuse?
+@iglesiasg	alibezz: maybe one of the examples under examples/undocumented?
+@iglesiasg	alibezz: or even any of tapkee examples
+ alibezz	iglesiasg: chill! didn't check these folders yet. ha
+@lisitsyn	kind of re
+@lisitsyn	alibezz: oh the idea of sammon mapping is as old as my parents probably :D
+@iglesiasg	lisitsyn: around 1969 according to wikipedia
+@iglesiasg	good number btw
+@lisitsyn	a little younger then
+@lisitsyn	the sammon mapping is I mean
+ alibezz	lisitsyn: iglesiasg: well my parents are def older. i'm 25. hehe they're from the 50s
+@lisitsyn	alibezz: 22 and 1961 here
+ alibezz	lisitsyn: you guys are rather young! when did you start coding?
+@lisitsyn	alibezz: as professionals or?
+@iglesiasg	alibezz: I am 23 and started at university 5 years ago
+@iglesiasg	haha but I am no professional :)
+@iglesiasg	5 years ago with pascal omg
+@lisitsyn	I've been paid for programming for ehmm somewhere 1.5 to 2 years so far
+ alibezz	lisitsyn: weren't you coding before that?
+@lisitsyn	alibezz: of course, for some more years
+@lisitsyn	from school may be
+ alibezz	got it
+ alibezz	cool
+ alibezz	i started coding when i was 17
+@lisitsyn	>5 probably
+@iglesiasg	ooh you are old hardcore programmers :P
+ alibezz	but mostly in research projects
+@lisitsyn	I remember I was coding some puzzles when I was 11
+@lisitsyn	with pascal
+ alibezz	hahaha i don't have that much of experience in c++ tho
+@iglesiasg	lisitsyn: oh that's super cool
+@iglesiasg	lisitsyn: I regret none taught me anything about programming when I was younger
+ alibezz	yea same here
+@iglesiasg	I didn't even know it existed before I started uni lol
+ alibezz	i wish i've learnt it earlier
+ alibezz	i spent most of my life studying french and english. ha
+@iglesiasg	oh la al
+@iglesiasg	oh la la hehe
+ alibezz	yea my life was kinda crazy. I like programming but I wish I knew C++ better. hhehhe well, it's all good
+ alibezz	living is learning lolz
+ votjakovr	living is machine learning :)
+ alibezz	votjakovr: i see what you did there! hahahaha def sounds like a slogan
+-!- romi__ [~mizobe@187.74.6.200] has quit [Remote host closed the connection]
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has joined #shogun
+-!- iglesiasg [~nando@n177-p222.kthopen.kth.se] has quit [Quit: Lost terminal]
+ votjakovr	alibezz: yep) i think so too
+-!- iglesiasg [~nando@n177-p222.kthopen.kth.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has quit [Quit: wencan]
+ alibezz	iglesiasg: it's workers' day in Brazil. supposed to be a holiday for all workers. make a dance if you're Brazilian and are working! \o\ /o/ \o/ /o\
+ alibezz	haha
+ alibezz	the whole idea of holidays never make sense in grad school. haha
+@iglesiasg	alibezz: also in the office here :(
+ alibezz	yea i have to give classes tomorrow. haha
+ alibezz	iglesiasg:is it a holiday in spain too?
+@iglesiasg	alibezz: you are the lecturer then? about?
+@iglesiasg	alibezz: in Spain and in Sweden :)
+ alibezz	iglesiasg: Information Retrieval. it's a lecture about language models
+ alibezz	iglesiasg: we need to teach here in order to get our degree
+@iglesiasg	alibezz: this is my office partner today http://robotnyheter.se/wp-content/uploads/2011/11/KTH-roboten_Dora.jpg :D
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has joined #shogun
+@lisitsyn	totally back
+-!- gsomix_ [~gsomix@95.67.181.139] has joined #shogun
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has joined #shogun
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- gsomix [~gsomix@109.169.243.24] has quit [Ping timeout: 252 seconds]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Ping timeout: 245 seconds]
+ alibezz	hahahaha
+@iglesiasg	alibezz?
+ alibezz	hey I'm laughing at your partner
+ alibezz	hehe a robot
+@iglesiasg	aaah ok yeah hehe
+-!- gsomix_ is now known as gsomix
+ gsomix	hi, guys
+@iglesiasg	hey gsomix
+ gsomix	so, I have planted potatoes. time to coding. >:3
+@iglesiasg	haha cool
+ foulwall	join #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+ cameron__	hi
+@iglesiasg	hi cameron__
+ cameron__	I'm trying to understand all the python tests work
+ cameron__	I have found the directory where you keep all your test data in the tests/integration/tests
+ cameron__	I'm wondering how are those files produced
+@iglesiasg	cameron__: they are in the data submodule
+@iglesiasg	another repository
+ cameron__	i am reading the generate_testdata.py file in /tests/integration
+ cameron__	if I run this, it will regenrate all the test data files
+ alibezz	iglesiasg: could you please tell me where the tapkee examples are?
+ alibezz	iglesiasg: the undocumented ones don't really have much to do with isomap (or any other of the implemented mappings)
+@iglesiasg	alibezz: really?
+@iglesiasg	let me check
+ alibezz	iglesiasg: seems so
+@iglesiasg	alibezz: what about
+@iglesiasg	https://github.com/shogun-toolbox/shogun/blob/master/examples/undocumented/libshogun/converter_isomap.cpp
+ alibezz	oh in libshogun? duh
+ alibezz	iglesiasg: i was looking for something in the python directories dunno why
+@iglesiasg	alibezz: aham ok
+ alibezz	iglesiasg: sorry for that. and thanks ;)
+@iglesiasg	alibezz: no problem ;)
+@iglesiasg	there should be another example for isomap in python_modular or so in any case
+ alibezz	not really to be honest. or i'm crazy.
+ alibezz	because this is one of the dirs i checked out :O
+@iglesiasg	https://github.com/shogun-toolbox/shogun/blob/master/examples/undocumented/python_modular/converter_isomap_modular.py
+@iglesiasg	?
+@iglesiasg	alibezz: maybe you checked static interfaces
+ alibezz	iglesiasg: yeah maybe. or maybe i' m really crazy. there's always a possibility lolz
+@iglesiasg	heh
+@wiking	lisitsyn: around?
+ cameron__	the generate_testdata.py complains about unknown category classifier.
+-!- ozan [~ozan@ee-167-250.eee.metu.edu.tr] has joined #shogun
+@iglesiasg	cameron__: how are you running it?
+ cameron__	iglesiasg: just by ./generator_testdata.py
+@iglesiasg	cameron__: so did you modify anyting to add a new classifier or sth?
+@iglesiasg	cameron__: dummy question -- have you compiled and installed for python_modular?
+ cameron__	iglesiasg: yes, i've been playing around with shogun in python
+ cameron__	iglesiasg: nvm, i'll try and figure it out myself. should just be sth minor
+@iglesiasg	cameron__: ok
+@iglesiasg	cameron__: I cannot test right now in my machine if it works, but I'd bet it should
+@lisitsyn	wiking: yes
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Ping timeout: 264 seconds]
+ cameron__	votjakovr: Hi, did u fix the GP regression problem with -ve values?
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has left #shogun ["PING 1367426647"]
+ votjakovr	cameron__: Hi, yep. Now  variances is not negative
+ cameron__	votjakovr: great work. what was the problem actually?
+-!- foulwall_ [~foulwall@2001:da8:215:c252:a90a:af19:4758:3a27] has joined #shogun
+-!- iglesiasg [~nando@n177-p222.kthopen.kth.se] has quit [Quit: Lost terminal]
+ votjakovr	cameron__: i think somewhere in LAPACK calls and matrix manipulations, but i'm not sure.
+--- Log closed Wed May 01 19:10:49 2013
+--- Log opened Wed May 01 19:10:56 2013
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 21 nicks [4 ops, 0 halfops, 0 voices, 17 normal]
+-!- Irssi: Join to #shogun was synced in 6 secs
+-!- viksvampire19 [~chatzilla@115.184.88.5] has joined #shogun
+ viksvampire19	Hi everyone..
+ alibezz	lisitsyn: ping
+@lisitsyn	alibezz: pong
+ alibezz	lisitsyn: I'm trying to run the converter_isomap_modular.py example
+ alibezz	and it gives me this error: IOError: [Errno 2] No such file or directory: '../data/fm_train_real.dat'
+ alibezz	although i downloaded the data
+@lisitsyn	how?
+ alibezz	and made the symbolic link point to it
+@lisitsyn	bahh why did you do that
+ alibezz	well the data wasnt here hehe i just pointed it
+@lisitsyn	all you needed was 'git submodule init --update'
+ alibezz	oh nice
+ alibezz	let me see if it works then
+@lisitsyn	just restore your symlinks
+@lisitsyn	they were here
+ alibezz	ok no worries
+@sonney2k	lisitsyn, ok so 17 proposals by now
+@lisitsyn	sonney2k: + votjakovr + gsomix
+@sonney2k	lisitsyn, please mark the ones you intend to mentor
+@lisitsyn	sonney2k: with wish to mentor?
+@sonney2k	lisitsyn, http://shogun-toolbox.org/page/Events/gsoc2012
+@sonney2k	looking at this image
+@sonney2k	we got 25 applications in the last 3 days
+@lisitsyn	sonney2k: see # increased just before
+@lisitsyn	sonney2k: lets calm down - everybody gets less it seems
+@sonney2k	maybe it is the same - lets see
+@sonney2k	well we have maybe -10 compared to 2012
+@lisitsyn	sonney2k: so we decided about 4?
+@sonney2k	lisitsyn, and please accept the one you would want to mentor most
+@sonney2k	lisitsyn, no why?
+@lisitsyn	sonney2k: well more or less
+@sonney2k	nothing is set in stone
+@lisitsyn	okay 5
+@sonney2k	yes more or less
+@lisitsyn	no I don't mean in stone
+@lisitsyn	HeikoS: where is your supertask guy (tm)?
+@HeikoS	lisitsyn: having exams :) but wrote me an email, I told him to apply asap
+ alibezz	lisitsyn: until which day can I send the patch?
+ alibezz	lisitsyn: like, I'm gonna send it anyway, of course
+@lisitsyn	alibezz: good question
+ alibezz	lisitsyn: but to be able to participate of the GSoC selection
+@lisitsyn	let me check the date
+@lisitsyn	alibezz: okay it is very unlikely to be that long but assignment due is May 24
+ alibezz	lisitsyn: okay. fortunately I'll send the sammon mapping until Friday ;) let's see how things work
+ alibezz	hopefully...
+@sonney2k	alibezz, we decide before may 20
+@sonney2k	so anything until then my make us reconsider
+@lisitsyn	alibezz: ^ so I will have some time to change my mind
+@lisitsyn	we have to decide ideas ASAP
+@sonney2k	lisitsyn, ?
+ alibezz	lisitsyn: sure, makes sense
+@lisitsyn	sonney2k: I mean to ask for slots
+@lisitsyn	but not real assignment
+@sonney2k	yes we make our slot request based on the number of excellent proposals we get
+@sonney2k	so we already *now* put names to tasks to get an idea of #slots
+ alibezz	yeah the things is that week is full of deadlines for me. haha i wish i had known of the applications earlier =(
+ alibezz	but i totally understand it all. if it doesn't work, it's ok! i like helping anyways =)
+@sonney2k	alibezz, well may 20 is the hard deadline
+@sonney2k	on may 22 there will be a dedup meeting
+@sonney2k	err may 24 is the dedup meeting
+@sonney2k	but in any case google has the last word and does the official announcement on may27
+-!- Netsplit *.net <-> *.split quits: syst3mw0rm
+@lisitsyn	yeah so one more month of suffering
+-!- Netsplit over, joins: syst3mw0rm
+ gsomix	lisitsyn, everyday I'm suffering, life is pain, haha... :(
+ alibezz	lisitsyn: git submodule init --update didn't work actually
+@sonney2k	submodule update --init
+@lisitsyn	oops :D
+@sonney2k	alibezz, other way round!
+@lisitsyn	my mistake sorry
+ alibezz	huaauahua makes more sense
+ alibezz	it's because both init and update are commands
+ alibezz	who knows... maybe --update was a path. duh
+-!- ozan [~ozan@ee-167-250.eee.metu.edu.tr] has quit [Quit: Leaving]
+ alibezz	lisitsyn: i'll need some style tips today, later. sammon mapping has a lot of parameters and i'd like to discuss what's the most elegant way of dealing with them in the shogun architecture. but I'll write/make a bunch of tests here before. and finish this crazy lecture i'm preparing. hahaah
+@lisitsyn	alright
+ alibezz	lisitsyn: well, the git update worked, but the error remains
+ alibezz	lisitsyn: IOError: [Errno 2] No such file or directory: '../data/fm_train_real.dat'
+ alibezz	any idea?
+@lisitsyn	alibezz: you said you changed symlinks
+@lisitsyn	are they listed in 'git status' output?
+ alibezz	actually i'm working in a brand new branch at this very moment
+ alibezz	so no symlinks were changed here
+@lisitsyn	is there a file ../data/fm_train_real.dat then?
+ alibezz	yup
+@lisitsyn	what is the dir you run example in
+@lisitsyn	?
+ alibezz	if you could execute ~/shogun/examples/undocumented$ python python_modular/converter_isomap_modular.py
+ alibezz	i'd be glad ;)
+@lisitsyn	run in python_modular folder
+@lisitsyn	the path is not absolute that's why you get troubles
+ alibezz	yeah it's not absolute but i thought the execution would take the file where the python code is as a reference, not from where i'm running
+ alibezz	but it worked. ;)
+-!- foulwall_ [~foulwall@2001:da8:215:c252:a90a:af19:4758:3a27] has quit [Ping timeout: 245 seconds]
+@lisitsyn	no, why? pwd is pwd
+ alibezz	lisitsyn: yes it is. it's from where i'm running not from where it's at. just got confused. he
+ alibezz	well now i can start writing tests and going further with the sammon mapping
+@lisitsyn	nice
+-!- viksvampire19 [~chatzilla@115.184.88.5] has quit [Quit: ChatZilla 0.9.90 [Firefox 20.0/20130329030832]]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- kakashi_ [~kakashi_@nltk/kakashi] has quit [Ping timeout: 240 seconds]
+-!- kakashi_ [~kakashi_@nltk/kakashi] has joined #shogun
+@sonney2k	lisitsyn, ok so I am convinced now that we will get 30 proposals until the end of may 3rd
+@lisitsyn	haha
+@iglesiasg	is it starting to grow exponentially?
+@lisitsyn	iglesiasg: 17 so far
+@iglesiasg	you know what to do if you get too many
+@iglesiasg	https://i.chzbgr.com/maxW500/7373469696/h5FA4741A/
+@lisitsyn	hahaha
+@iglesiasg	haha
+@iglesiasg	just kidding
+ gsomix	iglesiasg, I want to eat because of this gif.
+-!- mikhailBelous [~quassel@37.98.242.99] has joined #shogun
+@iglesiasg	haha
+ mikhailBelous	In aplication you said that report when I succsesufuly download and compile project and get used to github lot time ago.I have done it
+@lisitsyn	mikhailBelous: alright - now we'd like to see contributions - that's a hard requirement for successful applicants
+ mikhailBelous	What the dead for contribution?
+ mikhailBelous	*deadline
+ mikhailBelous	?
+@lisitsyn	mikhailBelous: somewhat near 20 May I'd say
+ mikhailBelous	fine
+@lisitsyn	application deadline is 3 May
+ mikhailBelous	contribution
+@lisitsyn	contribution is 20 May
+@lisitsyn	application is 3 May
+-!- hushell [43bd6474@gateway/web/freenode/ip.67.189.100.116] has joined #shogun
+ mikhailBelous	If is it problem that I can't be in the city during 20 july - 10 august, but worked it before?
+@lisitsyn	mikhailBelous: just mention that in application
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Hello all
+@lisitsyn	KMcQuisten: hey
+ KMcQuisten	Hope all is going well on your side of the world
+@lisitsyn	hah yeah
+@lisitsyn	what about you?
+ KMcQuisten	Not too bad.  I put a question up on the mailing list a bit earlier today, and I partially answered my own question, but i'm still having some trouble.
+@lisitsyn	KMcQuisten: oh sorry hadn't enough time to check your question
+@lisitsyn	will take a look a bit later
+ KMcQuisten	Righto.
+ KMcQuisten	I didn't know if it was something that i was just missing or if it was a deeper issue
+ KMcQuisten	Sometimes, I must admit, I am an idiot who doesn't see what's in front of his own face *grin*
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+-!- mikhailBelous [~quassel@37.98.242.99] has quit [Read error: Connection reset by peer]
+-!- zhh210 [80b493c5@gateway/web/freenode/ip.128.180.147.197] has joined #shogun
+-!- alibezz [~alibezz@177.182.164.8] has left #shogun []
+-!- zhh210 [80b493c5@gateway/web/freenode/ip.128.180.147.197] has left #shogun []
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has joined #shogun
+-!- mikhailBelous [~quassel@37.98.242.99] has joined #shogun
+-!- Asix3 [~asix3@d47-69-144-148.nap.wideopenwest.com] has quit [Quit: Leaving]
+-!- mikhailBelous [~quassel@37.98.242.99] has quit [Remote host closed the connection]
+ cameron__	hi,
+ cameron__	just wondering why when you fetch from github from shogun
+ cameron__	the data folder is empty
+@iglesiasg	cameron__: it is in another repo, a submodule
+@iglesiasg	git submodule update or so should work
+ cameron__	thanks
+ cameron__	Trying to update the submodule , but failed the travis build.
+@iglesiasg	cameron__: mmm I don't understand
+@iglesiasg	you cannot get the data repository because the travis build failed?
+ cameron__	i got it
+ cameron__	made a change
+ cameron__	tried to do commit and push
+ cameron__	i did it inside in the submoduel folder, then in the shogun folder
+ cameron__	changes appeared on github. but didn't seem right
+ cameron__	https://github.com/goldbug/shogun/commit/7790dd146bf5e315faba55ff926d9f7e080b5408
+--- Log closed Thu May 02 00:00:29 2013

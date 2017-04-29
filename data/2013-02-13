@@ -1,0 +1,651 @@
+--- Log opened Wed Feb 13 00:00:45 2013
+-!- SCV__ [~FSCV@173.254.212.46] has quit [Quit: Leaving]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- sumit [75e210ac@gateway/web/freenode/ip.117.226.16.172] has joined #shogun
+-!- sumit [75e210ac@gateway/web/freenode/ip.117.226.16.172] has quit [Ping timeout: 245 seconds]
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Ping timeout: 245 seconds]
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+-!- blackburn [~blackburn@83.234.54.219] has joined #shogun
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~blackburn@83.234.54.219] has quit [Quit: Leaving.]
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+-!- lambday [3ba2174d@gateway/web/freenode/ip.59.162.23.77] has joined #shogun
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: iglesias :master * c4443b0 / src/shogun/converter/KernelLocallyLinearEmbedding.cpp: https://github.com/shogun-toolbox/shogun/commit/c4443b05e08274639d5053f4bc5dfdb357b7df71
+ shogun-notifier-	shogun: small fix in KLLE to avoid valgrind errors
+ shogun-notifier-	shogun: iglesias :master * ded1104 / src/shogun/converter/DiffusionMaps.cpp: https://github.com/shogun-toolbox/shogun/commit/ded1104c19f0445fbf33f40f2508145b5606291d
+ shogun-notifier-	shogun: + Gaussian kernel width initialization in DiffusionMaps
+ shogun-notifier-	shogun: iglesias :master * 3f87a2e / src/shogun/converter/NeighborhoodPreservingEmbedding.cpp: https://github.com/shogun-toolbox/shogun/commit/3f87a2e0183aa42396be7994f6bfd7233544223a
+ shogun-notifier-	shogun: * minor fix in NPE to avoid valgrind complains
+ shogun-notifier-	shogun: Sergey Lisitsyn :master * db0a595 / src/shogun/converter/ (3 files): https://github.com/shogun-toolbox/shogun/commit/db0a595a2cc65032be3573b340c9d10548912c55
+ shogun-notifier-	shogun: Merge pull request #862 from iglesias/tapkee
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: [WIP] Small fixes in converters to avoid valgrind errors
+ shogun-buildbot_	build #805 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/805  blamelist: iglesias <fernando.iglesiasg@gmail.com>
+-!- n4nd0 [~nando@n158-p227.kthopen.kth.se] has joined #shogun
+ blackburn	n4nd0: thanks for issuing a PR
+ blackburn	is everything fixed now?
+ n4nd0	no, not everything yet
+ n4nd0	I am working in the LLTSA errors now
+ n4nd0	I tried with the usual path, setting m_nullspace_shift but it didn't solve it
+ blackburn	hmm
+ n4nd0	I tried also a couple of things more but didn't succeed
+ n4nd0	I will look to it now :)
+ blackburn	if you have some time for that
+ blackburn	I'd appreciate
+ n4nd0	mmm SGVectorTest failed
+ n4nd0	blackburn: btw I was thinking yesterday
+ n4nd0	it could be good if we think of a small set of tasks
+ n4nd0	and write them down somewhere
+ blackburn	yeah..
+ blackburn	n4nd0: github issues
+ n4nd0	blackburn: yes, it is a good idea to write them there
+ blackburn	n4nd0: I added 'entrance' label
+ blackburn	if you have any ideas please put it
+ n4nd0	will do, thank you!
+ n4nd0	blackburn: why is it that lltsa needs the features to be set both in parameters.kernel and parameters.features?
+ n4nd0	https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/converter/LinearLocalTangentSpaceAlignment.cpp#L41
+ blackburn	n4nd0: it uses both kernel and feature access callbacks
+ n4nd0	aham
+ blackburn	n4nd0: so I asked for help in the ML
+ n4nd0	blackburn: yeah, just read it
+ n4nd0	that's nice, let's see if we get more suggestions
+ blackburn	n4nd0: 3 already! :)
+ n4nd0	:)
+ lambday	hello, this is soumyajit. I want to get involved with shogun.. I've already cloned the source code and built it.. (cmdline static and python interfaces).. But I am not sure how to get started with such a huge codebase.. could you please suggest me something?
+ n4nd0	lambday: you have come in a good moment :)
+ lambday	:)
+ n4nd0	blackburn has just created an entrance section on github issues
+ n4nd0	https://github.com/shogun-toolbox/shogun/issues?labels=entrance&page=1&state=open
+ lambday	okay. i'm checking..
+ n4nd0	it was announced in the mailing list a few minutes ago too
+-!- proKrammer [73fe7104@gateway/web/freenode/ip.115.254.113.4] has joined #shogun
+ lambday	okay.. I'm not yet registered to the mailing list.. will do
+ lambday	and also, is there any kernel related development task currently within the scope? I'm doing some reading on string kernels and I'm really interested to work with one
+ n4nd0	lambday: you could check if we already have implemented that kernel
+ n4nd0	if it is not, you are welcome to include it
+ n4nd0	lambday: see src/shogun/kernel/string
+ lambday	n4nd0: thanks.. I'm checking
+ n4nd0	what kernel is it btw the one you are interested to work with?
+ lambday	n4nd0: well, I was reading this paper "Fast Kernels for String and Tree matching" by Vishwanathan et al. as a part of my coursework
+ lambday	http://books.nips.cc/papers/files/nips15/AA11.pdf
+ blackburn	I'd recommend Soeren's thesis http://sonnenburgs.de/soeren/publications/Son08.pdf
+ n4nd0	blackburn: everything in there is probably already in shogun though
+ n4nd0	I am not sure, just guessing
+ lambday	blackburn: are these the kernels that are already implemented in shogun?
+ blackburn	lambday: I think so
+ lambday	oh I see the subsequence kernel
+ lambday	but it implemented the paper by lodhi..
+ lambday	blackburn: well, can you suggest me something then, any development related ideas (better if kernel related).. I'll do some reading and will be in touch...
+ lambday	and also, how should I go about understanding the architecture of shogun?
+ blackburn	lambday: we are now collecting ideas https://github.com/shogun-toolbox/shogun/issues?labels=entrance&state=open
+ blackburn	there should be some kernel related for sure - we just started
+ n4nd0	lambday: get to know the code superficially, browse different classes and so on
+ lambday	blackburn: okay.. thanks :)
+ blackburn	it is a difficult question about architecture - I have nothing general about that
+ lambday	n4nd0: alright.. I'll keep in touch.. meanwhile, I'll go through the thesis by Soeren
+ n4nd0	wiking: haha ok ok
+ n4nd0	I don't think that in this case to compile with -lpthread -pthread would make a mistake anyway
+ n4nd0	wiking: who can take a look to configure script?
+ wiking	n4nd0: i did now... it's a bit problematic
+ wiking	i mean the configure script for -pthread or -lpthread is quite easy
+ wiking	the problem is more about that i actually do not understand
+ wiking	why -pthread is not working for unit test compilation
+ n4nd0	yeah, I reckon that feeling when looking at configure :)
+ wiking	but works fine for libshogun
+ sonne|work	n4nd0: regarding this list - is LDA multiclass already?
+ n4nd0	sonne|work: LDA multiclass and change QDA to eigen were in my head
+ n4nd0	I am going to write them soon
+ wiking	mmm
+ n4nd0	in the entrance issues I mean
+ sonne|work	n4nd0: yes please thx
+ wiking	n4nd0: what is the exact compilation that does not work for you for unit test?
+ n4nd0	wiking: give me a couple of minutes to check
+ wiking	n4nd0: ok
+ n4nd0	sonne|work: did you talk with c-base people?
+ n4nd0	I don't exactly recall when was the exact
+ n4nd0	around 15 IIRC
+ n4nd0	exact date*
+ blackburn	14 I think
+ blackburn	love meeting
+ blackburn	lol
+ n4nd0	haha yeah
+ sonne|work	14th but it looks like I don't have time that evening :/
+ sonne|work	and gunnar == /dev/null
+ n4nd0	:(
+ n4nd0	wiking: https://gist.github.com/iglesias/4943650
+ wiking	ah shit the linking line is actually not there :(
+ wiking	n4nd0: can u edit the Makefile under tests/unit
+ wiking	and there at line 28
+ n4nd0	wiking: sure
+ wiking	remove the @ in front of @$(LINK)
+ n4nd0	it seems that sonne|work has found an answer though hehe
+ wiking	n4nd0: so just remove that @
+ wiking	and do make again
+ wiking	and copy paste the linking line
+ wiking	the last c++ line
+ wiking	sonne|work: afaik there's a better fix i just need to see the linking line
+ wiking	i think the order of -pthread matters
+ proKrammer	hi n4nd0 , I have spoken to you yesterday regarding the installation, i am done with it, but what about the GUI part?
+ sonne|work	wiking: true
+ wiking	n4nd0: u have it?
+ wiking	:)
+ n4nd0	c++ -o shogun-unit-test ./classifier/svm/SVMOcas_unittest.cc.o ./multiclass/MulticlassOCAS_unittest.cc.o ./base/main_unittest.cc.o ./latent/LatentSVM_unittest.cc.o ./lib/SGVector_unittest.cc.o -Xlinker --no-undefined -L../../src/shogun -lshogun libgmock.a
+ n4nd0	/usr/bin/ld: libgmock.a(gtest-all.o): undefined reference to symbol 'pthread_key_delete@@GLIBC_2.2.5'
+ wiking	ok
+ n4nd0	/usr/bin/ld: note: 'pthread_key_delete@@GLIBC_2.2.5' is defined in DSO /usr/lib/libpthread.so.0 so try adding it to the linker command line
+ n4nd0	/usr/lib/libpthread.so.0: could not read symbols: Invalid operation
+ n4nd0	collect2: error: ld returned 1 exit status
+ n4nd0	make: *** [shogun-unit-test] Error
+ wiking	mmmm
+ wiking	i wonder why there's no pthread there
+ wiking	ok just a sec
+ wiking	sonne|work: shouldn't $(LINKFLAGS) contain -pthread?
+ wiking	sonne|work: POSTLINKFLAGS
+ wiking	that should be it?!
+ wiking	n4nd0: can u add to that line 28 this variable
+ wiking	$(POSTLINKFLAGS)
+ wiking	$(LINK) -o shogun-unit-test $(TESTOBJFILES) $(LINKFLAGS) -L$(SHOGUNSRCTOP)/shogun -lshogun libgmock.a $(LINKFLAGS_GMOCK) $(POSTLINKFLAGS)
+ wiking	so it should look like something like this ^
+ n4nd0	ok
+ wiking	and run make again
+ wiking	and paste here the c++ line
+ n4nd0	wiking: that made it
+ wiking	ok how does the line look like?
+ n4nd0	c++ -o shogun-unit-test ./classifier/svm/SVMOcas_unittest.cc.o ./multiclass/MulticlassOCAS_unittest.cc.o ./base/main_unittest.cc.o ./latent/LatentSVM_unittest.cc.o ./lib/SGVector_unittest.cc.o -Xlinker --no-undefined -L../../src/shogun -lshogun libgmock.a  -lm -pthread -ljson  -lxml2  -llapack -lcblas -larpack -lz -lbz2 -llzma
+ wiking	ok
+ n4nd0	-pthread is in da house now
+ wiking	and it did not complain?
+ n4nd0	no
+ wiking	ran fine?
+ n4nd0	yeah
+ wiking	cool
+ n4nd0	all tests passed
+ wiking	commit and PR it
+ n4nd0	just a few warnings
+ wiking	i'll merge it
+ wiking	that's ok that's because of MOCK
+ n4nd0	should I put back the @ in front of @(LINK)?
+ wiking	yes
+ wiking	plz
+ wiking	:)
+ n4nd0	compiling again with @ to ensure
+ wiking	yeah that just silences the compile line
+ wiking	so that it doesn't get printed on stdout
+ n4nd0	aham
+ wiking	but should work fine still
+ n4nd0	yeah it did
+ wiking	ok commit + pr :>
+ wiking	plz
+ n4nd0	wiking: the pull request is a bit ugly because of the previous commit and pull request I had issued :S
+ n4nd0	wiking: take a look
+ n4nd0	three commits in there
+ wiking	aah yeah ok
+ wiking	i got it why :)
+ n4nd0	was there any way to fix that
+ n4nd0	?
+ wiking	can u do --amend?
+ n4nd0	I should always work from a branch
+ wiking	git commit --amend .
+ n4nd0	it was already pushed in my repo, since I did the PR
+ wiking	ah yeah
+ wiking	true
+ n4nd0	git commit --amend would make a problem?
+ wiking	i think then it would break your branch
+ wiking	:))))
+ wiking	but that's ok we can merge it like this no sonne|work ?
+ wiking	i mean yeah 3 commits for 1 fix but still it's workng :>
+ shogun-notifier-	shogun: iglesias :master * 021237f / tests/unit/Makefile: https://github.com/shogun-toolbox/shogun/commit/021237f32332ba15b6b0baf337b4ae3e5293c0d4
+ shogun-notifier-	shogun: add -lpthread flag to build tests correctly
+ shogun-notifier-	shogun: iglesias :master * a954c4f / tests/unit/Makefile: https://github.com/shogun-toolbox/shogun/commit/a954c4f2912d5c736a9c521750e48bf9082f1707
+ shogun-notifier-	shogun: minor fix: add POSTLINKFLAGS in linking gtest
+ shogun-notifier-	shogun: iglesias :master * c553667 / : https://github.com/shogun-toolbox/shogun/commit/c5536673621c26ebbaa7cdb496eb733a66ce5a16
+ shogun-notifier-	shogun: Merge branch 'master' of github.com:iglesias/shogun
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Conflicts:
+ wiking	done
+ shogun-notifier-	shogun: tests/unit/Makefile
+ shogun-notifier-	shogun: Viktor Gal :master * da53770 / tests/unit/Makefile: https://github.com/shogun-toolbox/shogun/commit/da53770c936c847376f96449e78f2545fc7269ef
+ shogun-notifier-	shogun: Merge pull request #867 from iglesias/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: minor fix: add POSTLINKFLAGS in linking gtest
+ sonne|work	why 3 commits not one?
+ n4nd0	wiking: thank you for finding out the error :)
+ wiking	nw
+ wiking	sonne|work: see ^
+ n4nd0	sonne|work: becuase of the previous PR with one commit
+ n4nd0	I did that from master :S
+ n4nd0	I shouldn't have done it, my bad
+ sonne|work	n4nd0, wiking now please get shogun in release shape and we are good
+ n4nd0	sonne|work: I am currently taking a look to converter errors detected by valgrind
+ sonne|work	thanks
+ blackburn	fixing my mistakes hah
+ shogun-buildbot_	build #807 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/807  blamelist: iglesias <fernando.iglesiasg@gmail.com>
+ n4nd0	well you are actually telling me where the errors are most of the time :D
+ wiking	why did u faaaail
+ wiking	ah ok
+ n4nd0	wiking: I think the test was already broken before
+ wiking	SGVectorTest.misc failed
+ n4nd0	yeah
+ wiking	ok yeah we need to use EXPECT_DOUBLE_EQ :>
+ blackburn	wiking: if you want to get more tests for shogun and have ideas - please add them to 'entrance' issues at github
+ wiking	blackburn: oh good idea!
+ blackburn	but it would need to describe what exactly to test
+ shogun-buildbot_	build #808 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/808  blamelist: Viktor Gal <vigsterkr@gmail.com>, iglesias <fernando.iglesiasg@gmail.com>
+ blackburn	our candidates could get stucked with concepts that are well-known for us
+ blackburn	that's probably normal but we should keep that in mind :)
+ wiking	blackburn: yeah i'll try to make a module list and put them up one by one
+ n4nd0	blackburn: hey
+ n4nd0	maybe this makes sense to you
+ n4nd0	in lltsa to set parameters.eigenshift equal to m_nullspace_shift (default -1e-9)
+ n4nd0	gives more valgrind errors thatn
+ n4nd0	to set it to m_reconstruction_shift (default 1e-3)
+-!- n4nd0 [~nando@n158-p227.kthopen.kth.se] has quit [Ping timeout: 272 seconds]
+-!- n4nd0 [~nando@n158-p227.kthopen.kth.se] has joined #shogun
+ blackburn	n4nd0: that's out of sense for me
+ n4nd0	too bad
+ n4nd0	I will look at it again later today or tom
+ blackburn	I hope I can take a look tonight
+ n4nd0	ok
+ sonne|work	wiking: urgs -have you seen the ocas test failing?
+ wiking	sonne|work: noup
+ wiking	sonne|work: where?
+ sonne|work	http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/808/steps/test/logs/stdio
+ sonne|work	wiking: don't you get the buildbot emails ?
+-!- proKrammer [73fe7104@gateway/web/freenode/ip.115.254.113.4] has quit [Quit: Page closed]
+ wiking	i do but not always i check them ;P
+ wiking	uff
+ wiking	sonne|work: i reckon there's some problem there with an SGVector function
+ wiking	sonne|work: since we had the exact same errors when the ::max was bogus
+ sonne|work	wiking: no idea but please check. if we don't address the issues tests are useless...
+ wiking	sonne|work: working on it
+ blackburn	7 entrance tasks so far!
+ wiking	sonne|work: btw what is the proper method of right away applying patches of mine into shogun? or do i should go still with the commit local repot -> pr -> merge ?
+ n4nd0	blackburn: we need now 7 students! hehe
+ wiking	blackburn: ^
+ blackburn	wiking: my position is that for small changes/bugfixes it is ok to commit directly
+ wiking	blackburn: how?
+ blackburn	wiking: hmm you can't?
+ wiking	blackburn: no i dont know how :)
+ blackburn	wiking: I think you need to change remote
+ blackburn	to git@github.com:shogun-toolbox/shogun.git
+ sonne|work	wiking: yeah that is best, but merge yourself
+ blackburn	you probably have git://github.com/shogun-toolbox/shogun.git
+ sonne|work	wiking: I will switch to doing that too
+ blackburn	as a remote
+ sonne|work	don't directly work on shogun master
+ blackburn	I do not think we should do PRs for every change we make
+ sonne|work	blackburn: and I do :)
+ wiking	mm this is interesting
+ wiking	http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/807/steps/test/logs/stdio
+ wiking	sonne|work: any ideas ^
+ sonne|work	but we had that discussion already.
+ wiking	we use EXPECT_DOUBLE_EQ in both cases
+ wiking	but still it complains
+ blackburn	sonne|work: you know once I get POWER and AUTHORITY..
+ sonne|work	wiking: then maybe we need a slightly higher epsilon
+ sonne|work	float stuff is certainly scary
+ sonne|work	blackburn: you will I am sure but it is better that everyone's damage to the code might be looked at
+ blackburn	sonne|work: well we actually should not work in master branch
+ blackburn	I do not feel the difference between one commit + PR and one commit
+ blackburn	both can be looked at
+ blackburn	and the damage is done
+ sonne|work	blackburn: yeah dev branches might be a good idea
+ sonne|work	once we have a release we should attempt to switch
+ wiking	lolface
+ wiking	fucking google test blog answers the same shit
+ n4nd0	wiking: link?
+ wiking	http://googletesting.blogspot.hu/2008/10/tott-floating-point-comparison.html
+ wiking	sonne|work: can u enable unit testing on freebsd bot plz?
+ wiking	sonne|work: ah ok it is
+ wiking	sorry
+ sonne|work	wiking: so why not use say 1e-12 as precision?
+ wiking	mmmm
+ wiking	sonne|work: no i was wrong
+ wiking	what is interesting though
+ wiking	that the same bot
+ wiking	has some weird things
+ wiking	http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/807/steps/test/logs/stdio
+ wiking	so there the SGVector.misc fails
+ wiking	but then in the next build
+ wiking	http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/808/steps/test/logs/stdio
+ wiking	it is all good
+ wiking	but the multiocas fails
+ wiking	can we force a new build on this bot
+ wiking	just out of curiosity
+ sonne|work	wiking: sure just do it
+ wiking	sonne|work: what is the command? :D
+ sonne|work	wiking: I guess it is due to parallelization...
+ wiking	shogun-buildbot_: force build deb1
+ sonne|work	shogun-buildbot_: force build "deb1 - libshogun"
+ shogun-buildbot_	no such builder 'deb1'
+ shogun-buildbot_	build forced [ETA 1m27s]
+ shogun-buildbot_	I'll give a shout when the build finishes
+ wiking	almost :)
+ shogun-buildbot_	build #809 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/809
+ wiking	hohoho
+ wiking	this is mega insteresting
+ wiking	as now it succeeded
+ sonne|work	^
+ sonne|work	(02:28:20 PM) sonne|work: wiking: I guess it is due to parallelization...
+ wiking	yeps seems so
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- FSCV [~FSCV@204.45.110.163] has joined #shogun
+ sonne|work	wiking: so then just limit it to use a single core
+ n4nd0	sonne|work, wiking : why does parallelization make it fail?
+ sonne|work	n4nd0: not sure if it fails or just finds some other valid solution (given objective w/i epsilon)
+ wiking	lol now i have a failure with:
+ wiking	Value of: SGVector<float64_t>::arg_max_abs(a.vector, 1, a.vlen, __null) Actual: 0
+ wiking	Expected: arg_max_abs
+ wiking	Which is: 9
+ wiking	same with max_abs
+ sonne|work	wiking: valgrind....
+ wiking	ok i see why
+ wiking	:))0
+ wiking	it's an actual bug indeed
+ wiking	btw where's github bot?
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :master * 59e15f5 / tests/unit/ (2 files): https://github.com/shogun-toolbox/shogun/commit/59e15f5087e05618b4f29faa533b3d8002571ec0
+ shogun-notifier-	shogun: Fix unit tests for SGVector::max_abs and MOCASSVM
+ shogun-notifier-	shogun: there was a bug when calculating max_abs in an SGVector
+ shogun-notifier-	shogun: and MulticlassOCAS has been set to use only 1 thread
+ shogun-notifier-	shogun: Viktor Gal :master * 18ea338 / tests/unit/ (2 files): https://github.com/shogun-toolbox/shogun/commit/18ea3388b7b64b08df95f7d7f34c7fad484c9851
+ shogun-notifier-	shogun: Merge pull request #872 from vigsterkr/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix unit tests for SGVector::max_abs and MOCASSVM
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ wiking	interesting that until now that max_abs error has not surfaced... there's no fool proof unit-testing as this one proves it well ;)
+ sonne|work	wiking: what is the github bot?
+ wiking	sonne|work: we used to have github hook for commits and pull requests
+ wiking	that was set up with a hook
+ shogun-buildbot_	build #811 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/811  blamelist: Viktor Gal <vigsterkr@gmail.com>
+ wiking	mmm
+ wiking	seems 1 thread did not help
+ wiking	:(
+ sonne|work	wiking: no longer working with github :/
+ wiking	really? :) i guess then it's a bug of github that we should report
+-!- tom__ [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ tom__	hi!
+ sonne|work	wiking: or they shoudl just install irker on their side...
+ sonne|work	wiking: about the build fail      - could you please print the objective value in the test?
+ tom__	Quesion about saving/loading mklmachine : I use 'CSerializableAsciiFile' but when loaded from file, mkl->getsubkernelweights() return 0. Is there code sample for that ?
+ sonne|work	tom__: please give us a minimal example to reproduce
+ sonne|work	then we can create a test out of this and fix it!
+ tom__	sonne|work: ok
+ tom__	sonne|work: here it is http://pastebin.com/ZZKNRzqj
+ tom__	my first question is: does the mkl saved in file contain all kernels, machine params and weights ?
+-!- n4nd0 [~nando@n158-p227.kthopen.kth.se] has quit [Quit: leaving]
+ tom__	sonne|work: I just re-use the mkl example from shogun examples and add save and load function. Ths for help
+ sonne|work	tom__: yes it should
+ sonne|work	tom__: it should be self containing
+ tom__	then no need to save kernels and weights separatly ?
+ tom__	ok
+ sonne|work	no
+ sonne|work	just save the core mklmachine
+ sonne|work	then all kernels/labels/features/parameters *should* be saved too
+ sonne|work	if not -> bug
+ tom__	that's what I am doing in the example I gave you. it is c++, maybe I misunderstood smthg
+ tom__	how to access to combined kernel and weights from mkl pointer ?
+ sonne|work	for example the multiclass classifier for the hand written digit recognition is stored exactly like that (the one from here http://shogun-toolbox.org/page/documentation/samples/ )
+ sonne|work	tom__: gtg now might have a look later
+ sonne|work	cu
+ tom__	ok thx anyway i wil lokk into samples
+-!- tom__ [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Hi folks
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+-!- ipondering [~iponderin@li568-69.members.linode.com] has joined #shogun
+-!- ipondering [~iponderin@li568-69.members.linode.com] has left #shogun []
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- blackburn [~blackburn@188.168.2.253] has joined #shogun
+ blackburn	sonney2k: around?
+-!- heiko1 [~heiko@nat-166-57.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	heiko1: really?
+ blackburn	:)
+ blackburn	NP-hard graph colouring?
+ heiko1	blackburn, greedy version allowed :)
+ heiko1	blackburn, updated
+ blackburn	heiko1: what do you need it for btw?
+ heiko1	just need *a* graph colouring
+ heiko1	for estimating the trace of a matrix
+ heiko1	as
+ heiko1	 tr A = E_s [s^T A s] where s is a random variable with zero mean and identity covariance
+ heiko1	the distribution of s determines the variance of this estimator
+ heiko1	and there is a clever way to choose it
+ heiko1	based on a graph colouring of the matrix
+ blackburn	interesting
+ heiko1	blackburn, its a bit weird, but gives really cool results
+ heiko1	Google Hutchison estimator for the basic ideas
+ heiko1	(without graph colouring)
+ blackburn	okay anyway I don't mind :)
+ heiko1	hey blackburn a question
+ blackburn	yes?
+ heiko1	c++ /swig /python
+ heiko1	I have a class which inherits from a templated class
+ heiko1	so class B: A<float64_t>
+ heiko1	fixing the template arugment
+ heiko1	I can call any methods from B<T> in C++
+ heiko1	but not from python modular
+ heiko1	says they dont exist
+ heiko1	blackburn, any idea how to solve that?
+ heiko1	I could make B also a template and then pass the parameter, create a bunch of names for pyhton for all different types
+ heiko1	this works
+ heiko1	but I dont want to do all the template hell since not needed anyway
+ blackburn	wait wait let me understand
+ blackburn	nicht schiessen
+ heiko1	I will commit this then you can try it out
+ blackburn	ahh
+ blackburn	that sounds strange for me actually
+ blackburn	didn't know about that
+ heiko1	maybe I did a mistake
+ blackburn	heiko1: what if A->B->C
+ blackburn	and B is templated
+ blackburn	while A and C not
+ blackburn	does C have methods of A?
+ heiko1	dont know
+ heiko1	but thats not my problem :D
+ blackburn	wait wait
+ blackburn	we have such example
+ blackburn	heiko1: CPNorm
+ blackburn	heiko1: I think it works nice - nothing lost
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Heiko Strathmann :master * 7e6bc9c / src/shogun/features/streaming/generators/ (2 files): https://github.com/shogun-toolbox/shogun/commit/7e6bc9c9fd797cd0120735760dc42393c06b63ab
+ shogun-notifier-	shogun: fixed typo
+ shogun-notifier-	shogun: Heiko Strathmann :master * 822d40a / src/shogun/features/streaming/generators/ (2 files): https://github.com/shogun-toolbox/shogun/commit/822d40a6534b801ea2c83fede17d9c165dde846c
+ shogun-notifier-	shogun: added new streaming data generator class for creating Gaussian blobs as in NIPS paper for optimal kernel choice for linear time MMD
+ shogun-notifier-	shogun: Heiko Strathmann :master * 773664d / examples/undocumented/libshogun/streaming_generators.cpp: https://github.com/shogun-toolbox/shogun/commit/773664da6de95fa85580eccd5aa549cf9f94d923
+ shogun-notifier-	shogun: added example for new gaussian blobs data generator
+ shogun-notifier-	shogun: Heiko Strathmann :master * d9bb5b8 / / (7 files): https://github.com/shogun-toolbox/shogun/commit/d9bb5b825203d4e52c7e1399a3b3f2a56dca23ca
+ shogun-notifier-	shogun: made CMeanShiftDataGenerator not be a template anymore since useless and annoying
+ shogun-notifier-	shogun: Heiko Strathmann :master * 0a21ab6 / / (9 files): https://github.com/shogun-toolbox/shogun/commit/0a21ab68ecbae93c2f31dd3962b6512b9e12a3b6
+ shogun-notifier-	shogun: Merge pull request #874 from karlnapf/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: New class for data generation
+ heiko1	blackburn, try in python to call the method get_streamed_features of CMeanShiftDataGenerator
+ heiko1	probably just me being stupid :)
+ heiko1	ah just read a hint in compile warnings
+ blackburn	heiko1: what is it?
+ heiko1	../../shogun/features/streaming/generators/MeanShiftDataGenerator.h:28: Warning 401: Nothing known about base class 'CStreamingDenseFeatures< float64_t >'. Ignored.
+ heiko1	../../shogun/features/streaming/generators/MeanShiftDataGenerator.h:28: Warning 401: Maybe you forgot to instantiate 'CStreamingDenseFeatures< float64_t >' using %template.
+ blackburn	ahh
+ blackburn	so here you go then :)
+ heiko1	yep
+ heiko1	this was not in the interface
+ heiko1	mmh
+ heiko1	it IS in there
+ heiko1	#ifdef USE_FLOAT64
+ heiko1	    %template(StreamingRealFeatures) CStreamingDenseFeatures<float64_t>;
+ heiko1	#endif
+ heiko1	I think the problem is that the wrong class name is used
+ heiko1	when compiling the interface
+ heiko1	any ideas how to fix that?
+ blackburn	hmm
+ shogun-buildbot_	build #812 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/812
+ heiko1	this is the class
+ heiko1	class CMeanShiftDataGenerator: public CStreamingDenseFeatures<float64_t>
+ heiko1	I think fixing the base class here is the problem
+ heiko1	python thinks that CStreamingDenseFeatures<float64_t> should be "real"densefeaturesblabla
+ shogun-buildbot_	build #814 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/814  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ blackburn	hmm
+ blackburn	well
+ blackburn	two ideas
+ blackburn	idea one - forward declaration of that class in meanshift...h
+ blackburn	like template <class T> CStreamingDenseFeatures<T>
+ blackburn	template <class T> CStreamingDenseFeatures<T>;
+ blackburn	just declaration
+@sonney2k	blackburn, yes %template is missing
+ heiko1	in fact, it all compiled on my machine
+ blackburn	sonney2k: where?
+ blackburn	sonney2k: who could lead vowpal wabbit?
+ blackburn	I put it to myself for onw
+ blackburn	it is of great priority IMO
+@sonney2k	why?
+ shogun-notifier-	shogun: Heiko Strathmann :master * e15edc3 / src/shogun/features/streaming/generators/MeanShiftDataGenerator.cpp: https://github.com/shogun-toolbox/shogun/commit/e15edc3eb2ac0c81b875801d22d9877eea75e396
+ shogun-notifier-	shogun: added forgotten template arugment in base class
+ shogun-notifier-	shogun: Heiko Strathmann :master * 8d72b29 / src/shogun/features/streaming/generators/MeanShiftDataGenerator.cpp: https://github.com/shogun-toolbox/shogun/commit/8d72b2949edc7427ff33414b914239745d7e9a83
+ shogun-notifier-	shogun: Merge pull request #875 from karlnapf/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: quickfix
+ blackburn	sonney2k: it is something like true large scale
+ blackburn	heiko1: whoa!
+ blackburn	how did that compile :D
+ heiko1	blackburn ?
+ heiko1	no idea :)
+ blackburn	heiko1: wonderful world of C++
+ heiko1	sonney2k, blackburn, how to fix this template issue?
+ heiko1	blackburn, yes :)
+ blackburn	heiko1: http://abstrusegoose.com/strips/ars_longa_vita_brevis.png
+ shogun-buildbot_	build #813 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/813  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ heiko1	hehe , great comic blackburn :)
+ heiko1	not responsible for the above fail
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 245 seconds]
+@sonney2k	blackburn, I don't know - it is overhyped
+@sonney2k	it is just sgd
+ blackburn	sonney2k: really? I don't know for sure
+@sonney2k	but yes it can run on kiloclusters
+@sonney2k	that is the cool part about it
+@sonney2k	IMHO any truely largescale stuff is just (distributed) sgd
+ blackburn	sonney2k: I added ideas page - feel free to update if you have some horsepower
+@sonney2k	no more horses left :(
+ blackburn	I think I do not so will continue tomorrow
+ blackburn	:)
+@sonney2k	heiko1, what did you do? you derived from a templated class without specifying the type?
+@sonney2k	you crazy?
+ heiko1	nono
+ heiko1	sonney2k, class CMeanShiftDataGenerator: public CStreamingDenseFeatures<float64_t>
+ heiko1	works fine in C++
+ heiko1	I think its an issue of renaming CStreamingDenseFeatures<float64_t> to StreamingRealFeatures
+ heiko1	when processing Features.i
+ heiko1	it does work when I do
+ heiko1	template <class T> class CMeanShiftDataGenerator: public CStreamingDenseFeatures<T>
+ heiko1	but then I have to create all these names for the different types
+ heiko1	which I would like to avoid
+ shogun-buildbot_	build #815 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/815  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@sonney2k	heiko1, I have to see the error
+ blackburn	see you tomorrow
+-!- blackburn [~blackburn@188.168.2.253] has quit [Quit: Leaving.]
+-!- lambday [3ba2174d@gateway/web/freenode/ip.59.162.23.77] has quit [Ping timeout: 245 seconds]
+ heiko1	sonney2k, ok will show soon, first have to fix this thing here, which is strange since compiles on my machine
+ heiko1	gotta go now, will look after the build in a few hours when home
+-!- FSCV_ [~FSCV@173.254.212.46] has joined #shogun
+-!- FSCV [~FSCV@204.45.110.163] has quit [Ping timeout: 245 seconds]
+-!- syst3mw0rm [~quassel@aws.aamirkhan.co.in] has quit [Ping timeout: 255 seconds]
+-!- syst3mw0rm [~quassel@aws.aamirkhan.co.in] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * b80a07c / src/ (3 files): https://github.com/shogun-toolbox/shogun/commit/b80a07c63b7123d23c4b1f4682c000daf404182d
+ shogun-notifier-	shogun: fix %template warning and potential compile error
+@sonney2k	wiking, so how do I write a test
+@sonney2k	wiking, I want to write one for MKL
+@sonney2k	err CombinedKernel
+@sonney2k	shogun/kernel/CombinedKernel.cpp
+ shogun-buildbot_	build #816 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/816  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ wiking	sonney2k: well follow my lead :)
+-!- heiko1 [~heiko@nat-166-57.internal.eduroam.ucl.ac.uk] has left #shogun []
+ wiking	see latentsvm for example
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * f509af5 / tests/unit/classifier/svm/SVMOcas_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/f509af518f34862e792b86b65b3831fd13203976
+ shogun-notifier-	shogun: add objective test for ocas
+@sonney2k	wiking, done :)
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 9580b2d / tests/unit/kernel/CombinedKernel_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/9580b2de01e236f9bbc411ee066f40f41179ee6c
+ shogun-notifier-	shogun: add test for combined kernel weights getter/setter
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * bba7f87 / tests/unit/multiclass/MulticlassOCAS_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/bba7f878e20f6440b221b564015637620d713c66
+ shogun-notifier-	shogun: set #threads to one *before* training and epsilon to sth very low
+ shogun-buildbot_	build #817 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/817  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ n4nd0	sonney2k: hey, what do you think about the project idea "Further design and implementation of an API for structured output learning"?
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * d41b313 / tests/unit/kernel/CombinedKernel_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/d41b3134895c3e95440fe9c8e446d6d8cddc69cd
+ shogun-notifier-	shogun: add serialization test for combined kernel
+@sonney2k	wiking, gtest stuff is really a cool and convenient framework!!
+ n4nd0	sonney2k: do you know anyone who could mentor that?
+@sonney2k	n4nd0, nah needs a totally different name
+@sonney2k	n4nd0, did you ask georg?
+ n4nd0	sonney2k: aham, such as?
+ n4nd0	sonney2k: yep
+ n4nd0	he is going to contact us by this weekend with his ideas
+@sonney2k	n4nd0, names that continue some work are not a good thing
+ n4nd0	aham I understand
+ n4nd0	and I think it makes sense
+@sonney2k	so sth like implement CRFs, Markov Random Field, Conintuos variable SO would be good names :)
+ n4nd0	got it
+* sonney2k wonders what the issue was with _tom's problem - the tests work just fine...
+@sonney2k	who was it who said sparse features + serialization doesn't work?
+ n4nd0	not me I think :) AFAIK SGNDArray + serialization doesn't work, other than that everything works :)
+@sonney2k	n4nd0, https://github.com/shogun-toolbox/shogun/issues/851
+@sonney2k	this one
+@sonney2k	I've just written a test
+@sonney2k	and it indeed fails
+@sonney2k	wiking, how can I run just a single test e.g. via valgrind?
+@sonney2k	debugging?
+@sonney2k	with gdb?
+@sonney2k	argh
+@sonney2k	it is the inplace destructor
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 255 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 8cad60c / tests/unit/features/SparseFeatures_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/8cad60cd802899b362aef78286d2f6da449586e1
+ shogun-notifier-	shogun: add sparse features serialization test
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 2f80763 / tests/unit/Makefile: https://github.com/shogun-toolbox/shogun/commit/2f807630df1d2b18345701ba662d96e1108452fa
+ shogun-notifier-	shogun: add valgrind target
+-!- cwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+ cwidmer	hi all
+ cwidmer	what, no blackburn?
+ cwidmer	;)
+ n4nd0	cwidmer: he said good night some time ago hehe
+ n4nd0	I am surprised too! :)
+-!- zxtx_ [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 244 seconds]
+ cwidmer	n4nd0, wow, that seems unusual
+ cwidmer	just sent you an email
+ cwidmer	looking into SGMatrixList after all
+ n4nd0	reading
+ cwidmer	https://github.com/cwidmer/shogun/blob/cc01bf5ca02aa0425be24159eae8b842f89c5a23/src/interfaces/python_modular/swig_typemaps.i
+ cwidmer	I did some typemaps some time ago
+ cwidmer	this one seems to be more involved, though
+ n4nd0	then you know more about typemaps than I do :)
+ n4nd0	but sonney2k seems very active this evening
+ n4nd0	maybe he can help you?
+ n4nd0	I am taking a look in any case
+ cwidmer	sonney2k, around?
+ cwidmer	trying to add typemap for SGMatrixList
+ n4nd0	cwidmer: curiosity, what is it you didn't like of the SGNDArray interface?
+ n4nd0	cwidmer: stupid question, it hits me that there is matrix_list_from_numpy but no matrix_list_to_numpy
+ n4nd0	as for SGMatrix, SGVector, etc
+ cwidmer	that's right, its one directional at the moment
+ n4nd0	not needed yet?
+ cwidmer	only an IN typemap
+ n4nd0	ok
+ cwidmer	as for SGNDArray, it doesn't let me access the matrices as nicely using operator()
+ cwidmer	I mean, SGMatrix now has operator()
+ n4nd0	aham
+ n4nd0	SGNDArray is a T* actually, isn't it?
+ n4nd0	IIRC
+ cwidmer	SGMatrixList seems to have operator[]
+ n4nd0	yeah, it does
+ cwidmer	so it's just a matter of nicely accessing it
+ n4nd0	I understand
+ n4nd0	cwidmer: did you see SGNDArray::get_matrix()?
+ n4nd0	I think it should be better done returning an SGMatrix instead of a T* but still
+ n4nd0	good night then guys
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+--- Log closed Thu Feb 14 00:00:45 2013

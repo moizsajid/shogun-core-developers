@@ -1,0 +1,288 @@
+--- Log opened Mon Sep 24 00:00:17 2012
+-!- blackburn [~blackburn@188.168.2.50] has quit [Quit: Leaving.]
+ shogun-buildbot_	build #111 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/111
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- ptizoom [4f475132@gateway/web/freenode/ip.79.71.81.50] has joined #shogun
+-!- heiko [~heiko@host86-180-121-44.range86-180.btcentralplus.com] has joined #shogun
+-!- heiko1 [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-180-121-44.range86-180.btcentralplus.com] has quit [Ping timeout: 244 seconds]
+-!- heiko1 [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has quit [Remote host closed the connection]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackburn	sonne|work: lua appears to recursively call typemap on my machine
+ blackburn	did that ever happen to you?
+-!- heiko [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has joined #shogun
+ blackburn	heiko: hey
+ heiko	blackburn hi
+ blackburn	how are you?
+ heiko	blackburn, thanks I am fine how are you?
+ blackburn	fine but I am about to fall asleep right now :D
+ blackburn	anything new with shogun stuff you do?
+ blackburn	last days I have changed SGSttring a little
+ heiko	I saw that, nice
+ blackburn	now lua fails thoguh
+ heiko	I postponed the labels stuff
+ heiko	since we need to discuss that properly
+ heiko	with others
+ blackburn	after vodka
+ heiko	switched to making statistical tests work with streaming features
+ blackburn	to make that more productive
+ heiko	lol :) yeah
+ heiko	I find it is a serious problem that we cannot do structures of SG* data so I dont want to touch that yet
+ heiko	all this effort went into serialization, would be a stupid to just drop that now
+ blackburn	heiko: are you having more time now?
+ heiko	blackburn, kind of yes
+ blackburn	may be we could get back to kaggle?
+ blackburn	or rather say to kaggle idea
+ heiko	oh yeah, tell me about it
+ heiko	I dont know if I have *that* much time, but its interesting anyways
+ blackburn	well - what can I tell - we join a team and attack some problem
+ blackburn	and probably earn money and all hail to shogun :D
+ heiko	probably? :)
+ heiko	I participated earlier this year
+ heiko	and got to place 150 or so
+ heiko	so no money :)
+ blackburn	nah don't be so pessimistic, there is always a chance
+ heiko	there is
+ blackburn	recently one guy that used scikits reported that he won something
+ heiko	just my experience
+ heiko	I wont do it for the money anyways
+ heiko	there are much better ways getting to money ;)
+ heiko	but its fun!
+ heiko	and one learns something
+ blackburn	yeah it is always wrong to do anything for money :)
+ blackburn	lets talk about that once again this week
+ blackburn	I will check any competitions we could take participance in
+ heiko	ah you  haven't got something particular yet?
+ blackburn	heh no, did you think I have?
+ blackburn	my mistake :)
+ blackburn	no, nothing yet
+ heiko	ok so just an idea
+ heiko	well ok
+ blackburn	exactly
+ heiko	say blackburn, do you know the streaming features a bit?
+ blackburn	yeah a bit
+ heiko	I wonder if there is the possibility to compute kernel values with them
+ heiko	using the CStreamingFeatures interface only
+ heiko	without knowing the type of features
+ heiko	I just want to compute kernel values of features that I stream
+ heiko	and then forget
+ blackburn	it seems that no, we can't
+ heiko	strange
+ blackburn	well first of all it should be
+ heiko	thats the whole point of having streaming features
+ blackburn	dotfeatures not just features
+ heiko	what do you mean?
+ blackburn	do you need some custom kernel for that?
+ blackburn	or dot-based?
+ heiko	no a shogun kernel is fine
+ heiko	no any type please
+ heiko	CKernel interface
+ blackburn	ah so any possible shogun kernel
+ blackburn	that's a problem
+ heiko	Gaussian kernel as a working example
+ blackburn	why do you need that at all?
+ blackburn	:D
+ heiko	when feature data is too large to fit in memory
+ heiko	I want to stream it
+ heiko	and I only need kernel values of certain pairs
+ heiko	and I want to stream these
+ heiko	large - scale stuff
+ blackburn	currently we pull vectors one by one
+ heiko	I only need sums of kernel values
+ blackburn	from features
+ blackburn	is that ok for you?
+ heiko	I would prefer some blocks but one by one is fine to start with
+ heiko	I have two streaming features
+ heiko	and need two samples from each
+ heiko	and then kernel of all combinations, that are 4 values
+ blackburn	are you sure you need streaming but not just file features?
+ heiko	is there a difference?
+ blackburn	yeah streaming is not really for random access
+ heiko	why?
+ heiko	I just need "one more" functionality
+ blackburn	it is rather something for online learning when examples come all the time
+ heiko	yeah thats what I need
+ heiko	do you got another idea?
+ blackburn	let me make it more clear - do you have unknown stream of features?
+ blackburn	or just big data
+ heiko	I need this: "give me four more examples from features"
+ blackburn	there is a difference
+ blackburn	well I am unsure streaming is what you need still
+ heiko	whats the difference?
+ blackburn	streaming known only one feature vector - current
+ blackburn	and it just gives you more current vectors one by one
+ heiko	but thats what I need, I just need 4 at once
+ heiko	or two from each feature instance
+ blackburn	but why do you need streaming then?
+ heiko	I need 4 at once for many many times
+ blackburn	ah wait
+ blackburn	so you have two current vectors
+ blackburn	and compute kernel values?
+ heiko	yes
+ heiko	then forget these
+ heiko	and repeat
+ blackburn	ah okay then it is the streaming thing
+ blackburn	but I don't think you can handle that in general way
+ blackburn	at least currently
+ heiko	strange
+ heiko	online kernel algorithms face exactly the same problem
+ blackburn	we have only linear algorithms
+ blackburn	or even algorithm
+ heiko	ah we dont have kernel on-line stuff?
+ heiko	though so
+ heiko	thought
+ heiko	what about adding something like this
+ heiko	let me think
+ heiko	maybe add a method to CKernel
+ heiko	get_kernel_matrix(num_streaming_samples)
+ heiko	which only works if underlying features are streams
+ blackburn	kernel matrix?
+ heiko	or even overload old one
+ heiko	yeah in case one wants to sample multiple features at once
+ blackburn	I do not understand that cause we are assumed to have kind of infinite examples
+ blackburn	in case of streaming features
+ heiko	which is a single scalar in case of one sample
+ heiko	yeah but you want kernel matrices on small subsets in streaming
+ heiko	extreme case is one example from each stream -1x1 kernel matrix
+ heiko	to make it easier
+ blackburn	I don't mind to add some
+ heiko	overload CKernel::kernel
+ blackburn	StreamingKernel
+ blackburn	no idea how should that work though
+ heiko	but then we would have to create a new subclass for each existing kernel or?
+ blackburn	yeah that's the worst ever way
+ heiko	or we pass an existing kernel to StreamingKernel
+ heiko	that is then used for evaluation
+ heiko	CStreamingKernel(CKernel* single_kernel, CStreamingFeatures* p, CStreamingFeatures* q)
+ heiko	and if you call CStreamingKernel::kernel(index_t m) you get a mxm matrix for streamed values
+ blackburn	oops I've got an email about my appliance to new job
+ blackburn	:D
+ heiko	?
+ blackburn	I sent my CV to some company
+ heiko	congrats then!
+ blackburn	let me phone them to ask when can I be interviewed
+ heiko	okay, good luck
+ blackburn	oops I have interview tomorrow
+ heiko	wow
+ blackburn	heiko: so you want to have a method that computes mxm for first streaming vectors, right?
+ heiko	yeah
+ heiko	I think I have a solution:
+ heiko	CStreamingKernel as described above
+ heiko	which you can ask for an mxn matrix on streamed samples
+ heiko	and this is computed as follows:
+ heiko	I add a get_features_bla method to CStreamingFeatures, which returns a non-streaming feature object with samples from the stream
+ heiko	and these "normal" features (e.g. dense) are then put into kernel and matrix is computed
+ heiko	do you see any problems with that?
+ heiko	blackburn, I dont see any, should work
+ blackburn	yes good idea I think
+ blackburn	two features at the time
+ heiko	or even more (may be set by a method)
+ heiko	in case one needs blocks
+ blackburn	blocks like?
+ heiko	say 100 features at once
+ blackburn	features ? or feature vectors?
+ heiko	I am currently using both terms for the same thing
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+ heiko	blackburn, I made a draft and sent a PR. Let me know what you think
+ blackburn	heiko: looks valid
+ heiko	blackburn, from my class I can then just ask for 2x2 kernel matrices on the streaming data and work with that
+ heiko	will leave it open for some time for sonney2k to have a look at it, maybe he has suggestions.
+ blackburn	okay
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- heiko [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@37.61.181.31] has joined #shogun
+ wiking	blackburn: yo
+ wiking	seems it works
+ blackburn	wiking: your code?
+ wiking	yep
+ wiking	it did converge
+ blackburn	what is it btw?
+ blackburn	SO latent svm?
+ wiking	based on bmrm
+ wiking	yeah
+ blackburn	nice
+-!- audy [~audy@heyaudy.com] has quit [Changing host]
+-!- audy [~audy@unaffiliated/audy] has joined #shogun
+-!- ptizoom [4f475132@gateway/web/freenode/ip.79.71.81.50] has quit [Ping timeout: 245 seconds]
+-!- heiko [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has joined #shogun
+-!- romi__ [~mizobe@187.74.0.20] has joined #shogun
+-!- romi_ [~mizobe@187.74.0.20] has quit [Ping timeout: 246 seconds]
+-!- CIA-47 [cia@cia.vc] has joined #shogun
+-!- heiko [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has quit [Ping timeout: 274 seconds]
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has quit [Ping timeout: 274 seconds]
+-!- CIA-31 [cia@cia.vc] has quit [Ping timeout: 274 seconds]
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has joined #shogun
+-!- heiko [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has joined #shogun
+-!- heiko [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has quit [Ping timeout: 241 seconds]
+-!- heiko [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has joined #shogun
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- voket [26688042@gateway/web/freenode/ip.38.104.128.66] has joined #shogun
+ voket	Hey all. I am attempting to serialize a CRelaxedTree. The built-in print_serialized was hitting an infinite loop, so I am writing my own visiting function, but I am puzzled by the printed kernels -- in my two node tree, the second node has a three dimensional kernel when I expected a two dimensional one like the root. Any ideas?
+ voket	I am using a LinearKernel and calling its save method with a CAsciiFile
+ blackburn	voket: hey.. let me check
+ blackburn	voket: you meant save_serializable, right?
+ voket	not on the kernel. Should I be using save_serializable instead of save()?
+ voket	blackburn: save_serializable looked like it had a thornier interface, but I can switch over. I'll try that and get back to you.
+ blackburn	voket: well yes, the method you should rather use is save_serializable
+ blackburn	voket: save(FILE* f) is something deprecated like actually
+ voket	blackburn: Ok. I will switch over and see if I can get it to behave. Thanks for the help.
+ blackburn	however we need to assure that RelaxedTree registers its parameters properly
+ blackburn	voket: what do you need to store?
+ voket	blackburn: It looks like it is using SG_ADD in its constructor, but when I print i just get a mess of growing ascii.
+ blackburn	are you features big?
+ blackburn	we have one problem I didn't manage to find time to solve
+ voket	blackburn: I want the trained learner from each level, so: For each node,  Left classes, right classes, support vectors, alphas, bias
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ blackburn	the problem is that all submachines (tree nodes) should have a copy of features
+ blackburn	it can become huge..
+ voket	Submachines get a local copy of the features? Why can't they just have a view?
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has quit [Ping timeout: 240 seconds]
+ blackburn	voket: no technical problem - just a thing to be improved
+ voket	At the moment I am testing with a small toy dataset, but it's good to know that I may run into scaling issues.
+ blackburn	it is on our todo list
+ blackburn	so I hope we will fix that somehow - I don't mind to patch multiclass machines somehow for now
+ voket	Ohhhh. The reason the print_serializable is infinitely looping is that children have their parent as one of their serialized parameters.
+ blackburn	oops
+ voket	I'll fix it and pull request
+ blackburn	thanks, we'd appreciate any improvements
+ voket	I am happy to help - one of my pull requests was merged in this weekend (aasted on github)
+ blackburn	ahh so now I recognize you better :)
+ blackburn	I am lisitsyn at github
+ voket	Nice to meet you. I am looking at the serialization code -- is there a reason that print is not just a save using stdout?
+ voket	Also, is there a quick way to break this recursion loop? I could just unregister the parent parameter, but it would be better if the parameter printer just detected cycles.
+ blackburn	re
+ blackburn	let me check what print does
+ blackburn	voket: yes we need to handle cycles there
+ blackburn	but it is a nightmare :)
+-!- shogun-t1olbox [~shogun@7nn.de] has quit [Ping timeout: 240 seconds]
+--- Log closed Mon Sep 24 23:32:59 2012
+--- Log opened Mon Sep 24 23:33:06 2012
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 13 nicks [1 ops, 0 halfops, 0 voices, 12 normal]
+-!- Irssi: Join to #shogun was synced in 6 secs
+ voket	Yes, huge nightmare. So long as print/save are not generating objects it could be just be a hash map by memory location stored in the CSerializableFile. But that's kind of ugly.
+ voket	Is there any way I can mark a parameter to be excluded from serialization? Also it looks like the person who wrote the tree class knew about this since they wrote their own debug_print function.
+ blackburn	well with brute force it could be excluded for sure
+ blackburn	voket: the author of this code is chiyuan zhang, our gsoc 2012 student
+ blackburn	you may attempt to talk to him using mailing list actually - not sure if he has time now - he joined phd at MIT
+ voket	Ok. For now I will write a workaround in my local code and then see if I can write a better workaround in general to push upstream.
+ blackburn	yeah that's what I wanted to suggest for now
+ voket	I'll only bug Chiyuan Zhang if I need to -- the first month of a PhD is a bad time to get a hold of someone.
+ blackburn	heh yeah
+ blackburn	are you applying these complicated tree methods?
+ voket	I had planned on it. Is that a mistake?
+ blackburn	no,no, I just wanted to know if it works in practice well
+ blackburn	I never tried
+--- Log closed Mon Sep 24 23:53:30 2012
+--- Log opened Mon Sep 24 23:53:40 2012
+-!- shogun-t1olbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 14 nicks [1 ops, 0 halfops, 0 voices, 13 normal]
+!hitchcock.freenode.net [freenode-info] why register and identify? your IRC nick is how people know you. http://freenode.net/faq.shtml#nicksetup
+-!- Irssi: Join to #shogun was synced in 8 secs
+ blackburn	voket: why do you stick to trees btw?
+-!- shogun-toolbox [~shogun@7nn.de] has quit [Ping timeout: 252 seconds]
+ blackburn	okay, I'm leaving now
+ blackburn	see you
+ voket	ok. thanks for your help
+--- Log closed Tue Sep 25 00:00:17 2012

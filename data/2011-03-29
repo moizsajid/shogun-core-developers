@@ -1,0 +1,334 @@
+--- Log opened Tue Mar 29 00:00:36 2011
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Quit: I'll be back...]
+-!- blackburn [~qdrgsm@188.168.5.159] has joined #shogun
+-!- blackburn [~qdrgsm@188.168.5.159] has quit [Quit: Leaving.]
+-!- seviyor [c1e20418@gateway/web/freenode/ip.193.226.4.24] has quit [Ping timeout: 252 seconds]
+-!- aifargonos [~aifargono@46.18.27.35] has left #shogun []
+-!- serialhex [~serialhex@99-101-149-136.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- serialhex [~serialhex@99-101-149-136.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- shelhamer [~shelhamer@AMontsouris-152-1-64-127.w83-202.abo.wanadoo.fr] has joined #shogun
+-!- sploving [~root@124.16.139.196] has left #shogun []
+-!- sonney2k [~sonney2k@f053046246.adsl.alicedsl.de] has quit [Ping timeout: 276 seconds]
+-!- sonney2k [~sonney2k@f053045182.adsl.alicedsl.de] has joined #shogun
+-!- serialhex [~serialhex@99-101-149-136.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- ^knrrrd^ [~knrrrd@bane.ml.tu-berlin.de] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: cwidmer, yoh, yin, l0uis_, siddharth, sonney2k, meanerelk, @knrrrd, shelhamer
+-!- Netsplit over, joins: siddharth, meanerelk, l0uis_, sonney2k
+-!- Ryaether [~Ryaether@50-80-170-245.client.mchsi.com] has joined #shogun
+-!- Netsplit over, joins: yoh, shelhamer
+-!- Netsplit over, joins: cwidmer, yin
+-!- sploving [~root@124.16.139.196] has joined #shogun
+-!- alesis-novik [~alesis@188.74.87.84] has joined #shogun
+-!- sploving [~root@124.16.139.196] has left #shogun []
+-!- eppz [~epps@84.18.157.200] has joined #shogun
+-!- eppz [~epps@84.18.157.200] has quit [Changing host]
+-!- eppz [~epps@unaffiliated/epps] has joined #shogun
+-!- eppz [~epps@unaffiliated/epps] has quit [Client Quit]
+-!- dvevre [b49531e3@gateway/web/freenode/ip.180.149.49.227] has joined #shogun
+-!- Tanmoy [75d35896@gateway/web/freenode/ip.117.211.88.150] has joined #shogun
+-!- Tanmoy [75d35896@gateway/web/freenode/ip.117.211.88.150] has quit [Client Quit]
+-!- sploving [~root@124.16.139.196] has joined #shogun
+-!- Tanmoy [75d35896@gateway/web/freenode/ip.117.211.88.150] has joined #shogun
+ sploving	hello sonney2k
+ sonney2k	sploving, good morning
+ sploving	good morning. I find that jblas do not support sparse matrix
+ sonney2k	sploving, not many packages do - not even R has support for sparse matrices
+ sploving	okay. then we should not write these typemaps
+ sonney2k	sploving, let me check - I recall that there is one big java matrix package around
+-!- aifargonos [~aifargono@46.18.27.35] has joined #shogun
+ sploving	http://jblas.org/javadoc/index.html
+ sonney2k	that one probably http://www.ujmp.org/
+ sonney2k	it can indeed do sparse matrices http://www.ujmp.org/apidocs/ujmp-core/apidocs/
+ sploving	this lib is maturate?
+ sploving	I have never heard that
+ sploving	it indeed
+ sonney2k	sploving, I think it is very mature
+ sploving	ok. sonney2k, another question, I took at the typemap.i in the python_modular and know what thatis meaning. But I do not understand the two interface file in pyton dir. "pythoninterface.h" "pythoninterface.cpp"
+ sploving	what are they for?
+ sploving	are they equal the wrapper file that swig generate?
+ sonney2k	sploving, sorry where are these files?
+ sonney2k	$ ls python_modular/
+ sonney2k	sg_print_functions.cpp  swig_typemaps.i
+ sonney2k	is all I have there
+ sploving	$ls python/
+ sonney2k	you will only need to modify swig_typemaps.i
+ sonney2k	sploving, ahh I understand. That is the legacy static interface
+ sonney2k	let me explain
+ sonney2k	shogun has two kinds of interfaces: static ones (do not require swig) and modular ones (require swig)
+ sploving	this i know.
+ sploving	what is the difference?
+ sonney2k	the static ones are in the directories octave, r, python, matlab ...
+ sonney2k	modular swig based ones in the *_modular
+ sploving	the static interface files equal the wrapper file that swig generate?
+ sonney2k	the difference is that for static ones one has to write interfaces / for swig they are automatically created *AND* maybe more important the static ones are not object oriented and have interfaces for only a very limit amount of functions
+ sonney2k	Did I make myself clear?
+ sploving	okay. swig could also generated static wrapper file
+ sonney2k	sploving, well no...
+ sonney2k	swig exports all of shoguns classes directly into python etc
+ sonney2k	so we have e.g. CClassifier -> Classifier in python
+ sonney2k	the static interfaces have just some 'sg' command that takes a few options e.g. sg('new_classifier', 'LibSVM')
+ sonney2k	so totally different
+ sploving	i took at the examples. and clear now. then I also need write the static java file?
+ sonney2k	sploving, no
+ sonney2k	only java_modular interface
+ sploving	i am glad to hear that. but why not support static?
+ sonney2k	sploving, because functionality is very limited in static anyways
+ sploving	i know~
+ sonney2k	so I expect new users to only ever use a modular interface
+ sploving	then for jave support, i need write typemap.i for ujmp.
+ sonney2k	sploving, btw, I am just now modifying the configure script etc to enable swig for lua, ruby, java - such that you can get started much easier then
+ sonney2k	swig_typemaps.i yes - I think you should start writing wrappers for jblas first and then maybe later for ujmp ... simply because mikio braun can mentor how this works (he is the author of jblas) and also a mentor for this
+ sploving	sonney2k, i know. thx.
+-!- Ryaether [~Ryaether@50-80-170-245.client.mchsi.com] has left #shogun []
+ sploving	as there are 12 weeks, what do you think better.  java coding ->java test,doc; lua coding->lua test,doc; or java coding, lua coding->java test,doc, lua test doc
+ sploving	i just need write the proposal plan. although they are not difficult to implement
+-!- dvevre [b49531e3@gateway/web/freenode/ip.180.149.49.227] has quit [Ping timeout: 252 seconds]
+ sonney2k	sploving, I don't think it will take you that much time but I guess it is better to finish one before attempting the other.
+ sonney2k	I guess you will easily be able to also do ruby_modular but I am fine with it not being mentioned in the proposal
+-!- aifargonos [~aifargono@46.18.27.35] has quit [Ping timeout: 240 seconds]
+ sploving	ruby never used:(
+ sploving	overestimate me :)
+ sonney2k	sploving, doesn't matter ... you know enough languages already to easily read that code
+ sonney2k	the difficulty lies only in getting the typemaps to work, not the language - see http://www.ruby-lang.org/en/documentation/quickstart/
+ sploving	then are you familiar with one matrix lib?
+ sploving	if support ruby which lib we use?
+ sonney2k	sploving, http://www.ruby-doc.org/stdlib/ the matrix package I think.
+-!- jabbok [8d550074@gateway/web/freenode/ip.141.85.0.116] has joined #shogun
+-!- aifargonos [~aifargono@193.206.186.107] has joined #shogun
+-!- siddharth [~siddharth@117.211.88.150] has quit [Ping timeout: 246 seconds]
+-!- ^knrrrd^ is now known as knrrrd
+-!- mode/#shogun [+o knrrrd] by ChanServ
+ sploving	sonney2k, for a language, the final file i need write is : swig_typemaps.i sg_print_functions.cpp, and testsuite files. the doc and the examples are not need. am i right?
+-!- mode/#shogun [+o sonney2k] by ChanServ
+@sonney2k	well some examples at least
+-!- knrrrd [~knrrrd@bane.ml.tu-berlin.de] has left #shogun []
+@sonney2k	gtg, l8r
+-!- sonney2k [~sonney2k@f053045182.adsl.alicedsl.de] has quit [Quit: Leaving]
+-!- yin [~chatzilla@207.46.92.18] has quit [Quit: ChatZilla 0.9.86.1 [Firefox 3.6.16/20110319135224]]
+-!- jabbok_ [8d550074@gateway/web/freenode/ip.141.85.0.116] has joined #shogun
+-!- jabbok [8d550074@gateway/web/freenode/ip.141.85.0.116] has quit [Ping timeout: 252 seconds]
+-!- jabbok_ [8d550074@gateway/web/freenode/ip.141.85.0.116] has quit [Client Quit]
+-!- jabbok [8d550074@gateway/web/freenode/ip.141.85.0.116] has joined #shogun
+-!- yin [~chatzilla@207.46.92.18] has joined #shogun
+-!- knrrrd [~knrrrd@bane.ml.tu-berlin.de] has joined #shogun
+ knrrrd	when did sonne leave?
+-!- mode/#shogun [+o knrrrd] by ChanServ
+-!- shelhamer [~shelhamer@AMontsouris-152-1-64-127.w83-202.abo.wanadoo.fr] has quit [Quit: Computer has gone to sleep]
+-!- shelhamer [~shelhamer@AMontsouris-152-1-64-127.w83-202.abo.wanadoo.fr] has joined #shogun
+-!- sonney2k [~sonney2k@89.204.153.70] has joined #shogun
+ sonney2k	sploving, hmmhh it is actullay not totally straight forward to even get the basic swig thingies to compile
+ sonney2k	sploving, I will try a few more hours but then I guess you have to take over...
+ sonney2k	there are things happening like: java package names cannot have the same name like a class in the package
+ sonney2k	etc
+ sonney2k	sploving, it seems like only lua works out of the box
+ sploving	sonney2k, you mean lua works well
+ sonney2k	lua at least compiles
+ sploving	could we use %rename java?
+ sonney2k	sploving, yes but it is somehow stupid - I mean in all languages it is named differntly? stupid!
+ sonney2k	but yes, for now I will rename Classifier -> ClassifierBase etc
+-!- siddharth [~siddharth@117.211.88.150] has joined #shogun
+ sploving	sonney2k, when you develop with python, r , not have these problems?
+ sonney2k	sploving, well with R I had some problems too, but octave & python were easy, but give me a few more moments...
+ sploving	sonney2k,okay
+-!- shelhamer [~shelhamer@AMontsouris-152-1-64-127.w83-202.abo.wanadoo.fr] has quit [Quit: Computer has gone to sleep]
+ sonney2k	sploving, regarding lua
+ sonney2k	what how are binary extension named?
+ sonney2k	I mean do the end with extension.so ?
+ sonney2k	and how do I load an extension?
+ sploving	yep
+ sploving	require ("example")
+ sploving	example.so is the binary
+ sonney2k	sploving, segfault!
+ sonney2k	dammed, this train is crowded with kids calling me a hacker! a hacker *LOL*
+ sonney2k	ok so I guess something lua wise is not correct
+ sonney2k	but at least it compiles ...
+ sploving	sonney2k compiles is a good start.
+ sonney2k	sploving, I will commit later today so you can have a look...
+ sploving	sonney2k, i am writing the proposal now
+ sonney2k	sploving, sure that has priority
+ sploving	soney2k, okay
+-!- aifargonos [~aifargono@193.206.186.107] has quit [Ping timeout: 240 seconds]
+-!- sonney2k [~sonney2k@89.204.153.70] has quit [Ping timeout: 246 seconds]
+-!- siddharth [~siddharth@117.211.88.150] has quit [Read error: Connection reset by peer]
+-!- Tanmoy [75d35896@gateway/web/freenode/ip.117.211.88.150] has quit [Ping timeout: 252 seconds]
+-!- siddharth [~siddharth@117.211.88.150] has joined #shogun
+-!- sonney2k [~sonney2k@no.ml.tu-berlin.de] has joined #shogun
+-!- seviyor [c1e20418@gateway/web/freenode/ip.193.226.4.24] has joined #shogun
+-!- jabbok [8d550074@gateway/web/freenode/ip.141.85.0.116] has quit [Ping timeout: 252 seconds]
+-!- Tanmoy [75d35896@gateway/web/freenode/ip.117.211.88.150] has joined #shogun
+ yin	on the second page of the coffin paper, the last formula I(\Phi(x)_k) should be \Phi(z)??
+ sonney2k	yin, ehh could be :)
+ yin	:) as x should be the mapped vector and z is the original feature vector.
+ sonney2k	true then
+ sonney2k	yin, I think I have more papers to be proof red :D
+ sonney2k	sploving, java compiles now too...
+ sploving	sonney2k, congratulation~ thx for your work
+ Tanmoy	@yin...feature map shld be on i/p vectors
+ sonney2k	now off to ruby
+-!- aifargonos [~aifargono@46.18.27.35] has joined #shogun
+ sploving	sonney2k, good luck~
+ sploving	waiting for good news.
+ sploving	sonney2k, the typemaps.i just map the in/out para, where are the *.i files that include all the functions that pytho,etc calls. for example, in pythin example, svm=LibSVM(..), where is the wrapper file for libsvm function
+ sonney2k	sploving, in the modular/ dir we have all the *.i files that do the svm=LibSVM() magic etc
+ yin	sonney2k, in section 2.1.2 computing \Phi for a variety of kernels. are the three kernels implemented in shogun now?
+ sonney2k	the typemaps just do the conversion e.g. numpy matrix -> set_matrix(float64_t* matrix, int dim1, int dim2)
+ sploving	that is the interface file for general language
+ sonney2k	yin, spectrum / weightedegree, polynomial ? yes
+ yin	sonney2k, yes. these three.
+ sploving	sonney2k, i know ant take a look at it
+-!- skydiver [4deac315@gateway/web/freenode/ip.77.234.195.21] has joined #shogun
+ yin	sonney2k, i am reading CFeatures and its children now. These classes should contain all the data structures that hold data samples. Are there any other class outside this family that are relevant to data samples?
+ sploving	sonney2k, there are mainly four arrays in python typemap: input output in-place argout. but the octave, r modular just have input argout array.
+ sploving	Do r and octave not support output and in-place array?
+-!- siddharth [~siddharth@117.211.88.150] has quit [Remote host closed the connection]
+ sonney2k	sploving, within shogun I've never used inplace argout
+ sonney2k	yin, no
+ yin	sonney2k, thanks:)
+ sonney2k	yin, these classes can be pretty big /messy
+ sploving	sonney2k, besides the arrays, there are also CTstring feature, What are they for?
+ yin	sonney2k, i am diving into the source now.
+ yin	hope i can figure some structure out and i will add to my "some design patterns in shogun" report.
+ sonney2k	sploving, regarding features we support strings (that is what these are for), sparse matrices and dense matrices
+ yin	i think analyzing this part of code is important as we have a project for designing online feature class.
+ yin	sonney2k, i also found that CAttributeFeatures and some others are never used by a classifier or clustering algorithm.
+ sonney2k	yin, I hope it does not turn into a 'clean up the mess' project ...
+-!- aifargonos [~aifargono@46.18.27.35] has quit [Ping timeout: 250 seconds]
+ sonney2k	yin, yes they are not used. I was only drafting this - but had no time to finish... basically what I wanted is something like in C structs as features
+ yin	sonney2k, i see. btw, there is a "feature name" concept for cdotfeatures?
+ sonney2k	no
+ yin	e.g. the first dimension of feature vector x means the "length", the 2nd dimension means "age"
+ yin	ok. but if we add decision trees, this information is better encoded into its feature class.
+-!- aifargonos [~aifargono@193.206.186.107] has joined #shogun
+ sonney2k	yin, well not really
+ sonney2k	it is nice to have I agree
+ yin	i've sent a email to the mailing list earlier today about the opencv library
+ yin	do you have any comments?
+ yin	thanks.
+ sonney2k	Yes, I will reply today
+ yin	:)
+ sonney2k	sploving, OK lua,java,ruby now at least compile with swig interfaces...
+ sploving	sonney2k, good news~
+-!- jabbok [8d550074@gateway/web/freenode/ip.141.85.0.116] has joined #shogun
+ sonney2k	sploving, I've pushed the changes to github already ...
+ sonney2k	so if you have time try things out...
+ sploving	okay. I will
+-!- sonney2k [~sonney2k@no.ml.tu-berlin.de] has quit [Ping timeout: 246 seconds]
+-!- skydiver [4deac315@gateway/web/freenode/ip.77.234.195.21] has quit [Quit: Page closed]
+-!- aifargonos [~aifargono@193.206.186.107] has quit [Ping timeout: 248 seconds]
+ sploving	sonney2k, thx. I submitted the proposal. when you have time please take a look at it.
+ sploving	bye. good night~
+-!- aifargonos [~aifargono@46.18.27.35] has joined #shogun
+-!- fredt [~fredt@sshgate.tu-berlin.de] has joined #shogun
+* fredt hrrrrr :)
+ fredt	thanks for the reports :) bye
+-!- fredt [~fredt@sshgate.tu-berlin.de] has quit [Quit: thats it :)]
+-!- epps [~epps@unaffiliated/epps] has joined #shogun
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Remote host closed the connection]
+-!- alesis-novik [~alesis@188.74.87.84] has joined #shogun
+-!- epps [~epps@unaffiliated/epps] has quit [Ping timeout: 264 seconds]
+-!- epps [~epps@unaffiliated/epps] has joined #shogun
+-!- jabbok [8d550074@gateway/web/freenode/ip.141.85.0.116] has quit [Ping timeout: 252 seconds]
+-!- hiteshk [~hitesh_na@117.211.88.150] has joined #shogun
+ hiteshk	hi
+ alesis-novik	hello
+ hiteshk	hi , are you a mentor for this project
+ hiteshk	or any project
+ alesis-novik	No, I'm a student
+ hiteshk	Ok , is Vojtech Franc available on irc
+ alesis-novik	I don't think so. What idea are you interested in?
+ hiteshk	I am interested in new machine learning algorithms , and you
+ alesis-novik	Implementing EM
+ hiteshk	So the mentor is Vijtech only , did you talk to him
+ hiteshk	is any mentor available on the irc
+ alesis-novik	I did send him an e-mail today
+ alesis-novik	So what are you studying?
+ hiteshk	I am a Computer Science undergraduate in India
+ hiteshk	what about you
+ alesis-novik	Artificial Intelligence masters student from UK
+-!- Tanmoy [75d35896@gateway/web/freenode/ip.117.211.88.150] has quit [Ping timeout: 252 seconds]
+@knrrrd	Hi, Guss
+@knrrrd	guys
+ alesis-novik	Hello knrrrd
+ hiteshk	alesis-novik , did he reply to your mail
+ alesis-novik	I only sent it recently, so no. Hopefully tomorrow.
+@knrrrd	The official deadline is 8th, right?
+ hiteshk	have you subscribed to the mailing list
+ alesis-novik	yes knrrrd
+ alesis-novik	Not yet hiteshk
+@knrrrd	Ah ok. I am looking forward to the applications.
+ alesis-novik	If we submit them earlier, will anyone comment on them before the deadline?
+@knrrrd	alesis-novik: I am not sure if this would be fair
+ alesis-novik	I meant asking to clarify something or similar comments, but either way is fine
+ alesis-novik	Just so I know that I can refine it until the last day and then submit
+@knrrrd	As far as I know, the mentors will have a discussion on all applications after the deadline
+-!- siddharth_ [~siddharth@117.211.88.150] has joined #shogun
+-!- sonney2k [~sonney2k@g225143240.adsl.alicedsl.de] has joined #shogun
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Quit: I'll be back]
+ sonney2k	*sigh* my router just died
+ sonney2k	4 hours without internet - hard to believe that I survived this nightmare ;-)
+ aifargonos	...I can imagine...
+ aifargonos	torture for a programmer ...
+-!- davidcg [d8a57e6f@gateway/web/freenode/ip.216.165.126.111] has joined #shogun
+ davidcg	Not sure if anyone is there, but just wanted to point out that SVMLin is behaving strangely.  It generates decent classifiers in very little time, but sometimes it reverses the labels (e.g. generates a classifier with 20% accuracy instead of 80% accuracy).
+ sonney2k	davidcg, do you see any pattern in that?
+ sonney2k	I mean like the first label is always -1 in such cases?
+ davidcg	It happens about 50% of the time, I'd wager it's being assigned randomly.
+ davidcg	Hm, not sure if it's dependent on what the first label is.
+ sonney2k	davidcg, you could check if liblinear behaves in the same way
+ sonney2k	if not then it could be really a bug
+ davidcg	It may be due to the first label....
+ davidcg	Just checked and if the first label was -1, it would generate the opposite classifier, when I changed only the first label to 1 it produced the correct result.
+ siddharth_	hello
+ sonney2k	davidcg, heh ... that code looks suspicous:
+ sonney2k	    float64_t sgn=train_labels[0];
+ sonney2k	    for (int32_t i=0; i<num_feat+1; i++)
+ sonney2k	        Weights.vec[i]*=sgn;
+ sonney2k	perfectly correlates with your observation
+ sonney2k	davidcg, would you mind commenting lines 100-102 in SVMLin.cpp and see if it fixes the problem?
+ sonney2k	siddharth_, hi...
+ siddharth_	i would like to work on "Implement Olivier Chapelles fast newton based SVM solver"
+ davidcg	Haha, yeah, that looks like it would cause it.
+ siddharth_	so how should i apply through GSOC?
+ davidcg	Btw, using the python modular interface - don't seem to be able to use LibLinear (get a "Sorry, not yet implemented." when attempting to train).
+ siddharth_	Btw sonney2k are u Soeren Sonnenburg?
+ davidcg	Thanks for the help on SVMLin though - I'm sure that changing those lines will fix it.
+ sonney2k	davidcg, so can you confirm it?
+ sonney2k	siddharth_, I am about to send out an email with details
+ siddharth_	so should i apply after ur email?
+ siddharth_	There is one more thing
+ siddharth_	i was not able to clearly understand the member function "Calibrate" in SVMSGD
+ sonney2k	siddharth_, that is Leon Bottou black magic :)
+ davidcg	I'm sorry, don't have the permissions to recompile part of shogun on my server - I've used several other classifiers without seeing this behavior though, and that first line would definitely explain it.
+ davidcg	(float64_t sgn=train_labels[0])
+ davidcg	Thanks again!
+-!- davidcg [d8a57e6f@gateway/web/freenode/ip.216.165.126.111] has quit [Quit: Page closed]
+ siddharth_	 I went through the slides  of Leon Bottou "learning with large datasets" where he has explained SGD...but from the code its difficult to understand
+-!- davidcg [d8a57e6f@gateway/web/freenode/ip.216.165.126.111] has joined #shogun
+ davidcg	Just wanted to add - probably obvious, but SVMLin inverts the sign for b as well as w in the svm if the first training label is -1.
+-!- davidcg [d8a57e6f@gateway/web/freenode/ip.216.165.126.111] has quit [Client Quit]
+-!- epps [~epps@unaffiliated/epps] has quit [Ping timeout: 250 seconds]
+-!- shelhamer [~shelhamer@AMontsouris-152-1-50-9.w83-202.abo.wanadoo.fr] has joined #shogun
+ sonney2k	siddharth_, he simply has a lot of SGD experience
+ sonney2k	I think he estimates step sizes for bias and w independently and also has some heuristics how often to update one but not the other
+ siddharth_	yes and he using the sparse features
+ sonney2k	siddharth_, yes
+ siddharth_	sonney2k, for the primal SVM solver project,we have to convert matlab code to c++,in the overloaded train() function
+ siddharth_	before jumping to that,can u suggest some SVm code to begin with
+ siddharth_	so that I can get a feel of it
+ sonney2k	the liblinear in shogun maybe?
+ siddharth_	sonney2k, ok i will try them...Also for the proposal do we have to give the timeline or just the project name?
+ sonney2k	siddharth_, timeline is better. plan conservatively and maybe add additional projects in some later months/outlook... if you accidentally finish early :)
+ siddharth_	sonney2k, thanks...i will keep this in mind...Also i want to ask whether SVMSMO has been implemented in Shogun?
+ sonney2k	siddharth_, what is SVMSMO? I mean that sounds like libsvm - no?
+ sonney2k	siddharth_, potentially more interesting is a GPU based svm ...
+ siddharth_	sonney2k, Support Vector Machines Using Sequential Minimal Optimization
+ sonney2k	siddharth_, but libsvm does that alread...
+ sonney2k	http://mklab.iti.gr/project/GPU-LIBSVM
+ sonney2k	that would be pretty cool I think ...
+ siddharth_	yeah :)
+ siddharth_	sonney2k, well I am currently going into CUDA thing for my 3D texture modeling project
+ sonney2k	siddharth_, well then the plan is clear :D
+-!- epps [~epps@unaffiliated/epps] has joined #shogun
+-!- hiteshk [~hitesh_na@117.211.88.150] has left #shogun []
+-!- jabbok [8d550074@gateway/web/freenode/ip.141.85.0.116] has joined #shogun
+--- Log closed Wed Mar 30 00:00:36 2011

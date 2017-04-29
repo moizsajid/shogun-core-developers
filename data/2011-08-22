@@ -1,0 +1,440 @@
+--- Log opened Mon Aug 22 00:00:12 2011
+-!- f-x [~user@117.192.207.63] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+ blackburn	serialhex: no more floating faces :(
+ CIA-87	shogun: Sergey Lisitsyn master * r6e02faf / src/shogun/preprocessor/KernelLocallyLinearEmbedding.cpp : Fixes for kLLE - http://git.io/2iRxKw
+ serialhex	why no more floating faces???
+ blackburn	serialhex: they died
+ serialhex	died??? what happened blackburn???
+ blackburn	ok joke :D
+ serialhex	did you kil the floating faces??? :P
+ blackburn	I'm now trying to the get intrinsic manifold of promoter data
+ serialhex	ok, cool
+ blackburn	fancy-mancy-pancy bioinformatics hehe
+ serialhex	heh
+ blackburn	serialhex: how are you?
+ serialhex	good good, and yourself blackburn??
+ blackburn	fine, soon starting to studying again
+ serialhex	...and wondering what happened to my local branch of shogun... :(
+ blackburn	what's up with your branch?
+ serialhex	yeah?  classes start on tues for me, what are you taking this simester??
+ blackburn	I don't know :D
+ serialhex	it's saying there are a *BUNCH* of files that i edited & it's all stuff like: shogun/ui/GUIHMM.h and shogun/base/init.h  and i have no reason to edit those files...
+ serialhex	:(
+ blackburn	serialhex: hmm try rebase
+ serialhex	you dont know!?!?!  you're gonna be studying but you dont know what!?!?
+ blackburn	I have fixed warnings in these files
+ blackburn	yeah I will study what I have to study
+ blackburn	no choice is given heh
+ serialhex	niiice :P
+ blackburn	I know I have to study experimental design techniques or so
+ serialhex	it's weird, it says i have those files staged for commit... but i havnt done that :(
+ serialhex	cool cool
+ blackburn	java ee but my teacher will free me for that
+ blackburn	cause I will be working as java ee developer starting from september, the 5th
+ blackburn	well it would be strange to study java ee again :D
+ serialhex	really? thats kind of cool!!
+ blackburn	yeah I will have to work about 20-30 per week
+ blackburn	I hope I will have much time for studies, vodka and shogun
+ blackburn	not much, bad word
+ blackburn	ehmm
+ blackburn	sufficient
+ serialhex	yeah, sufficient works better :D
+ blackburn	and I have to study some optical informatics or so
+ blackburn	some crazy shit I don't want to do
+ blackburn	and mathematical physics again
+ serialhex	lovely :P
+ serialhex	holy crap dude... the shogun repository is ~23MB!!!!
+ blackburn	http://dl.dropbox.com/u/10139213/shogun/promoters-wdk-k10%2C100.png
+ blackburn	serialhex: ^ some promoter embedding via kernel LLE I implemented just now
+ serialhex	ooh, perdy dots!! :P
+ blackburn	different colors are standing for different organisms
+ blackburn	I don't know if it is good or not but at least something
+ blackburn	with kPCA I've got gaussian cloud
+ blackburn	nothing to deal with
+ serialhex	so is it like showing diffs in DNA or something?
+ serialhex	hmm, ok
+ blackburn	yeah
+ blackburn	it uses kernel
+ blackburn	I used weighted degree kernel with degree of 100
+ serialhex	cool
+ blackburn	and 150 instances of each organism
+ blackburn	so it should be something like underlying manifold of this data
+ blackburn	input data is some ACTCGACTTTTCACGAC....
+ serialhex	hmm... ok
+ blackburn	150*9 strings of length 600
+ blackburn	I don't really understand anything hahah
+ serialhex	ooh, niiice.... i bet that took a while to compute :P
+ blackburn	nope
+ blackburn	<10s
+ blackburn	the most expensive here was to load data
+ serialhex	oh, i thought it was 150**9, not *9 :P
+ blackburn	ah nooo
+ serialhex	yeah... that'd be insane!
+ blackburn	I bet it would never do a half of that embedding
+ blackburn	hmm the most strange thing for me is that according to the embedding all of the promoters are the same
+ blackburn	I should add some crap here and see if it will be farther or so
+ blackburn	serialhex: time for sleep, see you :)
+ serialhex	ok, nite blackburn
+-!- blackburn [~blackburn@188.122.238.50] has quit [Quit: Leaving.]
+-!- f-x [~user@117.192.207.63] has quit [Remote host closed the connection]
+@sonney2k	serialhex, problem is I cannot use CONFIG['sitelibdir']
+@sonney2k	serialhex, the prefix that we might want to install to might be different from /usr/local ...
+@sonney2k	so I need to set it someow
+@sonney2k	serialhex, so ruby -e 'require "mkmf"; CONFIG["sitedir"]="/my/prefix"; puts Config::expand("$(sitelibdir)")' should say sth lilike /my/prefix ...
+-!- f-x [~user@117.192.206.200] has joined #shogun
+-!- f-x [~user@117.192.206.200] has quit [Remote host closed the connection]
+ CIA-87	shogun: Soeren Sonnenburg master * r676fcae / (src/Makefile.template src/configure): attempt to determine ruby extensions dir and add make install target - http://git.io/JCO6MQ
+ CIA-87	shogun: Soeren Sonnenburg master * rddac142 / (src/Makefile.template src/configure): add option --rubydir to override ruby installation path - http://git.io/eqof2A
+ CIA-87	shogun: Soeren Sonnenburg master * r0964f03 / src/shogun/base/Parallel.h : it should be NULL in the mutex case - http://git.io/OMR1OA
+ CIA-87	shogun: Soeren Sonnenburg master * rdfba7da / src/shogun/base/Parallel.h : fix mutex macro - http://git.io/h3qZjg
+-!- blackburn [~blackburn@188.122.238.50] has joined #shogun
+ blackburn	sonney2k: eeh?!
+ blackburn	uh :(
+ blackburn	did you fix it?
+ blackburn	parallel issue?
+@sonney2k	blackburn, no
+@sonney2k	blackburn, it does neither work with mutex nor with spinlocks
+ blackburn	I don't know where regression happen
+ blackburn	are you sure it is related to locks?
+@sonney2k	blackburn,
+@sonney2k	#include <shogun/base/init.h>
+@sonney2k	#include <shogun/features/Labels.h>
+@sonney2k	using namespace shogun;
+@sonney2k	int main(int argc, char** argv)
+@sonney2k	{
+@sonney2k	init_shogun();
+@sonney2k	CLabels* l = new CLabels(10);
+@sonney2k	exit_shogun();
+@sonney2k	return 0;
+@sonney2k	}
+@sonney2k	this crashes
+@sonney2k	well it crashes in the call to CSGObject()
+ blackburn	valgrind shows strange error
+ blackburn	okay I'll check
+ blackburn	modular works..
+@sonney2k	blackburn, no
+@sonney2k	compile yes but no more
+ blackburn	python examples works here
+@sonney2k	blackburn, I guess you should git bisect
+ blackburn	I'll disable ref counting
+ blackburn	and check
+@sonney2k	though I suspect that it is working before the spinlock macro change
+@sonney2k	blackburn, good idea
+ blackburn	uh a lot of warnings from DynamicObjectArray
+ blackburn	when compiling w/o ref counting
+@sonney2k	and does it work?
+ blackburn	checking
+ blackburn	no
+ blackburn	sonney2k: no, disabling ref counting didn't help
+ blackburn	sonney2k: do you have any idea what caused this?
+ blackburn	making git bisect now
+ blackburn	okay sgobject things caused this
+ blackburn	but why
+@sonney2k	blackburn, which commit is it?
+ blackburn	sonney2k: https://github.com/shogun-toolbox/shogun/commit/ed1846562fef047cca1847d16d79dd3ee8092ac2
+ blackburn	the problem is that revision is not compiling
+ blackburn	I fixed it in the next commit
+ blackburn	so probably better that
+ blackburn	https://github.com/shogun-toolbox/shogun/commit/85ce83d0a70ff64fc02c5ef994a761a9995b1de5
+@sonney2k	blackburn, but that commit is unrelated
+@sonney2k	blackburn, so ed1846562fef047cca1847d16d79dd3ee8092ac2 is the problem?
+ blackburn	yes
+@sonney2k	blackburn, why did you change it to not using a ptr?
+ blackburn	changed what?
+@sonney2k	I mean the &lock instead of lock in the macro?
+ blackburn	cause parameter should be ptr
+ blackburn	but in sgobject it is instance
+@sonney2k	I mean that is not the problem - it is just confusing when the function before was taking ptr's
+@sonney2k	that is why I would have kept the ptr
+@sonney2k	then one woul PTHREAD_UNLOCK(&m_ref_lock);
+ blackburn	yeah may be
+ blackburn	but it is not a problem
+@sonney2k	I don't see the problem...
+ blackburn	i've reverted the commit
+ blackburn	will try to run
+@sonney2k	blackburn, the other option is to comment parts of the code until it works
+ blackburn	yeah
+ blackburn	works now
+ blackburn	sonney2k: I think it is better to push revert and then commit it then it works
+ blackburn	it's kinda bad that shogun is not working now
+ blackburn	do you agree?
+@sonney2k	yes
+ CIA-87	shogun: Sergey Lisitsyn master * r0020af8 / (src/shogun/base/SGObject.cpp src/shogun/base/SGObject.h):
+ CIA-87	shogun: Revert "SGObject mutex to generic lock transition"
+ CIA-87	shogun: This reverts commit ed1846562fef047cca1847d16d79dd3ee8092ac2. - http://git.io/1qXRAw
+ blackburn	sonney2k: interesting thing: libshogun examples can't run cause they don't know anything about PTHREAD_LOCK_T..
+ blackburn	I have no idea how to avoid this
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- f-x [~user@117.192.221.24] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 258 seconds]
+-!- in3xes_ is now known as in3xes
+ CIA-87	shogun: Sergey Lisitsyn master * r904b1a8 / examples/undocumented/python_modular/preprocessor_kernellocallylinearembedding_modular.py : Added kLLE example - http://git.io/dYIuQg
+-!- alesis-novik [~alesis@188.74.87.206] has quit [Quit: Leaving]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- f-x [~user@117.192.221.24] has quit [Remote host closed the connection]
+ CIA-87	shogun: Sergey Lisitsyn master * r876909b / src/shogun/preprocessor/DimensionReductionPreprocessor.h : Added AUTO_TARGET_DIM option for dimensionality reduction preprocessor - http://git.io/0Ux-1A
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has joined #shogun
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has quit [Ping timeout: 260 seconds]
+-!- in3xes_ is now known as in3xes
+ blackburn	sonney2k: should -larpack or so be in params of check.sh of libshogun?
+ blackburn	for arpack test being compiled
+@sonney2k	blackburn, why should examples know anything about PTHREAD_LOCK_T?
+@sonney2k	blackburn, no we need to modify the code then to don't have library calls in the .h file
+@sonney2k	blackburn, then this can be avoided
+ blackburn	sonney2k: arpack.h have no library calls
+ blackburn	but not visible for some reason
+ blackburn	can't understand why
+@sonney2k	then I don't understand what you mean
+ blackburn	I tried to make mathematics_arpack.cpp example
+ blackburn	but arpack_dsaeupd_wrap routine 'was not declared'
+@sonney2k	blackburn, could it be that you don't include lib/config.h in the file where you define arpack?
+ blackburn	hmm I didn't
+ blackburn	didn't help :(
+ blackburn	sonney2k: any other ideas?
+ blackburn	oh I see
+ blackburn	wrong order of includes :)
+@sonney2k	blackburn, err no
+@sonney2k	then some include is missing somewhere
+ blackburn	sonney2k: I placed include of config *after* ifdefs
+@sonney2k	but lib/config.h must be included first that is right
+@sonney2k	ok
+@sonney2k	blackburn, what about the PTHREAD_LOCK_T thing?
+@sonney2k	resolved?
+@sonney2k	blackburn, btw is that perhaps the reason for the crash we were seeing?
+* sonney2k tries
+@sonney2k	unfortunately not
+ blackburn	sonney2k: I can't fix it
+@sonney2k	what?
+ blackburn	I've reverted sgobject transition
+ blackburn	now it uses mutex
+ blackburn	when I try to use PTHREAD_LOCK_T there - examples fails
+ blackburn	I don't know why
+ CIA-87	shogun: Sergey Lisitsyn master * r80149f4 / (7 files in 3 dirs): Improved and renamed arpack wrapper, added libshogun arpack example - http://git.io/FPkGAQ
+@sonney2k	blackburn, I found the problem
+@sonney2k	bug in configure script
+ blackburn	to which issue is it related?
+@sonney2k	blackburn, and only possible because we are doing library calls in .h file
+@sonney2k	to the lib/config.h include one and the library calls in .h file one
+@sonney2k	I will commit a revert reverted SGObject version with the & replaced soon
+ blackburn	sonney2k: so should config.h be included in prior of every HAVE_*?
+@sonney2k	blackburn, yes
+ blackburn	ohh
+@sonney2k	once per file at most :)
+ blackburn	yeah I see..
+@sonney2k	blackburn, of course we could avoid this if we had no ifdef HAVE_XXX in a .h file
+@sonney2k	but that is not possible
+ blackburn	sure
+ blackburn	sonney2k: so did you manage to make generic lock work in sgobject?
+@sonney2k	yes
+ blackburn	how?
+@sonney2k	blackburn, configure was not writing out the HAVE_PTHREAD to lib/config.h
+ blackburn	oh
+@sonney2k	but only setting it in DEFINES (arguments passed to g++)
+@sonney2k	same for SPINLOCKS btw
+ blackburn	my bug :D
+ blackburn	hmm but spinlock is yours
+@sonney2k	I copy pasted from PTHREAD :)
+ blackburn	sonney2k: your email is wonderful thing to start a day with haha :D
+ blackburn	btw I had a dream I killed someone and got email What have you done :D
+@sonney2k	blackburn, I spend all my spare time on hunting this bug today too - so you are not alone...
+ blackburn	sonney2k: how soon will you receive new computer?
+@sonney2k	blackburn, no idea - hopefully this week
+ CIA-87	shogun: Sergey Lisitsyn master * ra030b01 / (9 files): Added necessary include of config header to preprocessors - http://git.io/PZFclQ
+ blackburn	sonney2k: I've got this picture for the promoter data: http://dl.dropbox.com/u/10139213/shogun/pr.png
+ blackburn	have you any ideas what axes could mean? :D
+@sonney2k	blackburn, for one I would expect GC frequency
+ blackburn	sonney2k: hm! I should check, thanks
+ blackburn	sonney2k: what do you think about storing consts this way? https://github.com/shogun-toolbox/shogun/commit/876909b8ef40dc42c7beb543cd6a9b4de0dde89f#L0R101
+ blackburn	it is used in java commonly
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has joined #shogun
+ blackburn	for examples I can do something like
+ blackburn	ltsa = LocalTangentSpaceAlignment()
+ blackburn	ltsa.set_target_dim(ltsa.AUTO_TARGET_DIM)
+ blackburn	without any import except ltsa itself
+ blackburn	for example*
+@sonney2k	blackburn, shouldn't it be static const int32_t AUTO_TARGET_DIM ?
+ blackburn	what is the difference?
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has quit [Client Quit]
+ blackburn	hmm yes
+ CIA-87	shogun: Soeren Sonnenburg master * r728d1de / (3 files in 2 dirs):
+ CIA-87	shogun: Merge pull request #307 from alesis/gmm
+ CIA-87	shogun: Bug fix for GMM. - http://git.io/-KA8nw
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has joined #shogun
+ CIA-87	shogun: Soeren Sonnenburg master * ra715fc7 / (5 files in 3 dirs):
+ CIA-87	shogun: Merge pull request #308 from frx/streaming_vw
+ CIA-87	shogun: VW application and option to save predictions to a file - http://git.io/nBVdUw
+ CIA-87	shogun: Soeren Sonnenburg master * re7aed82 / src/interfaces/ruby_modular/modshogun.rb : don't require pry - http://git.io/gvcwBw
+ CIA-87	shogun: Soeren Sonnenburg master * r4d7f40a / (src/shogun/base/SGObject.cpp src/shogun/base/SGObject.h): use generic defines for pthread spinlock / mutexes - http://git.io/LDtbWg
+ CIA-87	shogun: Soeren Sonnenburg master * ra57de60 / (4 files in 3 dirs): fix the mutex/spinlock bugs - http://git.io/EZz-hw
+ CIA-87	shogun: Soeren Sonnenburg master * rd32fded / (src/shogun/base/SGObject.cpp src/shogun/base/SGObject.h):
+ CIA-87	shogun: move library calls in SGObject into .cpp files and un-inline respective
+ CIA-87	shogun: functions - http://git.io/KmWuxQ
+ CIA-87	shogun: Sergey Lisitsyn master * r706bca0 / src/shogun/preprocessor/DimensionReductionPreprocessor.h : int32_t const -> const int32_t in dimreductionpreprocessor - http://git.io/WTJw2A
+ blackburn	sonney2k: so what are the tasks we have to finish?
+ blackburn	there should be <50 warning now, seems various examples is what we have to do
+@sonney2k	blackburn, get the test suite to work fix remaining warnings, fix / port examples for all new languages, get installer to work for new languages, write  / update make release script
+@sonney2k	I am working on the install scripts currently
+@sonney2k	blackburn, would be good if you could get the warnings down to 0
+ blackburn	hmm okay
+@sonney2k	(and you don't need a buildbot for that - just compile python_modular and you see all the many)
+ blackburn	sure but I usually disable doxygen hah
+@sonney2k	I never do
+@sonney2k	I guess I like to suffer
+@sonney2k	blackburn, btw it doesn't even compile here w/ doxygen on
+ blackburn	ehh why?
+@sonney2k	blackburn, some unicode errror you\u22c5' ?
+@sonney2k	no idea what that could be
+ blackburn	where?
+@sonney2k	no idea
+ blackburn	okay will try to detec
+ blackburn	t
+@sonney2k	blackburn, found it
+@sonney2k	was ?
+@sonney2k	and in your commit
+ CIA-87	shogun: Soeren Sonnenburg master * r1a48148 / src/shogun/preprocessor/MultidimensionalScaling.h : fix unicode error - http://git.io/0hMEfA
+ blackburn	oh
+ blackburn	no idea what it is
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has quit [Quit: Leaving.]
+@sonney2k	blackburn, it looks like a broken pixel on my display
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has joined #shogun
+@sonney2k	I was first trying to remove the dust from my display but it is an actual unicode character pixel ?
+@sonney2k	heiko, how is it going?
+ heiko	sonney2k, hi, the stuff in running, no more errors
+ heiko	but it leaks
+@sonney2k	the first sentence is exactly what I wanted to hear :)
+ heiko	there are some minor memory leaks which i hope to fix soon :)
+ heiko	Though its kind of complicated to add a migration now, but you will see. Let me just hunt down the memory leaks .)
+@sonney2k	heiko, I guess you will be just in time for when the new buildbot arrives
+ heiko	when will that be? :)
+ blackburn	sonney2k: have you seen doc in vojtech's toolkit?
+@sonney2k	no - did you?
+ blackburn	I want similar
+@sonney2k	heiko, somewhen this week
+@sonney2k	blackburn, does it contain formulas?
+ blackburn	it contains short description
+ blackburn	yeah
+ blackburn	and it is in latex -> pdf
+@sonney2k	blackburn, yeah but then jsut write formulas
+@sonney2k	I did...
+ blackburn	no, I want to choke seeing doxygen formulas
+@sonney2k	blackburn, http://www.shogun-toolbox.org/doc/classshogun_1_1CKernelMachine.html
+ blackburn	don't like it
+@sonney2k	blackburn, if you want to spend all your life keeping the documentation up-to-date - feel free
+@sonney2k	blackburn, or write a book even
+ blackburn	why? do methods change?
+@sonney2k	all the time
+ blackburn	ehm
+@sonney2k	and no one updates documentation
+ blackburn	e.g. LLE stays LLE
+@sonney2k	it is already tough enough to update the doc inside the source code
+ blackburn	no chance it will be changed
+@sonney2k	blackburn, haha - like PCACut you mean?
+@sonney2k	or Classifier
+ blackburn	no
+ blackburn	not the API doc
+@sonney2k	blackburn, the method itself?
+ blackburn	yes
+@sonney2k	for that a pointer to a paper is all that is needed
+ blackburn	everytime I see vojtech's toolbox description I cry and want the same for shogun :(
+ blackburn	:D
+@sonney2k	blackburn, no one wants to write documentation - so if you don't do it it will always be like this
+ blackburn	possibly it is because I'm a latex fan
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+ blackburn	sonney2k: btw I have a nice doc for my preprocessors :P even without mistakes haha
+@sonney2k	serialhex proof-read it?
+ blackburn	yeah
+@sonney2k	heiko, this week I hope
+ heiko	sonney2k, ok
+@sonney2k	heiko, my machine is just too unstable ...
+@sonney2k	so I bought a new one
+ heiko	ok, cool that we got a new one then
+ heiko	will you install it at home?
+@sonney2k	heiko, now with 16G of memory - btw whose price dropped to 52 EUR now
+ heiko	oh no, i paid too much :)
+ heiko	but my 4gb are cool now, everything much faster
+ blackburn	sonney2k: do you know everything fails now?
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has quit [Quit: Leaving.]
+@sonney2k	blackburn, life is a total failure - in the end we all fail (aka die) or what are you talking about?
+ blackburn	examples
+ blackburn	they all fail now
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has joined #shogun
+@sonney2k	blackburn, no they work here
+ blackburn	I'm up-to-date
+@sonney2k	me too
+ blackburn	all examples fails with segfaults
+@sonney2k	blackburn, all work through nicely
+@sonney2k	libshogun, python_modular...
+ blackburn	ok will try to rebuild
+ blackburn	and reconfigure
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has left #shogun []
+ blackburn	sonney2k: still fails
+ blackburn	==2650== Invalid write of size 1
+ blackburn	==2650==    at 0x43FF689: shogun::CGaussianKernel::set_compact_enabled(bool) (GaussianKernel.h:118)
+@sonney2k	blackburn, are you at 1a481483e709e3d1a0010e7c8d5bf8bfdeb4333c
+@sonney2k	?
+ blackburn	???
+ blackburn	yes
+@sonney2k	git clean -dfx
+@sonney2k	./configure --interfaces=python_modular   +otheropts
+@sonney2k	maek
+@sonney2k	make
+@sonney2k	make install
+ blackburn	I already did distclean and configure and make
+ blackburn	trying again
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has joined #shogun
+@sonney2k	blackburn, I also rebuild /reinstalled everything - works all nicely
+ blackburn	sonney2k: Segmentation fault
+ blackburn	sonney2k: okay got it
+@sonney2k	?
+ blackburn	I didn't recompile examples
+ blackburn	all ok now
+@sonney2k	blackburn, next time just type make check-examples
+@sonney2k	that will do it for you
+ blackburn	yeah it is what I did
+ blackburn	now
+@sonney2k	blackburn, so now you can finally fix examples :)
+@sonney2k	err warnings
+ blackburn	yeah will start in a min
+ blackburn	not really much left
+@sonney2k	I have lots of in preprocessors...
+@sonney2k	10-20 already
+ blackburn	yeah it is because of kpca refactoring
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has quit [Read error: Connection reset by peer]
+-!- heiko [~heiko@541D5B0C.cm-5-6b.dynamic.ziggo.nl] has joined #shogun
+ heiko	sonney2k, my example is now memclean :) :)
+ heiko	now for some more complex tests
+ blackburn	warnings -> 0
+ blackburn	verrrrry soon hah
+@sonney2k	heiko, great!
+@sonney2k	go guys go!
+ blackburn	10 to go
+ heiko	sonney2k, I will open a pull request so that you can read a bit what I did.
+ heiko	I will polish it a bit more, don't yet merge
+@sonney2k	heiko, ok
+@sonney2k	blackburn, btw regarding documentation - I had a look at what you all wrote. I think it really needs some improvement in the header: like formula of the problem that is to be solved and when it is most useful to use this method plus a pointer to a paper.
+ blackburn	sonney2k: are you kidding? we will never finish if I writing true doc
+@sonney2k	blackburn, what is a true doc?
+ blackburn	with formulas, etc
+ blackburn	papers
+ blackburn	I will improve doc but writing all of it now - it is impossible
+ blackburn	sonney2k: or what do you mean?
+ blackburn	the whole shogun or my preprocs?
+ blackburn	if the whole shogun ^
+@sonney2k	I didn't say that you have to do it *now* - I said that documentation is worse than average - which is e.g.  http://www.shogun-toolbox.org/doc/classshogun_1_1CSVM.html
+ blackburn	yeah sure we have worst doc ever
+@sonney2k	not true
+@sonney2k	we don't have a book or tutorial
+@sonney2k	it is more like a reference for someone who knows about ML
+ blackburn	yeah
+ blackburn	2 warnings left
+@sonney2k	blackburn, writing a tutorial style book for the methods inside of shogun is like 1000 pages
+@sonney2k	good luck when attempting that
+ blackburn	calm down I don't want to write it
+@sonney2k	blackburn, you wine all the time
+--- Log closed Tue Aug 23 00:00:15 2011

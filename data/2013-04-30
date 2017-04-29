@@ -1,0 +1,611 @@
+--- Log opened Tue Apr 30 00:00:29 2013
+ van51	sonney2k: I may be doing something wrong, but valgrind still reports memory leaks with your commit alone
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- cesarf [b2c73bf3@gateway/web/freenode/ip.178.199.59.243] has joined #shogun
+-!- [1]wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has joined #shogun
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has quit [Ping timeout: 256 seconds]
+-!- [1]wencan is now known as wencan
+-!- cesarf [b2c73bf3@gateway/web/freenode/ip.178.199.59.243] has quit [Quit: Page closed]
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has quit [Quit: Leaving.]
+-!- van511 [~van51@athedsl-401908.home.otenet.gr] has joined #shogun
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 276 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has quit [Quit:  HydraIRC -> http://www.hydrairc.com <- \o/]
+-!- alibezz [~alibezz@177.182.164.8] has quit [Quit: Leaving.]
+-!- alibezz1 [~alibezz@177.182.164.8] has joined #shogun
+-!- alibezz1 [~alibezz@177.182.164.8] has quit [Quit: Leaving.]
+-!- alibezz [~alibezz@177.182.164.8] has joined #shogun
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- alibezz1 [~alibezz@177.182.164.8] has joined #shogun
+-!- alibezz [~alibezz@177.182.164.8] has quit [Ping timeout: 245 seconds]
+-!- alibezz1 [~alibezz@177.182.164.8] has left #shogun []
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- foulwall_ [~foulwall@li379-21.members.linode.com] has joined #shogun
+@sonney2k	wiking, yeah I think the system might just have slightly different numerical precision...
+@sonney2k	shogun-buildbot, force build 'cyg1 - libshogun'
+ shogun-buildbot	build forced [ETA 11m44s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #716 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/716
+@sonney2k	shogun-buildbot, force build 'cyg1 - libshogun'
+ shogun-buildbot	build forced [ETA 11m44s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #717 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/717
+-!- mikhailBelous [~quassel@109.205.249.161] has quit [Remote host closed the connection]
+-!- foulwall_ [~foulwall@li379-21.members.linode.com] has quit [Ping timeout: 245 seconds]
+ sonne|work	wiking: the deviation is actually 1e-17 or 1e-18
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- admtuku [b4951f3b@gateway/web/freenode/ip.180.149.31.59] has joined #shogun
+-!- lisitsyn1 [~blackburn@37.61.181.55] has quit [Quit: Leaving.]
+@wiking	sonne|work: lol
+-!- van511 [~van51@athedsl-401908.home.otenet.gr] has left #shogun ["PING 1367308428"]
+-!- gsomix_ [~Miranda@37.61.181.55] has quit [Ping timeout: 245 seconds]
+ sonne|work	wiking: this test is *very* strict it really checks for 100% reproducibility
+ sonne|work	if e.g. atlas would give a different result than just standard basic floatingpoint ops then we would get this
+-!- van51 [~van51@195.251.235.94] has joined #shogun
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- admtuku [b4951f3b@gateway/web/freenode/ip.180.149.31.59] has quit [Quit: Page closed]
+@lisitsyn	sonne|work: I'll arrive to schoenefeld :D
+ sonne|work	haha
+ sonne|work	that is not an airport
+@lisitsyn	sonne|work: nice :D
+ sonne|work	it is some temporary construction site
+@lisitsyn	hmm
+@lisitsyn	let me check
+ sonne|work	you will have to walk off the plane
+ sonne|work	for 500m's
+@lisitsyn	sonne|work: that's usual here in samara :D
+ sonne|work	then pass through some boxes and then walk again 200m's to get to a train station
+ sonne|work	but hey
+@lisitsyn	haha nice nice
+@lisitsyn	sonne|work: I checked - it is schoenefeld
+ sonne|work	lisitsyn: any ideas what we do about the failed test on travis? We now have the full detail...
+ sonne|work	lisitsyn: output is here https://travis-ci.org/shogun-toolbox/shogun/jobs/6739254
+ sonne|work	(go to the very end)
+ sonne|work	you will notice that the originally serialized object deviates by 1e-17 or even 1e-18
+@lisitsyn	sonne|work: interesting
+ sonne|work	I would totally understand that if other tests were failing too
+ sonne|work	but it seems to be just this one !?!
+ sonne|work	and only w/ one setting
+@lisitsyn	we get lucky
+@lisitsyn	that's the only thing I can say haha
+ sonne|work	well but what do we do about it
+ sonne|work	we could
+ sonne|work	a) just drop the first setting
+ sonne|work	or change the test to return some numpy values
+ sonne|work	or ...?
+ sonne|work	lisitsyn, wiking any ideas?
+@lisitsyn	sonne|work: it sounds unreasonable to test values with such precision
+ sonne|work	lisitsyn: yes and no
+ sonne|work	what this test does is serialize a file
+ sonne|work	err object
+ sonne|work	and then it does the same thing again
+ sonne|work	and compares
+@lisitsyn	sonne|work: it may be just gmnpsvm tihng
+ sonne|work	so stuff should match 100%
+ sonne|work	I don't see how
+ sonne|work	gmnpsvm tests don't have this issue
+@lisitsyn	don't we train it in this example?
+@lisitsyn	we should not train it there
+ thoralf	sonne|work: Sorry if I'm bugging - but did you think about my email?  i.e. how to use stream_features->get_vector() properly?
+* sonne|work overload
+ sonne|work	lisitsyn: yes we train
+ sonne|work	it is meant to be a complex example
+ sonne|work	lisitsyn: we have a) multiclass machine - so it has multiple SVMs
+ sonne|work	each having its kernel set & features
+ sonne|work	and labels
+ sonne|work	and preprocessors attached
+ sonne|work	and if you currently train GMNPsvm on that example
+ sonne|work	then serialize to .json etc etc
+ sonne|work	and then load from json etc
+ sonne|work	and train again
+ sonne|work	you will get exactly the same result (except for json - slightly worse accuracy)
+@lisitsyn	sonne|work: well I mean we could just initialize it rather hard-coded
+@lisitsyn	and then we will not have that issues
+@lisitsyn	issue*
+@lisitsyn	it makes sense to test only serialization here
+@lisitsyn	but not gmnpsvm
+ sonne|work	lisitsyn: makes sense. Then I would just say we remove the first test and simplify it later
+ sonne|work	lisitsyn: by may 6th we have to request the number of slots
+ sonne|work	so we should have students <-> mentors loosely assigned by then
+@lisitsyn	sonne|work: alright
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+@lisitsyn	sonne|work: do you think I'll get to tiergarten from schoenefeld somewhat at 22:00?
+@lisitsyn	by public transport? or rather taxi?
+ sonne|work	why go to tiergarten?
+ sonne|work	that is the other airport
+@lisitsyn	sonne|work: hotel is there
+ sonne|work	more or less
+ sonne|work	I still don't get why you dont' take the ostel
+ sonne|work	but yes sure
+@lisitsyn	yes I know tegel is closer but my tickets are to schoenefeld
+@lisitsyn	ostel is not cheapier than what I chose
+@lisitsyn	may be just a little
+@lisitsyn	so why not to live in something more comfortable? :)
+@lisitsyn	sonne|work: not really tiergarten - cross of schillstrasse and kurfuerstenstrasse
+ sonne|work	your holidays :)
+@lisitsyn	sonne|work: I just don't know how good public transport is - that's why I am asking
+@lisitsyn	in samara it could be a trouble to get to the city that late :D
+@lisitsyn	but we are wild you know
+@lisitsyn	I was surprised you have night transport
+ sonne|work	well it is berlin
+@lisitsyn	we have nothing like buses on roads after midnight
+@iglesiasg	no roads haha
+ sonne|work	20% of the people wake up around midnight here
+@iglesiasg	lisitsyn: according to the pictures you have shown, you roads also have some troubles during daylight
+@iglesiasg	:P
+@lisitsyn	iglesiasg: oh that keeps you awake
+@lisitsyn	you can't be no cautious here
+@lisitsyn	sonne|work: iglesiasg: btw happy bday to gsomix
+@iglesiasg	cool
+ van51	sonne|work: hey, did you see the messages I left you? can it be that it still leaks?
+ van51	also if not, should i start another entry issue?
+-!- abinash [75ef5e6e@gateway/web/freenode/ip.117.239.94.110] has joined #shogun
+ abinash	iglesiasg: please could you review my GSoC application and comment me if any changes are to be done?
+ sonne|work	van51: looks like my messages got dropped
+@iglesiasg	abinash: I can glance over it but I am just a simply mortal student :P
+ sonne|work	van51: yes - it might still leak memory
+ sonne|work	I was only ensuring that it gives the correct result / doesn't crash
+@iglesiasg	abinash: I mean for you to know that I am not a mentor or so
+ abinash	iglesiasg: ok
+@iglesiasg	abinash: link me to it please
+ abinash	iglesiasg: just a moment I am sending you the link
+-!- gsomix [~Miranda@188.168.2.34] has joined #shogun
+@iglesiasg	gsomix: feliz cumplea?os!
+ gsomix	iglesiasg: thanks. :)
+ van51	sonne|work: ok.. those wrong results/crashes did you see them from travis or from "make tests"?
+ abinash	iglesiasg: here is the link http://www.google-melange.com/gsoc/proposal/review/google/gsoc2013/abinashpanda/1
+ van51	so I can try to spot them on my own from now on
+@iglesiasg	abinash: I think it looks good ;)
+ abinash	iglesiasg: ok, are there any changes to be made particularly in the project details and in the timeline
+ gsomix	iglesiasg: friends gave me a bottle of Spanish non-alcoholic wine today. not vodka, but ok.
+@iglesiasg	abinash: from top level it looks fine I think. The thing is that I am not completely aware of the contents of this project, maybe Vojtech can give you better feedback
+@iglesiasg	gsomix: is it called mosto?
+ sonne|work	van51: I just ran the serialize complex example from python
+@iglesiasg	abinash: I think there is a type in the timeline btw
+@iglesiasg	abinash: july 15 - august 29 should be july 29 I think
+@iglesiasg	type -> typo*
+ abinash	iglesiasg: yeah just noticed it, thanks
+@iglesiasg	abinash: in any case, from my experience I think that it is normally more important to make contributions rather than writing a fancy application
+ abinash	iglesiasg: ok, I have contributed to one issue previously and now working on another one
+@iglesiasg	abinash: at first sight, I think that the part of interfacing libqp from modular interfaces should be easy to do
+@iglesiasg	maybe it could be an idea to get that part done and include it in the application
+@iglesiasg	abinash: only my opinion :)
+ gsomix	iglesias: yes, I think so. but I don't know technology of production exactly. http://bit.ly/189Go0r
+ abinash	iglesiasg: ok, then I should write atleast the python interfaces and the rest of modular interfaces can be left as a part of GSoC project
+@iglesiasg	gsomix: ahhh ok, I think it is not mosto though
+-!- abinash [75ef5e6e@gateway/web/freenode/ip.117.239.94.110] has quit [Ping timeout: 245 seconds]
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has joined #shogun
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has left #shogun []
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has joined #shogun
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has quit [Remote host closed the connection]
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has joined #shogun
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Ping timeout: 245 seconds]
+@wiking	sonne|work: ping
+ sonne|work	wiking: poiiing
+@wiking	sonne|work: ok so question: i couldn't find any specific macros/variables for freebsd in ./configure
+ sonne|work	wiking: so?
+@wiking	which one(s) were u referring to yesterday?
+ sonne|work	just add them
+@wiking	sonne|work: heheh ok cool that's even more work...
+ sonne|work	there is a function called freebsd()
+ sonne|work	not really
+ van51	sonne|work: hey again :P so with your changes and mine, I don't see neither that test failing nor any memory leaks
+ van51	would you like me to make another PR so you can have another look?
+ sonne|work	van51: is it still the same one you do?
+-!- van51 [~van51@195.251.235.94] has quit [Read error: Connection reset by peer]
+ sonne|work	hmmhh
+-!- van51 [~van51@195.251.235.94] has joined #shogun
+@wiking	sonne|work: what if i add this into test_modular ?
+@wiking	as it's swig related
+ sonne|work	wiking: check_wordsize maybe
+ sonne|work	it is a workaround for wrong wordsize so I think it fits best there
+@wiking	sonne|work: yeah although that script runs fine as it uses simple c
+@wiking	not c++
+ sonne|work	just add the if freebsd ; then ...
+ sonne|work	what?
+ sonne|work	DEFINES_SWIG="${DEFINES_SWIG} -DSWIGWORDSIZE64"
+ sonne|work	after this line
+ sonne|work	just add this
+ sonne|work	if
+@wiking	sonne|work: yeah as i said yesterday wordsize is 64 if u compile with c and not c++
+ sonne|work	sorry what?
+ sonne|work	just do the fix there and be done
+ van51	sonne|work: yeap the same one
+@wiking	sonne|work: shall it be part of DEFINES_SWIG ?
+ sonne|work	yes it is only affecting swig
+@wiking	ok lets see
+@wiking	we still need --swig as well
+ sonne|work	van51: I think the reference count increase there is justified - what is missing is to decrement the counter once the structure is no longer used
+@wiking	since the swig binary is swig2.0 and not swig
+ sonne|work	van51: so you found the issue but I would solve it differently
+ sonne|work	wiking: not really difficult isn't it?
+ sonne|work	just do it
+@wiking	yeah and as well as -ldl removal
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+@wiking	i dont know how that's going to effect though python_modular on linux
+@wiking	loool
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+@wiking	sonne|work: DEFINES_SWIG is actually not good
+ sonne|work	why not?
+@wiking	swig2.0 -w473 -w454 -w312 -w325 -fvirtual -builtin -modern -modernargs -c++ -python -I../../shogun -I../.. -I.. -I. -DSWIGWORDSIZE64 -DUINTPTR_MAX=0xffffffffffffffff -DUINT64_MAX=0xffffffffffffffff -DSWIG_TYPE_TABLE=shogun -DSHOGUN -DFREEBSD -DUSE_BOOL -DUSE_CHAR -DUSE_UINT8 -DUSE_UINT16 -DUSE_INT32 -DUSE_INT64 -DUSE_UINT64 -DUSE_FLOAT32 -DUSE_FLOAT64 -DHAVE_SQRTL -DHAVE_LOG2 -DHAVE_PTHREAD -DHAVE_JSON -DHAVE_XML -DHAVE_ATLAS -DHAVE_LAPACK -DHAVE_CATLAS
+@wiking	# error "SWIG wrapped code invalid in 32 bit architecture, regenarete code using -DSWIGWORDSIZE32"
+@wiking	mmm
+@wiking	i think thi one has been cropped
+@wiking	sonne|work: http://pastebin.com/RZ8s1HQ4
+@wiking	it's better here
+@wiking	so basically that variable is passed for swig
+@wiking	which we don't really need
+@wiking	but we need it for clang++
+@wiking	hence it should be appeneded to COMP_...
+ sonne|work	ok
+@wiking	COMPFLAGS_CPP
+@wiking	testing
+@wiking	btw
+@wiking	this is not the best:
+@wiking	find . -name "*.c" -o -name "*.cpp" \
+@wiking	-exec gcc -MM -DSWIG_TYPE_TABLE=shogun -DSHOGUN -DFREEBSD -DUSE_BOOL -DUSE_CHAR -DUSE_UINT8 -DUSE_UINT16 -DUSE_INT32 -DUSE_INT64 -DUSE_UINT64 -DUSE_FLOAT32 -DUSE_FLOAT64 -DHAVE_SQRTL -DHAVE_LOG2 -DHAVE_PTHREAD -DHAVE_JSON -DHAVE_XML -DHAVE_ATLAS -DHAVE_LAPACK -DHAVE_CATLAS -DHAVE_EIGEN3 -DUSE_GLPK -DUSE_SNAPPY -DUSE_GZIP -DUSE_BZIP2 -DUSE_LZMA -DHAVE_LARGEFILE -DUSE_SHORTREAL_KERNELCACHE -DUSE_BIGSTATES -DUSE_HMMCACHE -DUSE_REFERENCE_COUNTING -DUSE_SVML
+@wiking	it's using gcc.... but it should use clang
+@wiking	as that the compiler based on ./configure
+@wiking	sssshsss
+@wiking	woah
+@wiking	why that clang++ does not use COMPFLAGS_CPP
+@wiking	COMPFLAGS_CPP += $(DEFINES)
+@wiking	COMPFLAGS_C += $(DEFINES)
+@wiking	mmmm
+@wiking	where DEFINES += $(DEFINES_PYTHON_MODULAR)
+ sonne|work	wiking: that is for dependency generation - ignore that
+@wiking	still
+@wiking	i have to somehow pass those 2 defines
+@wiking	so i'll try now DEFINES=....
+@wiking	ah you mean that find....
+@wiking	sonne|work: ok got the fix working
+-!- gsomix [~Miranda@188.168.2.34] has quit [Ping timeout: 260 seconds]
+@wiking	ok before commiting
+@wiking	you can change the configuration for freebsd bot
+@wiking	change the ./configure that it has --interfaces=python_modular and --swig=swig2.0
+@wiking	here
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :develop * 71ac672 / src/configure: https://github.com/shogun-toolbox/shogun/commit/71ac672e34734d79edd490ea371fb88351137eb2
+ shogun-notifier-	shogun: Fix for issue #1023 Fix for compiling python_modular on FreeBSD Add new --swig command line argument for ./configure script to be able to define the actual swig executable to use
+@wiking	let's check what happens with other buildbots that build python_modular :P
+-!- iglesiasg [~nando@n177-p222.kthopen.kth.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@wiking	doh why only deb1 builds :(
+ shogun-buildbot	build #718 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/718  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@wiking	ah shit i can test my hypotesis now about RNG :)
+@wiking	sonne|work: seems that this patch hasn't broke modular interface so you can change the configure command of freebsd bot
+ sonne|work	wiking: what?
+-!- travis-ci [~travis-ci@ec2-50-16-143-238.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6755300
+-!- travis-ci [~travis-ci@ec2-50-16-143-238.compute-1.amazonaws.com] has left #shogun []
+@wiking	sonne|work: for freebsd bot
+@wiking	change the ./configure command
+@wiking	add --swig=swig2.0
+@wiking	and --interfaces=python_modular
+@wiking	and run python modular tests as well on that bot
+ van51	sonne|work: I can fix the memory leak by making an additional decrease to the reference counter.. but I cannot really explain why it needs it :/
+ sonne|work	van51: the get increases the refcount and since things are put in a list that is mangled later it is better to have everything in there refcount increased
+ sonne|work	not that sth dies
+ sonne|work	wiking: can only do this tonight
+@wiking	okok
+@wiking	oh lol
+@wiking	running features_sparse_modular.py .. ERROR
+ van51	so should I leave it at this?
+@wiking	running serialization_complex_example.py .. ERROR
+-!- gsomix [~Miranda@188.168.128.160] has joined #shogun
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Ping timeout: 245 seconds]
+ sonne|work	van51: no decrease it when everything is parsed/destroyed
+ sonne|work	at the end
+ sonne|work	wiking: ?
+ sonne|work	does sth work?
+@wiking	sonne|work: mmm yes some of them... but seems there were missing deps for the tests
+ van51	sonne|work: yeah that's what i meant
+@wiking	first it was scipy
+@wiking	now it was hdf5
+ van51	should I make another PR?
+@wiking	sonne|work: so still trying to fill the gaps
+ sonne|work	yeah will take time
+@wiking	ok serialization now passes
+@wiking	so it was 'just' a dependency problem
+@wiking	features_string_char_compressed_modular.py fails
+@wiking	i think there's still some package missing
+@wiking	afaik it was lzo...
+@wiking	let's see the new build
+@wiking	at least now when you'll change the fbsd bot's configure it'll run
+@wiking	sonne|work: ok examples of python_modular runs fine...
+@wiking	let's see the integration tests
+@wiking	yep
+@wiking	the same integration tests fails on freebsd as on osx
+@wiking	=> they have the same RNG
+@wiking	so at least now we'll have a buildbot that'll show us when we managed to fix all the integration tests
+@wiking	:P
+ sonne|work	so we won't enable tests on *bsd/sx just yet
+@wiking	well yes and no :P
+@wiking	sonne|work: so how do you feel about depending on openssl?
+@wiking	that has a 'quite' stable RNG
+ sonne|work	wiking: I would rather borrow from opencv
+-!- FSCV [~FSCV@187.210.54.166] has joined #shogun
+ van51	sonne|work: I made a PR, please have a look when you can
+ van51	got to go for a while now
+ van51	cya all
+-!- van51 [~van51@195.251.235.94] has left #shogun ["QUIT :Leaving."]
+-!- ianlini [8c701e90@gateway/web/freenode/ip.140.112.30.144] has joined #shogun
+-!- mdragan [8d55007a@gateway/web/freenode/ip.141.85.0.122] has joined #shogun
+ mdragan	Hello everyone!
+ sonne|work	hey there.
+ mdragan	@iglesiasg or @lisitsyn  Is anyone of you here? :)
+@iglesiasg	mdragan: yep
+ mdragan	I just made a ne pull request for issue 863 - dev branch.
+ mdragan	Is it now OK?
+@iglesiasg	mdragan: yeah, the target branch is fine now :)
+ mdragan	ok, fine :)
+-!- ianlini [8c701e90@gateway/web/freenode/ip.140.112.30.144] has quit [Ping timeout: 245 seconds]
+ mdragan	This is what I wanted to check. See you!
+@iglesiasg	bye
+-!- mdragan [8d55007a@gateway/web/freenode/ip.141.85.0.122] has quit [Quit: Page closed]
+-!- FSCV [~FSCV@187.210.54.166] has quit [Quit: Leaving]
+@wiking	sonne|work: ok so take some RNG implementation from an opensouce project and put it into shogun...
+ sonne|work	wiking: yeah with some meaning == working & maintained and well tested
+ sonne|work	ohh and fast :)
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- iglesiasg [~nando@n177-p222.kthopen.kth.se] has quit [Quit: leaving]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@lisitsyn	re!
+ sonne|work	er!
+@lisitsyn	sonne|work: er!
+* gsomix is on the road to home...
+ gsomix	see you, guys
+-!- gsomix [~Miranda@188.168.128.160] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@nat-171-79.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ thoralf	Hey Heiko.
+@wiking	sonney2k: https://github.com/Itseez/opencv/blob/master/modules/core/src/rand.cpp
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has left #shogun []
+-!- van51 [~van51@athedsl-401908.home.otenet.gr] has joined #shogun
+@HeikoS	thoralf: hi!
+@HeikoS	thoralf: I haven't yet looked into the code, but will later today are at latest tomorrow
+ thoralf	Heiko: Okay, thanks.
+ thoralf	Heiko: The example is sooo easy, that there will be an easy explanation, too. ;)
+-!- alibezz [~alibezz@177.182.164.8] has joined #shogun
+ votjakovr	HeikoS: I added test case, in which GP regression returns negative variances. So when you'll have a time, please, look at it :)
+@HeikoS	votjakovr: does it still return negative variance?
+ votjakovr	HeikoS: Nope
+@HeikoS	ah nice
+@HeikoS	Ill check
+ votjakovr	HeikoS: Thanks
+@HeikoS	here we ho
+@HeikoS	go
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Roman Votyakov :develop * bf4df78 / src/shogun/regression/GaussianProcessRegression.cpp: https://github.com/shogun-toolbox/shogun/commit/bf4df784376fbfc011150e304213bc0f99939cf7
+ shogun-notifier-	shogun: Fixed bug with negative values for the variance
+ shogun-notifier-	shogun: Roman Votyakov :develop * b30b8ea / / (4 files): https://github.com/shogun-toolbox/shogun/commit/b30b8ea7cc368dfe94ff098dd1986dd648163604
+ shogun-notifier-	shogun: Merge branch 'develop' of https://github.com/shogun-toolbox/shogun into develop
+ shogun-notifier-	shogun: Roman Votyakov :develop * 964362e / tests/unit/regression/GaussianProcessRegression_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/964362ef24b3b154f3de00f5ba1a5a1fd5ec597d
+ shogun-notifier-	shogun: Added test case for GP regression, which checks negative value for the variance
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 0f133a8 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/0f133a89573cfab4eb0492351df0a5cc38d059f5
+ shogun-notifier-	shogun: Merge pull request #1030 from votjakovr/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed bug with negative values for the variance in GP regression
+ shogun-buildbot	build #719 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/719
+-!- travis-ci [~travis-ci@ec2-50-16-50-250.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6762831
+-!- travis-ci [~travis-ci@ec2-50-16-50-250.compute-1.amazonaws.com] has left #shogun []
+-!- thoralf [~thoralf@enki.zib.de] has quit [Quit: Konversation terminated!]
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has quit [Remote host closed the connection]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+@sonney2k	HeikoS, I think it is too hard to ask people to generate test data - it took ages until we managed to do that ourselves
+@HeikoS	sonney2k: I think I agree!
+@HeikoS	just realised during this epic series of PR
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 3823b83 / src/shogun/multiclass/MulticlassSVM.h: https://github.com/shogun-toolbox/shogun/commit/3823b83752592faa508894d014f37685742978ad
+ shogun-notifier-	shogun: fix typos
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 94e0a02 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/94e0a023709d86c471b0ccbe39e718e5138b9af0
+ shogun-notifier-	shogun: return svm bias in serialization example for all types
+@sonney2k	HeikoS, after all these are students that are new to everything
+@sonney2k	so we have to teach them
+@sonney2k	it is not like they can do *everything* already no matter how good
+-!- travis-ci [~travis-ci@ec2-50-16-50-250.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6764632
+-!- travis-ci [~travis-ci@ec2-50-16-50-250.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #721 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/721  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #1020 of deb3 - modular_interfaces is complete: Failure [failed test ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1020  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Roman Votyakov <votjakovr@gmail.com>
+ shogun-buildbot	build #722 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/722  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- romi__ [~mizobe@187.74.6.200] has quit [Ping timeout: 245 seconds]
+@sonney2k	shogun-buildbot, force build 'cyg1 - libshogun'
+ shogun-buildbot	build forced [ETA 12m16s]
+ shogun-buildbot	I'll give a shout when the build finishes
+@wiking	sonney2k: how about fbsd bot ?
+@sonney2k	wiking, what is the configure line again?
+@wiking	sonney2k: ./configure --cc=clang --cxx=clang++ --interfaces=python_modular --swig=swig2.0 --includes=/usr/local/include --libs=/usr/local/lib --gtest=/home/wiking/gmock-1.6.0/gtest --gmock=/home/wiking/gmock-1.6.0 --prefix=`pwd`/build
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+@sonney2k	wiking, how do we want to do it - change libshogun_freebsd into just freebsd?
+-!- romi__ [~mizobe@187.74.6.200] has joined #shogun
+@sonney2k	wiking, or add another modular_freebsd?
+ shogun-buildbot	build #723 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/723
+@sonney2k	wiking, tada! https://travis-ci.org/shogun-toolbox/shogun/jobs/6764636
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ shogun-buildbot	build #1021 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1021
+-!- travis-ci [~travis-ci@ec2-50-16-50-250.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/6764632
+-!- travis-ci [~travis-ci@ec2-50-16-50-250.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	shogun-buildbot, force build 'bsd1 - libshogun'
+ shogun-buildbot	build forced [ETA 3m33s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #885 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/885
+@sonney2k	wiking, travis is green for the first time: https://travis-ci.org/shogun-toolbox/shogun/builds/6764632
+@wiking	sonney2k: amaaaazing!
+@sonney2k	wiking, any idea why the bsd bot doesn't even configure?
+@wiking	sonney2k: lolface
+@wiking	lemme check
+@wiking	mmmm this is weird
+@wiking	are we sure it's trying on develop branch?
+@wiking	mmm
+@wiking	sonney2k: [wiking@sandbox ~/shogun-buildbot/bsd1_-_libshogun/source]$ git branch
+@wiking	* master
+@wiking	:(
+@wiking	wrong branch
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+@wiking	http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/885
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has joined #shogun
+@wiking	check the source stamp
+@wiking	Got Revisiond10e022a23a26b51e73a217c5014f3cf8d879ee6
+@wiking	https://github.com/shogun-toolbox/shogun/commit/d10e022a23a26b51e73a217c5014f3cf8d879ee6
+@wiking	and that's from master branch
+@sonney2k	wiking, please erase the build dir then
+@wiking	just a sec
+@wiking	but the source dir is wrong as well
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+@sonney2k	that too then
+@wiking	erased
+@wiking	oh wait
+@wiking	don't start yet
+@sonney2k	wiking, it might be though that it will try to build master & develop
+@wiking	ok
+@wiking	shogun-buildbot, force build 'bsd1 - libshogun'
+ shogun-buildbot	build forced [ETA 3m33s]
+ shogun-buildbot	I'll give a shout when the build finishes
+@wiking	lets see
+@wiking	sonney2k: it again checked out master branch :(
+@wiking	but ok it's still fetching
+@wiking	so maaaybe it'll change after
+@sonney2k	wiking, it will checkout master & develop
+ shogun-buildbot	build #886 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/886
+@wiking	ok now what? :D
+@wiking	since this is only master
+@wiking	:(
+@sonney2k	wiking, maybe submit to develop?
+@wiking	hehehe either we force now a dummy commit
+@wiking	or wait for a new commit
+@wiking	and see what happens
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * abf0f1d / src/NEWS: https://github.com/shogun-toolbox/shogun/commit/abf0f1df47ec92031c407a9ef13d3f6dd59fecff
+ shogun-notifier-	shogun: update news
+@wiking	heheheh
+ shogun-buildbot	build #724 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/724  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has left #shogun ["Off to code | sleep"]
+@sonney2k	wiking, seems like it is doing develop now
+@wiking	yeps
+@wiking	ok configure seems went well with detecting everything for python_modular
+ shogun-buildbot	build #887 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/887
+@wiking	and yeah cool
+@wiking	everything went fine
+@wiking	although it did not run the integration tests
+@wiking	which is cool
+@wiking	as it would have failed
+@sonney2k	wiking, any thoughts how we can mirror the github repository to shogun-toolbox.org & code.google.com?
+@wiking	sonney2k: mmm why do u want to mirror?
+@sonney2k	wiking, everything
+@wiking	sonney2k: i mean for shogun-toolbox.org should be easy as i guess u have a shell for it :P
+@wiking	sonney2k: so just a simple cron script for mirroring
+@sonney2k	I dont' know if it is good - but this year we will have likely 20-30 student proposals only
+@wiking	only? :)
+@sonney2k	I think we are raising the bar to enter year by year getting fewer submissions
+@wiking	last year we had more?
+@sonney2k	wiking, yes - 2 years ago we had >70
+@wiking	ah and last year?
+@sonney2k	last year we hard ~45
+@sonney2k	had
+@wiking	ah ok
+@wiking	does the quality keeps at least the same?
+@sonney2k	but again quality of proposals improved year by year
+@wiking	ah ok
+@wiking	well
+@wiking	how many slots did u apply for last year?
+@wiking	i mean this year
+@wiking	?
+@sonney2k	it is good for us (not so many reviews) but not clear if this will reduce #slots
+@sonney2k	not sure yet
+@wiking	ah slots are not decided yet?
+@sonney2k	I think about 10
+@sonney2k	but that woudl be really a lot
+@sonney2k	if we get them
+@sonney2k	wiking, btw here is the graph from 2012 http://shogun-toolbox.org/page/Events/gsoc2012
+@sonney2k	(scroll down a bit)
+@wiking	yeah i remember :P
+@wiking	the last minute proposals
+@wiking	well we have 3 more days ;)
+@sonney2k	we got 12 applications by now
+@sonney2k	maybe 7 HQ
+@sonney2k	definite want
+@wiking	but hey last year we had like 9 no?
+@wiking	i mean i think that 7 will get the slots :)
+@wiking	apache gets like crazy amount of slots
+@wiking	afaik they apply as apache foundation in gsoc
+@wiking	but there's like mahout, lucene, hadoop etc.
+@wiking	and that's like at least 5 slots apache subproject
+-!- gsomix [~Miranda@109.169.243.24] has joined #shogun
+ gsomix	good evening
+ gsomix	I'm at home finally
+@wiking	\o/ gsomix
+@wiking	how many kms have u travelled?
+ gsomix	wiking: just 100+ kms, but 3 hours in bus: hard traffic in the Samara
+@wiking	ufff
+@wiking	crazy
+* wiking just got graphsearch on his fb... it's pretty nice what they put together :P
+ gsomix	wiking: graphsearch?
+ vgorbati_	 gsomix: do you live in the same town with lisitsyn?
+ gsomix	vgorbati_: yep.
+ vgorbati_	gsomix: do you know each other?)
+@wiking	vgorbati_: :)
+@wiking	i guess samara has only 2 resident who uses shogun ;P
+@wiking	that's gsomix and lisitsyn
+ vgorbati_	:D
+ gsomix	vgorbati_: yes, we live in one room in the hostel
+ vgorbati_	gsomix: ah, I did not know :)
+@wiking	vgorbati_: they are a couple ;P
+@wiking	gsomix: can u come to the workshop?
+ vgorbati_	wiking: aha
+@wiking	or will u?
+ gsomix	wiking: nope. I will keep the law and order in Samara, while he is in Berlin :3
+@wiking	too bad :(
+ gsomix	*he == lisitsyn
+-!- lisitsyn [~blackburn@109-226-120-160.clients.tlt.100megabit.ru] has joined #shogun
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+@lisitsyn	sonney2k: so you are into reviewing now? ;)
+ gsomix	lisitsyn: hello, honey :]
+@lisitsyn	no money no honey!
+ gsomix	:(
+ shogun-notifier-	shogun: vladislav.horbatiuk@gmail.com :develop * 5a2df25 / / (4 files): https://github.com/shogun-toolbox/shogun/commit/5a2df2554ad6b4c08c462ec2cfcac4c9d37dfc30
+ shogun-notifier-	shogun: Added a wrapper for the t-SNE DR method; added an integration test for it (black-listed for now).
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 7df41b2 / / (4 files): https://github.com/shogun-toolbox/shogun/commit/7df41b21aa46e905d4f40da27f8bad05352ea24a
+ shogun-notifier-	shogun: Merge pull request #1027 from vladislav-horbatiuk/vgorbati-develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Added a wrapper for the t-SNE DR method; added an integration test for it (black-listed for now).
+ gsomix	new photo from hipsters^WCurioisty http://cs405418.vk.me/v405418490/c09d/GZ0Oe0jKu58.jpg
+ gsomix	Curioisty is in touch again
+ shogun-buildbot	build #888 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/888  blamelist: vladislav.horbatiuk@gmail.com <vladislav.horbatiuk@gmail.com>
+ shogun-buildbot	build #725 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/725  blamelist: vladislav.horbatiuk@gmail.com <vladislav.horbatiuk@gmail.com>
+ gsomix	*Curiosity
+ shogun-buildbot	build #726 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/726  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #889 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/889
+-!- wencan [~wencan@c-71-61-182-121.hsd1.pa.comcast.net] has quit [Quit: wencan]
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * b370f6b / src/shogun/lib/tapkee/ (2 files): https://github.com/shogun-toolbox/shogun/commit/b370f6b807d58953f8e29b6c7cdb6fb433f1cf6e
+ shogun-notifier-	shogun: Ported a few improvements from tapkee
+@lisitsyn	sonney2k: wiking: we are not going to have 20 proposals, that's not true
+@lisitsyn	16 already + last day/hour/minute..
+ gsomix	nite
+ shogun-buildbot	build #727 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/727
+-!- vgorbati_ [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Quit: Page closed]
+ shogun-buildbot	build #1025 of deb3 - modular_interfaces is complete: Failure [failed test ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1025  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #1026 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1026
+ alibezz	lisitsyn: sorry for the dull question, but how do i clone the develop branch?
+ alibezz	i'm finally down to work on my issue ;)
+ alibezz	lisitsyn: maybe that i guess: https://github.com/shogun-toolbox/shogun.git i'll check it out
+ alibezz	lisitsyn: nope it always drives me to the master branch. is the develop branch remote??
+ alibezz	lisitsyn: chill i found it. it was a remote one. ;)
+@lisitsyn	alibezz: git checkout develop
+@lisitsyn	in your local repo
+ alibezz	yup found it thx!
+@lisitsyn	alibezz: sorry have to sleep now - if you have any questions please mail me or ask here I'll answer and then you can read in logs
+ alibezz	lisitsyn: no worries ;) thx
+--- Log closed Wed May 01 00:00:29 2013

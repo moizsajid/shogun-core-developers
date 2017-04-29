@@ -1,0 +1,298 @@
+--- Log opened Wed Oct 03 00:00:17 2012
+ shogun-buildbot	build #121 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/121
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@188.168.5.67] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	hey n4nd0
+ blackburn	managed to get this linking thing to disappear?
+ n4nd0	blackburn: no :(
+ blackburn	argh
+ n4nd0	I have no idea how to fix that kind of problem
+ n4nd0	I saw a similar one today
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- Marty28 [9eb54d46@gateway/web/freenode/ip.158.181.77.70] has joined #shogun
+-!- adoniscik [~emre@c-67-180-103-118.hsd1.ca.comcast.net] has joined #shogun
+ adoniscik	greetings! Does Shogun work compile with EPD?
+ blackburn	adoniscik: hey
+ adoniscik	hey blackburn. That's the Enthought Python distribution.
+ blackburn	yeah, thanks
+ blackburn	well it should work with it since it works with basic python
+ blackburn	adoniscik: I didn't hear anything about compilation of shogun with EPD actually
+ blackburn	adoniscik: just try and let us know if there are any problems
+ adoniscik	there are. what does it mean if compilation of the Python test fails like http://pastebin.com/BfjrG6DH
+ blackburn	adoniscik: okay lets try to get rid of it.. when does that happen?
+ adoniscik	during configure's python/numpy stage
+ blackburn	adoniscik: do you have a configure.log saved?
+ adoniscik	that's an extract i gave you; the important part
+ blackburn	adoniscik: so it happens when it checks for numpy?
+ adoniscik	correct. this is the error returned by running gcc on the code snippet shogun uses to test numpy
+ blackburn	adoniscik: numpy developer files, right?
+ adoniscik	yes. I don't know if I have it though. How can I check manually?
+ adoniscik	I assume it comes with EPD but I don't know
+ blackburn	adoniscik: well the error you've got tells me you have headers
+ blackburn	but some linking error
+ blackburn	to be honest I do not know what is so different in EPD's python
+ adoniscik	that's what I thought. Is it some path problem?
+ blackburn	I googled a little and it could be caused by static linking - let me check for more information
+ blackburn	adoniscik: I don't think it is a path problem - rather something wrong with linking flags
+ blackburn	adoniscik: I found that there was a similar problem and we already have a  workaround in configure that adds -ldl flag
+ adoniscik	I think you're getting close.
+ adoniscik	let me try
+ blackburn	adoniscik: I mean it is already here and should work..
+ blackburn	that's pretty bad it doesn't
+ blackburn	adoniscik: can you paste few lines more that are before these ones?
+ blackburn	what is compiler call there?
+ blackburn	adoniscik: I believe that's an enthought's gap btw
+ adoniscik	it's long because I managed to install all the "extras" shogun supports: cc -I. -I..   -I/usr/include/atlas -isystem /usr/include/eigen3   -fPIC -g -Wall -O9 -fexpensive-optimizations -frerun-cse-after-loop -fcse-follow-jumps -finline-functions -fschedule-insns2 -fthread-jumps -fforce-addr -fstrength-reduce -funroll-loops -mfpmath=sse -march=native -mtune=native -pthread ./configure-21993-27344.c -o ./configure-17354-27344.o  -Xlinke
+ adoniscik	r --no-undefined -fno-strict-aliasing -fPIC -I/opt/enthought/include/python2.7 -I/opt/enthought/lib/python2.7/site-packages/numpy/core/include -shared -L/opt/enthought/lib/python2.7/config -lpython2.7 -lm -pthread -lhdf5 -llapack -lcblas -llapack_atlas -lsuperlu -lnlopt -lglpk -lm -llzo2 -lz -lbz2 -llzma
+ blackburn	it looks like python was built without dl out there
+ blackburn	I miss -ldl there
+ blackburn	okay no ldl right?
+ blackburn	adoniscik: lets try to hack it then
+ blackburn	adoniscik: easiest way is to add '-ldl' in the string on the line 159 of src/configure
+ blackburn	I'll report an issue meanwhile to not forget about that later
+-!- heiko [~heiko@host86-183-74-52.range86-183.btcentralplus.com] has joined #shogun
+ blackburn	heiko: hey there
+ adoniscik	I added it to end and I got a shorter error
+ heiko	blackburn, h
+ heiko	i
+ heiko	how are you doing?
+ blackburn	working on a test task for that job I am applying for
+ blackburn	pretty fun - I had to gimp a little: https://dl.dropbox.com/u/10139213/ml/horses-snow_with_skates.jpg
+ heiko	wtf?
+ heiko	gimp sketches for a job? :)
+ blackburn	heh okay okay
+ blackburn	they asked me to kinda reverse engineer
+ blackburn	https://imagecategorizer.services.open.xerox.com/
+ blackburn	that thing
+ blackburn	that's where crazy pictures came from
+ blackburn	I also have an inverted earth that looks like and is categorized like an oyster :D
+ heiko	reverse engeneer?
+ adoniscik	blackburn: adding ldl gave http://pastebin.com/S6nSvysR
+ blackburn	adoniscik: closer!
+ adoniscik	yes, indeed, thank you! now we have to deal with libpython?
+ blackburn	adoniscik: -lutil please then too
+ blackburn	heiko: well like to describe how could it work
+ adoniscik	you da man!
+ heiko	blackburn, alright
+ heiko	image classification that is ight?
+ heiko	right?
+ blackburn	heiko: yes, multi-label
+ blackburn	heiko: I've made a 5 page long report already and keeping on
+ blackburn	have two days more to think and write
+ heiko	wow
+ heiko	and?
+ heiko	what are you describing?
+ adoniscik	sorry to butt in... so which lines in the configuration script should I amend?
+ blackburn	adoniscik: right next to -ldl I think
+ blackburn	heiko: well I believe it is the thing that won ILSVRC 2011 (xerox guys again)
+ blackburn	heiko: horse with skates is recognized as winter sports, hockey and donkey
+ heiko	I see
+ heiko	wow
+ blackburn	so I kinda state that it is a local patch based
+ heiko	thats pretty good isnt it
+ heiko	which means?
+ blackburn	SIFT/SURF, etc
+ blackburn	so it basically counts visual words
+ blackburn	skates, some white areas
+ blackburn	so the approach in a nutshell is local patches + BoW (bag of words) or Fisher vectors
+ blackburn	and then SVM
+ blackburn	may be some improvements along but I believe it works like that
+ blackburn	a few evidences already
+-!- zxtx [~zv@ip-64-134-226-61.public.wayport.net] has joined #shogun
+ blackburn	heiko: the system works pretty well, yes
+ blackburn	it fails terribly with cats though
+ heiko	ok
+ blackburn	I can't stand that
+ blackburn	:D
+ heiko	we did something similar in our MV class
+ heiko	these visual words are pretty cool I think
+ blackburn	yeah
+ blackburn	heiko: xerox owns a few patents about visual words
+ blackburn	context-dependent is of some interest I think
+ blackburn	I am unsure it works well already though - in the end it recognizes paris+london in the same pic
+ blackburn	or donkey+hockey
+ heiko	sounds like you will get the job :D
+ blackburn	heh why?
+ adoniscik	the python_static compiled! do you need SWIG to compile python_modular
+ blackburn	adoniscik: yeah, swig is required only for python_modular
+ blackburn	static does not require swig at all
+ adoniscik	okay so that's why it failed that part; will fix quickly
+ blackburn	heiko: alex helped me quite a lot too - I asked him
+ blackburn	he is the expert in this field you know
+ heiko	blackburn, because you sound competent
+ heiko	alex?
+ blackburn	binder
+ heiko	I see
+ heiko	nice
+ blackburn	btw may be you have ideas too - feel free to share :)
+ blackburn	heiko: that job would mean I won't be gsoc student next summer but rather mentor
+ heiko	blackburn, I am not really fit in MV, sorry :)
+ heiko	well I think that would be better anyway :D
+ heiko	more mentore=more students
+ heiko	= more SHOGUN :)
+ blackburn	yeah
+ blackburn	and I feel like a ship captain sometimes so it would not be hard for me
+ blackburn	heiko: that company is like the only one having consistent salaries around there
+ heiko	consistent?
+ blackburn	well I am now having less than 1/10 of gsoc per month
+ blackburn	:D
+ blackburn	not really reasonable
+ adoniscik	blackburn: I got both python interfaces to compile. I added the two flags to LINKFLAGS_PYTHON in the configure script. Perhaps it should detect EPD and take care of it automatically in a future release?
+ blackburn	adoniscik: exactly
+ heiko	blackburn, wow
+ heiko	maybe come to london and earn 50k punds a year :)
+ heiko	with your skills, you could easily do that
+ adoniscik	Is there anything I can do to help or will you take care of it?
+ heiko	pounds
+ blackburn	adoniscik: I issued an issue :) we shouldn't lost that
+ heiko	and thats the wages for machine learners here
+ blackburn	adoniscik: well I'll test if it would work without any bugs/warnings when we forcely add -ldl and -lutil there
+ blackburn	on usual python
+ blackburn	and then add that to the master thing
+ blackburn	I will do that now
+ blackburn	heiko: I have runglish
+ blackburn	:D
+ heiko	blackburn, youll pick that up quickly - also some of the people here speak such a bad english, you are probably better
+ blackburn	heiko: I do not have speaking practice at all..
+ blackburn	heiko: btw is that true in germany people care about pronunciation?
+ blackburn	I rather meant accent
+ heiko	how do you  mean that?
+ blackburn	I heard like it is hard to get job if you speak like russian invader :D
+ heiko	that depends on the place
+ heiko	but that might be true
+ heiko	London --since much more international-- is less strict about that
+ blackburn	heh I see
+ heiko	you could also do a 2 week course or so
+ heiko	I bet you would pick up things quickly
+ blackburn	yeah I hope so
+ heiko	blackburn, I visited the Google offices in London today
+ heiko	that is an *awesome* place
+ blackburn	yeah, I've seen photos
+ blackburn	I am acknowledged with one guy
+ blackburn	who works there
+ blackburn	former netcracker job and SSAU university (just like me)
+ blackburn	may be I will be able to get on that lane too :)
+ heiko	yeah :)
+ heiko	unfortunately no data analysis or software engineering in London
+ heiko	only business
+ blackburn	really?
+ blackburn	I thought he is a software developer
+ heiko	a friend of mine applied to Mountain View, CA and is going for an interview next week
+ heiko	well, only minor
+ heiko	I did only see well-dressed women,    no nerds :)
+ blackburn	heiko: google interview is a hell
+ heiko	blackburn, dont know. what is it like?
+ blackburn	heiko: one guy from St. petersburg who were applying for GSoC 2011 tried
+ blackburn	(I talk to him sometimes)
+ blackburn	it was like 6 hours of questions, questions, questions
+ blackburn	tasks and more tasks
+ blackburn	so in the end there were like two accept and one reject
+ blackburn	and he was unfortunately rejected
+ blackburn	software engineering position that was
+ heiko	oh wow
+ blackburn	heiko: well didn't you heard of their crazy questions like what is a cost of washing all windows in seattle?
+ blackburn	this way they check how one thinks
+ heiko	how many ping pong balls do fit into a Swimming Pool?
+ heiko	these are easy
+ heiko	you just have to structure the answer a bit
+ blackburn	well yes, not hard
+ heiko	I would be more afraid of technical questions
+ blackburn	heiko: that company I am applying to gave me a brainbench C++ test
+ blackburn	on the interview
+ heiko	meaning?
+ blackburn	they are lazy to check whether one knows C++ I guess :)
+ blackburn	sonney2k's STL hate played a bad role there, I've got sth like 74% percentile
+ heiko	what is that?
+ heiko	ah stl
+ heiko	what did you have to do?
+ blackburn	http://brainbench.com/ that is the site
+ blackburn	well just some test like
+ blackburn	what is wrong there
+ blackburn	and some code with algorithms and STD
+ blackburn	or what will be outputted after the running of the following code
+ blackburn	etc
+ heiko	ah I see
+ heiko	yeah I only know the containers of the STL :)
+ blackburn	heiko: it is not that ugly I think
+ heiko	I actually like them
+ heiko	I mean
+ heiko	what else to use? :)
+ heiko	there is nothing
+ heiko	in shogun we got the base-class so things are different
+ heiko	and we want to serialise
+ heiko	btw any new ideas for the SGReferenced problem and serialization?
+ blackburn	I do not like things without alternative (we have president here for 12 years already :D)
+ blackburn	not really, last days were pretty busy and I failed to even think about that
+ blackburn	btw we broke things a little
+ heiko	I worked a bit more on the streaming framwork for my part
+ blackburn	I disabled Lua string tests for now
+ heiko	ok
+ blackburn	but streaming features fail in python
+ blackburn	with segmentation fault
+ heiko	jep probably my fault
+ heiko	sorry
+ blackburn	probably I caused that somehow
+ heiko	will catch up with that this week
+ heiko	was in germany over the weekend
+ blackburn	i changed something out there too
+ heiko	I made some streaming features run again in libshogun
+ heiko	this code btw
+ heiko	is not really well written
+ blackburn	we just need to bisect a problem
+ blackburn	valgrind error appears to be strange
+ blackburn	heiko: *tss* shogun is not really well written in general :D
+ heiko	blackburn, LOL :)
+ blackburn	however proprietary business things are much worse
+ heiko	yeah we are at least open-source so people find problems
+ blackburn	heiko: did you ever work with some proprietary code for say java or sth like that?
+ heiko	yes
+ heiko	horrow
+ heiko	I once tried to use a commercial software for graph visualization in java
+ heiko	that was the worst library I ever came across with :D
+ blackburn	heiko: I support that kind of code at job day by day
+ heiko	finally, we decided to re-implement it ourselves
+ blackburn	I thank all gods that we are migrated to SVN instead of clearcase
+ heiko	I think its dangerous if one doesnt pay enough attention to well written code which is hack-free
+ heiko	because all the errors come back and steal your time
+ blackburn	yeah that's our mistake as well
+ heiko	indeed
+ heiko	too many quick changes
+ heiko	and stopping at 95%
+ heiko	thats bad on the long run
+ heiko	anyway
+ blackburn	adoniscik: still around?
+ heiko	I  should write unit-tests instead complaining :D
+-!- zxtx [~zv@ip-64-134-226-61.public.wayport.net] has quit [Ping timeout: 252 seconds]
+ blackburn	I am thinking where to put these -ldl -lutil things
+ blackburn	heiko: btw about these 50k pounds - isn't that near to sum one spends living in london?
+ blackburn	you told me and I heard that it is crazy expensive
+ adoniscik	yes, sorry to overhear! there's a slight problem with nlopt which I'll write about in a sec
+ adoniscik	it fails with /usr/bin/ld: /usr/local/lib/libnlopt.a(optimize.o): relocation R_X86_64_32S against `.text' can not be used when making a shared object; recompile with -fPIC
+ adoniscik	/usr/local/lib/libnlopt.a: could not read symbols: Bad value
+ adoniscik	I found a mention of this error in http://permalink.gmane.org/gmane.comp.ai.machine-learning.shogun/2896
+ blackburn	right right
+ blackburn	adoniscik: did you compile nlopt by yourself?
+ heiko	blackburn, me and my girlfriend, we live on about 1800 pounds a month
+ adoniscik	err, no. Should I?
+ heiko	so much less
+ blackburn	adoniscik: where it comes from?
+ blackburn	EPD too?
+ blackburn	if you don't mind compilation of another package (pretty simple for nlopt) you could do that
+ blackburn	it requires -fPIC to be linked properly but for some reason nlopt ignores that in binary and source (by default)
+ adoniscik	yes EPD
+ adoniscik	I mean wait no
+ adoniscik	I downloaded it myself I think.
+ adoniscik	and stuffed it in /usr/lib
+ adoniscik	right. so what should I compile?
+ blackburn	just download nlopt sources, set -fPIC option, recompile and install
+ blackburn	I am currently trying to find how to set -fPIC there
+ adoniscik	okay. I only downloaded it manually because I couldn't find an nlopt package for Ubuntu
+ adoniscik	in the software center
+ blackburn	yeah, there is no yet
+ blackburn	adoniscik: just do
+ blackburn	./configure --enable-shared
+ blackburn	make
+ blackburn	sudo make install
+--- Log closed Thu Oct 04 00:00:17 2012

@@ -1,0 +1,508 @@
+--- Log opened Fri Mar 09 00:00:19 2012
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- vikram360 [~vikram360@117.192.186.135] has quit [Ping timeout: 252 seconds]
+@sonney2k	blackburn - lets discuss
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- vikram360 [~vikram360@117.192.186.135] has joined #shogun
+-!- cronor [~cronor@e178170108.adsl.alicedsl.de] has quit [Quit: cronor]
+-!- cronor [~cronor@e178170108.adsl.alicedsl.de] has joined #shogun
+-!- cronor [~cronor@e178170108.adsl.alicedsl.de] has quit [Ping timeout: 246 seconds]
+-!- cronor [~cronor@e178170108.adsl.alicedsl.de] has joined #shogun
+-!- cronor [~cronor@e178170108.adsl.alicedsl.de] has quit [Remote host closed the connection]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 244 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- Guest93322 [~rohit@14.139.82.6] has joined #shogun
+-!- Guest93322 [~rohit@14.139.82.6] has quit [Client Quit]
+ CIA-64	shogun: Sergey Lisitsyn master * rc25cd07 / src/shogun/classifier/svm/SVMOcas.cpp : Added maxtraintime initialization for ocas svm - http://git.io/YP8vmw
+-!- blackburn [~qdrgsm@109.226.105.25] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 240 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ CIA-64	shogun: Soeren Sonnenburg master * r0d72eb6 / (2 files): if max_train_time == 0 - disable time limit for ocas - http://git.io/I86ydA
+ blackburn	sonne|work: mc ocas scales O(K^2) in means of number of classes K :(
+ sonne|work	I told you there is room for improvement in the MC area
+ sonne|work	(the whole field of machine learning!)
+ sonne|work	btw KNN scales better ;-)
+ blackburn	sonne|work: I was expecting ocas is better than liblinear
+ blackburn	but training is 50 times slower
+ blackburn	noway
+ sonne|work	how did you set epsilon?
+ sonne|work	1e-2?
+ blackburn	yes
+ sonne|work	C?
+ blackburn	sonne|work: if I got better accuracy I would keep it, but liblinear is fast and gets better accuracy
+ blackburn	well same as it was for liblinear
+ sonne|work	well results may differ then
+ sonne|work	liblinear will not optimize as accurately
+ blackburn	isn't it a crammer-singer here as well?
+ blackburn	here = in ocas
+ sonne|work	could be a smaller C is better for ocas because of this
+ sonne|work	yes sure
+ sonne|work	but different method
+ sonne|work	numerically different!
+ sonne|work	if you do early stopping in one method results will differ for a very precisely optimizing method
+ blackburn	sonne|work: well varying C can't slow down optimization so much?
+ sonne|work	sure it can
+ blackburn	in consistent ranges like [1,100]
+ sonne|work	100 will take more time than all the others together
+ blackburn	ok I'll try 1e-5 C
+ blackburn	and check train speed
+ sonne|work	1 iteration :)
+ sonne|work	w=0
+ blackburn	sonne|work: why did you make another if there?
+ sonne|work	blackburn: regarding structure
+ blackburn	I'll change to one, and add MaxTime>0 everywhere
+ sonne|work	why not have a separate shogun/multicalls folder?
+ blackburn	sonne|work: what to place here?
+ sonne|work	the multiclass methods
+ sonne|work	all of them
+ blackburn	svms, knn, etc
+ blackburn	in one place?
+ sonne|work	multiclass liblinear / multiclass ocas/ knn / GMNP / ...
+ sonne|work	yes
+ blackburn	hmm works for me
+ blackburn	but ugly cross-dependencies
+ sonne|work	and then all your new ecoc schemes
+ sonne|work	well regression has the same issues
+ blackburn	oh ecoc, yeah I should start with it as well
+ blackburn	sonne|work: we need to extract libraries like libocas
+ blackburn	to avoid these cross-shit
+ sonne|work	If you have an idea how this could be done say so
+ blackburn	shogun/libraries?
+ sonne|work	and?
+ blackburn	when no need to refer classifier in multiclass
+ blackburn	cause all needed things are in shogun/libraries
+ sonne|work	it doesn't solve all problems - if we use svmlight - we also want svrlight which is derived from it
+ blackburn	no, with regression I see no solution
+ sonne|work	for libocas/liblinear it would though
+ blackburn	but at least for multiclass it would solve
+ sonne|work	maybe even partially libsvm
+ blackburn	storing libraries just near shogun wrappers is crappy for me anyway
+ sonne|work	well they are all heavily modified - not really libraries anymore
+ CIA-64	shogun: Sergey Lisitsyn master * r7a9c865 / (2 files): Fixed max train time issue for MC OCAS - http://git.io/QoOZ5Q
+ blackburn	sonne|work: not so heavily :)
+ sonne|work	best would be if we did not have to modify them
+ sonne|work	liblinear is pretty heavily modified / ocas too
+ sonne|work	they all use the dotfeature concept of shogun
+ blackburn	it would be possible is developers were providing good reverse interfaces
+ sonne|work	libsvm/ svmlight shogun's kernels etc
+ blackburn	sonne|work: ocas is not modified except some bugs we found
+ blackburn	because of good reverse interface
+ blackburn	&update_W things, etc
+ sonne|work	ahh true I was working with vojtech on that - but IIRC then he changed to float32 internally or so?
+ blackburn	sonne|work: the only difference is double/float64_t
+-!- n4nd0 [~nando@n179-p53.kthopen.kth.se] has joined #shogun
+ blackburn	no float or float32 there
+ sonne|work	for ocas we could get things fixed and maybe even link to the (external) library
+ sonne|work	anyway back to structure
+ blackburn	aha
+ sonne|work	shogun/classifier/multiclass is weird
+ blackburn	why?
+ sonne|work	I mean we could have shogun/classifier/oneclass
+ sonne|work	shogun/classifier/binary
+ sonne|work	shogun/classifier/multiclass
+ blackburn	and place knn everywhere :D
+ sonne|work	no
+ sonne|work	knn is clearly mc
+ blackburn	hmm
+ blackburn	n4nd0: I've got a task for you
+ blackburn	:D
+ sonne|work	problem is we have an svm dir
+ sonne|work	classifier/svm
+ blackburn	yes, svm folder looks ugly
+ sonne|work	what to do with that?
+ blackburn	sonne|work: probably -SVM suffix would be better
+ sonne|work	there are 82 files in that dir
+ blackburn	but renaming all classes is pretty painful for users
+ n4nd0	blackburn: tell me ;)
+ blackburn	sonne|work: I would suggest to do things gradually - i.e. extract multiclass, then extract domainadaptation, etc
+ sonne|work	blackburn: so we are stuck again
+ sonne|work	I guess it is all due to the way one does the sorting
+ sonne|work	by task type or by method name
+ blackburn	n4nd0: we have some covertree integrated there (fast data structure for neighbors searching) and KNN makes no use of it
+ sonne|work	blackburn: currently we have a mixture of both
+ sonne|work	e.g. kernel / distance ...
+ n4nd0	blackburn: so the idea is to change KNN so it uses it? should it be sth optional to the way it is currently done?
+ blackburn	n4nd0: may be yes, some option if covertree should be used,
+ blackburn	sonne|work: damn I got stucked as well
+ n4nd0	blackburn: ok
+ sonne|work	n4nd0: yeah a separate train method utilizing covertree
+ blackburn	n4nd0: check locallylinearembedding for example of covertree usage
+ sonne|work	blackburn: my suggestion for now is to create shogun/multiclass and to move everything in there
+ n4nd0	blackburn: ok, thanks
+ blackburn	sonne|work: agree
+ sonne|work	this matches shogun/regression
+ n4nd0	blackburn: is this more important than QDA?
+ sonne|work	YMMV :)
+ blackburn	n4nd0: I don't know, it is up to you
+ n4nd0	blackburn: ook
+ blackburn	probably yes, scikits treated we have slow KNN in their paper :D
+ blackburn	sonne|work: what about machines?
+ n4nd0	blackburn: oh did they say that about shogun? what paper is that?
+ sonne|work	blackburn: we had that discussion a year ago or so - machines are just the base-baselines for everything
+ sonne|work	at some point we wanted shogun/machines/classifier ...
+ blackburn	n4nd0: their jmlr paper http://www.jmlr.org/papers/volume12/pedregosa11a/pedregosa11a.pdf (well I showed my algos are faster than their in my paper that is under review)
+ sonne|work	but multiple inheritance was required so we couldn't do it
+ blackburn	sonne|work: where to place multiclass machines?
+ sonne|work	in shogun/machines/
+ blackburn	hmm ok
+ sonne|work	and the real multiclass impl. in shogun/multiclass
+ sonne|work	as I expect several in there
+ sonne|work	I guess we won't have the next release before end of gsoc
+ sonne|work	so we have time to play around with things
+ blackburn	sonne|work: huh, why don't you want to release?
+ sonne|work	looks like we are doing lots of feature *additions* currently
+ sonne|work	no stabilization work
+ sonne|work	which would focus on test suite etc
+ blackburn	probably
+ blackburn	but well we've got no regressions from 1.1
+ blackburn	and even some fixes
+ sonne|work	so you propose to release just now (or soon) and then again after gsoc is over?
+ blackburn	sonne|work: makes sense for me
+ blackburn	6-7-8 months looks like pretty long release period
+ blackburn	no idea how many, I always had troubles with math :D
+ sonne|work	ok then - please prepare as much as you can ChangeLog, check for regressions etc
+ sonne|work	no more feature commits before this release then
+ blackburn	sonne|work: yeah sure
+ sonne|work	blackburn: btw look at publicity
+ sonne|work	I added the idea there
+ sonne|work	if it makes sense to you I would put it live
+ sonne|work	but maybe you have some addition ideas
+ blackburn	sonne|work: ok checking
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ blackburn	sonne|work: my custom swig object idea?
+ blackburn	I mean could go there as well
+ sonne|work	what is this?
+ sonne|work	ahh yes sure
+ blackburn	sonne|work: I believe it could speed up development with shogun
+ sonne|work	just make sure you know exactly what you want?
+ blackburn	sonne|work: do you understand what I suggest?
+ sonne|work	only very few function calls can be marked 'to be overloaded'
+ blackburn	sonne|work: do we need to make it in base class?
+ blackburn	mark it *
+ sonne|work	I would always vote for a class that derives from the last known class
+ blackburn	sonne|work: hmm probably then we can make it optional
+ sonne|work	e.g. derive from OverloadableSimpleFeatures
+ sonne|work	and then change it to whatever
+ blackburn	yes, exactly what I suggest
+ blackburn	can we get it done?
+ blackburn	sonne|work: i.e. can we get it done w/o slowing down other features?
+ sonne|work	yes
+ sonne|work	but what is essential there is that we have *separate* classes for that for which we enable the so called director feature in swig
+ blackburn	sonne|work: can you see impact of rapid development there?
+ sonne|work	rapid crashes you mean :D
+ blackburn	I just check whether I get hallucinated by this idea
+ sonne|work	I like the idea so add it but think about one toy case (e.g. implement QDA via scikits learn or whatever)
+ sonne|work	or orange
+ sonne|work	or XXX
+ sonne|work	ahh better
+ sonne|work	a preprocessor that changes features from python side!
+ blackburn	yes
+ blackburn	did you get in love with this idea as me?
+ blackburn	:D
+ blackburn	sonne|work: features,labels,machines,preprocessors could be prototyped in python and then implemented in C++
+ sonne|work	we have to see how it goes
+ sonne|work	but in principle yes
+ blackburn	sonne|work: will you modify idea?
+ sonne|work	no, please do it
+ blackburn	ok
+ sonne|work	maybe you have some other ideas / enhancements for that
+ sonne|work	but do you like it in principle?
+ blackburn	sonne|work: yes, good idea for me
+ blackburn	not for me, but for me
+ blackburn	ah nevermind
+ blackburn	:D
+ sonne|work	these are all small tasks - but have huge impact on usability I would say
+ blackburn	ok I'll modify it a bit later
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0_ [~nando@n179-p53.kthopen.kth.se] has joined #shogun
+-!- n4nd0_ [~nando@n179-p53.kthopen.kth.se] has left #shogun []
+-!- blackburn [~qdrgsm@109.226.105.25] has quit [Ping timeout: 246 seconds]
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+ cronor	Hey!
+ cronor	I have a weird problem. I do cross validation and then train on the full dataset. This does not work (all alphas are 0). If I take the C chosen by cross validation and train on the full dataset in a separate matlab instance, it works fine. I already use sg('clean_features', 'TRAIN|TEST'). Is there a possibility to destroy the classifier object, too? I noticed it has the same memory address. I would like to reset shogun as far as possible.
+ cronor	or what does sg('clear') do?
+-!- vikram360 [~vikram360@117.192.186.135] has quit [Ping timeout: 245 seconds]
+-!- vikram360 [~vikram360@117.192.164.156] has joined #shogun
+-!- n4nd0 [~nando@n179-p53.kthopen.kth.se] has quit [Ping timeout: 244 seconds]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Read error: Operation timed out]
+ sonne|work	yeah sg('clear') should do that but it should work after xval too
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Remote host closed the connection]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Client Quit]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- blackburn [~qdrgsm@109.226.105.25] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ blackburn	sonney2k: hmm I managed to fully reproduce same accuracy with liblinear and homogeneous map
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Ping timeout: 244 seconds]
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Quit: cronor]
+-!- puneet [~chatzilla@115.240.22.83] has joined #shogun
+-!- puneet [~chatzilla@115.240.22.83] has quit [Client Quit]
+-!- jekintrivedi [~jekin@27.4.212.232] has joined #shogun
+-!- jekintrivedi [~jekin@27.4.212.232] has quit [Client Quit]
+-!- blackburn [~qdrgsm@109.226.105.25] has quit [Ping timeout: 246 seconds]
+-!- blackburn [~qdrgsm@109.226.78.202] has joined #shogun
+ CIA-64	shogun: Sergey Lisitsyn master * rc3afe20 / (18 files in 6 dirs): Some rearrangements - http://git.io/1avbYg
+@sonney2k	blackburn, what does that mean?
+ blackburn	sonney2k: same 97.30 with liblinear
+ blackburn	as with gmnp
+@sonney2k	with different C - or how did you manage to get that?
+@sonney2k	btw, do you do proper train/test splits?
+ blackburn	sonney2k: well I just did use same data
+ blackburn	sonney2k: train/test is already splitted
+@sonney2k	ok
+ blackburn	probably my task was to get concepts how to classify it
+ blackburn	so I was trying to get best accuracy
+ blackburn	sonney2k: have you seen ECOC library code?
+ blackburn	sonney2k: I am afraid to abandon part of MC gsoc idea
+ blackburn	cause not very much of work and I need it probably
+@sonney2k	but what did you change that you got 97.3 instead of 96%?
+ blackburn	sonney2k: features, I mixed up features :(
+ blackburn	these was better and I was using exactly these ones with gmnp
+ blackburn	sonney2k: I have rearranged things, but did not extract multiclass yet
+@sonney2k	so you should get same accuracy with mc ocas :)
+ blackburn	sonney2k: too slow
+@sonney2k	you just have a too tight stopping criterion - maybe...
+ CIA-64	shogun: Sergey Lisitsyn master * rba356f2 / src/NEWS : updated NEWS - http://git.io/ibcGsA
+ blackburn	probably
+ blackburn	sonney2k: wow got 97.41
+ blackburn	with better normalization
+@sonney2k	ok updated task idea
+@sonney2k	maybe we need more links to classes
+ blackburn	sonney2k: which idea?
+@sonney2k	but it should be rather good already
+@sonney2k	SGVector for example
+@sonney2k	and file swig_typemaps.i
+ blackburn	sonney2k: I am pretty enjoyed with ideas and application both
+@sonney2k	you mean happy?
+ blackburn	probably
+@sonney2k	yeah I think it is a nice mixture
+@sonney2k	have to leave train
+@sonney2k	cu
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 260 seconds]
+@sonney2k	blackburn, I added a couple of references for the first idea
+ blackburn	sonney2k: aha, I checked
+@sonney2k	so we are done with that - now release and then next task is to weed through 100 student applications...
+ blackburn	sonney2k: fyi I got same or worse results with pyramidal hog
+ blackburn	probably it is pretty useless
+ blackburn	no idea whether you're interested :)
+ wiking	mmmm
+ wiking	just as an fyi
+ wiking	i'm starting my latent-svm branch on the weekend... had the chat with alex so now i'll try to first make the api and then a simple solver for it
+ blackburn	wiking: huh!@
+ blackburn	wiking: why do you hurry so damn much?
+ blackburn	;)
+ wiking	have to
+ wiking	got to have some results for new papers
+ blackburn	ah
+ blackburn	wiking: we probably would need to discuss api
+ wiking	cool
+ wiking	now?
+ blackburn	if you want to - why not :)
+ wiking	ok
+ wiking	just a sec
+ blackburn	wiking: ok
+ wiking	here
+ blackburn	wiking: do you need some new features for l-svm btw?
+ wiking	yeah
+ wiking	well it all depends how do you define the latent variable h
+ wiking	so you have x as usual
+ wiking	y as labeling
+ wiking	and h as the latent variable
+ wiking	in case of image
+ wiking	h can be a coordinate, x,y
+ blackburn	yeah, I know
+ wiking	ah ok
+ wiking	so yeah
+ wiking	that was a good question how you can read this in
+ wiking	from a file
+ wiking	i.e. how to store it
+ blackburn	wiking: what do you plan to use as features?
+ blackburn	sliding hog window?
+ blackburn	just like in some papers before?
+ wiking	yeah in my case yes
+ wiking	but it can be different for anybody
+ wiking	it's up to you how to define your features
+ wiking	so alex had the idea
+ wiking	that on the api level
+ blackburn	what is the idea?
+ wiking	you should supply the Psi(x, y, h)
+ blackburn	dot product?
+ blackburn	that's the thing I do not know ;)
+ wiking	it's the joint features
+ wiking	afaik
+ blackburn	ah
+ blackburn	so probably we would have hog in there :)
+ blackburn	just as example
+ wiking	yeah
+ wiking	and position
+ wiking	and labeling
+ blackburn	okay I see
+ blackburn	so you are going to implement new classes
+ wiking	yep
+ blackburn	some LatentDotFeatures?
+ blackburn	and some LatentSVM
+ blackburn	any other classes?
+ wiking	LatentSVM
+ wiking	and then it has a train and infer function
+ wiking	question is the inheritance
+ wiking	which machine should i use?
+ blackburn	wiking: which solver will you use?
+ blackburn	and which model will you train :)
+ wiking	well
+ wiking	that's another question
+ wiking	i mean i would really like to use an SMO for this
+ wiking	and libqp would be my usual suspect
+ wiking	and i'd got first with a simple binary classification problem
+ blackburn	wiking: can it be linear?
+ wiking	well currently nobody had defined yet kernelized version of latent svm
+ blackburn	only linear?
+ wiking	you have to do some funky shit with the lagrangians to have it kernelized
+ wiking	yep
+ wiking	afaik
+ blackburn	then LinearMachine
+ blackburn	and MulticlassLinearMachine
+ blackburn	probably you would have to separate these things
+ blackburn	just as it is now
+ blackburn	I mean MulticlassLatentSVM and LatentSVM
+-!- cronor [~cronor@e178169201.adsl.alicedsl.de] has joined #shogun
+ wiking	ok well then let's first go with LatentSVM : LinearMachine
+ wiking	let me check what's the pure virtual functions in linearmachine
+ blackburn	wiking: train_machine
+ blackburn	and get_name
+ blackburn	nothing more IIRC
+ wiking	oh ok
+ wiking	and it either trains on the supplied features
+ wiking	via the func arg
+ blackburn	wiking: train() just delegates to train_machine
+ wiking	or the one given via apply
+ wiking	or no
+ blackburn	and train(Features) just set features and call train()
+ wiking	apply is for getting the inference
+ blackburn	yes
+ blackburn	it works in train - apply way
+ wiking	i mean apply is for actually doing the classification based on the trained machine
+ wiking	right?
+ blackburn	yes
+ wiking	as it returns labels
+ wiking	ok
+ wiking	there we will have problem
+ blackburn	which?
+ wiking	since the return value
+ wiking	in case of latent
+ wiking	it should not only be the labels
+ wiking	i.e. y
+ blackburn	not a problem
+ wiking	but h as well
+ blackburn	well would be but easy to solve
+ wiking	ok
+ wiking	enlighten
+ blackburn	okay I suggest to simply inherit from Labels
+ wiking	ah ok
+ wiking	and do my own LatentLabels
+ blackburn	yes
+ wiking	or something like that?
+ wiking	ok
+ wiking	i think i'll start writing the code now
+ blackburn	wiking: you probably would need to modify apply as well?
+ wiking	and do a commit then into my own repo
+ wiking	which apply? apply () or apply (Cfeatures) ?
+ wiking	or apply (int)
+ blackburn	may be all
+ wiking	well in case of apply (int) it'll be funky
+ blackburn	just SG_NOTIMPLEMENTED it then
+ wiking	ok
+ blackburn	wiking: okay so classes are
+ blackburn	hmm
+ blackburn	wait
+ wiking	kook listening
+ wiking	*okok
+ blackburn	wiking: may be you can do it as machine
+ blackburn	not as svm only
+ blackburn	or..
+ blackburn	wiking: no need to, just do svm
+ blackburn	:)(
+ wiking	:>
+ blackburn	wiking: so, LinearLatentSVM
+ blackburn	LatentLabels
+ blackburn	LatentFeatures
+ blackburn	LatentDotFeatures
+ wiking	dotfeatures?
+ blackburn	derive your features from DotFeatures
+ blackburn	yeah it is an abstract class of features that are capable of + and dot
+ wiking	ah ok
+ wiking	i see from doxy now
+ wiking	do i need then LatentFeatures itself?
+ blackburn	I don't know :)
+ blackburn	do you need?
+ wiking	imho no
+ wiking	but we'll see i guess :)))
+ blackburn	ah yes
+ blackburn	just some simplefeatures would work I guess?
+ wiking	well i suppose so
+ wiking	i mean my only wonder now is
+ wiking	how the fuck will the solver know
+ wiking	(pardon my french) about what is what
+ wiking	in the features
+ wiking	meaning x, y and h
+ blackburn	I speak in this way always so no need to worry :)
+ wiking	cool
+ blackburn	hmm
+ blackburn	well X is always features
+ blackburn	and y and h are in labels
+ wiking	people think usually in other parts of the world weird since they are not used to swearing only if they are mad :)))
+ wiking	yeah
+ blackburn	you probably should listen to my russian when I'm in rush and unhappy
+ blackburn	:D
+ wiking	but if you give like a feature where all these are in one
+ wiking	i mean x,y, h
+ wiking	then how do yiou know what is what
+ wiking	especially that what h actually is
+ wiking	how long it is
+ wiking	in my case it's (x,y) coordinate
+ blackburn	wait, isn't it already known?
+ wiking	but in other application
+ wiking	it can be whatever
+ wiking	i mean that's the plan here
+ blackburn	ahhhhh
+ wiking	that somehow be able to generalize this
+ blackburn	so you mean no way to generalize these LatentLabels?
+ wiking	not to narrow down what kind of h you can have
+ wiking	i'm just now digging the history of the chat with alex
+ blackburn	wiking: some vector?
+ blackburn	h could be some d-dimensional vector
+ blackburn	probably pretty general
+ wiking	I think that the meaning of the latent variable depends on the task: 1D position for genes
+ wiking	[9/03/12 2:30:47 PM] Sascha: 2D or 3D position for object detection
+ wiking	[9/03/12 2:31:07 PM] Sascha: whatever for language topics
+ wiking	[9/03/12 2:31:29 PM] Sascha: well, on thei nterface level you have to provide it at each iteration with a set of psi(x,y,h_opt)
+ wiking	[9/03/12 2:31:54 PM] Sascha: that would be my idea
+ wiking	I would say that the basic interface should work with the psi(x,y,h)
+ wiking	[9/03/12 2:27:47 PM] Sascha: and the argmax step should be a template
+ wiking	[9/03/12 2:28:15 PM] Sascha: that allows to implement the core and tackle the latent variable meaning later
+ wiking	from the logs
+ blackburn	wiking: well just provide some api to extend
+ blackburn	I mean LatentLabels <- 2DPositionLatentLabels or so is ok
+ blackburn	or better VectorLatentLabels or so
+ blackburn	wiking: http://cs9735.userapi.com/u649772/12134085/z_79bcd6ca.jpg
+ blackburn	result of elections lol
+ wiking	:P
+ blackburn	ok sleep time!
+ blackburn	wiking: good luck with code ;)
+ blackburn	??
+ blackburn	cu
+-!- blackburn [~qdrgsm@109.226.78.202] has quit [Quit: Leaving.]
+--- Log closed Sat Mar 10 00:00:19 2012

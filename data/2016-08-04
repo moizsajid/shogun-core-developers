@@ -1,0 +1,284 @@
+--- Log opened Thu Aug 04 00:00:51 2016
+-!- OXPHOS [4441a916@gateway/web/freenode/ip.68.65.169.22] has joined #shogun
+@wiking	OXPHOS, ping
+ OXPHOS	wiking: hey sgvector serialization should be working now. I just squashed
+@wiking	yeah i know
+@wiking	but i just replied :)
+@wiking	read it and if you are open to talk a bit
+@wiking	lets talk :)
+ OXPHOS	wiking: kk
+ OXPHOS	wiking: also I had problem fetching from shogun. I thought it was the network but seems not..
+@wiking	fetching what?
+ OXPHOS	Mac148934:shogun zora$ git fetch upstream
+ OXPHOS	fatal: unable to connect to github.com:
+ OXPHOS	github.com[0: 192.30.253.112]: errno=Operation timed out
+@wiking	aaah
+ OXPHOS	wiking ^
+@wiking	check status.github.com
+@wiking	``` All systems operational ```
+@wiking	but who knows...
+ OXPHOS	wiking: I can fetch shogun-data
+ OXPHOS	wiking: and I was experiencing the same problem ~12h ago..
+@wiking	ping github on twitter
+@wiking	i bet they'll answer in no time :)
+ OXPHOS	wiking: so it's their problem : ) lemme try
+@wiking	yep i mean all our code is on github
+@wiking	so yeah i cannot help
+ OXPHOS	wiking: kk thx
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: christopher :develop * ade10a6 / / (4 files): https://github.com/shogun-toolbox/shogun/commit/ade10a677daadb798087b912fffd666ae508c2a2
+ shogun-notifier-	shogun: LARS float32 / floatmax support clean up
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Replacing if-SGERROR sets with REQUIRE statements
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixing memory leaks / implicit type conversion warnings
+ shogun-notifier-	shogun: Viktor Gal :develop * ed1c24e / / (4 files): https://github.com/shogun-toolbox/shogun/commit/ed1c24e8c46197a412d7a11ac346786b1eb7ead1
+ shogun-notifier-	shogun: Merge pull request #3401 from c4goldsw/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: LARS float support cleanup patch (for PR #3133)
+ shogun-buildbot	build #1319 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1319  blamelist: Viktor Gal <vigsterkr@gmail.com>, christopher <christopher.goldsworthy@outlook.com>
+ shogun-buildbot	build #2961 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2961  blamelist: Viktor Gal <vigsterkr@gmail.com>, christopher <christopher.goldsworthy@outlook.com>
+ shogun-buildbot	build #98 of xenial - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/xenial%20-%20libshogun/builds/98  blamelist: Viktor Gal <vigsterkr@gmail.com>, christopher <christopher.goldsworthy@outlook.com>
+@wiking	OXPHOS,
+@wiking	so the problem is we just cannot include cereal headers
+@wiking	unless we make cereal dependency a STRONG dependency
+ OXPHOS	wiking: like Eigen?
+@wiking	well no not really
+@wiking	because in eigen the problem is solved internally
+@wiking	meaning that although we download eigen for building shogun
+@wiking	but we dont distribute it
+@wiking	because we compile the header related stuff into shogun
+@wiking	but what you are doing now is actually making the cereal dependency outside of shogun
+@wiking	imagine that you compile and install libshogun
+@wiking	(without the cereal headers)
+@wiking	i mean without having cereal on the system
+@wiking	then you'll download cereal to build libshogun
+@wiking	and then ...?
+@wiking	if the user creates a new example
+@wiking	in c++ where he uses shogun
+@wiking	he will not be able to compile it at all
+@wiking	because a) he doesn't have cereal installed on the system
+@wiking	b) the headers you used for shogun to compile are long gone
+@wiking	do you get what i'm trying to say here?
+@wiking	in eigen case things are all wrapped into .cpp
+ OXPHOS	wiking: not sure..so they have to be moved away from .h files in shogun?
+@wiking	so yeah
+@wiking	basically the idea is
+@wiking	that if we cannot solve
+@wiking	not to include cereal headers
+@wiking	in our headers
+@wiking	then we have to make cereal a strong dependency
+@wiking	note: not having some type defined is fine, because those can be forward declared in headers
+@wiking	see the trick about Eigen in SGVector
+@wiking	(SGVector.h)
+ OXPHOS	wiking: you mean the namespace Eigen{} stuff?
+@wiking	yes
+@wiking	that is all because
+@wiking	we do not want to include eigen related headers in our headers
+@wiking	only in cpp
+ OXPHOS	wiking: not checked closely yet - but there's include <Eigen/xx> in mathematics/eigen3.h
+@wiking	:)
+@wiking	and where do we include eigen3.h? ?:)
+@wiking	i mean trust me
+@wiking	i know what i'm talking about ehre
+@wiking	:)
+@wiking	no need to check things like this
+ OXPHOS	wiking: yeah i believe you are :) ..trying to make myself clear. so the goal is to move cereal stuff to .cpp
+@wiking	(btw you do realise that mathematics/eigen3.h is just a wrapper around Eigen/xxxx headers )
+@wiking	but yeah the idea is that
+@wiking	in headers
+@wiking	that exposed to the public
+@wiking	(say not linalg related headers)
+@wiking	you should not include cereal headrs
+@wiking	only in definition
+@wiking	meaning cpp
+@wiking	if that's not solveable
+@wiking	we'll have to default to the idea
+@wiking	that we gonna make cereal a strong dependency
+@wiking	but let's try to concentrate now on the
+ OXPHOS	okay..I think I got it
+@wiking	part where we could solve this
+@wiking	and btw yeah it all makes sense
+@wiking	why it was working for you on your machine
+@wiking	as i believe you have cereal installed on your system
+@wiking	while on travis it was using the internal cereal (fetching as the part of cmake build...)
+ OXPHOS	I tried removed it - and it also worked..I guess some settings are different
+@wiking	mmm
+@wiking	it should not
+@wiking	:)
+@wiking	but ok
+@wiking	the problem is this definitely atm
+@wiking	that we act like we have cereal headers installed globally
+ OXPHOS	yeah
+@wiking	where we fake it sometimes...
+ OXPHOS	haha
+ OXPHOS	wiking
+ OXPHOS	thanks!
+ OXPHOS	lemme work on it
+@wiking	nw thnx for looking at it
+@wiking	can you do rebases on some of the prs?
+@wiking	or github is not working for you atm?
+ OXPHOS	wiking: not working - only fetch upstream is not working
+@wiking	can you copy paste the exact error lines?
+ OXPHOS	wiking: 1 sec. it takes a while to know it's failed :)
+ OXPHOS	wiking: http://pastebin.com/4MEQb63Q
+@wiking	can you
+@wiking	ping github.com
+@wiking	?
+ OXPHOS	wiking: PING github.com (192.30.253.113): 56 data bytes 64 bytes from 192.30.253.113: icmp_seq=0 ttl=52 time=68.613 ms
+ OXPHOS	and so on..
+@wiking	mmm yeah
+@wiking	ok try
+@wiking	nc
+@wiking	ok not this
+@wiking	but
+@wiking	nc -vz github.com 443
+@wiking	and then
+@wiking	nc -vz 192.30.253.112 443
+ OXPHOS	wiking: http://pastebin.com/Dg5FBJtQ
+ OXPHOS	wiking: succeeded
+@wiking	haha
+@wiking	cat shogun/.git/config
+ OXPHOS	wiking: I should do it in dir upstream shogun right?
+ OXPHOS	Mac148934:Github zora$ cd shogun/.git/config -bash: cd: shogun/.git/config: Not a directory
+@wiking	i mean within your shogun just do
+@wiking	cat .git/config
+-!- OXPHOS_ [4441a916@gateway/web/freenode/ip.68.65.169.22] has joined #shogun
+-!- OXPHOS [4441a916@gateway/web/freenode/ip.68.65.169.22] has quit [Ping timeout: 250 seconds]
+ OXPHOS_	wiking: sry my irc somehow got stuck..
+@wiking	k
+ OXPHOS_	wiking: http://pastebin.com/m6c8bf1P
+@wiking	mmm
+@wiking	when have you added the upstream to your config?
+@wiking	was it ever working?
+@wiking	as i believe you dont have access rights to the upstream repo
+@wiking	[remote "upstream"]
+@wiking	    url = git://github.com/shogun-toolbox/shogun.git
+@wiking	and this would only work in that case
+@wiking	you should edit your config
+@wiking	and use https
+@wiking	url = https://github.com/shogun-toolbox/shogun.git
+@wiking	and yeah that git thign was toootaly weird
+ OXPHOS_	what..I never touched it can I used it pretty frequently..
+@wiking	because if then it should have been
+@wiking	git@github.com...
+@wiking	so i dont really know how this got into this state
+@wiking	but no wonder it's not working
+ OXPHOS_	wiking: haha thanks! it must be hacked..or maybe wired : /
+ OXPHOS_	wiking: it's back to work!
+@wiking	yep
+@wiking	so rebase now plz
+@wiking	:)
+ OXPHOS_	wiking: i'm running(checking) it at local now. I'll push once it's done.
+@wiking	k
+@wiking	htn
+@wiking	*thnx
+ shogun-buildbot	build #1181 of nightly_default is complete: Failure [failed test notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1181  blamelist: Viktor Gal <vigsterkr@gmail.com>, christopher <christopher.goldsworthy@outlook.com>
+-!- OXPHOS_ [4441a916@gateway/web/freenode/ip.68.65.169.22] has quit [Ping timeout: 250 seconds]
+-!- OXPHOS [4441a916@gateway/web/freenode/ip.68.65.169.22] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot	build #47 of FC23 - libshogun - aarch64 is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC23%20-%20libshogun%20-%20aarch64/builds/47  blamelist: Viktor Gal <vigsterkr@gmail.com>, christopher <christopher.goldsworthy@outlook.com>
+ shogun-buildbot	build #53 of memleak - valgrind is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/memleak%20-%20valgrind/builds/53  blamelist: Viktor Gal <vigsterkr@gmail.com>, christopher <christopher.goldsworthy@outlook.com>
+ shogun-buildbot	build #1052 of nightly_none is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_none/builds/1052  blamelist: Viktor Gal <vigsterkr@gmail.com>, christopher <christopher.goldsworthy@outlook.com>
+-!- OXPHOS [4441a916@gateway/web/freenode/ip.68.65.169.22] has quit [Ping timeout: 250 seconds]
+-!- leagoetz [~leagoetz@host-92-0-178-129.as43234.net] has joined #shogun
+-!- leagoetz [~leagoetz@host-92-0-178-129.as43234.net] has quit [Remote host closed the connection]
+@wiking	Saurabh7, ping
+-!- sanuj [~sanuj@117.203.13.13] has joined #shogun
+ sanuj	lisitsyn, wiking yo\
+ sanuj	lisitsyn, are you working on SG_ADD?
+ lisitsyn	sanuj: yeah will spend some time on that today
+ lisitsyn	didn't get time yesterday tho
+ sanuj	lisitsyn, okay, how to make swig interfaces for shogun templates like SGVector?
+ lisitsyn	not get it
+ lisitsyn	we specialize sgvector for specific types
+ sanuj	lisitsyn, shogun-base.i looks like this: https://gist.github.com/sanuj/a85986fb35052de761ac251496e90e90
+ lisitsyn	once specialized it is just some time
+ lisitsyn	type
+ sanuj	we had left the templates since you wanted to discuss with HekioS and wiking
+ sanuj	lisitsyn, so i just do SGVector<blah>
+ sanuj	?
+ lisitsyn	yeah I think so
+ sanuj	even i think there is no way
+ sanuj	lisitsyn, so i'll just do SGVector with some primitive types, just for demonstration
+ lisitsyn	ok
+@wiking	?
+@wiking	RealVector
+@wiking	is SGVector<float64_t>
+@wiking	etc.
+@wiking	i dont really understand the swig interface for shogun templates like sgvector Saurabh7
+@wiking	sanuj:
+ sanuj	wiking, yes yes
+@wiking	meaning? :)
+@wiking	we dont use SGVector for other types than primitive types
+@wiking	for none primitive types there are other data structs
+ sanuj	wiking, i mean i got it now :)
+ sanuj	had forgotten about RealVector etc
+@wiking	k
+-!- sanuj [~sanuj@117.203.13.13] has quit [Ping timeout: 252 seconds]
+-!- sanuj [~sanuj@117.203.13.13] has joined #shogun
+ sanuj	lisitsyn, there?
+ lisitsyn	sanuj: yeap
+-!- sanuj [~sanuj@117.203.13.13] has quit [Ping timeout: 252 seconds]
+@wiking	:)
+@wiking	that was fast
+-!- sanuj [~sanuj@117.203.22.232] has joined #shogun
+ sanuj	wiking, yo
+@wiking	what's happening
+@wiking	:)
+ sanuj	wiking, can you review this: https://github.com/shogun-toolbox/shogun/pull/3357
+ sanuj	i think it's done
+@wiking	k
+@wiking	checking
+ sanuj	wiking, MockObject is also used for integration testing
+@wiking	dont care
+@wiking	:)
+@wiking	if it's for testing
+@wiking	then it's no place
+@wiking	for that in code created for runtime
+ sanuj	wiking, so where do i put it then?
+@wiking	for tests
+@wiking	where ever they need to be
+@wiking	but not into a runtime
+@wiking	where you possibly not going to be using it
+@wiking	if you think there's no way you can solve it
+@wiking	tests for macros are still possible
+@wiking	although again i dont understand that why does a mock  object
+@wiking	has to be in runtime
+ sanuj	wiking, i am not clear what you mean by runtime?
+@wiking	 src/interfaces/modular/SGBase.i
+ sanuj	and MockObject is in SGBase.i so that it is available in python for integration tests
+@wiking	is something that will be created
+@wiking	no matter
+@wiking	if you do ever an integration test
+@wiking	or not
+@wiking	right?
+@wiking	i mean  src/interfaces/modular/SGBase.i  -> modshogun.i -> modshogun<interface>_wrap.cxx
+@wiking	-> swig SO library
+ sanuj	yeah
+ sanuj	wiking, it has to be in modshogun.i, one way or another
+@wiking	ok so if i'm user HailMerry
+@wiking	who just wanna use shogun
+@wiking	from python
+@wiking	do i need that?
+@wiking	mockobject?
+ sanuj	no
+@wiking	ok
+ sanuj	wiking, so only make it available when enable_testing=on?
+@wiking	now you understand?
+@wiking	yeah
+ sanuj	wiking, yeah, so i only need to add some MACRO checks?
+ sanuj	just confirming
+@wiking	idk if there's actually a C level MACRO when we are running tests :)
+ sanuj	okay
+ sanuj	wiking, TagRealVector and RealVector are different because TagX is used to identify an object of X by a name
+ sanuj	shall i put this in modshogun.i?
+ sanuj	+#ifdef HAVE_JINJA2
+ sanuj	 +%include "shogun-base.i"
+ sanuj	 +#endif
+ sanuj	instead of SGBase.i
+ sanuj	wiking, by doing this, i can write this as
+ sanuj	https://github.com/shogun-toolbox/shogun/pull/3357/files#diff-9096c96ee0cb9b5463c3fc420ed96b0aR12
+ sanuj	RealVector, RealVector*
+-!- sanuj [~sanuj@117.203.22.232] has quit [Remote host closed the connection]
+--- Log closed Fri Aug 05 00:00:52 2016

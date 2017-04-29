@@ -1,0 +1,397 @@
+--- Log opened Sun Nov 17 00:00:28 2013
+-!- zxtx_ [~zv@c-98-193-83-24.hsd1.il.comcast.net] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+ shogun-buildbot_	build #524 of nightly_all is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_all/builds/524
+-!- sonne|osx_ [~sonne@f053046174.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f053037142.adsl.alicedsl.de] has quit [Ping timeout: 260 seconds]
+-!- sonne|osx_ is now known as sonne|osx
+ shogun-buildbot_	build #620 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/620
+-!- Boeke [~alex@24-179-114-25.dhcp.oxfr.ma.charter.com] has quit [Remote host closed the connection]
+-!- new_lido [~walid@41.218.175.173] has joined #shogun
+-!- lisitsyn [~lisitsyn@92-240-132-54.clients.tlt.100megabit.ru] has joined #shogun
+-!- lisitsyn [~lisitsyn@92-240-132-54.clients.tlt.100megabit.ru] has quit [Read error: Connection reset by peer]
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Ping timeout: 252 seconds]
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+-!- new_lido [~walid@41.218.175.173] has quit [Ping timeout: 252 seconds]
+-!- new_lido [~walid@41.218.177.153] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: leaving]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- mode/#shogun [+o wiking] by ChanServ
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Client Quit]
+-!- wiking [~wiking@info2k1.hu] has joined #shogun
+-!- wiking [~wiking@info2k1.hu] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- mode/#shogun [+o wiking] by ChanServ
+@wiking	mm
+@sonney2k	wiking, mm
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: ZNC - http://znc.in]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- mode/#shogun [+o wiking] by ChanServ
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- mode/#shogun [+o wiking] by ChanServ
+@sonney2k	wiking, why are you reconnecting all the time?
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+@sonney2k	besser82, hey there back home?
+ besser82	sonney2k: Yes!  Since yesterday ~21:00
+@sonney2k	besser82, I am stuck with cmake - we have a binary protbuf file in shogun
+@sonney2k	but cmake rules for that are not complete
+ besser82	right
+@sonney2k	besser82, so I have protobuf detection and everything ready
+ besser82	sonney2k: kk, but it doesn't compile?
+@sonney2k	but the problem is I now need some kind of rule that goes over the files in shogun/io/protobuf/*.proto
+ besser82	like glob?
+ besser82	or iteration from glob?
+@sonney2k	and adds proper dependencies to compile them before the c++ code is compiled
+@sonney2k	besser82, I have no idea about cmake :/
+ besser82	so you want to process && build them?
+@sonney2k	as far as I understand I have to write WRAP_PROTO(VAR input1 input2 input3..)
+@sonney2k	and then the inputs will be converted from *proto to whatever
+@sonney2k	besser82, yes
+@sonney2k	besser82, so my plan was to have the protobuf detection in the main cmakelists.txt
+@sonney2k	and from there include the cmakefiles.txt that I put in src/shogun/io/protobuf
+@sonney2k	but I have no idea how dependency management works and which target is built first etc
+ besser82	sonney2k: allrighty!  Is there any link to what you have so far?
+-!- gsomix [~Miranda@188.168.2.129] has joined #shogun
+ gsomix	hello
+ besser82	sonney2k: like code-view on gh?
+@sonney2k	besser82, I just need to know how one usually does that with cmake
+ besser82	gsomix:hi!
+@sonney2k	gsomix, hah I am just discussing about how we get your protobuf stuff enabled
+ besser82	sonney2k: allrighty!  I'll write some example and fpaste for you after lunch, ok?
+ gsomix	sonney2k: magic.
+@sonney2k	besser82, I mean I need these *.proto files to be added
+* gsomix will be afk for little time.
+ besser82	sonney2k: as a dependency or for being processed?
+@sonney2k	as deps for the src/shogun/io/ProtobufFile.cpp
+@sonney2k	etc
+@sonney2k	that are including files that are to be generated with the WRAP_PROTO command
+@sonney2k	besser82, help says sth like
+@sonney2k	WRAP_PROTO(PROTO_SRC myproto.proto external.proto)
+@sonney2k	#  ADD_EXECUTABLE(server ${server_SRC} {PROTO_SRC})
+ besser82	sonney2k: got it  ;)
+@sonney2k	besser82, so any thoughts?
+ besser82	sonney2k: right on it  ;)
+* sonney2k tries to relax
+ besser82	sonney2k: try something like:
+@sonney2k	gsomix, how is it going? long time no see...
+ besser82	FILE(GLOB protobuf_src $path_to/*.proto)
+@sonney2k	besser82, then the wrap_proto line I guess
+ besser82	WRAP_PROTO(PROTO_SRC ${protobuf_src})
+ besser82	sonney2k: right  ;)
+ gsomix	re
+@sonney2k	besser82, and then? How do I add it to the shogun sources?
+@sonney2k	is it sth like add_dependencies(shogun PROTO_SRC) ?
+ besser82	ADD_TARGET(libshogun ${shogun_src} ${PROTO_SRC})
+-!- hushell [~hushell@c-50-188-141-210.hsd1.or.comcast.net] has quit [Ping timeout: 268 seconds]
+ besser82	sonney2k: add_dependencies might work too
+@sonney2k	besser82, I see in src/shgoun/CMakelists.txt that it does add_library(shogun ...) what is the difference between that and target?
+ besser82	sonney2k: a target is like adding dependency, e.g. you want to compile a prg and need a lib build first
+@sonney2k	besser82, problem is that this will create some .cxx or so files that will need to be compiled too - so I guess target is what we need
+ besser82	sonney2k: forget, just wrote silly stuff
+* sonney2k tries what we have so far
+ besser82	sonney2k: add_dependency is for depencies like explained above...
+ besser82	sonney2k: add_target is for creating a new target in makefile --> like make docs
+ besser82	sonney2k: i'm afk now ---> lunch will be back in ~30 mins
+ gsomix	sonney2k: slowly. I now I'm really bastard. :) at work we preparing release of our optical software. there is not a lot of work, so, last days I was trying "to dive into shogun" again.
+ gsomix	first task at my schedule is mat-files reader.
+ gsomix	btw I have attended a couple of conferences.
+ gsomix	hm, that's all news
+@sonney2k	gsomix, yeah would be nice if you could continue the .mat stuff
+@sonney2k	people would love it :)
+@sonney2k	I am sure
+ gsomix	yeah, I love science's people.
+@sonney2k	btw once you have cracked this for CFile - you should also try to write a SerializableMatlabFile.* so we can save shogun objects in .mat files :D
+@sonney2k	gsomix, but for the time being I am trying to get the protbuf stuff to work which is not currently :/
+ gsomix	sonney2k: m? what's problem?
+@sonney2k	gsomix, currenlty proto files are not compiled
+@sonney2k	so the reade & writer is just not used / included
+ gsomix	sonney2k: .cxx?
+ gsomix	or more complicated problem?
+@sonney2k	gsomix, the *proto -> *.cpp/h yes
+@sonney2k	besser82, back?
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 252 seconds]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+@sonney2k	besser82, back?
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 4562893 / CMakeLists.txt,src/shogun/CMakeLists.txt: https://github.com/shogun-toolbox/shogun/commit/4562893e610c59a74e193cd280280fb40f61dcc1
+ shogun-notifier-	shogun: half way protobuf detection
+@sonney2k	besser82, wiking any thoughts why add_dependencies is not causing the proto files to be compiles? https://github.com/shogun-toolbox/shogun/commit/4562893e610c59a74e193cd280280fb40f61dcc1
+ shogun-buildbot_	build #1950 of bsd1 - libshogun is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1950  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ besser82	sonney2k: I just dived a bit into protobuf && cmake stuff and came up with some interesting conclusions
+ besser82	sonney2k: You need to have Find(Protobuf) inside the same CMakeLists.txt, where the shogun-target is setup and need to append ${PROTO_HDRS} to the file-list of the shogun-target to get it running...
+@sonney2k	besser82, just realized that too but still far from working
+@sonney2k	besser82, it creates inside the build dir then the wanted src/shogun/ShogunVersion.pb.*
+@sonney2k	and also compiles them
+@sonney2k	besser82, but I need these files in the core source tree and also ship them with shogun
+@sonney2k	I mean in principle it is an extra project
+ besser82	sonney2k: lemme checkout current commit and investigate...
+@sonney2k	besser82, I had to do this
+@sonney2k	add_library(shogun SHARED ${protobuf_src} ${PROTO_SRCS} ${PROTO_HDRS} ${LIBSHOGUN_SRC} lib/config.h base/class_list.cpp)
+@sonney2k	then it compiles it but not to the place I want it to
+@sonney2k	besser82, my take is that I would rather add a ADD_CUSTOM_COMMAND
+@sonney2k	and compile the files myself with PROTOBUF_PROTOC_EXECUTABLE
+ besser82	sonney2k: why?
+@sonney2k	besser82, because I don't get it to work otherwise
+@sonney2k	besser82, or any idea how to force the ourput dir?
+* sonney2k I mean we have to install the generated .h files
+ shogun-buildbot_	build #321 of FCRH - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/321
+ besser82	sonney2k: can you push a commit of what you have now into a private branch; so I can have a look and add some needed bits to get it going?
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 1a6ae35 / src/shogun/ (3 files): https://github.com/shogun-toolbox/shogun/commit/1a6ae35b80d4fdab491cda3b313cc499a7f0972d
+ shogun-notifier-	shogun: protobuf fixes
+@sonney2k	besser82, have a look
+@sonney2k	besser82, if I do cp src/shogun/*.{cc,h} ../src/shogun/io/protobuf/
+@sonney2k	it compiles
+@sonney2k	besser82, so all I need is this output to be in the respective directory (at least the *.h) the .cc file doesn't matter
+ besser82	sonney2k: allrighty!  Will do my best to solve that..
+ shogun-buildbot_	build #1951 of bsd1 - libshogun is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1951  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot_	build #113 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/113  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	besser82, I have an idea
+@sonney2k	forget it
+@sonney2k	I only see add_custom_target as solution...
+-!- new_lido is now known as new_lido_afk
+ besser82	sonney2k: there is actually another solution:
+ besser82	sonney2k: I will set it up tomorrow morning
+ besser82	sonney2k: We will need to build the *.pb.cc as a static lib and link that into shogun
+ besser82	sonney2k: That will so the trick and solve the outdir problem
+ besser82	s/ so / do /
+ shogun-buildbot_	build #288 of precise - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/288  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot_	build #111 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/111  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ dsockwell	what does it take to cross-compile libshogun in 3.0?
+ dsockwell	n/m i think i got it
+-!- sonne|osx [~sonne@f053046174.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+@sonney2k	besser82, you sure? I mean I still need to include files in that dir?
+@sonney2k	besser82, I mean sure I could just add another static lib target - get the files created in the right place
+@sonney2k	and then add the lib
+ besser82	sonney2k: right and add the headers to be install
+@sonney2k	besser82, well I can try...
+ besser82	sonney2k: If you want to  :D  Otherwise I can implement that tomorrow morning...
+@sonney2k	besser82, but problem will still be that it generates the .h/cc files under build/src
+@sonney2k	and so I guess the include won't be found
+ besser82	not really, because you can move the autogeneration magic to some seperate CMakeLists.txt in the protobuf dir, then  ;)
+@sonney2k	besser82, well about issues with packaging - I realized I would prefer for debian packaging - that one builds libshogun in one go
+@sonney2k	and then uploads that to the archive
+@sonney2k	and then only later builds interfaces but *using* the shogun headers installed
+@sonney2k	and lib of course
+ besser82	sonney2k: what is your specific reason for that?
+ besser82	sonney2k: Wouldn't that just raise overhead for no benefit?
+@sonney2k	besser82, it is not really overhead but think about the dependencies shogun interfaces have
+@sonney2k	shogun 2.0 didn't make it into debian because there was always one stupid dependency that went kaboom
+@sonney2k	think octave, R, lua, ruby, openjdk, narray, numpy, mono, ...
+@sonney2k	besser82, the amount of dependencies is insane
+@sonney2k	now with the split I can at least make sure that a couple of things survive
+ besser82	sonney2k: I've seen packages with lots of more deps... like hadoop
+ besser82	sonney2k: In FC there is one rule:  If someone breaks your package with a stupid update, you can intoduce a bat to his face  :-P
+@sonney2k	besser82, in debian the rule is if your package has no critical bugs it enters testing and if you don't care fixing the bugs even in the deps - your fault
+@sonney2k	so I need that
+@sonney2k	and there is no overhead...
+ besser82	sonney2k: with overhead i meant two (or more) seperated src-pkgs...
+@sonney2k	yeah ok that there is
+ shogun-buildbot_	build #130 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/130  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@wiking	sonney2k: i've just did a little bit of polishing and now i have static lib localhost
+@wiking	sonney2k: btw: the static interfaces actually should be
+@wiking	libshogun objects + static interface object -> .so
+@wiking	or?
+@wiking	sonney2k: as currently static interface is currently: static interface obj and then that is linked to libshogun.so
+@wiking	or?
+-!- shainer [~shainer@host74-228-dynamic.18-79-r.retail.telecomitalia.it] has joined #shogun
+ shainer	hello
+@wiking	helo
+ shainer	can I ask someone about the matlab interface? I downloaded shogun 3.0.0 and can't get it to compile correctly on Linux
+@sonney2k	wiking, it should be separete yes
+@wiking	shainer: go ahead, give us some error output
+@wiking	sonney2k: sorry i lost you. separate in what sense?
+ shainer	wiking: well no error output, I followed the INSTALL and everything went fine, but the dir src/interfaces/matlab_static only contains a source code, and header and the CMakeLists.txt
+ shainer	it tells me to try this to test the installation
+ shainer	  addpath('../../../src/interfaces/matlab_static/graphical')
+ shainer	on matlab
+@wiking	sonney2k: which scenario would u go with: static interface obj linked with shared libshogun or static interface obj + libshogun obj
+ shainer	but of course this fails, the directory graphical doesn't exist
+@wiking	i.e. create a shared lib out of static obj + libshogun obj (static lib)
+@sonney2k	wiking, yes 2 libraries libshogun.so and the sg.so for the interfaces dynamically loading libshogun.so
+@sonney2k	wiking, how do I get -fPIC in cmake for the lib?
+@wiking	sonney2k: so actually the current one should be the right way?
+@wiking	shainer: mmm weird
+ shainer	wiking: I should mention that I had to set MATLAB_ROOT explicitly when invoking cmake because it needs it to find the paths
+@sonney2k	shainer, do a find shogun | grep sg.mex
+ shainer	no occurrence
+@sonney2k	shainer, then the matlab interface didn't get compiled
+@sonney2k	or you are in the wrong dir
+@sonney2k	shogun == root level source dir
+ shainer	yes
+ shainer	the one I extracted
+@sonney2k	besser82, any thoughts about how to get -fPIC?
+@sonney2k	besser82, it doesn't want to link against the static lib because -fPIC is not on?
+@wiking	sonney2k: u need to add that compiler flag
+ shainer	aah wait...
+ shainer	let me look at the CMakeLists for matlab_static
+ shainer	probably I miss some variable used there
+@sonney2k	wiking, how to figure out I need -fPIC? and how to add the compiler flag to my target?
+ shainer	or they are not correct
+@wiking	sonney2k: there's currently no way to add -fPIC
+@wiking	sonney2k: u need to add a new cmake variable that actually adds -fPIC to the compiler flags
+ besser82	sonney2k: set_target_properties(${THE_TARGET} PROPERTIES COMPILE_FLAGS "-fPIC" ${CMAKE_CXXFLAGS})
+@sonney2k	wiking, errm but when we compile libshogun we have to compile with -fPIC otherwise the lib is not useable under amd64 etc
+@sonney2k	besser82, thanks
+ besser82	sonney2k: np  :D
+@wiking	sonney2k:                         LINKFLAGS_CMDLINE="$LINKFLAGS_CMDLINE ../../shogun/libshogun.a"
+@wiking	sonney2k: in older times it was like this
+@wiking	cmdline was rolled together with static lib
+@wiking	so actually it was not linking to shared lib...
+ shainer	sonney2k: no ok they are all set as they should
+@sonney2k	besser82, seems to work
+@wiking	shainer: mex is not being generated atm with cmake
+@sonney2k	besser82, now question is how to install these *.h files to the install targets?
+@wiking	that's your problem
+ shainer	wiking: what is mex?
+@wiking	shainer: u need sg.mex
+@wiking	for matlab interface
+@sonney2k	besser82, maybe I can do everything with forward declarations and then I don't need the stuff?
+@wiking	but currenlty we are not creating that
+* sonney2k tries
+ shainer	wiking: can I download that or generate it by hand or something like that?
+ shainer	otherwise what's the latest version without cmake?
+ shainer	so I can use that one instead :)
+@wiking	shainer: the problem is that only sonney2k would know how to generate that mex file actualy
+ besser82	sonney2k: just add ${PROTOBUF_HDRS} to the shogun-headers list...
+ shainer	wiking: does he accept VISA? :D joking
+ shogun-buildbot_	build #114 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/114  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@wiking	shainer: u can sponsor us actually if u need that feature ASAP
+@wiking	:)
+@sonney2k	wiking, what?
+@sonney2k	I don't even have matlab...
+@wiking	sonney2k: i do not know how that .mex file was being generated
+@wiking	if anybody tells me
+@wiking	i can add that to cmake
+-!- shainer [~shainer@host74-228-dynamic.18-79-r.retail.telecomitalia.it] has quit [Read error: Connection reset by peer]
+-!- shainer [~shainer@host74-228-dynamic.18-79-r.retail.telecomitalia.it] has joined #shogun
+@wiking	shainer: yo :)
+@sonney2k	wiking, look at the configure lines - it was no magic
+ shainer	sorry, back again
+@sonney2k	shainer, or dpaste a mex -v
+@sonney2k	besser82, no I won't need headers :D
+ besser82	sonney2k:  :D
+@sonney2k	besser82, but I have an issue :(
+ besser82	sonney2k: which one?
+@sonney2k	I somehow need to add the build/src/shogun/io/protobuf to the include dirs
+@sonney2k	otherwise it won't find the lib
+@sonney2k	the .h when compiling I mean
+@sonney2k	lib probably too
+ shainer	sonney2k: http://paste.chakra-project.org/5749/
+@wiking	shainer: i would love to help but neither now nor in the past i've managed to find out how that sg.mex was generated
+ shainer	wiking: thanks all the same :) I'll try an older version in case
+@sonney2k	shainer, well get shogun 2.0 compile it with matlab and past the link line to wiking here
+@sonney2k	shainer, that combained with your paste will fix it
+ besser82	sonney2k: LIST(INSERT INCLUDES ${CMAKE_CURRENT_BINARYDIR}) in CMake-file in protobuf-dir  ;)
+@wiking	sonney2k: your problem actually is that the protobuf files are not being generated in the right place man.... see ./build/src/shogun/ShogunVersion.pb.h
+ shainer	sonney2k: ok will do once I finish
+@sonney2k	wiking, yeah they are in build/src but not ./src/ - so no what?
+@sonney2k	s/no/now
+@wiking	sonney2k: well i'm just trying to fix this
+@sonney2k	wiking, but then on what I currently have please
+@sonney2k	let me commti first
+@wiking	ok
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * bd80022 / / (5 files): https://github.com/shogun-toolbox/shogun/commit/bd800220b765adfa19689f880daad3feb4cacb8e
+ shogun-notifier-	shogun: use forward decls in protobuf and create static sgproto lib
+@sonney2k	wiking, there
+@wiking	eh?
+@wiking	wtf? :D
+@sonney2k	wiking, if I could tell cmake to search for includes in build/src/ then it would work
+@wiking	sonney2k: that's easy
+@wiking	src/shogun/io/protobuf/CMakeLists.txt?!
+@wiking	why is this?
+@wiking	ah ok
+@wiking	so u generated a static 'lib'
+@wiking	and u want that to be linked into shogun?
+@sonney2k	wiking, yes - but problem is that ProtobufFile includes some of the libs' headers
+@wiking	i mean i blame the fucking protobuf macro for doing this shit
+@wiking	yeah i nkow exactly what's the problem
+@wiking	as i wanted to fix this like 2 months ago
+@sonney2k	wiking, enlighten us?
+@wiking	but i gave up because of the shity cmake protobuf macros
+@sonney2k	well IMHO it would make sense to have a separate protobuf project/lib and then we woulnd' thave such issues
+ shogun-buildbot_	build #112 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/112  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@wiking	where do u depend on sgproto?
+@wiking	ok i see
+@wiking	sonney2k: do u need the -D flags for creating the protobuf static lib?
+@sonney2k	wiking, -D?
+@wiking	the define flags we pass to the compiler
+@wiking	when creating libshogun
+@sonney2k	no
+@wiking	btw: Users/wiking/shogun/src/shogun/./io/ProtobufFile.h:17:17: error: nested namespace definition must define each namespace separately
+@wiking	namespace google::protobuf ^~~~~~~~~~
+@wiking	wtf?!
+@sonney2k	man so I nest it then
+@wiking	/Users/wiking/shogun/src/shogun/./io/ProtobufFile.h:367:39: error: unknown type name 'ShogunVersion_SGDataType' void read_and_validate_global_header(ShogunVersion_SGDataType type);
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@wiking	/Users/wiking/shogun/src/shogun/base/class_list.cpp:632:66: error: cannot initialize return object of type 'shogun::CSGObject *' with an rvalue of type 'shogun::CProtobufFile *'
+@wiking	static CSGObject* __new_CProtobufFile(EPrimitiveType g) { return g == PT_SGOBJECT? new CProtobufFile(): __null; } ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-!- shainer [~shainer@host74-228-dynamic.18-79-r.retail.telecomitalia.it] has quit [Read error: Connection reset by peer]
+-!- shainer [~shainer@host74-228-dynamic.18-79-r.retail.telecomitalia.it] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 1ffd4d9 / src/shogun/io/ProtobufFile.h: https://github.com/shogun-toolbox/shogun/commit/1ffd4d9de0d3f9066ef970c9874d286abc6cc1c6
+ shogun-notifier-	shogun: fix
+@sonney2k	wiking, try again
+ shainer	wiking: sonney2k ok shogun 2.0.0 installed correctly
+ shainer	I start matlab, add the path (now it's there)
+ shainer	and when I launch svr_regression this happens: http://paste.chakra-project.org/5750/
+@wiking	the setting of fpic should be much more robust then what u r doing now <- sonney2k
+ shainer	but this is only a matter of installing the correct library I guess
+@wiking	sonney2k:
+@wiking	In file included from /Users/wiking/shogun/src/shogun/base/class_list.cpp:179:
+@wiking	/Users/wiking/shogun/src/shogun/./io/ProtobufFile.h:371:39: error: unknown type name 'ShogunVersion_SGDataType'
+@wiking	 void read_and_validate_global_header(ShogunVersion_SGDataType type);
+@wiking	                                      ^
+@wiking	/Users/wiking/shogun/src/shogun/./io/ProtobufFile.h:374:27: error: unknown type name 'ShogunVersion_SGDataType'
+@wiking	 void write_global_header(ShogunVersion_SGDataType type);
+@wiking	                          ^
+@wiking	/Users/wiking/shogun/src/shogun/base/class_list.cpp:632:66: error: cannot initialize return object of type 'shogun::CSGObject *' with an rvalue of type 'shogun::CProtobufFile *'
+@sonney2k	shainer, that is something we have in our FAQ :D
+@wiking	static CSGObject* __new_CProtobufFile(EPrimitiveType g) { return g == PT_SGOBJECT? new CProtobufFile(): __null; }
+@wiking	                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@wiking	3 errors generated.
+ shainer	sonney2k: ah great :D
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 3fcfb04 / src/shogun/io/ProtobufFile.h: https://github.com/shogun-toolbox/shogun/commit/3fcfb041261b36dfdd147ada6effe3fba517ca45
+@sonney2k	wiking, ok now
+ shogun-notifier-	shogun: fix
+@sonney2k	wiking, well we should have general PIC detection
+@sonney2k	so it holds for all libs
+@wiking	yep
+@wiking	heh
+@wiking	i give up
+@sonney2k	besser82, so then you can take over :D
+@sonney2k	it is there but in a hmmh hhmmh state
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Ping timeout: 246 seconds]
+ besser82	sonney2k: alrighty, will take care of it  :D
+@sonney2k	iglesiasg, I have a new idea regarding gf-markdown - we could use githubs api to prerender the stuff and then just store them as static files on the disc
+@sonney2k	that's it
+@iglesiasg	sonney2k, aham! That sounds like a nice idea.
+@iglesiasg	sonney2k, Have you see already if the API provides a markdown to html converter function?
+@iglesiasg	the source of the page https://github.com/shogun-toolbox/shogun/blob/develop/README.md has indeed the markdown converted to HTML
+@iglesiasg	sonney2k, http://developer.github.com/v3/markdown/
+@iglesiasg	maybe this one? ^
+ shogun-buildbot_	build #1952 of bsd1 - libshogun is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1952  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+ shogun-buildbot_	build #328 of FC19 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20libshogun/builds/328  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot_	build #131 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/131  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot_	build #289 of precise - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/289
+ shogun-buildbot_	build #115 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/115  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+ shogun-buildbot_	build #113 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/113  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- travis-ci [~travis-ci@ec2-107-20-41-97.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14101889
+-!- travis-ci [~travis-ci@ec2-107-20-41-97.compute-1.amazonaws.com] has left #shogun []
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+@wiking	asdf
+ shogun-buildbot_	build #132 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/132  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- travis-ci [~travis-ci@ec2-54-221-101-78.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/14102308
+-!- travis-ci [~travis-ci@ec2-54-221-101-78.compute-1.amazonaws.com] has left #shogun []
+-!- hushell [~hushell@c-50-188-141-210.hsd1.or.comcast.net] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- shainer [~shainer@host74-228-dynamic.18-79-r.retail.telecomitalia.it] has quit [Read error: Connection reset by peer]
+--- Log closed Mon Nov 18 00:00:29 2013

@@ -1,0 +1,136 @@
+--- Log opened Mon Aug 08 00:00:30 2011
+ CIA-87	shogun: Soeren Sonnenburg master * r85a0cd9 / (12 files in 2 dirs):
+ CIA-87	shogun: Merge pull request #268 from frx/streaming_vw
+ CIA-87	shogun: Restructured vw class definitions (+15 more commits...) - http://bit.ly/oc9DeU
+ blackburn	sonney2k: can you please run examples/undocumented/python_modular/graphical/dimreduct/swissroll.py?
+ blackburn	and take a screenshot or so
+ CIA-87	shogun: Sergey Lisitsyn master * r3f165e8 / (12 files in 2 dirs): Merge branch 'master' of github.com:shogun-toolbox/shogun - http://bit.ly/qs7cn3
+ CIA-87	shogun: Sergey Lisitsyn master * r2ab04b1 / src/shogun/preprocessor/LocallyLinearEmbedding.cpp : Fixed wrong attempt to reuse matrix when LAPACK is used in LLE null space finding - http://bit.ly/rdfegh
+-!- f-x [~user@117.192.201.23] has quit [Remote host closed the connection]
+ blackburn	uh.. got it
+ CIA-87	shogun: Sergey Lisitsyn master * rb44191d / src/shogun/mathematics/arpack.cpp : Made ARPACK residual vector non-random - http://bit.ly/qEd5eK
+ CIA-87	shogun: Sergey Lisitsyn master * r015de5a / src/shogun/preprocessor/LocallyLinearEmbedding.cpp : Fixed runtime error with LLE - http://bit.ly/nngNl6
+ blackburn	I thought I'll never find it
+-!- blackburn [~blackburn@188.122.237.5] has quit [Quit: Leaving.]
+-!- f-x [~user@117.192.215.3] has joined #shogun
+-!- f-x [~user@117.192.215.3] has quit [Read error: Connection reset by peer]
+-!- heiko [~heiko@134.91.52.156] has joined #shogun
+ CIA-87	shogun: Soeren Sonnenburg master * r8730565 / (3 files in 2 dirs):
+ CIA-87	shogun: Merge pull request #271 from sploving/master
+ CIA-87	shogun: support csharp SGVector and SGMatrix and add two examples: VectorTest.cs and MatrixTest.cs - http://bit.ly/reXZYZ
+ CIA-87	shogun: Soeren Sonnenburg master * r8e9019a / (11 files in 3 dirs):
+ CIA-87	shogun: Merge pull request #270 from frx/streaming_vw
+ CIA-87	shogun: VW classes are now mostly SGObjects - http://bit.ly/onUf7L
+ CIA-87	shogun: Soeren Sonnenburg master * r96ef739 / src/Makefile : fix make clean/distclean targets - http://bit.ly/qAMCiq
+-!- f-x [~user@117.192.215.3] has joined #shogun
+-!- blackburn [~blackburn@188.122.237.5] has joined #shogun
+-!- heiko [~heiko@134.91.52.156] has quit [Ping timeout: 258 seconds]
+-!- heiko [~heiko@134.91.52.156] has joined #shogun
+-!- heiko [~heiko@134.91.52.156] has quit [Ping timeout: 258 seconds]
+-!- blackburn [~blackburn@188.122.237.5] has quit [Quit: Leaving.]
+-!- heiko [~heiko@134.91.52.156] has joined #shogun
+-!- heiko [~heiko@134.91.52.156] has quit [Quit: Leaving.]
+-!- heiko [~heiko@134.91.52.156] has joined #shogun
+-!- heiko [~heiko@134.91.52.156] has left #shogun []
+-!- blackburn [~blackburn@188.122.237.5] has joined #shogun
+-!- blackburn [~blackburn@188.122.237.5] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.122.237.5] has joined #shogun
+@sonney2k	blackburn, python swissroll.py
+@sonney2k	  File "/usr/lib/pymodules/python2.6/matplotlib/projections/__init__.py", line 61, in get_projection_class
+@sonney2k	    raise ValueError("Unknown projection '%s'" % projection)
+@sonney2k	ValueError: Unknown projection '3d'
+ blackburn	uh
+@sonney2k	I guess my matplotlib is too old
+ blackburn	old matplotlib
+ blackburn	yes
+ blackburn	anyway it is solved now
+ blackburn	I've been strugelling with one bug whole night long
+@sonney2k	great :)
+@sonney2k	bug hunts can be very addictive
+ blackburn	the problem was that arpack inits residual vector with random data
+ blackburn	i.e. if we use one preprocessor - results are identical
+ blackburn	but >2 preprocessors in one python script - results are sligtly different
+ blackburn	I've checked everything
+ blackburn	sonney2k: what to do with that script?
+ blackburn	should I provide any action for old matplotlib?
+@sonney2k	blackburn, we should have 1 script per preprocessor anyways
+ blackburn	why/
+ blackburn	?
+@sonney2k	(like we have for kernels)
+ blackburn	it is not test scripts
+@sonney2k	otherwise testing doesn't work / and users usually look for particular examples
+@sonney2k	we should assume newer matplotlib being available
+@sonney2k	which script do you refer to?
+ blackburn	it just shows differences between preprocessors on swiss roll
+ blackburn	what do you mean?
+ blackburn	oh I should do KernelPCA :(
+@sonney2k	blackburn, name of the script?
+ blackburn	I was talking about graphical/dimreduct/swissroll.py
+ blackburn	and hemisphere.py too
+@sonney2k	ahh ok, but then it is just OK - just document the behaviour othewise others will wonder too
+ blackburn	okay
+@sonney2k	blackburn, I am getting some errors compiling csharp examples now that relate to preprocessors:
+@sonney2k	../../../src/interfaces/csharp_modular/BaseIsomap.cs(16,77): error CS0117: `modshogunPINVOKE' does not contain a definition for `BaseIsomap_SWIGUpcast'
+@sonney2k	../../../src/interfaces/csharp_modular/modshogunPINVOKE.cs(13,7): (Location of the symbol related to previous error)
+@sonney2k	../../../src/interfaces/csharp_modular/BaseIsomap.cs(16,55): error CS1502: The best overloaded method match for `DimensionReductionPreprocessor.DimensionReductionPreprocessor(System.IntPtr, bool)' has some invalid arguments
+@sonney2k	../../../src/interfaces/csharp_modular/DimensionReductionPreprocessor.cs(16,12): (Location of the symbol related to previous error)
+@sonney2k	../../../src/interfaces/csharp_modular/BaseIsomap.cs(16,55): error CS1503: Argument `#1' cannot convert `object' expression to type `System.IntPtr'
+ blackburn	uh
+ blackburn	hmm it shouldn't be BaseIsomap
+@sonney2k	should I do git clean dfx?
+ blackburn	I guess it won't help
+ blackburn	sonney2k: can I *not* describe abstract classes in *.i?
+ blackburn	in particular, DimensionReductionPreprocessor and Isomap
+@sonney2k	blackburn, DotFeatures is also abstract class and in .i file
+@sonney2k	blackburn, did you use any templates?
+ blackburn	DimensionReductionPreprocessor derives from SimplePreprocessor<float64_t>
+ blackburn	stop, Isomap is not BaseIsomap
+ blackburn	*anymore
+ blackburn	sonney2k: so yes, try a git clean
+@sonney2k	:)
+ blackburn	it seems I've changed it's name
+ blackburn	yesterday I fixed a bug related to DSYEVR
+ blackburn	it was a surprise I can't change matrix when calling it
+ blackburn	oops!
+@sonney2k	what does that mean?
+ blackburn	oops?
+ blackburn	I forgot to fix similar bug in MDS :)
+ blackburn	changing only 3 elements of LLE weight matrix leads to completely different results
+ blackburn	for sparsity reasons..
+ blackburn	sonney2k:
+ blackburn	/home/blackburn/shogun/shogun/src/shogun/classifier/vw/vw_regressor.cpp:42: undefined reference to `sg_malloc(unsigned int, char const*, int)'
+ blackburn	/home/blackburn/shogun/shogun/src/shogun/classifier/vw/vw_regressor.cpp:46: undefined reference to `sg_calloc(unsigned int, unsigned int, char const*, int)'
+ f-x	looks like it's in my code
+@sonney2k	blackburn, how did you get that?
+@sonney2k	I just compiled from scratch and I don't have this
+ blackburn	f-x: yeah sorry didn't noticed you are here ;)
+ blackburn	what is the options you have used?
+@sonney2k	./configure --interfaces=csharp_modular,python_modular --enable-debug --prefix=/usr/local/stow/shogun-0.99.9 --disable-optimization
+ blackburn	I tried without --enable-debug and got it
+ blackburn	will try now with
+@sonney2k	blackburn, do git clean dfx
+@sonney2k	the file got renamed...
+@sonney2k	(no longer exists)
+ blackburn	ah
+ blackburn	okay
+ CIA-87	shogun: Sergey Lisitsyn master * r63e6105 / src/shogun/preprocessor/ClassicMDS.cpp : Fixed wrong attempt to reuse matrix while DSYEVR is called - http://bit.ly/nIwrp6
+@sonney2k	f-x, with size_t transition you mean what exactly?
+@sonney2k	use index_t ?
+ f-x	sonney2k: what should size_t become?
+ f-x	index_t is valid in most cases, true
+@sonney2k	it depends - most time index_t
+ f-x	but one or two places the code expects size_t to be unsigned
+ f-x	i think that is quite minor - i can replace it with uint32_t in those places
+@sonney2k	f-x, or keep size_t if it is using official functions like memcpy or so
+ f-x	sonney2k: there are many custom functions returning size_t too
+ f-x	in vw
+ f-x	i'll have a look into it soon.. uint32_t appears safe, i'll use index_t where more appropriate
+ f-x	sonney2k: if it put it in lib/Hash.*, do I have to make a class for this?
+@sonney2k	f-x, no
+@sonney2k	there is lib/Hash.* already
+ f-x	ah
+ f-x	ok
+@sonney2k	just add the needed functions
+@sonney2k	with proper names (just look at the code it is obvois)
+ f-x	sonney2k: ok
+--- Log closed Tue Aug 09 00:00:42 2011

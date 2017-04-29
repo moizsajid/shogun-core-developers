@@ -1,0 +1,194 @@
+--- Log opened Mon Dec 05 00:00:59 2011
+-!- blackburn [~blackburn@31.28.51.215] has quit [Quit: Leaving.]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+--- Log opened Mon Dec 05 03:23:14 2011
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 5 nicks [0 ops, 0 halfops, 0 voices, 5 normal]
+-!- Irssi: Join to #shogun was synced in 7 secs
+-!- in3xes_ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.230] has quit [Ping timeout: 244 seconds]
+-!- in3xes_ is now known as in3xes
+-!- in3xes [~in3xes@180.149.49.230] has quit [Ping timeout: 255 seconds]
+-!- blackburn [~blackburn@31.28.51.215] has joined #shogun
+-!- blackburn [~blackburn@31.28.51.215] has quit [Quit: Leaving.]
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackburn	sonne|work: I have reproduced custom kernel error..
+ blackburn	setting triangle from full fails, will try to fix today
+ blackburn	then if you will manage to detect HMM or SVMs errors we can release
+ sonne|work	blackburn: hi
+ blackburn	hi
+ sonne|work	I noticed that 10 tests or so are failing on the train ride to work
+ sonne|work	not the old tests but the newer ones (python tester.py )
+ sonne|work	I've debugged a few - but it still needs work also from you ...
+ blackburn	sonne|work: do you remember any?
+ sonne|work	all the converters have no test
+ blackburn	sonne|work: converters tests is difficult task
+ sonne|work	basically for non-existent tests one needs to call python generator.py <filename_of_the_python_foo>
+ blackburn	sonne|work: I did tell you already, there is problems..
+ sonne|work	yeah but we need something reasonable... maybe you can come up with something
+ blackburn	damn, there are
+ blackburn	sonne|work: I can but I need time, I think it would be ok to do it later
+ blackburn	sonne|work: almost all of them requires to add some self-testing methods I can use in python
+ sonne|work	I think this is really important - otherwise we won't know if we broke anything
+ blackburn	sonne|work: I know status of converters 24h a week ;)
+ sonne|work	I don't have time now to discuss but lets do this maybe tonight
+ blackburn	sonne|work: but others - yes, we should fix it
+ blackburn	okay
+ sonne|work	(I thought so too about several other components btw)
+ sonne|work	cu
+ blackburn	I will be online from 23-30 UTC+4
+ blackburn	cu
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- blackburn [~blackburn@188.168.4.192] has joined #shogun
+-!- blackburn [~blackburn@188.168.4.192] has quit [Ping timeout: 252 seconds]
+-!- blackburn [~blackburn@188.168.4.192] has joined #shogun
+ blackburn	sonney2k: here
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+ blackburn	sonney2k: I wonder why almost all tests are 'ERROR' :D
+ blackburn	bugs.. I haz it
+ 15SAAI18M	shogun: Soeren Sonnenburg master * r77c55d7 / (2 files): fix library and evaluation test - http://git.io/iCkWjA
+ 15SAAI18M	shogun: Soeren Sonnenburg master * r0a36522 / data : require new data for regression tests - http://git.io/Iy6JdA
+@sonney2k	blackburn, here maybe 3-4 tests fail + all the converter_* ones
+ blackburn	sonney2k: 50% here
+ blackburn	just like united russia election result
+@sonney2k	united we stand
+@sonney2k	wait
+@sonney2k	this happens when you do python tester.py?
+ blackburn	sonney2k: ERROR OK ERROR OK ..
+@sonney2k	?
+@sonney2k	yes or no?
+ blackburn	sonney2k: ah sorry yes
+ blackburn	wait
+ blackburn	python modular?
+@sonney2k	yes the others don't support that
+ blackburn	then yes
+@sonney2k	I have an error only in preprocessor_dimensionreductionpreprocessor_modular.py + converter_*
+ blackburn	lol
+@sonney2k	so which is the first test failing for you?
+ blackburn	regression_krr_modular.py setting 1/2                        ERROR
+ blackburn	regression_krr_modular.py setting 2/2                        ERROR
+ blackburn	regression_libsvr_modular.py setting 1/2                     ERROR
+ blackburn	regression_libsvr_modular.py setting 2/2                     ERROR
+ blackburn	regression_svrlight_modular.py setting 1/2                   ERROR
+ blackburn	regression_svrlight_modular.py setting 2/2                   ERROR
+ blackburn	these ones for example
+@sonney2k	you don't have lapack/atlas?
+ blackburn	sonney2k: I thought I have
+@sonney2k	or let me guess different cpu / optimization flags different results?
+@sonney2k	I made it easy to investigate
+@sonney2k	just run python tester.py -d regression_krr_modular.py
+@sonney2k	you will get detailled debug output and be in pdb to investigate
+@sonney2k	there are two variables then a and b
+ shogun-buildbot	build #361 of r_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/361  blamelist: sonne@debian.org
+@sonney2k	both should be lists
+@sonney2k	with the things returned by this function
+@sonney2k	blackburn, btw did you do git submodule update?
+@sonney2k	not that we have different versions of data...
+ blackburn	sonney2k: minute
+@sonney2k	I now forcefully enabled all tests checks in buildbot
+ blackburn	[ -6.67244038e-14   9.76996262e-15   8.28848101e-12  -2.22044605e-14
+ blackburn	  -2.08366657e-12  -7.94919686e-14   4.06741307e-12  -5.29576383e-14
+ blackburn	  -1.99840144e-15  -4.55191440e-15   5.21804822e-15   1.78868031e-12
+ blackburn	   1.99840144e-15  -5.07416331e-12  -6.25055563e-14  -3.21964677e-15
+ blackburn	   2.42028619e-14   5.55111512e-16  -7.99360578e-15   4.71844785e-16
+ blackburn	   4.62185845e-13   6.66133815e-15   5.10702591e-15  -2.10942375e-15
+ blackburn	  -6.69064804e-12  -3.01980663e-14   0.00000000e+00
+ blackburn	mismatch
+ blackburn	hm not really much
+@sonney2k	that explains it though
+ blackburn	sonney2k: how?
+@sonney2k	different atlas etc lib / cpu etc and so different results
+@sonney2k	these things are strict 100% exact match tests to determine if anything changes...
+ blackburn	sonney2k: oh that's pretty bad way to test machine learning algos
+@sonney2k	no
+ blackburn	sonney2k: I have no atlas btw
+@sonney2k	it is very tough to figure out if your eps change is due to a bug or sth else
+@sonney2k	so running things twice should give 100% same result
+ blackburn	twice sure, but different machines..
+@sonney2k	of course this assumes you can init the random number generator etc
+@sonney2k	sure
+@sonney2k	that's true but for that one could easily introduce a numerical comparison and allow for some slack
+ blackburn	sonney2k: I do not really know but I have x86 ubuntu here, while you have 64
+@sonney2k	tester.py is not that difficult to read and whenever we have floats/numpy matrices we could do a lossy test (if enabled at cmdline)
+ blackburn	it does matter sometimes
+@sonney2k	problem is that it is not clear how much slack to allow
+@sonney2k	floating point crap is awful
+@sonney2k	e.g. a 1e-16 difference might lead to a 1e-2 difference in e.g. svm training
+@sonney2k	and this could easily be a newly introduced bug (like forgotten variable to add or so)
+ blackburn	sonney2k: I have added a little slack
+ blackburn	distances are ok now
+ blackburn	but svms are not
+@sonney2k	optional please
+@sonney2k	(like the -d option with -s --slack)
+@sonney2k	yeah
+ blackburn	kernels are halfly ok
+ blackburn	sonney2k: something is really wrong with subgradient, sgd and ocas
+@sonney2k	sgd and ocas work just fine here
+@sonney2k	subgradient yes broken
+@sonney2k	well very random
+ blackburn	sonney2k: then everything should look ok
+ blackburn	sonney2k: have you ran ./test_all?
+@sonney2k	yes - I'd like to get rid of these tests though
+@sonney2k	that is the stuff we wanted to get rid of for 1.0.0
+@sonney2k	but failed
+ blackburn	sonney2k: how much errors did you have?
+@sonney2k	subgradientsvm, sgd (but this can be ignored we changed default args and that is tested), hmm, localalignment, oligo string, FK, TOP
+@sonney2k	that's it
+@sonney2k	btw we should have these new tests for python-static too
+@sonney2k	but hell no we dont' have them for matlab/octave/r/...
+ blackburn	sonney2k: I'm worried only about HMM :)
+ blackburn	I have never used to use it but
+@sonney2k	blackburn, so can you come up with some way that we can test your dim red stuff?
+ blackburn	sonney2k: yes but not now
+@sonney2k	how long do you think will you need? I would rather not want to release with new functions that dont' have tests
+ blackburn	sonney2k: I have to write complex tests
+@sonney2k	why?
+ shogun-buildbot	build #63 of nightly_default is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/63
+ blackburn	sonney2k: e.g. to test isomap I have to check if geodesic distances are ~
+@sonney2k	can't you just apply $DIMREDMETHOD and compute $SCORE and then compare?
+ blackburn	sonney2k: but for LLE I have to check something much more complex
+ shogun-buildbot	build #77 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/77
+ blackburn	sonney2k: I'm really sure with LLE, etc
+@sonney2k	so you want to compute sth like objective value?
+ blackburn	three algos I'm not sure with are NPE, LPP and LLTSA
+ blackburn	sonney2k: yes
+ blackburn	sonney2k: my point is we should fix HMM and release
+ blackburn	sonney2k: do not much worry about dimreduction things, I do a lot of development and testing still
+ blackburn	and now everything looks ok
+ blackburn	btw a little before it wasn't
+@sonney2k	I am more worried about the dimred stuff than the hmm stuff :)
+ blackburn	sonney2k: ehmm why?
+ blackburn	sonney2k: I did tests on LLE, KLLE and both LTSA and KLTSA
+ blackburn	on different data
+ blackburn	and checked with scikits even
+ blackburn	you underestimate too much
+@sonney2k	no this is just experience - at some point any algorithm we have in shogun was correct and well tested but the bigger things get the harder it is to ensure that there are no side effects
+ blackburn	it is much faster, flexible and accurate that it was in shogun 1.0
+@sonney2k	so please do the test when you find the time - we can now but I am not too happy about it
+ blackburn	sonney2k: test what?
+ blackburn	sonney2k: do you want to hold release without tests?
+@sonney2k	please do the tests for converter_* / dimred*
+@sonney2k	no, as I said we can release now
+ blackburn	sonney2k: but hmm??
+@sonney2k	I will attempt to fix all tests except converter_* / dimred* first
+@sonney2k	then
+ blackburn	sonney2k: it can took more than 2 weeks
+@sonney2k	could you please commit the modifyied tester.py?
+ blackburn	sonney2k: ok
+ blackburn	sonney2k: should it support different tolerances?
+@sonney2k	yes, just as arg
+ blackburn	sonney2k: btw numpy.all is bad pattern
+ blackburn	there was near or so
+@sonney2k	I only know any/all
+ 15SAAI18M	shogun: Sergey Lisitsyn master * r380f6e2 / testsuite/python_modular/tester.py : Added tolerance option for tester - http://git.io/UcRuRw
+@sonney2k	blackburn, I would rather use the relative deviation e.g. (a-b)/(a+b) < eps instead of norm
+@sonney2k	anyway time to sleep
+ blackburn	norm of (a-b)/(a+b)?
+ 15SAAI18M	shogun: Sergey Lisitsyn master * r21324b9 / (3 files in 2 dirs): Faces application to dimreduction, added word embedding example - http://git.io/Hlu8CQ
+ 15SAAI18M	shogun: Sergey Lisitsyn master * r51970aa / testsuite/python_modular/tester.py : Changed tolerance to max - http://git.io/M_3ezQ
+ 15SAAI18M	shogun: Sergey Lisitsyn master * r8108a74 / examples/undocumented/python_modular/converter_multidimensionalscaling_modular.py : Added testing info for MDS into python example - http://git.io/F_8Fyw
+-!- blackburn [~blackburn@188.168.4.192] has quit [Quit: Leaving.]
+--- Log closed Tue Dec 06 00:00:10 2011

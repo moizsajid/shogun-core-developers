@@ -1,0 +1,534 @@
+--- Log opened Mon Jul 16 00:00:17 2012
+-!- heiko1 [~heiko@host86-181-80-163.range86-181.btcentralplus.com] has joined #shogun
+-!- heiko1 [~heiko@host86-181-80-163.range86-181.btcentralplus.com] has left #shogun []
+-!- blackburn [~blackburn@109.226.92.17] has quit [Quit: Leaving.]
+-!- audy- is now known as audy
+-!- zxtx [~zv@ool-43559feb.dyn.optonline.net] has quit [Ping timeout: 246 seconds]
+ gsomix	good morning
+ gsomix	sonney2k, inplace arithmetic operators works, I will send PR at evening.
+-!- gsomix [~gsomix@188.168.5.232] has quit [Ping timeout: 265 seconds]
+-!- gsomix [~gsomix@r206-10.smr.ru] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:f833:c09a:45c8:bbd3] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:f833:c09a:45c8:bbd3] has quit [Ping timeout: 245 seconds]
+-!- uricamic [~uricamic@cmpgw-27.felk.cvut.cz] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ yoo	hi
+-!- heiko [~heiko@host86-181-80-163.range86-181.btcentralplus.com] has joined #shogun
+@sonney2k	gsomix, nice!
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ gsomix	aha, workin on surface triangulation now
+@sonney2k	gsomix, booring
+@sonney2k	gsomix, looking forward to your PR this evening
+@sonney2k	heiko, can you have a look at puffins PR?
+@sonney2k	heiko, ahh and one question - do we have serialization support for SGSparseMatrix ?
+ heiko	sonney2k, yes I will soon
+@sonney2k	heiko, thanks
+ heiko	sonney2k, I think no
+@sonney2k	heiko, and for SGStringList?
+ heiko	sonney2, I also just talked to this guy who found that x-val for multiclass machines doesnt work
+ heiko	sonney2k, not that I know of, I never touched it
+@sonney2k	ok - so it is probably still the same code that we had with double* stuff right?
+ heiko	sorry, didnt get that
+ heiko	what do you mean now?
+@sonney2k	heiko, before we had SGVector / SGMatrix
+@sonney2k	we had double* int
+ heiko	ah I see
+ heiko	yes
+ heiko	same code
+@sonney2k	k
+ heiko	actually, these vectors only register the array
+ heiko	the rest (the SGVector structure) stays with the class
+ heiko	so same thing as before SGVector for serialization
+@sonney2k	so I guess the fix would be to do the same thing for SGSparseMatrix
+@sonney2k	heiko, ohh one thing - what happens to the reference count of SGVector?
+ heiko	so far, nothing, its on my todo list :)
+ heiko	should just be svaed
+ heiko	saved
+@sonney2k	that sounds like a crasher
+@sonney2k	yeah
+ heiko	I think that should do it
+@sonney2k	k
+@sonney2k	heiko, I am asking because I am working on converting sparsefeatures -> SGSparseMatrix
+ heiko	I see
+ heiko	maybe this can be serialized
+ heiko	I just never used
+ heiko	was it possible before?
+@sonney2k	I *think* so :D
+ heiko	hehe :D
+@sonney2k	heiko, ok thanks sorry for the interruption
+ heiko	sonney2k, no worries
+ heiko	sonney2k, btw as I already said
+ heiko	there is this guy who found out that x-val doesnt work for anything but libsvm
+ heiko	is anybody aware of that?
+ heiko	I wasnt
+@sonney2k	I never tried...
+@sonney2k	heiko, ohh btw did you ask wrt. shogun toolbox foundation stuff?
+@sonney2k	otherwise we might loose quite a bit of money.
+ heiko	oh, yes, I forgot that
+ heiko	I talked to a guy who does that for a plane-friend-organization
+ heiko	He told me the following:
+ heiko	its possible, however
+ heiko	its much work (we would have to do reports a few times a year, 4 or so)
+ heiko	the leaders are repsonsible for finanzial stuff and also liable in case of a crash or so
+ heiko	they had this example where they bought some ground to do stuff and the leaders took the wrong decision and then a few hundred thousand euros were gone
+ heiko	but thats probably not the case for us as we dont deal with any "risk"
+@sonney2k	no money no risk :D
+ heiko	except for ML risks ;)
+@sonney2k	heh
+ heiko	yeah, I mean its quite some formal organizational stuff that we would have to do. Everybody would have to get together to vote about the Satzung etc.
+ heiko	and the guy told me that usually these Amt people are not well aware of internet based stuff
+ heiko	but that might have changed
+@sonney2k	heiko, if you can easily find out what we have to do then please do otherwise it is what it is
+@sonney2k	heiko, well I would just do it via internet
+@sonney2k	I don't see any other possible way
+ heiko	yeah, that was more of a general discussion about it with that friend
+ heiko	yes Internet is the way.
+ heiko	I will try to call somebody this week and ask more questions, kind of forgot about that in the last weeks
+ heiko	when is your tax thing due?
+@sonney2k	heiko, btw blackburn is digging into the modsel stuff so he might know more what works ok what not :)
+ heiko	sonney2k, good to hear
+@sonney2k	heiko, I don't know - I am usually slow with this stuff
+@sonney2k	heiko, and I actually would like gsomix to start with the new modsel typemaps rather soon (next week latest) so we should find out too :)
+ shogun-buildbot	build #151 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/151
+ heiko	yes, I will investigate this multiclass problem later today
+ blackburn	multiclass is not modsel issue
+ blackburn	it is just multiple train call issue
+@sonney2k	heiko, you heard the master :D
+ heiko	blackburn, yes, did you already check that out?
+ heiko	sonney2k, I am feeling spied now :D
+ blackburn	well what I know larank fails to work with modsel
+ blackburn	not because of modsel
+ heiko	blackburn, GMNPSVM fails with cross-validation evaluation already
+ blackburn	I am pretty sure the same reason
+ heiko	ok
+ heiko	what exactly is the reason? multiple training? whats that? shouldnt be bad
+ blackburn	heiko: train() train() yeah
+ heiko	why is that bad?
+ heiko	should be slow but not give false results?
+ blackburn	larank doesn't clean up some stuff
+ heiko	a ok
+ blackburn	so kaboooms
+ blackburn	heiko: did you like my modseloutput stuff?
+ heiko	blackburn, where?
+ heiko	the debug messages?
+ blackburn	not really - I added a class
+ heiko	havent seen yet
+ heiko	what does it do?
+ blackburn	modelselection/ModelSelectionOutput.h
+ blackburn	well just outputs test/train indices/results, evaluation result
+ heiko	ah cool
+ heiko	yes I will probably like it
+ blackburn	ah and for linear machine it outputs W
+ blackburn	next step would be to set up different output ways
+ blackburn	now it just prints
+ heiko	cool
+ heiko	good idea
+ blackburn	heiko: have you seen some eigen3 code is in?
+ heiko	I noticed it
+ heiko	whats it for?
+ blackburn	I bet you would like it
+ blackburn	well blas without 75878 parameters :)
+ blackburn	and faster
+ heiko	ah
+ heiko	nice :)
+ heiko	thats something I like :)
+ blackburn	heiko: trace(A*B') is (A*B.transpose()).trace()
+ heiko	ehm? yes?
+ heiko	so thats how you use it or what?
+ heiko	our SGMatrices got these operators now?
+ blackburn	no
+ blackburn	heiko: well that wouldn't work with sgmatrices anyway
+ heiko	what was that then?
+ blackburn	heiko: they have MatrixXd for that
+ heiko	ah ok
+ blackburn	however
+ blackburn	if you want to use some preallocated memory
+ blackburn	you may use Map<MatrixXd> stuff
+ blackburn	this way you can modify sgmatrix's data
+ heiko	I am a bit lost now
+ heiko	what can one do nwo?
+ heiko	now
+ blackburn	heiko: well you may use eigen3 both for sgmatrices and some internal MatrixXd matrices
+ heiko	ah now I see
+ blackburn	heiko: http://latex.codecogs.com/gif.latex?\min_\beta%20\frac{1}{2}%20\beta^T%20K%20\beta%20-%20\kappa%20\beta%20\\%20\beta_i%20\in%20[0,B],%20~~~%20\left|\sum_i%20\beta_i%20-%20n_s\right|%20\leqslant%20n_s%20\varepsilon
+ blackburn	any idea how to approach this problem?
+ blackburn	uricamic: may be you? :)
+ heiko	blackburn, I cannot read that
+ blackburn	heiko: everything except beta is given
+ heiko	no the font
+ blackburn	ehm
+ blackburn	again? :D
+ heiko	yeah
+ heiko	black on black
+ blackburn	ok will try different latex generator
+ blackburn	heiko: how about that? http://www.numberempire.com/equation.render?\min_\beta%20\frac{1}{2}%20\beta^T%20K%20\beta%20-%20\kappa%20\beta\\\beta_i%20\in%20[0,B],%20~~~%20\left|\sum_i%20\beta_i%20-%20n_s\right|%20\leqslant%20n_s%20\varepsilon
+ heiko	same thing
+ heiko	ust send the tex
+ heiko	Ill insert it myself
+ heiko	ah i have it
+ blackburn	heiko: \min_\beta \frac{1}{2} \beta^T K \beta - \kappa \beta
+ blackburn	\\
+ blackburn	\beta_i \in [0,B], ~~~ \left|\sum_i \beta_i - n_s\right| \leqslant n_s \varepsilon
+ heiko	without this abs value thing it would be easy right?
+ blackburn	yeah
+ heiko	this looks a bit like a L1 norm regularizer, isnt there a lasso method that does a similar thing?
+ heiko	blackburn, otherwise. no idea, never saw one like this :)
+ blackburn	heiko: I don't know actually..
+ blackburn	it is a KMM
+ blackburn	kernel mean matching
+ heiko	mmh
+ blackburn	some stuff by your supervisor btw :)
+ heiko	really?
+ heiko	we compute the distance between the means
+ heiko	we dont match them :)
+ blackburn	http://listengine.tuxfamily.org/lists.tuxfamily.org/eigen/2012/07/msg00101.html
+ blackburn	hehe
+ blackburn	heiko: http://www.kyb.mpg.de/fileadmin/user_upload/files/publications/attachments/shift-book-for-LeEtAl-webversion_5376%5b0%5d.pdf
+ heiko	oh well
+ heiko	at least not me :)
+ blackburn	v-trick
+ blackburn	hmm what is v-trick
+ blackburn	or rather \nu-trick
+-!- Netsplit *.net <-> *.split quits: wiking_
+-!- Netsplit over, joins: wiking_
+ blackburn	[DEBUG] 201 iteration passed, objective = 301058401603326972979179723582841701075978963558336672155439500039329112745427114261305300261979153027907701835932192738286119401824164274262496646950403644063744.000000
+ blackburn	ROFL
+ heiko	hehe :)
+ CIA-18	shogun: Sergey Lisitsyn master * r7b9ac25 / (8 files in 4 dirs): Added Multitask Trace Logistic Regression - http://git.io/r8n9Ww
+ blackburn	argh
+ CIA-18	shogun: Sergey Lisitsyn master * r4f42e08 / src/shogun/mathematics/Math.h : Guarded eigen3 include - http://git.io/XRlOLA
+ shogun-buildbot	build #141 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/141  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #142 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/142
+-!- os252 [~stegle@as-net.tuebingen.mpg.de] has joined #shogun
+-!- os252 [~stegle@as-net.tuebingen.mpg.de] has quit [Client Quit]
+-!- blackburn [~blackburn@109.226.92.17] has quit [Quit: Leaving.]
+-!- gsomix [~gsomix@r206-10.smr.ru] has quit [Quit: Ex-Chat]
+-!- heiko [~heiko@host86-181-80-163.range86-181.btcentralplus.com] has quit [Quit: Leaving.]
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has left #shogun []
+-!- wiking_ is now known as wiking
+-!- wiking [~wiking@info2k1.hu] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- zxtx [~zv@ool-457e7550.dyn.optonline.net] has joined #shogun
+-!- zxtx [~zv@ool-457e7550.dyn.optonline.net] has quit [Ping timeout: 246 seconds]
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+-!- zxtx [~zv@ool-457e7550.dyn.optonline.net] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- zxtx [~zv@ool-457e7550.dyn.optonline.net] has quit [Ping timeout: 246 seconds]
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+-!- gsomix [~gsomix@188.168.5.70] has joined #shogun
+ gsomix	good evening
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- uricamic [~uricamic@cmpgw-27.felk.cvut.cz] has quit [Quit: Leaving.]
+@sonney2k	gsomix, hey there? doing shogun stuff now?
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ gsomix	sonney2k, yes, of course
+-!- blackburn [~blackburn@109.226.92.17] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+-!- blackburn [~blackburn@109.226.92.17] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ gsomix	sonney2k, ta-dam
+-!- heiko [~heiko@host86-185-15-105.range86-185.btcentralplus.com] has joined #shogun
+@sonney2k	gsomix, ta-dam? ka-boom? crashing?
+ gsomix	there is "da bum tss" for crashing.
+@sonney2k	gsomix, adn ta-dam?
+ gsomix	for success
+@sonney2k	heh
+ gsomix	ok, need some defines.
+ gsomix	and PR.
+ heiko	blackburn, around?
+ blackburn	yeah
+ heiko	I wanted to ask about that multiple train() bug again
+ blackburn	aham
+ heiko	we need to train multiple times while cv
+ blackburn	exactly
+ heiko	so how did you resolve the other one?
+ blackburn	I didn't
+ blackburn	it is not fixed yet
+ heiko	ah ok
+ heiko	I will check whether its really the resion
+ heiko	reason
+ blackburn	heiko: just add double train call in
+ blackburn	classifier_larank_modular
+ heiko	blackburn, just did :)
+ blackburn	gmnp works though
+ heiko	mmh
+ heiko	yes
+ heiko	but I train on same features
+ heiko	Ill train on different and then on original again
+ heiko	no its fine
+ heiko	so thats not the problem for gmnp
+ heiko	blackburn, any other suspicions?
+ blackburn	heiko: no, not really
+ blackburn	we need to check what fails
+ blackburn	and what works
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Hello all
+ blackburn	it's been a long, KMcQuisten
+ blackburn	how are you?
+ blackburn	heiko: I will take care of larank
+ KMcQuisten	I'm doing ok, but I'm having some troubles.  Can't even get a simple 2kernel MKL to train.
+ heiko	blackburn, ok, wait a bit
+ heiko	perhaps the fault is in the CV
+ blackburn	do you think so?
+ heiko	blackburn, you mean me?
+ blackburn	heiko: what is wrong in CV?
+ heiko	if so: I think the recent multiclass-change might have caused problems
+ heiko	I remember fixing something when I did my multi-class bioinfo coursework on christmas
+ blackburn	hmm
+ heiko	but I only did this for libsvm
+ heiko	remember?
+ blackburn	not really
+ blackburn	KMcQuisten: what is the problem?
+ heiko	labels were not set correctly to all submachine or something
+ KMcQuisten	blackburn:  Same kind of thing as before.  Using multiple string kenrels in MKLregression, setup up the proper features and kernels, then when I train, sometimes it will train, and sometimes I get:
+ KMcQuisten	SystemError: [ERROR] Assertion R >= 0 failed!
+ KMcQuisten	And it seems random
+ KMcQuisten	i think we dealt with this once before, but it's become unfixed, as it were
+ KMcQuisten	I have a test script I can email you if you want to reproduce
+ blackburn	KMcQuisten: sure
+ KMcQuisten	Sent
+ KMcQuisten	Did that make it through to you?
+ blackburn	KMcQuisten: yeah fails here too
+ blackburn	checking code
+ KMcQuisten	Righto
+ blackburn	KMcQuisten: for now you may disable linadd again
+ KMcQuisten	Ah, yes
+ blackburn	slower but seems to work
+ KMcQuisten	Sounds like a plan for now
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Ping timeout: 245 seconds]
+-!- audy [~audy@heyaudy.com] has quit [Changing host]
+-!- audy [~audy@unaffiliated/audy] has joined #shogun
+-!- os253 [~stegle@as-net.tuebingen.mpg.de] has joined #shogun
+ blackburn	hey os253
+ blackburn	heiko: any thoughts?
+ os253	hey Blackburn
+ blackburn	os253: do you know kernel mean matching method?
+ blackburn	I ask everyone today :D
+ wiking	boooyaaa
+ blackburn	awakening of wiking
+ wiking	heheh yeps
+ os253	I have compared to this at some point: it's very simple and works ok.
+ os253	http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.165.8929
+ wiking	blackburn: new pr
+ wiking	!
+ wiking	so take it
+ wiking	oh no just a sec to pull it
+ wiking	blackburn: btw have u had time to check on larank and cv?
+ blackburn	os253: I'd like to implement it but stucked with formulation
+ blackburn	os253: can you help me there?
+@sonney2k	blackburn, heiko is the expert for that isn't he?
+ wiking	blackburn: and do you have a hog implementation at hand?
+ blackburn	wiking: I have python hog implementation only actually
+ wiking	blackburn: what are the dependencies?
+ wiking	apart from python ;)
+ os253	blackburn: with the exact identical method?
+ os253	I.e. you need an implementation of this?
+ blackburn	os253: well I am confused with |\sum \beta_i - n_tr | < e n_tr
+ wiking	sonney2k: i think u could run libshogun test on freebsd bot
+ blackburn	os253: how one can handle this?
+ blackburn	wiking: I didn't get to larank yet
+ wiking	sonney2k: i've installed some extra dependencies on that machine for shogun
+ wiking	blackburn: link for hog?
+ blackburn	wiking: I'll send you a link in a sec
+ wiking	blackburn: cool thnx
+ blackburn	wiking: I used this one http://code.google.com/p/python-cvgreyc/source/browse/trunk/cvgreyc/features/HOG.py?r=83
+ os253	To be honest I looked at this years ago and compared to it only. The implementation was from elephant (an ML toolbox), I think. Maybe I also coded it up, I can take a look.
+ blackburn	os253: formulation is
+ blackburn	http://latex.codecogs.com/gif.latex?\min_\beta%20\frac{1}{2}%20\beta^T%20K%20\beta%20-%20\kappa%20\beta%20\\%20\beta_i%20\in%20[0,B],%20~~~%20\left|\sum_i%20\beta_i%20-%20n_s\right|%20\leqslant%20n_s%20\varepsilon
+ wiking	blackburn: thnx i'll give it a go
+ blackburn	sonney2k: may be you can help too?
+ blackburn	:)
+ os253	get's scrambled in this IRC client. Give me a bit, need to finish 1,2 things and then will take a look.
+ blackburn	ok sure
+ gsomix	sonney2k, PR
+ blackburn	wiking: I  can't see any PR :)
+* wiking mumblesbadshit
+-!- yoo [575b08cb@gateway/web/freenode/ip.87.91.8.203] has joined #shogun
+ yoo	good evening there
+ blackburn	evening
+@sonney2k	gsomix, I don't get it
+ heiko	yoo, still looking at the problem
+@sonney2k	gsomix, are these operators for += ?
+ heiko	quick fix didnt work ;)
+@sonney2k	etc
+ yoo	heiko: brb
+ gsomix	sonney2k, +=, *=, -=. more operators are needed?
+@sonney2k	gsomix, but isn't this doing x+=y where x are CDenseFeatures and y is a numpy matrix?
+@sonney2k	gsomix, why don't you write instead of
+@sonney2k	result_mat[num_feat*i + j] = lhs[num_feat*i + j] ## operator ## buf[num_feat*i + j]
+@sonney2k	lhs[num_feat*i + j] ## operator ## buf[num_feat*i + j]
+@sonney2k	and operator then is += etc?
+@sonney2k	instead of creating a new one?
+@sonney2k	gsomix, ^
+ gsomix	sonney2k, what do you mean? it works for DenseFeature+(*, -)=DenseFeatures and for DenseFeatures+(*,-)=numpy.array
+ gsomix	sonney2k, oops, my fault
+ gsomix	one moment
+ blackburn	gsomix: but you treat it inplace
+ blackburn	:)
+ heiko	blackbrun, is there a test for the store_model_features of multi class kernel machine?
+ blackburn	heiko: nein
+ blackburn	it is not even implemented
+ blackburn	I am afraid
+ heiko	it is
+ heiko	I bet this is causing the errors
+ heiko	wrong sv indices
+ blackburn	heiko: ohh
+ blackburn	that can be
+ wiking	heiko: that has been implemented in a rush afaik
+ heiko	Chiyuan Zhang wrote it
+ blackburn	heiko: ok this describes gmnp failure
+ blackburn	but larank still to fix
+ heiko	The only thing is that why works it for libsvm multiclass
+ blackburn	interesting
+ wiking	heiko: when the new machines were introduced somebody realised that cv doesnt work for  kernelmachines
+ wiking	i mean kernel multiclass machines
+ yoo	heiko: one thg I havnt checked is the sv indices. I m double checking.
+ wiking	and then it got implemented fast...
+ wiking	that was like 2-3 months ago
+ wiking	rather 3
+ heiko	mmmh
+ wiking	heiko: you can check the correspoinding chat logs for the git commit date...
+ heiko	we need more tests ...
+ heiko	this should be captured automatically
+ heiko	but it works for libsvm so I will search for the differences
+ wiking	heiko: CMulticlassLibLinear?
+ heiko	wiking, have a look at MultiClassLibSVM
+ heiko	.cpp
+ heiko	line 197
+ heiko	there I wrote a fix for this problem
+ heiko	which is rather unefficient, but works
+ heiko	I think this would be needed for the other multi class svms too
+ gsomix	compling...
+ heiko	its almost the only difference between working and not-working implementations
+ heiko	and whats this?
+ heiko	svm_svs()=SGVector<index_t>(m_kernel->get_num_vec_lhs());
+-!- blackburn [~blackburn@109.226.92.17] has quit [Quit: Leaving.]
+ wiking	dunno
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ heiko	yoo, its a bit more complicated, Ill have to dive a bit into it so it may take some time ...
+ yoo	heiko: ok. guide me to help if needed. what type of fix did u do for MultiClassLibSVM ?
+ heiko	yoo, there was a simila problem and I just put in a hack where I just stored *all* SV
+ heiko	so the problem is probably related to wrongly set SVs
+@sonney2k	wiking, can you test whether make tests works on your buildslave?
+ heiko	but I currently cannot oversee that all
+ heiko	has to be debugged step by step unfortunately
+ wiking	sonney2k: sec
+@sonney2k	wiking, to do so just go into the build/src directory
+ heiko	which is a lot of work
+@sonney2k	then run make install
+@sonney2k	make tests
+ yoo	heiko: arf
+ heiko	yoo, yes annoying
+ wiking	sonney2k: ah usual stuff: #!/bin/bash
+ wiking	sonney2k: in check.sh
+ wiking	sonney2k: should i replace it or will you to #!/usr/bin/env bash
+ wiking	?
+ yoo	heiko: I will then check the mailing list to be aware of any fix for this bug.
+ yoo	thx
+ heiko	yoo, I fear there currently is not
+ heiko	is has to be "really" fixed
+@sonney2k	wiking, I am doing... but just replace it locally and try to get it to work...
+@sonney2k	maybe there is more
+ wiking	ok trying
+ wiking	Error expanding embedded variable.
+ wiking	wht is this?
+ wiking	ah ok i know
+ wiking	so the problem is that ./check.sh calls make
+ wiking	but it should call gmake on freebsd
+ wiking	will replace it locally just to test it
+ wiking	ok that solved the problem
+ wiking	woah but there's a problem with compilation
+ wiking	//usr/home/wiking/shogun-buildbot/bsd1_-_libshogun/build/src/build/lib/libshogun.so: undefined reference to `std::__detail::_List_node_base::_M_hook(std::__detail::_List_node_base*)@GLIBCXX_3.4.15'
+ CIA-18	shogun: Soeren Sonnenburg master * r2f6ce63 / (25 files in 24 dirs): replace #!/bin/bash with #!/usr/bin/env bash - http://git.io/lxgOMQ
+ wiking	//usr/home/wiking/shogun-buildbot/bsd1_-_libshogun/build/src/build/lib/libshogun.so: undefined reference to `std::ctype<char>::_M_widen_init() const@GLIBCXX_3.4.11'
+ yoo	heiko: need to leave. thks for the info. its too bad that the easy fix didnt work but the bug is identified now. hope some1 is going to work on this (?) cya.
+ heiko	yoo, I will work on it this week
+ heiko	hope to fix it in a few days
+ yoo	heiko: great I ll come back to support ^^ ++
+-!- yoo [575b08cb@gateway/web/freenode/ip.87.91.8.203] has quit [Quit: Page closed]
+@sonney2k	wiking, wait your gcc is 3.X sth?
+ gsomix	sonney2k, fixed
+ wiking	sonney2k: noup.. i think it's more that it tries to use the wrong lib
+@sonney2k	gsomix, looking
+@sonney2k	wiking, do you run make check-examples from the build/src dir?
+ wiking	sonney2k: gmake tests
+ wiking	i did this
+ CIA-18	shogun: Evgeniy Andreev master * rb5127eb / (2 files in 2 dirs): inplace arithmetic operators for dense features - http://git.io/Av3-fQ
+ CIA-18	shogun: Soeren Sonnenburg master * rdb85eb2 / (2 files in 2 dirs): Merge pull request #650 from gsomix/buffer_protocol - http://git.io/aTWcrA
+@sonney2k	wiking, yeah that is the same
+@sonney2k	gsomix, alright - could you then tomorrow do slicing support?
+ wiking	sonney2k: apparently not ;)
+ wiking	i mean make != gmake on bsd
+ gsomix	sonney2k, ok
+ gsomix	sonney2k, tnx for review
+@sonney2k	gsomix, thanks for the code :)
+@sonney2k	btw wiking, gsomix did you send your weekly report yet?
+ gsomix	sonney2k, I'm writing now.
+ wiking	sonney2k: so there should be a variable in the check.sh for make
+ wiking	or seomthing
+@sonney2k	wiking, sure but you can patch this locally for now
+ wiking	sonney2k: i did it
+ CIA-18	shogun: Sergey Lisitsyn master * r6b69c17 / src/shogun/multiclass/LaRank.cpp : Fixed larank multiple training issue - http://git.io/je1UZA
+@sonney2k	wiking, I am rather interested in understanding why you get such weird erros
+ wiking	i just need to find outnow about those build errors
+@sonney2k	wiking, grep M_widen_init /usr/lib/x86_64-linux-gnu/libs* -r
+@sonney2k	Binary file /usr/lib/x86_64-linux-gnu/libstdc++.so.6 matches
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+ CIA-18	shogun: Soeren Sonnenburg master * r98f4788 / (2 files in 2 dirs): call $MAKE from configure... - http://git.io/cwgqMA
+@sonney2k	wiking, that ^ could do it... please test
+@sonney2k	wiking, and again please don't forget about your weekly report
+ wiking	sonney2k: for both: yep just doing them!
+@sonney2k	wiking, thanks...
+ wiking	sonney2k: just had to organize soemthing about my wedding...
+ wiking	crazy times
+ blackburn	wedding?
+ blackburn	:)
+ wiking	blackburn: yes :)
+ blackburn	my brother is going to have wedding on 27th Jul
+ wiking	congrtz
+ gsomix	good night guys
+ heiko	blackburn, my sister maried a few weeks ago :)
+ blackburn	chain
+ wiking	sonney2k: here?
+ shogun-buildbot	build #154 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/154  blamelist: Evgeniy Andreev <gsomix@gmail.com>
+ wiking	sonney2k: the problem about the compiling: the c++ has not been set in the right way...
+ wiking	sonney2k: the configure script doesn't set it
+ wiking	sonney2k: in examples/undocumented/libshogun/Makefile the CC variable should be set by ./configure script
+ wiking	as now it's always CC=c++ which in this box will fail as the whole shogun has been built with c++46
+ wiking	which is set by the configure script
+ wiking	sonney2k: if i replace CC=c++46 in that Makefile then it compiles
+-!- heiko1 [~heiko@host86-181-81-54.range86-181.btcentralplus.com] has joined #shogun
+ wiking	sonney2k: ok almost... there's still some weird errors... just trying with a clean build...
+-!- heiko [~heiko@host86-185-15-105.range86-185.btcentralplus.com] has quit [Ping timeout: 265 seconds]
+ wiking	ok this part i dont get yet:
+ wiking	running basic_minimal .. ERROR
+ wiking	/usr/lib/libstdc++.so.6: version GLIBCXX_3.4.11 required by //usr/home/wiking/shogun-buildbot/bsd1_-_libshogun/build/src/build/lib/libshogun.so.12 not found
+ wiking	ok i think there's a problem with linking
+ wiking	since it's actually according to ldd libshogun.so.12 is requiring /usr/lib/libstdc++.so.6 but it should use /usr/local/lib/gcc46/libstdc++.so.6 instead since that's the one for c++46 on my system...
+ shogun-buildbot	build #155 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/155  blamelist: Soeren Sonnenburg <sonne@debian.org>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #136 of deb2 - static_interfaces is complete: Failure [failed test octave_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/136  blamelist: Evgeniy Andreev <gsomix@gmail.com>, Soeren Sonnenburg <sonne@debian.org>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- rieck [~rieck@paul.ml.tu-berlin.de] has joined #shogun
+ rieck	moin
+ rieck	anyone home
+ blackburn	hey
+ rieck	sonney2k: still alive?
+ rieck	that's a pitty, got an IM 40 mins ago
+ shogun-buildbot	build #137 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/137
+ rieck	blackburn: still working on shogun extensions?
+ blackburn	rieck: yeah breaking shogun still ;)
+ rieck	blackburn: did gsoc work out last year? did you have fun and get some money?
+ blackburn	rieck: yes, I am participating this year too
+ blackburn	rieck: this year we've got 8 students
+ wiking	bzzzz
+* wiking does not understand freebsd's moves in this linking...
+ rieck	cool.
+ rieck	support from google is clearly a boost for shogun
+ rieck	it's also good to see people working again in gsoc
+ blackburn	rieck: yeah things have changed here
+ rieck	i am tired. i have to get some sleep, tomorrow is a written exam
+ blackburn	not for you I guess :D
+ rieck	no. its my students and my exam. still, i need to be somewhat prepared and awake, otherwise it would not be fair
+ rieck	nite
+ blackburn	heh good luck to you students then
+ blackburn	night
+--- Log closed Tue Jul 17 00:00:17 2012

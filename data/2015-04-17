@@ -1,0 +1,118 @@
+--- Log opened Fri Apr 17 00:00:46 2015
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- vortex_ape [~vortex_ap@59.177.131.141] has quit [Ping timeout: 245 seconds]
+-!- vortex_ape [~vortex_ap@120.59.199.238] has joined #shogun
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+ shogun-buildbot	build #1000 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1000  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Bj?rn Esser <bjoern.esser@gmail.com>
+-!- vortex_ape [~vortex_ap@120.59.199.238] has quit [Ping timeout: 245 seconds]
+-!- vortex_ape [~vortex_ap@120.56.194.112] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has joined #shogun
+-!- vortex_ape [~vortex_ap@120.56.194.112] has quit [Ping timeout: 240 seconds]
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has quit [Quit: Textual IRC Client: www.textualapp.com]
+@besser82	lisitsyn, yo?
+ lisitsyn	besser82: hey
+@besser82	lisitsyn, about the plugin-style thing we talked a few days ago...
+ lisitsyn	yes?
+@besser82	lisitsyn, I think I have some idea, for not getting the api so ugly and handling swig stuff pretty well ^_^
+@besser82	lisitsyn, all we need is two c++ libs ;)
+ lisitsyn	which?
+@besser82	lisitsyn, and the functional plugins of course  :P
+@besser82	lisitsyn, one libshogun, which handles the functional plugins
+@besser82	lisitsyn, and a second one: libshogun-{types, structures}
+@besser82	lisitsyn, holding the common data-types
+@besser82	what's your oppinion?
+@besser82	so we don't need to do ugly "blackbox"-data passing
+ lisitsyn	not sure I understand
+ lisitsyn	what are common data-types?
+@besser82	stuff like SGMatrix / SGVector...
+@besser82	of SGObjects
+@besser82	or
+@besser82	stuff like that
+ lisitsyn	ok how does that help?
+@besser82	we have a split out functional part with dyn-loading and a pretty slim api to access them
+@besser82	no SWIG-bloat
+@besser82	and we have directly accessible data
+@besser82	which can be passed between the classes / methods inside the plugins and queried by the use
+@besser82	r
+ lisitsyn	ok it loads plugin
+ lisitsyn	what's next?
+@besser82	resolves dependencies and loads further stuff
+ lisitsyn	say I loaded svmlight
+ lisitsyn	how do I get svmlight instance
+ lisitsyn	and what type would it be?
+@besser82	Instace will be created by "plugin-server" and passed as ptr
+@besser82	ptr can be like SGObject or sth. specialized like SGsvm
+@besser82	so we class-object in libshogun-types
+@besser82	have
+ lisitsyn	would it be CSVM or CKernelSVM or CSVMLight?
+ lisitsyn	I mean how deep hierarchy you mean?
+@besser82	I'd opt for CSVM sth.
+@besser82	not too deep hierachy of exposed data-tyxpes
+@besser82	otherwise libshogun-types will blow SWIG again :P
+@besser82	inside the plugin we can specialize more, but not directly exposed to api
+@besser82	so we can get data out as some component of CSVM
+@besser82	or in
+@besser82	so we keep hierarchy of exposed data-types pretty shallow
+@besser82	like a dozen of globally usable data-types which can hold all stuff needed for "blackboxed" functionalitiy
+ lisitsyn	okay I see
+ lisitsyn	well I had the very same idea
+ lisitsyn	limited number of classes to expose
+ lisitsyn	and plugins
+ lisitsyn	so plugin can create an instance of CLinearMachine or something else
+@besser82	lisitsyn, right
+@besser82	lisitsyn, and possibly specialize that to sth. "as needed"...
+@besser82	lisitsyn, I'm currently working on plugin-framework
+@besser82	lisitsyn, so we possibly can have that as C++-template-lib sth.
+ lisitsyn	ok cool
+@besser82	lisitsyn, ripping out the data-structures, shouldn't be that hard ;)
+@besser82	lisitsyn, so we can that stuff going like shogun5
+@besser82	or shogun-ng  :P
+ lisitsyn	heh
+@besser82	lisitsyn, next question is:  building all in a row?
+@besser82	lisitsyn, or building stuff modularized?
+@besser82	like having seperate repo for every plugin
+@besser82	I'm biased to the later
+@besser82	latter
+@besser82	because we have an easier approach for e.g. build interfaces seperately
+@besser82	or later if one needs them
+@besser82	and not a hyper overlaborated monolithic build progess
+ lisitsyn	separate repo is a bit tough
+ lisitsyn	I'd go for one first
+@besser82	lisitsyn, why is it tough?
+ lisitsyn	besser82: we'd get hundred of repos instantly
+@besser82	lisitsyn, we can provide sth. like shogun-meta repo for noobs  ;)
+@besser82	lisitsyn, which provides some easy-peasy scripts to get all stuff built
+ lisitsyn	maybe
+@besser82	lisitsyn, a hundred of repos isn't a reason, really, I think
+ lisitsyn	well I mean it would be harder to keep them updated
+ lisitsyn	and you harder to maintain probably
+@besser82	lisitsyn, okay... that might be a reason...
+@besser82	lisitsyn, like I said...  shogun-meta  ;)
+@besser82	lisitsyn, some small toolchain to keep stuff managed
+@besser82	lisitsyn, with that modular stuff we can update things pretty easy
+@besser82	lisitsyn, without rebuilding all crap, which takes ages  :P
+@besser82	rebuilding my fedora rpm-spec with basically all features enabled takes ~ 50 minutes on my local machine
+@besser82	rebuilding on fedora-infra takes ~ 8+ hours...
+ lisitsyn	yeah this sucks
+@besser82	lisitsyn, another good reason for modularized repos / builds
+@besser82	lisitsyn, and we can push updates quite more frequently  ;)
+@besser82	lisitsyn, because we only need to release new tarball of changed / improved plugin
+@besser82	lisitsyn, adding new features / plugins is easy as well
+@besser82	lisitsyn, and they are likely not break all other stuff
+@besser82	but themselves
+-!- vortex_ape [~vortex_ap@120.56.194.112] has joined #shogun
+-!- vortex_ape [~vortex_ap@120.56.194.112] has quit [Ping timeout: 264 seconds]
+-!- vortex_ape [~vortex_ap@120.56.206.108] has joined #shogun
+-!- vortex_ape [~vortex_ap@120.56.206.108] has quit [Ping timeout: 276 seconds]
+@besser82	lisitsyn, plugin-shiatz is getting tight  :D
+@besser82	lisitsyn, I'm narrowing down to have a versatile C++-lib handling plugin stuff
+@besser82	lisitsyn, so we don't need to mess-up shogun code with
+@besser82	lisitsyn, that shiatz nobody understands
+@besser82	lisitsyn, instead we a nice template we can inherit from to create plugins and handle them  :D
+@besser82	lisitsyn, loading and dependency solving is handled from external code
+-!- nszceta [~nszceta@95.211.152.2] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 265 seconds]
+-!- nszceta [~nszceta@95.211.152.2] has quit [Quit: My Mac has gone to sleep. ZZZzzz...]
+--- Log closed Sat Apr 18 00:00:48 2015

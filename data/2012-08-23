@@ -1,0 +1,432 @@
+--- Log opened Thu Aug 23 00:00:17 2012
+ shogun-buildbot_	build #63 of nightly_none is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/63
+ shogun-buildbot_	build #74 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/74
+-!- emrecelikten1 [~emre@trir-4d0d8caa.pool.mediaWays.net] has joined #shogun
+-!- emrecelikten [~emre@trir-5d8000e4.pool.mediaWays.net] has quit [Ping timeout: 248 seconds]
+-!- av3ngr [av3ngr@nat/redhat/x-kzxmpmjwtrcqadom] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-kzxmpmjwtrcqadom] has quit [Client Quit]
+-!- cheng [80fa500f@gateway/web/freenode/ip.128.250.80.15] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:6dc1:2e18:bbfe:a408] has joined #shogun
+-!- blackgun|shoburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackgun|shoburn	hey cheng
+ CIA-52	shogun: Michal Uricar master * r3713c0c / examples/undocumented/libshogun/so_multiclass_BMRM.cpp : BMRM libshogun example fix (runnable without cmd arguments) - http://git.io/8yy6bA
+ CIA-52	shogun: Michal Uricar master * rf1a5b95 / examples/undocumented/python_modular/graphical/so_multiclass_BMRM.py : so_multiclass_BMRM.py fix - http://git.io/51HZpQ
+ CIA-52	shogun: Sergey Lisitsyn master * rdea19d8 / (2 files in 2 dirs): Merge pull request #754 from uricamic/BM_SOL_EXAMPLE - http://git.io/jn1uiQ
+ cheng	blackburn: Hi
+ cheng	blackgun|shoburn: Hi again. :-)
+ blackgun|shoburn	okay let get not so crazy nickname
+-!- blackgun|shoburn is now known as blackburn
+ cheng	blackburn: You want to start a new channel so that we don't flood shogun?
+ blackburn	we could just send messages directly
+ blackburn	check other tab
+ shogun-buildbot_	build #337 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/337
+ shogun-buildbot_	build #448 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/448
+ shogun-buildbot_	build #355 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/355
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- emrecelikten1 [~emre@trir-4d0d8caa.pool.mediaWays.net] has quit [Quit: Leaving.]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- cheng [80fa500f@gateway/web/freenode/ip.128.250.80.15] has quit [Ping timeout: 245 seconds]
+ wiking	yo
+ wiking	n4nd0: ping
+ n4nd0	wiking: tell me
+ wiking	when u have time i want to discuss a patch with you
+ n4nd0	I have time now
+ wiking	it's a massively ugly patch
+ wiking	but i really dont know what to do about this
+ n4nd0	mine?
+ wiking	nono mine
+ n4nd0	ok
+ wiking	mmm i think i'll just pastebin it
+ wiking	n4nd0: header http://pastebin.com/a8EUQEu7
+ wiking	implementation http://pastebin.com/pBcjZ7LB
+ wiking	this is the consequence of not being able to have class anything: public CStructuredModel, public CLatentModel
+ n4nd0	yeah, I see
+ n4nd0	but it could be bad to have multiple inheritance ...
+ n4nd0	why are there two classes, CLSOModel and CLatentSOModel?
+ wiking	well the naming is now stupid
+ n4nd0	aham I see
+ wiking	but basically CLSOModel goes for the structural machine
+ n4nd0	one extends LatenModel and the other one the StructuredModel
+ wiking	yes
+ wiking	indeed
+ wiking	and in order to just
+ wiking	require one inheritance
+ wiking	i hardwired CLatentSOModel into CLSOModel
+ wiking	i.e. a user will only need to do an inharitance of CLatentSOModel
+ wiking	and define all the relevant application specific functions
+ n4nd0	I understand
+ n4nd0	I guess that, providing how it is one right now, a user should do inheritance of CLSOModel or?
+ n4nd0	I mean it since it is the class that has access to CLatentSOModel and not vice versa
+ wiking	no
+ wiking	it should do inheritance of CLatentSOModel
+ wiking	the CLSOModel is completely fixed
+ wiking	and basically it's 'just' a proxy class
+ n4nd0	ok
+ wiking	and we cannot do multiple inheritance as then some modular interfaces will fail
+ wiking	like java
+ wiking	so we either go with something like this
+ wiking	or i just throw out latentmodel as is
+ wiking	and try to use structuredmodel
+ wiking	the problem is that for simple LatentSVM
+ wiking	most of the stuff in structuredmodel is not necessary
+ wiking	and some other stuff are missing...
+ wiking	so if possible i would like to keep it
+ wiking	and maybe just rename CLSOModel to CLatentSOProxy
+ wiking	;D
+ n4nd0	that last renaming is good I think
+ n4nd0	:)
+ n4nd0	but I don't think it is such an ugly patch!
+ n4nd0	I mean it is not a common thing to do
+ n4nd0	but it is not a common situation either
+ n4nd0	I think it is ok
+ wiking	btw: this is lol: http://gizmodo.com/5937143/what-facebook-deals-with-everyday-27-billion-likes-300-million-photos-uploaded-and-500-terabytes-of-data
+ wiking	500 Terabytes of Data /day
+ n4nd0	dafuq
+ wiking	yeah
+ wiking	and it's all running on hadoop
+ wiking	pretty impressive that it can handle it
+ wiking	hahaha the hdfs is 100+ PB
+ wiking	:DDD
+ n4nd0	smart people
+ wiking	yeah maybe shogun would fail on trying to use this :)
+ wiking	StreamingFeatures ;)
+ n4nd0	hehe
+ wiking	ok well if u don't find this patch soooo ugly
+ wiking	then i can actually commit
+ wiking	just need to finish calculating the subgrad in the risk function
+ n4nd0	ok
+ wiking	do u actually use in PrimalMosek the y value in the ResultSet?
+ wiking	or just psi_truth and psi_pred
+ wiking	?
+ n4nd0	wiking: you mean the argmax right?
+ wiking	yeah sorry
+ wiking	yeah ResultSet->argmax
+ n4nd0	I think not
+ n4nd0	let me check
+ wiking	yeah i've greped now
+ wiking	didn't show up
+ wiking	just wanted to make sure
+ n4nd0	no
+ n4nd0	just delta and psis
+ n4nd0	that one is used in the moment of prediction
+ n4nd0	in the PrimalMosek we are training so ignored
+ wiking	k
+ wiking	thnx a lot
+ n4nd0	you are welcome
+ n4nd0	this is just awesome
+ n4nd0	http://www.heraldo.es/noticias/cultura/2012/08/21/la_restauracion_una_pintura_mural_una_iglesia_borja_acaba_chapuza_200865_308.html
+ n4nd0	I don't know if you understand
+ n4nd0	but just look at the picture...
+ n4nd0	restoration, they said
+ wiking	yeah i saw that... the old lady went a little bit creative ;)
+ wiking	uricamic: here?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 276 seconds]
+ uricamic	wiking: yep
+ wiking	so i'm just checking the multiclassmodel again, the risk function
+ wiking	and the subgrad is  R'({\bf w}) = \sum_{i=1}^{m} \Psi(x_i, \hat{y}_i) - \Psi(x_i, y_i),
+ wiking	right?
+ uricamic	yep
+ wiking	i wanted to say that couldn't we just use the CResultSet->psi_truth and CResultSet->psi_pred
+ wiking	but then i've realised that argmax is not being called in the ::risk function
+ uricamic	not yet, but eventually it should be called there
+ wiking	ok ok
+ wiking	then i guess we could use those two values
+ wiking	as they are generated already by argmax
+ uricamic	but the psi_pred has to be computed including the loss
+ uricamic	I mean argmax, computed on features infected by loss
+ wiking	ok i think this one is ready let's test it on the example :)
+-!- cheng [73406f11@gateway/web/freenode/ip.115.64.111.17] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- cheng [73406f11@gateway/web/freenode/ip.115.64.111.17] has quit [Ping timeout: 245 seconds]
+ wiking	AAAAAAAAAAAAAAAAAAAA
+ n4nd0	wiking: ?
+ wiking	screaming at my code :)
+ wiking	why no work :)
+ n4nd0	does it work?
+ n4nd0	I mean when you scream :D
+ wiking	heheh yeah
+@sonney2k	wiking, please do your final evaluations today!
+ wiking	hahah i looove when somebody is creating a release with -g flags
+@sonney2k	?
+ wiking	you always get some nice info:
+ wiking	/home/eda/mosekprj/brn-6-0/extern/flexlm/src/11.10.0/osx64x86/libsb.a
+@sonney2k	why would one not?
+ wiking	sonney2k: in a release?
+@sonney2k	ahh closed source ok...
+ wiking	sonney2k: even if it's open source
+@sonney2k	?
+ wiking	i wouldn't create a release with -g
+@sonney2k	then you have no info when things crash
+@sonney2k	wiking, seen the 'please do the final eval today'?
+ wiking	sonney2k: affirmitive
+ wiking	sonney2k: *nod* and on it!
+ wiking	sonney2k: i mean honestly i would just do a striped library for real release
+ wiking	that way small memory footprint
+ wiking	etc
+ wiking	but it's good now as my code crashed big time
+ wiking	ah null pointer referencing :)
+ wiking	juhuuu
+ wiking	n4nd0: still here?
+ n4nd0	wiking: yeah
+ n4nd0	uricamic: are you around?
+ wiking	have u checked the static analyzer report for structure/*
+ uricamic	n4nd0: yep
+ n4nd0	wiking: not really to be honest
+ wiking	n4nd0: http://maeth.com/shogun-report/report-LoMVrV.html#EndPath
+ wiking	do u use DynProg atm somewhere?
+ wiking	i mean it's jsut that it'd be great to clear out some of those problems
+ n4nd0	uricamic: have you analyzed the Dual Lib QP BM SOSVM for memory leaks? I get some in my example when I am using it :S
+@sonney2k	wiking, how do you create the static analysis btw?
+ wiking	i'm happy to create a new report with the latest commit
+@sonney2k	wiking, I mean we could run this on the bb's regularly...
+ n4nd0	wiking: I am using PLiFs but those are defined in Plif.h and so not in DynProg
+ wiking	sonney2k: yeah but we need clang/llvm for it
+ wiking	sonney2k: at least for this particular one
+ n4nd0	wiking: so no, I am not using anything from DynProg directly
+ uricamic	n4nd0: to be honest not
+ uricamic	I mean not using e.g. valgrind
+ wiking	sonney2k: clang-analyzer.llvm.org
+@sonney2k	wiking, that shouldn't be the problem I think
+ uricamic	but according to some report system it should be ok
+ n4nd0	uricamic: aham ok, I think there may be some leaks there - at least it is what valgrind tells me
+ wiking	sonney2k: i'm happy to do it if u give me access where i can have clang
+ uricamic	n4nd0: ok, can u send me the log then?
+ n4nd0	uricamic: if you are busy with another thing I can try to fix it if you don't mind
+ uricamic	n4nd0: ok, feel free to do that :)
+ wiking	sonney2k: http://clang-analyzer.llvm.org/installation.html
+ n4nd0	uricamic: I will let you know about any change
+ wiking	sonney2k: i'm not 100% sure that u really need to build the whole thing from scratch
+ uricamic	n4nd0: ok
+ uricamic	thx
+ wiking	sonney2k: but yeah it'd be cool to have that report within the buildbot system
+ wiking	hahahaha
+ wiking	sonney2k: http://packages.ubuntu.com/search?searchon=contents&keywords=scan-build&mode=filename&suite=precise&arch=any
+ wiking	sonney2k: easy peasy ;)
+ wiking	sonney2k: apt-get install clang
+ wiking	sonney2k: after that you just need scan-build ./configure && scan-build make
+ wiking	and your report is ready
+@sonney2k	wiking, will that do the usual compile too?
+@sonney2k	I mean is the analysis in addition?
+ wiking	sonney2k: good question
+ wiking	sonney2k: it did compile me the libshogun
+ n4nd0	wiking: have you used resize_vector in SGVector?
+ n4nd0	wiking: valgrind detects leaks with it but I don't see anything weird in the code
+ wiking	n4nd0: noup i haven't
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackburn	worst day on job ever :D
+ n4nd0	blackburn: why so?
+ blackburn	support is on fire with 3-4 blocker issue
+ blackburn	may be even 5
+ n4nd0	what is that?
+ blackburn	issue - well just like github issue
+ blackburn	blocker means we have to respond immediately or close to that
+ n4nd0	aaahm
+ n4nd0	it was the blocker what confused me hehe
+ n4nd0	but that means some job to do, right?
+@sonney2k	blackburn, so down to 0 blockers now?
+@sonney2k	blackburn, btw any ideas where gsomix is hiding?
+ blackburn	n4nd0: blocker is like  OMG DAMN WE ARE GOING TO DIE issue
+ blackburn	sonney2k: no I am still wroking on it
+ n4nd0	blackburn: hehe
+ n4nd0	blackburn: I have a blocker issue here now
+@sonney2k	blackburn, I at least know what you are talking about
+ blackburn	sonney2k: hehe
+ n4nd0	blackburn: valgrind complains quite a bit of SGVector::resize_vector, any clue about it?
+ n4nd0	have you used this method before?
+ blackburn	n4nd0: no, not really
+ blackburn	let me get back to that a little bit later
+ blackburn	:)
+ n4nd0	I'll investigate a bit more then
+@sonney2k	n4nd0, it is like hey we sold you an alarm clock but it will stop incrementing seconds after 7 days of use
+ n4nd0	sonney2k: :D I like your metaphors
+ n4nd0	but last day's one with the party to go by car or boat and the bundle methods for SO is remains my favourite :D
+ n4nd0	uricamic: let me ask you, why do you use resize_vector in libbmrm.cpp lines 528-530
+ n4nd0	?
+ blackburn	sonney2k: I hope you didn't have to use clearcase
+ uricamic	n4nd0: it is there just because of the history tracks of Fp, Fd and wdists
+ n4nd0	uricamic: it looks to me that at that point there is nothing else to do in the algorithm, then why to resize those vectors?
+ blackburn	and we, wiking and I, are the only victims of it
+ uricamic	and resize is there since I guess in the beginning there is initialization to the BufSize
+ uricamic	so to remove the rest after nIter
+ n4nd0	uricamic: aham, I understand
+ uricamic	but probably this could be done in more clever way now
+ uricamic	I was writing it in a hurry and also changed the way how these values are represented, so it is possible that the recent version is cumbersome
+ n4nd0	uricamic: no problem :)
+ uricamic	so the lines valgrind was complaining about were just these with resize_vector ?
+ n4nd0	uricamic: yes, it seems something is not working as it should with resize_vector
+ uricamic	n4nd0: I see, well positive is at least that the rest is ok :)
+ n4nd0	uricamic: there was another thing related to using get_label in MulticlassModel::risk
+ n4nd0	uricamic: but that was easy to solve
+ uricamic	n4nd0: I see, ok
+ n4nd0	uricamic: when you call get_label you need to do an UNREF later since this method increases the reference count of the object that returns
+ n4nd0	uricamic: I will show you when I prepare the patch
+ uricamic	n4nd0: aha, ok, thx
+@sonney2k	n4nd0, btw is your friend bern4rd still alive? I hope I can install the new website rather soon that is why I am asking (in case we run into issues...)
+ n4nd0	sonney2k: yes he is alive, he's in an internship in Paris
+ n4nd0	sonney2k: I can tell him about it
+@sonney2k	Cool thanks
+ n4nd0	what day will that be?
+@sonney2k	n4nd0, well we put it live September eleven errr 1 :)
+@sonney2k	if blackburn doesn't have blockers to fix :D
+@sonney2k	but I want to put it live under some 'hidden' url fist
+@sonney2k	first
+ blackburn	next 3 days should be free
+ n4nd0	sonney2k: ok
+ blackburn	that's why I am finishing things with my burning head
+@sonney2k	blackburner!
+@sonney2k	bunsenblackburner even!
+ blackburn	lol
+ n4nd0	uricamic: https://github.com/shogun-toolbox/shogun/pull/756/files
+ uricamic	n4nd0: THANKS
+ n4nd0	that has solved the leaks I saw using so_multiclass.cpp
+ n4nd0	it seems that there are some others triggered when using so_multiclass_BMRM.cpp
+ uricamic	ok, I will have to update valgrind and look on that
+ n4nd0	uricamic: I posted in my blog a good reference for valgrind if you need to check something
+-!- yoo [575b08cb@gateway/web/freenode/ip.87.91.8.203] has joined #shogun
+ yoo	hi all
+ n4nd0	hi yoo
+ uricamic	n4nd0: the only problem I encountered was that the last version I had haven't supported some instructions and therefore it actually didn't provide any useful information, the way how that could be overcome was to compile with some flag to disable those features
+ n4nd0	uricamic: aham ok
+ uricamic	but somebody told me, that there should be now new version for ubuntu, that should fix that issue
+ uricamic	so I hope it will be ok, when I will update it
+ n4nd0	uricamic: but that thing was for python support or for C++ programs too?
+ uricamic	C++
+ uricamic	it was something with 64bit and the intel i7, I think
+ blackburn	fails on i5 as well
+ uricamic	that valgrind was not able to get some instructuons and then it just refuse to examine the code
+ blackburn	when I debug things I disable optimizations and it works
+ CIA-52	shogun: thereisnoknife master * r800c845 / src/shogun/CMakeLists.txt : update src/shogun/CMakeLists.txt - http://git.io/mxTAIA
+ CIA-52	shogun: thereisnoknife master * r764509e / src/shogun/CMakeLists.txt : update src/shogun/CMakeLists.txt - http://git.io/VXas-w
+ CIA-52	shogun: Sergey Lisitsyn master * r00d3056 / src/shogun/CMakeLists.txt : Merge pull request #755 from thereisnoknife/master - http://git.io/LoljPg
+ uricamic	blackburn: yep, something like that
+ uricamic	but the latest release of valgrind should hopefully fix that
+ n4nd0	blackburn: CMakeLists, does shogun support cmake? didn't know about that!
+ blackburn	yeah there was a effort of some guy before
+ n4nd0	nice
+ yoo	n4nd0: you cannot compile shogun using cmake because the lib dependencies are not up-to-date
+ yoo	n4nd0: I have fill the CMakeLists.txt with new files just for visualization
+ yoo	n4nd0: my IDE read cmake files, that's why ..
+ n4nd0	yoo: aham, but we will be able to do so, compile with cmake, in the future?
+ yoo	n4nd0: then we have to had all the dependencies in the root cmakelists.txt
+ yoo	I can try to do this in the future but I am not very used to all shogun dependencies since I am still a shogun-noob
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- yoo [575b08cb@gateway/web/freenode/ip.87.91.8.203] has quit [Quit: Page closed]
+ n4nd0	sonney2k: around?
+ n4nd0	see you later guys
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has left #shogun []
+-!- uricamic [~uricamic@2001:718:2:1634:6dc1:2e18:bbfe:a408] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	nice, we have users from Ernst & Young now :)
+@sonney2k	n4nd0, ?
+ n4nd0	sonney2k: the guy in the mailing list
+@sonney2k	n4nd0, ahh I meant to reply to your 'around?'
+ n4nd0	sonney2k: ah ok, that was in case you could merge the PR I issued before since I wanted to put some other changes
+ n4nd0	but at the end I just put everything in the same PR
+ n4nd0	it is a small patch in any case though
+ CIA-52	shogun: Soeren Sonnenburg master * r10341ca / (2 files in 2 dirs): Minor warning fix. - http://git.io/CaeoZA
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 272 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- blackburn [~blackburn@188.168.5.81] has joined #shogun
+ blackburn	oh so e&y uses shogun right?/
+ blackburn	:D
+ blackburn	interesting news
+ n4nd0	blackburn: yeah :)
+ n4nd0	blackburn: did you see my patch at github?
+ blackburn	not yet
+ blackburn	what is it about?
+ n4nd0	the generic risk function, I fixed it a bit
+ n4nd0	I get same results with it as with the one michal did in MulticlassModel
+ n4nd0	what is good :)
+ blackburn	what was wrong?
+ n4nd0	initialization of subgrad and the computation of the risk
+ blackburn	oooops
+ n4nd0	the term -<w, psi(xi,yi)>
+ blackburn	do we need to initialize subgrad?
+ n4nd0	yeah
+ blackburn	hmm
+ blackburn	did you change score in multiclass
+ blackburn	I mean now you are adding loss
+ blackburn	did you subtract it in multiclass?
+ blackburn	see what I mean?
+ blackburn	btw I think argmax in training mode should do that
+ blackburn	it could be highly inefficient this way
+ n4nd0	highly inefficient because I substract the delta?
+ n4nd0	blackburn: ?
+-!- K0stIa [~kostia@alt2.hk.cvut.cz] has joined #shogun
+-!- K0stIa [~kostia@alt2.hk.cvut.cz] has left #shogun []
+@sonney2k	blackburn, any news on gsomix?
+@sonney2k	blackburn, btw please kick chris that he does your evaluation...
+@sonney2k	and wiking - please do yours too
+ blackburn	sonney2k: oops
+ blackburn	what is deadline?
+@sonney2k	tomorrow
+ blackburn	n4nd0: inefficient because of <w,Phi(x,y_truth)>
+ n4nd0	blackburn: yeah sure, but it is the price of having it generic
+ n4nd0	blackburn: I think the best idea is to do as wiking suggested
+ blackburn	we could assume argmax does that
+ n4nd0	blackburn: aham, we could do that too maybe
+ blackburn	it sounds more efficient
+ n4nd0	I think so too
+ wiking	sonney2k: hye
+ wiking	sonney2k: here?
+-!- blackburn1 [~blackburn@188.168.2.190] has joined #shogun
+ wiking	sonney2k: managed to get the scan-build working?
+-!- blackburn [~blackburn@188.168.5.81] has quit [Read error: Operation timed out]
+ blackburn1	sonney2k: chris says he has done it two days ago
+ blackburn1	sonney2k: are you sure?
+ blackburn1	sonney2k: about gsomix he floats in some space probably - I said to him you are missing him
+-!- gsomix [~gsomix@80.234.22.113] has joined #shogun
+ blackburn1	sonney2k: hooray
+ blackburn1	n4nd0: lets discuss that issue tomorrow
+ n4nd0	blackburn1: ok
+ wiking	blackburn1: yo
+ gsomix	sonney2k, sorry for absence. was helping parents with home t last days
+ n4nd0	blackburn1: in any case I think the patch should be ok since the current StructuredModel::risk is wrong
+ blackburn1	wiking:
+ wiking	blackburn1: seems EY people will really going to try using shogun for catching tax fraud :DD
+ blackburn1	yeah I've seen
+ blackburn1	sounds crazy but pretty nice to hear
+ wiking	it'd be great if he could share us what they are trying to use for
+ wiking	i'll email him and ask him... maybe he can share a little bit
+ wiking	that reminds me: anybody knows how to prepare an .rpm?
+ blackburn1	hah
+ wiking	mmm as i can see the .deb creator scripts are not within the repo either
+ wiking	sonney2k do you maybe have them somewhere?
+ wiking	i knew once how to create deb package but i think things have changed ever since 2004 :P
+-!- blackburn [~blackburn@188.168.14.160] has joined #shogun
+-!- blackburn1 [~blackburn@188.168.2.190] has quit [Ping timeout: 248 seconds]
+ wiking	doh: incorrect checksum for freed object
+ blackburn	sonney2k: could you please send a mail to chris if there is a problem with my evaluation still
+@sonney2k	blackburn, why don't you do it?
+@sonney2k	gsomix, you have to do your final evaluations!
+@sonney2k	gsomix, ASAP
+ blackburn	sonney2k: I said that because I didn't know you are around :)
+ blackburn	sonney2k: did you check it just?
+ blackburn	is it still not in system?
+@sonney2k	let me check
+ gsomix	sonney2k, Final Various usability improvements Submitted 2012-08-23 17:30:03 2012-08-23 17:30:03
+ gsomix	already done, hm
+@sonney2k	alright - everyone submitted
+* sonney2k relaxes
+ blackburn	argh you made all nervous :)
+ gsomix	sonney2k, :) dont worry, be happy
+ gsomix	ok, it's a working time
+@sonney2k	blackburn, well I just (1 hr ago) received reminder emails - so things have just been done.
+@sonney2k	gsomix, whats the status
+ blackburn	as I said chris was sure he did it two days ago
+ blackburn	:)
+@sonney2k	he didn't :D
+ blackburn	okay anyway it is done and we are all happy
+@sonney2k	blackburn, wait - he did, wiking, gsomix and arthur didn't
+@sonney2k	but now we are back to peace love and you know :D
+ gsomix	sonney2k, preparing PR now. plan to talk with heiko tomorrow (luck?)
+@sonney2k	gsomix, you should email him - he is writing his masters thesis currently and probably won't be online
+@sonney2k	(in chat I mean)
+@sonney2k	reachable via email yes
+ gsomix	sonney2k, ok, I will do this
+ blackburn	see you
+-!- blackburn [~blackburn@188.168.14.160] has quit [Quit: Leaving.]
+-!- gsomix [~gsomix@80.234.22.113] has quit [Quit: Ex-Chat]
+ n4nd0	good night guys
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+--- Log closed Fri Aug 24 00:00:17 2012

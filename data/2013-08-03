@@ -1,0 +1,332 @@
+--- Log opened Sat Aug 03 00:00:59 2013
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+-!- travis-ci [~travis-ci@ec2-54-226-85-18.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9792052
+-!- travis-ci [~travis-ci@ec2-54-226-85-18.compute-1.amazonaws.com] has left #shogun []
+ hushell	iglesiasg: hi
+@iglesiasg	hey hushell!
+@iglesiasg	how are you doing_
+@iglesiasg	?
+ hushell	iglesiasg: I am implementing code after all meetings with my supervisors :)
+ hushell	iglesiasg: A strange problem
+@iglesiasg	hushell, lot of work in related to the phd these days?
+@iglesiasg	what is it?
+ hushell	iglesiasg:  undefined reference to `shogun::SGVector<shogun::CFactor*>::~SGVector()'
+ hushell	I was trying to use SGVector<CSGObject*> also failed, only int float supported
+@iglesiasg	hushell, yes
+ hushell	iglesiasg: yeah, quit busy these days, too many meetings, but I'll be free next week :)
+@iglesiasg	hushell, look at SGVector.cpp
+@iglesiasg	hushell, the last lines. Those are the types that SGVector is usable for
+ hushell	but I checked base/Parameters.h there is SGVector<CSGObject*>
+@iglesiasg	aham, then you already know more than I do about that hehe
+ hushell	iglesiasg: okay, I see I was strange why template functions can be declared in different files
+ hushell	iglesiasg: but SGVector<CSGObject*> cannot be used
+@iglesiasg	hushell, yeah. It is a trick to separate both files
+@iglesiasg	hushell, well if it is used in Parameter.h, it should be possible!
+ hushell	iglesiasg: okay which means I should resolve DynamicObjectArray or CList somthing like those?
+ hushell	iglesiasg: resort to I mean
+@iglesiasg	hushell, I think I have never used SGVector for things other than primitive types
+@iglesiasg	hushell, but if it appears in Parameter.h, so maybe it is possible
+ hushell	iglesiasg: what will you do if you need to store a bunch of class instances
+@iglesiasg	hushell, it depends what do I need to do with them
+ hushell	std::vector is the best way but I think it is not allowed
+@iglesiasg	hushell, std::vector is fine as long as you can avoid including it in .h files that are visible to SWIG
+ hushell	iglesiasg: in my case, I have a sequence of messages for each edge in the graph
+ hushell	I need to store them
+ shogun-buildbot	build #1146 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1146  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@iglesiasg	this is, if it is something internal of the implementation, and not something that is going to be exposed in the interface. then it is completely fine to use STL
+ hushell	iglesiasg: but I may need keep it as members
+@iglesiasg	hushell, then I guess DynamicObjectArray is the way to go
+@iglesiasg	but I am curious about this use of SGVector in Parameter.h
+ hushell	iglesiasg: I tried to include SGObject.h and use SGVector<CSGObject*>, not working
+@iglesiasg	hushell, yeah, it doesn't work for me either
+@iglesiasg	simple example declaring
+@iglesiasg	SGVector<CSGObject> vector(5);
+@iglesiasg	compile error due to undefined reference
+ hushell	iglesiasg: DynamicObjectArray is not very convenient honestly
+@iglesiasg	hushell, what is wrong with it?
+@iglesiasg	IIRC is sort of std::vector
+@iglesiasg	you have got a similar API with push_back and so
+ hushell	iglesiasg: yeah, it's efficient but I don't like the type conversion code
+@iglesiasg	hushell, aham, that some casts have to be made explicitly?
+ hushell	iglesiasg: I found some code has std::vector as members :D
+@iglesiasg	hushell, too bad. That is not usable from SWIG I am afraid. Where?
+@iglesiasg	maybe it is a class that is not visible to SWIG
+@iglesiasg	note that all of them are not, one has to make that explicit
+ hushell	iglesiasg: maybe it's not big case, e.g. shogun/multiclass/LaRank.h:295
+ hushell	iglesiasg: you can use this command to search it: find . -type f -exec grep -l 'std::' {} \;
+@iglesiasg	hushell, cool thanks for little script! practical indeed
+@iglesiasg	hushell, I bet that is sort of an internal class
+@iglesiasg	hushell, grep -R LaRankPatterns * in src/interfaces
+ hushell	I think so
+@iglesiasg	hushell, that class is ignored by SWIG, so it is fine to use STL
+ hushell	iglesiasg: if a class is going to be used in other languages, no STL in function arguments and class members, right?
+@iglesiasg	hushell, exactly
+ hushell	iglesiasg: I can put these message stuff inside a function, but maybe not quite efficient, they have to be recomputed :(
+@iglesiasg	hushell, mmm
+ hushell	iglesiasg: okay, I will use DynamicObjectArray ...
+ hushell	and make message class be a derived class from SGObject
+@iglesiasg	hushell, why don't you like the casts? performance, syntax, another thing?
+ hushell	iglesiasg: :D too much typing
+@iglesiasg	hushell, haha ok
+ hushell	iglesiasg: Thanks, I guess it's very late in your time
+@iglesiasg	hushell, 1:15am
+@iglesiasg	hushell, but I am sort of a night guy hehe
+@iglesiasg	hushell, so how is the inference going?
+ hushell	iglesiasg: I am also late person :) you always online when I want to find someone to talk
+ hushell	I'll be finish it tonight, so you will see when you get up
+ hushell	I have commited half to my github
+ hushell	maybe I can send a PR now, 690 lines already
+@iglesiasg	hushell, it sounds good!
+@iglesiasg	but no rush, just issue the PR when you think it is ready
+ hushell	okay, because no documentation there I think do it later better
+@iglesiasg	hushell, I am working on LMNN
+@iglesiasg	hushell, it is not scalable *at all* at this moment :(
+ hushell	iglesiasg: good, all right, I go back to work
+ hushell	iglesiasg: hmm, I guess maybe the problem is the algorithm itself not your code
+@iglesiasg	hushell, unfortunately not, I am comparing with the author's implementation. It can handle bigger datasets than mine
+@iglesiasg	hushell, but it is fine. I just made a couple of big simplifications at the beginning
+@iglesiasg	hushell, I am refining at the moment. The one I am implementing now worked pretty well in my Matlab prototype so I have big hopes for it
+ hushell	iglesiasg: interesting, no worries, we got time. what will be your demo? I'll let my college to use it after gsoc
+@iglesiasg	hushell, classification in metagenomics data
+ hushell	I am trying to have some image demos, but Patrick likes OCR better, something like POS tagging
+@iglesiasg	I would like images better as well :)
+@iglesiasg	I think it is more eye-candy
+ hushell	yeah, much better demo for ipython notebook :)
+ hushell	I will think about converting some of my work to here, but the feature part will be annoying
+@iglesiasg	hushell, why?
+@iglesiasg	why annotying I mean
+ hushell	Usually CRF features involves many types, color, texture, shape, position etc
+ hushell	That's quite a lot code, I have these in matlab
+ hushell	ah, you mean we can precompute these for demo?
+@iglesiasg	hushell, yeah
+@iglesiasg	hushell, or if you have them in matlab, we can just create bindings of your code for matlab
+ hushell	iglesiasg: can private functions have STL arguments?
+@iglesiasg	it would be definitely better if your code can also be used from octave
+@iglesiasg	hushell, yes, no problem
+ hushell	and private class members?
+@iglesiasg	hushell, but it would be better if you can encapsulate those functions in another class so you don't need to include in the header the include of the STL class
+ hushell	will not be see outside
+@iglesiasg	those functions and members then
+@iglesiasg	it is what I have done with LMNN
+@iglesiasg	I have LMNN and LMNNImpl with lot of Eigen and STL
+ hushell	good, I will have a look
+@iglesiasg	nothing of those in LMNN.h, everything in LMNNImpl.h
+@iglesiasg	you will see that I have done all the methods static in LMNNImpl.h
+@iglesiasg	but that is because I was confused at first
+@iglesiasg	I will probably change it to normal sooner or later
+ hushell	:) I see
+ hushell	iglesiasg: you put everything internal in LMNNImpl.h, good idea!
+@iglesiasg	hushell, yes! It is something called opaque pointer or pimpl
+@iglesiasg	http://en.wikipedia.org/wiki/Opaque_pointer
+@iglesiasg	in QT they have made a science of that :D
+ hushell	iglesiasg: Thanks! Learned a lot!
+ hushell	Then, I need to refactor a bit my code :(
+@iglesiasg	hushell, sonney2k liked the idea quite a bit
+@iglesiasg	he says we can very much improve compilation time using that
+ hushell	I understand a bit now, so your opaque pointers are pointed to those static funcs in LMNNImpl.h
+ hushell	In the wiki's example, they have a class pointer defined in the main class, and your case with static funcs even better
+@iglesiasg	hushell, yes
+@iglesiasg	but I don't think it is actually even better...
+@iglesiasg	it implies some limitations I think
+@iglesiasg	having a class pointer is just fine I think
+ hushell	After read this, I have to say it's great idea for our development!
+ hushell	iglesiasg: better I mean, no extra class need to be defined in the main class
+@iglesiasg	you don't even need to include the implementation class in the public one, just doing forward declaration of the class is enough (that was what I didn't know and first, and why I made everything static)
+@iglesiasg	hushell, I am glad you liked it!
+ hushell	in this case, the hided information will never be found
+ hushell	I am leaving man. Good night!
+@iglesiasg	see you!
+ hushell	Good night everybody
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Quit: WeeChat 0.3.7]
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- pickle27 [~Kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving]
+ shogun-buildbot	build #1456 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1456  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #477 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/477
+-!- gsomix [~gsomix@178.45.89.48] has joined #shogun
+ gsomix	hello
+-!- zxtx [~zv@c-98-207-60-193.hsd1.ca.comcast.net] has joined #shogun
+-!- lambday [67157d4c@gateway/web/freenode/ip.103.21.125.76] has joined #shogun
+ lambday	good morning
+-!- van51 [~van51@ppp-94-66-76-131.home.otenet.gr] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	morning
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 268 seconds]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- zxtx [~zv@c-98-207-60-193.hsd1.ca.comcast.net] has quit [Ping timeout: 256 seconds]
+-!- van51 [~van51@ppp-94-66-76-131.home.otenet.gr] has quit [Remote host closed the connection]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 8f80504 / src/shogun/metric/LMNNImpl.cpp,src/shogun/metric/LMNNImpl.h: https://github.com/shogun-toolbox/shogun/commit/8f80504e00b326e9a5326054b1a510cd51fc4580
+ shogun-notifier-	shogun: Faster exact computation of neighbors in LMNN
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 6043056 / tests/unit/metric/LMNNImpl_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/604305678e284c32c2d0516925cb112a13fa373f
+ shogun-notifier-	shogun: Fix missing UNREF in LMNNImpl unittest
+ shogun-notifier-	shogun: Fernando Iglesias :develop * f138cb7 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/f138cb7afb0e0d24e45915c8861b6a57116cb9d0
+ shogun-notifier-	shogun: Merge pull request #1352 from iglesias/feature/lmnn
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Feature/lmnn
+-!- lisitsyn1 [~lisitsyn@5-28-21-18.clients.tlt.100megabit.ru] has joined #shogun
+-!- lisitsyn [~lisitsyn@5-28-17-136.clients.tlt.100megabit.ru] has quit [Read error: Operation timed out]
+ shogun-buildbot	build #1147 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1147  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- travis-ci [~travis-ci@ec2-107-20-60-156.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/9803573
+-!- travis-ci [~travis-ci@ec2-107-20-60-156.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #1148 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1148  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #1457 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1457  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #1149 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1149  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- lisitsyn1 [~lisitsyn@5-28-21-18.clients.tlt.100megabit.ru] has quit [Quit: Leaving.]
+ shogun-buildbot	build #1458 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1458
+-!- lisitsyn [~lisitsyn@5-28-21-18.clients.tlt.100megabit.ru] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 268 seconds]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Client Quit]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 240 seconds]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- lambday [67157d4c@gateway/web/freenode/ip.103.21.125.76] has quit []
+@sonney2k	hey gsomix
+ gsomix	sonney2k, hey
+ gsomix	sonney2k, I thinking about interface of LibSVMFile. Look, at first column we have labels - so I added new method get_labels_vector.
+ gsomix	and other columns are sparse matrix/vector
+ gsomix	we have get_sparse_matrix in CFile for this case
+ gsomix	*I'm thinking
+@sonney2k	gsomix, it is done exactly this way in CSparseFeatures
+@sonney2k	gsomix, the label is optional though
+@sonney2k	gsomix, btw I have a bug report for get_*_vector
+ gsomix	sonney2k, get_*_vector?
+@sonney2k	gsomix, when you just have a single line with many numbers
+@sonney2k	it should return all these numbers
+@sonney2k	not only when you have one number per line
+ gsomix	sonney2k, can you show me example?
+ gsomix	I didn't get.
+-!- vgorbati [~vgorbati@91.216.173.29] has joined #shogun
+ gsomix	sonney2k, I just have tested csv reader with single line.
+ gsomix	works fine
+-!- vgorbati [~vgorbati@91.216.173.29] has quit [Quit: vgorbati]
+@sonney2k	gsomix, err sorry one entry per line
+@sonney2k	gsomix, ../data/label_train_regression.dat
+@sonney2k	gsomix, labels_io_modular.py
+ gsomix	sonney2k, ah, ok. you want get all this number in one vector?
+@sonney2k	gsomix, yes
+@sonney2k	gsomix, so get*vector should work with both variants
+ gsomix	sonney2k, I'll add flag for this case, ok?
+@sonney2k	gsomix, no
+@sonney2k	gsomix, just make it work transparantly
+ gsomix	sonney2k, but I have LineReader, that read lines with  now.
+ gsomix	*with '\n' at end
+ gsomix	should I make it more configurable?
+ gsomix	I mean LineReader that contains in CVSReader.
+ gsomix	* is contained
+@sonney2k	gsomix, I don't get it
+@sonney2k	gsomix, if you line reader reads a single line then fine
+@sonney2k	gsomix, but for get_*vector you should read the whole file anyways and if it has > 1 line
+@sonney2k	it should just read the other lines and build the vector from that
+ gsomix	whole file? O_O
+ gsomix	oh
+@sonney2k	gsomix, I would even say that you could just use the matrix reading code for that
+@sonney2k	and then ``convert'' the matrix to vector
+@sonney2k	gsomix, errm what is surprising?
+ gsomix	I thought get_vector should, for example in csv, read one line and then should parse it. just get ONE vector stored in file (in model vector-features).
+@sonney2k	gsomix, no these CFile based ops are at least currently parsing the full file
+ gsomix	ok, I'll do it in this way.
+@sonney2k	gsomix, however the streaming* features will need it the way you are doing it now
+ gsomix	sonney2k, ok. so. now I should make it in "read-whole-file" way, right?
+-!- zxtx [~zv@c-98-207-60-193.hsd1.ca.comcast.net] has joined #shogun
+ gsomix	sonney2k, and sorry for this. I'm just thoughtless
+@sonney2k	gsomix, well everything is ok just get vector not
+@sonney2k	gsomix, just use get_*_matrix there and then if it has num_columns == 1 || num_rows==1 return sth reasonable
+@sonney2k	by doing SGMatrix -> SGVector
+ lisitsyn	ahhhr sonney2k I forgot one thing
+ lisitsyn	about foulwall stuff
+@sonney2k	lisitsyn, one thing?
+@sonney2k	ahh
+@sonney2k	what?
+ lisitsyn	sonney2k: that MIT-CBCL dataset has some strnage license
+ lisitsyn	http://cbcl.mit.edu/software-datasets/heisele/facerecognition-database.html
+ lisitsyn	3. You may not distribute the downloaded images, or any portion thereof, to anyone else.
+ lisitsyn	sonney2k: ^
+@sonney2k	lisitsyn, ok so it has to be dropped then
+ lisitsyn	I guess so
+ lisitsyn	stupid license :(
+@sonney2k	not a problem
+@sonney2k	the other examples are sufficient
+ lisitsyn	this dataset is really really cool for DR
+ lisitsyn	it has real intrinsic dim of 2
+@sonney2k	lisitsyn, why not create an artificial one with the same properties?
+ lisitsyn	sonney2k: hah yes I wanted to
+@sonney2k	lisitsyn, I mean you know take some 3d object rotate it or so
+ lisitsyn	yes
+@sonney2k	actually I generated some data set like this for teaching. not that beautiful though
+@sonney2k	IIRC was some 2d-plane rotated to be in some n-dim space
+ lisitsyn	well let foulwall do that then ;)
+ lisitsyn	it should be easy to script such a rotating in blender
+@sonney2k	lisitsyn, I would rather move on and take the data we have
+ lisitsyn	yeah
+ lisitsyn	sure
+ lisitsyn	I am ok with it too
+@sonney2k	lisitsyn, there are a couple of things that require manual work like hierarchical clustering
+ gsomix	sonney2k, btw did you got my email yeasterday?
+ gsomix	awful day. I was in city (parents was needed help) from 15:00 to 21:00.
+ gsomix	and 80% time we was in car.
+ gsomix	very, very hard traffic
+ gsomix	and many car accident at city
+ gsomix	*accidents
+ gsomix	the city has gone mad
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 264 seconds]
+@sonney2k	gsomix, yes I did no clue what this was about though
+@sonney2k	but I will have the same tomorrow getting back home
+ gsomix	sonney2k, huh, ok.
+-!- gsomix_ [~gsomix@109.169.187.164] has joined #shogun
+-!- gsomix [~gsomix@178.45.89.48] has quit [Ping timeout: 256 seconds]
+-!- pickle27 [~Kevin@67.193.243.174] has joined #shogun
+ lisitsyn	pickle27: hey
+ pickle27	hey!
+ lisitsyn	pickle27: how is it going?
+ pickle27	lisitsyn: good! you?
+ lisitsyn	pickle27: quite good too, last week was quite intense
+ lisitsyn	I moved to another place and a lot of things at my job
+ pickle27	lots of work?
+ pickle27	ahh
+ lisitsyn	pickle27: yeah we had kind of deadline to have a showcase
+ lisitsyn	it failed though haha
+ pickle27	oh no!
+ lisitsyn	but that's not an issue of mine, we have other people to sell things
+ pickle27	right cool
+ pickle27	I defended my thesis on Thurs!
+ lisitsyn	oh
+ lisitsyn	:D
+ lisitsyn	I missed that
+ lisitsyn	so how it was?
+ pickle27	lisitsyn: it went well!
+ lisitsyn	so you are Msc now?
+ pickle27	MASc
+ lisitsyn	what does it mean?
+ pickle27	I'm under comp eng so its a masters of applied science but essentially yes
+ lisitsyn	ahh
+ lisitsyn	no clue about that :D
+ pickle27	lisitsyn: everything is going well though. I should have a PR for my audio example as an ipython notebook next week
+ lisitsyn	pickle27: good!
+ lisitsyn	pickle27: when do you start your job?
+ pickle27	lisitsyn: not until November
+ lisitsyn	I see!
+ pickle27	lisitsyn: hows cmake coming along?
+ lisitsyn	pickle27: shame for me I am not that helpful for wiking but he is doing really well
+ lisitsyn	better and better :)
+ pickle27	lisitsyn: im excited for it
+ lisitsyn	yeah me too
+@sonney2k	lisitsyn, btw did you have a chance to look at that bug
+ lisitsyn	sonney2k: right now
+@sonney2k	thx
+ lisitsyn	sonney2k: Heiko wins I will add some tests  ;)
+@sonney2k	lisitsyn, heh yeah and wiking - they were very pushy wrt
+@sonney2k	I even started writing tests my own :)
+ lisitsyn	sonney2k: yeah they make the world go round
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * c1bbb34 / examples/undocumented/python_modular/features_dense_io_modular.py: https://github.com/shogun-toolbox/shogun/commit/c1bbb3468650aa04cb9130d7afae6fa251cf984b
+ shogun-notifier-	shogun: fix function name in example
+--- Log closed Sun Aug 04 00:00:00 2013

@@ -1,0 +1,256 @@
+--- Log opened Fri Sep 12 00:00:38 2014
+-!- flaxter [43520460@gateway/web/freenode/ip.67.82.4.96] has quit [Ping timeout: 246 seconds]
+ sonne|osx	flaxter ccache...
+ sonne|osx	broken on 12.04
+ sonne|osx	so remove it or disable it
+-!- sonne|osx [~sonne@e178049235.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- flaxter [43520460@gateway/web/freenode/ip.67.82.4.96] has joined #shogun
+ flaxter	back...still here sonne?
+ flaxter	ok, general question for anyone...
+ flaxter	since I can't get shogun installed on various machines I have ready access to, it seems like terminal.com is a good option (if you've never used it but want to play with it, ask me and I'll give you a referral code...)
+ flaxter	they have ubuntu 13.10 and 14.04 and debian 7.0
+ flaxter	but I didn't have luck with those...if someone has the time to either help me get one of these working or do it themselves, you can share a snapshot for others to use, which would be very helpful I think
+ flaxter	e.g., right now I see snapshots people have shared preconfigured with PyPy, Rstudio server, Coursera ML, Julia, EulerPy, Octave, pandas, etc...
+-!- flaxter [43520460@gateway/web/freenode/ip.67.82.4.96] has quit [Ping timeout: 246 seconds]
+-!- flaxter [43520460@gateway/web/freenode/ip.67.82.4.96] has joined #shogun
+@wiking	flaxter: it works on ubuntu 12.04 as well: just do cmake -DENABLE_CCACHE=OFF ..
+ flaxter	ok, will try that now
+ flaxter	ok, I've tried a bunch of things so I might have lost track of what the problem was/is or whether I was supposed to do something else
+ flaxter	but I just ran:
+ flaxter	cmake -DENABLE_CCACHE=OFF -DPythonModular=ON ..
+ flaxter	that worked
+ flaxter	then
+ flaxter	make
+ flaxter	which gave:
+ flaxter	 /home/ubuntu/shogun-3.2.0/src/shogun/statistics/TestStatistic.cpp:1:0: error: CPU you selected does not support x86-64 instruction set
+@wiking	mmmm
+@wiking	r u running like this in a virtual machine enviroment?
+@wiking	flaxter: btw i suggest to checkout the latest development code of shogun, i.e.: git clone https://github.com/shogun-toolbox/shogun.git
+ flaxter	yep, I'm trying on opensciencedatacloud.org
+ flaxter	ok, will checkout the latest
+ flaxter	same error exactly
+@wiking	mmm
+@wiking	what's thie site? :)
+ flaxter	they provide unix VMs for science research
+@wiking	mmm
+@wiking	lemme check
+@wiking	mmm it only works if u have affiliation with a us academic institution?
+ flaxter	somtehing like that, plus they'll make you fill something out
+ flaxter	but I'd be happy to get this going on terminal.com
+ flaxter	I think if I refer you you get $10 free which lets you try it for awhile
+@wiking	flaxter: have u tried: http://cloud.shogun-toolbox.org/ ?
+@wiking	althought it's quite outdated
+@wiking	go ahead drop me an invite for terminal
+ flaxter	yes! great for playing with...but I've got something with gigs of data I want to try
+ flaxter	https://www.terminal.com/signup?ref_u=flaxter&ref_c=9f83804ab0b784a
+@wiking	ok just trying
+@wiking	flaxter: why don't u run it on your own machine?
+@wiking	flaxter: have u been trying to use this with 'Official Ubuntu 14.04 '/?
+@wiking	i cannot believe that somebody made a service of this :)
+ flaxter	good question. I am currently trying to install the latest from github on my machine.
+ flaxter	yes, 14.04. I also tried Debian and 13.10
+@wiking	ok, testing
+-!- travis-ci [~travis-ci@ec2-54-92-235-21.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/34651994
+-!- travis-ci [~travis-ci@ec2-54-92-235-21.compute-1.amazonaws.com] has left #shogun []
+@wiking	btw this is a simple site wrapped around docker :P
+ flaxter	interesting, I hadn't heard of docker
+@wiking	nevemrind :)
+@wiking	mmm there is something very wrong with this ubuntu distro on terminal.com :)
+ flaxter	really? weird...
+@wiking	yeah because cmake is erroring like never before
+@wiking	flaxter: we have a machine testing each changes in shogun with ubuntu 14.04
+@wiking	and never had such problems :S
+ flaxter	I've seen your buildbots...very cool
+@wiking	why cannot i copy paste from terminal.com's termnal...
+@wiking	:S
+ flaxter	I'm also trying on linode, which is 14.04...totally different error, but I can get the latest from github and try again
+@wiking	have u tried to compile python modular?
+ flaxter	pastebin.com/22q6dPcn
+@wiking	yeah
+ flaxter	I have been trying modular...should I try static?
+@wiking	it's because linode doesn't have enough memory by default to compile python modular interface
+@wiking	it requires 4G+ free memory
+@wiking	unfortunately
+ flaxter	wait, did you look at the pastebin? that error means out of memory?  because it got pretty far
+@wiking	yes
+@wiking	thats the momemnt when it's trying to build the python modular interface
+ flaxter	aha
+@wiking	so you can compile it on a linode machine of course
+@wiking	but not with the cheapest version
+@wiking	...
+@wiking	ok
+@wiking	i see it's the very same problem i think on terminal.com
+ flaxter	aha, out of memory
+@wiking	yeah the default terminal has like 250 megs of ram
+ flaxter	so wait, terminal.com has an option to have more memory...did you get cmake to work?
+@wiking	ok no wait now that i don't run the build in parallel it managed to go on
+@wiking	dunno about what are the options of terminal.com
+@wiking	i'm just saying that with the one i have now... it's not possible
+ flaxter	ooh, how do you disable parallel?
+@wiking	since 250 megs of ram is really not enough to compile it
+@wiking	but if u change the instance type
+@wiking	ok wait ai'll try taht
+@wiking	flaxter: apt-get install cmake build-essential git libeigen3-dev
+@wiking	these are the minimum set of packages you'll need to build shogun
+@wiking	ok now i've switch to the small instance (1.6 gigs ram) now it continues to build
+ flaxter	cool; after the apt-get you're building from source from git?
+@wiking	yep
+@wiking	now i'm at 12%
+@wiking	seems to be working
+@wiking	but as i said before... you'll need much more ram if u want to compile python modular as well
+@wiking	i reckon the xlarge instance might do it (6400 megs of ram)
+ flaxter	how restrictive is the static interface? I'd like to reproduce what's in the Gaussian Processes python notebook...
+@wiking	mmm
+@wiking	i doubt that you'll be able to do that
+ flaxter	ok, well let's see if small does it, and if not I'll try it on xlarge =)
+ flaxter	ok, new error on my home computer....maybe I didn't install libnlopt correctly?
+@wiking	mmm why what's the error?
+ flaxter	http://pastebin.com/WL2jWy0J
+@wiking	uuu yeah
+@wiking	have u installed nlopt from source?
+ flaxter	yes
+ flaxter	is there an ubuntu package?
+@wiking	flaxter: yeah... depends of course which ubuntu u r using
+@wiking	for 12.04 there's no package
+ flaxter	home computer is 14.04
+@wiking	btw: i've just compiled shogun on small
+@wiking	apt-get install libnlopt-dev
+ flaxter	oh, sweet
+ flaxter	can you save a snapshot and share it?
+@wiking	mmmm just a sec the unit test part is still compiling
+@wiking	in 2 mins i think it's fully ready
+ flaxter	great
+@wiking	flaxter: https://www.terminal.com/tiny/peImyFXuxK
+ flaxter	awesome. thank you!
+ flaxter	oh no, gaussian process binary classification failed ;)
+ flaxter	shogun/data is empty
+@wiking	flaxter: that's just because i haven't checked out the data submodule
+@wiking	yeah
+@wiking	git submodule init && git submodule update
+ flaxter	you didn't do make install either, right?
+@wiking	noup
+ flaxter	ok, just did that
+@wiking	and there's not python modular interface either
+ flaxter	ah ok, so how much ram should I try it with?
+@wiking	youll need more than 4gigs free
+@wiking	so as i said i'd try with xlarge
+ flaxter	ok, trying it
+ flaxter	I need swig I guess?
+@wiking	yeps
+ flaxter	should I do -DENABLE_CCACHE=OFF?
+@wiking	noup since i haven't installed ccache
+ flaxter	also installing python-dev
+@wiking	and that is a problem only with ubuntu 12.04
+ flaxter	ok
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+ flaxter	(still downloading and installing python-dev....)
+ flaxter	for anyone who finds this by google search, I now need to install numpy
+ flaxter	wiking, if you're still here, do you know if the ubuntu package for 14.04 is good or should I install it with pip?
+@wiking	should be good
+@wiking	same with scipy
+ flaxter	ok
+ flaxter	also need libblas-dev
+@wiking	yeah well you'll need a lot of packages
+ flaxter	libatlas-base-dev?
+@wiking	if u want to have all the features of shogun
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Remote host closed the connection]
+ flaxter	libnlopt-dev
+ flaxter	what else? :)
+@wiking	mmmm
+@wiking	when u run cmake
+@wiking	on the end it shows what libraries has been detected
+@wiking	and which not
+ flaxter	opencl is the only required one not found
+@wiking	mmm well that u won't have in a virtualenv like this anwyas
+@wiking	*anyways
+ flaxter	do you know which package I need?
+@wiking	for?
+ flaxter	sorry, didnt see you say I won't need it
+ flaxter	so I shouldn't take the *REQUIRED* packages part too seriously?
+@wiking	mmm is it in required section... wonder why it ended up there:S
+-!- flaxter [43520460@gateway/web/freenode/ip.67.82.4.96] has quit [Ping timeout: 246 seconds]
+-!- hushell [~hushell@c-98-232-237-144.hsd1.or.comcast.net] has quit [Ping timeout: 240 seconds]
+-!- flaxter [43520460@gateway/web/freenode/ip.67.82.4.96] has joined #shogun
+ flaxter	anyone know about "NameError: name 'GradientEvaluation' is not defined"?
+ flaxter	I have nlopt; maybe I also need one of these optional packages which were not found?   * CCache  * GDB  * Mosek  * OpenMP  * Atlas  * GLPK  * CPLEX  * ARPACK  * ViennaCL (required version >= 1.5.0)  * LpSolve  * ColPack  * ARPREC  * Doxygen  * LibXml2  * HDF5  * CURL  * ZLIB  * LibLZMA  * SNAPPY  * LZO  * Protobuf  * Jinja2  -- The follo
+@wiking	mmm
+@wiking	flaxter: src/shogun/evaluation/GradientEvaluation.h doesn't need any special library
+ flaxter	I am also missing GaussianProcessBinaryClassification
+ flaxter	ImportError: cannot import name GaussianProcessBinaryClassification
+ flaxter	oh wait, GradientEvaluation is there. it's GradientModelSelection that's missing
+@wiking	flaxter: it GradientModelSelection needs nlopt
+@wiking	and there's no more GaussianProcessBinaryClassification
+@wiking	it's GaussianProcessClassification
+ flaxter	(ok, I have been collecting issues with the GP python notebook--when I fix it up I should probably do a pull request or something?)
+ flaxter	I installed nlopt...double-checking
+@wiking	yeah
+ flaxter	yes, libnlopt-dev is installed from apt
+ flaxter	-- The following OPTIONAL packages have been found: includes NLopt
+@wiking	mmm
+@wiking	then u should have GradientModelSelection
+ flaxter	recompiling, just in case
+ flaxter	bbiab
+-!- vivekrai [uid10305@gateway/web/irccloud.com/x-ffwaltnxsungthdf] has joined #shogun
+-!- flaxter [43520460@gateway/web/freenode/ip.67.82.4.96] has quit [Ping timeout: 246 seconds]
+-!- flaxter [43520460@gateway/web/freenode/ip.67.82.4.96] has joined #shogun
+ flaxter	back, in case you've had any ideas about GradientModelSelection...still recompiling (it crashed because not enough memory, reconfigured (on the fly!) to have more memory, now waiting.)
+ flaxter	build complete
+ flaxter	>>> from modshogun import GradientModelSelection Traceback (most recent call last):   File "<stdin>", line 1, in <module> ImportError: cannot import name GradientModelSelection
+ flaxter	no luck...
+ sonne|work	flaxter: have a look at the GradientModelSelection.{h,cpp} files and look for the ifdefs there
+ sonne|work	I guess you still don't have some dep installed
+ flaxter	only one that's there is HAVE_NLOPT...
+ sonne|work	flaxter:  and did NLOPT get detected?
+ sonne|work	(HAVE_NLOPT should be in lib/config.h)
+ flaxter	it got detected, yeah, see here: http://pastebin.com/Jtxx4Bk4
+ flaxter	ok, just looked there as well-- #define HAVE_NLOPT 1
+ flaxter	wait! I might have done just make and not make install for this one
+ sonne|work	sounds like :)
+ flaxter	fixed! ok, cool
+ sonne|work	heh
+ flaxter	btw, I now think I have a pretty much working version of python modular on terminal.com...which I'd be happy to share for others (it took lots of ram to compile, but once it's compiled you can reduce the amount of ram allocated to save money)
+ sonne|work	what is terminal.com?
+ flaxter	I pretty much know what it says on www.terminal.com but I've had fun playing with it so far ... I was referred by a friend who does systems / ML research
+ flaxter	let me know if you want an invite to try it out (not sure if this is necessary, but I get some kind credit for referring)
+ sonne|work	flaxter: I am currently scarce in time but hey why  not won't hurt
+ flaxter	try this link? http://www.terminal.com/signup?ref_u=flaxter&ref_c=9f83804ab0b784a
+ sonne|work	ok registered - I am sonne - where is that terminal?
+ flaxter	sharing, hold on
+ flaxter	https://www.terminal.com/tiny/yAzDIQeZpq
+ flaxter	bbiab
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has quit [Read error: Connection reset by peer]
+ flaxter	back
+ flaxter	are there any dependencies for StringFeatures?
+ flaxter	NameError: name 'SimpleFeatures' is not defined
+ flaxter	NameError: name 'StringFeatures' is not defined
+ flaxter	doxygen?
+ flaxter	no wait, that seems unlikely
+ flaxter	maybe I should just be using StringCharFeatures instead.
+-!- txomon|home [~txomon@unaffiliated/txomon] has joined #shogun
+-!- vivekrai [uid10305@gateway/web/irccloud.com/x-ffwaltnxsungthdf] has quit [Quit: Connection closed for inactivity]
+ flaxter	ok, I am using StringCharFeatures, perhaps incorrectly. the model fits but gp.apply crashes
+ flaxter	here is a minimum working example...
+ flaxter	http://pastebin.com/iAE3771h
+ flaxter	just tried the same kernel with an svm and everything is fine
+-!- naywhaya1e [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Write error: Broken pipe]
+ flaxter	totally unrelated...I'm looking at the TensorProductPairKernel
+ flaxter	is the documentation wrong or the code? I think it should be Kp ((A,B),(C,D)) = K(A,C)K(B,D)+K(A,D)K(B,C), following http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2275314/
+ flaxter	but the docs say it calculates k(a,c)k(b,c) + k(a,d)k(b,c)
+-!- sonne|osx [~sonne@f052199095.adsl.alicedsl.de] has joined #shogun
+-!- hushell [~hushell@c-98-232-237-144.hsd1.or.comcast.net] has joined #shogun
+-!- sonne|osx [~sonne@f052199095.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- hushell [~hushell@c-98-232-237-144.hsd1.or.comcast.net] has quit [Ping timeout: 245 seconds]
+-!- naywhaya1e is now known as naywhayare
+-!- sonne|osx [~sonne@f052199095.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f052199095.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@f052199095.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f052199095.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@f052199095.adsl.alicedsl.de] has joined #shogun
+-!- flaxter_ [43520460@gateway/web/freenode/ip.67.82.4.96] has joined #shogun
+-!- flaxter_ [43520460@gateway/web/freenode/ip.67.82.4.96] has quit [Ping timeout: 246 seconds]
+-!- sonne|osx [~sonne@f052199095.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- sonne|work1 [~sonnenbu@85.90.76.130] has joined #shogun
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has quit [Ping timeout: 276 seconds]
+--- Log closed Sat Sep 13 00:00:40 2014

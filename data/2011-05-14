@@ -1,0 +1,117 @@
+--- Log opened Sat May 14 00:00:58 2011
+-!- blackburn [~qdrgsm@188.168.3.72] has quit [Quit: Leaving.]
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Quit: I'll be Bach]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- alesis-novik [~alesis@188.74.87.84] has joined #shogun
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has quit [Ping timeout: 264 seconds]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- sudarshan [~sudarshan@c-174-50-225-74.hsd1.tn.comcast.net] has joined #shogun
+-!- sudarshan [~sudarshan@c-174-50-225-74.hsd1.tn.comcast.net] has quit [Remote host closed the connection]
+-!- blackburn [~qdrgsm@188.122.225.203] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- ameerkat [~ameerkat@184-98-140-155.phnx.qwest.net] has joined #shogun
+ CIA-31	shogun: Soeren Sonnenburg master * rb9d67bb / (5 files in 4 dirs): add SGMatrix support in python typemaps - http://bit.ly/jB5H5I
+@sonney2k	blackburn, I only now realized that we have another naming clash
+@sonney2k	what I call sparse matrix now is actually only a sparse vector
+@sonney2k	so I will have to do renamings to SGSparseVector etc
+@sonney2k	and introduce SGSparseMatrix
+@sonney2k	same for strings btw
+@sonney2k	SGString
+@sonney2k	will need to introduce SGStringList
+ blackburn	sonney2k: ehh, but do we have sparse vectors already?
+@sonney2k	sure but called SGSparseFeatureMatrix or so
+ blackburn	ah
+ blackburn	sonney2k: I need some advice with LLE
+ blackburn	what is better - to allocate memory for all instance life or only within init()?
+@sonney2k	blackburn, ask but I am not sure if mlsec/cwidmer could help better here
+@sonney2k	blackburn, I don't understand
+ blackburn	sonney2k: not about algorithmic but about pure programming ;)
+@bettyboo	rahaha!?!
+@sonney2k	ok
+ blackburn	I mean I have to allocate some matrices
+ blackburn	should I allocate it within init() method
+ blackburn	or better allocate it with constructor?
+@sonney2k	blackburn, do you know the sizes before calling init?
+ blackburn	:D
+@sonney2k	do you use them 'often'
+ blackburn	sorry of course not
+ blackburn	oh how stupid I am
+@sonney2k	ok
+ blackburn	sonney2k: another question about that preproc framework
+ blackburn	ehh.
+ blackburn	well, we have apply_to_feature_matrix and apply_to_feature_vector
+ blackburn	if to matrix I understand, it will call init, etc
+ blackburn	but what about vector?
+ blackburn	should I use already initialized features?
+ blackburn	sonney2k: https://github.com/SergeyLisitsyn/shogun/blob/274a2fefe4de3c82dc5c585e89ab3edd336a12b0/src/libshogun/preproc/LLE.cpp
+@sonney2k	blackburn, you have to assume that your preproc is inited
+ blackburn	now all routines are in init
+ blackburn	I'm stucked what to do with apply_* methods
+@sonney2k	so that you can apply it to single vectors (when the feature matrix is not avalable in memory)
+@sonney2k	blackburn, btw we have a CMath::display_matrix()
+ blackburn	sonney2k: ok, will know
+ blackburn	it just some crap not cleaned up
+ blackburn	of course there wouldn't be any sg_print :)
+ blackburn	sonney2k: so, when apply_to_feature_matrix is called I should re-init (or init) with given features, right?
+@sonney2k	blackburn, never re-init
+@sonney2k	always assume that you are inited
+ blackburn	I'm confused what exactly I should do in init()
+ blackburn	sonney2k: if it is inited already why CFeatures instance is passed to apply_to_feature_matrix?
+@sonney2k	blackburn, I don't understand - it should apply ti to the CFeatures object that is passed...
+ blackburn	but what should init(CFeatures* f) do?
+@sonney2k	example:
+ blackburn	I can't see any relation between two different features..
+@sonney2k	you want to remove features which have small variance
+@sonney2k	then you measure variance on init() and recall which dims should be removed
+@sonney2k	then when you call apply* you use that list
+ blackburn	ah!
+ blackburn	sonney2k: but what about dim reduction techniques like LLE? it is absolutely determined to feature set
+ blackburn	we can't init on one feature set and process other
+ blackburn	do you understand my miscomprehension?
+@sonney2k	no
+ blackburn	eeeh
+ blackburn	nevermind :)
+@bettyboo	cool
+ blackburn	will try to understand how it is done with pca
+ blackburn	ah don't understand how to do it with LLE
+ blackburn	sonney2k: will you implement addition of two SGVectors?
+ blackburn	and I'm interested with scalar multiplication too
+ CIA-31	shogun: Soeren Sonnenburg master * r7b958bf / (57 files in 14 dirs):
+ CIA-31	shogun: rename sparse matrix to sparse vector and introduce sparse matrix
+ CIA-31	shogun: structure and string list structure - http://bit.ly/j1Sl11
+@sonney2k	blackburn, I won't - but feel free to do so
+@sonney2k	btw, have a look at DataType.h and tell me if that is OK
+ blackburn	I don't understand why you are asking me for that (in fact I can't grasp preproc) :)
+ blackburn	oh nice I switched branch and lost LLE :D
+@sonney2k	hard to believe
+@sonney2k	switch back!
+ blackburn	aha
+ blackburn	will get from github
+ blackburn	but I was surprised
+ blackburn	EHRRR i'm useless
+@sonney2k	blackburn, bah get some sleep or eat more chocolate ;-)
+@bettyboo	8)
+ blackburn	sonney2k: should ops on vectors be implemented as its methods?
+@sonney2k	blackburn, yes makes most sense - at some point this does no longer belong in datatype.h though - but for now yes
+ blackburn	sonney2k: SGVector.add(a,b)?
+@sonney2k	no only add(v)
+ blackburn	it is less readable, don't you think so/
+ blackburn	?
+ blackburn	ah
+ blackburn	I see
+@sonney2k	i think it is more readable - it adds v to the current object
+ blackburn	moreover it doesn't copy vector
+ blackburn	but what if we want x,y and x+y both?
+@sonney2k	 sorry what?
+@sonney2k	ahh I understand
+@sonney2k	well then feel free to add another function for this
+ blackburn	sonney2k: what about zero vector constructor?
+@sonney2k	blackburn, implement what you need...
+ blackburn	ok.
+@sonney2k	blackburn, you probably can take much of what is in CMath* now
+@sonney2k	e.g. dot, fill vector range_fill vector etct etc
+ blackburn	anyway my addition doesn't compile yet :D
+-!- warpy [~warpy@bzq-79-183-44-64.red.bezeqint.net] has quit [Ping timeout: 252 seconds]
+--- Log closed Sun May 15 00:00:00 2011

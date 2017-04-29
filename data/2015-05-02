@@ -1,0 +1,337 @@
+--- Log opened Sat May 02 00:00:07 2015
+-!- abinashm [uid66179@gateway/web/irccloud.com/x-fzdkorchplaibrbf] has quit [Quit: Connection closed for inactivity]
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- dataVinci [~Akash@115.248.64.169] has joined #shogun
+-!- dataVinci [~Akash@115.248.64.169] has quit [Read error: Connection reset by peer]
+-!- dataVinci [~Akash@14.139.121.55] has joined #shogun
+-!- Akash_ [~Akash@123.63.47.173] has joined #shogun
+-!- Akash_ [~Akash@123.63.47.173] has quit [Client Quit]
+-!- dataVinci [~Akash@14.139.121.55] has quit [Client Quit]
+-!- dataVinci [~Akash@117.239.210.100] has joined #shogun
+-!- dataVinci [~Akash@117.239.210.100] has quit [Read error: Connection reset by peer]
+-!- dataVinci [~Akash@123.63.47.173] has joined #shogun
+@wiking	besser82: ping
+@wiking	sorry yesterday i fell asleep
+@wiking	i have an almost done patch
+@wiking	question
+@wiking	where do we define the swig releated macros?
+@wiking	see for example SWIG_TYPE_TABLE=shogun SHOGUN
+@wiking	or USE_BOOL
+@wiking	etc
+@wiking	if we can solve this then i can push my patch
+@besser82	USE_BOOL can be taken from config.h
+@wiking	it's not there yet
+@besser82	The other's can done in modshogun.i afaik
+@wiking	:)
+@wiking	but USE_BOOL is only used in swig related stuff
+@wiking	this is only used in .i
+@wiking	LIST(APPEND DEFINES USE_CHAR)
+@wiking	LIST(APPEND DEFINES USE_BOOL)
+@wiking	LIST(APPEND DEFINES USE_UINT8)
+@wiking	LIST(APPEND DEFINES USE_UINT16)
+@wiking	#LIST(APPEND DEFINES USE_UINT32)
+@wiking	LIST(APPEND DEFINES USE_UINT64)
+@wiking	#LIST(APPEND DEFINES USE_INT8)
+@wiking	#LIST(APPEND DEFINES USE_INT16)
+@wiking	LIST(APPEND DEFINES USE_INT32)
+@wiking	LIST(APPEND DEFINES USE_INT64)
+@wiking	LIST(APPEND DEFINES USE_FLOAT32)
+@wiking	LIST(APPEND DEFINES USE_FLOAT64)
+@wiking	LIST(APPEND DEFINES USE_COMPLEX128)
+@wiking	#LIST(APPEND DEFINES USE_FLOATMAX)
+@besser82	wiking, that shouldn't matter  ;)
+@besser82	wiking, let's stuff all in config.h
+@besser82	wiking, and "%include <shogun/lib/config.h>" that in modshogun.i  :D
+@wiking	okeeey
+@wiking	will do it then now
+@wiking	and push
+@wiking	gimme 5 mins
+@besser82	okie...  will check locally then...  =)
+@wiking	besser82: this is a problematic thing to put in config.h:
+@wiking	#cmakedefine HAVE_PYTHON 1
+@wiking	#cmakedefine HAVE_OCTAVE 1
+@wiking	as they are only relevant if we compile modular stuff
+@wiking	and if we want to decouple libshogun from modular interfaces
+@wiking	it's going to be a problem
+@wiking	as actually one needs to override config.h macros...
+@wiking	so i would actually create a swig_config.h
+@wiking	that we generate for modular interfaces
+@besser82	wiking, if it's just this macro(s), we can pass them on cli
+@wiking	mmm
+@besser82	as when building / generating the swiged cxx
+@wiking	well all those USE_<types> are the same
+@wiking	as well as
+@wiking	HAVE_JBLAS
+@besser82	those can go to config.h
+@wiking	noup
+@wiking	again
+@besser82	so we have one common config.h
+@wiking	jblas is only relevant
+@besser82	why?
+@wiking	if u create the java_modular interface
+@besser82	and otherwise won't do impact, right?
+@besser82	since we pass it now to all file being build...
+@besser82	so no conflicts, when def'ing this in config.h  :P
+@besser82	wiking, 1
+@besser82	wiking, ^
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has joined #shogun
+@besser82	same is for HAVE_{PYTHON,OCTAVE,...}
+@besser82	they don't collide with each other
+@wiking	yeah but it's useless to define in config.h
+@besser82	just, if one wouldn't have the deps installed when building libshogun...  :(
+@besser82	not really useless...
+@wiking	well look
+@wiking	if we build libshogun
+@wiking	we'll get a config.h
+@besser82	yes
+@wiking	that won't have HAVE_PYTHON + HAVE_JBLAS etc defined
+@wiking	then you want to separately build the python_modular and java_modular interface
+@wiking	then you check the dependent libshogun's config.h
+@wiking	and you will have a problem...
+@wiking	or you start overriding those variables
+@wiking	but then i dont see why would you define them there in the first plac
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+@besser82	wiking, I see...  It's about build-time config...
+@besser82	then you are fully right...
+@besser82	and we should generate that into swig_config.h sth...
+@besser82	but the USE_* defines can go to config.h ?
+@wiking	those are the same
+@wiking	only used for *_modular (swig) stuf
+@besser82	then we can put them there as well...
+@besser82	swig_config
+@wiking	ok
+@wiking	so shall we have a src/interfaces/modular/swig_config.h.in
+@wiking	?
+@besser82	yes, that would be nice
+-!- besser82 [~besser82@fedora/besser82] has quit [Remote host closed the connection]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has quit [Quit: My Mac has gone to sleep. ZZZzzz...]
+-!- dataVinci [~Akash@123.63.47.173] has quit [Quit: Leaving]
+@wiking	besser82: okeeey testing now python modular
+@wiking	if it works i'll commit+psuh
+@besser82	wiking, allrighty, will then build all interfaces in a row  ;)
+@wiking	hehe
+@besser82	wiking, and run testsuite...  rpmbuild is tha thing  ;)
+@wiking	ok
+@wiking	only one error :))
+@besser82	which error?
+@wiking	/Users/wiking/shogun/build/src/interfaces/python_modular/modshogunPYTHON_wrap.cxx:384556:48: error: allocating an object of abstract class type 'shogun::CLinearARDKernel'
+@wiking	      result = (shogun::CLinearARDKernel *)new shogun::CLinearARDKernel();
+@wiking	                                               ^
+@wiking	/Users/wiking/shogun/src/shogun/kernel/LinearARDKernel.h:160:30: note: unimplemented pure virtual method 'get_parameter_gradient' in 'CLinearARDKernel'
+@wiking	 virtual SGMatrix<float64_t> get_parameter_gradient(const TParameter* param,
+@wiking	                             ^
+@wiking	/Users/wiking/shogun/src/shogun/kernel/LinearARDKernel.h:197:20: note: unimplemented pure virtual method 'compute' in 'CLinearARDKernel'
+@wiking	 virtual float64_t compute(int32_t idx_a, int32_t idx_b)=0;
+@wiking	dunno why
+@besser82	push and I'll figure out =)
+@besser82	as soon as we're finished, we can rebase the branch && PR... ;)
+@besser82	wiking, ^
+@wiking	mmm ok pushing
+@wiking	couldn't compile the python modular though
+@wiking	in
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :feature/config.h * 74ffb67 / / (29 files): https://github.com/shogun-toolbox/shogun/commit/74ffb670099a07db4e5d4827dc6c17e744d7ec3e
+ shogun-notifier-	shogun: Remove compiler macros defined via compiler flags
+ shogun-notifier-	shogun: Use <shogun/lib/config.h> and swig_config.h for configure paramters
+@wiking	74ffb67
+-!- travis-ci [~travis-ci@ec2-54-92-244-69.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/60931544
+-!- travis-ci [~travis-ci@ec2-54-92-244-69.compute-1.amazonaws.com] has left #shogun []
+ shogun-notifier-	shogun: Viktor Gal :feature/config.h * d8cea97 / src/shogun/lib/RefCount.h: https://github.com/shogun-toolbox/shogun/commit/d8cea97cae978125e1234f3614ac3e8c5ba1aca6
+ shogun-notifier-	shogun: Fix the order of including config.h in RefCount.h
+@besser82	Building CXX object src/shogun/CMakeFiles/libshogun.dir/lib/RefCount.cpp.o
+@besser82	cd /home/besser82/shared/git/shogun/build/src/shogun && /usr/bin/ccache /usr/lib64/ccache/c++   -std=c++11 -Wall -Wno-unused-parameter -Wformat -Wformat-security -Wparentheses -Wshadow -Wno-unknown-pragmas -Wno-deprecated   -fopenmp -O2 -g -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches  -m64 -mtune=generic  -O3 -fexpensive-optimizations -frerun-cse-after
+@besser82	-loop -fcse-follow-jumps -finline-functions -fschedule-insns2 -fthread-jumps -fforce-addr -fstrength-reduce -funroll-loops -mfpmath=sse -fPIC -I/home/besser82/shared/git/shogun/src -I/home/besser82/shared/git/shogun/src/shogun -I/home/besser82/shared/git/shogun/build/src -I/home/besser82/shared/git/shogun/build/src/shogun -isystem /usr/include/eigen3 -I/usr/lib64/../include -I/usr/include/json-c -I/usr/include/libxml2    -o CMakeFiles/libshogun.dir/li
+@besser82	b/RefCount.cpp.o -c /home/besser82/shared/git/shogun/src/shogun/lib/RefCount.cpp
+@besser82	In file included from /home/besser82/shared/git/shogun/src/shogun/lib/RefCount.cpp:1:0:
+@besser82	/home/besser82/shared/git/shogun/src/shogun/lib/RefCount.h:47:19: error: 'atomic' in namespace 'std' does not name a template type
+@besser82	     volatile std::atomic<int> rc;
+@besser82	                   ^
+@besser82	/home/besser82/shared/git/shogun/src/shogun/lib/RefCount.h: In constructor 'shogun::RefCount::RefCount(int32_t)':
+@besser82	/home/besser82/shared/git/shogun/src/shogun/lib/RefCount.h:25:34: error: class 'shogun::RefCount' does not have any field named 'rc'
+@wiking	yeah that was fucked up
+@besser82	  RefCount(int32_t ref_start=0) : rc(ref_start) {}
+@besser82	                                  ^
+@besser82	/home/besser82/shared/git/shogun/src/shogun/lib/RefCount.cpp: In member function 'int32_t shogun::RefCount::ref()':
+@besser82	/home/besser82/shared/git/shogun/src/shogun/lib/RefCount.cpp:8:18: error: 'rc' was not declared in this scope
+@wiking	fixed it in the last commit
+@besser82	  int32_t count = rc.fetch_add(1)+1;
+@besser82	                  ^
+@besser82	/home/besser82/shared/git/shogun/src/shogun/lib/RefCount.cpp: In member function 'int32_t shogun::RefCount::unref()':
+@besser82	/home/besser82/shared/git/shogun/src/shogun/lib/RefCount.cpp:21:18: error: 'rc' was not declared in this scope
+@besser82	  int32_t count = rc.fetch_sub(1)-1;
+@besser82	                  ^
+@besser82	/home/besser82/shared/git/shogun/src/shogun/lib/RefCount.cpp: In member function 'int32_t shogun::RefCount::ref_count()':
+@wiking	see d8cea97
+@besser82	/home/besser82/shared/git/shogun/src/shogun/lib/RefCount.cpp:34:18: error: 'rc' was not declared in this scope
+@besser82	  int32_t count = rc.load();
+@wiking	too long copy-past :)
+@besser82	                  ^
+@besser82	src/shogun/CMakeFiles/libshogun.dir/build.make:8119: recipe for target 'src/shogun/CMakeFiles/libshogun.dir/lib/RefCount.cpp.o' failed
+@besser82	which?
+@wiking	*paste
+@wiking	this refcount trouble
+@besser82	I see...
+@wiking	is fixed in commmit d8cea97
+-!- travis-ci [~travis-ci@ec2-54-167-156-211.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/60931544
+-!- travis-ci [~travis-ci@ec2-54-167-156-211.compute-1.amazonaws.com] has left #shogun []
+@besser82	rebuilding...
+@besser82	takes time, because ccaches are invalid again  :P
+-!- travis-ci [~travis-ci@ec2-54-92-244-69.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/60932021
+-!- travis-ci [~travis-ci@ec2-54-92-244-69.compute-1.amazonaws.com] has left #shogun []
+@besser82	wiking, confirmed... can reproduce...
+@wiking	besser82: yeah travis can do it as well :)
+@besser82	lemme dig into...  ;)
+@besser82	wiking, ^
+-!- travis-ci [~travis-ci@ec2-54-167-156-211.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/60932021
+-!- travis-ci [~travis-ci@ec2-54-167-156-211.compute-1.amazonaws.com] has left #shogun []
+-!- travis-ci [~travis-ci@ec2-54-92-244-69.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/60932021
+-!- travis-ci [~travis-ci@ec2-54-92-244-69.compute-1.amazonaws.com] has left #shogun []
+@wiking	besser82: ok this whole thing got introduced in b6e297c8c4a64c558d30d496df5be084c06686a3
+@besser82	wiking, thx for the info :D
+@wiking	just sent a mail to the mailing list
+@wiking	because that patch actually doesn't make any fucking sense :)
+@besser82	wiking, let's bully yorkelin to refix :P
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 265 seconds]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 265 seconds]
+-!- besser82 [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has joined #shogun
+-!- besser82 [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- lambday [6a33f00b@gateway/web/freenode/ip.106.51.240.11] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+ shogun-notifier-	shogun: lambday :develop * 7bbf957 / / (10 files): https://github.com/shogun-toolbox/shogun/commit/7bbf957df313bbf5f25188422e60c24747c017ee
+ shogun-notifier-	shogun: Added elementwise operators framework in linalg
+ shogun-notifier-	shogun: lambday :develop * 35c609b / / (10 files): https://github.com/shogun-toolbox/shogun/commit/35c609bce2c1d1a7357a5eac96404d69892b391d
+ shogun-notifier-	shogun: Added a benchmark for elementwise operations
+ shogun-notifier-	shogun: Soumyajit De :develop * 7f15f5e / / (12 files): https://github.com/shogun-toolbox/shogun/commit/7f15f5e1ca1fef6507e2a1ce800b9a21366d0240
+ shogun-notifier-	shogun: Merge pull request #2830 from lambday/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Added element-wise unary operators in linalg
+-!- travis-ci [~travis-ci@ec2-54-167-156-211.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Soumyajit De's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/60939812
+-!- travis-ci [~travis-ci@ec2-54-167-156-211.compute-1.amazonaws.com] has left #shogun []
+@lambday	wiking: lisitsyn: hey
+ lisitsyn	lambday: hey
+@lambday	do you guys know why index_t is signed int?
+ shogun-buildbot	build #2685 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2685  blamelist: lambday <heavensdevil6909@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>
+ lisitsyn	soeren had some negative opinion on signed
+ lisitsyn	unisgned
+ lisitsyn	sorry
+ lisitsyn	that's a holywar actually hah
+ lisitsyn	pretty common
+@lambday	umm.. is there any case when we expect index_t to be -ve? :/
+ lisitsyn	not really
+ lisitsyn	but unsigned can overflow pretty funny
+ lisitsyn	I mean when it overflows you get huge positive
+ lisitsyn	and you don't really detect that
+ lisitsyn	that was one point I think
+@lambday	lisitsyn: actually I added size() method to all matrix and vector types... and for matrices I am returning uint64_t ...
+@lambday	nothing too serious but I am getting a bunch of warnings because of that..
+ lisitsyn	yeah
+ lisitsyn	don't know :)
+ lisitsyn	keep it maybe
+@lambday	lisitsyn: okay..
+@lambday	lisitsyn: btw if you have a few mins could you please have just a quick look at https://github.com/shogun-toolbox/shogun/pull/2830/files
+ lisitsyn	yeah sure
+@lambday	element-wise operations for linalg
+ lisitsyn	lambday: what about these strings?
+@lambday	lisitsyn: thanks.. could really use some useful inputs on the design
+@lambday	lisitsyn: those are for OpenCL kernel
+ lisitsyn	lambday: I have some idea
+@lambday	there are a bunch of predefined element-wise operations... and users can provide custom as well
+@lambday	lisitsyn: yeah tell me
+ lisitsyn	can we provide supported operations in some namespace?
+ lisitsyn	so they are really objects
+@lambday	lisitsyn: shogun::linalg::operations
+@lambday	yep - they are
+ lisitsyn	no
+ lisitsyn	I mean in this strings
+ lisitsyn	lambday: are these "fdsfd"+dsadsa just for test?
+@lambday	lisitsyn: yes...
+@lambday	check the Sin.h file
+ lisitsyn	operation.append(data_type+" outer_factor=-2*"+s_pi+"*sqrt(element)*pow("+s_weights+", 2);\n");
+ lisitsyn	lambday: ^ will this happen only in test?
+@lambday	that string is just an illustration to show that if we want, we can specify complex, custom element-wise operations as well
+ lisitsyn	yes
+@lambday	lisitsyn: for predefined operations, users don't need to do anything
+ lisitsyn	so can we avoid this string thing a bit?
+ lisitsyn	ok let me comment
+ lisitsyn	in github
+@lambday	lisitsyn: yeah...
+ shogun-buildbot	build #2643 of deb3 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2643  blamelist: lambday <heavensdevil6909@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>
+ shogun-buildbot	build #1020 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/1020  blamelist: lambday <heavensdevil6909@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>
+ shogun-buildbot	build #5 of FC22 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC22%20-%20libshogun/builds/5  blamelist: lambday <heavensdevil6909@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>
+-!- dataVinci [~Akash@123.201.110.122] has joined #shogun
+ lisitsyn	lambday: https://github.com/shogun-toolbox/shogun/pull/2830/files#r29546970
+ lisitsyn	just some ideas
+ shogun-buildbot	build #2460 of deb2 - static_interfaces is complete: Failure [failed octave static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb2%20-%20static_interfaces/builds/2460  blamelist: lambday <heavensdevil6909@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>
+@lambday	lisitsyn: ah this would be much better
+ lisitsyn	you can implement 2nd thing in a hour I think
+ lisitsyn	first thing is tougher I think
+@lambday	lisitsyn: thinking about that only
+ lisitsyn	lambday: was there some trouble with elementwise<sin,..>
+ lisitsyn	instead of elementwise_sin?
+@lambday	lisitsyn: well, that's just more of a wrapper.. sin can be done using elementwise<operand_type, sin> as well
+ lisitsyn	ahh
+ lisitsyn	cool
+ lisitsyn	missed that
+ lisitsyn	lambday: I don't have other comments for now then :)
+@lambday	lisitsyn: the first thing you suggested is so cool!!..
+@lambday	lisitsyn: will think a bit
+@lambday	no wonder it left Heiko puzzled... all those strings are really messy
+ lisitsyn	lambday: about the formatted thing
+ lisitsyn	you know how to implement that?
+ lisitsyn	if not I can outline a bit
+@lambday	lisitsyn: haven't thought about that yet... I am stuck with the first...
+@lambday	but you suggest...
+ lisitsyn	I think 2nd is easier
+ lisitsyn	:)
+@lambday	lisitsyn: I think I can make it work
+ lisitsyn	yeah
+@lambday	lisitsyn: but the first one looks more elegant..
+ lisitsyn	I mean you probably spend more time debugging it
+ lisitsyn	while it is not that important
+@lambday	lisitsyn: with the first one?
+ lisitsyn	yeah I expect it to be a bit buggier
+ lisitsyn	as it is more complex
+@lambday	all the ops should ve overloaded
+ lisitsyn	yeah
+@lambday	lisitsyn: let me think a bit.. I'll get back
+@lambday	thanks for my food for thought for today :D
+ lisitsyn	hah you're welcome
+ shogun-buildbot	build #630 of deb4 - python3 is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/630  blamelist: lambday <heavensdevil6909@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>
+-!- lambday [6a33f00b@gateway/web/freenode/ip.106.51.240.11] has quit [Quit: Page closed]
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has quit [Max SendQ exceeded]
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has joined #shogun
+-!- dataVinci [~Akash@123.201.110.122] has quit [Ping timeout: 272 seconds]
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has quit [Max SendQ exceeded]
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has quit [Read error: Permission denied]
+-!- besser82 [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has joined #shogun
+-!- besser82 [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- nszceta [~nszceta@5ED062E5.cm-7-1b.dynamic.ziggo.nl] has quit [Max SendQ exceeded]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- besser82 [~besser82@fedora/besser82] has quit [Read error: Permission denied]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 265 seconds]
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+--- Log closed Sun May 03 00:00:09 2015

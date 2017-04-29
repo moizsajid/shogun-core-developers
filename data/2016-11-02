@@ -1,0 +1,634 @@
+--- Log opened Wed Nov 02 00:00:58 2016
+-!- travis-ci [~travis-ci@ec2-54-205-74-4.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/172443639
+-!- travis-ci [~travis-ci@ec2-54-205-74-4.compute-1.amazonaws.com] has left #shogun []
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+-!- adi__ [31cf3b3b@gateway/web/freenode/ip.49.207.59.59] has joined #shogun
+-!- adi__ [31cf3b3b@gateway/web/freenode/ip.49.207.59.59] has quit [Ping timeout: 260 seconds]
+-!- praisethemoon [~praisethe@41.226.248.123] has joined #shogun
+-!- HeikoS [~heiko@eduroam-int-pat-8-38.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	wiking: jojo
+@wiking	HeikoS, hi
+@HeikoS	wiking: jo
+@HeikoS	any updates?
+@wiking	hi
+@wiking	on?
+@HeikoS	release
+@wiking	yeah msged u
+@wiking	did some stuff
+@HeikoS	the windows yeah
+@HeikoS	so infinite loop is not coming from openmp
+@HeikoS	baaad ;)
+@HeikoS	I will file another 5.1 issue I guess
+@HeikoS	log is where again?
+@wiking	https://ci.appveyor.com/project/vigsterkr/shogun/history
+@HeikoS	thanks
+@HeikoS	wiking: so anything I can help with the release?
+@wiking	dunno man
+@HeikoS	otherwise I will polish the wiki and website more
+@wiking	how about the
+@wiking	notebooks?
+@HeikoS	ah yeah
+@HeikoS	I have fixed more
+@HeikoS	let me push
+@wiking	ok push and then i re-run the generator
+@HeikoS	wiking: ah I already pushed that yesterday
+@wiking	ok lemme regen
+@wiking	lets seee
+@HeikoS	Intro
+@HeikoS	is fixed
+@HeikoS	the other ones: I dont get error message locally
+@HeikoS	so maybe its worth that I do this thing that the ntoebooks are executed as python code
+@wiking	pip install -U matplotlib
+@wiking	and you will get them
+@wiking	it's all about scatter()
+@HeikoS	mmh
+@HeikoS	weird because I had a scatter problem in the Intro one
+@HeikoS	but the others went fine
+@HeikoS	can i force the nighly default?
+@wiking	matplotlib (1.4.2)
+@wiking	this is on the nightly_default
+@wiking	you can force anything
+@wiking	but i've already forced it
+@HeikoS	ok :)
+@wiking	http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/6
+@HeikoS	wiking: saw that sanuj got his blog post on the google blog?
+@wiking	yep
+@wiking	but is it already posted
+@wiking	?
+@wiking	or is it on the works?
+@HeikoS	they posted 3/10
+@HeikoS	his is 8 or so
+@HeikoS	pretty cool
+@HeikoS	I asked the others to write one as well would be cool
+@wiking	yep saw it
+@wiking	btw shouldn't we write to Gunnar?
+@HeikoS	yes
+@HeikoS	but lets release first
+@HeikoS	all the exposure to the old website hurts me :)
+@HeikoS	I mean in reaching out to people to talk about it
+@HeikoS	and then they come visit this old shiat
+@wiking	:>
+@wiking	lets see
+@HeikoS	I already sent him the notes we made
+@HeikoS	but we shoul dhave a hangout I think
+@HeikoS	shall I ask about that
+@HeikoS	wiking: email sent :)
+@wiking	sure
+@wiking	:+1:
+@wiking	HeikoS, more problems
+@wiking	:)))
+@wiking	http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/6/steps/notebooks/logs/stdio
+@wiking	[NbConvertApp] Converting notebook /home/buildslave/nightly_default/build/doc/ipython-notebooks/multiclass/multiclass_reduction.ipynb to html
+@wiking	[NbConvertApp] Converting notebook /home/buildslave/nightly_default/build/doc/ipython-notebooks/multiclass/KNN.ipynb to html
+@wiking	[NbConvertApp] Converting notebook /home/buildslave/nightly_default/build/doc/ipython-notebooks/multiclass/Tree/DecisionTrees.ipynb to html
+@wiking	[NbConvertApp] Converting notebook /home/buildslave/nightly_default/build/doc/ipython-notebooks/multiclass/Tree/TreeEnsemble.ipynb to html
+@wiking	[NbConvertApp] Converting notebook /home/buildslave/nightly_default/build/doc/ipython-notebooks/multiclass/naive_bayes.ipynb to html
+@HeikoS	ok checking
+@wiking	mmm
+@wiking	wait
+@wiking	there is something very wrong
+@wiking	...
+@HeikoS	I was searching for "error |"
+@wiking	suddenly all of them are failing
+@wiking	RuntimeError: Kernel died before replying to kernel_info
+@wiking	:(
+@HeikoS	yeah
+@HeikoS	I mean we have to convert them to python and execute that first
+@wiking	i might need to upgrade jupyter
+@wiking	nono
+@wiking	this is something else
+@HeikoS	ok?
+@wiking	lemme look at it
+@wiking	in the meanwhile
+@wiking	you should find out how to convert to pythno
+@HeikoS	ok checking
+@HeikoS	wiking: this guy right?
+@wiking	which?
+@HeikoS	https://github.com/shogun-toolbox/infra/blob/master/buildbot/scripts/generate-notebooks.sh
+@wiking	what's with it?
+@HeikoS	I modify that
+@wiking	ah you can yeah
+@HeikoS	to execute python code first
+@HeikoS	or rather have another script
+@HeikoS	might be better
+@HeikoS	one execute_notebooks.sh
+@HeikoS	one generate_notebooks.sh
+@HeikoS	or?
+@HeikoS	all in one?
+@wiking	all in one
+@HeikoS	kk
+@wiking	AttributeError: 'AxesSubplot' object has no attribute 'set_prop_cycle'
+@wiking	(in the regression notebook)
+@wiking	should i just fucking downgrade
+@wiking	the matplotlib?
+@wiking	HeikoS, i think all the notebooks are failing on this
+@wiking	too old matplotlib commands
+@wiking	and i actually wonder what is your ubuntu version
+@wiking	that you dont get these errors
+@wiking	...
+@HeikoS	yeah downgrade for now maybe?
+@wiking	as this is running on a default debian jessie
+@wiking	pacakge
+@HeikoS	I have two upgrades
+@HeikoS	so lots of shit on my system
+@HeikoS	twice lts upgrade
+@HeikoS	not clean
+@wiking	yeah but what is your matplotlib version?
+@wiking	yeah but still
+@wiking	what the fuck is your matplotlib version?
+@HeikoS	1.5.3
+@wiking	1.3.1-1ubuntu5
+@wiking	hahah lol
+@wiking	then maybe i should UPGRADE
+@wiking	not downgrade
+@HeikoS	just upgraded
+@HeikoS	haha
+@wiking	since we have 1.4.2
+@wiking	ah ok
+@HeikoS	let me run something
+@HeikoS	which noteobok fails
+@wiking	well then try regression
+@HeikoS	since I just changed things
+@HeikoS	k 1sec
+@wiking	but yeah
+@wiking	more than 50% are failing
+@wiking	so you have a 50% chance to open a shitty one anyways
+@HeikoS	worked
+@HeikoS	regression
+@HeikoS	all cells work
+@wiking	ok so should i upgrade then?
+@wiking	to 1.5.3
+@wiking	?
+@HeikoS	yeah maybe try
+@HeikoS	is that reversible easily?
+@wiking	well
+@wiking	it's fucking computers
+@wiking	everything is reversible
+@wiking	:)
+@HeikoS	then go for it
+@HeikoS	I mean it is better to have this updated anyways
+@wiking	ok done
+@wiking	do you have the python command/
+@wiking	i guess --to python
+@HeikoS	yeah
+@HeikoS	but its tricly
+@HeikoS	just figuring that out
+@HeikoS	because we use %inline stuff
+@wiking	those inlines
+@wiking	are discouraged to use no?
+@HeikoS	nono
+@HeikoS	it is just executing the python file needs to be done with ipython as well
+@HeikoS	so what works is
+@HeikoS	find $1 -type f -name '*.ipynb' | xargs -P $2 -I{} jupyter nbconvert --to script '{}'
+@wiking	ok rerunning
+@wiking	shogun-buildbot_: force build --branch=develop 'nightly_default'
+ shogun-buildbot_	build #7 forced
+ shogun-buildbot_	I'll give a shout when the build finishes
+@HeikoS	wiking: and then need to do something about the graphics, so they are not displayed/blocking
+@HeikoS	wiking: https://pypi.python.org/pypi/runipy
+@wiking	mmm
+@wiking	but yeah
+@wiking	this is not good
+@wiking	coz we have jupyer
+@HeikoS	yeah
+@HeikoS	though does what we want
+@HeikoS	i.e. runs the cells nicely, showing error output
+@HeikoS	wiking: it is maintained
+@wiking	shocking
+@wiking	:)
+@HeikoS	hahahha
+@HeikoS	ah man
+@HeikoS	https://github.com/paulgb/runipy/issues/122
+@HeikoS	read this
+@HeikoS	lets not use it
+-!- CaBa [~Diu7saig@unaffiliated/caba] has quit [Remote host closed the connection]
+@wiking	HeikoS, try gmm locally
+@wiking	as it seems to be failing
+@HeikoS	yep
+@HeikoS	Ill fix
+@HeikoS	and push
+@HeikoS	wiking: pushed
+@wiking	k
+@wiking	lets see what's with the others
+@wiking	i wonder why no notification now about pushing to repo
+@wiking	...
+-!- mizari [~mizari@95-174-213-100.nts.su] has quit [Ping timeout: 260 seconds]
+@HeikoS	wiking: sooo
+@HeikoS	we can add this guy
+@HeikoS	--allow-errors
+@HeikoS	which is good
+@wiking	what is that
+@wiking	?
+@HeikoS	allow cells to fail
+@HeikoS	but actually
+@HeikoS	not good
+@HeikoS	since we wanna know
+@wiking	:)
+@HeikoS	ah man
+@HeikoS	these tools
+@HeikoS	why is there no option to print the failing cell output
+@wiking	dunno
+@wiking	you know
+@wiking	opensource
+@wiking	if you dont like it send a patch
+@wiking	:)
+@HeikoS	haha
+@HeikoS	we could actually do this:
+@HeikoS	we put the flag
+@HeikoS	and then upload to some place
+@HeikoS	and then read error there
+@HeikoS	haha
+@wiking	yeah no thanku
+@wiking	[10142929.139176] python[25657]: segfault at 0 ip 00007f962d7e0844 sp 00007fff189936d0 error 4 in libshogun.so.17.2[7f962d1bc000+1988000]
+@wiking	theser are the beautiful ones
+@wiking	:)
+@wiking	i have a feeling that KNN is segfaulting
+@wiking	can u actually test that locally?
+@wiking	and pca_notebook.ipynb
+@wiking	is definitely failing
+@HeikoS	trying both
+@wiking	fgm just failed as well
+@wiking	hahahaha
+@wiking	and tapkee now
+@wiking	which worked before
+ lisitsyn	tap kee
+@wiking	prior the matplotlib update
+@HeikoS	pca fixed
+ lisitsyn	did I fucked up something?
+@wiking	lisitsyn, as alwasy :D
+@wiking	no
+@wiking	things are messy
+@HeikoS	knn segfaults
+@wiking	HeikoS, yep i thought so
+@HeikoS	uh
+@HeikoS	wiking: ill have a look
+@wiking	k
+@HeikoS	but first want to get error message
+@wiking	check tapkee
+@wiking	that should be an easy fix
+@wiking	since it's just some matplotlib shit
+@wiking	as it worked before the upgrade
+@HeikoS	wiking: works for me
+ lisitsyn	how come tapkee + matplotlib?
+@wiking	HeikoS, fuck i dont understand
+@wiking	lisitsyn, old matplotlib
+@wiking	:)
+@HeikoS	wiking: so, it seems that nbconvert should print the error
+@HeikoS	https://github.com/jupyter/nbconvert/pull/120
+@HeikoS	I mean if a  cell fails
+@HeikoS	the way you call it
+@wiking	which version?
+@HeikoS	thjs PR added that
+@HeikoS	sept 2015
+@HeikoS	checking
+@HeikoS	4.1 milestone
+@wiking	jupyter (1.0.0)
+@wiking	jupyter-client (4.2.2)
+@wiking	jupyter-console (4.1.1)
+@wiking	jupyter-core (4.1.0)
+@HeikoS	wiking: so if I put an errorneous python statement in notebooks and run it using the jupyter-nbconvert command, I locally get a print in stderr or the thing that failed
+@HeikoS	CellExecutionError: An error occurred while executing the following cell:
+@HeikoS	------------------
+@HeikoS	assert False
+@HeikoS	------------------
+@HeikoS	AssertionError:
+@wiking	ok tell me the numbers
+@wiking	(version numbers) you have locally
+@wiking	i can pip upgrade then
+@HeikoS	4.2
+@wiking	fuck this fucking shi
+@wiking	but which
+@HeikoS	jupyter-nbconvert
+@wiking	of what
+@wiking	fuck
+@wiking	i mean
+@wiking	pip list|grep jupyter
+@wiking	plz
+@HeikoS	jupyter (1.0.0)
+@HeikoS	jupyter-client (4.4.0)
+@HeikoS	jupyter-console (5.0.0)
+@HeikoS	jupyter-core (4.2.0)
+@wiking	ok
+@wiking	upgrading
+@HeikoS	let me know when there is a new log
+@HeikoS	from log, I can usually fix things without running locally
+@wiking	tomorrow
+@HeikoS	cant force it to be there sooner?
+ shogun-buildbot_	Hey! build nightly_default #7 is complete: Exception [exception interrupted]
+ shogun-buildbot_	Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/7
+@wiking	no
+@wiking	:D
+@wiking	shogun-buildbot_: force build --branch=develop 'nightly_default'
+ shogun-buildbot_	The build has been queued, I'll give a shout when it starts
+@wiking	ok this will have the new output
+@wiking	as just upgraded the shit
+@wiking	but will take some time
+@wiking	coz other bots got triggered in the meanwhile
+ shogun-buildbot_	build #8 forced
+ shogun-buildbot_	I'll give a shout when the build finishes
+@wiking	HeikoS, ^
+-!- HeikoS [~heiko@eduroam-int-pat-8-38.ucl.ac.uk] has quit [Ping timeout: 256 seconds]
+-!- HeikoS [~heiko@eduroam-int-pat-8-38.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	HeikoS, http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/8/steps/notebooks/logs/stdio
+-!- HeikoS [~heiko@eduroam-int-pat-8-38.ucl.ac.uk] has quit [Ping timeout: 250 seconds]
+-!- HeikoS [~heiko@eduroam-int-pat-8-38.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	cool!
+@HeikoS	wiking: so
+@wiking	so there's the error
+@wiking	from fgb
+@wiking	*fgm
+@wiking	but yeah we are almost there
+-!- HeikoS [~heiko@eduroam-int-pat-8-38.ucl.ac.uk] has quit [Ping timeout: 260 seconds]
+ shogun-buildbot_	Hey! build nightly_default #8 is complete: Failure [failed notebooks]
+ shogun-buildbot_	Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/8
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	HeikoS, gimme admin rights to the #shogun channel via ChanServ thnx
+@HeikoS	wiking: you dont have?
+@wiking	noup
+@HeikoS	wiking: can you send me the command for that in pm
+@HeikoS	wiking: fixed gp notebook
+@HeikoS	pushing in a sec
+@HeikoS	and fgm is fixed as well
+@HeikoS	opencv I will do in a bit
+-!- mode/#shogun [+o sukey] by ChanServ
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 250 seconds]
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@wiking	shogun-buildbot_: force build --branch=develop 'nightly_default'
+@wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+-!- HeikoS [~heiko@eduroam-int-pat-8-38.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+@wiking	hahaha
+@wiking	i did that already
+@wiking	we are waiting for other tasks now
+ shogun-buildbot	build #9 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@HeikoS	wiking: cancel them all
+@wiking	?
+@HeikoS	and restart with my latest push
+@HeikoS	had a mistake
+@HeikoS	notebook will fail
+@HeikoS	gp
+@HeikoS	the latest one should only have the opencv failing
+ shogun-buildbot	Hey! build nightly_default #9 is complete: Exception [exception interrupted]
+ shogun-buildbot	Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/9
+@HeikoS	thx
+@wiking	shogun-buildbot_: force build --branch=develop 'nightly_default'
+@wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+@HeikoS	so thats it
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+@HeikoS	I can look into the opencv but I guess this has low priority?
+@HeikoS	wiking: how is the rest?
+@wiking	nono
+@wiking	you can leave the opencv
+@wiking	knn
+@HeikoS	ah yes
+@wiking	that has a segfault
+@wiking	:)
+@HeikoS	sorry
+@HeikoS	checking
+@HeikoS	haha
+@HeikoS	man so bad :)
+@wiking	:>
+@wiking	it's worth to do it
+@wiking	this way things gets fixed :d
+@HeikoS	yeah I agree, checkign it atm
+@HeikoS	wiking: hows the pipeline coming?
+@wiking	dont get me started
+@HeikoS	man knn code is a f***
+@HeikoS	Saurabh7: ^
+@HeikoS	want to clean this up? :)
+-!- praisethemoon [~praisethe@41.226.248.123] has quit [Ping timeout: 268 seconds]
+-!- HeikoS [~heiko@eduroam-int-pat-8-38.ucl.ac.uk] has quit [Ping timeout: 256 seconds]
+ shogun-buildbot	build #10 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	Hey! build nightly_default #10 is complete: Failure [failed notebooks]
+ shogun-buildbot	Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/10
+@wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+ shogun-buildbot	build #11 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	Hey! build nightly_default #11 is complete: Failure [failed notebooks]
+ shogun-buildbot	Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/11
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	wiking: jo!
+@HeikoS	lisitsyn: jo!
+@HeikoS	lisitsyn: I remembered you said covertree KNN was buggy?
+@HeikoS	is that true?
+@HeikoS	wiking: think I fixed the KNN issue
+@HeikoS	I used gdb in fact to debug shogun from ipython notebook :)
+@wiking	\o/
+@wiking	yeey
+@wiking	pushed?
+@wiking	now it's only
+@wiking	scene classification
+@wiking	and knn is failing
+@wiking	if we could fix knn that'd be great
+@HeikoS	knn is fixed
+@HeikoS	not yet pushed
+@HeikoS	but i have local fix
+@HeikoS	just running unit and integration tests to be sure
+@HeikoS	wiking: so 5 mins
+@wiking	kk
+@wiking	i'm trying to fix that stupid job
+@wiking	that it doesn't stop
+@wiking	if one or more notebooks are failing
+@HeikoS	wiking: it is weird with the notebook
+@HeikoS	that must have been failing for a while
+@wiking	yeah
+@HeikoS	as this definitely was a bug in KNN
+@HeikoS	but not in a recent addition
+@HeikoS	general bug
+@wiking	:)
+@wiking	lol
+@wiking	interesting
+@HeikoS	might have to do with the refactoring of Euclidean distance
+@HeikoS	Actually, I should check that I guess
+@HeikoS	but I know why it breaks
+@HeikoS	and fixed it, so all good
+@HeikoS	man that class
+@HeikoS	Knn.cpp
+@HeikoS	really needs to be sorted out
+@HeikoS	it is SO bad
+@HeikoS	and old
+@wiking	:)
+@HeikoS	wiking: oh and btw
+@HeikoS	this sg_progress is quite nice
+@wiking	what?
+@wiking	ahhahah
+@wiking	but man that's printf
+@HeikoS	as when I press ctrl-c in python
+@HeikoS	signal sorry
+@HeikoS	CSignal
+@HeikoS	it asks whether it should break from the loop
+@HeikoS	that is very nice
+@HeikoS	as program doesnt die
+@HeikoS	just exists the loop
+@wiking	yep
+@wiking	we should generally have that implemented everywhere
+@wiking	i.e. stop convergence
+@HeikoS	yep
+@wiking	but still have the model
+@HeikoS	really good
+@HeikoS	the progress would be cool to be iuntegrated into ipython
+@wiking	ah but
+@wiking	for progress
+@wiking	i would use something like reactivecpp
+@HeikoS	wiking: https://github.com/tqdm/tqdm
+@wiking	https://github.com/Reactive-Extensions/RxCpp
+@HeikoS	connect with this
+@wiking	mmm
+@wiking	lemme see wtf is this
+@HeikoS	as progress bars are mostly useful in interactive sessions
+@wiking	yep
+@wiking	but would be cool
+@wiking	that you can forward this
+@wiking	to anywhere
+@wiking	like not only your STDOUT
+@wiking	but like tcp or whatever
+@wiking	right?
+@wiking	btw with Greg i had the idea
+@wiking	to even be able to publish
+@wiking	the state of the model
+@wiking	i.e. to be able to monitor
+@wiking	w
+@wiking	how does it change iteration by iteration
+@HeikoS	yep
+@HeikoS	great
+@HeikoS	I guess first step is to forward
+@HeikoS	that seems easy
+@HeikoS	maybe comment in the issue I just created :)
+@wiking	HeikoS, http://www.thinkingparallel.com/2007/06/29/breaking-out-of-loops-in-openmp/
+@HeikoS	wiking: shall we still use openmp?
+@HeikoS	since were moving to c++11 in 6.0?
+@wiking	yes yes
+@wiking	you are not going to implement
+@wiking	a parallel for
+@wiking	with std::thread
+@wiking	:)
+@HeikoS	kk
+@HeikoS	ok ill push now
+@wiking	cool
+@HeikoS	wiking: force da build
+@wiking	just a sec
+@wiking	wanna try to make it sure
+@wiking	somehow
+@wiking	that it still uploads the fucking notebooks
+@wiking	even if there's only 1 fail
+@HeikoS	kk
+@wiking	dont really understand why haltOnFailure=False
+@wiking	doesn't fucking work
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+@wiking	lets see
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@wiking	lisitsyn HeikoS
+@wiking	so one thing :)
+@wiking	we have this nice
+@wiking	modshogun/doxygen_xml/index.xml
+@wiking	that generates modshogun_doxygen.i
+@wiking	sonney2k_, around?
+@wiking	 :)
+@HeikoS	dont know anything about that
+@wiking	hehehe
+@wiking	i wonder why docstrings are generated for everything but ruby
+@wiking	:)
+@HeikoS	ah I see :)
+@wiking	i dont even know that those docstrings could be used from java for example
+@wiking	if not t
+@wiking	then we are generating them
+@wiking	for no use
+@HeikoS	I dont know
+@HeikoS	I guess
+@HeikoS	this is another issue for 5.1 :)
+@HeikoS	Ill create it
+@wiking	HeikoS, btw
+@wiking	what's the naming for python generated tests?
+@wiking	as i believe we have currently a problem
+@wiking	in the modular interface tests
+@wiking	:))))
+@HeikoS	haha
+@HeikoS	generated-python-
+@wiking	okok
+@HeikoS	I guess that needs some clean up
+@HeikoS	but maybe later :)
+@wiking	r generated are currently not being run
+@wiking	right?
+@HeikoS	btw for the notebook github hook
+@HeikoS	that needs to be a new build on buildbot right?
+@wiking	just like lua
+@HeikoS	or can we us nightly default=?
+@wiking	right?
+@wiking	no
+@HeikoS	yeah
+@wiking	man wtf :)
+@wiking	i told you
+@HeikoS	lua and r are not ran
+@HeikoS	I forgot
+@wiking	check the PR hook build
+@wiking	http://buildbot.shogun-toolbox.org/builders/cookbook%20-%20PR
+@wiking	rename this
+@HeikoS	yeah
+@HeikoS	so in there
+@wiking	yeah you need to extend that job
+@wiking	is it generated-cpp
+@wiking	or generated_cpp
+@wiking	?
+@wiking	and you should of course move it to maybe builder_pr or something like that
+@wiking	and just add a python modular build + the notebook steps
+@HeikoS	wiking: yeah I am trying to get through this stuff, it is a lot
+@wiking	thankyou
+@wiking	:)
+@HeikoS	generated_cpp-generated_cpp-generated_cpp-
+@HeikoS	ah
+@HeikoS	mouse
+@HeikoS	generated_cpp-
+@wiking	at least somebody knows how much energy was put into this shit
+@HeikoS	wiking: yeah :)
+@HeikoS	Ok i gotta go home now
+@HeikoS	Friday more
+@HeikoS	have to give a seminar tomorrow and havent prepared it yet
+@HeikoS	gnaaa
+@HeikoS	wiking: let me know when release is ready :)
+@HeikoS	ill check my mail
+@wiking	kk
+@wiking	i will release as soon as i can fix these little blockers
+@wiking	like why notebooks blocking the nightly upload
+@wiking	haha ok fuck
+@wiking	new thing
+@HeikoS	mmh something is weird
+@HeikoS	with the log
+@HeikoS	-P
+@HeikoS	option
+@HeikoS	ok I gotta go
+@HeikoS	good luck ;)
+@wiking	DEPECHEMODE
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@wiking	shogun-buildbot: force build --branch=develop 'nightly_default'
+ shogun-buildbot	build #13 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@wiking	shogun-buildbot: force build --branch=develop 'bsd1 - libshogun'
+ shogun-buildbot	build #39 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	Hey! build bsd1 - libshogun #39 is complete: Success [build successful]
+ shogun-buildbot	Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/39
+-!- OXPHOS [92bd305b@gateway/web/freenode/ip.146.189.48.91] has quit [Quit: Page closed]
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 252 seconds]
+ shogun-buildbot	Hey! build nightly_default #13 is complete: Failure [failed notebooks]
+ shogun-buildbot	Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/13
+--- Log closed Thu Nov 03 00:00:59 2016

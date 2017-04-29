@@ -1,788 +1,788 @@
 --- Log opened Mon Feb 20 00:00:32 2017
-@sukey	Pull Request #3399 "LinalgRefactor - Add sum_symmetric and Rm old sum methods" - https://github.com/shogun-toolbox/shogun/pull/3399	00:06
-@wiking	CaBa, yes if you want to have proper clone-able object you need to have the params registered	01:31
--!- goksinen_ [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has joined #shogun	01:48
-@sukey	Issue #3644 "New Linalg library cannot compile with Eigen 3.3.x" opened by OXPHOS - https://github.com/shogun-toolbox/shogun/issues/3644	02:46
--!- IRCFrEAK [~gk.1wm.su@2a03:4a80:3:43d:43d:23b:2e38:2839] has joined #shogun	03:30
--!- IRCFrEAK [~gk.1wm.su@2a03:4a80:3:43d:43d:23b:2e38:2839] has left #shogun []	03:30
-@sukey	Pull Request #3641 "add tests for KNN and fix an error in KDTree solver"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3641	04:42
--!- goksinen_ [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has quit [Remote host closed the connection]	05:00
-@sukey	Pull Request #3641 "add tests for KNN and fix an error in KDTree solver"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3641	05:34
-@sukey	Pull Request #3635 "LinalgRefactor - Memory Transfer Mutex"  synchronized by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3635	06:21
--!- madgoat [~gk.1wm.su@2a03:4a80:5:41e:41e:efdd:c10d:1c12] has joined #shogun	06:36
--!- madgoat [~gk.1wm.su@2a03:4a80:5:41e:41e:efdd:c10d:1c12] has left #shogun []	06:36
-shogun-buildbot	build #53 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/53  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>, Tiramisu 1993 <sabergeass@gmail.com>	08:38
-shogun-buildbot	build #31 of nightly_all is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_all/builds/31  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>, Tiramisu 1993 <sabergeass@gmail.com>	09:02
-@sukey	New Commit "Update NEWS" to shogun-toolbox/shogun by lambday: https://github.com/shogun-toolbox/shogun/commit/142ba6b916e623f75c393799598b1d91332687b1	09:12
-@sukey	Issue #3625 "Installation failed"- https://github.com/shogun-toolbox/shogun/issues/3625	09:14
--!- travis-ci [~travis-ci@ec2-54-91-162-115.compute-1.amazonaws.com] has joined #shogun	10:06
-travis-ci	it's Soumyajit De's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/203355835	10:06
--!- travis-ci [~travis-ci@ec2-54-91-162-115.compute-1.amazonaws.com] has left #shogun []	10:06
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun	10:30
--!- mode/#shogun [+o HeikoS] by ChanServ	10:31
-CaBa	HeikoS: heya	10:44
-CaBa	wiking: thanks for the info	10:44
-CaBa	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/base/class_list.cpp.templ <- what dark magic is this?	10:44
-@wiking	CaBa, generates a factory clas	10:45
-@wiking	class	10:45
-@wiking	for the swig interface	10:45
-CaBa	wiking: my class still fails to clone, apparently in there	10:45
-CaBa	wiking: do i have to "register" it somewhere?	10:45
-@wiking	then i suppose the way you defined the class	10:45
-@wiking	is having some issue	10:45
-CaBa	wiking: well my class get_name() value is not in the class_list i suppose	10:46
-@HeikoS	wiking: jojo	10:46
-@HeikoS	CaBa: might well be some cache thing	10:46
-@HeikoS	there is build bugs when you add classes after the class_list has been generated	10:47
-CaBa	HeikoS: my kernel is not in shogun. i have it in my application, which links against shogun	10:47
-@HeikoS	then you shouldnt need this	10:48
-CaBa	HeikoS: well my kernel won't ::clone() otherwise	10:48
-@wiking	HeikoS, so not true	10:49
-@wiking	HeikoS, please update yourself with some of the latest development of	10:49
-@wiking	shogun	10:49
-@wiking	:)	10:49
-CaBa	lol	10:49
-@wiking	like CLock	10:49
-@wiking	and this class_list.cpp	10:49
-@HeikoS	wiking: ?	10:50
-@wiking	i worked on this	10:51
-@wiking	quite extensively	10:51
-@wiking	2 weeknds ago	10:51
-@HeikoS	worked on what?	10:51
-@wiking	both clock and class_list.cpp	10:51
-@HeikoS	ah i see	10:51
-@HeikoS	cool then	10:51
-CaBa	wiking: so what do i need to do for my outside-of-shogun kernel then? write my own clone()?	10:51
-@HeikoS	what about this? https://github.com/shogun-toolbox/shogun/issues/2934	10:52
-@wiking	mmm but wait	10:52
-@wiking	CaBa, you wanna write	10:52
-@wiking	a class that is not part of the library	10:52
-@wiking	say a new kernel	10:52
-@wiking	and then have clone? :)	10:52
-@wiking	mmmmmm	10:52
-CaBa	yeah i actually have quite a few CKernel derivatives in my application	10:53
-@wiking	it might work on some level	10:53
-@wiking	but for sure not for swig	10:53
-@wiking	:(	10:53
-@wiking	which i know is a shit	10:53
-CaBa	i use c++ only	10:53
-@wiking	but this is what is it	10:53
-@wiking	CaBa, and what's your error?	10:54
-@wiking	when you call kernel->clone()	10:54
-@wiking	?	10:54
-CaBa	wiking: shogun::new_sgserializable returns NULL	10:54
-@wiking	doh	10:54
-@wiking	:D	10:54
-CaBa	wiking: since it doesn't find my class name in it's list	10:54
-@wiking	yeah	10:54
-@wiking	so here we go	10:54
-@wiking	another shit	10:54
-@wiking	:D	10:54
-@wiking	so actually then	10:55
-@wiking	it doesn't work at all	10:55
-@wiking	if it's not part of the library	10:55
-@wiking	which makes everything fucking crazy	10:55
-@wiking	:)	10:55
-@wiking	because to be able to extend your library	10:55
-@wiking	i mean the library	10:55
-@wiking	you actually have to make your code	10:55
-@wiking	part of the library	10:55
-@wiking	:(	10:55
-@wiking	HeikoS, you wrote clone no?	10:55
-@HeikoS	yep	10:56
-@HeikoS	but this sg_serializable thing not	10:56
-@wiking	HeikoS, caef78db (Heiko Strathmann 2013-06-11 14:49:26 +0100 747) CSGObject* CSGObject::clone()	10:56
-@HeikoS	the clone is based on that	10:56
-@wiking	ok but the way you do it	10:56
-@wiking	is to call the factory object	10:56
-@wiking	?	10:56
-@wiking	i.e. class_list.h's sg_ser?	10:56
-@HeikoS	I would have to check, but I think yes	10:56
-@wiking	ye yep	10:57
-@wiking	ok so this is major shit	10:57
-@wiking	:D	10:57
-@HeikoS	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/base/SGObject.cpp#L752	10:57
-@wiking	i wonder how tags will help us here	10:57
-CaBa	well... overriding ::clone() could be a workaround, right? the requirements aren't that complex, i just have to return a pointer to a copy... i can even call ::clone() for all upstream shogun member variables...	10:57
-@wiking	yeah	10:57
-@wiking	lemme see if you can actually override	10:57
-CaBa	yes its virtual	10:58
-@wiking	virtual CSGObject* clone();	10:58
-@wiking	luckly	10:58
-@wiking	;)	10:58
-@wiking	ok so then you can implement your own clone method	10:58
-@wiking	but	10:58
-@wiking	still this we need to fix urgently	10:58
-@wiking	HeikoS, ^	10:58
-CaBa	i already override that before :P since i have non-SGobject members :P	10:58
-CaBa	but then in the override i called SGObject::clone() for the rest	10:58
-@wiking	i see	10:58
-@wiking	well then you cannor rely obviously	10:58
-@HeikoS	wiking: how would you create the new instance?	10:59
-@wiking	HeikoS, yeah i'm just wondering if we could create at least a helper method	10:59
-@wiking	that CaBa would need	10:59
-@HeikoS	if we just used cereal, then all good	10:59
-@HeikoS	serialize to memory	10:59
-@HeikoS	de-serialize	10:59
-@wiking	memory?	10:59
-@wiking	uffofff	10:59
-@wiking	that's very brute force	10:59
-@wiking	what about just cutting out the part	11:00
-@wiking	where we copy the registered params	11:00
-@wiking	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/base/SGObject.cpp#L761	11:00
-@wiking	and add that as	11:00
-@wiking	a helper method	11:00
-@wiking	(protected?)	11:00
-@wiking	to the SGObj	11:00
-@HeikoS	I see	11:01
-@HeikoS	yeah thats an option	11:01
-@wiking	and i wonder	11:01
-@wiking	instead of	11:01
-@wiking	CSGObject* copy=new_sgserializable(get_name(), this->m_generic);	11:01
-@wiking	why can't we just call	11:01
-@wiking	the default ctor of the obj?	11:01
-@wiking	i mean that shit i think you can do	11:01
-@wiking	with type	11:01
-@wiking	in c++11	11:01
-@wiking	and once linalg is in	11:01
-@wiking	c++11 is in	11:01
-@wiking	right?	11:01
-@HeikoS	yep	11:02
-@wiking	because now it's a bit shit i woudl say	11:02
-@wiking	or?	11:02
-@wiking	and then i wonder	11:02
-@wiking	if we could get rid of the whole class_list.cpp hack	11:02
-@wiking	let's see where else new_sgserializable is being used	11:02
-@wiking	:)	11:02
-@wiking	src/shogun/base/Parameter.cpp:  *param = new_sgserializable(sgserializable_name, generic);	11:03
-@wiking	src/shogun/base/SGObject.cpp:   CSGObject* copy=new_sgserializable(get_name(), this->m_generic);	11:03
-@wiking	tests/unit/base/DynamicObjectArray_unittest.cc.jinja2:          array1->push_back(new_sgserializable(class_name, PT_NOT_GENERIC));	11:03
-@wiking	tests/unit/base/DynamicObjectArray_unittest.cc.jinja2:          array1->push_back(new_sgserializable(class_name, {{type}}));	11:03
-@wiking	ok	11:03
-@wiking	this is doable	11:03
-@wiking	no?	11:03
-@wiking	:)	11:03
-@HeikoS	de-serialization	11:04
-@HeikoS	also needs default ctor objects	11:04
-@HeikoS	but thats all in fact	11:04
-@HeikoS	so yeah much nicer	11:04
-@wiking	i mean then we dont need	11:04
-@wiking	the classlist hack	11:04
-@wiking	so let's see	11:04
-@wiking	i'll make a feature branch	11:04
-@wiking	and see if it's possible	11:04
-@wiking	and make it like that	11:04
-@wiking	that if c++11 available	11:04
-@wiking	it'll rather use that	11:04
-@wiking	than class_list	11:04
-@wiking	so later it is easy to cut out the code	11:05
-@HeikoS	yes	11:05
-@HeikoS	good	11:05
-@HeikoS	wiking: just saw you changed location of shogun.unit-test	11:06
-@HeikoS	changed any others?	11:06
-@wiking	?	11:06
-@wiking	you mean bin?	11:07
-@wiking	that has moved a long time ago	11:07
-@wiking	(with windows feature)	11:07
-@HeikoS	kk	11:07
-@HeikoS	any other thing? just realised readme is outdated ...	11:07
-@wiking	mmm	11:07
-@wiking	yeah cmake readme i'll have to update	11:07
-@wiking	before release	11:07
-@wiking	because now every feature has	11:07
-@wiking	ENABLE_<package> flag	11:08
-@wiking	so even if it's detected	11:08
-@wiking	you can turn it off	11:08
-@wiking	say	11:08
-@wiking	-DENABLE_ZLIB=OFF	11:08
-@wiking	etc.	11:08
-@wiking	and yeah the strings to change linalg backend	11:08
-@wiking	changed as well	11:08
-@wiking	had to	11:08
-@wiking	the copy paste code	11:08
-@wiking	was a mess	11:08
-@HeikoS	ok then i wont update the readme submodule for now	11:09
-@HeikoS	just patched developing.md	11:09
-@wiking	yeah that needs fixing	11:09
-@wiking	but lets get first things into releaseable state	11:09
-@wiking	which we are quite off now from	11:09
-@wiking	(many failing builds again)	11:10
-@sukey	New Commit "disable failing linear time mmd unit tests" to shogun-toolbox/shogun by karlnapf: https://github.com/shogun-toolbox/shogun/commit/1560b3b39e214be4cd066c6ca4005496dc9a3354	11:11
-@wiking	is this the solution? :)	11:12
-@HeikoS	no	11:12
-@wiking	why are they failing?	11:12
-@HeikoS	I have no idea	11:12
-@wiking	ok why dont we let Rahul fix it?	11:12
-@wiking	he said he'll fix it	11:12
-@HeikoS	yeah	11:12
-@wiking	so ?	11:12
-CaBa	hmmm... it's not so trivial to clone the CKernel components of my kernel, right? unfortunately, CKernel also doesn't offer a copy ctor...	11:12
-@HeikoS	I want travis green	11:13
-@wiking	for?	11:13
-@wiking	it's already red	11:13
-@wiking	see octave	11:13
-@HeikoS	wiking: things not slipping through even more	11:13
-@HeikoS	I know	11:13
-@HeikoS	these tests are for like weird parts anyways ...	11:14
-@HeikoS	so they could even be deleted, they are old	11:14
-@HeikoS	and testing non-interpretable stuff	11:14
-@HeikoS	but yeah Ill leave it	11:14
-@wiking	ok then why not delete it?	11:14
-@HeikoS	rahul promised that hell do the guarding today	11:14
-@wiking	i mean iether just chuck it out	11:14
-@wiking	if it's really not necessary	11:14
-@wiking	the guarding is a totally different story	11:14
-@wiking	i dont even know how that not raised any concerns	11:14
-CaBa	how about	11:15
-CaBa	https://github.com/auchenberg/volkswagen	11:15
-CaBa	?	11:15
-CaBa	:-)	11:15
-@HeikoS	hahaha	11:15
-@HeikoS	nic eone	11:15
-@wiking	:)	11:15
-@wiking	HeikoS, when's that course starting?	11:18
-@HeikoS	sooo	11:18
-@HeikoS	we decided to not use cloud for the march one	11:18
-@HeikoS	but for the may one	11:18
-@HeikoS	there are two	11:18
-@wiking	why not?	11:18
-@HeikoS	each year	11:18
-@wiking	i mean the problem is	11:18
-@wiking	that in may	11:18
-@wiking	probably	11:18
-@HeikoS	because we would have to develop the material now	11:18
-@wiking	you wont be able to use it anymore	11:18
-@wiking	(the cloud)	11:19
-@wiking	note: the credits are out in may	11:19
-@HeikoS	uh I see	11:19
-@HeikoS	we need to get new ones then :)	11:19
-@wiking	and for being able to get new ones	11:19
-@wiking	one would need to demonstrate	11:19
-@wiking	that the previously got credits were used in a constructive manner	11:19
-@wiking	i suppose :)	11:19
-@HeikoS	nah I am sure we can get more via the usual channels	11:19
-@wiking	but yeah	11:19
-@wiking	if you wanna get more	11:19
-@HeikoS	I mean I can sneak some things in	11:19
-@HeikoS	in march	11:20
-@wiking	make sure you dont forget	11:20
-@wiking	to remind gunnar about this	11:20
-@wiking	latest around end of march	11:20
-@HeikoS	yeah we talk soon right	11:20
-@wiking	as you remember it took a while	11:20
-@wiking	to get those credits	11:20
-@HeikoS	I can put some demo things in	11:20
-@HeikoS	but the course also needs re-writing	11:20
-@wiking	Your promotion is valid for 12 months and will expire on May 31, 2017 or when credits are fully depleted, whatever comes first	11:20
-@wiking	just checked	11:20
-@HeikoS	and arthur was hesitant to do that yet as the cloud is not yet workintg	11:20
-@HeikoS	and the old material software works	11:21
-@wiking	?	11:21
-@wiking	but for the cloud	11:21
-@wiking	you	11:21
-@wiking	or who ever	11:21
-@wiking	just needs to create a docker image	11:21
-@wiking	nothing else	11:21
-@wiking	i mean if you have the notebooks?	11:21
-@wiking	then it's super easy	11:21
-@wiking	if you dont have any notebook	11:21
-@wiking	and you have to write the notebooks	11:21
-@wiking	then i understand	11:21
-@wiking	"old material software" =?	11:22
-@wiking	written in?	11:22
-@HeikoS	we will only start putting time into that once the thing is working on the aws	11:22
-@wiking	lolface	11:22
-@HeikoS	that is how it goes here, unfortunately	11:22
-@wiking	i mean lolface	11:22
-@wiking	i'm sorry	11:22
-@wiking	this is way too mcuh man	11:22
-@HeikoS	there is many people involved I am not to decide	11:22
-@wiking	ok look	11:22
-@wiking	i dont give a damn	11:22
-@wiking	it's just very fucking disappointing	11:23
-@HeikoS	old material is matlab stuff and SVMLight ;D	11:23
-@wiking	when somebody works	11:23
-@wiking	hours and hours	11:23
-@wiking	and you get this shit	11:23
-@wiking	but hey	11:23
-@wiking	yeah	11:23
-@wiking	sure	11:23
-@HeikoS	we will use it in may	11:23
-@wiking	i mean the question	11:23
-@wiking	if we had an agreement	11:23
-@HeikoS	its way before 31st	11:23
-@wiking	that we are gonna do this	11:23
-@HeikoS	so all good with the credits	11:23
-@wiking	in march	11:23
-@wiking	and i held up to my end	11:23
-@wiking	i wonder	11:23
-@wiking	why do i get this now?	11:24
-@wiking	"[18:20]  <HeikoS> we will only start putting time into that once the thing is working on the aws	11:24
-@wiking	"	11:24
-@wiking	it's a bit	11:24
-@wiking	let's say	11:24
-@wiking	awkward	11:24
-@HeikoS	I cant convince anyone in relying on the cloud thing before it works	11:24
-@wiking	again	11:24
-@HeikoS	you see?	11:24
-@wiking	if we have	11:24
-@HeikoS	I say: lets do it	11:24
-@wiking	an agreement	11:24
-@wiking	that we do this	11:25
-@HeikoS	they say: well it doesnt work, lets wait until it works	11:25
-@wiking	in march 17	11:25
-@wiking	and i say let's do it	11:25
-@wiking	then ok i do my part	11:25
-@wiking	you gusy do your part	11:25
-@wiking	if you say	11:25
-@HeikoS	there is more than just us	11:25
-@HeikoS	arthur also has to re-work the course	11:25
-@wiking	that when there's cloud	11:25
-@wiking	we wil think about doing it	11:25
-@wiking	ok that's acceptable as well	11:25
-@wiking	and all good	11:25
-@wiking	but that's another story	11:25
-@wiking	see what i mean?	11:25
-@wiking	i was calculating with this being set in stone	11:26
-@wiking	now i'm being told	11:26
-@wiking	'when ready we'll see'	11:26
-@wiking	ok	11:26
-@HeikoS	not we will see	11:26
-@HeikoS	we want to do it	11:26
-@wiking	[18:22]  <HeikoS> they say: well it doesnt work, lets wait until it works	11:26
-@wiking	it is we'll see once it's ready	11:26
-@wiking	i mean ready = cloud working	11:26
-@wiking	then after that t	11:27
-@wiking	things gonna get rolling on your end	11:27
-@wiking	and dont get me wrong	11:27
-@HeikoS	yes arthur will do the course after:	11:27
-@HeikoS	-the cloud works	11:27
-@wiking	it's not your fault or anything	11:27
-@HeikoS	-i wrote some coursework	11:27
-@wiking	but please next time	11:27
-@wiking	be more specific when you write	11:27
-@wiking	'lets have march course thing'	11:27
-@HeikoS	and it needs time	11:27
-@wiking	because i was counting on this	11:27
-@wiking	now it's a disappointment from my side	11:28
-@wiking	because i really wasted a lot of fucking time on this	11:28
-@wiking	whereas if you start	11:28
-@wiking	lets do it in may	11:28
-@wiking	then i might have done it in different phase	11:28
-@wiking	that's all	11:28
-@HeikoS	lets do it now	11:28
-@wiking	yeah i told you	11:28
-@wiking	prepare the notebooks	11:28
-@HeikoS	I am	11:28
-@HeikoS	thats why i merged bigtest	11:29
-@wiking	that's all is needed	11:29
-@wiking	is it working from python?	11:29
-@wiking	or what notebook you want?	11:29
-@wiking	c++	11:29
-@wiking	java?	11:29
-@HeikoS	nono python is ok	11:29
-@wiking	R?	11:29
-@wiking	ok have you guys tested	11:29
-@HeikoS	octave maybe	11:29
-@wiking	the python interface	11:29
-@wiking	of the bigtest?	11:29
-@HeikoS	yes	11:29
-@wiking	if there's c+111	11:29
-@wiking	it works i guess	11:29
-@wiking	ok so then why dont you prepare the notebooks?	11:30
-@wiking	and give me a location where i can download them	11:30
-@wiking	same for the data	11:30
-@wiking	it requires	11:30
-@wiking	and currently the way the authentication works for the notebooks is github	11:30
-@wiking	but it can be anything from this list	11:30
-@wiking	https://github.com/jupyterhub/oauthenticator	11:31
-@wiking	or you can develop your own authenticator if you wanna use something else	11:31
-@HeikoS	kk	11:32
-@HeikoS	so one more thing	11:32
-@HeikoS	the course in march will be on svm, the one in may on testing	11:32
-@HeikoS	so if i write things for svm, that only makes sense if the thing works then	11:33
-@wiking	but man	11:33
-@HeikoS	if I write for kernel testing, it is all a bit more relaxed as we want to change it to that anyways	11:33
-@wiking	this is ready	11:33
-@wiking	the cloud	11:33
-@wiking	it is FUCKING READY	11:33
-@wiking	i'm now just wanking	11:33
-@wiking	to add extra support	11:34
-@wiking	to be nice and easy	11:34
-@wiking	with dcos	11:34
-@wiking	but on the other hand functionally it was ready last week wednesday	11:34
-@wiking	i just want to have it liekt hat	11:34
-@wiking	that i dont need to touch it	11:34
-@HeikoS	if I had a link, I could go to arthur and say: here it is done, lets change the course, that would be best	11:34
-@wiking	if suddenly	11:34
-@wiking	100+ people registers	11:34
-@wiking	and start using it	11:34
-CaBa	https://gitlab.unique-internet.de/snippets/11 <- can i have a quick opinion on the idea of this clone hack? i guess it leaks mem, but i'm not quit sure how to go around that...	11:34
-@wiking	i.e. the whole shit autoscales	11:34
-@HeikoS	wiking: is there something I can show?	11:35
-@HeikoS	that would help immensely to push stuff here	11:35
-@wiking	please	11:35
-@wiking	find a docker image	11:35
-@wiking	that has something in it	11:35
-@wiking	does't fucking matter what now	11:35
-@wiking	that would help	11:35
-@wiking	or prepare one	11:36
-@wiking	doesn't even have to be shogun	11:36
-@wiking	https://hub.docker.com/r/jupyter/singleuser/	11:36
-@wiking	i'm currenlty starting this	11:36
-@wiking	but it has no notebook example in it	11:36
-@wiking	https://hub.docker.com/r/jupyterhub/singleuser/	11:37
-@wiking	this one	11:37
-@wiking	i mean	11:37
-@wiking	there's two options	11:37
-@wiking	if you can show him something now in the next 2 hours	11:37
-@wiking	or 5	11:37
-@wiking	then i can get it back manually	11:37
-@wiking	and then you demo it	11:37
-@HeikoS	doesnt need to be in next hours	11:38
-@HeikoS	just this week	11:38
--!- goksinen [~goksinen@cpe-74-71-4-175.nyc.res.rr.com] has joined #shogun	11:38
-@wiking	if not then i want to finsh this whole thing nicely	11:38
-@wiking	so that really we can reproduce	11:38
-@wiking	the whole environment	11:38
-@wiking	any time	11:38
-@wiking	anywhere	11:38
-@wiking	without	11:38
-@wiking	doing fucking devops	11:38
-@wiking	for days	11:38
-@HeikoS	yes ok	11:38
-@wiking	http://en.cppreference.com/w/cpp/types#Runtime_type_identification	11:39
-@wiking	it'll be at cloud.shogun.ml	11:39
-@wiking	and github auth	11:39
-@HeikoS	wiking: cool, so let me reproduce the coursework stuff then	11:39
-@wiking	what i'm gonna be working on later	11:39
-@wiking	is to prepare	11:39
-@wiking	the old cloud image	11:39
-@wiking	i.e. all the notebooks in it	11:39
-@wiking	with the data	11:40
-@wiking	that's another docker image	11:40
-@wiking	but the nice thing with this jupytherhub is	11:40
-@wiking	that we can have multiple instance of it	11:40
-@wiking	so one for cloud.shogun.m	11:40
-@wiking	.ml	11:40
-@wiking	and one for	11:40
-@wiking	<whatever course>shogun.ml	11:40
-@wiking	:)	11:40
-@wiking	and it runs different instances	11:40
-@wiking	with differnet content in it	11:40
-@wiking	HeikoS, note that since this is jupyterhub	11:41
-@wiking	we could even prepare a cloud.shogun.ml image	11:41
-@wiking	such	11:41
-@wiking	that we chuck into it all the fucking metaexamples as well	11:41
-@wiking	in all the languages	11:41
-@wiking	and since it's jupytherhub	11:41
-@wiking	i mean jupyter	11:42
-@wiking	they can play with any of those languages	11:42
-@sukey	Issue #3645 "replace `sg_newserializable` with c++11 magic" karlnapf added label: "Cleanups" - https://github.com/shogun-toolbox/shogun/issues/3645	11:42
-@sukey	Issue #3645 "replace `sg_newserializable` with c++11 magic" opened by karlnapf - https://github.com/shogun-toolbox/shogun/issues/3645	11:42
-@sukey	Issue #3645 "replace `sg_newserializable` with c++11 magic" karlnapf added label: "entrance" - https://github.com/shogun-toolbox/shogun/issues/3645	11:42
-@HeikoS	https://github.com/shogun-toolbox/shogun/issues/3645	11:42
-@HeikoS	put any comments you have in there, maybe somebody picks it up as a nice entrance task	11:42
--!- goksinen [~goksinen@cpe-74-71-4-175.nyc.res.rr.com] has quit [Ping timeout: 240 seconds]	11:42
-@HeikoS	wiking: yeah thats great with the courses in the link	11:42
-@HeikoS	wiking: and love the idea on putting all the meta stuff in	11:43
-@HeikoS	wiking: would be nice to maybe at some point develop some meta notebooks with plots	11:43
-@wiking	yeah	11:43
-@wiking	that is a bit more shitty	11:43
-@HeikoS	wiking: thats a nice one to get funding for in fact	11:43
-@wiking	well	11:43
-@wiking	we could	11:43
-@wiking	reach out to jupyter people	11:43
-@wiking	no?	11:43
-@HeikoS	its not really part of shogun	11:43
-@HeikoS	yeah	11:43
-@wiking	show them the meta stuff we have now	11:43
-@wiking	show them the ipython notebooks	11:43
-@wiking	that are actually nice imo	11:44
-@wiking	and then tell that that we wanna merge the 2	11:44
-@sukey	Issue #3645 "replace `sg_newserializable` with c++11 magic"- https://github.com/shogun-toolbox/shogun/issues/3645	11:44
-@wiking	meta-notebooks	11:44
-@HeikoS	wiking: yep	11:44
-@wiking	does Lea care to write up such a letter	11:44
-@wiking	?	11:44
-@wiking	and then we just add the link to the cloud.shogun.ml	11:44
-@wiking	and once everything is in place	11:44
-@wiking	we send it to jupyter	11:44
-@wiking	maybe internally they are having some effort for this	11:45
-@wiking	who knows	11:45
-@wiking	would be good to know	11:45
-@wiking	i totally fucking accidentally saw this story with juptyerhub	11:45
-@HeikoS	wiking: yes I had that in mind already	11:45
-@HeikoS	it would be great to use that to get some funding	11:46
-@HeikoS	its kinds of a self contained project	11:46
-@HeikoS	and maybe juypter can support as well	11:46
-@wiking	btw i dont think yo urealise	11:46
-@wiking	what sorts of shit	11:46
-@wiking	is being done for the cloud  ;P	11:46
-@HeikoS	and then we can pay someone in summer to do that or something	11:46
-@wiking	i think i should demo it to you once	11:46
-@HeikoS	wiking: I guess you are right	11:47
-@wiking	it is very nice	11:47
-@wiking	i learnt from our past mistakes	11:47
-@wiking	with using custom hacks	11:47
-@wiking	now it's all easily reproducable	11:47
-@wiking	easily maintainable	11:48
-@sukey	Issue #3645 "replace `sg_newserializable` with c++11 magic"- https://github.com/shogun-toolbox/shogun/issues/3645	11:48
-@HeikoS	wiking: we should have some video session or so and you walk me through it	11:48
-@HeikoS	as for now, you are the only one who knows whats going on there	11:48
-@wiking	mm it's all code	11:48
-@wiking	and will be publicly available	11:48
-@wiking	just the custom proprietary settings	11:49
-@HeikoS	I know, but the things you were refering to earlier	11:49
-@wiking	are gonna be in shogun-infra	11:49
-@HeikoS	you ever saw that before? https://travis-ci.org/shogun-toolbox/shogun/jobs/203383958#L6308	11:49
-@wiking	never	11:50
-@wiking	but	11:50
-@wiking	travis is acting weird lately	11:50
-@wiking	sometimes i see clang jobs	11:50
-@wiking	exit 0	11:50
-@wiking	but still travis marks them as failed	11:50
-@HeikoS	yep saw that	11:50
-@wiking	mmm fuck	11:51
-@wiking	let's see if this works	11:51
-@wiking	fingers fucking crossed	11:51
-@sukey	Pull Request #3399 "LinalgRefactor - Add sum_symmetric and Rm old sum methods"  merged by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3399	11:51
-@sukey	New Commit "Merge pull request #3399 from OXPHOS/linalg_sum_remove	11:51
-@sukey	LinalgRefactor - Add sum_symmetric and Rm old sum methods" to shogun-toolbox/shogun by karlnapf: https://github.com/shogun-toolbox/shogun/commit/53150efb68b7d04c56d733a03e4e393221d33421	11:51
-@HeikoS	whooo random 10s ubuntu freeze without any cpu load	11:53
--!- travis-ci [~travis-ci@ec2-54-91-162-115.compute-1.amazonaws.com] has joined #shogun	12:04
-travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/203383957	12:04
--!- travis-ci [~travis-ci@ec2-54-91-162-115.compute-1.amazonaws.com] has left #shogun []	12:04
-@wiking	CaBa, lemme check	12:07
-CaBa	wiking: it's crap	12:07
-CaBa	wiking: there's no way i can use CKernel::clone() for the CKernel members only...	12:08
-CaBa	i think	12:08
-@wiking	CaBa, i seriously think	12:08
-@wiking	that adding that patch for you	12:08
-@wiking	in sgobject	12:08
-@wiking	would solve your problem faster	12:08
-@wiking	:)))	12:08
-CaBa	wiking: what patch?	12:09
-@wiking	for clone	12:09
-@wiking	get ride of sg_newserializable	12:09
-@wiking	see this bug	12:10
-@wiking	https://github.com/shogun-toolbox/shogun/issues/3645	12:10
-@HeikoS	wiking: even easier is the pulling the parameter cloning out	12:11
-@HeikoS	so people can just instantiate themselves and then call the method	12:11
-@wiking	HeikoS, yeah or that	12:11
-@wiking	either is fine	12:11
-@wiking	and then you dont need these hacky stsuff	12:11
-@wiking	:)	12:11
-@HeikoS	CaBa: so if you just cut out the loop over the parameters, and put that into a protected helper method and call it from clone	12:12
-@wiking	it's really not more than a couple of line of diffs	12:12
-@HeikoS	CaBa: then you can call that in your class	12:12
-CaBa	HeikoS: ok, lemme see	12:13
-@wiking	HeikoS, yeah and the inner part of the clone could be a big	12:13
-@wiking	ifdef have_cxx11	12:13
-@wiking	else	12:13
-@wiking	and once we are c++11 then we can get ride of class_listcpp	12:13
-@wiking	CaBa, if you do it	12:14
-@wiking	then could you do it	12:14
-@wiking	in a way	12:14
-@wiking	that if c++11 available	12:14
-@wiking	you use the tag	12:14
-@wiking	system	12:14
-@wiking	:D	12:14
-@wiking	HeikoS, ^ ?	12:14
-@HeikoS	wiking: yes, but thats not for CaBa to do, as tags doesnt work yet	12:14
-@wiking	ok	12:14
-@HeikoS	otherwise agreed	12:15
-@wiking	then CaBa forget it	12:15
-@wiking	just do that cut put	12:15
-CaBa	^^	12:15
-@wiking	and that's all	12:15
-@wiking	move the for loop into a protected function	12:15
-@HeikoS	CaBa: I can do it for you	12:15
-@wiking	and call that from the clone	12:15
-@HeikoS	give me a min	12:15
-@wiking	or HeikoS will do it for ya	12:15
-CaBa	HeikoS: thank you!	12:15
-CaBa	so that clone_params() or however you call it will get the new ptr passed?	12:17
-@HeikoS	bool CSGObject::clone_parameters(CSGObject* other)	12:32
-@HeikoS	thats the signature	12:32
-lisitsyn	uhm I don't think https://github.com/shogun-toolbox/shogun/issues/3645	12:32
--!- goksinen [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has joined #shogun	12:32
-lisitsyn	HeikoS: it would be replaced by plugins	12:32
-lisitsyn	and stuff	12:32
-@HeikoS	/* Iteratively clones all parameters of the provided instance into this instance.	12:32
-@HeikoS	* This will fail if the objects have different sets of registered parameters,	12:32
-@HeikoS	* or if they have a different type as defined by get_name().	12:32
-@HeikoS	*	12:32
-@HeikoS	* @param other other object whose parameters are to be cloned	12:32
-@HeikoS	* @return True if cloning was successful	12:32
-@HeikoS	*/	12:32
-@HeikoS	lisitsyn: what do you mean?	12:33
-lisitsyn	HeikoS: I just mean it is not an entrance task	12:33
-@HeikoS	why not?	12:33
-@HeikoS	before tags is used	12:33
-lisitsyn	well defines a lot	12:33
-lisitsyn	like architecture of shogun	12:33
-@HeikoS	no it is just about creating empty instances	12:34
-lisitsyn	I am terrible but it is a task for me	12:34
-lisitsyn	:D	12:34
-@HeikoS	and the current way only allows this for class_list ojects	12:34
-@HeikoS	lisitsyn: yeah do it :)	12:34
-lisitsyn	yeah ok :)	12:35
--!- goksinen [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has quit [Ping timeout: 240 seconds]	12:37
-@wiking	yeah do it	12:39
-@wiking	:)	12:39
-@wiking	because CaBa needs it	12:39
-@wiking	and i need it	12:39
-@wiking	:)	12:39
-@wiking	<3	12:39
-@HeikoS	you know whats shiat	12:40
-@HeikoS	that I have to recompile all of shogun whenever I change docs of SGObject.h	12:40
-@HeikoS	and it takes time	12:40
-@HeikoS	and yes the ccache is on	12:40
-lisitsyn	uhm that's not going to be fixed	12:41
-CaBa	HeikoS: do you push that clone_parameter() directly to develop?	12:44
-@HeikoS	CaBa: I might	12:44
-@HeikoS	CaBa: but maybe prefer a PR	12:44
-@HeikoS	since travis can have a look then	12:44
-@HeikoS	so CaBa	12:45
-@HeikoS	once it is merged, you can just create an empty instance of your kernel	12:45
-@HeikoS	and then call the method providing another one	12:46
-CaBa	cool	12:48
-@wiking	HeikoS, yeah sgobject touches everything	12:54
-@wiking	;)	12:54
--!- travis-ci [~travis-ci@ec2-54-90-131-18.compute-1.amazonaws.com] has joined #shogun	12:54
-travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/203394836	12:54
--!- travis-ci [~travis-ci@ec2-54-90-131-18.compute-1.amazonaws.com] has left #shogun []	12:54
-@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  opened by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646	12:55
-@HeikoS	CaBa: https://github.com/shogun-toolbox/shogun/pull/3646	12:55
-@HeikoS	lets see what travis says	12:55
-@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646	12:57
-@HeikoS	gnaa	12:58
-@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646	12:58
-@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646	13:00
-@HeikoS	ok lunch time	13:00
-CaBa	tjanks	13:06
--!- CaBa [~Diu7saig@unaffiliated/caba] has left #shogun []	13:09
--!- CaBa [~Diu7saig@unaffiliated/caba] has joined #shogun	13:09
-@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646	13:14
--!- goksinen [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has joined #shogun	13:27
--!- goksinen [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has quit [Ping timeout: 240 seconds]	13:31
-CaBa	HeikoS: seems broken unfortunately	14:25
-CaBa	just a sec	14:27
-CaBa	might be me... my feature class is also self baked :P	14:30
-@wiking	HeikoS, here?	15:15
-@wiking	so here's our infra for cloud	15:19
-@wiking	lisitsyn, HeikoS https://github.com/shogun-toolbox/shogun-cloud/tree/master/backend/aws	15:19
-@wiking	:)	15:19
--!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has joined #shogun	15:45
--!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has quit [Ping timeout: 240 seconds]	15:49
-@HeikoS	wiking: now	15:50
-@HeikoS	CaBa: no it is broken, fixing	15:50
-@wiking	HeikoS, there's the cloud :)	15:51
-@HeikoS	wiking: nice	15:51
-@HeikoS	so I just talked to Arthur	15:51
-@HeikoS	we will use it	15:51
-@HeikoS	in march already	15:51
-@HeikoS	wiking: i need to actually check out what you did there	15:52
-@HeikoS	this is some framework import	15:52
-@wiking	yes	15:52
-CaBa	HeikoS: yeah i also ran into more trouble with it...	15:56
-CaBa	some memory access... didnt really figure out where it comes from though	15:56
-@HeikoS	CaBa: yeah I got the order of the copy wrong	15:59
-CaBa	HeikoS: ah :)	15:59
-@HeikoS	so copying uninitialised memory into the one that I wanted rather than the other way around	15:59
-CaBa	HeikoS: i also commented some minor stuff on the diff	16:00
-@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646	16:01
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 240 seconds]	16:06
-@wiking	getting there https://hub.docker.com/r/shogun/jupyterhub/	16:12
-@wiking	:)	16:12
-@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646	16:17
--!- HeikoS [~heiko@eduroam-int-pat-8-27.ucl.ac.uk] has joined #shogun	16:18
--!- mode/#shogun [+o HeikoS] by ChanServ	16:18
-CaBa	HeikoS: looks better now	16:18
-@HeikoS	yeah it might work now	16:18
-@HeikoS	will still wait for travis ok?	16:19
-CaBa	HeikoS: sure, i cherry picked to my own temp branch until then	16:20
-CaBa	which is based on develop from last october *duck* :P	16:20
-@HeikoS	lol	16:21
-@HeikoS	where are you based btw?	16:21
-CaBa	HeikoS: berlin	16:22
-@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646	16:23
-@HeikoS	we should oeganise another workshop there	16:24
-@HeikoS	did we ever meet?	16:24
-@HeikoS	wiking, lisitsyn we need to have some kind of systematic testing for our REQUIRE etc	16:25
-@HeikoS	I bet there is lots of null pointer de-referencing, and other bad stuff	16:25
-@HeikoS	its currently never tested that methods throw exceptions on certain inputs	16:25
-CaBa	HeikoS: nope, at least not that i'm aware of :) another student from my grad school visited one of your workshops though iirc, matt	16:26
-@HeikoS	ah yeah	16:26
-@HeikoS	he fixed R back then	16:26
-CaBa	yep	16:27
-@HeikoS	hail the berlin hackers ;)	16:27
-CaBa	;)	16:29
-CaBa	hmhm... now i'm stuck with mem errors again. but this time it seems related to the parallel x-val code i took back in... in combination with my own kernel class	16:29
-@HeikoS	the parallel xval can be re-introduced I think	16:30
-@HeikoS	as wiking fixed stuff that was causing problems	16:30
-@wiking	yeah hopefully	16:31
-@wiking	try it	16:31
-CaBa	i'm trying it and i get bad_access here [1] when it reaches my own kernel...https://github.com/lkuchenb/shogun/blob/production/src/shogun/kernel/CombinedKernel.cpp#L240	16:31
-CaBa	i'm trying it and i get bad_access here [1] when it reaches my own kernel...	16:31
-CaBa	[1] https://github.com/lkuchenb/shogun/blob/production/src/shogun/kernel/CombinedKernel.cpp#L240	16:31
-CaBa	apparently the k pointer is no longer valid	16:31
-CaBa	*sigh*	16:32
-CaBa	i think i have tortured shogun with too much hackery O.O	16:32
-@HeikoS	hehe ;)	16:34
--!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has joined #shogun	16:39
--!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has quit [Ping timeout: 240 seconds]	16:43
--!- HeikoS [~heiko@eduroam-int-pat-8-27.ucl.ac.uk] has quit [Quit: Leaving.]	16:57
--!- OXPHOS [401e476d@gateway/web/freenode/ip.64.30.71.109] has joined #shogun	17:00
--!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has joined #shogun	17:02
--!- lambday [31cf349d@gateway/web/freenode/ip.49.207.52.157] has joined #shogun	17:06
--!- mode/#shogun [+o lambday] by ChanServ	17:06
--!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has quit [Ping timeout: 240 seconds]	17:06
-CaBa	wiking: i guess i should move forward from my october 2016 shogun if i want to use the parallel x-val code? i'm running into mem issues, but those were fixed in the backend in the meantime you said?	17:14
-CaBa	hm, i'm even in december with my codebase. so maybe those are already included and not the cause :(	17:16
-@wiking	mmm	17:24
-@wiking	what do you mean meamleaks?	17:24
-@wiking	and yeah there are may shit fixed	17:24
-@wiking	in the last 1 month	17:24
-@wiking	so rebase with upstream/develop is encouraged	17:25
-@wiking	if u can	17:25
-CaBa	i'll work my way through the rebase first and check if it's still a problem	17:42
-@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  merged by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646	17:44
-@sukey	New Commit "Merge pull request #3646 from karlnapf/feature/clone_refactor	17:44
-@sukey	pull cloning all parameterers out to a seperate method" to shogun-toolbox/shogun by karlnapf: https://github.com/shogun-toolbox/shogun/commit/ce652852c504edfad450a68e8b664702fcbd0b9c	17:44
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun	17:45
--!- mode/#shogun [+o HeikoS] by ChanServ	17:45
-@HeikoS	CaBa: merged it	17:45
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	17:48
--!- travis-ci [~travis-ci@ec2-54-90-131-18.compute-1.amazonaws.com] has joined #shogun	18:40
-travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/203510088	18:40
--!- travis-ci [~travis-ci@ec2-54-90-131-18.compute-1.amazonaws.com] has left #shogun []	18:40
-CaBa	HeikoS: neat	19:10
-CaBa	HeikoS: shogun won't build, at least for me...	19:10
-CaBa	In file included from /Users/lk/RESEARCH/external/shogun/src/shogun/statistical_testing/MultiKernelQuadraticTimeMMD.cpp:41:0:	19:11
-CaBa	/Users/lk/RESEARCH/external/shogun/src/shogun/statistical_testing/internals/mmd/ComputeMMD.h: In member function 'shogun::SGVector<double> shogun::internal::mmd::ComputeMMD::operator()(const shogun::internal::KernelManager&) const':	19:11
-CaBa	/Users/lk/RESEARCH/external/shogun/src/shogun/statistical_testing/internals/mmd/ComputeMMD.h:132:10: error: ambiguous overload for 'operator[]' (operand types are 'shogun::SGVector<double>' and 'std::size_t {aka long unsigned int}') result[k]=compute(terms[k]);	19:11
-CaBa	does that ring a bell to either of you?	19:11
-CaBa	wiking: anything special, mac-wise lately?	19:12
-CaBa	building with GCC 6.3	19:12
--!- lambday [31cf349d@gateway/web/freenode/ip.49.207.52.157] has quit [Ping timeout: 260 seconds]	19:26
-@HeikoS	CaBa: thats a recent feature branch	19:34
-@HeikoS	that has been merged	19:34
-@HeikoS	we need to fix that	19:34
-@HeikoS	can you post the error on an issue and poke @lamday	19:34
-@HeikoS	he is fixing things for that atm	19:35
--!- OXPHOS [401e476d@gateway/web/freenode/ip.64.30.71.109] has quit [Ping timeout: 260 seconds]	19:45
-CaBa	HeikoS: what branch was that?	19:53
-@sukey	Issue #3647 "Build fails" opened by lkuchenb - https://github.com/shogun-toolbox/shogun/issues/3647	19:55
-@sukey	Issue #3647 "Build fails"- https://github.com/shogun-toolbox/shogun/issues/3647	19:56
-CaBa	HeikoS: so how far do i have to go back to get a build through?	19:57
-@HeikoS	before sunday	20:01
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 260 seconds]	20:58
-CaBa	wiking: ping	21:16
-CaBa	wiking: do you build against colpack on mac os>?	21:16
-CaBa	wiking: you have killed my 'ENABLE_COLPACK' :P	21:18
-CaBa	wiking: actually it's protbuf that is causing my trouble. anyways - have all the options disappeard?	21:30
-CaBa	*dissappeared?	21:30
-CaBa	.oO(i'll give up spelling that correctly)	21:30
+@sukey	Pull Request #3399 "LinalgRefactor - Add sum_symmetric and Rm old sum methods" - https://github.com/shogun-toolbox/shogun/pull/3399
+@wiking	CaBa, yes if you want to have proper clone-able object you need to have the params registered
+-!- goksinen_ [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has joined #shogun
+@sukey	Issue #3644 "New Linalg library cannot compile with Eigen 3.3.x" opened by OXPHOS - https://github.com/shogun-toolbox/shogun/issues/3644
+-!- IRCFrEAK [~gk.1wm.su@2a03:4a80:3:43d:43d:23b:2e38:2839] has joined #shogun
+-!- IRCFrEAK [~gk.1wm.su@2a03:4a80:3:43d:43d:23b:2e38:2839] has left #shogun []
+@sukey	Pull Request #3641 "add tests for KNN and fix an error in KDTree solver"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3641
+-!- goksinen_ [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has quit [Remote host closed the connection]
+@sukey	Pull Request #3641 "add tests for KNN and fix an error in KDTree solver"  synchronized by MikeLing - https://github.com/shogun-toolbox/shogun/pull/3641
+@sukey	Pull Request #3635 "LinalgRefactor - Memory Transfer Mutex"  synchronized by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3635
+-!- madgoat [~gk.1wm.su@2a03:4a80:5:41e:41e:efdd:c10d:1c12] has joined #shogun
+-!- madgoat [~gk.1wm.su@2a03:4a80:5:41e:41e:efdd:c10d:1c12] has left #shogun []
+ shogun-buildbot	build #53 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/53  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>, Tiramisu 1993 <sabergeass@gmail.com>
+ shogun-buildbot	build #31 of nightly_all is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_all/builds/31  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>, Tiramisu 1993 <sabergeass@gmail.com>
+@sukey	New Commit "Update NEWS" to shogun-toolbox/shogun by lambday: https://github.com/shogun-toolbox/shogun/commit/142ba6b916e623f75c393799598b1d91332687b1
+@sukey	Issue #3625 "Installation failed"- https://github.com/shogun-toolbox/shogun/issues/3625
+-!- travis-ci [~travis-ci@ec2-54-91-162-115.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Soumyajit De's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/203355835
+-!- travis-ci [~travis-ci@ec2-54-91-162-115.compute-1.amazonaws.com] has left #shogun []
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ CaBa	HeikoS: heya
+ CaBa	wiking: thanks for the info
+ CaBa	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/base/class_list.cpp.templ <- what dark magic is this?
+@wiking	CaBa, generates a factory clas
+@wiking	class
+@wiking	for the swig interface
+ CaBa	wiking: my class still fails to clone, apparently in there
+ CaBa	wiking: do i have to "register" it somewhere?
+@wiking	then i suppose the way you defined the class
+@wiking	is having some issue
+ CaBa	wiking: well my class get_name() value is not in the class_list i suppose
+@HeikoS	wiking: jojo
+@HeikoS	CaBa: might well be some cache thing
+@HeikoS	there is build bugs when you add classes after the class_list has been generated
+ CaBa	HeikoS: my kernel is not in shogun. i have it in my application, which links against shogun
+@HeikoS	then you shouldnt need this
+ CaBa	HeikoS: well my kernel won't ::clone() otherwise
+@wiking	HeikoS, so not true
+@wiking	HeikoS, please update yourself with some of the latest development of
+@wiking	shogun
+@wiking	:)
+ CaBa	lol
+@wiking	like CLock
+@wiking	and this class_list.cpp
+@HeikoS	wiking: ?
+@wiking	i worked on this
+@wiking	quite extensively
+@wiking	2 weeknds ago
+@HeikoS	worked on what?
+@wiking	both clock and class_list.cpp
+@HeikoS	ah i see
+@HeikoS	cool then
+ CaBa	wiking: so what do i need to do for my outside-of-shogun kernel then? write my own clone()?
+@HeikoS	what about this? https://github.com/shogun-toolbox/shogun/issues/2934
+@wiking	mmm but wait
+@wiking	CaBa, you wanna write
+@wiking	a class that is not part of the library
+@wiking	say a new kernel
+@wiking	and then have clone? :)
+@wiking	mmmmmm
+ CaBa	yeah i actually have quite a few CKernel derivatives in my application
+@wiking	it might work on some level
+@wiking	but for sure not for swig
+@wiking	:(
+@wiking	which i know is a shit
+ CaBa	i use c++ only
+@wiking	but this is what is it
+@wiking	CaBa, and what's your error?
+@wiking	when you call kernel->clone()
+@wiking	?
+ CaBa	wiking: shogun::new_sgserializable returns NULL
+@wiking	doh
+@wiking	:D
+ CaBa	wiking: since it doesn't find my class name in it's list
+@wiking	yeah
+@wiking	so here we go
+@wiking	another shit
+@wiking	:D
+@wiking	so actually then
+@wiking	it doesn't work at all
+@wiking	if it's not part of the library
+@wiking	which makes everything fucking crazy
+@wiking	:)
+@wiking	because to be able to extend your library
+@wiking	i mean the library
+@wiking	you actually have to make your code
+@wiking	part of the library
+@wiking	:(
+@wiking	HeikoS, you wrote clone no?
+@HeikoS	yep
+@HeikoS	but this sg_serializable thing not
+@wiking	HeikoS, caef78db (Heiko Strathmann 2013-06-11 14:49:26 +0100 747) CSGObject* CSGObject::clone()
+@HeikoS	the clone is based on that
+@wiking	ok but the way you do it
+@wiking	is to call the factory object
+@wiking	?
+@wiking	i.e. class_list.h's sg_ser?
+@HeikoS	I would have to check, but I think yes
+@wiking	ye yep
+@wiking	ok so this is major shit
+@wiking	:D
+@HeikoS	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/base/SGObject.cpp#L752
+@wiking	i wonder how tags will help us here
+ CaBa	well... overriding ::clone() could be a workaround, right? the requirements aren't that complex, i just have to return a pointer to a copy... i can even call ::clone() for all upstream shogun member variables...
+@wiking	yeah
+@wiking	lemme see if you can actually override
+ CaBa	yes its virtual
+@wiking	virtual CSGObject* clone();
+@wiking	luckly
+@wiking	;)
+@wiking	ok so then you can implement your own clone method
+@wiking	but
+@wiking	still this we need to fix urgently
+@wiking	HeikoS, ^
+ CaBa	i already override that before :P since i have non-SGobject members :P
+ CaBa	but then in the override i called SGObject::clone() for the rest
+@wiking	i see
+@wiking	well then you cannor rely obviously
+@HeikoS	wiking: how would you create the new instance?
+@wiking	HeikoS, yeah i'm just wondering if we could create at least a helper method
+@wiking	that CaBa would need
+@HeikoS	if we just used cereal, then all good
+@HeikoS	serialize to memory
+@HeikoS	de-serialize
+@wiking	memory?
+@wiking	uffofff
+@wiking	that's very brute force
+@wiking	what about just cutting out the part
+@wiking	where we copy the registered params
+@wiking	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/base/SGObject.cpp#L761
+@wiking	and add that as
+@wiking	a helper method
+@wiking	(protected?)
+@wiking	to the SGObj
+@HeikoS	I see
+@HeikoS	yeah thats an option
+@wiking	and i wonder
+@wiking	instead of
+@wiking	CSGObject* copy=new_sgserializable(get_name(), this->m_generic);
+@wiking	why can't we just call
+@wiking	the default ctor of the obj?
+@wiking	i mean that shit i think you can do
+@wiking	with type
+@wiking	in c++11
+@wiking	and once linalg is in
+@wiking	c++11 is in
+@wiking	right?
+@HeikoS	yep
+@wiking	because now it's a bit shit i woudl say
+@wiking	or?
+@wiking	and then i wonder
+@wiking	if we could get rid of the whole class_list.cpp hack
+@wiking	let's see where else new_sgserializable is being used
+@wiking	:)
+@wiking	src/shogun/base/Parameter.cpp:  *param = new_sgserializable(sgserializable_name, generic);
+@wiking	src/shogun/base/SGObject.cpp:   CSGObject* copy=new_sgserializable(get_name(), this->m_generic);
+@wiking	tests/unit/base/DynamicObjectArray_unittest.cc.jinja2:          array1->push_back(new_sgserializable(class_name, PT_NOT_GENERIC));
+@wiking	tests/unit/base/DynamicObjectArray_unittest.cc.jinja2:          array1->push_back(new_sgserializable(class_name, {{type}}));
+@wiking	ok
+@wiking	this is doable
+@wiking	no?
+@wiking	:)
+@HeikoS	de-serialization
+@HeikoS	also needs default ctor objects
+@HeikoS	but thats all in fact
+@HeikoS	so yeah much nicer
+@wiking	i mean then we dont need
+@wiking	the classlist hack
+@wiking	so let's see
+@wiking	i'll make a feature branch
+@wiking	and see if it's possible
+@wiking	and make it like that
+@wiking	that if c++11 available
+@wiking	it'll rather use that
+@wiking	than class_list
+@wiking	so later it is easy to cut out the code
+@HeikoS	yes
+@HeikoS	good
+@HeikoS	wiking: just saw you changed location of shogun.unit-test
+@HeikoS	changed any others?
+@wiking	?
+@wiking	you mean bin?
+@wiking	that has moved a long time ago
+@wiking	(with windows feature)
+@HeikoS	kk
+@HeikoS	any other thing? just realised readme is outdated ...
+@wiking	mmm
+@wiking	yeah cmake readme i'll have to update
+@wiking	before release
+@wiking	because now every feature has
+@wiking	ENABLE_<package> flag
+@wiking	so even if it's detected
+@wiking	you can turn it off
+@wiking	say
+@wiking	-DENABLE_ZLIB=OFF
+@wiking	etc.
+@wiking	and yeah the strings to change linalg backend
+@wiking	changed as well
+@wiking	had to
+@wiking	the copy paste code
+@wiking	was a mess
+@HeikoS	ok then i wont update the readme submodule for now
+@HeikoS	just patched developing.md
+@wiking	yeah that needs fixing
+@wiking	but lets get first things into releaseable state
+@wiking	which we are quite off now from
+@wiking	(many failing builds again)
+@sukey	New Commit "disable failing linear time mmd unit tests" to shogun-toolbox/shogun by karlnapf: https://github.com/shogun-toolbox/shogun/commit/1560b3b39e214be4cd066c6ca4005496dc9a3354
+@wiking	is this the solution? :)
+@HeikoS	no
+@wiking	why are they failing?
+@HeikoS	I have no idea
+@wiking	ok why dont we let Rahul fix it?
+@wiking	he said he'll fix it
+@HeikoS	yeah
+@wiking	so ?
+ CaBa	hmmm... it's not so trivial to clone the CKernel components of my kernel, right? unfortunately, CKernel also doesn't offer a copy ctor...
+@HeikoS	I want travis green
+@wiking	for?
+@wiking	it's already red
+@wiking	see octave
+@HeikoS	wiking: things not slipping through even more
+@HeikoS	I know
+@HeikoS	these tests are for like weird parts anyways ...
+@HeikoS	so they could even be deleted, they are old
+@HeikoS	and testing non-interpretable stuff
+@HeikoS	but yeah Ill leave it
+@wiking	ok then why not delete it?
+@HeikoS	rahul promised that hell do the guarding today
+@wiking	i mean iether just chuck it out
+@wiking	if it's really not necessary
+@wiking	the guarding is a totally different story
+@wiking	i dont even know how that not raised any concerns
+ CaBa	how about
+ CaBa	https://github.com/auchenberg/volkswagen
+ CaBa	?
+ CaBa	:-)
+@HeikoS	hahaha
+@HeikoS	nic eone
+@wiking	:)
+@wiking	HeikoS, when's that course starting?
+@HeikoS	sooo
+@HeikoS	we decided to not use cloud for the march one
+@HeikoS	but for the may one
+@HeikoS	there are two
+@wiking	why not?
+@HeikoS	each year
+@wiking	i mean the problem is
+@wiking	that in may
+@wiking	probably
+@HeikoS	because we would have to develop the material now
+@wiking	you wont be able to use it anymore
+@wiking	(the cloud)
+@wiking	note: the credits are out in may
+@HeikoS	uh I see
+@HeikoS	we need to get new ones then :)
+@wiking	and for being able to get new ones
+@wiking	one would need to demonstrate
+@wiking	that the previously got credits were used in a constructive manner
+@wiking	i suppose :)
+@HeikoS	nah I am sure we can get more via the usual channels
+@wiking	but yeah
+@wiking	if you wanna get more
+@HeikoS	I mean I can sneak some things in
+@HeikoS	in march
+@wiking	make sure you dont forget
+@wiking	to remind gunnar about this
+@wiking	latest around end of march
+@HeikoS	yeah we talk soon right
+@wiking	as you remember it took a while
+@wiking	to get those credits
+@HeikoS	I can put some demo things in
+@HeikoS	but the course also needs re-writing
+@wiking	Your promotion is valid for 12 months and will expire on May 31, 2017 or when credits are fully depleted, whatever comes first
+@wiking	just checked
+@HeikoS	and arthur was hesitant to do that yet as the cloud is not yet workintg
+@HeikoS	and the old material software works
+@wiking	?
+@wiking	but for the cloud
+@wiking	you
+@wiking	or who ever
+@wiking	just needs to create a docker image
+@wiking	nothing else
+@wiking	i mean if you have the notebooks?
+@wiking	then it's super easy
+@wiking	if you dont have any notebook
+@wiking	and you have to write the notebooks
+@wiking	then i understand
+@wiking	"old material software" =?
+@wiking	written in?
+@HeikoS	we will only start putting time into that once the thing is working on the aws
+@wiking	lolface
+@HeikoS	that is how it goes here, unfortunately
+@wiking	i mean lolface
+@wiking	i'm sorry
+@wiking	this is way too mcuh man
+@HeikoS	there is many people involved I am not to decide
+@wiking	ok look
+@wiking	i dont give a damn
+@wiking	it's just very fucking disappointing
+@HeikoS	old material is matlab stuff and SVMLight ;D
+@wiking	when somebody works
+@wiking	hours and hours
+@wiking	and you get this shit
+@wiking	but hey
+@wiking	yeah
+@wiking	sure
+@HeikoS	we will use it in may
+@wiking	i mean the question
+@wiking	if we had an agreement
+@HeikoS	its way before 31st
+@wiking	that we are gonna do this
+@HeikoS	so all good with the credits
+@wiking	in march
+@wiking	and i held up to my end
+@wiking	i wonder
+@wiking	why do i get this now?
+@wiking	"[18:20]  <HeikoS> we will only start putting time into that once the thing is working on the aws
+@wiking	"
+@wiking	it's a bit
+@wiking	let's say
+@wiking	awkward
+@HeikoS	I cant convince anyone in relying on the cloud thing before it works
+@wiking	again
+@HeikoS	you see?
+@wiking	if we have
+@HeikoS	I say: lets do it
+@wiking	an agreement
+@wiking	that we do this
+@HeikoS	they say: well it doesnt work, lets wait until it works
+@wiking	in march 17
+@wiking	and i say let's do it
+@wiking	then ok i do my part
+@wiking	you gusy do your part
+@wiking	if you say
+@HeikoS	there is more than just us
+@HeikoS	arthur also has to re-work the course
+@wiking	that when there's cloud
+@wiking	we wil think about doing it
+@wiking	ok that's acceptable as well
+@wiking	and all good
+@wiking	but that's another story
+@wiking	see what i mean?
+@wiking	i was calculating with this being set in stone
+@wiking	now i'm being told
+@wiking	'when ready we'll see'
+@wiking	ok
+@HeikoS	not we will see
+@HeikoS	we want to do it
+@wiking	[18:22]  <HeikoS> they say: well it doesnt work, lets wait until it works
+@wiking	it is we'll see once it's ready
+@wiking	i mean ready = cloud working
+@wiking	then after that t
+@wiking	things gonna get rolling on your end
+@wiking	and dont get me wrong
+@HeikoS	yes arthur will do the course after:
+@HeikoS	-the cloud works
+@wiking	it's not your fault or anything
+@HeikoS	-i wrote some coursework
+@wiking	but please next time
+@wiking	be more specific when you write
+@wiking	'lets have march course thing'
+@HeikoS	and it needs time
+@wiking	because i was counting on this
+@wiking	now it's a disappointment from my side
+@wiking	because i really wasted a lot of fucking time on this
+@wiking	whereas if you start
+@wiking	lets do it in may
+@wiking	then i might have done it in different phase
+@wiking	that's all
+@HeikoS	lets do it now
+@wiking	yeah i told you
+@wiking	prepare the notebooks
+@HeikoS	I am
+@HeikoS	thats why i merged bigtest
+@wiking	that's all is needed
+@wiking	is it working from python?
+@wiking	or what notebook you want?
+@wiking	c++
+@wiking	java?
+@HeikoS	nono python is ok
+@wiking	R?
+@wiking	ok have you guys tested
+@HeikoS	octave maybe
+@wiking	the python interface
+@wiking	of the bigtest?
+@HeikoS	yes
+@wiking	if there's c+111
+@wiking	it works i guess
+@wiking	ok so then why dont you prepare the notebooks?
+@wiking	and give me a location where i can download them
+@wiking	same for the data
+@wiking	it requires
+@wiking	and currently the way the authentication works for the notebooks is github
+@wiking	but it can be anything from this list
+@wiking	https://github.com/jupyterhub/oauthenticator
+@wiking	or you can develop your own authenticator if you wanna use something else
+@HeikoS	kk
+@HeikoS	so one more thing
+@HeikoS	the course in march will be on svm, the one in may on testing
+@HeikoS	so if i write things for svm, that only makes sense if the thing works then
+@wiking	but man
+@HeikoS	if I write for kernel testing, it is all a bit more relaxed as we want to change it to that anyways
+@wiking	this is ready
+@wiking	the cloud
+@wiking	it is FUCKING READY
+@wiking	i'm now just wanking
+@wiking	to add extra support
+@wiking	to be nice and easy
+@wiking	with dcos
+@wiking	but on the other hand functionally it was ready last week wednesday
+@wiking	i just want to have it liekt hat
+@wiking	that i dont need to touch it
+@HeikoS	if I had a link, I could go to arthur and say: here it is done, lets change the course, that would be best
+@wiking	if suddenly
+@wiking	100+ people registers
+@wiking	and start using it
+ CaBa	https://gitlab.unique-internet.de/snippets/11 <- can i have a quick opinion on the idea of this clone hack? i guess it leaks mem, but i'm not quit sure how to go around that...
+@wiking	i.e. the whole shit autoscales
+@HeikoS	wiking: is there something I can show?
+@HeikoS	that would help immensely to push stuff here
+@wiking	please
+@wiking	find a docker image
+@wiking	that has something in it
+@wiking	does't fucking matter what now
+@wiking	that would help
+@wiking	or prepare one
+@wiking	doesn't even have to be shogun
+@wiking	https://hub.docker.com/r/jupyter/singleuser/
+@wiking	i'm currenlty starting this
+@wiking	but it has no notebook example in it
+@wiking	https://hub.docker.com/r/jupyterhub/singleuser/
+@wiking	this one
+@wiking	i mean
+@wiking	there's two options
+@wiking	if you can show him something now in the next 2 hours
+@wiking	or 5
+@wiking	then i can get it back manually
+@wiking	and then you demo it
+@HeikoS	doesnt need to be in next hours
+@HeikoS	just this week
+-!- goksinen [~goksinen@cpe-74-71-4-175.nyc.res.rr.com] has joined #shogun
+@wiking	if not then i want to finsh this whole thing nicely
+@wiking	so that really we can reproduce
+@wiking	the whole environment
+@wiking	any time
+@wiking	anywhere
+@wiking	without
+@wiking	doing fucking devops
+@wiking	for days
+@HeikoS	yes ok
+@wiking	http://en.cppreference.com/w/cpp/types#Runtime_type_identification
+@wiking	it'll be at cloud.shogun.ml
+@wiking	and github auth
+@HeikoS	wiking: cool, so let me reproduce the coursework stuff then
+@wiking	what i'm gonna be working on later
+@wiking	is to prepare
+@wiking	the old cloud image
+@wiking	i.e. all the notebooks in it
+@wiking	with the data
+@wiking	that's another docker image
+@wiking	but the nice thing with this jupytherhub is
+@wiking	that we can have multiple instance of it
+@wiking	so one for cloud.shogun.m
+@wiking	.ml
+@wiking	and one for
+@wiking	<whatever course>shogun.ml
+@wiking	:)
+@wiking	and it runs different instances
+@wiking	with differnet content in it
+@wiking	HeikoS, note that since this is jupyterhub
+@wiking	we could even prepare a cloud.shogun.ml image
+@wiking	such
+@wiking	that we chuck into it all the fucking metaexamples as well
+@wiking	in all the languages
+@wiking	and since it's jupytherhub
+@wiking	i mean jupyter
+@wiking	they can play with any of those languages
+@sukey	Issue #3645 "replace `sg_newserializable` with c++11 magic" karlnapf added label: "Cleanups" - https://github.com/shogun-toolbox/shogun/issues/3645
+@sukey	Issue #3645 "replace `sg_newserializable` with c++11 magic" opened by karlnapf - https://github.com/shogun-toolbox/shogun/issues/3645
+@sukey	Issue #3645 "replace `sg_newserializable` with c++11 magic" karlnapf added label: "entrance" - https://github.com/shogun-toolbox/shogun/issues/3645
+@HeikoS	https://github.com/shogun-toolbox/shogun/issues/3645
+@HeikoS	put any comments you have in there, maybe somebody picks it up as a nice entrance task
+-!- goksinen [~goksinen@cpe-74-71-4-175.nyc.res.rr.com] has quit [Ping timeout: 240 seconds]
+@HeikoS	wiking: yeah thats great with the courses in the link
+@HeikoS	wiking: and love the idea on putting all the meta stuff in
+@HeikoS	wiking: would be nice to maybe at some point develop some meta notebooks with plots
+@wiking	yeah
+@wiking	that is a bit more shitty
+@HeikoS	wiking: thats a nice one to get funding for in fact
+@wiking	well
+@wiking	we could
+@wiking	reach out to jupyter people
+@wiking	no?
+@HeikoS	its not really part of shogun
+@HeikoS	yeah
+@wiking	show them the meta stuff we have now
+@wiking	show them the ipython notebooks
+@wiking	that are actually nice imo
+@wiking	and then tell that that we wanna merge the 2
+@sukey	Issue #3645 "replace `sg_newserializable` with c++11 magic"- https://github.com/shogun-toolbox/shogun/issues/3645
+@wiking	meta-notebooks
+@HeikoS	wiking: yep
+@wiking	does Lea care to write up such a letter
+@wiking	?
+@wiking	and then we just add the link to the cloud.shogun.ml
+@wiking	and once everything is in place
+@wiking	we send it to jupyter
+@wiking	maybe internally they are having some effort for this
+@wiking	who knows
+@wiking	would be good to know
+@wiking	i totally fucking accidentally saw this story with juptyerhub
+@HeikoS	wiking: yes I had that in mind already
+@HeikoS	it would be great to use that to get some funding
+@HeikoS	its kinds of a self contained project
+@HeikoS	and maybe juypter can support as well
+@wiking	btw i dont think yo urealise
+@wiking	what sorts of shit
+@wiking	is being done for the cloud  ;P
+@HeikoS	and then we can pay someone in summer to do that or something
+@wiking	i think i should demo it to you once
+@HeikoS	wiking: I guess you are right
+@wiking	it is very nice
+@wiking	i learnt from our past mistakes
+@wiking	with using custom hacks
+@wiking	now it's all easily reproducable
+@wiking	easily maintainable
+@sukey	Issue #3645 "replace `sg_newserializable` with c++11 magic"- https://github.com/shogun-toolbox/shogun/issues/3645
+@HeikoS	wiking: we should have some video session or so and you walk me through it
+@HeikoS	as for now, you are the only one who knows whats going on there
+@wiking	mm it's all code
+@wiking	and will be publicly available
+@wiking	just the custom proprietary settings
+@HeikoS	I know, but the things you were refering to earlier
+@wiking	are gonna be in shogun-infra
+@HeikoS	you ever saw that before? https://travis-ci.org/shogun-toolbox/shogun/jobs/203383958#L6308
+@wiking	never
+@wiking	but
+@wiking	travis is acting weird lately
+@wiking	sometimes i see clang jobs
+@wiking	exit 0
+@wiking	but still travis marks them as failed
+@HeikoS	yep saw that
+@wiking	mmm fuck
+@wiking	let's see if this works
+@wiking	fingers fucking crossed
+@sukey	Pull Request #3399 "LinalgRefactor - Add sum_symmetric and Rm old sum methods"  merged by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3399
+@sukey	New Commit "Merge pull request #3399 from OXPHOS/linalg_sum_remove
+@sukey	LinalgRefactor - Add sum_symmetric and Rm old sum methods" to shogun-toolbox/shogun by karlnapf: https://github.com/shogun-toolbox/shogun/commit/53150efb68b7d04c56d733a03e4e393221d33421
+@HeikoS	whooo random 10s ubuntu freeze without any cpu load
+-!- travis-ci [~travis-ci@ec2-54-91-162-115.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/203383957
+-!- travis-ci [~travis-ci@ec2-54-91-162-115.compute-1.amazonaws.com] has left #shogun []
+@wiking	CaBa, lemme check
+ CaBa	wiking: it's crap
+ CaBa	wiking: there's no way i can use CKernel::clone() for the CKernel members only...
+ CaBa	i think
+@wiking	CaBa, i seriously think
+@wiking	that adding that patch for you
+@wiking	in sgobject
+@wiking	would solve your problem faster
+@wiking	:)))
+ CaBa	wiking: what patch?
+@wiking	for clone
+@wiking	get ride of sg_newserializable
+@wiking	see this bug
+@wiking	 https://github.com/shogun-toolbox/shogun/issues/3645
+@HeikoS	wiking: even easier is the pulling the parameter cloning out
+@HeikoS	so people can just instantiate themselves and then call the method
+@wiking	HeikoS, yeah or that
+@wiking	either is fine
+@wiking	and then you dont need these hacky stsuff
+@wiking	:)
+@HeikoS	CaBa: so if you just cut out the loop over the parameters, and put that into a protected helper method and call it from clone
+@wiking	it's really not more than a couple of line of diffs
+@HeikoS	CaBa: then you can call that in your class
+ CaBa	HeikoS: ok, lemme see
+@wiking	HeikoS, yeah and the inner part of the clone could be a big
+@wiking	ifdef have_cxx11
+@wiking	else
+@wiking	and once we are c++11 then we can get ride of class_listcpp
+@wiking	CaBa, if you do it
+@wiking	then could you do it
+@wiking	in a way
+@wiking	that if c++11 available
+@wiking	you use the tag
+@wiking	system
+@wiking	:D
+@wiking	HeikoS, ^ ?
+@HeikoS	wiking: yes, but thats not for CaBa to do, as tags doesnt work yet
+@wiking	ok
+@HeikoS	otherwise agreed
+@wiking	then CaBa forget it
+@wiking	just do that cut put
+ CaBa	^^
+@wiking	and that's all
+@wiking	move the for loop into a protected function
+@HeikoS	CaBa: I can do it for you
+@wiking	and call that from the clone
+@HeikoS	give me a min
+@wiking	or HeikoS will do it for ya
+ CaBa	HeikoS: thank you!
+ CaBa	so that clone_params() or however you call it will get the new ptr passed?
+@HeikoS	bool CSGObject::clone_parameters(CSGObject* other)
+@HeikoS	thats the signature
+ lisitsyn	uhm I don't think https://github.com/shogun-toolbox/shogun/issues/3645
+-!- goksinen [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has joined #shogun
+ lisitsyn	HeikoS: it would be replaced by plugins
+ lisitsyn	and stuff
+@HeikoS	/* Iteratively clones all parameters of the provided instance into this instance.
+@HeikoS	 * This will fail if the objects have different sets of registered parameters,
+@HeikoS	 * or if they have a different type as defined by get_name().
+@HeikoS	 *
+@HeikoS	 * @param other other object whose parameters are to be cloned
+@HeikoS	 * @return True if cloning was successful
+@HeikoS	 */
+@HeikoS	lisitsyn: what do you mean?
+ lisitsyn	HeikoS: I just mean it is not an entrance task
+@HeikoS	why not?
+@HeikoS	before tags is used
+ lisitsyn	well defines a lot
+ lisitsyn	like architecture of shogun
+@HeikoS	no it is just about creating empty instances
+ lisitsyn	I am terrible but it is a task for me
+ lisitsyn	:D
+@HeikoS	and the current way only allows this for class_list ojects
+@HeikoS	lisitsyn: yeah do it :)
+ lisitsyn	yeah ok :)
+-!- goksinen [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has quit [Ping timeout: 240 seconds]
+@wiking	yeah do it
+@wiking	:)
+@wiking	because CaBa needs it
+@wiking	and i need it
+@wiking	:)
+@wiking	<3
+@HeikoS	you know whats shiat
+@HeikoS	that I have to recompile all of shogun whenever I change docs of SGObject.h
+@HeikoS	and it takes time
+@HeikoS	and yes the ccache is on
+ lisitsyn	uhm that's not going to be fixed
+ CaBa	HeikoS: do you push that clone_parameter() directly to develop?
+@HeikoS	CaBa: I might
+@HeikoS	CaBa: but maybe prefer a PR
+@HeikoS	since travis can have a look then
+@HeikoS	so CaBa
+@HeikoS	once it is merged, you can just create an empty instance of your kernel
+@HeikoS	and then call the method providing another one
+ CaBa	cool
+@wiking	HeikoS, yeah sgobject touches everything
+@wiking	;)
+-!- travis-ci [~travis-ci@ec2-54-90-131-18.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/203394836
+-!- travis-ci [~travis-ci@ec2-54-90-131-18.compute-1.amazonaws.com] has left #shogun []
+@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  opened by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646
+@HeikoS	CaBa: https://github.com/shogun-toolbox/shogun/pull/3646
+@HeikoS	lets see what travis says
+@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646
+@HeikoS	gnaa
+@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646
+@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646
+@HeikoS	ok lunch time
+ CaBa	tjanks
+-!- CaBa [~Diu7saig@unaffiliated/caba] has left #shogun []
+-!- CaBa [~Diu7saig@unaffiliated/caba] has joined #shogun
+@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646
+-!- goksinen [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has joined #shogun
+-!- goksinen [~goksinen@2604:2000:c591:8400:3420:31fb:5538:73fd] has quit [Ping timeout: 240 seconds]
+ CaBa	HeikoS: seems broken unfortunately
+ CaBa	just a sec
+ CaBa	might be me... my feature class is also self baked :P
+@wiking	HeikoS, here?
+@wiking	so here's our infra for cloud
+@wiking	lisitsyn, HeikoS https://github.com/shogun-toolbox/shogun-cloud/tree/master/backend/aws
+@wiking	:)
+-!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has joined #shogun
+-!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has quit [Ping timeout: 240 seconds]
+@HeikoS	wiking: now
+@HeikoS	CaBa: no it is broken, fixing
+@wiking	HeikoS, there's the cloud :)
+@HeikoS	wiking: nice
+@HeikoS	so I just talked to Arthur
+@HeikoS	we will use it
+@HeikoS	in march already
+@HeikoS	wiking: i need to actually check out what you did there
+@HeikoS	this is some framework import
+@wiking	yes
+ CaBa	HeikoS: yeah i also ran into more trouble with it...
+ CaBa	some memory access... didnt really figure out where it comes from though
+@HeikoS	CaBa: yeah I got the order of the copy wrong
+ CaBa	HeikoS: ah :)
+@HeikoS	so copying uninitialised memory into the one that I wanted rather than the other way around
+ CaBa	HeikoS: i also commented some minor stuff on the diff
+@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 240 seconds]
+@wiking	getting there https://hub.docker.com/r/shogun/jupyterhub/
+@wiking	:)
+@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646
+-!- HeikoS [~heiko@eduroam-int-pat-8-27.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ CaBa	HeikoS: looks better now
+@HeikoS	yeah it might work now
+@HeikoS	will still wait for travis ok?
+ CaBa	HeikoS: sure, i cherry picked to my own temp branch until then
+ CaBa	which is based on develop from last october *duck* :P
+@HeikoS	lol
+@HeikoS	where are you based btw?
+ CaBa	HeikoS: berlin
+@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  synchronized by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646
+@HeikoS	we should oeganise another workshop there
+@HeikoS	did we ever meet?
+@HeikoS	wiking, lisitsyn we need to have some kind of systematic testing for our REQUIRE etc
+@HeikoS	I bet there is lots of null pointer de-referencing, and other bad stuff
+@HeikoS	its currently never tested that methods throw exceptions on certain inputs
+ CaBa	HeikoS: nope, at least not that i'm aware of :) another student from my grad school visited one of your workshops though iirc, matt
+@HeikoS	ah yeah
+@HeikoS	he fixed R back then
+ CaBa	yep
+@HeikoS	hail the berlin hackers ;)
+ CaBa	;)
+ CaBa	hmhm... now i'm stuck with mem errors again. but this time it seems related to the parallel x-val code i took back in... in combination with my own kernel class
+@HeikoS	the parallel xval can be re-introduced I think
+@HeikoS	as wiking fixed stuff that was causing problems
+@wiking	yeah hopefully
+@wiking	try it
+ CaBa	i'm trying it and i get bad_access here [1] when it reaches my own kernel...https://github.com/lkuchenb/shogun/blob/production/src/shogun/kernel/CombinedKernel.cpp#L240
+ CaBa	i'm trying it and i get bad_access here [1] when it reaches my own kernel...
+ CaBa	[1] https://github.com/lkuchenb/shogun/blob/production/src/shogun/kernel/CombinedKernel.cpp#L240
+ CaBa	apparently the k pointer is no longer valid
+ CaBa	*sigh*
+ CaBa	i think i have tortured shogun with too much hackery O.O
+@HeikoS	hehe ;)
+-!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has joined #shogun
+-!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has quit [Ping timeout: 240 seconds]
+-!- HeikoS [~heiko@eduroam-int-pat-8-27.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- OXPHOS [401e476d@gateway/web/freenode/ip.64.30.71.109] has joined #shogun
+-!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has joined #shogun
+-!- lambday [31cf349d@gateway/web/freenode/ip.49.207.52.157] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+-!- goksinen [~goksinen@2604:2000:f64b:c700:3067:a1ec:ec57:e5c6] has quit [Ping timeout: 240 seconds]
+ CaBa	wiking: i guess i should move forward from my october 2016 shogun if i want to use the parallel x-val code? i'm running into mem issues, but those were fixed in the backend in the meantime you said?
+ CaBa	hm, i'm even in december with my codebase. so maybe those are already included and not the cause :(
+@wiking	mmm
+@wiking	what do you mean meamleaks?
+@wiking	and yeah there are may shit fixed
+@wiking	in the last 1 month
+@wiking	so rebase with upstream/develop is encouraged
+@wiking	if u can
+ CaBa	i'll work my way through the rebase first and check if it's still a problem
+@sukey	Pull Request #3646 "pull cloning all parameterers out to a seperate method"  merged by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3646
+@sukey	New Commit "Merge pull request #3646 from karlnapf/feature/clone_refactor
+@sukey	pull cloning all parameterers out to a seperate method" to shogun-toolbox/shogun by karlnapf: https://github.com/shogun-toolbox/shogun/commit/ce652852c504edfad450a68e8b664702fcbd0b9c
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	CaBa: merged it
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-90-131-18.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/203510088
+-!- travis-ci [~travis-ci@ec2-54-90-131-18.compute-1.amazonaws.com] has left #shogun []
+ CaBa	HeikoS: neat
+ CaBa	HeikoS: shogun won't build, at least for me...
+ CaBa	In file included from /Users/lk/RESEARCH/external/shogun/src/shogun/statistical_testing/MultiKernelQuadraticTimeMMD.cpp:41:0:
+ CaBa	/Users/lk/RESEARCH/external/shogun/src/shogun/statistical_testing/internals/mmd/ComputeMMD.h: In member function 'shogun::SGVector<double> shogun::internal::mmd::ComputeMMD::operator()(const shogun::internal::KernelManager&) const':
+ CaBa	/Users/lk/RESEARCH/external/shogun/src/shogun/statistical_testing/internals/mmd/ComputeMMD.h:132:10: error: ambiguous overload for 'operator[]' (operand types are 'shogun::SGVector<double>' and 'std::size_t {aka long unsigned int}') result[k]=compute(terms[k]);
+ CaBa	does that ring a bell to either of you?
+ CaBa	wiking: anything special, mac-wise lately?
+ CaBa	building with GCC 6.3
+-!- lambday [31cf349d@gateway/web/freenode/ip.49.207.52.157] has quit [Ping timeout: 260 seconds]
+@HeikoS	CaBa: thats a recent feature branch
+@HeikoS	that has been merged
+@HeikoS	we need to fix that
+@HeikoS	can you post the error on an issue and poke @lamday
+@HeikoS	he is fixing things for that atm
+-!- OXPHOS [401e476d@gateway/web/freenode/ip.64.30.71.109] has quit [Ping timeout: 260 seconds]
+ CaBa	HeikoS: what branch was that?
+@sukey	Issue #3647 "Build fails" opened by lkuchenb - https://github.com/shogun-toolbox/shogun/issues/3647
+@sukey	Issue #3647 "Build fails"- https://github.com/shogun-toolbox/shogun/issues/3647
+ CaBa	HeikoS: so how far do i have to go back to get a build through?
+@HeikoS	before sunday
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 260 seconds]
+ CaBa	wiking: ping
+ CaBa	wiking: do you build against colpack on mac os>?
+ CaBa	wiking: you have killed my 'ENABLE_COLPACK' :P
+ CaBa	wiking: actually it's protbuf that is causing my trouble. anyways - have all the options disappeard?
+ CaBa	*dissappeared?
+ CaBa	.oO(i'll give up spelling that correctly)
 --- Log closed Tue Feb 21 00:00:34 2017

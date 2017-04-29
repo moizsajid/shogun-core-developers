@@ -1,0 +1,62 @@
+--- Log opened Wed Aug 19 00:00:42 2015
+-!- PirosB3 [~pirosb3@host227-133-dynamic.33-79-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host227-133-dynamic.33-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+ shogun-buildbot	build #1035 of nightly_default is complete: Failure [failed test notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1035  blamelist: Wu Lin <yorker.lin@gmail.com>
+-!- witness [uid10044@gateway/web/irccloud.com/x-vrlfiqmevxpdahmk] has joined #shogun
+-!- witness [uid10044@gateway/web/irccloud.com/x-vrlfiqmevxpdahmk] has quit [Quit: Connection closed for inactivity]
+-!- PirosB3 [~pirosb3@host227-133-dynamic.33-79-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host227-133-dynamic.33-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@host227-133-dynamic.33-79-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host227-133-dynamic.33-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+@besser82	lisitsyn, yo?
+ lisitsyn	besser82: hey
+@besser82	lisitsyn, You have a constructive idea, how to avoid ptr when instanciating classes from plugins?
+ lisitsyn	well just shared_ptr :D
+@besser82	I mean in shogun with plugins it'd be like this:  CSVM* my_svm = whateverpluginstuff.instance('libsvm') ;
+ lisitsyn	yes
+@besser82	That's ugly, because not all PhD can work with ptr
+ lisitsyn	shared_ptr<CSVM> my_svm = shogun.instance('libsvm');
+@besser82	So I'd prefer real object...
+ lisitsyn	yes shared_ptr :)
+@besser82	like:  CSVM = some_magick_here_to_get.instace('libsvm');   :P
+@besser82	shared_ptr / unique_ptr will be the same mess...
+ lisitsyn	ok we can make all our objects shared_ptrs inside
+ lisitsyn	so these object are lightweight and we can copy them
+@besser82	lisitsyn, like:
+@besser82	class CSVM {
+@besser82	public:
+@besser82	fancy_types params;
+@besser82	private:
+@besser82	shared_ptr<CSVMpriv> dptr;
+@besser82	}
+@besser82	?
+@besser82	Would be an idea...  So wrapper class should work it
+@besser82	lisitsyn, ^
+ lisitsyn	yes
+ lisitsyn	besser82: CSVM is just a really light wrapper
+@besser82	lisitsyn, sounds good  ^^
+@besser82	lisitsyn, lemme try around with that a bit...
+@besser82	It think stuff should be ready for first experiments within the next days
+@besser82	but we need to expose the header of CSVM_impl for the plugin then  ;)
+ lisitsyn	no
+ lisitsyn	use forward declaration
+ lisitsyn	you don't need full declaration for shared_ptr
+@besser82	lisitsyn, but the plugin-class needs to inherit from CSVM_impl...  ;)
+-!- PirosB3 [~pirosb3@host227-133-dynamic.33-79-r.retail.telecomitalia.it] has joined #shogun
+ lisitsyn	besser82: hmm yeah
+ lisitsyn	but that's ok
+ lisitsyn	it could be in .cpp
+@besser82	lisitsyn, yes, but then we'd have to dup it in to a kazillion different svm-plugz
+ lisitsyn	why?
+ lisitsyn	svm.h forward declares SVMImpl
+ lisitsyn	svm_impl.h declares SVMImpl
+ lisitsyn	svm.h *doesn't* include svm_impl.h
+ lisitsyn	fancy_svm.h *does* include svm_impl.h
+@besser82	ahhh...  now it's clearer  :P
+@besser82	I though of like directly written in cpp  :P
+ lisitsyn	I think this should work
+@besser82	lisitsyn, ^
+@besser82	yes, it will
+@besser82	afaik
+-!- PirosB3 [~pirosb3@host227-133-dynamic.33-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+--- Log closed Thu Aug 20 00:00:44 2015

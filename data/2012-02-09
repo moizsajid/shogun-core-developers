@@ -1,0 +1,241 @@
+--- Log opened Thu Feb 09 00:00:19 2012
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- dfrx [~f-x@inet-hqmc02-o.oracle.com] has joined #shogun
+-!- n4nd0 [~androirc@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~androirc@s83-179-44-135.cust.tele2.se] has quit [Remote host closed the connection]
+-!- wiking [~wiking@78-22-115-59.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-22-115-59.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~androirc@n151-p201.kthopen.kth.se] has joined #shogun
+-!- n4nd0 [~androirc@n151-p201.kthopen.kth.se] has quit [Quit: AndroIRC - Android IRC Client ( http://www.androirc.com )]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Read error: Operation timed out]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- dfrx [~f-x@inet-hqmc02-o.oracle.com] has quit [Quit: Leaving.]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~androirc@n151-p201.kthopen.kth.se] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection reset by peer]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ wiking	mm those are 2011 ideas that have not been implemented?
+-!- axitkhurana [~akshit@180.149.49.227] has joined #shogun
+-!- n4nd0 [~androirc@n151-p201.kthopen.kth.se] has quit [Read error: Connection reset by peer]
+-!- akshit_ [~akshit@210.212.58.111] has joined #shogun
+-!- axitkhurana [~akshit@180.149.49.227] has quit [Ping timeout: 248 seconds]
+-!- iglesias [~androirc@n151-p201.kthopen.kth.se] has joined #shogun
+-!- iglesias [~androirc@n151-p201.kthopen.kth.se] has quit [Ping timeout: 252 seconds]
+ wiking	why is that that when i create a kernel with the constructor with the left and right hand features shogun runs parallel, i.e. all 4 of my cores are used by shogun, while if i create the kernel with the default constructor and after that i call init function with the left and right-hand features, shogun runs only on one cpu
+ wiking	talking here about multiclasssvm train/classification
+-!- akshit_ [~akshit@210.212.58.111] has quit [Ping timeout: 240 seconds]
+-!- blackburn [~qdrgsm@83.234.54.5] has joined #shogun
+ blackburn	sonney2k: we've got Cheng Soon as Action Editor :)
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has joined #shogun
+ wiking	blackburn: heeey
+ wiking	blackburn: got another question... it's more about the internals of shogun...
+ wiking	blackburn: why is that that when i create a kernel with the constructor with the left and right hand features shogun runs parallel, i.e. all 4 of my cores are used by shogun, while if i create the kernel with the default constructor and after that i call init function with the left and right-hand features, shogun runs only on one cpu
+ n4nd0	hi there
+ n4nd0	yesterday I installed shogun with support for the matlab static interface
+ n4nd0	but I get some troubles trying out some of the examples
+ n4nd0	do I have to install matlab_modular or any other for them to work or is it another problem?
+ n4nd0	has someone installed before cplex in ubuntu?
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 252 seconds]
+ blackburn	wiking: no idea, will have to check later
+ wiking	mmm
+ blackburn	wiking: but you can use kernel.parallel.set_num_threads(4)
+ wiking	tried
+ wiking	no help
+ blackburn	to set it explicitly
+ wiking	it seems there's something else
+ wiking	because during training time it's always sequential, i.e. never use threads
+ wiking	but for some reason in case of histogramintersectionkernel there's a different speed depending on which constructor i'm using
+ wiking	although i know it doesn't make much sense, but this is what i get :S
+ blackburn	what exactly do you do?
+ blackburn	funny I use HIK too now :)
+ wiking	hehehe
+ wiking	well i'm trying to test my features with different kernels
+ wiking	so my usual thing is to create a kernel and then do the init
+ wiking	i mean do it later the init, after i've created the right kernel
+ wiking	and so with HIK it's weird
+ wiking	with poly kernel it's fine for instance
+ blackburn	well there is no difference between ^ and ^
+ blackburn	I mean CKernel class is parallelized
+ blackburn	not particular ones
+ wiking	yeah
+ wiking	i've checked the c++ code
+ wiking	so it's really weird
+ wiking	but now it's not even that
+ wiking	because as far as i can see now
+ wiking	the training time is never parallel
+ wiking	so it's always running on one cpu
+ wiking	but somehow when i use one or the other way of constructing the HIK kernel
+ wiking	the training time is very different
+ wiking	so let's say one way is like 10-20 seconds
+ wiking	the other way it's at least 2-3 minutes
+ blackburn	could u please paste the code somewhere?
+ wiking	ok sure
+ wiking	letme pastebin it
+ wiking	but note that i'm using java api
+ blackburn	well should not make any difference
+ blackburn	but who knows :D
+ wiking	ok
+ wiking	here's the snippet of the code: http://pastebin.com/2pGUjKw4
+ wiking	and depending on line 35 boolean you'll get slow or 'norma'/fast training time
+ blackburn	hmm I see
+ blackburn	the same cache size!
+ blackburn	strange it could act in a different way
+ wiking	yeah
+ wiking	so i've tried to set everything the same
+ wiking	just the way i construct the kernel is different
+ wiking	i've checked the cpp code
+ wiking	i cannot see the difference
+ blackburn	me neither
+ wiking	so now the only thing is somewhere in the java modular stuff
+ wiking	something happens
+ wiking	i've tried to turn on debugging mode
+ blackburn	no, can't be true
+ wiking	but i couldn't get there
+ wiking	for some reason the inheritance thingy is not working in java
+ wiking	i.e. i cannot call kernel.parallel.get_num_cpus ()
+ blackburn	really?
+ blackburn	bad,bad
+ wiking	i have to do first a kernel.get_global_parallel
+ wiking	and then do the thingy there
+ blackburn	do you think it is parallel issue?
+ wiking	nah not really
+ wiking	as said
+ wiking	i've tried to monitor the number of threads
+ wiking	it's always 4, i.e. as many core i have
+ wiking	and in train time i never get more than 1 threads running
+ blackburn	LaRank is not parallelized so it is ok
+ wiking	so it's not really the parallelization problem
+ wiking	it's more like, why does it run slower
+ blackburn	in fact we have no svm with parallel training
+ blackburn	that's really strange
+ blackburn	sorry I have to go now, but I'll check a little bit later
+ wiking	i think some flag is not turned on in some if branch
+ wiking	but i'll try to do first the same thing with a silly
+ wiking	c++ code
+ wiking	if i can get the same thing
+ wiking	ok no worries thnx!
+ blackburn	are you subscribed to the mailing list?
+ blackburn	I would suggest you to create github issue or write to the mailing list
+ blackburn	if you want
+ wiking	ah ok i'll do the github issue then
+ blackburn	thanks
+ wiking	nw
+ blackburn	it would be easier then to take care :)
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	n4nd0: what is the problem with matlab?
+ n4nd0	blackburn, so there were a couple of issues
+ n4nd0	blackburn, the one that I was concerned about was that the lpboost example does not run
+ n4nd0	blackburn, it says sth like classifier LPBOOST not found
+ blackburn	n4nd0: matlab static?
+ n4nd0	blackburn, I have looked it up on google and it seems that cplex is required for it to work so I am with that right now
+ n4nd0	blackburn, yes, I am using matlab static this far
+ blackburn	ah yes
+ n4nd0	blackburn, should it be an issue static or modular just to try the example out?
+ n4nd0	blackburn, I found that example under matlab_static so I assumed that it should work there also
+ n4nd0	there too*
+ blackburn	well should work indeed
+ blackburn	but cplex is required I guess
+ blackburn	lemme check
+ n4nd0	let's see then if I managed to get cplex to work
+ n4nd0	yeah I found that in this forum
+ blackburn	you could check it by yourself too :) just take a look on classifier/LPBoost.h
+ blackburn	there is a #ifdef HAVE_CPLEX
+ blackburn	so just install cplex and ./configure, etc
+ n4nd0	didn't think of looking it up in the code :-O
+ n4nd0	the other problem I found is that all the data directories are empty
+ n4nd0	I made first a defauult installation: ./configure, make, make install
+ n4nd0	and later another one with ./configure interfaces=matlab_static
+ n4nd0	but those directories are empty in any case
+ blackburn	ah
+ blackburn	do
+ blackburn	git submodule update --init
+ blackburn	IIRC
+ blackburn	or git submodule --init update
+ blackburn	that's a typical problem for sure
+ blackburn	it is because shogun and shogun-data are two different repos
+ n4nd0	mmm I installed it from the compressed directory so I must first activate the repo
+ blackburn	uh oh
+ blackburn	then I would suggest you to git clone shogun :)
+ blackburn	no idea how to activate it from compressed one
+ n4nd0	all right
+ n4nd0	I will take a look to that once I am done with the cplex issue
+ n4nd0	thank you very much :D
+ blackburn	you're welcome :)
+ blackburn	wiking: did you get any progress with this strange issue? :)
+ wiking	blackburn: none yet... postponed it... now i'm using the lil hack which is faster... since i would really like to get to the point where i can try out MKL on multi class :) that was the main reason i've started to write my shogun wrapper in my code... ;)
+ blackburn	wiking: okay sure
+ wiking	aaha coool
+ wiking	i've just realized that i can iterate through the features i've appended to the CombinedFeatures
+ blackburn	I feel butthurt remembering that there was a leak in java interface :D
+ blackburn	it was reproduced with HUGE mkl script
+ wiking	uff
+ blackburn	okay heading to bed right now
+ blackburn	see you
+ wiking	hahahah
+ wiking	let's see what happens
+ wiking	i really wouldn't like to rewrite now the whole thing in python or c++ :>
+ wiking	anyhow gnite
+ blackburn	nooo
+ blackburn	bug is not here anymore
+ blackburn	I hope
+ blackburn	it was CustomKernel issue
+ blackburn	but consider using python anyway, it is much cooler for shoguning :)
+ wiking	hahahahah
+ wiking	i'm using mahout as well
+ wiking	so i need a common ground :>
+ blackburn	I've never used it
+ wiking	it's cool
+ blackburn	ah yeah makes sense
+ wiking	but it's mainly developed for text processing
+ blackburn	is it for distributed things?
+ wiking	yep
+ wiking	based on hadoop
+ wiking	but for me that's just for acquiring the features
+ blackburn	I see
+ wiking	so it's good otherwise with shogun
+ blackburn	but they don't have many svms :D
+ wiking	until now i was using weka :>
+ wiking	but it's kind of like sucks as well with their limited kernels...
+ blackburn	what do you mean saying limited?
+ wiking	well like i really wanted HIK
+ wiking	and now i really hope i'm getting some boost with MKL
+ blackburn	with which features do you use HIK?
+ wiking	ah i'm doing image classification
+ blackburn	color histograms?
+ wiking	sift histogram
+ wiking	so basically bag of visual words...
+ blackburn	I used to do similar thing
+ wiking	ah and what's now? :)
+ blackburn	actually I'm going to implement some IKSVM a little bit later
+ wiking	mmm paper?
+ blackburn	http://acberg.com/papers/mbm08cvpr.pdf
+ blackburn	this one
+ wiking	ash a cvpr one :)
+ wiking	cool i'll give it a read
+ wiking	btw
+ wiking	any plan for latent svm
+ wiking	?
+ blackburn	not really, I don't know much about latent svms yet
+ blackburn	I used to implement dim reduction things so I'm pretty new to svms still hah
+ blackburn	okay now going to sleep really :)
+ blackburn	see you later
+ wiking	laterz
+ blackburn	we should exchange experience later :)
+-!- blackburn [~qdrgsm@83.234.54.5] has quit [Quit: Leaving.]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 246 seconds]
+-!- wiking_ [~wiking@huwico/staff/wiking] has quit [Ping timeout: 248 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Client Quit]
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 265 seconds]
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has joined #shogun
+--- Log closed Fri Feb 10 00:00:19 2012

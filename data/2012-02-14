@@ -1,0 +1,356 @@
+--- Log opened Tue Feb 14 00:00:19 2012
+-!- blackburn [~qdrgsm@188.168.4.209] has quit [Quit: Leaving.]
+-!- dfrx [~f-x@inet-hqmc07-o.oracle.com] has joined #shogun
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- karlnapf [~heiko@host86-180-120-146.range86-180.btcentralplus.com] has joined #shogun
+ karlnapf	sonney2k, around?
+ sonne|work	karlnapf: yes
+ karlnapf	sonne|work, hi, nice to see that you are still alive :) hope everything is going well. Do you have a minute?
+ sonne|work	we will soon go for lunch but before that yes
+ sonne|work	(and afterwards too)
+ karlnapf	ok then quick:
+ karlnapf	its currently not possible to do modelselection with custom kernels
+ sonne|work	that is true
+ karlnapf	since the splitting is done on the features
+ sonne|work	ok
+ karlnapf	And I think the only way to do this is to be possible to specify indices for training
+ karlnapf	(and applying)
+ karlnapf	but for this, the data has to stay fixed
+ sonne|work	true
+ karlnapf	with the current apply() methods this does not work
+ karlnapf	since apply() works an all features, apply(CFeatures) changes the features
+ karlnapf	same thing for train
+ sonne|work	but if you set the subset before it would -right?
+ karlnapf	subset on features?
+ sonne|work	yes
+ karlnapf	but the custom kernel has no features
+ karlnapf	The values it returns are not based on features
+ sonne|work	it has DummyFeatures
+ karlnapf	I know but the way it returns the value does not involve these
+ sonne|work	(a NOP just returning #lhs / #rhs)
+ karlnapf	I worked around this in my repo by setting a subse not to the features but to the kernel
+ sonne|work	but one could change this right?
+ sonne|work	argh
+ sonne|work	the others leave just now
+ karlnapf	oh
+ karlnapf	ok :)
+ sonne|work	so hope you are still around in 1 hour?
+ karlnapf	well lets continue later then :)
+ karlnapf	probably, but not completely sure
+ karlnapf	see you then
+-!- dfrx [~f-x@inet-hqmc07-o.oracle.com] has left #shogun []
+-!- n4nd0 [~n4nd0@n145-p102.kthopen.kth.se] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: @sonney2k, CIA-18, shogun-buildbot_
+-!- Netsplit over, joins: shogun-buildbot_, CIA-18, @sonney2k
+ sonne|work	karlnapf: Re
+ CIA-18	shogun: Soeren Sonnenburg master * rcda7657 / src/shogun/mathematics/Math.h : minor source code beautification - http://git.io/zLy5Kw
+ CIA-18	shogun: Soeren Sonnenburg master * ra044c79 / src/shogun/lib/DataType.h : introduce clone() function to SGVector - http://git.io/tclRpQ
+ CIA-18	shogun: Soeren Sonnenburg master * r107e9f9 / (src/shogun/features/Labels.cpp src/shogun/features/Labels.h):
+ CIA-18	shogun: Remove m_num_classes from CLabels and change get_num_(unique,)classes()
+ CIA-18	shogun: This adds a more efficient mechanism to determine the number of classes.
+ CIA-18	shogun: Instead of adding labels to a set, perform a sort + unique count. This
+ CIA-18	shogun: fixes an issue when using labels for regression (and crazily slow
+ CIA-18	shogun: behaviour). - http://git.io/xR86Sw
+ CIA-18	shogun: Soeren Sonnenburg master * r7cf941e / (2 files): fix warning in multiclass accuracy - http://git.io/Lqmb0Q
+ karlnapf	sonne|work hi
+ sonne|work	karlnapf: hi :)
+ karlnapf	so, where were we?
+ karlnapf	so your point is to modify the customKernel so that it somehow maps the subset indices of the underlying features
+ karlnapf	then modelselection would work with it
+ karlnapf	Still it would be nice when you could tell the x-val to reuse a kernel matrix in different runs
+ karlnapf	but the problem is that it only has a CMachine reference
+ karlnapf	so no kernels at all there.
+ karlnapf	sonne|work dont you think this might be handy? Then one wouldnt have to precompute all the matrices duing model selection by hand before but just pass a flag or so
+-!- n4nd0 [~n4nd0@n145-p102.kthopen.kth.se] has quit [Quit: Leaving]
+-!- nando [~nando@n145-p102.kthopen.kth.se] has joined #shogun
+-!- nando is now known as n4nd0
+ sonne|work	karlnapf: sorry got interrupted
+ karlnapf	np
+ karlnapf	I have to leave in about 20 min, if you are busy till then lets just discuss by mail/github
+ sonne|work	karlnapf: I guess from the user perspective it is
+ sonne|work	all a user wants is give the thing data get result as fast as possible - do whatever necessary inbetween
+ sonne|work	so this means precompute matrix / re-use kernel cache etc
+ karlnapf	yes
+ sonne|work	problem is that it makes things very complex
+ sonne|work	karlnapf: Don't you think that this becomes a bit too tough to control?
+ karlnapf	how do you mean that?
+ karlnapf	I mean all that has to be done is to replace the current kernel by a custom kernel with precomputed matrix and restore afterwards
+ karlnapf	the rest of the framework just uses the kernel as normal and does not even know thats its now a custom kernel
+ karlnapf	I mean you are right this adds complexity
+ sonne|work	yeah but what happens if the training process is interrupted?
+ sonne|work	ctrl +c
+ karlnapf	and then?
+ sonne|work	then the object has a customkernel assigned to it
+ karlnapf	Oh, yes, but if this locking would be used
+ sonne|work	not the one it had before
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection reset by peer]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ karlnapf	it should not be possible to do any of the normal stuff if the machine is locked
+ karlnapf	and unlocking restores the old configuration
+ sonne|work	I understand hmmhh. so lets summarize the benefits
+ karlnapf	for example train is only implemented in CMachine
+ karlnapf	there could be a check
+ sonne|work	hmmhh and the kernel machine could do the kernel precomputing (if e.g. < 5000 examples / sufficiently many kernel matrices need computation)
+ sonne|work	otherwise attempt kernel matrix cache re-use
+ karlnapf	I dont have too much overview in the kernel cache
+ karlnapf	but yes, the precomputation is done in KernelMachine
+ karlnapf	other machines could do different things (dont have a case in mind yet)
+ karlnapf	This also automatically makes x-val over custom kernels possible
+ karlnapf	because you can simply create a custom kernel from a custom kernel
+ sonne|work	but this requires twice the memory then right?
+ karlnapf	no just use the same
+ sonne|work	ahh you get just the ptr for custom kernel right? not a copy
+ sonne|work	?
+ karlnapf	yes
+ karlnapf	BTW do you know whats this about with the float32 matrices in custom kernel?
+ karlnapf	because that causes problems with the above procedure
+ sonne|work	I mean get_kernel_matrix returns the copy
+ sonne|work	ohh
+ sonne|work	for efficiency
+ karlnapf	k
+ sonne|work	customkernel tries to save memory
+ karlnapf	well CustomKernel would have to override the get_kernel_matrix method
+ sonne|work	that is why float instead of double
+ karlnapf	ok
+ sonne|work	so we need a copy too then :(
+ karlnapf	no
+ karlnapf	the CustomKernel can be created from a float32
+ sonne|work	yeah but when you do get kernel matrix?
+ sonne|work	ok you could get a float32 variant
+ sonne|work	should be ok I guess
+ karlnapf	yes, also the get_kernel_matrix is only called from a CustomKernel who wants to have the same matrix
+ karlnapf	no calling of this method from outside
+ karlnapf	if it is, a copy has to be returned, but this makes not really sense
+ karlnapf	I added this method to CustomKernel
+ karlnapf	SGMatrix<float32_t> get_kernel_matrix()
+ karlnapf	{
+ karlnapf	return kmatrix;
+ karlnapf	}
+ sonne|work	I see
+ karlnapf	then when the Constructor CCustomKernel(CKernel*) is used his is called
+ sonne|work	for customkernels...
+ karlnapf	only problem is with the free in destrucor because we dont want to second custom kernel to delete the oiginal matrix
+ karlnapf	yes, this is just to make the x-val work on custom kernels
+ sonne|work	argh yes
+ sonne|work	I wonder if it was the right decision to not have reference counts for SGVector/matrix objects
+ sonne|work	instead of the do_free flag
+ karlnapf	yes the counting would be nice here :)
+ sonne|work	there are other places where this is annoying
+ karlnapf	I dont like the do_free too much since I never know whether its used clean, so I tend to use the destroy_vector method and make sure that I know whats going on (where the vector comes from etc)
+ karlnapf	but anyway
+ karlnapf	the matrix could only be deleted if a flag is set or so
+ sonne|work	which means we should replace it by ref counts
+ karlnapf	Why dont you use a matrix class btw?
+ sonne|work	so the current x-val will call CMethod.data_lock ?
+ karlnapf	no
+ sonne|work	you mean sth else instead of SGMatrix?
+ karlnapf	yes
+ sonne|work	who has to lock the data?
+ karlnapf	two possibilities:
+ sonne|work	shouldn't x-val do it?
+ karlnapf	no because sometimes you want to do multiple x-vals on same kernel (for example for C)
+ karlnapf	so either the grid-search class does it for everxy parameter change
+ sonne|work	Re SGMatrix - this is only meant as a simple struct to store the data plus some minor helpers no real matrix class (we use blas etc for that underneath whereever possible)
+ karlnapf	or, the user (optionally) if he only wants to to x-val
+ karlnapf	ah ok
+ karlnapf	xval just check whether data is locked and then uses the corresponding train/apply methods
+ sonne|work	but the missing reference count is really a design flaw
+ karlnapf	yes would be nice to have but I guess this is a lot of work
+ sonne|work	not too much but I don't have any time :(
+ sonne|work	so is it best to do it in grid search?
+ karlnapf	yes, I think so
+ karlnapf	one could even only do it if a kernel parameter has changed, but thats too complicated for now I think
+ sonne|work	I mean it would be nice to do the locking automagically (optionally forced on/off of course (some enum MODSEL_LOCK_AUTO / OFF / ON)
+ karlnapf	yes
+ karlnapf	that would be nice
+ karlnapf	for example if train_locked is called, its locked automatically
+ karlnapf	but the problem is
+ karlnapf	that the unlocking has to be done by hand
+ sonne|work	nahh
+ karlnapf	because machine does not know when something has changed
+ sonne|work	doesn't the grid-search on top know?
+ karlnapf	yes
+ karlnapf	it currently does a lock before evaluation and unlock after
+ karlnapf	(if the flag was set)
+ karlnapf	otherwise it just does the old way
+ sonne|work	so it should set the flag itself
+ karlnapf	yes it does
+ karlnapf	Gridsearch gets a boolean wheather it should lock, then everythign is done internally
+ karlnapf	xval does not
+ karlnapf	since user may have locked before
+ karlnapf	if you just want to evaluate a machine you lock it and then perform xval
+ karlnapf	if xval would always lock then you would have double computations
+ karlnapf	also:
+ karlnapf	imagine you have a kernel which does not change but svm params that do and you want to do a search
+ sonne|work	couldn't xval test if things are locked and only then lock?
+ karlnapf	then you lock machine before and then tell grisearch to not lock
+ karlnapf	kernel is not recomputed, but machine is locked all he time so its fast
+ karlnapf	yes it could
+ karlnapf	I mean all kinds of user-friendly stuff could be added for this
+ karlnapf	if it would automatically lock if not yet locked
+ karlnapf	gridserach would just have to unlokc after each iteration
+ sonne|work	ok - I would want to hide all this locking from the user
+ sonne|work	and only add some property to gridsearch/xval that one can manually set
+ sonne|work	to override our decision
+ karlnapf	yes one flag in select_model method
+ karlnapf	the old examples still all run without anything changes (except for some signatures)
+ karlnapf	if somebody does not know about all this, everything is as it was
+ karlnapf	about the hiding the stuff. Since the user has to understand when locking is good when its not, I like that it has to be done manually
+ sonne|work	well we should do the best guess
+ karlnapf	for example in the case of ixed kernel search for SVM-C
+ karlnapf	The locking would be stupid
+ karlnapf	since kernel does not change
+ sonne|work	so for many parameter-combinations / small kernels
+ karlnapf	I mean locking in every iteration
+ karlnapf	yes
+ sonne|work	yeah but you know this in grid search
+ karlnapf	yes, so just lock mannually before once and then tell grid-search to not lock
+ sonne|work	wait - it makes sense there to precompute the kernel
+ karlnapf	yes but only once
+ sonne|work	but only once right?
+ karlnapf	not for every C
+ sonne|work	yeah but this we need to determine automagically somehow
+ karlnapf	how?
+ sonne|work	locking makes only sense if features change
+ sonne|work	so do it once for constant set of features
+ karlnapf	the problem is that the modelselection does not distinguish between kernel parameters and machine parameters
+ karlnapf	I thought of extracting the parameter combinations where the kernel params are fixed and then only lock for these
+ karlnapf	but then you would have to add knowledge about possible subclasses there
+ karlnapf	what about other machines, how to they do the locking?
+ karlnapf	for example we also got the distance matrices
+ karlnapf	Thats why I prefered the manually locking before there
+ sonne|work	seems like we need another flag - parameter changes data representation
+ sonne|work	manual locking is very tough for the user to get right
+ sonne|work	x-val/grid search is already pretty complicated
+ sonne|work	so we should hide that stuff if possible
+ karlnapf	In the basic case he does not have to do anything
+ karlnapf	I mean for model selection
+ karlnapf	only if he uses x-val manually
+ karlnapf	and if he wants to save more time while model selection
+ karlnapf	the x-val manually case could be done automatically though
+ karlnapf	x-val should always (flag) try to lock if its not done yet
+ sonne|work	exactly
+ karlnapf	ah, but what about the unlocking
+ karlnapf	this cannot be done automatically for xval
+ sonne|work	unlock if it has locked it
+ sonne|work	why not?
+ karlnapf	Because of this case where a grid-search was performed on locked data
+ karlnapf	then the kernel would always be recomputed
+ sonne|work	yeah but it didn't lock it itself then
+ karlnapf	eventhough it does not change
+ karlnapf	oh yes
+ karlnapf	Should be ok then
+ sonne|work	x-val just stores that it has to unlock later
+ CIA-18	shogun: Soeren Sonnenburg master * r3649f3b / (31 files in 9 dirs):
+ CIA-18	shogun: Merge pull request #367 from karlnapf/master
+ CIA-18	shogun: A draft for training on fixed kernel matrices/data in general - http://git.io/qv89yQ
+ karlnapf	Ok I will change the stuff we talked about soon
+ sonne|work	we don't have to work it out all at once - step by step is ok.
+ karlnapf	yes
+ karlnapf	I have locally added parallelization of apply_locked
+ karlnapf	in KernelMachine
+ sonne|work	I would love to have this much easier nested list way of specifying how grid search has to be done (from the python side)
+ karlnapf	yes
+ karlnapf	scicit is nice there
+ wiking	sonne|work:  just sent you my benchmark results... if you have any better idea how to do the benchmarking let me know...
+ sonne|work	yes - not as powerful but nice
+ karlnapf	but the framework itself is not so nice as ours :)
+ karlnapf	yes,
+ karlnapf	but this could be done for us
+ sonne|work	and after all the most common case is what counts
+ karlnapf	Say another thing
+ sonne|work	so if we make it simple for the most common cases
+ sonne|work	things would be good enough
+ karlnapf	I try to use shogun for university projects, and I really run across a lot of bugs/segfaults/no error messages
+ karlnapf	from python
+ karlnapf	for example in MultiClassSVM I found code which never was wrong but not niticed since it never was used before
+ karlnapf	so I thought of what about separating the examples and tests
+ karlnapf	and add some more tests which try to cover all the code
+ karlnapf	at least for new stuff
+ sonne|work	wiking: why don't you just compute a kernel matrix that has say 10000 * 10000 elements - single threaded maybe. then you could directly measure.
+ karlnapf	?
+ sonne|work	karlnapf: I used multiclasssvm just fine?!? and so did blackburn
+ sonne|work	what happened?
+ karlnapf	use apply(int32_t)
+ sonne|work	karlnapf: we don't have resources in splitting up examples / tests
+ sonne|work	too much work
+ wiking	sonne|work: this seemed to be much faster as this is really just about that function and it's implementation w/o any wrapping stuff...
+ sonne|work	we could have more examples and enable the the tests
+ karlnapf	two problems: a) does not set the kernel to svm before applying b) does not initialise the votes vector with zeros so if one class gets zero votes you return uninitialized emory
+ sonne|work	karlnapf: I never used apply(int32_t) (neither blackburn :)
+ sonne|work	pretty simple explanation :)
+ karlnapf	thats what I meant with code coverage tests :)
+ karlnapf	anyway, I have to go now
+ karlnapf	nice discussion, see you later! :)
+ sonne|work	karlnapf: well if we had an example for apply(int)
+ sonne|work	it would have shown the bug in the first place
+ sonne|work	but we don't...
+ karlnapf	yes, I will add one :)
+ sonne|work	thx
+ sonne|work	cu
+ karlnapf	There are more bugs in MultiClassSVM I am just fixing them cause I need to use it for uni :)
+ karlnapf	bye bye!
+ sonne|work	karlnapf: that is how it should be
+ sonne|work	I am doing the same in code you and others touched :D
+ karlnapf	ok, thats opensource then :D
+-!- n4nd0 [~nando@n145-p102.kthopen.kth.se] has quit [Quit: leaving]
+-!- karlnapf [~heiko@host86-180-120-146.range86-180.btcentralplus.com] has left #shogun []
+-!- n4nd0 [82ede32a@gateway/web/freenode/ip.130.237.227.42] has joined #shogun
+-!- n4nd0 [82ede32a@gateway/web/freenode/ip.130.237.227.42] has quit [Quit: Page closed]
+ CIA-18	shogun: Soeren Sonnenburg master * r3e3db13 / (33 files in 14 dirs):
+ CIA-18	shogun: add linear least squares and ridge regression
+ CIA-18	shogun: This add linear ridge regression and a convenience class
+ CIA-18	shogun: CLeastSquaresRegression calling CLinearRidgeRegression with
+ CIA-18	shogun: regularization parameter tau=0. To not cause confusion KRR is
+ CIA-18	shogun: renamed to KernelRidgeRegression throughout examples/code. - http://git.io/pQJ0OA
+ sonne|work	wiking: https://gist.github.com/1828072
+ wiking	echeckoing
+ wiking	ok so checking :)
+ sonne|work	wiking: there really is no difference sometimes one wins sometimes the other bu really a few s
+ sonne|work	wiking: btw you need to use gettimeofday to get highres timings
+ wiking	heheheh
+ wiking	so tie? :)
+ wiking	none of us gets a drink? :P
+ sonne|work	JS1: 134.6803036
+ sonne|work	JS2: 134.7876117
+ sonne|work	here
+ wiking	anyhow i was meaning to ask if you guys would be interested still in latent-structural svm implementation..
+ sonne|work	but when I run it a couple of times it might very well be vise versa
+ wiking	well i guess that's when the pipeline kicks in
+ sonne|work	wiking: problem might be that alex has no time to mentor...
+ sonne|work	I need to work on that gsoc ideas list (have already a couple of submissions from mentors) ... structured output learning / multiclass / optimization framework would be what I would want to see this year but I am not supermentoring this year :)
+ sonne|work	anyway gtg
+ sonne|work	cu
+ wiking	ca
+ wiking	cya
+-!- Netsplit *.net <-> *.split quits: @sonney2k, shogun-buildbot_, CIA-18
+-!- Netsplit over, joins: CIA-18, @sonney2k
+-!- shogun-t1olbox [~shogun@7nn.de] has quit [Ping timeout: 260 seconds]
+--- Log closed Tue Feb 14 19:09:54 2012
+--- Log opened Tue Feb 14 19:10:01 2012
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 8 nicks [1 ops, 0 halfops, 0 voices, 7 normal]
+-!- Irssi: Join to #shogun was synced in 7 secs
+-!- Netsplit *.net <-> *.split quits: shogun-t1olbox
+-!- blackburn1 [~qdrgsm@188.168.4.71] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: blackburn
+-!- blackburn1 [~qdrgsm@188.168.4.71] has quit [Ping timeout: 248 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	hi there
+ n4nd0	so, is it gsoc a topic to start talking about?
+ n4nd0	any topics that will be interesting this year? I have checked the ideas on the webpage for gsoc 2011
+ shogun-buildbot_	build #149 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/149
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 240 seconds]
+ shogun-buildbot_	build #135 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/135
+ shogun-buildbot_	build #148 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/148
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- nando [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- nando is now known as n4nd0
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- blackburn [~qdrgsm@188.168.4.152] has joined #shogun
+--- Log closed Wed Feb 15 00:00:19 2012

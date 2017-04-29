@@ -1,0 +1,763 @@
+--- Log opened Tue Apr 17 00:00:09 2012
+--- Day changed Tue Apr 17 2012
+ emrecelikten	and get accepted to a conference?
+ emrecelikten	No guidance from anyone whatsoever
+-!- blackburn [~qdrgsm@188.168.2.179] has quit [Ping timeout: 248 seconds]
+ emrecelikten	Apparently no :P
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 276 seconds]
+-!- av3ngr [av3ngr@nat/redhat/x-ucigzyknjltzoyko] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- emrecelikten [~Anubis@176.33.63.94] has quit [Quit: Leaving.]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- vikram360 [~vikram360@117.192.160.167] has quit [Ping timeout: 272 seconds]
+-!- vikram360 [~vikram360@117.192.182.125] has joined #shogun
+-!- vikram360 [~vikram360@117.192.182.125] has quit [Read error: Connection timed out]
+-!- vikram360 [~vikram360@117.192.182.125] has joined #shogun
+-!- gsomix [~gsomix@83.234.54.52] has quit [Ping timeout: 240 seconds]
+ CIA-64	shogun: Josh Klontz master * rb8bec85 / (5 files in 5 dirs): added basic CMake project files - http://git.io/hMwTwg
+ CIA-64	shogun: Soeren Sonnenburg master * rce82cc1 / (5 files in 5 dirs):
+ CIA-64	shogun: Merge pull request #461 from jklontz/master
+ CIA-64	shogun: Remove some deprecated function calls and add cmake project files. - http://git.io/OpDwww
+-!- uricamic [9320543b@gateway/web/freenode/ip.147.32.84.59] has joined #shogun
+-!- vikram360 [~vikram360@117.192.182.125] has quit [Ping timeout: 252 seconds]
+-!- pluskid [~chatzilla@li400-235.members.linode.com] has joined #shogun
+ sonne|work	pluskid: what is the lasso parameter doing in CLARS?
+ pluskid	sonne|work: you mean the regularization coefficient?
+ sonne|work	the parameter in the constructor
+ sonne|work	it can be true or false
+ pluskid	\\\\\\\\\\\\\\\\\\
+ pluskid	oops, cat on keyboard
+ pluskid	when it is true, it runs the LASSO
+ pluskid	when false, it runs LARS
+ pluskid	the LARS algorithm has a modification, which could give us a LASSO solution
+ pluskid	when passed true in the constructor, this modification is turned on
+ pluskid	I think the most case we use LARS is to get the LASSO solution (instead of the original LARS), so I made that parameter default to true
+ pluskid	sonne|work: am I clear?
+ sonne|work	yes
+ sonne|work	that was just missing from the doc
+ CIA-64	shogun: Soeren Sonnenburg master * r879ba9e / src/shogun/regression/LARS.h : fix doxygen warning in lars - http://git.io/-3TFeQ
+ sonne|work	however I still don't know what the difference between LASSO / LARS is
+ pluskid	sonne|work: thanks for the fix of doxygen
+ pluskid	in my understanding, LARS is a stagewise variable selection algorithm
+ pluskid	LASSO in its general meaning corresponds the the linear regression with L1-regularization
+ pluskid	the original LARS algorithm doesn't corresponds to any objective function though
+ pluskid	but when the *lasso modification* is enabled in the LARS algorithm, it will provide the solution for the LASSO problem
+ pluskid	when referring LASSO, we generally mean the problem
+ pluskid	and there are many different algorithms for solving LASSO
+ pluskid	sonne|work: that's my understanding, if you have interest, you may refer to the paper for more details :) www.stanford.edu/~hastie/Papers/LARS/LeastAngle_2002.pdf
+-!- av3ngr [av3ngr@nat/redhat/x-ucigzyknjltzoyko] has quit [Remote host closed the connection]
+-!- av3ngr [av3ngr@nat/redhat/x-utoswxpenjswqpzs] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-utoswxpenjswqpzs] has quit [Client Quit]
+ sonne|work	pluskid: ok I will have to read that
+ sonne|work	pluskid: I understand the problem with multiclass/kernel machine
+ sonne|work	one cannot set a multiclass machine as constraint generator
+ sonne|work	there is a separate multiclass mkl for that
+ sonne|work	so you should be fine
+ pluskid	sonne|work: that's nice, so we would be safe to simply remove the (currently) commented out code in GUIClassifier
+ uricamic	hi there
+ uricamic	I have some problems with git push
+ uricamic	I have committed changes to my branch, followed instructions from http://article.gmane.org/gmane.comp.ai.machine-learning.shogun/2537 and when I try to git push origin my_branch it results in this error: failed to push some refs to 'git@github.com:uricamic/shogun.git'
+ pluskid	uricamic: what is the detailed output of git?
+ uricamic	pluskid: you mean after that push?
+ uricamic	To git@github.com:uricamic/shogun.git  ! [rejected]        GSKRR -> GSKRR (non-fast-forward) error: failed to push some refs to 'git@github.com:uricamic/shogun.git' To prevent you from losing history, non-fast-forward updates were rejected Merge the remote changes (e.g. 'git pull') before pushing again.  See the 'Note about fast-forwards' section of 'git push --help' for details.
+ pluskid	uricamic: it seems you have rebased your local branch, isn't it?
+ pluskid	one simple solution is to first delete your remote branch, and then push again
+ pluskid	something like
+ pluskid	git push origin :branch-name
+ pluskid	and then
+ uricamic	pluskid: yes, I have followed this link: http://article.gmane.org/gmane.comp.ai.machine-learning.shogun/2537
+ pluskid	git push origin branch-name
+ uricamic	delete my remote branch?
+ pluskid	yes, try the command I mentioned above
+ uricamic	how can I delete my remote branch?
+ pluskid	git push origin :branch-name
+ pluskid	note the colon (:) before the branch name
+ uricamic	ok, I will try this
+ uricamic	pluskid: thanks, it seems that this worked
+ pluskid	although it seems you can also solve this problem by using git pull, but that will introduce an empty commit for merging, so I think the method here is more cleaner
+ shogun-buildbot	build #477 of ruby_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/477
+ pluskid	uricamic: then you should be able to push your branch to origin now :)
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ uricamic	pluskid: ok, I think the pushed worked, but now when I have already some opened pull request for this, should I close it and do a pull request again?
+ uricamic	*push
+ pluskid	uricamic: you have to create multiple branches to make multiple pull request
+ pluskid	I think the pull request are to be closed by the maintainers when they merged your commits to the official shogon repo
+ pluskid	*shogun
+ uricamic	pluskid: yes, I already know this :) the question is, if I have to do the pull request again, or if the changes which I have pushed right now will appear in the original pull request
+ pluskid	uricamic: OK, I see, as long as the branch name does not change, your new commits will be automatically "merged" into the pull request
+ pluskid	uricamic: you can look at the pull request you originally opened, navigate to "commits" tab, and see your new commits there
+ uricamic	pluskid: ok, thanks again :)
+ pluskid	uricamic: u r wel~ :)
+ n4nd0	hey guys
+ n4nd0	so now you were talking about the topic
+ n4nd0	if a pull request is already opened
+ n4nd0	is there any danger to rebase with the changes added to remote master since that pull request was opened?
+ pluskid	n4nd0: I don't think so
+ pluskid	actually, rebasing is always encouraged , I think
+ n4nd0	ok, so I can just go to my master
+ n4nd0	rebase upstream/master
+ n4nd0	push origin master
+ n4nd0	go to my branch
+ n4nd0	rebase master
+ n4nd0	and later commit and push the new changes to the branch to update the pull request
+ pluskid	what github do is simply keeping a reference to the branch name you are using for that pull request
+ n4nd0	aham
+ pluskid	when your branch changes (i.e. new commits are added), the pull request updates automatically
+ n4nd0	but I am afraid that the changes that enter in my branch when doing rebasing
+ n4nd0	the ones that are not mine
+ n4nd0	are introduced in the pull request as mine
+ pluskid	rebasing is inserting changes *before* your branch commits
+ pluskid	so when you run git rebase master
+ n4nd0	yeah
+ pluskid	it takes those commits in master that happens *after* you create the branch,
+ n4nd0	but now we are talking about changes that happened *after* the first changes in that pull request
+ pluskid	yes
+ pluskid	those commits are inserted *before* the first commit in your branch
+ n4nd0	that makes sense
+ n4nd0	:)
+ pluskid	however, we do have problem pushing to remote branch when we do rebasing
+ pluskid	if we have already pushed parts of our branch to origin
+ pluskid	we get non-fast-forward error
+ pluskid	you have encountered this error before, IIRC :)
+ pluskid	you solved it with git pull
+ pluskid	which produce an empty commit of merging
+ pluskid	My solution is to delete the remote branch first and push again
+ pluskid	which would be cleaner in my view
+ n4nd0	yeah, I think I had an error related to this before
+ n4nd0	but I think it was because I didn't push to origin master after rebasing
+ pluskid	oh, maybe
+ n4nd0	I will try it soon and let you know
+ n4nd0	I agree, to delete the remote branch looks cleaner
+-!- vikram360 [~vikram360@117.192.168.176] has joined #shogun
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 246 seconds]
+-!- wiking_ is now known as wiking
+-!- nickon [~noneedtok@kotnet-147.kulnet.kuleuven.be] has joined #shogun
+-!- Marina [8d175a52@gateway/web/freenode/ip.141.23.90.82] has joined #shogun
+-!- vikram360 [~vikram360@117.192.168.176] has quit [Ping timeout: 272 seconds]
+-!- vikram360 [~vikram360@117.192.172.56] has joined #shogun
+ Marina	Hi, I have the same problem with poims like Ralf Anders:  http://article.gmane.org/gmane.comp.ai.machine-learning.shogun/2536/match=                     can anyone help me
+ n4nd0	Marina: I have no experience in that part of the project but I can take it a look
+ Marina	that would be great
+ n4nd0	Marina: so you get an error with a python script right?
+-!- Marty28 [~Marty@158.181.78.199] has joined #shogun
+ Marty28	hi
+ n4nd0	Marina: in that case, can you please tell me the name of that file if included in shogun or give me a pointer to it?
+ Marty28	hi marina
+ Marty28	Marina: I guess I just wrote you an email, right?
+ Marina	I got your email.
+ Marty28	fine :)
+ Marina	the name of the file is poim.py
+-!- pluskid [~chatzilla@li400-235.members.linode.com] has quit [Quit: ChatZilla 0.9.88.2 [Firefox 11.0/20120312181643]]
+ Marty28	Easysvm has some POIM.
+ Marty28	http://people.tuebingen.mpg.de/vipin/www.fml.tuebingen.mpg.de/raetsch//projects/easysvm/
+ n4nd0	Marty28, Marina: I don't know if you already solved this issue or not
+-!- pluskid [~pluskid@117.136.17.55] has joined #shogun
+-!- pluskid [~pluskid@117.136.17.55] has left #shogun []
+ Marina	no i didn't
+ Marina	I made poims with poim.py half a year before and now it doesn't  work anymore....
+ n4nd0	Marina: all right
+ n4nd0	Marina: so where is this poim.py?
+ Marty28	It is in the easysvm package. It uses shogun-content.
+ n4nd0	ok found it
+ n4nd0	applications/easysvm/esvm/poim.py
+ Marina	can I send it to you per email?
+ Marina	a yes that's it
+ n4nd0	Marina: ok, so can you tell me exactly how to reproduce the error?
+* n4nd0 is afk
+* n4nd0 is back
+ n4nd0	wiking: around?
+ Marty28	My code here:
+ Marty28	    print "Loading kernel"
+ Marty28	    k1 = rdata.dataio.load_kernel(basename + ".kernel.dat",True)
+ Marty28	    print "Loading SVM"
+ Marty28	    svm1 = rdata.dataio.loadbz2(basename + ".svm.bz2")
+ Marty28	    # POIM stuff
+ Marty28	    print "Computing POIMs"
+ Marty28	    from poim import compute_poims
+ Marty28	    poimdegree = 5
+ Marty28	    max_len = 2
+ Marty28	    #
+ Marty28	    print "Trying to POIM..."
+ Marty28	    poim, max_poim, diff_poim, poim_totalmass = compute_poims(svm1, k1, poimdegree, max_len)
+* Marty28 tries to remember IRC...
+ wiking	?
+ wiking	n4nd0: sup?
+ n4nd0	wiking: git support ... as usual :P
+ wiking	lol
+ n4nd0	wiking: I don't know if you read my conv with pluskid before, it is about that
+ n4nd0	wiking: I can make a summary otherwise
+ wiking	sorry was away :(
+ n4nd0	wiking: ok so I openend a pull request
+ n4nd0	didn't work on it for a couple of days
+ n4nd0	now I am back
+ n4nd0	I rebased my origin master with upstream master, push to origin master
+ n4nd0	back in my branch where I do the work
+ n4nd0	I do some commits
+ n4nd0	rebase master
+ n4nd0	and when I try to push, the usual error
+ n4nd0	git push origin jlcovertree
+ n4nd0	To git@github.com:iglesias/shogun.git ! [rejected]        jlcovertree -> jlcovertree (non-fast-forward)
+ n4nd0	error: failed to push some refs to 'git@github.com:iglesias/shogun.git'
+ Marina	and if you use exactly the code from https://github.com/shogun-toolbox/shogun/blob/master/applications/easysvm/esvm/poim.py you get the error:  TypeError: WeightedDegreePositionStringKernel_prepare_POIM2() takes exactly 4 arguments (2 given)
+ n4nd0	To prevent you from losing history, non-fast-forward updates were rejected
+ n4nd0	Merge the remote changes (e.g. 'git pull') before pushing again.  See the
+ n4nd0	'Note about fast-forwards' section of 'git push --help' for details.
+ Marty28	compute_poims does     distr = ones((max_len,4))/4 ;
+ Marty28	then kernel.prepare_POIM2(distr, poimdegree, max_len)
+ wiking	n4nd0: and after doing a git pull?
+ n4nd0	wiking: I didn't pull yet because as far as I remember
+ n4nd0	wiking: last time I did that
+ Marty28	The error is only about the distr (numpy.ones generated it)
+ n4nd0	wiking: and my commits entered twice in the branch
+ Marina	So I have write kernel.prepare_POIM2(distr) to kernel.prepare_POIM2(distr, poimdegree, max_len) like you
+ Marina	and than I get the same error
+ wiking	n4nd0: mmm that's interesting
+ Marina	 TypeError: in method 'WeightedDegreePositionStringKernel_prepare_POIM2', argument 2 of type 'float64_t *'
+ Marty28	The error is only about the type of dist.
+ wiking	afaik a git pull would try to do a merge basically
+ n4nd0	wiking: I will pull and push and see what happens
+ wiking	pull will do you a merge thing
+ wiking	or at least will try
+ n4nd0	wiking: in any case, pluskid suggested to delete the remote branch doing git push :branch
+ wiking	since what it'll try to do
+ wiking	is to sync your remote repo with your local changes
+ wiking	hehehe
+ wiking	that's another option of course
+ n4nd0	wiking: if I remove the remote branch, the pull request will disappear as well or not?
+ wiking	it's more brute force solution
+ wiking	but it'll solve your thing
+ wiking	yes
+ wiking	itshould
+ Marty28	So probably either WeightedDegreePositionStringKernel.prepare_POIM2 was changed or numpy.ones (improbable)
+ wiking	since that commit only exist in that branch
+ wiking	afaik
+ wiking	but i'm not 100% sure of github internals
+ wiking	so maybe they do save somewhere the pull requested commits
+ wiking	i wouldn't do but who knows
+ Marina	Marty28: yes I think so too
+ wiking	maybe for some caching purposes or something they'd do it
+ n4nd0	Marina, Marty28: mm I can execute poim.py without problems, maybe I am trying exactly what fails for you
+ n4nd0	maybe I am not, sorry
+ n4nd0	wiking: I am going to pull and push
+ Marty28	numpy.ones gives <type 'numpy.ndarray'>
+ n4nd0	wiking: hopefully the commits won't be duplicated
+ wiking	hehehe
+ Marty28	prepare_POIM2 needs float64_t *
+ wiking	well that happens when rebase/merge fails
+ wiking	but it's not a real duplication...
+ n4nd0	wiking: git pull origin branch right?
+ wiking	yep the remote branch...
+ n4nd0	wiking: mmm, I got some conflicts :(
+ wiking	so the merge was not possible
+ wiking	i mean automatically
+ wiking	what are you conflict files?
+ Marty28	n4nd0: Of what type is your "dist" (1st parameter of prepare_POIM2)?
+ n4nd0	wiking: is there a way to indicate to accept my local version?
+ wiking	n4nd0: you'll have to fix it by yourself by hand
+ n4nd0	wiking: all right
+ wiking	n4nd0: check the git status
+ wiking	and you'll see the conflicted files
+ wiking	there go in edit them as you please
+ wiking	and then do a git commit -a
+ wiking	thus you'll have the merge done
+ n4nd0	ok
+ n4nd0	Marty28: I am taking a closer look to poim.py
+ n4nd0	Marty28: I can just see method definitions there
+ Marty28	    print "TYPE(distr): " + str(type(distr)) gives <type 'numpy.ndarray'> for me
+ Marina	yes right
+ Marty28	prepare_POIM2 needs 'float64_t *'
+ n4nd0	Marty28: yeah but what do you want me to execute?
+ n4nd0	Marty28: I mean, there must be another script making use of the functions in poim.py
+ n4nd0	Marty28: is it what you pasted above?
+ Marina	but if I make print distr.dtype than the answer is  float64
+ Marty28	Our own?
+ Marina	no I've found it on http://www.scipy.org/Tentative_NumPy_Tutorial
+ Marty28	n4nd0: poim.compute_poims is used
+ n4nd0	Marty28: from where?
+ Marty28	From my script
+ Marty28	n4nd0: poim, max_poim, diff_poim, poim_totalmass = compute_poims(svm1, k1, poimdegree, max_len)
+ n4nd0	Marty28: yeah but ... how I can execute your script?
+ Marty28	Of course the script needs an svm and a kernel.
+ n4nd0	Marty28: so do you have all the code for me to reproduce the error in one file or in several files?
+ Marty28	I would have to prepare that, mom
+ n4nd0	http://snipt.org
+ n4nd0	you can paste your code there if so
+ n4nd0	wiking: :O it went pretty bad
+ n4nd0	wiking: I pull, solved the conflict
+ n4nd0	wiking: commit the merge
+ n4nd0	wiking: push all the changes and look
+ n4nd0	https://github.com/shogun-toolbox/shogun/pull/455/commits
+ n4nd0	in my pull request the commits appear twice and I have even got commits not done by me
+ wiking	ihhhh
+ wiking	:(
+ sonne|work	n4nd0: you forgot a rebase
+ n4nd0	sonne|work: really? in my branch or where?
+ sonne|work	n4nd0: at some point you did a git pull
+ sonne|work	and then a git push
+ n4nd0	summary of what I did
+ sonne|work	which will make all the commits you did before the pull not to appear on top
+ sonne|work	but before that
+ sonne|work	so things look cluttered
+ n4nd0	the pull request was opened from the other day
+ n4nd0	git checkout master
+ n4nd0	git fetch upstream
+ n4nd0	git rebase upstream/master
+ n4nd0	git push origin master
+ n4nd0	git checkout <my branch>
+ n4nd0	git rebase master
+ n4nd0	some new commits
+ n4nd0	I couldn't push for the error ^
+ n4nd0	git pull
+ n4nd0	fix conflicts
+ n4nd0	git commit (commit for the merge)
+ n4nd0	git push origin <my branch>
+ n4nd0	what should I have done?
+ sonne|work	the last git pull should have been a git pull --rebase
+ n4nd0	it was git pull origin <my branch>
+ n4nd0	I should have done then git pull --rebase origin < my branch >
+ n4nd0	??
+ wiking	mmm we don't have a structural solver out of box right? :)
+ sonne|work	wiking, after the end of gsoc
+ wiking	hehehe who's doing it?
+ sonne|work	we will see :)
+ wiking	ah ok shit yeah
+ wiking	no decision yet
+ wiking	:)))
+ wiking	anyhow i'll put one now in
+ wiking	some hackstuff based on libqp
+ sonne|work	n4nd0: I don't know how you work but I ususally keep master in sync with origin/master
+ Marty28	ok
+ sonne|work	n4nd0: so I would have done git checkout master; git pull --rebase ; git checkout <my branch> ; git rebase master ; ...
+ n4nd0	how would you have solved my situation then?
+ n4nd0	there was a branch
+-!- rico [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ n4nd0	with a pull request issued
+ n4nd0	where I wanted to make new changes
+ Marty28	http://snipt.org/uhggf0
+ n4nd0	but also to bring in there the changes from master
+ Marty28	kernel_weighted_degree_position_string_modular is from shogun examples
+ Marty28	Data is shogun data
+ rico	hi there
+ n4nd0	Marty28: ok, let me try to make it work :)
+ sonne|work	n4nd0: via git checkout master; git pull --rebase ; git checkout <my branch> ; git rebase master ; git push
+ Marty28	Just a type error, it says.
+ n4nd0	sonne|work: and after that start the new work
+ n4nd0	sonne|work: maybe it was that, I should have pushed changes from master before commiting my own changes
+ rico	I am working on action recognition using opencv (mostly in c++)
+ rico	I am looking for code example which shows use of libshogun on opencv data structure.
+ sonne|work	I don't understand - I thought the new work was already committed?
+ rico	maybe a way to convert SGMatrix to opencv matrix ?
+ Marty28	n4nd0: thanks :)
+ sonne|work	rico: SGMatrix is just a ptr to some values, i.e. double*
+ n4nd0	sonne|work: no, the new work was still to be done
+ Marina	n4nd0: many thanks :)
+ sonne|work	n4nd0: then branch off from master, do the new work and push
+ n4nd0	sonne|work: mmm I think there's a missunderstanding here
+ n4nd0	sonne|work: the branch already existed, I did some work, commit, ..., pull request and fine
+ n4nd0	sonne|work: after a couple of days, I want to continue with my work in that branch
+ n4nd0	sonne|work: but sync it with master too
+ rico	 sonne|work: float64_t don't match with opencv's double, is there any issue already reported ?
+ n4nd0	that branch had a pull request open
+-!- gsomix [~gsomix@188.168.4.185] has joined #shogun
+ sonne|work	n4nd0: yes I understand that is why I am saying that you should do git checkout master; git pull --rebase ; git checkout <my branch> ; git rebase master  to be in sync again
+ sonne|work	rico - it is just a double
+ n4nd0	sonne|work: ok, for the moment I will delete the pull request since it has got quite dirty
+ gsomix	hello
+ gsomix	it's seems I will be an optician :)
+-!- vikram360 [~vikram360@117.192.172.56] has quit [Ping timeout: 276 seconds]
+ Marty28	sonne: Hi! Do you know who takes care of WeightedDegreePositionStringKernel.compute_POIM2 etc. in the shogun team? Is this the most modern method for POIMs?
+ sonne|work	I should but don't have time currently
+ n4nd0	sonne|work: it looks like it is a problem with the typemaps
+ n4nd0	sonne|work: my guess is that to change the type of the argument to an SGVector should make it work
+ n4nd0	sonne|work: what do you think?
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ sonne|work	n4nd0: sounds likely
+ n4nd0	sonne|work: I am working on it
+ wiking	haha anybody up for extending the HKM? http://www.vlfeat.org/~vedaldi/assets/pubs/sreekanth10generalized.pdf
+ blackburn	hey there
+ n4nd0	blackburn: hey!
+ blackburn	wiking: I told you they had rbf stuff!
+ wiking	:))
+ wiking	when?
+ wiking	they even have this now: http://www.vlfeat.org/~vedaldi/assets/pubs/vedaldi12sparse.pdf
+ blackburn	wiking: before :D
+ wiking	ah  ok
+ blackburn	hmm last one is quite interesting
+ wiking	yeps
+ sonne|work	what? how do they do it for gaussian kernels?
+-!- vikram360 [~vikram360@117.192.172.56] has joined #shogun
+ blackburn	sonne|work: magic
+ sonne|work	black or white?
+ blackburn	sonne|work: just some fourier stuff
+ blackburn	as in HIK and JS
+ sonne|work	so gaussians become polynomials?
+ blackburn	sonne|work: I am not sure what you mean
+ blackburn	using bochner's theorem they obtain spectrum of kernel usually
+ blackburn	so they just construct features from spectrum
+ Marina	n4nd0 : have you found the "poim - problem?
+ n4nd0	Marina: it looks like there is class that is not up to date
+ n4nd0	Marina: I am working on it
+ Marina	thank you!!!!!
+ blackburn	Marina: are you able to validate the fix?
+ blackburn	we have not much expertise in that stuff but there are some pitfalls I'd like to avoid
+-!- harshit_ [~harshit@182.68.246.67] has joined #shogun
+-!- harshit_ [~harshit@182.68.246.67] has quit [Remote host closed the connection]
+ n4nd0	Marty28: about the parameter poimdegree
+ n4nd0	Marty28: you gave it the value of 5 in your example
+ n4nd0	Marty28: I think that makes the program break a bit later
+ Marty28	I just used some number, AFAIK.
+ n4nd0	aham, all right
+ n4nd0	it looks like it cannot be any number
+ Marty28	use 1
+ n4nd0	no
+ n4nd0	I mean, it breaks too
+ Marty28	    easysvm.py poim 10 6 wd 10 2 arff testmotif1.arff poims.png dna R
+ Marty28	    easysvm.py poim 10 6 wd 10 2 fasta testmotifpos.fasta testmotifneg.fasta poims.png dna R
+ n4nd0	ok
+ Marty28	This is an application of POIM functionality.
+ n4nd0	what you tell me the values then?
+ n4nd0	for poimdegree and max_len
+ n4nd0	10 and 6?
+ Marty28	esvm/experiment.py
+ Marty28	There svm_poim
+ Marty28	so it is the 6 in the example
+ Marty28	usage: %s poim C poimdegree wd [kernelparameters] [arff|fasta] inputfiles  poim.png [dna|protein] non(nucleotide|amino)converter
+ n4nd0	what about max_len?
+ Marty28	I guess it is about the motifs.
+ Marty28	Maybe start with 5.
+ n4nd0	6 for poimdegree and 5 for max_len fails
+ Marty28	max_len 2?
+ n4nd0	6 and 23 made it work
+ n4nd0	ok
+ Marty28	len(examples[0])
+ n4nd0	yeah ...
+ n4nd0	but examples was?
+ n4nd0	anyway, that is solved now
+ Marty28	hehe
+ n4nd0	so now you script executes without problems
+ Marty28	I guess 92, but I do not know exactly.
+ Marty28	fine, thanks!
+ n4nd0	blackburn: should we modify the whole class first?
+ n4nd0	all the float64_t* to SG_Vector or SGMatrix?
+ blackburn	n4nd0: yes float64_t* won't work at all
+ n4nd0	blackburn: ok, I will do that and prepare a pull request so you can check it
+ blackburn	n4nd0: I am worried they do some tricks there (like different real and efficient shapes of matrices)
+ Marty28	(if you succeed please also think about WeightedDegreeStringKernel, which has similar functionality. s?ren ought to know.)
+ sonne|work	n4nd0: that is legacy code - the remainders of the double* -> SGVector migration we started changing last gsoc
+ n4nd0	sonne|work: yeah, it looks like that
+ blackburn	legacy shit
+ n4nd0	:D
+ Marty28	sonne: So is there a more modern version for WD and POIMs? Or any string kernels which are even better for the purpose?
+-!- rico [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+-!- tom__ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ Marty28	Still changing the data type of a simple 1d-array ought to be easy, I suppose
+ tom__	Is there an implementation of substring kernels in libshogun ?
+ n4nd0	Marty28: yeah, it is probably easy, I am a slow guy though :)
+ Marty28	Learning curves are exponential :D
+ blackburn	Marty28: you are always welcome to fix things by yourself :P
+ Marty28	Just a computational biologist. I can invent new applications and promote your stuff, though :)
+ tom__	Is there an implementation of substring kernels in libshogun ? Thanks.
+ n4nd0	tom__: I don't really know if we have what you are looking for
+ n4nd0	tom__: you can take a look here and check if any of these would serve you
+ n4nd0	http://www.shogun-toolbox.org/doc/en/current/dir_00ae96b5ce7201865cb2972b4a123693.html
+ blackburn	or https://github.com/shogun-toolbox/shogun/tree/master/src/shogun/kernel
+ n4nd0	yeah, better try the second link, documentation may not be updated
+ n4nd0	blackburn: thanks ;)
+ sonne|work	n4nd0: actually no new string kernel for a few years now - I guess we have them all :D
+ Marty28	:)
+ tom__	sonne|work: n4nd0: thx, great works btw.
+ Marina	I get the same float64 error if I used : maxlen = 23 and poimdegree = 6... whats my mistake?
+ Marty28	Marina: I guess it only works for a new version he made.
+ blackburn	Marina: the problem is in old typemaps we have abandoned
+ blackburn	it was (float64_t*, int, int) or so
+ blackburn	and now it should be SGMatrix
+ blackburn	the only issue with it is a proper shapes handling
+ n4nd0	Marty28, Marina: the thing is that not only the couple of changes that I made to make your script work are necessary to fix all the class
+ n4nd0	and it will take some time to have it ready
+ Marina	ah ok...
+ Marina	but how coud I used the SGMatrix?
+ blackburn	Marina: you don't have to it is just dev issue
+ Marina	:-)
+ Marty28	n4nd0: Ok. Yet I think it will be worth it, the functionality sounds interesting :)
+ n4nd0	I have to go now
+ n4nd0	I will continue to work on this later
+ n4nd0	hopefully it will be ready soon
+ n4nd0	bye!
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ Marty28	thanks :)
+-!- tom__ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+-!- pluskid [~pluskid@1.204.114.36] has joined #shogun
+ pluskid	n4nd0, deleting the remote branch won't make your pull request disappear
+ pluskid	as long as you push again the branch to remote
+ pluskid	I have done this multiple times
+ blackburn	hmm nice idea
+ pluskid	n4nd0's solution: git pull and merge, will cause duplicated commits as he said
+ pluskid	so this would be a better solution
+ pluskid	if there's any wiki for shogun, I think we can write something about our git work flow
+ blackburn	pluskid: README.developer?
+ blackburn	there is some mentioning of git workflow
+ blackburn	please add
+ pluskid	ok
+ blackburn	pluskid: btw if you want to update chinese doc - feel free :) however I bet you won't like it (I wouldn't)
+ pluskid	coz you don't know Chinese :p
+ pluskid	BTW: why are there English and Chinese doc in the homepage?
+ pluskid	I mean, no other languages?
+ blackburn	pluskid: soeren wanted me to do russian but I was lazy and didn't
+ pluskid	haha
+ blackburn	but actually does it make sense?
+-!- flxb [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+ pluskid	what?
+ blackburn	I see no reason to use any other lang
+ pluskid	what make sense?
+-!- uricamic [9320543b@gateway/web/freenode/ip.147.32.84.59] has quit [Quit: Page closed]
+ pluskid	hmm, English is almost universal
+ pluskid	I'm just curious to see only Chinese there :p
+ blackburn	it is obvious that machine learners can read and write in english
+ pluskid	yes, that's almost true
+ pluskid	and some can read english but might prefer other (native) language when available
+ blackburn	it is a nightmare to support
+ pluskid	but sync is a headache, when one has multiple translation
+ pluskid	yes
+ pluskid	I agree with you on this point
+ blackburn	once some X language speaker leaves
+ Marina	can I use an older shogun version to make poims work now?
+ blackburn	you have nothing to do with that translation
+ blackburn	Marina: what stops you?
+-!- harshit_ [~harshit@182.68.246.67] has joined #shogun
+-!- emrecelikten [~Anubis@176.40.226.62] has joined #shogun
+ pluskid	btw: I'll travel with the family tomorrow and be back the day after tomorrow
+ pluskid	not sure whether there will be internet access during the trip
+ blackburn	that's ok and thanks for notifying
+ pluskid	hope I won't miss some important thing
+ blackburn	no most important is 23, April
+ pluskid	:)
+ blackburn	pluskid: I guess it would be kind of morning for you when gsocers are announced?
+ pluskid	not sure about the exact time
+ blackburn	21 UTC afaik
+ pluskid	not good at counting numbers :p, but most of the time when friends in the US send me emails, I got them in the morning
+ blackburn	hard to believeheh
+ pluskid	21 + 8 % 24 = 5, seems so
+ pluskid	early in the morning if I'm not counting wrong :p
+ Marina	i get still the error  TypeError: in method 'WeightedDegreePositionStringKernel_prepare_POIM2', argument 2 of type 'float64_t *'
+ blackburn	pluskid: however that could be a great moment and you shall be here :)
+ blackburn	Marina: still?
+ Marina	yes
+@sonney2k	blackburn, did anyone merge a fix?
+ blackburn	sonney2k: no, fix is not ready yet
+ blackburn	Marina: what do you mean saying still?
+ pluskid	blackburn, I'll try to be there, if necessary :)
+@sonney2k	then I don't understand
+@sonney2k	why try again if there is no fix yet?
+ blackburn	sonney2k: no idea
+ blackburn	sonney2k: please let n4ndo know about shapes of matrices there if would you have time
+ Marina	ignore still ... I get the error and don't know what to do
+ blackburn	non-trivial sometimes
+ blackburn	Marina: do you want all the fixes get merged in a minute? :)
+ Marina	:) sometimes
+@sonney2k	hah!
+ blackburn	Marina: I am not able to fix things now so you have to wait a little this time
+ Marina	ok, thanks!
+ blackburn	this could be a day though ;)
+* sonney2k attempts to do a quick fix
+@sonney2k	(within the next 2 train stations)
+ blackburn	sonney2k: good luck ;)
+ blackburn	see you all
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+ CIA-64	shogun: Soeren Sonnenburg master * r8436b0a / (2 files): convert get_POIM2 to user SGVector - http://git.io/M4v28A
+@sonney2k	Marina, try again
+-!- vikram360 [~vikram360@117.192.172.56] has quit [Ping timeout: 245 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	sonney2k: I can do a pull request for the changes I have done so far
+ n4nd0	sonney2k: it might be ok as quick fix
+ n4nd0	right now it compiles correctly and the script Marty28 sent me works well
+ shogun-buildbot	build #725 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/725  blamelist: sonne@debian.org
+ pluskid	updated README.developer for some notes on git
+ pluskid	and opened a new pull request
+ pluskid	btw, n4nd0, have you got our previous conversation just now? you can safely delete your remote branch without affecting your pull request
+ n4nd0	oh yes pluskid I just read it in the logs :)
+ n4nd0	it is a good plan then
+ n4nd0	so I just have to delete the branch and it later push again?
+ pluskid	I think better delete *the moment* before you would push again
+ pluskid	not sure what github will show when someone go and look at the pull request, and find there's no such branch :p
+ pluskid	however, there's a "force" option for pushing, which could ignore the non-fast-forward error, but I haven't tried this
+-!- harshit_ [~harshit@182.68.246.67] has quit [Ping timeout: 260 seconds]
+ n4nd0	wiking suggested me once not to force the push
+ pluskid	yes, that's sounds horrible
+ pluskid	I'd rather not try
+ pluskid	though I guess the underlying thing is the same as deleting and pushing again
+ Marina	sonney2k: I reinstall shogun now, right?
+ pluskid	Marina, maybe have to reinstall from the latest git repo
+ Marina	thanks i do so
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ Marina	I get the error:   WeightedDegreePositionStringKernel.cpp:1861: error: prototype for ?shogun::SGMatrix<double> shogun::CWeightedDegreePositionStringKernel::get_POIM2()? does not match any in class ?shogun::CWeightedDegreePositionStringKernel
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	pluskid: I think that my problem is a bit worse though
+ n4nd0	the commit history in my branch screwed
+ n4nd0	https://github.com/iglesias/shogun/commits/jlcovertree
+ n4nd0	I have duplicated commits :S
+-!- pluskid [~pluskid@1.204.114.36] has quit [Ping timeout: 264 seconds]
+-!- pluskid [~pluskid@173.254.214.60] has joined #shogun
+ pluskid	n4nd0, so you have merged locally?
+ pluskid	that means those duplicated commits exists in your local branch
+ n4nd0	pluskid: I think so, since I couldn't push, I did git pull and solved conflicts
+ pluskid	hmm
+ pluskid	I have a suggestion
+ pluskid	you might create a new branch
+ n4nd0	and move the files there right?
+ pluskid	and make your changes of the current branch w.r.t. master as a patch
+ pluskid	and apply the patch in the new branch
+ pluskid	push the new branch to origin
+ pluskid	update your pull request (you can edit the commit range, where you can change the branch name)
+ pluskid	the pro is that you can avoid those duplicated commits
+ pluskid	the cons is that you "lose" your individual commits, and merge them into one big commit
+ pluskid	I think there's a command git-format-patch
+ pluskid	for convenient making patches
+ n4nd0	mmm
+ n4nd0	so I should create the new branch
+ n4nd0	and move there the files that I have been working on
+ n4nd0	?
+ pluskid	hmm
+ pluskid	first goto the master branch
+ pluskid	then create a new branch (based on master)
+ n4nd0	ok
+ pluskid	then goto jlcovertree branch
+ pluskid	run git diff master > something.patch
+ pluskid	and then goto the new branch
+ pluskid	apply the patch
+ n4nd0	oh
+ n4nd0	I didn't know about this patches
+ n4nd0	can I apply the changes directly?
+ pluskid	yes, I guess so
+ pluskid	something like
+ pluskid	patch -p0 < the_path_file, IIRC
+ n4nd0	ok
+ n4nd0	I will try it
+ pluskid	try it, your work will be safe in the jlcovertree branch as long as you don't delete it
+ n4nd0	I need a rest but I will try it later
+ n4nd0	pluskid: thank you!
+ pluskid	btw, I'm looking at the doc of git-format-patch
+ pluskid	which might give you a better solution
+ pluskid	which retains your individual commits
+-!- Marina [8d175a52@gateway/web/freenode/ip.141.23.90.82] has quit [Quit: Page closed]
+-!- pluskid [~pluskid@173.254.214.60] has quit [Read error: Connection reset by peer]
+-!- Marty28 [~Marty@158.181.78.199] has quit [Quit: ChatZilla 0.9.88.2 [Firefox 11.0/20120310010446]]
+-!- vikram360 [~vikram360@117.192.172.56] has joined #shogun
+-!- pluskid [~pluskid@1.204.114.36] has joined #shogun
+ pluskid	git-format-patch master
+ pluskid	will give you an individual patch for each of your commits
+ pluskid	select those good ones and discard duplicated ones
+ pluskid	and then use git-am to apply those patches
+ pluskid	in that order
+ pluskid	I think this seems to be a better solution, that retains your commit history
+ pluskid	n4nd0, see above
+ pluskid	and good night :)
+ pluskid	hope your problem could be resolved
+-!- pluskid [~pluskid@1.204.114.36] has quit [Client Quit]
+-!- Marty28 [~chatzilla@158.181.78.199] has joined #shogun
+ Marty28	re
+-!- gsomix [~gsomix@188.168.4.185] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+-!- flxb [~cronor@fb.ml.tu-berlin.de] has quit [Quit: flxb]
+ CIA-64	shogun: Soeren Sonnenburg master * r2649a77 / (4 files in 2 dirs): SGVector fix for WD-kernel constructor - http://git.io/ZZCF7g
+-!- vikram360 [~vikram360@117.192.172.56] has quit [Ping timeout: 264 seconds]
+-!- vikram360 [~vikram360@117.192.185.94] has joined #shogun
+ Marty28	sounds good
+ shogun-buildbot	build #726 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/726
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- vikram360 [~vikram360@117.192.185.94] has quit [Ping timeout: 264 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- vikram360 [~vikram360@117.192.185.94] has joined #shogun
+@sonney2k	n4nd0, pluskid yeah you should really use git format-patch - otherwise you loose all your commit messages
+ n4nd0	sonney2k: ok, I am watching now the video pluskid sent in the ML and I will try to fix it later in a new branch
+ n4nd0	sonney2k: but I have a doubt, if apply these patches in a new branch, the pull request will die right?
+ n4nd0	I mean that I have to do a new one
+-!- Marty28 [~chatzilla@158.181.78.199] has quit [Ping timeout: 246 seconds]
+-!- Marty28 [~chatzilla@158.181.78.199] has joined #shogun
+@sonney2k	n4nd0, yeah you have to do a new one
+@sonney2k	except if you use push --force
+-!- cronor [~cronor@e178173015.adsl.alicedsl.de] has joined #shogun
+ n4nd0	sonney2k: I will do a new one then, if that is not a problem for you
+-!- cronor [~cronor@e178173015.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- cronor [~cronor@e178173015.adsl.alicedsl.de] has joined #shogun
+-!- cronor_ [~cronor@e178176008.adsl.alicedsl.de] has joined #shogun
+-!- cronor [~cronor@e178173015.adsl.alicedsl.de] has quit [Ping timeout: 260 seconds]
+-!- cronor_ is now known as cronor
+ n4nd0	sonney2k: about the WD-kernel, are you taking care of that then? I have seen your commits
+-!- n4nd0_ [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0_ is now known as fjig
+-!- fjig [~nando@s83-179-44-135.cust.tele2.se] has left #shogun []
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has joined #shogun
+-!- gsomix [~gsomix@188.168.4.185] has joined #shogun
+-!- blackburn [5bde8018@gateway/web/freenode/ip.91.222.128.24] has quit [Ping timeout: 245 seconds]
+-!- Marty28 [~chatzilla@158.181.78.199] has left #shogun []
+ gsomix	I need more blackburn.
+-!- harshit_ [~harshit@182.68.246.67] has joined #shogun
+-!- Marty28 [~Marty@158.181.78.199] has joined #shogun
+-!- cronor_ [~cronor@e178176008.adsl.alicedsl.de] has joined #shogun
+-!- Marty28 [~Marty@158.181.78.199] has quit [Quit: ChatZilla 0.9.88.2 [Firefox 11.0/20120310010446]]
+-!- cronor [~cronor@e178176008.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- cronor_ is now known as cronor
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~qdrgsm@188.168.2.179] has joined #shogun
+-!- nickon [~noneedtok@kotnet-147.kulnet.kuleuven.be] has quit [Quit: ( www.nnscript.com :: NoNameScript 4.22 :: www.esnation.com )]
+-!- cronor_ [~cronor@e178176008.adsl.alicedsl.de] has joined #shogun
+-!- cronor [~cronor@e178176008.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- cronor_ is now known as cronor
+ CIA-64	shogun: Sergey Lisitsyn master * rb45f523 / src/shogun/multiclass/MulticlassLibLinear.cpp : SG_ADD for MC liblinear - http://git.io/jTHThw
+ CIA-64	shogun: Sergey Lisitsyn master * r4997875 / src/NEWS : Updated news - http://git.io/BS3Ddw
+@sonney2k	gsomix, for some gay games or what?
+ blackburn	sonney2k: phew
+@sonney2k	n4nd0, yeah WD kernel stuff should work?
+@sonney2k	gsomix, how is it going - happily SGVectoring?
+ blackburn	sonney2k: you are talking with sleeping deads probably
+ blackburn	n4ndo is not present at all and gsomix is sleeping afaik
+ blackburn	:)
+@sonney2k	blackburn, the good thing when doing that is that they cannot prove me wrong - I am always right then :)
+ blackburn	sonney2k: yeah you may claim whatever :)
+-!- sonney2k is now known as sonne|god
+* sonne|god == god
+ blackburn	lol
+* sonne|god shogun is my mission 
+* sonne|god obey!
+ blackburn	sonne|god: I do
+@sonne|god	blackburn, go review pluskids patch :)
+-!- sonne|god is now known as sonne|fallengod
+ blackburn	hehe
+@sonne|fallengod	blackburn, or did you do it already
+ blackburn	sonne|fallengod: I'll merge his readme stuff for now
+@sonne|fallengod	blackburn, I mean the multiclass stuff?
+ blackburn	sonne|fallengod: yes I'll get back to it once I am finished with some shity issue ;)
+ CIA-64	shogun: Chiyuan Zhang master * r86dce0b / src/README.developer : Added some notes of git work flow for developers. - http://git.io/DnywEw
+ CIA-64	shogun: Sergey Lisitsyn master * r4287096 / src/README.developer : Merge branch 'git-workflow-doc' of git://github.com/pluskid/shogun - http://git.io/MimugQ
+-!- sonne|fallengod is now known as sonney2k
+-!- cronor [~cronor@e178176008.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- cronor [~cronor@e178176008.adsl.alicedsl.de] has joined #shogun
+@sonney2k	blackburn, I am looking at his MC stuff now
+@sonney2k	blackburn, this patch is huuuuge!
+ blackburn	sonney2k: yes exactly
+@sonney2k	blackburn, problem is (as he pointed out) that we have to paths
+@sonney2k	one machine -> kernelmachine -> svm
+@sonney2k	the other: machine -> multiclassmachine -> mulitclasskernelmachine -> multiclasssvm
+@sonney2k	so a multiclass svm cannot be an svm any longer
+ blackburn	sonney2k: I prefer second
+@sonney2k	eh?
+@sonney2k	we have both!
+@sonney2k	it is only that multiclasssvm can no longer be an svm
+@sonney2k	and this breaks a couple of things
+ blackburn	sonney2k: there are a couple of reasons why multiclasssvm is not an svm
+@sonney2k	blackburn, yeah I am ok with that
+ blackburn	sonney2k: C1/C2 and a lot of other things
+@sonney2k	blackburn, yeah but for multiclass svm he now basically needs to add all the svm relvant functions
+@sonney2k	like C
+ blackburn	yes we have to..
+@sonney2k	epsilon
+@sonney2k	etc
+@sonney2k	it is what he did
+ blackburn	yes I know
+@sonney2k	I don't understand why he made multiclassvm a friend of svm though?
+@sonney2k	do you?
+ blackburn	hmm let me check
+--- Log closed Wed Apr 18 00:00:19 2012

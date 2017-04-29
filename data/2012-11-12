@@ -1,0 +1,144 @@
+--- Log opened Mon Nov 12 00:00:17 2012
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 256 seconds]
+-!- ptizoom [~christian@85.210.94.175] has quit [Quit: Ex-Chat]
+-!- ptizoom [~christian@85.210.94.175] has joined #shogun
+ shogun-buildbot	build #167 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/167
+-!- ptizoom [~christian@85.210.94.175] has quit [Quit: Ex-Chat]
+-!- ptizoom [~christian@85.210.94.175] has joined #shogun
+-!- zxtx [~zv@cpe-76-169-228-195.socal.res.rr.com] has joined #shogun
+-!- blackburn [~blackburn@188.168.128.121] has quit [Quit: Leaving.]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- nickp_ [836fb85a@gateway/web/freenode/ip.131.111.184.90] has joined #shogun
+ nickp_	Hello
+ nickp_	Is this the right place to ask dev questions about Shogun?
+ nickp_	I'm trying to add the obtain_from_generic method to the GaussianARDKernel
+ nickp_	I pretty much copies the code from GaussianKernel::obtain_from_generic
+ nickp_	*copied
+ nickp_	Getting this error from python
+ nickp_	Traceback (most recent call last):   File "main.py", line 23, in <module>     from shogun.Features import *   File "/path/local/lib/python2.7/dist-packages/shogun/Features/__init__.py", line 1, in <module>     from modshogun import *   File "/path/local/lib/python2.7/dist-packages/modshogun.py", line 30, in <module>     _modshogun = swig_import_helper()   File "/path/local/lib/python2.7/dist-packages/modshogun.py", line 26, in swig_i
+ nickp_	module('_modshogun', fp, pathname, description) ImportError: /path/local/lib/python2.7/dist-packages/_modshogun.so: undefined symbol: _ZN6shogun18CGaussianARDKernel19obtain_from_genericEPNS_7CKernelE
+ nickp_	Anyone know what is wrong?
+-!- audy [~audy@unaffiliated/audy] has joined #shogun
+ wiking	mmmm
+ wiking	nickp_: if u are still here: that's what actually happen... it should typecast the kernel to gaussianARDkernel as in python you cannot do this...
+ wiking	but what is interesting
+ nickp_	yeah I'm here
+ wiking	ah shit
+ wiking	sorry i've mixed up
+ wiking	ok
+ wiking	have you defined K_GAUSSIANARD in Kernel.h?
+ wiking	but i guess
+ wiking	there must be some other problem.... if u managed to recompile shogun library with that new code
+ wiking	have u for sure (110%) overwritten the library with the new .so and .a?
+ wiking	since if u have this new function in the code
+ wiking	then it should be able to find it
+ nickp_	Yeah I've defined it: K_GAUSSIANARD = 510,
+ wiking	ok
+ nickp_	Yeah I'm pretty sure I've over written it.
+ wiking	u use linux?
+ nickp_	I manually deleted the shogun .so I previously had
+ nickp_	Yeah I'm on ubuntu
+ wiking	ok
+ nickp_	I was working with virtualenv for the python environment
+ nickp_	so I'm trying deleting the whole virtualevn directory
+ nickp_	and trying again
+ nickp_	to see if that works
+ wiking	mmm
+ wiking	you should be able to find the symbol in libshogun.13.so
+ wiking	_ZN6shogun18CGaussianARDKernel19obtain_from_genericEPNS_7CKernelE
+ wiking	but i just cannot remember atm what is the disasm command in linux
+ wiking	ah ok
+ wiking	objdump -d <the path to your shogun>/libshogun.13.so|grep _ZN6shogun18CGaussianARDKernel19obtain_from_genericEPNS_7CKernelE
+ wiking	this should have an ouptut ;
+ wiking	output
+ wiking	if not then you should try first
+ wiking	objdump -d src/shogun/libshogun.13.so|grep _ZN6shogun18CGaussianARDKernel19obtain_from_genericEPNS_7CKernelE
+ wiking	that should have an output for sure
+ wiking	nickp_: let me know what are your ouptuts :D
+ nickp_	ok will try that now
+ nickp_	just wainting for compilation
+ wiking	no worries
+ nickp_	Ouput is:
+ nickp_	$ objdump -d libshogun.so.13.0 |grep _ZN6shogun18CGaussianARDKernel19obtain_from_genericEPNS_7CKernelE 0000000000b28b60 <_ZN6shogun18CGaussianARDKernel19obtain_from_genericEPNS_7CKernelE>:   b28b72:74 29                je     b28b9d <_ZN6shogun18CGaussianARDKernel19obtain_from_genericEPNS_7CKernelE+0x3d>
+ wiking	ok
+ wiking	so it's there
+ wiking	make install
+ wiking	and then try the python code
+-!- blackburn1 [~blackburn@188.168.2.38] has joined #shogun
+ nickp_	hmm
+ nickp_	so I tried the same command and get the same output
+ nickp_	but then from a python console
+ nickp_	>>> import shogun >>> from shogun.Kernel import GaussianKernel Traceback (most recent call last):   File "<stdin>", line 1, in <module>   File "/home/nickp/Dropbox/Repos/mkl/mklenv/local/lib/python2.7/dist-packages/shogun/Kernel/__init__.py", line 1, in <module>     from modshogun import *   File "/home/nickp/Dropbox/Repos/mkl/mklenv/local/lib/python2.7/dist-packages/modshogun.py", line 30, in <module>     _modshogun = swig_import_he
+ nickp_	>>> from shogun.Kernel import GaussianARDKernel Segmentation fault
+ nickp_	So gives unresolved import for GaussianARDKernel when importing GaussianKernel
+ wiking	lol
+ nickp_	and then a segfault when importing GaussianARDKernel
+ blackburn1	nickp_: I just read your mail
+ blackburn1	and I thinkyou missed static word in .cpp
+ blackburn1	I do not remember if it is relevant here
+ blackburn1	probably not
+ nickp_	I have static CGaussianARDKernel* obtain_from_generic(CKernel* kernel); in GaussianARDKernel.h
+ nickp_	Is that correct ^
+ nickp_	It's the same as for GaussianKernel
+ wiking	that should be alright
+ wiking	do you use the latest commit of the shogun repo
+ wiking	?
+ wiking	because it looks like as if you dont have that interfaces patch i've done the other time
+ blackburn1	wiking: did you get your paper done?
+ wiking	lol
+ wiking	no
+ wiking	:)
+ wiking	ran out of time
+ blackburn1	argh
+ wiking	yeah shit happens
+ nickp_	Yeah I've got those changes:
+ nickp_	%rename(LinearARDKernel) CLinearARDKernel; %rename(GaussianARDKernel) CGaussianARDKernel;
+ nickp_	in Kernel.i and Kernel_includes.i
+ wiking	nickp_: i'll try your patch on my machine
+ wiking	just to be safe
+ wiking	but i'm 100% that that should work alright
+ nickp_	ok cool thanks so much
+ nickp_	If you're works, I'll just grab that instead.
+ nickp_	No idea what I'm doing wrong.
+ wiking	me neither
+ wiking	but i'm defenetly sure that somewhere it tries to use a wrong library
+ wiking	and older version of it
+-!- audy [~audy@unaffiliated/audy] has quit [Excess Flood]
+-!- zxtx [~zv@cpe-76-169-228-195.socal.res.rr.com] has quit [Ping timeout: 240 seconds]
+@sonney2k	nickp_, what does ldd  /path/local/lib/python2.7/dist-packages/_modshogun.so say?
+@sonney2k	I second wiking - you have the wrong lib lying around somewhere
+ nickp_	I'll check
+ nickp_	sec
+ nickp_	libshogun.so.13 => /usr/local/lib/libshogun.so.13 (0x00007fdb15dc4000)
+ nickp_	so that's the problem ^ ?
+ nickp_	because I thought I had shogun installed in a virtualenv
+@sonney2k	is that the correct one?
+ nickp_	but seems to be linking to system wide one I installed earlier.
+@sonney2k	or do you expect the lib somewhere else?
+ nickp_	I expect it to be in /path/ ...
+ nickp_	not /usr/local
+ nickp_	When I ran ./configure
+@sonney2k	yeah then it is clear
+ nickp_	I passed --interfaces=python_modular --prefix=/home/nickp/path/...
+@sonney2k	what were your configure options?
+@sonney2k	then it will install into /home/nickp/path/
+ nickp_	Won't  it put everything in that directory when I run make install
+ nickp_	Yeah that's what I want
+@sonney2k	but you need to give it LD_LIBRARY_PATH=/home/nickp/path/... too
+@sonney2k	when running python etc
+@sonney2k	and PYTHON_PATH etc etc
+ nickp_	to why does _modshogun link to /usr/local/lib/...
+ nickp_	ooooh
+ nickp_	ok
+ nickp_	cool thats
+ nickp_	*thanks
+ nickp_	Will recompile now and give it a try, but that sounds like it should fix things.
+ nickp_	are ld_library_path and python_path the only other args I need to add.
+@sonney2k	I am not 100% sure but I think so
+ nickp_	Working
+ nickp_	thanks chaps!
+-!- nickp_ [836fb85a@gateway/web/freenode/ip.131.111.184.90] has quit [Ping timeout: 245 seconds]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+--- Log closed Tue Nov 13 00:00:17 2012

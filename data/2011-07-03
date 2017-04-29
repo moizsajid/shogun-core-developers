@@ -1,0 +1,222 @@
+--- Log opened Sun Jul 03 00:00:40 2011
+@sonney2k	f-x, does the templating we discussed about yesterday work?
+ f-x	sonney2k: haven't done it yet.. lost track of a few things in that and decided to do SGD until I asked you about that again...
+ f-x	can you please make it a bit more explicit?
+@sonney2k	f-x, what?
+ f-x	sonney2k: your idea of doing it
+ f-x	a templated get_vector() calling the other functions in the base class
+@sonney2k	f-x, you mean a templated function get_vector() etc?
+ f-x	sonney2k: yeah
+@sonney2k	f-x, the idea was to have one templated function get_vector() in StreamingFile IIRC
+@sonney2k	this function then has special implementations for the different types
+ f-x	sonney2k: ok
+@sonney2k	and within this just calls get_float64_vector etc
+@sonney2k	that's all
+ f-x	so i'd specialize the <int> to call get_int_vector() from the base class?
+ f-x	*derived
+@sonney2k	you do that all in the base class
+ f-x	i mean to call the get_*_vector function which will later be implemented in the derived class
+@sonney2k	f-x, in the derived class you just call get_vector<T>()
+ f-x	sonney2k: okay, let me check out the code for a bit
+ f-x	i'll get back to you in a minute
+ f-x	sonney2k: so let's take the case of StreamingFileFromStringFeatures and StreamingFileFromSimpleFeatures
+ f-x	and say T is float64_t
+ f-x	in each of them i call get_vector<float64_t>(), right?
+ f-x	where get_vector<float64_t> is implemented in the base class, where it just calls the appropriate function (which is again supposed to be implemented in the derived class)
+@sonney2k	f-x, no you always call get_vector<T>
+ f-x	sonney2k: i mean it indirectly calls get_vector<float64_t> in this case
+@sonney2k	because these derived classes are templated
+@sonney2k	yeah
+ f-x	sonney2k: so my question is:
+ f-x	since get_vector<T> is specialized only for type T,
+ f-x	how will it call a different function for SimpleFeatures and StringFeatures?
+ f-x	both have same parameters get_*_vector(T* vector, int len)
+ f-x	but the way of getting the vector would be different for String and Simple
+@sonney2k	f-x, huh?
+@sonney2k	you don't use vector for strings
+@sonney2k	but SGString
+ f-x	sonney2k: okay, so if that's the case then things would work
+ f-x	but isn't SGString another encapsulation of (T*, int/index)?
+@sonney2k	that is the case yes, dense vectors for dense matrices, sparse matrices -> sparse vectors, strings strings
+@sonney2k	yes indeed
+ f-x	sonney2k: so instead of using (T*, int) for dense vectors, i should switch to SGVector<T>?
+@sonney2k	yes
+@sonney2k	these should return SGVector
+ f-x	hmm.. if we take care to keep the function signatures different, things will work
+ f-x	but now I'm seeing why feature-oriented class division is better than the present stream-oriented stuff
+ blackburn	hm i did nothing today
+@sonney2k	blackburn, a black day for shogun :D
+ blackburn	sure
+ blackburn	ah no I started writing article about IRLM with MDS
+@sonney2k	f-x, I don't see that any longer
+ f-x	sonney2k: because if we want to read sparse vectors from an ascii file, how would we do it for different file formats? if we try to have that then we need to change the function names in StreamingAsciiFile.. (like get_svmlight_sparse_vector(SGSparseVectorEntry<T>*, int), and another get_vw_sparse_vector(SGSparseVectorEntry<T>*, int)
+@sonney2k	actually, I also don't see the problem when stringfeatures always return get_vector stuff
+@sonney2k	f-x, well it is not an asciifile then
+@sonney2k	it is a svmlight file
+ f-x	sonney2k: oh
+ f-x	so ascii just refers to the native shogun format?
+ blackburn	is vw stands for volkswagen? :D
+@sonney2k	to some format ye
+@sonney2k	s
+ blackburn	ok joking I know that it is vowpal wabbit
+* sonney2k sent his harddrive back to seagate for replacement
+ f-x	sonney2k: and about the problem with stringfeatures: i can't think of a proper way to define get_vector<T> in the base class
+ blackburn	sonney2k: nice, have you backed up everything you wanted?
+@sonney2k	f-x, I don't see the problem - please explain
+@sonney2k	blackburn, at least it did copy without telling me that there are errors
+ f-x	sonney2k: i mean now i've used get_*_vector(T*, int) and get_*_string(T*, int)
+@sonney2k	ok
+@sonney2k	but?
+ f-x	so when i try to define get_vector<int>(), how should i define it?
+@sonney2k	f-x, well it just calls get_*_vector of matching type
+@sonney2k	it could even return a SGVector<T> for the beauty of it
+ f-x	sonney2k: but get_*_vector refers to the reading function for dense vectors
+ f-x	for strings it is get_*_string
+@sonney2k	f-x, and?
+@sonney2k	you also have get_*_string stuff
+@sonney2k	so you need to define get_string<T> in the same way of course
+ f-x	sonney2k: ah - that's the thing i missed out!
+ f-x	i thought one function would do all the magic
+@sonney2k	f-x, same for get_sparse_vector<T>
+@sonney2k	f-x, no
+@sonney2k	f-x, we used it as example only
+@sonney2k	the plan was to start with get_vector<T> and then do the others later
+ blackburn	I want to change Labels
+@sonney2k	blackburn, ?
+@sonney2k	to +1
+ f-x	sonney2k: looking back at yesterday's discussion, it makes sense now.. took me a long time to get it properly :/
+@sonney2k	:D
+ bettyboo	:*)
+ blackburn	I don't like it provides no functionality to sth like 3 100000 2  5453 4234
+ blackburn	these min_labels at gaussian naive bayes and knn are pathetic!
+@sonney2k	blackburn, it is user error to some extend though
+@sonney2k	I mean why should we have to do the work to do proper label hashing
+ blackburn	why not? :)
+@sonney2k	because it takes time and effort
+ blackburn	well computing min and max label in KNN is O(n)
+ blackburn	hashing should be even faster
+@sonney2k	I don't mind if you add such functions but not enabled automagically for now
+@sonney2k	blackburn, are we talking about the same thing? hashing is a bit more expensive even
+@sonney2k	f-x, so ok - then please give it a try
+ blackburn	hmm
+ blackburn	well yes, may be it could be slower..
+ f-x	sonney2k: thanks - i'll start with that now
+@sonney2k	f-x, k thanks
+ blackburn	ok i don't want to change Labels
+ blackburn	:D
+ blackburn	hmm what to do after mid-term - what is the question of the universe
+ blackburn	that*
+@sonney2k	blackburn, I recall from that matlab toolbox  that there are plenty of dimred methods around
+ blackburn	sonney2k: I'm pretty sure we don't need all of them
+@sonney2k	heh :)
+ blackburn	for sure I'll implement Hessian LLE
+ blackburn	but there are some not-so-useful things
+@sonney2k	blackburn, did you optimize pca/kpca yet?
+ blackburn	sonney2k: not yet, it is in todo too :)
+@sonney2k	anyway I have to go to bed again... only 1 more day and I have to be alive early in the morning at work :)
+@sonney2k	l8r
+ blackburn	see ya
+-!- blackburn [~blackburn@188.122.238.13] has quit [Quit: Leaving.]
+-!- f-x [~user@117.192.218.221] has quit [Remote host closed the connection]
+-!- blackburn [~blackburn@188.122.238.13] has joined #shogun
+-!- blackburn1 [~blackburn@188.122.252.251] has joined #shogun
+-!- blackburn [~blackburn@188.122.238.13] has quit [Ping timeout: 244 seconds]
+-!- blackburn [~blackburn@85.114.187.90] has joined #shogun
+-!- blackburn1 [~blackburn@188.122.252.251] has quit [Ping timeout: 240 seconds]
+-!- f-x [~user@117.192.209.232] has joined #shogun
+-!- blackburn [~blackburn@85.114.187.90] has quit [Ping timeout: 255 seconds]
+-!- blackburn [~blackburn@188.122.238.99] has joined #shogun
+-!- blackburn1 [~blackburn@188.122.238.99] has joined #shogun
+-!- blackburn [~blackburn@188.122.238.99] has quit [Ping timeout: 255 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ is now known as in3xes
+-!- srikanth [~mrsrikant@59.92.0.164] has joined #shogun
+-!- blackburn1 [~blackburn@188.122.238.99] has quit [Ping timeout: 255 seconds]
+-!- srikanth [~mrsrikant@59.92.0.164] has quit [Quit: Leaving]
+-!- blackburn [~blackburn@188.122.238.99] has joined #shogun
+-!- blackburn [~blackburn@188.122.238.99] has quit [Read error: No route to host]
+-!- blackburn [~blackburn@188.122.238.99] has joined #shogun
+@sonney2k	f-x, so did it work out?
+@sonney2k	blackburn, did you sent your weekly report yet?
+ blackburn	sonney2k: oh sorry was fucking with arpack all day long
+ blackburn	:D
+ blackburn	will do it now
+ f-x	sonney2k: yes, just did it now... and i think it works
+ f-x	but again, one minor issue
+@sonney2k	I am just wondering because no one sent an email so far
+@sonney2k	f-x, yes?
+ blackburn	I just forgot about it
+ f-x	sonney2k: StreamingFileFromSimpleFeatures<T> needs to implement each of get_*_vector() and get_*_vector_and_label()
+ f-x	i mean even if T=int, it needs to implement get_bool_vector, get_real_vector, etc
+ f-x	and it has a CStreamingFile<T>* as member
+ f-x	sorry
+ f-x	CSimpleFeatures<T>*
+ f-x	fetching examples is done using simple_features->get_feature_vector(), and this returns an SGVector<T>
+ f-x	sonney2k: i'll point you to the code, just a sec
+@sonney2k	I understand
+@sonney2k	though that problem is also there without templates if I understand correctly
+@sonney2k	*argh*
+ f-x	sonney2k: yeah it is
+ f-x	so we need to typecast still
+ f-x	even though it is much better than the earlier method
+@sonney2k	this means it will return broken things ...
+ f-x	sonney2k: not if used properly
+ f-x	i mean nobody should call get_int_vector when using a StreamingFileFromSimpleFeatures<float64_t>
+ f-x	the typecast is done as without it things won't compile
+@sonney2k	blackburn, btw if you don't know how to spent time - there is this nice GPL'ed version of C5.0 lingering around - it would be cool to have this in shogun
+@sonney2k	f-x, can you throw SG_ERROR's if the T type doesn't match the get_*_vector one?
+@sonney2k	I mean you still need the typecast but at least it cannot be misused
+ blackburn	sonney2k: well I'll either find some guy to do it or do it by myself but later
+ blackburn	before mid-term I'm going to really polish ready algorithms
+ f-x	sonney2k: i tried that, but i couldn't find an easy way for it
+@sonney2k	blackburn, sure sure - I just saw you doing lots of trac cleaning issues
+ blackburn	sonney2k: most of them was kinda old
+ blackburn	ah yes, need your opinion
+ blackburn	I have closed some enhancement about to put lapack and blas into CMath
+@sonney2k	blackburn, seen that. I still don't want to require lapack / blas. It is ok to loose features but not to not being able to compile....
+@sonney2k	f-x, I mean since the class is templated now you know or?
+ f-x	sonney2k: we'll at least need some kind of helper function to do that (as far as i can see)
+ f-x	i'm worried about complicating code.. but wait, i'll try some more
+@sonney2k	f-x, I mean couldn't you do implementations for get_bool_vector<bool>() and then get_bool_vector<other_type>() { SG_ERROR("type mismatch") } ?
+ blackburn	sonney2k: exactly, but they would better install it (or they will not see my beautiful dimreduction ;)
+@sonney2k	blackburn, yeah - but getting this to work with osx and cygwin is a pain
+ f-x	sonney2k: that would mean templating those functions further.. but it looks like something which can work
+ blackburn	sonney2k: what is used in osx and windoze instead of lapack?
+@sonney2k	f-x, I mean you can do the correct implementation for the correct type - and then use the macro magic to throw errors for unsupported types
+@sonney2k	blackburn, lapack and blas :)
+ blackburn	sonney2k: okay but what is the problem?
+@sonney2k	blackburn, try to compile it under osx, cygwin and you will understand the problem
+ f-x	sonney2k: you're right.. but this macro business has already reduced readability a bit
+ f-x	more so now since the class StreamingFileFromSimpleFeatures is templated and the .cpp file has to be merged with the .h file
+ blackburn	sonney2k: is it a problem on our side?
+@sonney2k	f-x, yes I know but for just showing error messages it is ok I think
+@sonney2k	blackburn, only if we want windows/osx users :-)
+ blackburn	sonney2k: I think we want :)
+ f-x	sonney2k: ok.. i'll fiddle around with those macros to get that SG_ERROR in.. and finally this problem can be solved
+ blackburn	weekly report!
+ blackburn	okay done
+ blackburn	sonney2k: how to go to header in vim? :)
+@sonney2k	blackburn, thanks
+@sonney2k	blackburn, install A.vim
+@sonney2k	then you just type
+@sonney2k	:A
+* sonney2k is a heavy user of that feature
+ blackburn	sonney2k: what about #include<cblas.h>? how to go to cblas.h?
+ blackburn	ah I see
+ blackburn	ih
+@sonney2k	ahh, just type gf
+ blackburn	hm
+ blackburn	sonney2k: how to go back? :D
+@sonney2k	ctrl+o
+ blackburn	AWESOME
+@sonney2k	ctrl+i to go the other direction
+@sonney2k	f-x, does it work?
+ f-x	sonney2k: sorry i haven't checked it out properly yet.. pretty sure it will work out, but i was exploring some alternatives in which templating is not necessary... some ideas are possible to implement, but they will have the overhead of checking types at runtime with each function call, which templates won't... templates win, i guess
+ f-x	damn.. i really don't want readability to suffer more.. but if there's no other way, templating seems to be the reasonable option
+@sonney2k	f-x, hmmhh I thought that readability is not suffering with this approach - I guess you should write it down once and then we will see if it is that bad
+ f-x	sonney2k: okay.. i'll write it now and then see..
+ CIA-32	shogun: Sergey Lisitsyn master * rabf5a9d / (src/libshogun/lib/arpack.cpp src/libshogun/lib/arpack.h): Fixes and improvements for arpack wrapper - http://bit.ly/mAzY2k
+ CIA-32	shogun: Sergey Lisitsyn master * rbf05670 / src/libshogun/preprocessor/ClassicMDS.cpp : ARPACK-related fixes for ClassicMDS - http://bit.ly/jKyXIO
+-!- blackburn [~blackburn@188.122.238.99] has quit [Ping timeout: 255 seconds]
+--- Log closed Mon Jul 04 00:00:43 2011

@@ -1,0 +1,196 @@
+--- Log opened Thu May 31 00:00:41 2012
+-!- cwidmer [~chris@HSI-KBW-046-005-237-106.hsi8.kabel-badenwuerttemberg.de] has quit [Ping timeout: 252 seconds]
+-!- blackburn [~blackburn@31.28.59.65] has quit [Ping timeout: 260 seconds]
+-!- av3ngr [av3ngr@nat/redhat/x-aucsmzdxphqdgupq] has joined #shogun
+-!- gsomix [~gsomix@37.61.181.114] has quit [Quit: Ex-Chat]
+-!- cheng [73406f11@gateway/web/freenode/ip.115.64.111.17] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- cheng [73406f11@gateway/web/freenode/ip.115.64.111.17] has quit [Ping timeout: 245 seconds]
+ CIA-113	shogun: Soeren Sonnenburg master * r9a34a7e / (6 files in 2 dirs): first draft of director dot features - http://git.io/ijAKHQ
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 252 seconds]
+-!- uricamic [~uricamic@2001:718:2:1634:34d9:b99d:b4ec:4fa4] has joined #shogun
+-!- n4nd0 [~nando@n164-p37.kthopen.kth.se] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-aucsmzdxphqdgupq] has quit [Quit: That's all folks!]
+ n4nd0	sonne|work: hey! around?
+ sonne|work	n4nd0: wassup?
+-!- pluskid [~pluskid@li400-235.members.linode.com] has joined #shogun
+ n4nd0	sonne|work: how do you suggest me to enable compilation with mosek in shogun?
+ n4nd0	sonne|work: doing something similar to what is done for cplex?
+ sonne|work	n4nd0: yes
+ sonne|work	when mosek is found we enable the code using it
+ n4nd0	ook, I will dive into the configure script then
+ sonne|work	n4nd0: well more important
+ sonne|work	figure out a way to detect that mosek is installed...
+ sonne|work	and what the compile/linkflags are
+ n4nd0	sonne|work: yes, I already found out that when I compiled some of mosek examples to try it out
+ n4nd0	for the first I do whereis mosek
+ n4nd0	and the flags I have to do -I platform/linux32x86/h/ -L platform/linux32x86/bin/ -lmosek -pthread -lc -ldl -lm
+ n4nd0	where platform/ is a subdirectory inside mosek installation path
+ sonne|work	n4nd0: but how did you find out these flags?
+ sonne|work	these might be different for other archs
+ n4nd0	sonne|work: those in particular where the ones I used
+ n4nd0	for another archs it looks like $mosek_path/platform/$arch_dependent_dir/h
+ sonne|work	n4nd0: yeah the problem is how to figure out all these
+ n4nd0	sonne|work: I am finding my way so far - for the moment I am interested in make it work in my machine, once I do a PR we can make it more robust for other platforms
+ sonne|work	n4nd0: well you can do the PR w/o touching configure, just make sure you ifdef your class
+ sonne|work	I don't have access to mosek so I cannot test it
+ sonne|work	and not test will be run for this proprietary stuff anyways
+ n4nd0	sonne|work: I am doing it touching the configure in order to prepare the compilation flags
+ n4nd0	sonne|work: how can I do it otherwise?
+ sonne|work	n4nd0: manually add it to .config-local or .config
+ n4nd0	sonne|work: ok, I am checking, thanks!
+-!- harshit_ [~harshit.s@182.68.110.154] has joined #shogun
+ harshit_	hey n4nd0 whats up :)
+ n4nd0	hey harshit_
+ n4nd0	harshit_: working a bit here, how is it going fo ryou?
+ harshit_	how is gsoc going !
+ harshit_	just over with my exams , phew !
+ n4nd0	I finished yesterday my last exam this year too
+ harshit_	your weekly report looks really good.. you guys seems to be working really hard !
+ n4nd0	gsoc is going well
+-!- heiko2 [~heiko@host86-182-167-51.range86-182.btcentralplus.com] has joined #shogun
+ n4nd0	thanks!
+ n4nd0	harshit_: what plans do you have for the summer?
+ harshit_	is there any small feature/bug or anyother thing you think i could work with ? coz otherwise i'll get disconnected with shogun world !
+ harshit_	Summer !!! internship !! its mandatory for us, so I am doing it with amazon.com
+ n4nd0	nice
+ n4nd0	about something to do within shogun, mmm what about the idea you had gor gsoc?
+ n4nd0	for*
+ harshit_	that would be too big to implement ! I need something small !
+ harshit_	have to work with amazon too !
+ sonne|work	harshit_: if you want something small - you could add some convenience functions to SGVector/SGMatrix
+ sonne|work	like adding vectors, matrices
+ sonne|work	multiplying them
+ sonne|work	stuff like this
+ n4nd0	sonne|work: harshit_ I was thinking too about what you said related to LDA
+ harshit_	yeah that sounds simple
+ sonne|work	or all the sin(x)
+ sonne|work	etc
+ n4nd0	do something similar to what scikits has as I did with QDA
+ n4nd0	multiclass support
+ harshit_	sonne|work
+ sonne|work	harshit_: and more important a display() function
+ sonne|work	:)
+ sonne|work	harshit_: I am happy that you got some nice practical at amazon
+ sonne|work	should be very exciting
+ harshit_	sonne|work :Thats good idea ! nice and simple , will start with it today only !
+ harshit_	sonne|work : thanks !
+-!- harshit__ [~harshit.s@182.68.110.154] has joined #shogun
+-!- harshit__ [~harshit.s@182.68.110.154] has left #shogun []
+-!- harshit_ [~harshit.s@182.68.110.154] has quit []
+-!- harshit_ [~harshit@182.68.110.154] has joined #shogun
+-!- heiko2 [~heiko@host86-182-167-51.range86-182.btcentralplus.com] has quit [Ping timeout: 245 seconds]
+ n4nd0	I got a question here guys, when is the file class_list.cpp generated??
+ n4nd0	sonne|work: ^?
+ n4nd0	got it, class_list.cpp.py
+-!- heiko1 [~heiko@host86-183-74-50.range86-183.btcentralplus.com] has joined #shogun
+-!- harshit_ [~harshit@182.68.110.154] has quit [Ping timeout: 246 seconds]
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- heiko1 [~heiko@host86-183-74-50.range86-183.btcentralplus.com] has quit [Ping timeout: 246 seconds]
+-!- heiko1 [~heiko@host86-179-33-97.range86-179.btcentralplus.com] has joined #shogun
+-!- n4nd0 [~nando@n164-p37.kthopen.kth.se] has quit [Read error: Operation timed out]
+-!- blackburn [~blackburn@31.28.59.65] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@31.28.59.65] has joined #shogun
+-!- heiko [~heiko@host86-180-223-245.range86-180.btcentralplus.com] has joined #shogun
+-!- heiko1 [~heiko@host86-179-33-97.range86-179.btcentralplus.com] has quit [Ping timeout: 245 seconds]
+-!- heiko [~heiko@host86-180-223-245.range86-180.btcentralplus.com] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@n164-p37.kthopen.kth.se] has joined #shogun
+ n4nd0	hey blackburn
+ blackburn	hey
+ n4nd0	I've passed my software engineering exam :) awesome
+ n4nd0	blackburn: do you know if there are problems with swig a function pointers?
+ sonne|work	n4nd0: why do you need them?
+ n4nd0	sonne|work: it is the part that I will change, in CStructuredModel
+ n4nd0	the argmax, the combined feature function and the delta loss
+ n4nd0	they are with function pointers right now, but you told me to change them
+ sonne|work	n4nd0: it certainly makes directors impossible
+ sonne|work	yes
+ n4nd0	all right ...
+ sonne|work	classes are much prefered
+ n4nd0	then I think I'll have to change it to classes now
+ n4nd0	I wanted to do it once CPrimalMosek was ready
+ blackburn	n4nd0: cool!
+ n4nd0	sonne|work: but still, just curious, is it normal that swig breaks with it?
+ sonne|work	n4nd0: I dont' know
+ sonne|work	I thought it can somehow deal with function ptrs
+ sonne|work	in the worst case %ignore them
+ blackburn	I prefer no pointers in interface
+ sonne|work	n4nd0: http://www.swig.org/Doc1.3/SWIG.html#SWIG_nn30
+ sonne|work	it is possible
+ sonne|work	but I prefer clean interfaces too
+ n4nd0	yeah, I understand
+ sonne|work	alright guys
+ sonne|work	it is time for me to be away for some time...
+ sonne|work	I will be in chat from time to time
+ sonne|work	but no promises :)
+ n4nd0	sonne|work: enjoy your holidays!
+ sonne|work	thanks
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+ blackburn	n4nd0: time to STL shogun!
+ blackburn	:D
+ n4nd0	blackburn: haha
+ n4nd0	blackburn: let's go, we have to be fast!
+ n4nd0	pluskid: are you in? :P
+ pluskid	huuuuuuuge good news! :D
+ n4nd0	where's wiking? he would support us too
+ blackburn	at pakdd
+ pluskid	btw: blackburn, the Vowpal Wabbit in shogun is a wrapper of the official VW, right?
+ blackburn	yes but VW was updated pretty much
+ blackburn	after GSoC 2011
+ pluskid	hmm...
+ blackburn	not a wrapper even
+ blackburn	just integrated code
+ pluskid	I saw there's even a specific type of features for vw
+ pluskid	StreamingVwFeatures
+ pluskid	is there any other online machine in shogun other than VW?
+ blackburn	well larank should support that
+ blackburn	but not integrated for streaming features
+ pluskid	OK, I'll first try to use the current Shogun VW for conditional probability tree
+ blackburn	why online?
+ pluskid	because CPT is an online algorithm
+ blackburn	huh
+ blackburn	cool
+ pluskid	it's from JL :D
+ pluskid	it seems JL loves online
+ pluskid	but there are some problems
+ pluskid	I'm not sure
+ pluskid	for example, in shogun how do you specify Labels for an online algorithm
+ blackburn	in features IIRC
+ pluskid	you mean embed labels in features?
+ blackburn	yes, check methods of streamingfeatures
+ pluskid	ah, OK, cool
+ blackburn	daaaaaamn I broke caps lock
+ n4nd0	:O
+ n4nd0	your fingers are strong
+ blackburn	tried to clean it up
+ blackburn	argh
+ pluskid	are you swapping Caps Lock with ESC?
+ blackburn	I use some clue now :)
+ blackburn	argh I'm becoming mad and can buy new notebook at some point of madness :D
+-!- n4nd0 [~nando@n164-p37.kthopen.kth.se] has quit [Quit: leaving]
+-!- pluskid [~pluskid@li400-235.members.linode.com] has quit [Quit: Leaving]
+-!- uricamic [~uricamic@2001:718:2:1634:34d9:b99d:b4ec:4fa4] has quit [Quit: Leaving.]
+-!- gsomix [~gsomix@188.168.128.108] has joined #shogun
+ gsomix	15.67/20, passed
+ gsomix	hello
+ blackburn	gsomix: no more soeren - I'm your boss now :D
+ gsomix	blackburn, ok.
+ gsomix	blackburn, what to do first? DirectorDotFeatures?
+ blackburn	no that thing can be a little difficult
+ blackburn	interface needs to be changed
+ blackburn	I'd suggest DirectorDistance
+ gsomix	blackburn, ok. I need some rest, cu little later. :)
+ blackburn	cu
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+ CIA-113	shogun: Soeren Sonnenburg master * r86c3eaa / src/interfaces/python_modular/swig_typemaps.i : whitespace fixes - http://git.io/NEkoNA
+ CIA-113	shogun: Soeren Sonnenburg master * rea40ed5 / src/interfaces/modular/Features.i : enable director for directordotfeatures - http://git.io/LP9Tdg
+ CIA-113	shogun: Soeren Sonnenburg master * r018e453 / (3 files in 3 dirs): get minimal director dot features example to work - http://git.io/STF8Jg
+ shogun-buildbot	build #255 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/255
+ shogun-buildbot	build #166 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/166
+ blackburn	no way
+ blackburn	sonney2k: you are on holidays!
+ shogun-buildbot	build #1019 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/1019  blamelist: sonne@debian.org
+ CIA-113	shogun: Sergey Lisitsyn master * r13789b0 / src/shogun/features/DirectorDotFeatures.h : Fixed bug reported in #561 - http://git.io/ad4Xuw
+ shogun-buildbot	build #1020 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/1020
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Quit: Page closed]
+--- Log closed Fri Jun 01 00:00:41 2012

@@ -1,0 +1,351 @@
+--- Log opened Tue Mar 12 00:00:11 2013
+-!- FSCV [~FSCV@206.225.135.24] has quit [Quit: Leaving]
+ shogun-buildbot	build #275 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/275
+-!- blackburn1 [~blackburn@188.168.14.162] has joined #shogun
+-!- blackburn [~blackburn@83.234.54.98] has quit [Ping timeout: 245 seconds]
+ blackburn1	sonney2k: nice song
+ blackburn1	:D
+ blackburn1	sonney2k: git://github.com/airblade/vim-gitgutter.git
+ blackburn1	(if you are still using vim)
+ blackburn1	:)
+-!- blackburn1 [~blackburn@188.168.14.162] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@n177-p170.kthopen.kth.se] has joined #shogun
+-!- blackburn [~lisitsin@212.46.246.30] has joined #shogun
+ sonne|work	blackburn: I am still undecided...
+ blackburn	sonne|work: a nice feature anyway
+ sonne|work	blackburn: yes indeed... I am already used to that from eclipse btw
+ blackburn	sonne|work: have you heard hinton is joining google?
+ sonne|work	interesting. I guess he wants to create google brain(tm)
+ blackburn	sonne|work: yeah infinitely deep network
+ sonne|work	a c'mon a few million layers should be enough for everybody :)
+-!- sumit_ [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+ blackburn	sonne|work: 640K
+ sonne|work	true that
+ blackburn	as a hipster teenager I should tweet that
+ blackburn	or may be I should write it down to my moleskine and instagram it with my iphone..
+ blackburn	sad I don't have either hah
+-!- heiko [~heiko@nat-168-237.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- sumit_ [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Ping timeout: 245 seconds]
+ blackburn	heiko: okay that MDS thing must be changed
+ heiko	blackburn: ok will do tonight
+ blackburn	heiko: I will :)
+ heiko	blackburn:  just dicovered the coolness of Eigen3 :)
+ blackburn	heiko: hah congraatz
+ heiko	(compared to boost lina classes :)
+ blackburn	heiko: that's kind of late discover :)
+ heiko	blackburn:  well so far I did not need it
+ heiko	c++ array were sufficient
+ blackburn	heiko: explicit SSE is somewhat important speedup I think
+ heiko	what is that?
+ blackburn	heiko: when you compute norm your CPU can handle two doubles per op
+ heiko	blackburn:  I see, thats good stuff
+ blackburn	heiko: eigen does all vectorization explicitly (when compiler can be afraid of doing that)
+ heiko	blackburn: what does that mean vectorization?
+ blackburn	heiko: SIMD (single instruction multiple data), i.e. SSE
+ blackburn	heiko: (at least SSE)
+ heiko	blackburn: I see
+ heiko	cool
+ heiko	good stuff! :)
+ blackburn	heiko: some more magic of eigen is in template expression though
+ heiko	yeah this is what I meant
+ heiko	this is really cool and seems flexible
+ blackburn	heiko: a = b + c + d; means no copy
+ blackburn	as operator+ returns some thing that can be added to other vector and finally it is evaluated to a[i] = b[i] + c[i] + d[i] (but vectorized)
+ n4nd0	do you guys know if // means something special in python? I have found it in some code as an operator between two integers
+ n4nd0	I have seen it does the same as / for simple cases
+ n4nd0	i.e. integer division
+ heiko	n4nd0: no idea :)
+ heiko	n4nd0: but python has strange operators sometimes x**2 for example
+ heiko	to I guess // is related to that
+ blackburn	n4nd0:    3//1 => 3
+ n4nd0	floor division!
+ blackburn	ha
+ blackburn	   3//2.0 => 1.0
+ blackburn	n4nd0: ^
+ n4nd0	I see, thanks!
+ n4nd0	so actually if both of them are integers, it doesn't make any difference wrt using /
+ n4nd0	more explicit though
+ blackburn	heiko: I took a look at your statistics code - pretty well organized
+ heiko	blackburn:  thanks :) what did you look at in particular?
+ blackburn	heiko: glanced over classes
+ heiko	linear time mmd is the best one ! :)
+ blackburn	heiko: pretty big
+ heiko	yes, it does a lot of things
+ heiko	remember: it can handle infinite amounts of data
+ heiko	(and do automatic optimal kernel selection for that)
+ blackburn	heiko: I still do not understand how to use it but that's nice
+ heiko	blackburn: on streams
+ heiko	changepoint detection for example
+ heiko	but to be honest, it is not that widely used :)
+ blackburn	heiko: what is changepoint detection?
+ heiko	you have a stream of data and want to know when it changes
+ heiko	so imagine a brain-scanner
+ heiko	and you change your thought :)
+ heiko	(roughly)
+ heiko	test whether a distribution changes
+ blackburn	heiko: what would I need to pass to that algorithm?
+ heiko	first one needs a change point detection algo
+ heiko	the MMD does the following
+ heiko	you pass samples from two distributions p and q
+ heiko	and it tells you whether p!=q
+ blackburn	but how is that changepoint?
+ heiko	you can also use that to select kernels for classification since it will tell you which kernel maximises the difference
+ heiko	blackburn: you have to embed it into other things
+ heiko	there is a paper somewhere
+ heiko	how to do that
+ heiko	you have like groups and test one against others
+ blackburn	heiko: so I first collect some normal data?
+ blackburn	heiko: I see some 'business' case
+ heiko	yes
+ blackburn	imagine I have a website
+ blackburn	and collect visitors data
+ blackburn	that's P
+ blackburn	and then I change something in my adverstisement and collect more data
+ blackburn	that's Q
+ heiko	yep thats a thing you could do
+ blackburn	so I define some kernel on visiting data and check if distribution of P and Q
+ blackburn	are equal
+ blackburn	quite interesting
+ heiko	blackburn:  yeah its a bit like classification
+ blackburn	heiko: I was recently asked about possible way to solve similar problem
+ blackburn	heiko: but P>Q
+ heiko	but more the qeustion: are there differences
+ heiko	you mean number of samples?
+ blackburn	heiko: not really
+ blackburn	heiko: not correct formulation though :)
+ blackburn	heiko: guy needed to check if site with # of clicks P has more efficient adv than site with # of clicks Q
+ blackburn	or so
+ blackburn	heiko: he actually had only means so I said that's quite impossible if you just have means
+ heiko	thats quite little information :)
+ blackburn	as he needed to do that with 0.95 confidence heh
+ blackburn	no way to compute anything with confidence without probability distribution I guess
+ blackburn	or at least variance..
+ heiko	you need samples then you can do that
+ blackburn	heiko: I am actually unsure what is sample here
+ blackburn	# of clicks per some period may be
+-!- heiko [~heiko@nat-168-237.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+ sonne|work	blackburn: you seem to be so very excited about sse stuff in eigen - note that the standard gcc compiler will vectorize your simple for loops too so no need to be overly excited
+ blackburn	sonne|work: I am actually more excited about it gives you an API to do that stuff
+ sonne|work	yeah that is the benefit of it
+ blackburn	sonne|work: good code contains almost no loops
+ blackburn	sonne|work: it is not true sometimes - gcc don't care about aliasing
+-!- heiko [~heiko@nat-168-237.internal.eduroam.ucl.ac.uk] has joined #shogun
+ blackburn	sonne|work: so it could fail with that
+ blackburn	sonne|work: I am really unsure if gcc will be able to SIMDize some function which takes double* as a parameter
+ sonne|work	I would bet so
+ blackburn	sonne|work: anyway you can't say it does that in all cases that eigen does
+ blackburn	sonne|work: for example ICC vectorization is known to be more powerful (so there is a room)
+-!- heiko [~heiko@nat-168-237.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 252 seconds]
+ blackburn	sonne|work: about alignment issues: http://gcc.gnu.org/projects/tree-ssa/vectorization.html#assume-aligned
+ blackburn	I think there won't be such thing if it could determine that in 100% cases
+-!- FSCV [~FSCV@78.129.244.119] has joined #shogun
+ wiking	blackburn: i'm going to russian for 5 days... :)
+-!- blackburn [~lisitsin@212.46.246.30] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Sergey Lisitsyn :master * b6c25aa / examples/undocumented/python_modular/converter_multidimensionalscaling_modular.py: https://github.com/shogun-toolbox/shogun/commit/b6c25aa6ddcc3dd07f1d94f2970fb331bc9a8702
+ shogun-notifier-	shogun: An attempt to get MDS example make more sense
+-!- tom____ [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ tom____	hi!
+ tom____	I would like to use the sosvm framework in shogun
+ tom____	Is there any example of usage with sequential data ?
+-!- FSCV [~FSCV@78.129.244.119] has quit [Quit: This computer has gone to sleep]
+ n4nd0	hey tom____ !
+ n4nd0	nice to hear you want to use the sosvm framework :)
+ tom____	n4nd0: hey n4nd0
+ n4nd0	tom____: take a look to examples so_hmsvm_mosek.cpp and so_hmsvm_mosek_simple.cpp in examples/undocumented/libshogun
+ tom____	n4nd0: then mosek need to be installed ?
+ n4nd0	tom____: and for the python interface, structure_hmsvm_*
+ n4nd0	tom____: not really
+ n4nd0	there is a solver that makes use of mosek
+ n4nd0	for the examples with mosek in the name you need it
+ n4nd0	but we have also some bundle methods implemented
+ n4nd0	look for example structure_hmsvm_bmrm.py in examples/undocumented/python_modular
+ n4nd0	sorry for the misleading name so_ in some of them - I will rename those to structure_
+ tom____	n4nd0: ok thank you
+ n4nd0	tom____: no problem
+ tom____	n4nd0: I use most of the time c++ then I will take a lokk to CDualLibQPBMSOSVM
+ tom____	that's the bundle isn't it ?
+ n4nd0	tom____: yeah
+-!- shogun-t1olbox [~shogun@7nn.de] has quit [Ping timeout: 264 seconds]
+--- Log closed Tue Mar 12 16:54:27 2013
+--- Log opened Tue Mar 12 16:54:34 2013
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 12 nicks [1 ops, 0 halfops, 0 voices, 11 normal]
+!wright.freenode.net [freenode-info] help freenode weed out clonebots -- please register your IRC nick and auto-identify: http://freenode.net/faq.shtml#nicksetup
+-!- Irssi: Join to #shogun was synced in 7 secs
+ n4nd0	tom____: there are also examples using the bundle method in the C++ interface
+ n4nd0	tom____: examples/undocumented/libshogun/so_multiclass_BMRM.cpp
+ n4nd0	that's not dealing with sequential data
+ n4nd0	but for that part you can always check the other examples
+ tom____	such ?
+ n4nd0	the ones I mentioned before
+ n4nd0	e.g. so_hmsvm_mosek
+ n4nd0	you can exchange models and solvers as you wish
+ n4nd0	so if you are interested in the bundle methods -> check things with bmrm
+ n4nd0	if you are interested in sequential data -> things with hmsvm
+ n4nd0	tom____: see what I mean?
+ tom____	n4nd0: allright
+ tom____	n4nd0: thank you
+ n4nd0	you are welcome
+-!- travis-ci [~travis-ci@ec2-54-234-212-155.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/5444155
+-!- travis-ci [~travis-ci@ec2-54-234-212-155.compute-1.amazonaws.com] has left #shogun []
+ n4nd0	error in travis, "no space left on device"??!?
+ n4nd0	gtg now, see you later
+-!- n4nd0 [~nando@n177-p170.kthopen.kth.se] has quit [Quit: leaving]
+-!- tom____ [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+ wiking	lool
+ wiking	wtf is this
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- heiko [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 264 seconds]
+-!- blackburn [~blackburn@188.168.13.118] has joined #shogun
+-!- FSCV [~FSCV@187.210.54.166] has joined #shogun
+-!- FSCV_ [~FSCV@204.45.132.11] has joined #shogun
+-!- FSCV [~FSCV@187.210.54.166] has quit [Ping timeout: 245 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- FSCV_ [~FSCV@204.45.132.11] has quit [Ping timeout: 240 seconds]
+-!- FSCV_ [~FSCV@65.19.131.247] has joined #shogun
+-!- heiko [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has left #shogun []
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Client Quit]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	alright GPs are broken nice
+ n4nd0	blackburn: how badly?
+ n4nd0	what is it with them??
+ blackburn	n4nd0: heiko reports it's results are non-sense
+ blackburn	sonney2k: directors work here
+ blackburn	2.0.8
+ blackburn	trying 2.0.9
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 264 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Sergey Lisitsyn :master * f4696ee / src/shogun/evaluation/DirectorContingencyTableEvaluation.h: https://github.com/shogun-toolbox/shogun/commit/f4696ee7d06ba8ed097ed45ff74ac4c78ec12a44
+ shogun-notifier-	shogun: A fix for director contingency evaluation class
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	blackburn: I also tried out a couple of director examples here this morning
+ n4nd0	they worked fine
+ blackburn	n4nd0: evaluation one was wrong and I fixed it just a mniute ago
+ n4nd0	blackburn: nice
+ blackburn	n4nd0: about results
+ blackburn	(in paper)
+ n4nd0	blackburn: tell me
+ blackburn	n4nd0: I think I've got to try to optimize it
+ n4nd0	blackburn: what is the part that concerns you?
+ blackburn	n4nd0: I'd like to show >3x speedup always (that's the reason to parallelize code)
+ blackburn	n4nd0: I am surprised with speed of lle
+ blackburn	in drtoolbox
+ blackburn	n4nd0: 8 CPUs? really?
+ n4nd0	blackburn: that's what /proc/cpuinfo tells me
+ n4nd0	I can paste it if you want to check
+ blackburn	yeah could you please
+ blackburn	I'd rather expect 2 cpus with 4 cores
+ n4nd0	http://pastebin.com/GTVJNDwk
+ n4nd0	blackburn: well it may be
+ n4nd0	I have an i7 here
+ n4nd0	an proc/cpuinfo shows me 4 processors
+ blackburn	n4nd0: does it happen to have intel compiler around?
+ n4nd0	blackburn: how can I check that?
+ blackburn	n4nd0: X3470 is 4 core
+ blackburn	n4nd0: 'icpc' may be
+ n4nd0	comman not found
+ n4nd0	command*
+ blackburn	may be anything in /opt/intel?
+ n4nd0	no directory
+ blackburn	n4nd0: hmm alright
+ blackburn	n4nd0: what is ubuntu version?
+ n4nd0	Ubuntu 12.04.2 LTS
+ n4nd0	precise pangolin IIRC
+ blackburn	n4nd0: and matlab 2011a, right?
+ n4nd0	yep
+ blackburn	alright thanks
+ n4nd0	blackburn: a pleasure :)
+ n4nd0	blackburn: so how can we speed it up?
+-!- travis-ci [~travis-ci@ec2-54-234-212-155.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/5455109
+-!- travis-ci [~travis-ci@ec2-54-234-212-155.compute-1.amazonaws.com] has left #shogun []
+ blackburn	n4nd0: no idea actually
+ blackburn	n4nd0: what if you run scaling thing?
+ n4nd0	blackburn: what?
+ n4nd0	blackburn: ah sorry yeah
+ blackburn	n4nd0: python benchmark.py scaling
+ n4nd0	blackburn: let's do it
+ blackburn	n4nd0: I am curious what is $\infty$
+ blackburn	I'd avoid offensive claims that waffles didn't finish in 10 hours
+ n4nd0	Tapkee parallel implementations benchmark
+ n4nd0	Isomap on Swissroll with 1 threads takes 17.2111s
+ n4nd0	Isomap on Swissroll with 2 threads takes 9.5318s
+ n4nd0	Isomap on Swissroll with 3 threads takes 6.8726s
+ n4nd0	Isomap on Swissroll with 4 threads takes 5.5947s
+ n4nd0	Isomap on Swissroll with 5 threads takes 5.5965s
+ blackburn	but it is true in the end..
+ n4nd0	blackburn: well it was not 10 hours
+ n4nd0	blackburn: or yes
+ n4nd0	blackburn: I don't actually remember it
+ blackburn	n4nd0: alright lets say 3
+ n4nd0	mmm yeah yeah
+ blackburn	:D
+ n4nd0	it was 500 almost 600 minutes
+ blackburn	n4nd0: 100 dense matrix-vector products..
+ n4nd0	for each iteration
+ n4nd0	cannot be good no
+ blackburn	no I was wrong
+ blackburn	for each dimension of target dimensions
+ n4nd0	so then it is even more than 100??
+ blackburn	I got a little lame
+ blackburn	n4nd0: 200 totally to be more precise
+ n4nd0	ah ok
+ n4nd0	isn't it a bit weird that it was taking that much then?
+ blackburn	n4nd0: but that should be computed faster than in 10 hours
+ blackburn	so I expect some even more high performance stuff is here too
+ blackburn	may be he just waits I don't know
+ blackburn	Thread.sleep
+ n4nd0	http://pastebin.com/aBvzbcYh
+ blackburn	n4nd0: hmm I see
+ blackburn	thnaks
+ blackburn	n4nd0: I'd start review of the paper
+ n4nd0	blackburn: our or waffles?
+ blackburn	n4nd0: haha our
+ n4nd0	I guess you mean ours
+ n4nd0	haha
+ n4nd0	blackburn: so should we revise the paper again and decide to send it?
+ n4nd0	blackburn: I thought we had already reviewed it :)
+ blackburn	n4nd0: just after plots and website
+ n4nd0	the review or the send?
+ blackburn	n4nd0: no, I mean we should read it carefully, meanwhile finishing website and some nice plots
+ blackburn	and then send
+ n4nd0	blackburn: agree
+ n4nd0	blackburn: did Chris contact you about something?
+ blackburn	and we should release shogun
+ blackburn	:D
+ n4nd0	haha
+ blackburn	n4nd0: no, I guess he is busy
+ n4nd0	and end with starvation in the world
+ blackburn	n4nd0: btw do you think people should stop funding africa?
+ blackburn	:)
+ n4nd0	blackburn: wtf?
+ n4nd0	:)
+ n4nd0	it is a delicate thing
+ blackburn	n4nd0: well countries spend a lot of money for nothing
+ n4nd0	nothing?
+ n4nd0	ha!
+ n4nd0	there are lot of governors there getting rich man
+ n4nd0	and what about the organizations who ask for the money?
+ blackburn	yeah that's the only thing they sponsor
+ n4nd0	:D
+ n4nd0	delicate... I remembered this
+ n4nd0	http://www.youtube.com/watch?v=qeGChOUqQuk
+ n4nd0	I couldn't stop listening this song for some years ago
+ blackburn	I know it is not really tolerant but I'd say it is not possible to pay them for not fcking all around the africa and spread aids
+ blackburn	it is a matter of culture or so
+ blackburn	n4nd0: I have heard that song back in time
+ n4nd0	blackburn: it is a hard truth
+ n4nd0	blackburn: it was in a episode of House
+ n4nd0	maybe you heard it there
+ blackburn	n4nd0: oh then I know
+ blackburn	there were similar songs in
+ blackburn	oh let me find english name for these series
+ blackburn	ahhhhh remembered
+ blackburn	scrubs
+ n4nd0	hehe, that's about doctors too
+--- Log closed Wed Mar 13 00:00:11 2013

@@ -1,0 +1,197 @@
+--- Log opened Wed Jun 01 00:00:48 2011
+ CIA-32	shogun: Soeren Sonnenburg master * rcf2f5b2 / src/configure :
+ CIA-32	shogun: add jblas / ujmp detection (assumes that the jblas.jar / ujmp.jar are
+ CIA-32	shogun:  either in /usr/share/java/ or in CLASSPATH) - http://bit.ly/jMqzlm
+ blackburn	sleep time! see ya
+-!- blackburn [~qdrgsm@188.168.4.252] has left #shogun []
+@sonney2k	n8
+@sonney2k	but agreed
+* sonney2k stops doing shogunate maintenance 
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Quit: No Ping reply in 180 seconds.]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Quit: I'll be Bach]
+-!- alesis-novik [~alesis@188.74.87.84] has joined #shogun
+-!- VojtechFranc [~quassel@gw-101.scnet.cz] has joined #shogun
+-!- VojtechFranc [~quassel@gw-101.scnet.cz] has quit [Remote host closed the connection]
+-!- VojtechFranc [~quassel@gw-101.scnet.cz] has joined #shogun
+-!- Daniel__ [3edb9704@gateway/web/freenode/ip.62.219.151.4] has joined #shogun
+ Daniel__	Hi, in what file is the class SGString<> defined?
+ Daniel__	Its not in the documentation ...
+-!- blackburn [~qdrgsm@188.168.4.255] has joined #shogun
+ blackburn	wow
+ VojtechFranc	alesis-novik, hi, can we talk?
+-!- Daniel__ [3edb9704@gateway/web/freenode/ip.62.219.151.4] has quit [Ping timeout: 252 seconds]
+-!- heiko [~heiko@infole-06.uni-duisburg.de] has joined #shogun
+@sonney2k	in datatype.h
+@sonney2k	I think we have to cancel the meeting today
+@sonney2k	and do it on Monday next week
+@sonney2k	blackburn, VojtechFranc, alesis-novik, mlsec, heiko would that fit better?
+ VojtechFranc	sonney2k, for me both options are OK
+@sonney2k	I've had 50% complaining about the appointment today
+@sonney2k	nips deadline etc
+@sonney2k	VojtechFranc, how is it going with alesis-novik? Did you already do things?
+ heiko	sonney2k, ok, next monday is ok for me
+-!- blackburn [~qdrgsm@188.168.4.255] has quit [Ping timeout: 248 seconds]
+ VojtechFranc	sonney2k, we are just starting the real programming. Alesis finished exams the last week.
+-!- blackburn [~qdrgsm@188.168.4.255] has joined #shogun
+@sonney2k	(I am asking here before sending another stupid meeting schedule email causing yet more chaos)
+@sonney2k	VojtechFranc, so nothing yet - I guess?
+@sonney2k	but you have a plan I suppose :)
+@sonney2k	blackburn, monday also good for you?
+ heiko	sonney2k, when will the meeting be next monay? I do not have time between 1330 and 1530 (german time)
+ VojtechFranc	sonney2k, yes, we are following a plan, don't worry :)
+ heiko	thats 1130 to 1330 utc i think
+@sonney2k	heiko 13 UTC so 15:00 german time
+@sonney2k	we could schedule it to 13:30 UTC
+ heiko	ok, then I will be half an hour late
+ heiko	ok
+ heiko	this would be ok
+ heiko	what about using a doodle?
+ heiko	do you know this? is quite handy for getting meetings organized on the internet
+@sonney2k	heiko, yes I know but I am not really flexible
+ VojtechFranc	sonney2k, actually I already forced myself to program the algorithm in Matlab and Alesis is now traying to do it in Shogunm
+@sonney2k	heiko, I need to have childcare in that period...
+@sonney2k	read grandparents
+@sonney2k	VojtechFranc, very good
+@sonney2k	btw congrats on you ICML paper!
+ heiko	sonney2k, ok :)
+@sonney2k	things will be better in july though
+ heiko	well, enjoy your family life. Currently I know what to do, so its ok
+@sonney2k	heiko in case you have things to discuss - ask. btw great job with the parameter setting generator!
+ heiko	I will ask - thanks :)
+@bettyboo	heiko, yeah
+@sonney2k	heiko, I hope you can now rely on the CMachine infrastructure
+ heiko	was quite a lot of fiddeling with new and delete :)
+@sonney2k	and perf measures etc
+ heiko	I will check it out
+@sonney2k	I mean now you can do the real thing just assuming that you do modsel for a machine
+ heiko	Currently I am building a method that sets the ParameterCombination trees to a acutal machine
+ heiko	yes
+ heiko	then I will build one simple splitting strategy and a simple grid search
+@sonney2k	good plan
+ heiko	then when everything works fine, I will finish the subset stuff etc
+ heiko	and then examples
+ heiko	Just to remind you: I will leave for some climbing over the long weekend till sunday this evening
+@sonney2k	heiko, I remember - we still have 3 months. Given your progress it should be feasible if we don't stumble upon tons of stepping stones
+ heiko	hope so :)
+ heiko	do you still have a minute?
+@sonney2k	shoot
+ heiko	just encountered a thing ...
+ heiko	for the C parameter there is C1 and C2
+ heiko	for libsvm
+ heiko	and also CSVM
+ heiko	but you only hand ONE C-value in the constructor, both C1, B2 are then set to this value
+ heiko	however, when I want to set a C parameter, it is not know, because there are only C1 and C2
+ heiko	but when you want to specify the C parameter for model selection you only want to set ONE C parameter
+@sonney2k	there are two C's one for positive and one for negative class
+ alesis-novik	Morning
+ VojtechFranc	alesis-novik, hi
+ heiko	yes, but they are not used in the libsvm case when the svm is constructed by the constructor
+ heiko	and when I want only ONE c parameter to be modseled, I cant just use C but I have to use C1 or C2
+ alesis-novik	So, I've started working on the algorithm. I've decided to start be rewriting the Gaussian class to work with decomposed matrices and in log domain
+ heiko	Also, for example CLibSvm does only use one:
+ heiko	param.C = get_C1(); //is the only call
+@sonney2k	alesis-novik, ok - just don't forget to write a weekly *short* email to the mailinglist keeping everyone updated
+ alesis-novik	sonney2k, will do.
+ VojtechFranc	alesis-novik, great. How can I see the code?
+ alesis-novik	I'll commit it to my branch when I get it to the state where it compiles
+ VojtechFranc	ok
+ alesis-novik	When I do, it will be in https://github.com/alesis/shogun/tree/gmm
+ VojtechFranc	ok, them please let me know when I can start testing
+ alesis-novik	Not to break the class to much, I want to keep the get/set covariance as well (maybe something else will find the class useful)
+@sonney2k	heiko, checking
+@sonney2k	heiko, it uses C1 and C2
+@sonney2k	    float64_t weights[2]={1.0,get_C2()/get_C1()};
+ heiko	yes
+ heiko	something like to set multiple parameters with one value is needed here
+@sonney2k	I think I/we have to modify code to make this work.
+@sonney2k	e.g. C2 will alsways be 0.0 by default
+@sonney2k	and if it is only C1 is used
+ alesis-novik	VojtechFranc, so all in all, I'm planing to keep the structure as it is now, but rewrite the methods.
+ heiko	ok, I see
+ heiko	and then just change C1 in modsel if one wants the standard C
+@sonney2k	heiko, only alternative is to be able to set combinations of parameters
+ heiko	do you think this problem will appear at another place?
+ heiko	i would prefer the first way if this only happens here because it would be quite technical to implement the second one
+ VojtechFranc	alesis-novik, I'm not familiar with the current GMM class. I need to look at it.
+ alesis-novik	Essentially I use the Gaussian class within the GMM class to represent the mixture components
+@sonney2k	heiko, I don't like the C1/C2 thing either - I just don't know how to do it better
+@sonney2k	and I don't hope this happens more often
+@sonney2k	er do hope
+ heiko	mmh
+ VojtechFranc	alesis-novik, in which files is the definition of the current GMM ?
+ alesis-novik	clustering/GMM.h
+ alesis-novik	and I guess distributions/Gaussian.h
+@sonney2k	heiko, I mean we have cases where the SVM has just one C or one can set a vector of C's (example based)
+ heiko	mmmh perhaps it is best to implement this multiple parameters-one value thing
+@sonney2k	heiko, or not and assume that we set a vector of Cs or just one C
+ heiko	I dont understand this really, could you explain it again?
+@sonney2k	heiko, can't you set a vector of values?
+ heiko	where? for the modsel parameters?
+@sonney2k	heiko, yes I mean currently a double or SGObject
+@sonney2k	but a vector of doubles then
+ heiko	yes it is possible
+ heiko	however, currently the modelSelectionParams only set single values or SGObject
+ blackburn	sonney2k: yeah today is fine too :)
+ VojtechFranc	alesis-novik, do you need at this point some help from my side?
+ alesis-novik	VojtechFranc, did you look at the definitions? If the current structure seems fine, then I don't really have any more questions
+ alesis-novik	I've rewritten the definition of Gaussian to have D and U instead of cov_matrix and added a "type" field
+ alesis-novik	So now I'm rewriting the implementation of pdf methods
+ alesis-novik	I'm still thinking of keeping the "constant" part in, computing it when new covariances are set
+ VojtechFranc	regarding the definitions of GMM class, maybe it would be better if the constructor of the class was not liked to the EM algorihtm.
+ VojtechFranc	GMM paramaters can be estimated by other methods
+ VojtechFranc	it is also reasonable to add the parmaaters of GMM manually
+ VojtechFranc	isnt it better to have a method train_em(max_iter,min_change) ?
+ VojtechFranc	I mean the GMM class should be mainly a data structure to represent a mixture of Gaussians. The EM algorithm is just a single way how to set up its parameters.
+ alesis-novik	Ok, so the constructor should just have the number of components (or initial number of components) and then a train_em method of actual EM
+ VojtechFranc	yes, I think it is better
+ VojtechFranc	maybe, there should be another method (or constructor) to setup the inital vaule of the GMM paramaters
+ alesis-novik	Should that be in form of GMM(n, means, covs) or GMM(n, gaussians)?
+ VojtechFranc	to me both options are OK
+ VojtechFranc	however, the constructor should have also another argument : cov_type
+ alesis-novik	ah, if it's GMM(n, gaussians) I guess that wouldn't be needed, because cov_type would be in the gaussians already
+ VojtechFranc	I think the typicall usage will be GMM(n_componets,cov_type) then running the EM which sets the paramaters from training set
+ alesis-novik	I'll start from that then, adding additional features later
+ VojtechFranc	yes, I think it is good to start from simpler and then improve
+ alesis-novik	Ah, I remembered another question: in gmm_em.m you use knnest to initially assign datapoints. Does that make a significant improvement over just iterating EM?
+ VojtechFranc	knnest is used to get initial parameters;  do you have a better way how to do it?
+ VojtechFranc	you can either randomly initiallize the paramaters (Mean,Cov,Priors) or to randomly initialize p(y|x) assignments of data to clussters
+ VojtechFranc	knnest returns the crisp assignment of examples to clusters.
+ alesis-novik	The current one does a static initialization of covariances and KMeans for means
+ VojtechFranc	the m-code I send you 1) finds n centers either randonmly or by k-mean, 2) it assigns the points to this centers and 3) estimates means and covs for each cluster
+ alesis-novik	I guess I could try using KNN for parameter initialization, but I'm not sure if the current implementation in Shogun can do that.
+ VojtechFranc	I see, so the queation is if shogun has implemnetaion of KNN? well I don't know. we should aske Soeren
+ alesis-novik	Shogun has the implementation of KNN, but I don't think I can define centers manually and it has to be trained. Essentially is a proper KNN I guess.
+ alesis-novik	wouldn't the effect be similar to initializing the covariance to a spherical one? (not by type, but covariance itself)
+ VojtechFranc	it seems to be better if the initial estimate of covs fits the data, i.e. setting them to identity matrices is not generally a good idea
+ blackburn	I have some 'experience' with shogun's KNN and could adapt it if it is needed
+ VojtechFranc	I think it is not a big problem to do assigment of N points to K clusters...
+ VojtechFranc	i.e. we need only the 1-NN
+ blackburn	just fyi :)
+-!- blackburn [~qdrgsm@188.168.4.255] has quit [Quit: Leaving.]
+ alesis-novik	ok, I'll see what can be done. I can just implement 1-NN assignment in the method itself if needed
+ alesis-novik	Since I won't really need to think about distances
+ VojtechFranc	iii[
+ VojtechFranc	yes, exactly
+ VojtechFranc	so, alesis I have to leave now.
+ alesis-novik	Ok, I don't think I have any more questions now.
+ alesis-novik	If I think of any, I'll e-mail you
+ VojtechFranc	OK, great. And please, don't forget to write SHORT progress report as Soeren pointed out
+ VojtechFranc	bye
+ alesis-novik	See you
+-!- VojtechFranc [~quassel@gw-101.scnet.cz] has quit [Remote host closed the connection]
+-!- heiko [~heiko@infole-06.uni-duisburg.de] has quit [Quit: Leaving.]
+ CIA-32	shogun: Heiko Strathmann master * re0842b9 / (2 files): added example of how to apply a set of CParameterCombination trees to a support vector machine (+9 more commits...) - http://bit.ly/kTeDKu
+ CIA-32	shogun: Soeren Sonnenburg master * r95e0dad / (src/configure src/java_modular/swig_typemaps.i): Merge branch 'master' of git://github.com/sploving/shogun - http://bit.ly/iCOdWt
+@sonney2k	serialhex, can you do thsi minor change before I apply your patch?
+-!- blackburn [~qdrgsm@109.226.70.249] has joined #shogun
+ blackburn	sonney2k: hey it is some message we shouldn't see in logs :)
+-!- blackburn [~qdrgsm@109.226.70.249] has quit [Quit: Leaving.]
+-!- blackburn [~qdrgsm@109.226.70.249] has joined #shogun
+-!- blackburn [~qdrgsm@109.226.70.249] has quit [Read error: No route to host]
+-!- blackburn [~qdrgsm@109.226.70.249] has joined #shogun
+-!- blackburn [~qdrgsm@109.226.70.249] has quit [Quit: Leaving.]
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Quit: I'll be Bach]
+ serialhex	sonney2k: which change?  the one in the msg on github??
+ serialhex	btw, i msgd you back on that
+--- Log closed Thu Jun 02 00:00:30 2011

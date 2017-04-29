@@ -1,0 +1,203 @@
+--- Log opened Wed Oct 31 00:00:17 2012
+@sonney2k	wiking, what's that?
+@sonney2k	wiking, where is you gcc faq?
+ wiking	nowhere yet
+ wiking	i'm still looking into how to redesign the faq page
+ wiking	ah ok so we dont have sitemap
+ wiking	i'll generate one then
+ wiking	http://support.google.com/webmasters/bin/answer.py?hl=en&answer=156184
+@sonney2k	wiking, we might be able to do that automagically based on django urls
+@sonney2k	wiking, it is a bit of work but possible https://docs.djangoproject.com/en/dev/ref/contrib/sitemaps/
+@sonney2k	ahh what is badly missing from our website is the feature matrix
+@sonney2k	this one here http://shogun-toolbox.org/jmlr10/
+@sonney2k	it is created based on some google spredsheet
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- ptizoom [~christian@85.210.80.20] has quit [Quit: Ex-Chat]
+-!- ptizoom_ [~christian@85.210.80.20] has joined #shogun
+ blackburn	IT WORKS
+ blackburn	YEAH MOTHERFUCKER
+ blackburn	wiking: 1.63s to solve 15k x 15k eigenproblem
+ blackburn	that means when I get covertree for nearest neighbor queries I can get to quasilinear embedding cost like 5s for enormous number of vectors
+ blackburn	stability issues though :D
+-!- ptizoom_ is now known as ptizoom
+-!- blackburn [~blackburn@188.168.4.75] has quit [Quit: Leaving.]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ ptizoom	sonney*: shall /perl directory (from shogun root) be used for building and exporting a perl-shogun package (to CPAN)?
+ blackburn	sonne|work: let me cite you a VW code line
+ blackburn	for (vector<string>::iterator i = all.pairs.begin(); i != all.pairs.end();i++)      {
+ blackburn	:D
+ sonne|work	ptizoom: shogun/src or?
+ blackburn	sonne|work: I want to set VW up to date
+ blackburn	sonne|work: do you think I should discuss with john?
+ sonne|work	he would probably be happy about that
+ sonne|work	but he is NY
+ blackburn	sonne|work: well hurricane will end someday
+ blackburn	:D
+ sonne|work	not yet awake I mean
+ blackburn	ah
+ blackburn	well I use email usually
+ blackburn	so you say he would be happy?
+ wiking	aaa
+ blackburn	I am not really in what you have done with shashwat
+ blackburn	it'd be really cool if we just depend on vw
+ sonne|work	longer project then
+ blackburn	sonne|work: is there any reason to really include the codE?
+ blackburn	may be I could help them to create an API I don't know
+ blackburn	sonne|work: they have they own development line - so hard to track it
+ blackburn	liblinear is not being really developed anymore, vw is
+ sonne|work	no feel free
+ sonne|work	but lot of work
+ blackburn	sonne|work: okay
+ blackburn	will write a mail later
+ blackburn	john's APIs are pretty cumbersome for me though
+ blackburn	I remembed all these struggles with the covertree
+ blackburn	I never managed to get it working, only fernando did :D
+ sonne|work	well then maybe better choose some other fun project :D
+ blackburn	sonne|work: well I got interested
+ blackburn	sonne|work: btw I kinda developed a new method for eigendecomposition
+ blackburn	sonne|work: you've seen that probably in last night log
+ blackburn	it was working already but it took 3 days to realize that kernel distance is k(x,x) + k(y,y) - 2 k(x,y)
+ blackburn	and not k(x,y)
+ blackburn	:D
+ blackburn	so we will get some fun stuff soon
+ blackburn	both in standalone and shogun versions
+ blackburn	sonne|work: can you stand 3 headers with high std and eigen usage?
+ blackburn	flexibility was one of my intentions so I have to live with it
+ blackburn	eigen bloats code a little btw
+ blackburn	but it is like you have intel MKL with no intel MKL
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ ptizoom	sonney*: from root...together with data,doc,examples,src, application... then perl! unless you find a good place to stuff a Makefile.PL and a t directory?
+ sonne|work	blackburn: can't you avoid using eigen/std in headers?
+ sonne|work	ptizoom: well I guess at some point we should just move the src/Makefile and configure and everything one layer up but for now
+ sonne|work	in src
+ ptizoom	sonne*: okey dookey, I build a /src/perl ; typically I guess one put directories like src, perl, python, swig, debian etc... in the root.
+ n4nd0	can someone tell me why #include <eigen3/Eigen/...> doesn't work?
+ n4nd0	I have /usr/local/include/eigen3
+ n4nd0	and also /usr/include/eigen3 although I don't really know why both of them...
+ n4nd0	I made a symbolic link of /usr/local/include/eigen3/Eigen in /usr/local/include and then I got to compile with the directive #include <Eigen/...>
+ n4nd0	but still, I do not get why #include <eigen3/Eigen/...> fails
+ sonne|work	n4nd0: maybe eigen3 is including sth with <Eigen/xxx> too?
+ sonne|work	ptizoom: if it doesn't make sense we will change it later
+ n4nd0	sonne|work: what do you mean?
+ n4nd0	eigen3 is directory in /usr/local/include that includes another directory called Eigen
+ sonne|work	yeah but /usr/local/include/eigen3 is not in the include path
+ sonne|work	so when you include <eigen3/Eigen/sth>
+ sonne|work	and sth includes <Eigen/whateve> it cannot find whatever
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ wiking	n4nd0
+ wiking	ah shit
+ wiking	but yeah he is doing it wrong
+ wiking	he should include -issytem /user/local/include/eigen3
+ wiking	and then #include <Eigen...
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- blackburn_ [d5578acb@gateway/web/freenode/ip.213.87.138.203] has joined #shogun
+ blackburn_	sonne|work: I can hide them to cpp adapter
+ blackburn_	sonne|work: but there are templates
+ blackburn_	not specialized so can't put realization anywhere
+ blackburn_	sonne|work: that's all negotiable though but I still like functors more than crazy function pointers
+ blackburn_	so not really sure I can avoid templating
+ blackburn_	sonne|work: what I am sure is that all libraries should use reverse interface
+-!- fmailhot [~fmailhot@c-24-10-116-3.hsd1.ca.comcast.net] has joined #shogun
+ fmailhot	Hi all...what's the appropriate Python interface for multiclass logistic regression trained via SGD? (assuming Shogun has this)  I'd like to do some Shogun/scikit-learn comparisons...
+ blackburn_	fmailhot: I have bad news - your assumption is a little wrong :)
+ blackburn_	fmailhot:but  modular is the only interface one should use
+ fmailhot	OK...python_modular++...got it.
+ fmailhot	And...multiclass SGD-trained LR?
+ blackburn_	fmailhot: you need exactly that method?
+ blackburn_	fmailhot: I can suggest you to try MulticlassLibLinear
+ blackburn_	L2 regularized SVM Crammer-Singer that is
+ blackburn_	swap(SVM,Crammer-Singer)
+ fmailhot	I'm hoping for something that can be trained online, in a streaming data kind of scenario...
+ blackburn_	fmailhot: LaRank
+ fmailhot	Oh sorry, and most to the point, I'd like well-calibrated probabilities as outputs (hence my initial request for LR)
+ blackburn_	fmailhot: ah I see
+ blackburn_	fmailhot: if you can still live with batch mode I have one more suggestion
+* fmailhot is all ears
+ blackburn_	a minute
+ blackburn_	forgot the name of class I wrote :D
+ blackburn_	fmailhot: https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/multiclass/MulticlassTreeGuidedLogisticRegression.h
+ blackburn_	fmailhot: it is tree group lasso multiclass logistic regression
+ blackburn_	yeah it is funny we have such complex algorithms and have no SGD
+ blackburn_	:D
+ blackburn_	fmailhot: I think I can implement basic multiclass logistic regression in next 2-3 days if it is required
+ fmailhot	Cool, thanks. I'll have a look at that. And if you want to implement multiclass LR, I'd certainly be happy about it!  :D  (obviously I understand that you & other contributors are busy, though)
+ blackburn_	fmailhot: well I can find time if I know what to do - usually I am a little lost
+ blackburn_	fmailhot: IIRC basic regression is just two lines patch for that tree one
+ fmailhot	OK, cool...I'll do some experimenting with that and come back w/ questions as they arise. Thanks again!
+ blackburn_	fmailhot: I just checked - yes I'd have to change regularizer
+ blackburn_	fmailhot: but as it would be highly experimental I give no warranty :D
+ fmailhot	:)  Fair enough
+ blackburn_	fmailhot: I'll try, test it a little, commit and let you know once I get home
+ blackburn_	so 2-3 hours
+ fmailhot	No need to knock yourself out...it's only 10:30AM here in California.
+ fmailhot	And tomorrow is fine, too.
+ fmailhot	Thanks very much for this!
+ blackburn_	fmailhot: I will forget in other case :D
+ blackburn_	fmailhot: 21:31 here heh
+ fmailhot	Ah...heh. OK then.
+ blackburn_	fmailhot: I am from that snowy dark country
+ blackburn_	fmailhot: https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/lib/slep/slep_mc_tree_lr.cpp solver is pretty compact
+ fmailhot	Cool, thanks.
+-!- blackburn_ [d5578acb@gateway/web/freenode/ip.213.87.138.203] has quit [Quit: Page closed]
+-!- blackburn1 [~blackburn@83.234.169.204] has joined #shogun
+ blackburn1	fmailhot: still here?
+-!- fmailhot is now known as fmailhot_lunch
+ fmailhot_lunch	Hi yes, but about to run out for lunch
+ blackburn1	fmailhot_lunch: just wanted to say I started implementing the method
+ fmailhot_lunch	Awesome, thanks!
+ fmailhot_lunch	Will be back online in ~1hr. But like I said, no crazy rush...tomorrow would be fine.
+-!- fmailhot_lunch [~fmailhot@c-24-10-116-3.hsd1.ca.comcast.net] has quit [Quit: Leaving.]
+ blackburn1	I know :) I just don't want to get back to it later
+ blackburn1	fmailhot: see following commits - python example inside
+-shogungit:#shogun- [shogun] lisitsyn pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/7c1fcabf7d55...3222c06cb214
+-shogungit:#shogun- shogun/master 1526e97 Sergey Lisitsyn: Introduced multiclass logistic regression
+-shogungit:#shogun- shogun/master 3222c06 Sergey Lisitsyn: Added python example of multiclass logistic regression
+-shogungit:#shogun- [shogun] lisitsyn pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/5fa8df48872f9a7bc551066f21afac5b49a02c03
+-shogungit:#shogun- shogun/master 5fa8df4 Sergey Lisitsyn: Updated reference to submodule tutorial
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ shogun-buildbot	build #615 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/615  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- fmailhot [~fmailhot@ip-64-134-230-233.public.wayport.net] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ blackburn1	fmailhot: feel free to try
+ fmailhot	Cool, thanks...caught up in other things at the moment, but will definitely have a look.
+ blackburn1	fmailhot: please let us know if it is working for you - sorry don't have much time for thorough testing
+ fmailhot	No worries, I'll definitely come back w/ a report tomorrow, Friday at the latest. Thanks again very much!
+ blackburn1	fmailhot: are you a researcher btw?
+ fmailhot	industry
+ blackburn1	oh that's even more cool
+ fmailhot	But doing "research" for the moment...
+ fmailhot	Figuring out which libs are best for us
+ blackburn1	hah I see - we need feedback so if you 'choose' us and have time share your ideas
+ fmailhot	Sure thing...I'll give you guys feedback either way.
+ blackburn1	thanks
+ shogun-buildbot	build #616 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/616  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ blackburn1	whoops
+ blackburn1	okayy
+ ptizoom	snow and sand
+ blackburn1	ptizoom: oh it is you with your poetry :)
+ ptizoom	when industry of silicates spread dust over the infinite snowy steps of the east
+ blackburn1	I have no idea what you're talking about :D
+ ptizoom	me too
+-shogungit:#shogun- [shogun] lisitsyn pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/276a2ff8a85cadb935f5740603d45b19ef2d116d
+-shogungit:#shogun- shogun/master 276a2ff Sergey Lisitsyn: Made multiclass logistic regression python example safe when shogun is compiled without eigen3
+* fmailhot thinks he's stepped into a surrealist IRC performance art piece...
+ ptizoom	I see shogun is going well...I try to learn it also bit by bit... there are lots of things in it, incredible.
+ blackburn1	just a few algorithms
+ ptizoom	u r 2 modest
+ ptizoom	actually I wish there was already a group like this in the nooties... it would have simplified research no end...
+ ptizoom	whish
+ blackburn1	not really sure what you mean
+ blackburn1	I failed turing test you know
+ ptizoom	well, those ML are wonderful to organise trial and errors...and find converging algo...n'est ce pas?
+ ptizoom	and with a package like this, it gives no excuses, not to try...
+ blackburn1	well I see ML quite stupid actually :D
+ ptizoom	that the beauty!
+ ptizoom	stupid and beautiful
+ ptizoom	how many ll in hallowin?
+ blackburn1	come on, what's that again :D
+ ptizoom	made pictures and need to label a directory with this name...ok, no help from this channel... lets gg it.
+ ptizoom	2ll and 2ee....
+-!- blackburn1 [~blackburn@83.234.169.204] has quit [Quit: Leaving.]
+ shogun-buildbot	build #617 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/617
+-!- fmailhot [~fmailhot@ip-64-134-230-233.public.wayport.net] has left #shogun []
+--- Log closed Thu Nov 01 00:00:17 2012

@@ -1,0 +1,290 @@
+--- Log opened Tue May 27 00:00:06 2014
+-!- lisitsyn1 [~qdrgsm@80.252.20.67] has quit [Read error: Connection reset by peer]
+-!- zxtx [~zxtx@67.220.94.21] has quit [Read error: Connection reset by peer]
+-!- zxtx [~zxtx@sunnythinking.org] has joined #shogun
+@HeikoS	wiking: around?
+@HeikoS	sonney2k: around?
+@HeikoS	thoralf: around?
+@HeikoS	besser82: around?
+@HeikoS	lambday: around?
+-!- kislay [~Abhijeet@27.116.52.186] has joined #shogun
+ kislay	hey HeikoS
+@HeikoS	kislay:  hey!
+@HeikoS	kislay: say do the cloud notebooks work for you?
+ kislay	never!
+ kislay	never till now
+ lambday	HeikoS: hey1
+ lambday	HeikoS: sorry I was away
+@HeikoS	kislay: I see
+@HeikoS	lambday: any ideas why the cloiud notebooks dont work?
+ lambday	HeikoS: no man!
+ lambday	I actually never checked it
+ lambday	or did I... don't remember :/
+ kislay	HeikoS, lambday hey, if anyone can give me a review on my PR #2250.
+ kislay	on the cpp stuff. It would be helpful.
+ lambday	kislay: alright let me have a look if I can help :)
+ kislay	lambday, thanks :)
+-!- PirosB3 [~pirosb3@host80-223-dynamic.246-95-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+ lambday	kislay: there?
+ kislay	yeah
+ kislay	lambday, The enum thing that you said. I need to use replace 0 for uint8, 1 for int8...and so on.
+ lambday	kislay: I think we have enums for that, no?
+ kislay	lambday, I have no idea.
+ lambday	kislay: let me help you wiht that
+ lambday	just a min
+ lambday	kislay: have a look here - https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/lib/DataType.h#L46
+ lambday	will that work?
+ lambday	or do you need exact 0 there?
+ kislay	exact 0. It's the way OpenCV wants it!
+ lambday	kislay: okay I see. Then may be define an enum somewhere
+ lambday	I mean, using 0, 1... things like that is a bit confusing IMO
+ lambday	just a suggestion though
+ lambday	kislay: but please take care of the multi line thing :)
+ kislay	lambday, err... sorry. what is it?
+ lambday	kislay: read comments :D
+ kislay	lambday, got it. :)
+ lambday	kislay: :)
+ lambday	kislay: you're not up all night, are you?
+ kislay	lambday, no. I woke up at 4 :)
+-!- HeikoS [~heiko@0542590b.skybroadband.com] has quit [Quit: Leaving.]
+ kislay	lambday, you doing a all-nighty ?
+ lambday	kislay: hahaha... that happens? :D
+ lambday	kislay: yeah I am no more a homo sapiens
+ kislay	lambday, haha. I am getting transformed lately too. slowly slowly..
+ lambday	kislay: better late than never :P
+ khalednasr	lambday, hey
+ lambday	khalednasr: hey man
+ lambday	how's it going?
+ khalednasr	I tried a few things
+ khalednasr	did you mean making the base class look like:
+ khalednasr	template <class Info1, class Info2, enum Backend,template<class,Info1, Info2...>class Matrix,class T,Info1 I1, Info2... I2>
+ khalednasr	lambday, I tried that but I can't figure out how to specialize it for viennacl matrices
+ lambday	khalednasr: variadic templates
+ lambday	template <class Info, enum Backend, template<class,class...,Info...> class Matrix, class ST, class.... T>
+ lambday	so matrix now works with 1 required template arg (1st one - scalar type)
+ lambday	2nd arg is optional.. so zero or more... which would be 0 in case of SGMatrix, and Eigen3 matrix and one for ViennaCL matrix
+ khalednasr	lambday, does c++ allow two argument packs for templates?
+ lambday	and last one us again nothing for SG, int... for Eigen3, and unsigned int for viennacl
+ lambday	khalednasr: what do you mean?
+ lambday	khalednasr: I think what I just wrote here would work...
+ lambday	this should be the basic struct
+ lambday	then later specialize as mentioned above...
+ khalednasr	lambday, just a sec, I'll check something
+ khalednasr	lambday, if you try something like: template <class..., int...> struct bar {};
+ khalednasr	lambday, it won't compile
+ khalednasr	lambday, you can't have multiple parameter packs
+ lambday	khalednasr: nah... you gotta use it like template <class... T, int... Other> struct bar {};
+ lambday	later expand the packs as T... and Other...
+ lambday	let me try
+ lambday	khalednasr: ah I got your pt
+ lambday	yep you're right
+ lambday	and in that case its a bummer :/
+ khalednasr	yeah that sucks
+ lambday	ummm..
+ khalednasr	lambday, we could get around the entire problem if we restrict ourselves to only column-major or only row-major viennacl matrices..
+ lambday	khalednasr: but that's a bad limitation to have, no? :(
+ lambday	khalednasr: may be the only other way to deal with this is to use another separate class altogether
+ lambday	that only deals with viennacl sums
+ lambday	not sure how ugly would that be
+ khalednasr	lambday, if we do that we'd  still have the same problem if we wanted to do matrix multiplication or any other matrix operation
+ lambday	khalednasr: yeah that's also true
+ lambday	sucks to have duplicates
+ khalednasr	lambday,maybe we could have two specializations, one for column major and on for raw major matrices..
+ lambday	khalednasr: what is default? row-major or col-major?
+ khalednasr	lambday, row major
+ lambday	khalednasr: that sounds like a better idea!
+ lambday	khalednasr: so could you please try just row major for now and see if it fits?
+ khalednasr	lambday, I tried something like:
+ khalednasr	template <class T, unsigned int Info>
+ khalednasr	using VCLMatrix= viennacl::matrix<T, viennacl::row_major, Info>;
+ lambday	so that works?
+ khalednasr	lambday, and then VCLMatrix works directly with the specialization
+ khalednasr	lambday, just like a vector
+ lambday	khalednasr: so it fits, right?
+ lambday	only row-major as of now is fine
+ khalednasr	lambday, better make it column major, since thats the shogun default
+ lambday	khalednasr: eigen3 default also... but my concern is,  we intend to do this because we want viennacl matrices to pass directly do these methods, right? so in that case its less probable that someone would actually any other template except the scalar type and rely on the defaults for the rest
+ lambday	khalednasr: what do you think?
+ khalednasr	lambday, I see
+ lambday	do you think that converting would take time if I pass SGMatrix (col-major) and convert it to vienncl (row-major) ?
+ khalednasr	lambday, passing SGMatrix into a viennacl backend method?
+ lambday	if performance wise the drawback is less then I guess its okay to have row-major
+ lambday	khalednasr: yes
+ lambday	khalednasr: we would always have to copy, right?
+ khalednasr	lambday, I don't think it would take much time, since you'd already be copying it
+ khalednasr	yeah
+ lambday	khalednasr: so in that case, I'll vote for default
+ khalednasr	lambday, but I need column major matrices for neuralnets :D
+ khalednasr	lambday, we could just do both
+ lambday	khalednasr: haha I see :D so please go ahead with col-major as of now
+ lambday	that you urgently need
+ lambday	may be add row-major later?
+ khalednasr	it would be pretty much just copy-paste, so it shouldn't be a problem
+ lambday	got a bit ugly here.. I thought they would use similar thing for matrices as well - bad design for them :@
+ lambday	haha yeah
+ lambday	eigen3's design is impressive!
+ khalednasr	yeah :)
+ lambday	khalednasr: alright so col-major it is
+ lambday	in fact I'll also add a few more for vectors... so lets push this a bit before thursday
+ lambday	mine is independent of what you're doing so we won't run into any crazy merge conflicts I suppose
+ khalednasr	yeah probably
+ khalednasr	lambday, so, where should I put this? : template <class T, unsigned int Info> using VCLMatrix= viennacl::matrix<T, viennacl::row_major, Info>;
+ lambday	implementation/Sum.h would do, right?
+ lambday	that's included in modules/Redux.h
+ khalednasr	lambday, well, users of the library would have to use VCLMatrix
+ khalednasr	and it would be used in other modules too
+ lambday	ah crap
+ lambday	may be a Base.h somewhere
+ lambday	and include that in Sum.h
+ lambday	whereever you feel it should go properly
+ khalednasr	yeah I guess
+ lambday	so that only using mathematics/linalg.h in our applications it becomes immediately available
+ lambday	and within linalg as well
+ khalednasr	alright
+ lambday	also, if you later do the row-major stuff, its may be better to use different names for both
+ lambday	so VCLMatrixRowMajor (ugly ugly ugly)
+ lambday	suggest some names :D
+ khalednasr	I was gonna suggest that :D
+ lambday	we're gonna be the worst people ever while suggesting baby names I tell you :D
+ lambday	but its alright
+ khalednasr	:D
+ lambday	its understandable
+ lambday	and clean
+ lambday	khalednasr: thanks for catching this stuff, man.. looking forward to see it at work :)
+ lambday	one of the main reason why Heiko wanted to have a few more methods added before it makes it to develop
+ shogun-buildbot	build #13 of nightly_fedora is complete: Failure [failed git]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_fedora/builds/13  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>, jiaolong <jiaolongxu@gmail.com>, Wu Lin <yorker.lin@gmail.com>, lambday <heavensdevil6909@gmail.com>
+ lambday	ouch!
+ khalednasr	lambday, lol :D
+ lambday	khalednasr: what's the time there?
+ khalednasr	lambday, 4 am:)
+ lambday	khalednasr: hmm... 6:30 here... I'm gonna catch some sleep
+ khalednasr	yeah me too
+ lambday	khalednasr: ciao tomorrow man.. nice discussion :)
+ lambday	good night
+ khalednasr	lambday, bye, nice talking to you :)
+ lambday	khalednasr: likewise :)
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Quit: Leaving.]
+-!- khalednasr [~k.nasr92@196.221.66.173] has quit [Quit: Leaving]
+ shogun-buildbot	build #708 of nightly_all is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_all/builds/708
+ shogun-buildbot	build #811 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/811  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>, jiaolong <jiaolongxu@gmail.com>, Wu Lin <yorker.lin@gmail.com>, lambday
+ shogun-buildbot	<heavensdevil6909@gmail.com>
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- witness___ [uid10044@gateway/web/irccloud.com/x-brvezkphvqqatsak] has joined #shogun
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- HeikoS [~heiko@0542590b.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Parijat Mazumdar :develop * d923cb1 / / (4 files): https://github.com/shogun-toolbox/shogun/commit/d923cb10ed5e2ef489857362d45d6c7e9ed4af65
+ shogun-notifier-	shogun: pruning and missing values features added in CART
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 4bfa55e / / (4 files): https://github.com/shogun-toolbox/shogun/commit/4bfa55e616861fb9627ddcf754ee605d5beac551
+ shogun-notifier-	shogun: Merge pull request #2255 from mazumdarparijat/CART
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: prune method added and missing values handled
+-!- Saurabh7 [~Saurabh7@117.200.178.253] has joined #shogun
+ thoralf	HeikoS: around.
+-!- PirosB3 [~pirosb3@host80-223-dynamic.246-95-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host80-223-dynamic.246-95-r.retail.telecomitalia.it] has quit [Ping timeout: 255 seconds]
+-!- PirosB3 [~pirosb3@host48-206-static.58-79-b.business.telecomitalia.it] has joined #shogun
+-!- mroemer [8602ac52@gateway/web/freenode/ip.134.2.172.82] has joined #shogun
+-!- mroemer [8602ac52@gateway/web/freenode/ip.134.2.172.82] has quit [Client Quit]
+ shogun-buildbot	build #320 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/320  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Parijat Mazumdar <mazumdarparijat@gmail.com>
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- PirosB3 [~pirosb3@host48-206-static.58-79-b.business.telecomitalia.it] has quit [Quit: PirosB3]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- PirosB3 [~pirosb3@host48-206-static.58-79-b.business.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host48-206-static.58-79-b.business.telecomitalia.it] has quit [Quit: PirosB3]
+-!- khalednasr [~k.nasr92@196.221.76.69] has joined #shogun
+-!- PirosB3 [~pirosb3@host48-206-static.58-79-b.business.telecomitalia.it] has joined #shogun
+-!- [1]Saurabh7 [~Saurabh7@117.200.178.253] has joined #shogun
+-!- Saurabh7 [~Saurabh7@117.200.178.253] has quit [Ping timeout: 264 seconds]
+-!- [1]Saurabh7 is now known as Saurabh7
+-!- kislay [~Abhijeet@27.116.52.186] has quit [Ping timeout: 252 seconds]
+-!- HeikoS [~heiko@0542590b.skybroadband.com] has quit [Quit: Leaving.]
+-!- PirosB3 [~pirosb3@host48-206-static.58-79-b.business.telecomitalia.it] has quit [Ping timeout: 240 seconds]
+-!- PirosB3 [~pirosb3@host48-206-static.58-79-b.business.telecomitalia.it] has joined #shogun
+-!- pickle27f [~pickle27@216.191.231.218] has joined #shogun
+-!- khalednasr [~k.nasr92@196.221.76.69] has quit [Quit: Leaving]
+-!- HeikoS [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@nat-178-82.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-178-82.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- kislay [~Abhijeet@27.116.52.105] has joined #shogun
+-!- abinash_panda [75d659e0@gateway/web/freenode/ip.117.214.89.224] has joined #shogun
+-!- HeikoS [~heiko@nat-178-82.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- khalednasr [~k.nasr92@196.221.76.69] has joined #shogun
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+-!- HeikoS [~heiko@nat-178-82.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- Saurabh7 [~Saurabh7@117.200.178.253] has quit [Ping timeout: 252 seconds]
+-!- Saurabh7 [~Saurabh7@59.88.38.163] has joined #shogun
+-!- pickle27f [~pickle27@216.191.231.218] has joined #shogun
+-!- Saurabh7 [~Saurabh7@59.88.38.163] has quit [Read error: Connection reset by peer]
+-!- PirosB3 [~pirosb3@host48-206-static.58-79-b.business.telecomitalia.it] has quit [Quit: PirosB3]
+-!- witness___ [uid10044@gateway/web/irccloud.com/x-brvezkphvqqatsak] has quit [Quit: Connection closed for inactivity]
+-!- PirosB3 [~pirosb3@host48-206-static.58-79-b.business.telecomitalia.it] has joined #shogun
+-!- kislay [~Abhijeet@27.116.52.105] has quit [Ping timeout: 240 seconds]
+-!- kislay [~Abhijeet@103.240.205.205] has joined #shogun
+-!- HeikoS [~heiko@nat-178-82.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- khalednasr [~k.nasr92@196.221.76.69] has quit [Quit: Leaving]
+-!- HeikoS [~heiko@nat-178-82.internal.eduroam.ucl.ac.uk] has quit [Client Quit]
+-!- PirosB3 [~pirosb3@host48-206-static.58-79-b.business.telecomitalia.it] has quit [Quit: PirosB3]
+-!- abinash_panda [75d659e0@gateway/web/freenode/ip.117.214.89.224] has quit [Ping timeout: 240 seconds]
+-!- abinash_panda [75c8e0d7@gateway/web/freenode/ip.117.200.224.215] has joined #shogun
+-!- kislay [~Abhijeet@103.240.205.205] has quit [Ping timeout: 258 seconds]
+-!- HeikoS [~heiko@nat-178-82.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-178-82.internal.eduroam.ucl.ac.uk] has quit [Client Quit]
+-!- PirosB3 [~pirosb3@host80-223-dynamic.246-95-r.retail.telecomitalia.it] has joined #shogun
+-!- HeikoS [~heiko@nat-178-82.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- khalednasr [~k.nasr92@196.221.76.69] has joined #shogun
+-!- HeikoS [~heiko@nat-178-82.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- thor|home [~thoralf@91-65-138-218-dynip.superkabel.de] has joined #shogun
+ thor|home	Heyho.
+-!- khalednasr [~k.nasr92@196.221.76.69] has quit [Quit: Leaving]
+-!- PirosB3 [~pirosb3@host80-223-dynamic.246-95-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+ abinash_panda	Hey thor|home !
+ thor|home	Hey ;)
+ thor|home	I'm just checking your PR.
+ abinash_panda	Okay :)
+-!- abinash_panda [75c8e0d7@gateway/web/freenode/ip.117.200.224.215] has quit []
+-!- abinash_panda [~abinash@117.200.224.215] has joined #shogun
+-!- abinash_panda [~abinash@117.200.224.215] has quit [Client Quit]
+-!- abinash_panda [~abinash@117.200.224.215] has joined #shogun
+-!- abinash_panda [~abinash@117.200.224.215] has quit [Client Quit]
+-!- abinash_panda [75c8e0d7@gateway/web/freenode/ip.117.200.224.215] has joined #shogun
+-!- abinash_1anda [~abinash@117.200.224.215] has joined #shogun
+-!- abinash_1anda [~abinash@117.200.224.215] has quit [Client Quit]
+ thor|home	abinash_panda: I commented your PR.  The code looks good and clean, but I'm missing the unit test and/or a small example.
+ thor|home	abinash_panda: You already ran some small experiments, right?
+-!- abinash_1anda [~abinash@117.200.224.215] has joined #shogun
+-!- abinash_1anda [~abinash@117.200.224.215] has quit [Client Quit]
+ abinash_panda	thor|home: Yeah. I did some minor experiments with random data.
+ abinash_panda	thor|home: I would be completing unit tests
+ thor|home	abinash_panda: Did you compare shogun-results to scikit-learn results?
+ thor|home	i.e. better/worse?
+-!- khalednasr [~k.nasr92@196.221.76.69] has joined #shogun
+ abinash_panda	thor|home: No, I have not yet compared them. Let me check now
+ thor|home	And I saw you introduced a small memory leak http://buildbot.shogun-toolbox.org/memcheck/20140527-0803.html
+ thor|home	I guess it is because you're calling `get_label()` without `SG_UNREF` on the returned label.
+ abinash_panda	thor|home: I checked the results. Both of them gave nearly same output except for few cases in which scikit-learn gave a lot of false negatives (and in those shogun gave some false positives).
+ thor|home	abinash_panda: Cool.
+ abinash_panda	thor|home: I can run proper benchmarkings on larger data sets and would give a detailed report :)
+ thor|home	abinash_panda: Do you have "real" datasets to check?
+ abinash_panda	thor|home: No. I was hoping that you could provide me some links.
+ thor|home	Check this: http://mulan.sourceforge.net/datasets.html
+ thor|home	Maybe yeast is good enough.
+ thor|home	./data/multilabel/yeast_test.svm
+ thor|home	./data/multilabel/yeast_train.svm
+ thor|home	We already have it.
+ abinash_panda	Okay. I would use it.
+ thor|home	http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multilabel.html
+ thor|home	libsvm is a cool thing.  We can also compare with them.
+ abinash_panda	thor|home: So, I am thinking of first completing the unit tests for this class and after that create some benchmarks tests with libSVM and scikit-learn and would post them on my blog.
+ thor|home	abinash_panda: Where do I find your blog?
+ abinash_panda	thor|home: Its abinashpanda.github.io. Currently, it doesn't have any articles regarding shogun and GSoC but I am planning to write some :)
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+--- Log closed Wed May 28 00:00:07 2014

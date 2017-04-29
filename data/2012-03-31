@@ -1,0 +1,705 @@
+--- Log opened Sat Mar 31 00:00:19 2012
+-!- Vuvu [~Vivan_Ric@115.248.130.148] has quit [Quit: Leaving]
+-!- blackburn [~qdrgsm@62.106.114.183] has quit [Ping timeout: 246 seconds]
+ n4nd0	sonney2k: hey, still around? I am getting some weird results with one-vs-one and I don't know if they might make actually sense
+@sonney2k	n4nd0, what is the problem?
+ n4nd0	sonney2k: so I am getting pretty bad classification results with one-vs-one using LibSVM + GaussianKernel
+ n4nd0	sonney2k: one-vs-rest success though
+@sonney2k	n4nd0, you could try to compare results with LibSVMMultiClass
+@sonney2k	it does OvO too
+ n4nd0	sonney2k: ok, thank you!
+@sonney2k	so results should be the same or similar at least
+@sonney2k	n4nd0, did you copy the OvO routine from CMultiClassSVM ?
+ n4nd0	sonney2k: yeah
+ PhilTillet	sonney2k, I think I have a reason for the OpenCL being slow on your computer
+@sonney2k	PhilTillet, ok so how do I turn it on then?
+ PhilTillet	hmmm, do you have the proprietary NVidia Drivers?
+ PhilTillet	if so, then you should have your libopencl.so somewhere in an nvidia folder, for me it is /usr/lib/nvidia-current/libopencl.so
+ PhilTillet	libOpenCL.so*
+@sonney2k	doesn't help
+@sonney2k	PhilTillet, any way to debug whether opencl is used?
+ PhilTillet	you mean on which device it is used?
+@sonney2k	yes
+ PhilTillet	there is a viennacl function for that, hmm wait a bit
+ n4nd0	sonney2k: the results with LibSVMMultiClass are good, classification correct there must be erros in one-vs-one :S
+ PhilTillet	sonney2k, std::cout << viennacl::ocl::current_device().info();
+@sonney2k	n4nd0, how do you map labels?
+@sonney2k	n4nd0, they should be in range 0...<nr classes-1>
+@sonney2k	and then you need to map them to +1 / -1
+ n4nd0	n4nd0: yeah, that's how I do it
+ n4nd0	sonney2k: let me show you the code
+ PhilTillet	n4nd0, you send messages to yourself? :p
+ n4nd0	shit, again talking to me :P
+ n4nd0	yeah ... I do it more often I want to admit
+ n4nd0	:D
+@sonney2k	PhilTillet, CL Device Vendor ID: 4098
+@sonney2k	CL Device Name: Intel(R) Core(TM)2 Duo CPU     T9900  @ 3.06GHz
+@sonney2k	CL Driver Version: 2.0
+@sonney2k	so you are right
+@sonney2k	question is why the nvidia one is not taken?!
+ PhilTillet	hmmm
+ PhilTillet	there can be several reasons
+ PhilTillet	do you have an nvidia.icd in your /etc/OpenCL/vendors/ ?
+@sonney2k	yes and an amdocl64.icd
+ PhilTillet	I think the reason why is that the program is linked to AMD's ocl
+ PhilTillet	AMD's OpenCL implementation does not detect the NVidia Card as a device
+ PhilTillet	and NVidia's OCL does not detect the Intel CPU
+ PhilTillet	(yes, it's sort of a headache XD)
+@sonney2k	let me remove the amd one
+@sonney2k	CL Device Vendor ID: 4318
+@sonney2k	CL Device Name: GeForce 9600M GT
+@sonney2k	CL Driver Version: 295.20
+@sonney2k	aha
+@sonney2k	CPU Apply time : 0.482976
+@sonney2k	GPU Apply time : 0.249349
+@sonney2k	yay!
+ PhilTillet	hehe
+ n4nd0	sonney2k: there it is train_one_vs_one and classify_one_vs_one
+ PhilTillet	that was the reason
+@sonney2k	CL Device Max Compute Units: 4
+@sonney2k	bah
+@sonney2k	PhilTillet, now benchmark for 1000x100k and get the error down to <1e-6 and all good
+ PhilTillet	sonney2k, okay :p
+ PhilTillet	i'll do some tests on small inputs
+@sonney2k	n4nd0, where is that?
+ PhilTillet	to see where the error comes from
+@sonney2k	makes sense
+ n4nd0	sonney2k: https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/machine/MulticlassMachine.cpp
+ PhilTillet	sonney2k, float64_t* lab;
+ PhilTillet	float32_t* feat;
+ PhilTillet	float64_t* alphas; ... are you sure the computation is not done in double on the cpu?
+@sonney2k	PhilTillet, only alphas
+@sonney2k	but try on your monster GPU with double
+ PhilTillet	lol, monster GPU :p
+@sonney2k	then difference should be 1e-16
+ PhilTillet	1e-16 per example or total?
+@sonney2k	PhilTillet, total
+@sonney2k	n4nd0, I suspect subsets
+ n4nd0	sonney2k: why do you think so?
+@sonney2k	n4nd0, if you print the votes vector - does it show sth suspicious like just one class?
+ n4nd0	sonney2k: yes
+ PhilTillet	sonney2k, so 100K vectors of dim 1000 and 1000 Support vectors?
+@sonney2k	PhilTillet, something that fits in memory :)
+@sonney2k	maybe you have to reduce dim
+@sonney2k	to 100 or so
+ PhilTillet	yes, I'll see
+ PhilTillet	Benchmarking cpu...
+ PhilTillet	CPU Apply time : 18.7195
+ PhilTillet	Compiling GPU Kernels...
+ PhilTillet	Benchmarking GPUs..
+ PhilTillet	GPU Apply time : 2.19845
+ PhilTillet	Total  error : 0.001015
+ PhilTillet	on i7 950 vs GTX 470
+@sonney2k	nice
+ PhilTillet	now got to reduce the error, but it will be harder :p
+@sonney2k	well try with 2 dims and 1 SV and 1 output :)
+ PhilTillet	yes, I tried
+ PhilTillet	some vectors have 0.0000000 error
+ PhilTillet	some have like 1e-6
+ PhilTillet	like the last digit of the floating point representation
+@sonney2k	n4nd0, I think the reason is that features can only have one subset
+@sonney2k	I think you would need to store the subset too
+@sonney2k	and assign it in apply
+@sonney2k	n4nd0, or do everything without subsets
+ n4nd0	sonney2k: I don't understand clearly, do you mean that the subsets cannot be set and remove for every machine?
+ n4nd0	sonney2k: how could it be done without subsets?
+@sonney2k	you assign the subset to the features right?
+ n4nd0	yes
+@sonney2k	so there can be only one such assignment
+@sonney2k	which will be the last one
+ n4nd0	set_machine_subset is define in LinearMulticlassMachine or KernelMulticlassMachine and it basically calls the method set_subset of for the features
+@sonney2k	yeah but does KernelMulticlassMachine store the subset?
+@sonney2k	or just assign it to features?
+ n4nd0	no, it doesn't store it
+ n4nd0	assign to features
+@sonney2k	if it assigns things to features only then that is the explanation
+@sonney2k	because in apply() you won't have the correct subset set
+ n4nd0	aham I see
+@sonney2k	so support vectors etc need to be converted back to the features w/o subset
+@sonney2k	I guess that is the best solution
+@sonney2k	there should be a method for that btw
+ n4nd0	but since the subset is removed at the end
+ n4nd0	then the subset shouldn't be there when apply is called right?
+@sonney2k	n4nd0, you could call CKernelMachine::store_model_features()
+@sonney2k	then it will store the SVs
+@sonney2k	and all good
+ n4nd0	mmm I think I am not getting the point correctly, I am sorry
+@sonney2k	n4nd0, yeah but the problem is that the kernel machine doesn't internally store the trained machine
+@sonney2k	it only stores indices to support vectors and alphas
+@sonney2k	so these sv-indicices will be relative to the subsets that were used
+@sonney2k	so the best solution is to make the svm store not only the sv-indices but the real feature vectors
+@sonney2k	which is what the store_model_features() call will do
+ n4nd0	but why does storing the feature vectors will solve the problem?
+ PhilTillet	sonney2k, double on alphas make things better but there is still a small error at the end
+@sonney2k	PhilTillet, and with double?
+ PhilTillet	Benchmarking cpu...
+ PhilTillet	CPU Apply time : 18.7456
+ PhilTillet	Compiling GPU Kernels...
+ PhilTillet	Benchmarking GPUs..
+ PhilTillet	GPU Apply time : 2.1955
+ PhilTillet	Total  error : 0.000015
+ PhilTillet	with 100k of 1000
+ PhilTillet	and double on alphas
+ PhilTillet	don't know where the rounding error takes place
+@sonney2k	PhilTillet, and when you use just 1k instead of 100k and fewer dims?
+@sonney2k	n4nd0, then the SVM is self-contained
+ PhilTillet	1k SV ?
+@sonney2k	yes
+ PhilTillet	oh my
+ PhilTillet	very bad
+ PhilTillet	Total  error : 0.006018
+@sonney2k	n4nd0, it won't store indices relative to anything but the features themselves
+@sonney2k	PhilTillet, that sounds like a bug somewhere
+ n4nd0	sonney2k: ok, I think I am starting to see the point
+@sonney2k	PhilTillet, hopefully in your opencl code :D
+ PhilTillet	lol :D
+ n4nd0	sonney2k: I have to think about how to implement it now, since the training occurs in CMulticlassMachine and bot CLinearMulticlassMachine and CKernelMulticlassMachine derive
+ PhilTillet	when there's an error it's always on the last digit
+ PhilTillet	out[3]=7.026104
+ PhilTillet	out_gpu[3]=7.026103
+ n4nd0	sonney2k: but we just want to this for CKernelMulticlassMachine
+ PhilTillet	and no error for out[0] to out[2]
+ PhilTillet	well
+ PhilTillet	total_diff was a float
+@sonney2k	PhilTillet, bah
+@sonney2k	n4nd0, just do: set_store_model_features(true);
+@sonney2k	then it will do that for you :)
+@sonney2k	no need to do any extra magic
+@sonney2k	n4nd0, btw one problem later might be that there is already a subset set
+@sonney2k	n4nd0, so one would need nested subsets %-)
+ n4nd0	sonney2k: but isn't it enought to remove the subsets for every machine that is trained?
+ n4nd0	once the machine is trained, it removes the subsets
+@sonney2k	n4nd0, that is what set_store_model_features(true); will automagically do
+@sonney2k	+ store the features
+@sonney2k	that will be expensive for one-vs-rest though
+@sonney2k	for that it is much better to just store indices
+ PhilTillet	sonney2k, seems like the problem is a bit more complicated
+ n4nd0	sonney2k: one vs rest doesn't need subsets I think
+ PhilTillet	for NUM 15 and DIM 3 :
+ PhilTillet	Difference between GPU and CPU at pos 0 1.64044e-07
+ PhilTillet	Difference between GPU and CPU at pos 1 4.05671e-08
+ PhilTillet	Difference between GPU and CPU at pos 2 1.7945e-07
+ PhilTillet	Difference between GPU and CPU at pos 3 2.29995e-07
+ PhilTillet	Difference between GPU and CPU at pos 4 1.46e-07
+ PhilTillet	Difference between GPU and CPU at pos 5 3.52479e-08
+ PhilTillet	Difference between GPU and CPU at pos 6 2.49558e-07
+ PhilTillet	Difference between GPU and CPU at pos 7 6.59237e-08
+ PhilTillet	Difference between GPU and CPU at pos 8 2.7401e-07
+ PhilTillet	Difference between GPU and CPU at pos 9 1.81766e-08
+ PhilTillet	Difference between GPU and CPU at pos 10 1.48443e-07
+ PhilTillet	Difference between GPU and CPU at pos 11 3.06445e-07
+ PhilTillet	Difference between GPU and CPU at pos 12 1.21206e-07
+ PhilTillet	Difference between GPU and CPU at pos 13 6.44709e-08
+ PhilTillet	Difference between GPU and CPU at pos 14 2.98222e-08
+ PhilTillet	Total  error : 0.000002
+ PhilTillet	(sorry for the spam :D)
+@sonney2k	n4nd0, true but then you should only set store module features to  true for one-vs-one
+@sonney2k	PhilTillet, float again?
+ PhilTillet	no, double
+@sonney2k	that's too much :(
+ PhilTillet	ah wait
+ PhilTillet	there are some other differences
+ PhilTillet	const float64_t rbf_width
+@sonney2k	yes?
+ PhilTillet	i used float not double for the width
+ n4nd0	sonney2k: if I have understood correctly, where it makes more sense would in line 185 here
+@sonney2k	PhilTillet, well I guess you have to debug step by step
+ n4nd0	sonney2k: https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/machine/MulticlassMachine.cpp
+@sonney2k	first check if the kernel is the same
+ n4nd0	sonney2k: right after the training
+ PhilTillet	will be super fun
+ PhilTillet	lol
+@sonney2k	then alpha*k(x,y)
+@sonney2k	well just for one element
+@sonney2k	should be easy
+@sonney2k	n4nd0, yes exactly - try it and report if it works!
+-!- flxb [~cronor@g225030062.adsl.alicedsl.de] has quit [Quit: flxb]
+ PhilTillet	sonney2k, good news
+ PhilTillet	sort of
+ PhilTillet	:p
+ PhilTillet	i am using double everywhere
+ PhilTillet	the error is about 1e-14 per example
+ PhilTillet	don't think I can get lower
+ PhilTillet	but now the improvement on the GPU is no longer *9
+ PhilTillet	but more like *3
+ PhilTillet	:p
+ PhilTillet	had to reduce dim to 100
+ PhilTillet	(else, does not fit in memory
+@sonney2k	n4nd0, did it work?
+@sonney2k	PhilTillet, heh
+ PhilTillet	Benchmarking cpu...
+ PhilTillet	CPU Apply time : 3.11451
+ PhilTillet	Compiling GPU Kernels...
+ PhilTillet	Benchmarking GPUs..
+ PhilTillet	GPU Apply time : 0.64685
+ PhilTillet	Total  error : 0.000000
+ PhilTillet	for 100k examples of dim 100
+ PhilTillet	and 1000 SVs
+ n4nd0	sonney2k: not yet, idk why but now apply for one-vs-one seems not to output anything
+@sonney2k	PhilTillet, so things seem OK - increasing precision reduces the error. I would have hoped for 1e-16 or 15 but ok
+@sonney2k	might be depending on width, summing order etc
+ PhilTillet	yes
+ PhilTillet	but seems like double precision really reduces performances :p
+@sonney2k	yeah
+ PhilTillet	seems like graphic cards are still slower than cpus at doing double operations
+@sonney2k	but not soo much on CPU
+ PhilTillet	yes
+ PhilTillet	on my mobile GPU things are even worse
+@sonney2k	I mean also CPU benefits from using floats
+ PhilTillet	yes but the difference between float and double on CPU does not seem so significant
+ PhilTillet	i mean there is no real performance drop down
+@sonney2k	there should be
+@sonney2k	we should be measuring memory speed
+@sonney2k	so close to factor 2 speedup?!
+ PhilTillet	on my mobile GPU yes
+ PhilTillet	on high end GPU and high end CPU, more like factor 4
+@sonney2k	also on CPU
+ PhilTillet	oh you mean for float compared to double
+ PhilTillet	but another point is that I changed everything to double in GPU
+ PhilTillet	even temporaries etc
+ PhilTillet	on CPU, some temporaries might be float
+@sonney2k	PhilTillet, ahh ok it is using double internally - just not for kerne
+@sonney2k	that is why
+ PhilTillet	oh ok
+ PhilTillet	:p
+@sonney2k	n4nd0, uhh
+ PhilTillet	so i should not use double everywhere in kernel too
+ PhilTillet	that explains the difference error too then I guess
+@sonney2k	?
+ PhilTillet	i don't get it
+ PhilTillet	where does shogun use floating point temporaries?
+ PhilTillet	in kernels?
+@sonney2k	PhilTillet, I meant that even when you use float on CPU it will use double for most compuations
+@sonney2k	except for kernel
+ PhilTillet	oh I see
+@sonney2k	PhilTillet, shogun never uses float32_t
+ PhilTillet	is the implementation multithreaded for CPUs?
+@sonney2k	as temporaries
+@sonney2k	yes multithreaded
+ PhilTillet	okay
+@sonney2k	so load should be #cpus
+ PhilTillet	so *4 sounds realistic
+ PhilTillet	*9 was a bit unrealistic :p
+@sonney2k	anyway most expensive is kernel compuation
+ PhilTillet	yes
+ PhilTillet	same on GPU
+ PhilTillet	but it is also where you can get most GFlops with caching
+ n4nd0	sonney2k: idk why yet, but doing m_machine->set_store_model_features(true) in MulticlassMachine.cpp:184 makes apply return nothing :S
+@sonney2k	PhilTillet, maybe one can be more clever and compute k(x_i, x) for all x first and then go to x_j
+ PhilTillet	well, on cpu you mean?
+@sonney2k	ahh but in your case examples fit in memory...
+@sonney2k	yeah
+ PhilTillet	yes
+ PhilTillet	on GPU it is somewhat treatedas a matrix-matrix product
+ PhilTillet	but where operations are not inner product but norm_2
+ PhilTillet	XD
+ PhilTillet	exp(-norm2/width) actually
+@sonney2k	n4nd0, great :(
+@sonney2k	n4nd0, I guess you need to debug what is going on (print out number of SVs / and values of alphas or so)
+ PhilTillet	could maybe get a little increase by mapping features and stuff to texture cache, but it is not something I am used to do and I am not even sure about the gain that could be got
+@sonney2k	n4nd0, if that doesn't work ask on the mailinglist - heiko wrote that code so he can help
+ n4nd0	sonney2k: ok, thank you - I am going to try to see now why does that happen, why it returns nothing in this case
+@sonney2k	PhilTillet, well you should make sure all x_i are in GPU mem
+@sonney2k	n4nd0, ok
+ n4nd0	sonney2k: in any case, what was the other possibility of doing one-vs-one without subsets?
+@sonney2k	for x ... not so important
+@sonney2k	n4nd0, well craft new features / labels
+@sonney2k	could mean huge overhead I know...
+@sonney2k	anyway I have to sleep now
+@sonney2k	cu
+ PhilTillet	cu
+ n4nd0	good night, bye
+ n4nd0	it looks pretty cool your OpenGL stuff
+ n4nd0	that was for you PhilTillet ;)
+ PhilTillet	OpenCL you mean?
+ PhilTillet	:p
+ n4nd0	c'mon ... isn't kind of late? allow me some mistakes :P
+ PhilTillet	haha :D
+ PhilTillet	it's true
+ PhilTillet	i'm tired
+ PhilTillet	but jet lag pwnd me...
+ n4nd0	haha I see
+ n4nd0	you said you were in a conference right?
+ PhilTillet	yes
+ PhilTillet	:p
+ PhilTillet	High Performance Computing conference
+ n4nd0	sounds interesting
+ n4nd0	I hope you learnt lot of new stuff
+ PhilTillet	well to be honest
+ PhilTillet	i just didn't get most of the stuff
+ PhilTillet	:p
+ n4nd0	well ... honesty is a good feature! :P
+ PhilTillet	i mean, i was very lucky to get there
+ PhilTillet	it was not made for students
+ PhilTillet	:p
+ PhilTillet	that's also why I didn't get most of the stuffs ^^
+ PhilTillet	but well, was able to give my talk, that was why i was here :p
+ n4nd0	I hope it went good
+ PhilTillet	well, more or less, i think it was fine... but you know at the end you're always like "oh i've forgotten to talk about that and that and that"
+ n4nd0	yeah, I know that feeling
+ n4nd0	good night people
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ PhilTillet	good night :)
+-!- vikram360 [~vikram360@117.192.170.195] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.177.199] has joined #shogun
+-!- vikram360 [~vikram360@117.192.177.199] has quit [Ping timeout: 248 seconds]
+-!- vikram360 [~vikram360@117.192.167.204] has joined #shogun
+-!- Miggy [~piggy@14.139.82.6] has quit [Ping timeout: 252 seconds]
+-!- PhilTillet [~Philippe@tillet-p42154.maisel.int-evry.fr] has left #shogun ["Leaving"]
+-!- vikram360 [~vikram360@117.192.167.204] has quit [Ping timeout: 244 seconds]
+-!- av3ngr [av3ngr@nat/redhat/x-kwymmyssrqxjiwle] has joined #shogun
+-!- harshit_ [~harshit@182.68.160.94] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-kwymmyssrqxjiwle] has quit [Quit: That's all folks!]
+-!- harshit_ [~harshit@182.68.160.94] has quit [Ping timeout: 260 seconds]
+-!- harshit_ [~harshit@182.68.158.71] has joined #shogun
+-!- blackburn [~qdrgsm@62.106.114.183] has joined #shogun
+-!- vikram360 [~vikram360@117.192.188.233] has joined #shogun
+-!- flxb [~cronor@e177094239.adsl.alicedsl.de] has joined #shogun
+-!- gsomix [~gsomix@188.168.4.150] has quit [Ping timeout: 248 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Client Quit]
+-!- flxb_ [~cronor@e177094239.adsl.alicedsl.de] has joined #shogun
+-!- flxb [~cronor@e177094239.adsl.alicedsl.de] has quit [Ping timeout: 246 seconds]
+-!- flxb [~cronor@e178183060.adsl.alicedsl.de] has joined #shogun
+-!- flxb_ [~cronor@e177094239.adsl.alicedsl.de] has quit [Ping timeout: 246 seconds]
+ PhilTillet	hey
+-!- jckrz [~jacek@89-69-164-5.dynamic.chello.pl] has joined #shogun
+ blackburn	hi
+-!- harshit_ [~harshit@182.68.158.71] has quit [Read error: Connection reset by peer]
+-!- gsomix [~gsomix@83.149.21.216] has joined #shogun
+ PhilTillet	how are you blackburn ?
+ blackburn	PhilTillet: fine, what about you?
+-!- Marty28 [~Marty@158.181.76.57] has joined #shogun
+ Marty28	hiho
+ PhilTillet	blackburn, fine :)
+ PhilTillet	solved most problems with OpenCL
+ PhilTillet	:p
+ blackburn	yeah I have seen you were discussing things yesterday
+-!- harshit_ [~harshit@182.68.133.39] has joined #shogun
+ PhilTillet	Still there is a last problem i on precision, I asked Soeren about that
+ PhilTillet	for computing norm(x-y) you do norm(x) + norm(y) - 2*inner_prod(x,y)
+ PhilTillet	in the gaussian kernel
+ PhilTillet	why? :)
+ PhilTillet	(I use inner_prod(x-y,x-y) so the round off error is different)
+ blackburn	PhilTillet: which is better in means of precision?
+ PhilTillet	I have absolutely no idea :D
+ PhilTillet	but the two are different
+ PhilTillet	the second one might be faster to compute though
+ blackburn	PhilTillet: well you may precompute norm things right?
+ PhilTillet	what do you mean?
+ PhilTillet	I don't precompute anything
+ blackburn	I mean dot(x-y,x-y) can be partially precomputed
+ PhilTillet	well I kinda do a for loop with "diff = x[i] - y[i] ; sum+=pow(diff,2);"
+ blackburn	so what is faster
+ blackburn	to compute pow'ed differences
+ blackburn	or to compute dot product?
+ PhilTillet	to compute pow'ed difference for sure, but from a rounding error point of view I have no idea which is more precise :p
+-!- gsomix [~gsomix@83.149.21.216] has quit [Ping timeout: 246 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	blackburn: hey there!
+ Marty28	Hi! Do you know where I can find some relatively new ***Python*** scripts on computing and visualizing POIMs? (http://www.fml.tuebingen.mpg.de/raetsch/projects/POIM)
+ n4nd0	Marty28: no idea :(
+ Marty28	thx
+ Marty28	I guess I have to ask Gunnar R?tsch.
+ flxb	Why is it that in python I have to import KernelRidgeRegression and in the online documentation the class is called KRR? Is the documentation outdated?
+ n4nd0	flxb: is in the online doc for python or for another language?
+ n4nd0	flxb: naming changes among languages
+ flxb	n4nd0: i was looking at the c++ classes. where can i find the online doc for python?
+ n4nd0	flxb: I don't think there is doc for python
+ n4nd0	flxb: we only have doxygen doc extracted from C++ source code
+ n4nd0	flxb: but you should be able to use help() in python
+ n4nd0	flxb: and if you have a problem like this, that you do know the name in C++ but not in python, I suggest you to check the file
+ n4nd0	src/interfaces/python_modular
+ flxb	n4nd0: i was always curious about that. why is there no documentation on how to use shogun in python?
+ n4nd0	flxb: well, I think that if you issue help you will find quite a bit of info as well
+ n4nd0	but yes, more documentation would be quite useful probably
+ n4nd0	anyway, I think that if you read C++ doc/check the code it is normally enough to get the point of everything
+ n4nd0	and don't forget the examples!
+-!- harshit_ [~harshit@182.68.133.39] has quit [Ping timeout: 246 seconds]
+ flxb	n4nd0: as far as i know the python modular examples never work
+ n4nd0	flxb: that's weird
+ n4nd0	flxb: did you configure with support for python_modular?
+ flxb	n4nd0: yes it works fine. but i have to import modshogun, not shogun
+ n4nd0	flxb: I didn't get it, do the examples work on your machine or not?
+ flxb	n4nd0: If I update all imports they would work, I guess.
+ n4nd0	flxb: I don't it is normal that you have to do that
+ flxb	I don't know if it is just a problem on my machine, but i cannot import shogun. i have to import modshogun.
+ n4nd0	no problem in my machine importing shogun
+ n4nd0	and the examples work fine
+ flxb	n4nd0: ah, i think it is because i don't make install. i just compile and add src/interfaces/python_modular to my python path
+ n4nd0	aha
+ n4nd0	yes, try to do sudo make install as well
+-!- harshit_ [~harshit@182.68.133.39] has joined #shogun
+-!- jckrz [~jacek@89-69-164-5.dynamic.chello.pl] has quit [Quit: Ex-Chat]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 244 seconds]
+ flxb	n4nd0: how do you install when you can't sudo?
+ n4nd0	flxb: can you make install?
+ flxb	n4nd0: no it tries to alter permissions on /usr/lib
+ n4nd0	flxb: hmm I don't know then :S
+ flxb	n4nd0: this isn't a big problem. i'll just use modshogun
+ n4nd0	flxb: I guess that there must be an option to just install for the user you have permissions
+-!- blackburn_ [50ea622b@gateway/web/freenode/ip.80.234.98.43] has joined #shogun
+-!- blackburn_ [50ea622b@gateway/web/freenode/ip.80.234.98.43] has quit [Quit: Page closed]
+-!- gsomix [~gsomix@85.26.232.131] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- harshit_ [~harshit@182.68.133.39] has quit [Read error: Connection reset by peer]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 244 seconds]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- gsomix [~gsomix@85.26.232.131] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+-!- gsomix [~gsomix@85.26.232.131] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 244 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 245 seconds]
+ gsomix	hi
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+-!- gsomix [~gsomix@85.26.232.131] has quit [Ping timeout: 252 seconds]
+-!- gsomix [~gsomix@85.26.232.131] has joined #shogun
+ Marty28	void prepare_POIM2 ( float64_t *  distrib,
+ Marty28	int32_t  num_sym,
+ Marty28	int32_t  num_feat
+ Marty28	)
+ Marty28	Here I need a float64_t *
+ Marty28	numpy.ones((4,4)) gives me a numpy.ndarray
+ Marty28	Can I convert the matrix somehow to fit into the float_64_t?
+ Marty28	I try using the script poim.py from http://people.tuebingen.mpg.de/vipin/www.fml.tuebingen.mpg.de/raetsch//projects/easysvm/
+ Marty28	I get the ERROR: "TypeError: in method 'WeightedDegreePositionStringKernel_prepare_POIM2', argument 2 of type 'float64_t *'"
+-!- flxb [~cronor@e178183060.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- flxb [~cronor@e178183060.adsl.alicedsl.de] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- romovpa [bc2c2ad0@gateway/web/freenode/ip.188.44.42.208] has joined #shogun
+-!- romovpa_ [bc2c2ad0@gateway/web/freenode/ip.188.44.42.208] has joined #shogun
+-!- romovpa [bc2c2ad0@gateway/web/freenode/ip.188.44.42.208] has quit [Ping timeout: 245 seconds]
+ gsomix	sonney2k, hey
+-!- Marty28 [~Marty@158.181.76.57] has quit [Quit: ChatZilla 0.9.88.1 [Firefox 11.0/20120310010446]]
+-!- romovpa_ [bc2c2ad0@gateway/web/freenode/ip.188.44.42.208] has quit [Client Quit]
+-!- harshit_ [~harshit@182.68.67.61] has quit [Ping timeout: 260 seconds]
+-!- Marty28 [~Marty@158.181.76.57] has joined #shogun
+-!- romi_ [~mizobe@187.74.1.223] has quit [Ping timeout: 246 seconds]
+-!- romi_ [~mizobe@187.74.1.223] has joined #shogun
+-!- gsomix [~gsomix@85.26.232.131] has quit [Ping timeout: 260 seconds]
+-!- gsomix [~gsomix@85.26.234.192] has joined #shogun
+-!- romi_ [~mizobe@187.74.1.223] has quit [Ping timeout: 246 seconds]
+-!- nickon [d5774105@gateway/web/freenode/ip.213.119.65.5] has joined #shogun
+ nickon	good evening, everyone (for me at least)
+ nickon	:)
+-!- romi_ [~mizobe@187.74.1.223] has joined #shogun
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+ n4nd0	nickon: hey!
+ nickon	hey n4nd0 :)
+ nickon	how are you ?
+ nickon	are you a developer at the shogun organisation ?
+ n4nd0	nickon: I have done some contributions to the project
+ nickon	what did you work on then ? :)
+ n4nd0	nickon: and I am fine thanks, what about you?
+ nickon	I'm fine too, thanx :)
+ n4nd0	nickon: small things here and there :)
+ n4nd0	nickon: https://github.com/shogun-toolbox/shogun/commit/afb8b5eb7058640949cc7774d09b8756a66a5ada you can check them here if interested
+ nickon	just nice to get an idea on who is who and who is working on what :)
+ n4nd0	yeah sure
+ n4nd0	now I am working on a dimensionality reduction algo
+ nickon	what kind of method are you implementing ?
+-!- PhilTillet [~Philippe@tillet-p42154.maisel.int-evry.fr] has joined #shogun
+ nickon	my thesis is somehow related to dimensionality reduction (tensor compression, so not exactly in the context of machine learning ;)
+ n4nd0	Stochastic Proximity Embedding
+ n4nd0	aham, are you working on it now?
+ nickon	interesting
+ nickon	well, not right now ;)
+ nickon	but yes, during this academic year I've been busy on that
+ n4nd0	ok
+-!- PhilTillet [~Philippe@tillet-p42154.maisel.int-evry.fr] has quit [Client Quit]
+ nickon	At the moment I'm actually interested in what shogun offers for GSoC (as I'm still a student :))
+ nickon	the C5.0 integration project seems to get my attention, can't really explain why
+-!- harshit_ [~harshit@182.68.67.61] has quit [Ping timeout: 260 seconds]
+ n4nd0	ok, nice
+ nickon	Where are you from actually, if I may ask?
+-!- PhilTillet [~Philippe@tillet-p42154.maisel.int-evry.fr] has joined #shogun
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+ gsomix	nickon, hi. if you are interested to know, I'm working on python3 interface and covertree integration now.
+-!- harshit_ [~harshit@182.68.67.61] has quit [Client Quit]
+ n4nd0	I come from Spain, what about you?
+-!- harshit__ [~harshit@182.68.67.61] has joined #shogun
+-!- harshit__ [~harshit@182.68.67.61] has quit [Client Quit]
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+ harshit_	hey n4nd0.que tal !
+ nickon	I'm from Belgium :)
+ nickon	sorry I gotta go eat!
+ nickon	see ya
+ n4nd0	bye
+ n4nd0	harshit_: buenas! bien y t??? :D
+ harshit_	n4nd0:good :)
+ harshit_	hey do you knw what does SG_ADD() does exactly ?
+ n4nd0	harshit_: let me check
+ n4nd0	mmm not exactly
+ n4nd0	I remember S?ren told me that m_parameters->add is used for things like serialization
+ n4nd0	but Heiko said that SG_ADD must be done in order to be able to use model selection
+ n4nd0	so I guess it is a kind of method to save some info about the class members
+ n4nd0	but actually no idea what it exactly does
+-!- romovpa [b064f6fe@gateway/web/freenode/ip.176.100.246.254] has joined #shogun
+ harshit_	got it ..
+ harshit_	thanks :)
+ romovpa	Hi all. I've found that saving the model isn't implemented for LinearMachine and many other machines. I would like to implement the missing save/load methods. Is it a good idea?
+ blackburn	romovpa: do you mean serialization?
+ blackburn	romovpa: btw do you know vojtech franc?
+ blackburn	harshit_: SG_ADD is m_parameters->add
+ romovpa	yes, I mean
+ blackburn	n4nd0: did you solve your issue?
+ blackburn	romovpa: no, that's not needed it works already
+ romovpa	blackburn: (about Vojtech Franc) no, I have wrote him, but haven't receive any answer
+ blackburn	aha I see
+ romovpa	blackburn: hmm... why I couldn't save my liblinear model through cmdline interface?
+ blackburn	oh you use this stuff..
+ romovpa	blackburn: =)
+ blackburn	why cmdline?
+ blackburn	anyway let me check how it works
+ n4nd0	blackburn: hey! you talking about spe or o-vs-o?
+ blackburn	n4nd0: both probably
+ n4nd0	blackburn: ah, for o-vs-o I am waiting for Heiko's answer, spe is still on progress :)
+ blackburn	ok I see
+ blackburn	feel free to ask if you need help
+ n4nd0	thank you :)
+ n4nd0	blackburn: a theoretical thing, embedding == DR method?
+ blackburn	n4nd0: embedding is a process of R^n -> R^t so yes
+ blackburn	t<n
+ n4nd0	blackburn: aham, I understand that they are synonyms then
+ Marty28	python3? nice
+ blackburn	romovpa: ok that makes sense probably but my advice is to use modular interface
+ romovpa	blackburn: Could you explain me, what is the right way of saving trained model? (Using libshogun and c++) Are CMachine.save()/load() methods deprecated?
+ blackburn	use save_serializable
+ blackburn	romovpa: actually I do not know whether it should work right in static right now
+ blackburn	but anyway save_serializable does the job
+ romovpa	blackburn: I'm trying to use many interfaces and libshogun directly, thats ok =)
+ blackburn	romovpa: main issue of static is we have to update it *manually*
+ romovpa	ok, thanks
+ blackburn	each time we add new feature we actually should update it
+ blackburn	but actually we don't
+ blackburn	so it becomes outdated day-by-day hah
+ romovpa	blackburn: documentation seems to have a similar problem
+ blackburn	oh yes we hear this thing everyday
+ harshit_	blackburn: I have few questions regarding the liblinear/ocas and lbp features project .. can you help me out ?
+-!- romovpa [b064f6fe@gateway/web/freenode/ip.176.100.246.254] has quit [Ping timeout: 245 seconds]
+ blackburn	harshit_: yes
+ blackburn	one warning - I believe it is not really actual
+ blackburn	liblinear and ocas are up-to-date
+-!- harshit_ [~harshit@182.68.67.61] has quit [Ping timeout: 272 seconds]
+-!- nickon [d5774105@gateway/web/freenode/ip.213.119.65.5] has quit [Quit: Page closed]
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+ harshit_	Exactly
+ harshit_	blackburn: only thing i noticed that is not in shogun is the multi class svm
+ harshit_	of liblinear
+ blackburn	yes it is in
+ harshit_	you mean multiclass svm of liblinear, is now in shogun .?
+ blackburn	yes, MulticlassLiblinear
+ harshit_	but in liblinear.cpp, Under MCSVM_CS case nothing is there except SG_NOTIMPEMENTED
+ blackburn	you probably have outdated shogun
+ harshit_	http://www.shogun-toolbox.org/doc/en/current/LibLinear_8cpp_source.html#l00078
+ harshit_	oh
+ harshit_	actually i was checking out in documentation
+ blackburn	source on site is not up-to-date for sure
+ harshit_	ohk, So in the project i was considering for gsoc, Actually nothing is left in it except lbp features
+ blackburn	yeah probably :)
+ blackburn	I believe it is not a problem
+ blackburn	there is a week still and nobody wants you to start with project before proposals deadline
+ blackburn	e.g. n4nd0 contributes with a variety of patches and it is actually ok
+ harshit_	ok , so could you tell me about decision trees
+ harshit_	I mean I remember you saying that
+ harshit_	its quite hard to implement
+ harshit_	why so ?
+ blackburn	no, not really
+ blackburn	I think summer would be enough to adapt it for shogun
+ harshit_	so C5.0 + lbp features will make a nice project !
+ blackburn	makes sense
+ harshit_	and regarding lbp features : i think the implementation of openCV is quite nice
+ blackburn	that needs some discussion
+ harshit_	but i wonder why is the liblinear/ocas project is in ideas list when it is updated
+ blackburn	actually I believe opencv features would be better
+ blackburn	yes probably this one should be removed
+ harshit_	I think liblinear is going to release there regression feature this summer, So it might be bcoz of that it is there .
+ harshit_	any thoughts on that ?
+ blackburn	I have no idea actually
+ harshit_	Actually i am not able to chat with sonney2k, Time lag :(
+ harshit_	so I am having problem in refining my project
+ blackburn	if you are sure liblinear will release you may add this to project
+-!- romi_ [~mizobe@187.74.1.223] has quit [Ping timeout: 246 seconds]
+ harshit_	I think soeren is involved with liblinear too, So he will probably have a better idea abt release !
+ blackburn	no actually he is not involved with liblinear
+ blackburn	so what are ideas you want to apply for?
+ n4nd0	blackburn: so one thing about SPE and using KNN with cover tree
+ blackburn	aha shoot
+-!- romi_ [~mizobe@187.74.1.223] has joined #shogun
+ n4nd0	blackburn: so I see that I have to use the same that is in LLE, as you told me
+ blackburn	you don't have to but it has best performance
+ n4nd0	blackburn: but to copy the code there directly is not a very nice solution
+ n4nd0	blackburn: or is it ok like that?
+ blackburn	why?
+ blackburn	hmm you may inherit from isomap
+ blackburn	but now really better
+ n4nd0	not to have the same code in several places ...
+ harshit_	blackburn: Actually saw his name in liblinear paper,
+ blackburn	harshit_: are you sure?
+ blackburn	n4nd0: ok let me describe my plan on libedrt
+ n4nd0	blackburn: ok
+ blackburn	actually I plan to extract things into half-standalone libedrt
+ blackburn	so it is ok, I will just reuse one function in solid library
+ blackburn	it would take a while to adapt your code
+ harshit_	yeah , check this out :http://www.csie.ntu.edu.tw/~cjlin/papers/liblinear.pdf
+ n4nd0	blackburn: ok, I will just commetn that is taken from there
+ n4nd0	blackburn: c'mon, I will try to do it good so it is not that much to adapt :P
+ harshit_	and saw his name in libocas too :)
+ blackburn	harshit_: he was action editor there
+ blackburn	no involvement with project itself
+ blackburn	he is an author of libocas
+ blackburn	as well as v. franc
+ harshit_	oh gr8
+ blackburn	n4nd0: would require some adaptations anyway
+ blackburn	just copy the code
+ harshit_	blackburn : I think C5.0 and lbp features will make a good project for me in gsoc, but the problem is that i dont have much knowledge about c5.0
+ blackburn	n4nd0: that code is duplicated in isomap already
+ harshit_	except some knowledge about decision trees and pruning in general
+ n4nd0	blackburn: ok
+ n4nd0	harshit_: in my opinion, you shouldn't probably be scared about that :) I'm sure it's sth you are able to pick up and implement
+ harshit_	thanks for boosting my confidence n4nd0, I think finally i'll go with that project only but just need some research before that
+ n4nd0	:)
+ blackburn	n4nd0: actually I would suggest you to work on libedrt directly if it was already in shogun
+ blackburn	but Soeren didn't like it and it is not ready so it is in separate branch yet
+ n4nd0	blackburn: I saw your commit proof of concept, but you didn't like it that much at the end, did you?
+ n4nd0	oh yeah, I remember whe you guys talked about that
+ blackburn	n4nd0: yes but I still think I should get this done
+ harshit_	hey , Is there any reference on how cross validation is implemented in shogun .
+ blackburn	I am afraid Heiko is the only reference for that :D
+ harshit_	okay, btw whats the nickname of heiko here ?
+ blackburn	'heiko' as his name usually
+ n4nd0	karlnapf too?
+ blackburn	ah yes
+ blackburn	I got wrong probably
+ harshit_	havnt seen him often !
+ blackburn	karlnapf is more usual
+ harshit_	blackburn : there is a project named " Integrate SGD-QN: in ideas of 2011,that actually seems to be easy . should I work on it for now .
+ harshit_	as in, before gsoc
+-!- blackburn1 [~qdrgsm@31.28.34.168] has joined #shogun
+-!- blackburn [~qdrgsm@62.106.114.183] has quit [Ping timeout: 246 seconds]
+-!- blackburn1 is now known as blackburn
+ harshit_	It is in shogun :(
+ blackburn	what is in shogun?
+ harshit_	SGD-QN
+ harshit_	i was just going through 2011 ideas list, to get something cool to work on now
+ blackburn	ah yes
+-!- vikram360 [~vikram360@117.192.188.233] has quit [Ping timeout: 276 seconds]
+-!- vikram360 [~vikram360@117.192.168.95] has joined #shogun
+ n4nd0	blackburn: this macro that is used around in DR methods
+ n4nd0	SG_DEBUG
+ n4nd0	I guess there must be an ifdef around there to activate/desactivate it right
+ n4nd0	?
+ blackburn	n4nd0: no, why?
+ n4nd0	blackburn: oh, that's just what I expected
+ n4nd0	blackburn: so it is just like SG_PRINT, it will always appear on screen?
+ blackburn	it prints nothing if loglevel is above than MSG_DEBUG
+ n4nd0	ok
+-!- harshit_ [~harshit@182.68.67.61] has quit [Remote host closed the connection]
+-!- romovpa_ [b064f6fe@gateway/web/freenode/ip.176.100.246.254] has joined #shogun
+-!- gsomix [~gsomix@85.26.234.192] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+-!- gsomix [~gsomix@85.26.234.192] has joined #shogun
+ romovpa_	could somebody explain to me what stands for an abbreviation PLIF?
+ blackburn	romovpa_: piecewise linear function
+-!- Vuvu [~Vivan_Ric@115.248.130.148] has joined #shogun
+-!- blackburn [~qdrgsm@31.28.34.168] has quit [Ping timeout: 246 seconds]
+--- Log closed Sun Apr 01 00:00:19 2012

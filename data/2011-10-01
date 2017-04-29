@@ -1,0 +1,250 @@
+--- Log opened Sat Oct 01 00:00:48 2011
+@sonney2k	blackburn what happened?
+@sonney2k	why are you quoting?
+ blackburn	sonney2k: too much sentences to answer without quoting :)
+@sonney2k	blackburn, I see
+-!- ChrisD_ [43dc92a2@gateway/web/freenode/ip.67.220.146.162] has quit [Ping timeout: 252 seconds]
+@sonney2k	blackburn, btw regarding the bias
+@sonney2k	I thought it would be easiest to just return an array for all fprs
+@sonney2k	that matches the tprs/fprs
+@sonney2k	then one could easily pick
+@sonney2k	same for prc
+ blackburn	sonney2k: I don't understand :)
+@sonney2k	?
+ blackburn	isn't it returned in ROC graph?
+@sonney2k	when you have a roc curve each point corresponds to a certain bias
+@sonney2k	blackburn, roc graph just returns fpr / trp
+@sonney2k	tpr
+@sonney2k	and array of fprs/trps
+@sonney2k	tprs
+@sonney2k	but not the bias that is needed to achieve a certain fpr
+ blackburn	sonney2k: how to compute that?
+@sonney2k	err fpr/tpr combination
+@sonney2k	IIRC you have the outputs of the classifier sorted right?
+@sonney2k	so when you consider output[i] it should be the bias
+@sonney2k	good thing is that you can double check w/ contingency table evaluator
+ blackburn	sonney2k: so just store sorted labels?
+@sonney2k	blackburn, regarding arpack.h - why does it not work? I mean you could just template the respective arpack functions
+@sonney2k	blackburn, yes I think so
+ blackburn	sonney2k: superlu files slu_ddefs.h (double defines) and slu_sdefs (single defines) can't be included at the same time
+@sonney2k	why defines?
+ blackburn	sonney2k: I need that file to be included to use superlu
+@sonney2k	where is that file?
+ blackburn	superlu/slu_ddefs.h
+@sonney2k	in shogun?
+ blackburn	no
+-!- ChrisD_ [43dc92a2@gateway/web/freenode/ip.67.220.146.162] has joined #shogun
+ blackburn	e.g. /usr/include/superlu/slu_ddefs.h on my machine
+@sonney2k	what happens if you include both?
+ blackburn	sonney2k: some functions are defined in both of them
+ blackburn	-> compilation fail
+@sonney2k	example?
+@sonney2k	which one?
+ blackburn	sonney2k: e.g. GlobalLU_t structure
+ blackburn	mem_usage_t, ..
+@sonney2k	I see
+@sonney2k	ok
+ blackburn	so the best way I see is to describe it templated in arpack.h
+@sonney2k	then you really have to do it in separete files
+ blackburn	and arpack_d, arpack_s
+@sonney2k	but why does this appear in arpack?
+@sonney2k	not some superlu.h in shogun/mathematics/*
+ blackburn	sonney2k: well there was no need to describe it in superlu.h
+ blackburn	sonney2k: the only content of the mathematics/superlu.h could be "#include <superlu/slu_ddefs.h>"
+ blackburn	another way is to rewrite all the functions once again to make s/d supported
+@sonney2k	I mean it is not arpack that needs two different files but only superloo
+ blackburn	sonney2k: yes but there is no way to use it generally in *one* arpack.cpp
+@sonney2k	sure
+ blackburn	so I think it is ok
+@sonney2k	one templated function
+ blackburn	sonney2k: there?
+@sonney2k	and then you just call the superlu stuff from there
+ blackburn	how?
+ CIA-3	shogun: Sergey Lisitsyn master * r57e582d / src/shogun/mathematics/arpack_d.cpp : Fixed wrong include at arpack double - http://git.io/0Ujt8g
+ blackburn	okay, example: dCreateCompColMatrix(..) and sCreateCompColMatrix(..)
+ blackburn	the only way I see is to describe CreateCompColMatrix<?>
+@sonney2k	yes
+ blackburn	but there are a lot of functions
+@sonney2k	and implement it for double and single
+ blackburn	I have to shadow all the interface funcs of superlu
+ blackburn	I don't like to do that (at least now)
+@sonney2k	how many do you need
+@sonney2k	?
+@sonney2k	btw, one unrelated minor thing - please don't indent #ifdefs
+ blackburn	sonney2k: ~5-7, what is the advantage of doing that?
+@sonney2k	I would say it is much more readable plus not twice the same code
+@sonney2k	even now superlu stuff should be in an extra file
+ blackburn	sonney2k: there would be templated functions for blas, lapack, arpack and superlu
+ blackburn	every blas/lapack/arpack routine I use there would be shadowed with some template function
+@sonney2k	yes
+ blackburn	I would say it is better to stay it duplicated
+ blackburn	code dup is bad but this solution is pretty cumbersome
+@sonney2k	ok but then please at least have only one arpack.cpp / h and move the superlu stuff into 2 different superlu_double.h superlu_float.h files encapsulating all the stuff you have in ifdef SUPERLU
+ blackburn	sonney2k: how can I have one arpack.cpp?!
+@sonney2k	there is no clash in arpack / blas / lapack right?
+@sonney2k	only superlu
+ blackburn	sonney2k: so?
+@sonney2k	so when you extract the superlu code you can have one
+ blackburn	sonney2k: how?
+ blackburn	there would be naming clash still
+@sonney2k	which ?
+ blackburn	superlu
+@sonney2k	but superlu stuff is in superlu_double / superlu_float
+@sonney2k	so how can there be a clash?
+ blackburn	if I have one arpack.cpp I will need both _double _float to be included
+ blackburn	and what should I define in superlu_double to avoid clash?
+@sonney2k	and?
+@sonney2k	you don't need to include the superlu headers in the superlu_double/float file
+@sonney2k	superlu_double.h that is
+ blackburn	?! what to include in superlu_double then?
+@sonney2k	nothing, just define the needed functions
+@sonney2k	and in superlu_double.cpp do the include + implementation
+ blackburn	sonney2k: e.g. SuperMatrix would be defined in both of them
+@sonney2k	why
+ blackburn	but contents are float or double according to included header
+ blackburn	I'm not a big fan of doing this because no chance to get superlu used somewhere else
+@sonney2k	but you don't need SUperMatrix in any file other than SuperLU*.cpp
+ blackburn	sonney2k: I use it right in arpack wrapper
+ blackburn	SuperMatrix slu_A, slu_L, slu_U, slu_B, slu_X;
+ blackburn	superlu_options_t options;
+ blackburn	SuperLUStat_t stat;
+@sonney2k	yeah that code should go into superlu*.cpp
+@sonney2k	that is what I said
+ blackburn	sonney2k: I can't see any way to hide it
+ blackburn	sonney2k: okay let me explain
+ blackburn	I need to matrix be factorized first
+ blackburn	then I need to solve system in every iteration
+ blackburn	I can't just call some superlu_solve for matrix
+ blackburn	I need to replace contents of vectors b and x (in eq. Ab=x)
+ blackburn	and to solve
+ blackburn	that is the fastest way and I can't store factored matrix and vectors in superlu format in some superlu.cpp
+@sonney2k	so then you write some replace function that does the replacement in superlu
+@sonney2k	.cpp
+ blackburn	sonney2k: anyway I need to store matrices, parameters, etc
+@sonney2k	yes the relevant ones in superlu - it is no solution to clutter arpack with this
+@sonney2k	s/no solution/no nice solution/
+ ChrisD_	sonney2k: I just checked regression_svrlight_modular.py and it is indeed the same error.
+@sonney2k	blackburn, it is like implementing CKernel in CSVM
+@sonney2k	ChrisD_, ok
+ blackburn	sonney2k: you want too nice solution, it is already specialized to many other things, not only superlu
+@sonney2k	ChrisD_, so we at least have a way to trigger it
+@sonney2k	but no idea how to fix it
+@sonney2k	I neither understand why we get 'success as error'
+ ChrisD_	;) steps
+@sonney2k	ChrisD_, I found it
+@sonney2k	it should be if (code) not if (!code)
+ CIA-3	shogun: Soeren Sonnenburg master * r90d5064 / src/shogun/kernel/Kernel.cpp : fix multithreading error w/ svr light - http://git.io/VVXcFA
+@sonney2k	ChrisD_, ^ patch
+ ChrisD_	sonney2k, thanks, also comes with a slight optimization :)
+@sonney2k	well...
+@sonney2k	blackburn, I mean look at lapack.h it only contains wrapper functions for lapack - so it would be very natural to assume that arpack /superlu does the same. I understand that superlu is not too well designed and has to be worked around but the code that uses arpack etc for whatever algorithm should not really be in there
+@sonney2k	ChrisD_, if it works please post success on the ML
+@sonney2k	others will appreciate it :)
+ ChrisD_	not in channel?
+ blackburn	sonney2k: let it stay as it is now, at least for now
+@sonney2k	(when they search for the same thing)
+ blackburn	we are crazy doing development friday's night
+ CIA-3	shogun: Sergey Lisitsyn master * r0f94ec8 / (2 files): Implement clapack single precision routines wrappers - http://git.io/dnKG_Q
+ shogun-buildbot	build #308 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/308
+ blackburn	hooray!
+ blackburn	sonney2k: have you any idea how to restrict <T> parameter with float32_t or float64_t?
+ blackburn	sleep mode
+ blackburn	see you
+-!- blackburn [~blackburn@188.168.4.53] has quit [Quit: Leaving.]
+-!- ChrisD_ [43dc92a2@gateway/web/freenode/ip.67.220.146.162] has quit [Ping timeout: 252 seconds]
+-!- blackburn [~blackburn@188.168.4.189] has joined #shogun
+@sonney2k	blackburn, just implement it for both
+ CIA-3	shogun: Sergey Lisitsyn master * ra945b61 / (9 files in 2 dirs): Made arpack wrapper templated, updated preprocessors according to new structure - http://git.io/BeW-Bg
+ CIA-3	shogun: Sergey Lisitsyn master * r3f082b3 / (2 files): Updated ARPACK and LAPACK libshogun examples - http://git.io/DghCwg
+ blackburn	sonney2k: https://github.com/shogun-toolbox/shogun/blob/a945b61abe960bc54673c2fa6ee9f443e9fca43d/src/shogun/mathematics/arpack.h
+ blackburn	you should be satisfied :)
+ blackburn	a little
+ shogun-buildbot	build #310 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/310  blamelist: blackburn91@gmail.com
+ CIA-3	shogun: Sergey Lisitsyn master * r3d5000c / src/shogun/mathematics/arpack.cpp : Added common.h include for arpack wrap impl - http://git.io/dtnanA
+ CIA-3	shogun: Sergey Lisitsyn master * r7314daf / src/shogun/preprocessor/DimensionReductionPreprocessor.cpp : Fixed wrong effective target dimensionality threshold - http://git.io/anRgTg
+-!- swvist [75d3564b@gateway/web/freenode/ip.117.211.86.75] has joined #shogun
+-!- swvist [75d3564b@gateway/web/freenode/ip.117.211.86.75] has quit [Quit: Page closed]
+ CIA-3	shogun: Sergey Lisitsyn master * re338daa / (2 files): Fixed and improved KLLE - http://git.io/fShWKw
+ shogun-buildbot	build #315 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/315
+@sonney2k	blackburn, thx
+ blackburn	sonney2k: around?
+ blackburn	need your kernel experience :)
+ blackburn	found solution!
+ blackburn	double centering!
+ blackburn	hohoh
+@sonney2k	blackburn, double centering?
+@sonney2k	as in twice?
+ blackburn	sonney2k: twice?
+@sonney2k	double?
+ blackburn	yes
+ blackburn	like CMath::center_matrix do
+ blackburn	does
+ blackburn	*
+@sonney2k	2 times?
+ blackburn	sonney2k: no, it is called double centering
+ blackburn	as I have seen..
+@sonney2k	I don't understand...
+ blackburn	sonney2k: I would better tell you the problem I had
+@sonney2k	you don't need to use the kernel normalizer?
+@sonney2k	for centering I mean?
+ blackburn	nooo
+ blackburn	in the LTSA algorithm
+ blackburn	there are some trick to make error matrix have zero mean
+@sonney2k	ok
+ blackburn	for every X vector mean vector C is subtracted
+ blackburn	and then X'X eigenvectors are being computed
+ blackburn	sonney2k: then X'X is a gram matrix
+ CIA-3	shogun: Soeren Sonnenburg master * r85dadcf / (6 files in 2 dirs): move inline functions from .h to .cpp - http://git.io/deFY2w
+ blackburn	sonney2k: is it clear what I mean? I got cumbersome english :D
+@sonney2k	ok and then?
+ blackburn	sonney2k: if I want to do it kernelized
+@sonney2k	I see
+ blackburn	I can't get the mean vector C
+@sonney2k	we have a kernel normalizer for that
+ blackburn	sonney2k: I have to do it for submatrices of kernel matrix
+ blackburn	so not a solution
+@sonney2k	ZeroMeanCenterKernelNormalizer
+ blackburn	sonney2k: there are N such submatrices of shape m_k by m_k
+@sonney2k	well you could create a customkernel and then use this normalizer on top...
+ blackburn	would be slower to use new kernel for all of them
+@sonney2k	why?
+@sonney2k	custom kernel just copies data ptr to matrix
+@sonney2k	anyway if you have a solution fine
+ blackburn	sonney2k: why not to just call center_matrix?
+@sonney2k	if that works for you - all good
+ blackburn	sonney2k: do you have any idea how to avoid lists like
+ blackburn	parameters[t].x
+ blackburn	parameters[t].y
+ blackburn	parameters[t].z
+ blackburn	?
+@sonney2k	I again don't understand
+ blackburn	haha
+@sonney2k	it is missing context
+ blackburn	sonney2k: have you seen threading in my preprocs?
+@sonney2k	I see
+@sonney2k	then I also would love to learn how to avoid this :)
+ blackburn	sonney2k: constructor for thread?
+ blackburn	param*
+@sonney2k	I mean I know that one can init structs in one go by specifying all the elements
+@sonney2k	not sure if that is better though
+ blackburn	better
+@sonney2k	you should google for the exact syntax
+ blackburn	sonney2k: is it possible to LTSA_THREAD_PARAM(x,y,z,t)?
+ blackburn	okay I see
+ blackburn	I was writing constructor hehe
+@sonney2k	sth like this
+@sonney2k	blackburn, http://linuxprograms.wordpress.com/2008/03/07/c-structure-initialization-advanced/
+@sonney2k	that is how one can do it
+ blackburn	thanks
+ blackburn	sonney2k: the good thing about this double centering: we will have two new methods
+ blackburn	not available anywhere
+ blackburn	I've never seen ever idea of doing such kernel extension of the LTSA
+ blackburn	sonney2k: crazy syntax!
+-!- blackburn [~blackburn@188.168.4.189] has quit [Read error: Operation timed out]
+-!- blackburn [~blackburn@188.168.5.80] has joined #shogun
+-!- blackburn [~blackburn@188.168.5.80] has quit [Ping timeout: 252 seconds]
+-!- blackburn [~blackburn@188.168.4.116] has joined #shogun
+ blackburn	sonney2k: what's up with heiko's stuff? will you fix it?
+-!- blackburn [~blackburn@188.168.4.116] has quit [Read error: Connection reset by peer]
+-!- blackburn1 [~blackburn@188.168.4.116] has joined #shogun
+--- Log closed Sun Oct 02 00:00:52 2011

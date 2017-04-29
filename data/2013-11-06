@@ -1,0 +1,190 @@
+--- Log opened Wed Nov 06 00:00:12 2013
+-!- FSCV [~FSCV@50.7.50.60] has quit [Quit: Leaving]
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+-!- zxtx [~zv@129-79-241-148.dhcp-bl.indiana.edu] has quit [Ping timeout: 240 seconds]
+-!- zxtx [~zv@c-98-223-198-47.hsd1.in.comcast.net] has joined #shogun
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Quit: Leaving]
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+-!- zxtx [~zv@c-98-223-198-47.hsd1.in.comcast.net] has quit [Ping timeout: 272 seconds]
+-!- zxtx [~zv@c-98-223-198-47.hsd1.in.comcast.net] has joined #shogun
+-!- parijat [b495342a@gateway/web/freenode/ip.180.149.52.42] has joined #shogun
+ parijat	hi, I wanted t know how does the shogun unit test work? what needs to be done to create a new unit test?
+-!- parijat [b495342a@gateway/web/freenode/ip.180.149.52.42] has quit [Quit: Page closed]
+-!- sonne|osx [~sonne@89.204.154.216] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * e280950 / src/interfaces/modular/Machine.i: https://github.com/shogun-toolbox/shogun/commit/e2809507e15ceca22b8414f81263cf27e241b5e7
+ shogun-notifier-	shogun: apply_* methods return new objects - make that known to swig
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: likely fixes #7323621
+-!- taylan [d5f4a885@gateway/web/freenode/ip.213.244.168.133] has quit [Ping timeout: 250 seconds]
+-!- sonne|osx [~sonne@89.204.154.216] has quit [Quit: sonne|osx]
+ sonne|work	thoralf: so test it!
+ sonne|work	parijat - just add a file with a test and then cmake with -DENABLE_TESTING=ON
+ shogun-buildbot	build #2009 of deb3 - modular_interfaces is complete: Failure [failed test python modular test ruby modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2009  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- new_lido [~walid@193.227.20.2] has joined #shogun
+ thoralf	sonne|work: Oh, cool.  Thanks!
+ thoralf	Will test it in a minute.
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Ping timeout: 272 seconds]
+ thoralf	sonne|work: Works perfectly, thank you.
+ thoralf	sonne|work: There are still some smaller leaks related to _wrap_new_SparseRealFeatures, but in total it's 230kb after 100 iterations.
+ sonne|work	thoralf: please rerun valgrind with this origin thingy
+ sonne|work	that it says at the bottom
+ sonne|work	otherwise it is hard to figure out where / what
+ sonne|work	thoralf: some stuff might be python and no real leak
+ sonne|work	wiking: that bug is rather important and if we intend to release 3.0.1 this should be definitely in
+@wiking	mmm
+ sonne|work	mmm what?
+ thoralf	sonne|work: New output with same script as before: https://gist.github.com/tklein23/7333816
+ thoralf	sonne|work: I only copy-pasted the shogun-related stuff.
+ thoralf	sonne|work: approx. 230kb after 100 iterations, so it's not critical any more.
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@wiking	sonne|work: well we can create then a hotfix branch for it
+-!- new_lido [~walid@193.227.20.2] has quit [Ping timeout: 260 seconds]
+@wiking	sonne|work: but you've already commited the fix
+@wiking	anyhow we can make an easy 3.0.1 release i think
+ sonne|work	thoralf: could you please create a minimal example with that other leak?
+ sonne|work	and here valgrind line numbers don't make sense
+ thoralf	sonne|work: I just did: https://gist.github.com/tklein23/7333816
+ sonne|work	I need this with -O0 to make sense
+ sonne|work	thoralf: I guess you don't even need liblinear for that
+ sonne|work	thoralf: maybe just passing the sparse matrix to shogun is sufficient
+ thoralf	I see, I'll check.
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 76f28aa / src/interfaces/python_modular/swig_typemaps.i: https://github.com/shogun-toolbox/shogun/commit/76f28aa64b64c3d216e0c17aeca05065065d1eda
+ shogun-notifier-	shogun: drop inplace new for sparse vector (no longer needed...) and create SGSparseVector directly
+ sonne|work	thoralf: that commit ^ might even fix it...
+ thoralf	Oh, I just updated the gist: https://gist.github.com/tklein23/7333816
+ thoralf	Let me rebuild with your fix.
+ sonne|work	thoralf: would fit...
+ sonne|work	lets see
+ thoralf	Hmm.  Failed unit tests: python_modular-structure_factor_graph_model (SEGFAULT)
+ thoralf	sonne|work: The leak disappeared.
+ thoralf	But I've got a failing unit test, but I think it was already failing yesterday.
+-!- HeikoS [~heiko@97e0a10b.skybroadband.com] has joined #shogun
+ HeikoS	sonney2k: the satzung already includes that every member of the vorstand is able to represent shogun to the world
+ HeikoS	so we can do the voting now
+ HeikoS	Once thats done, I will quickly write the protocol of the founding process, and then ready to register
+ HeikoS	sonne|work: ^
+ shogun-buildbot	build #2010 of deb3 - modular_interfaces is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2010  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- HeikoS [~heiko@97e0a10b.skybroadband.com] has quit [Read error: Operation timed out]
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:a0fe:60b8:7a0d:832c] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	hey guys!
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has joined #shogun
+-!- new_lido [~walid@193.227.20.2] has joined #shogun
+-!- combi [89de72ee@gateway/web/freenode/ip.137.222.114.238] has joined #shogun
+ combi	Is there a way to install shogun on a Linux machine with an old version of cmake?
+ combi	I don't have admin privileges, just FYI
+ combi	One machine has cmake 2.6.4 and another doesn't even have it.
+ combi	Mainly I'd like to gain access to the MKL implementation using Python if possible.
+@iglesiasg	hey combi
+-!- combi [89de72ee@gateway/web/freenode/ip.137.222.114.238] has quit [Quit: Page closed]
+@iglesiasg	all right, bye then :D
+ sonne|work	HeikoS, nice!
+ sonne|work	iglesiasg: so do the voting then!
+@iglesiasg	sonne|work, I am just waiting for Heiko's answer
+ sonne|work	iglesiasg: I mean send this thing around - seems like you only have to write heiko and me are candidates for the vorstand
+@iglesiasg	although you can tell me about it too
+@iglesiasg	I am not sure whether I should include besser82 already in the votation or not
+ sonne|work	iglesiasg: did you read what he just said ~1hr ago?
+ sonne|work	iglesiasg: sure do it
+@iglesiasg	yep
+@iglesiasg	ok, then I am preparing it pretty soon!
+@iglesiasg	sonne|work, by this afternoon the mails are sent around already
+ sonne|work	iglesiasg: thx
+ besser82	sonne|work: I still didn't get a copy of the satzung to sign nor an adress to send it back to :(
+ sonne|work	besser82: I can send you the thing
+ besser82	sonne|work: That would be great  :D
+ besser82	sonne|work: Seems like nobody read my reply on Fernando's email two days ago  :(
+ sonne|work	besser82: about what?
+@iglesiasg	besser82, I did ;) You are not alone :P
+ besser82	sonne|work: It was about SHOGUN foundation - it starts
+ besser82	sonne|work: and HeikoS wrote I just need to sign the satzung && snail-mail it to you  :)
+ sonne|work	besser82: I only read the one about you sending it to me signed
+ sonne|work	yeah I read that
+ sonne|work	but since the satzung was not ready
+ sonne|work	I didn't reply yet
+ besser82	sonne|work: Ahhh, that makes sense  ;)
+@iglesiasg	besser82, just forwarded you a prev mail in that thread including the Satzung
+@iglesiasg	cannot assure it is the very last version though
+ besser82	iglesiasg: +1  Thanks!
+@iglesiasg	welcome
+ besser82	sonne|work: So i got the satzung in revision from 03.11. now. Is that the recent thing?
+ sonne|work	besser82: heiko would knoq
+ sonne|work	know
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- Saurabh7 [~Saurabh7@115.248.130.148] has quit [Ping timeout: 245 seconds]
+@iglesiasg	besser82, all right. I just talked to Heiko
+@iglesiasg	besser82, it seems that the version I sent you is the latest
+ besser82	iglesiasg: Thx for the info!  :)
+ besser82	iglesiasg: So I can sign && snail-mail to S?ren  :D
+@iglesiasg	haha yeah
+@iglesiasg	snail-mail, that's funny :D
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Fernando Iglesias :develop * fa06b44 / doc/ipython-notebooks/metric/LMNN.ipynb: https://github.com/shogun-toolbox/shogun/commit/fa06b448352f93629b36469d9fc0d1a95d8d16a7
+ shogun-notifier-	shogun: Remove unused Python statement in metric learning notebook
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 2dc9383 / doc/ipython-notebooks/metric/LMNN.ipynb: https://github.com/shogun-toolbox/shogun/commit/2dc93839542934b255237ef49fb01753b3d0fcb1
+ shogun-notifier-	shogun: Merge pull request #1751 from iglesias/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Remove unused Python statement in metric learning notebook
+-!- parijat [b495342a@gateway/web/freenode/ip.180.149.52.42] has joined #shogun
+@iglesiasg	besser82, btw, do you know of any problem with Shogun, swig and Fedora?
+ shogun-buildbot	build #2449 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2449  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+@iglesiasg	mmm
+@iglesiasg	what is it with the buildbot timing out
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:a0fe:60b8:7a0d:832c] has quit [Quit: Ex-Chat]
+ shogun-buildbot	build #2450 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2450
+ shogun-buildbot	build #1935 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1935  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- parijat [b495342a@gateway/web/freenode/ip.180.149.52.42] has quit [Quit: Page closed]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ shogun-buildbot	build #2011 of deb3 - modular_interfaces is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2011  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- new_lido [~walid@193.227.20.2] has quit [Ping timeout: 272 seconds]
+@iglesiasg	all right, survey shipped
+ besser82	iglesiasg: there might be some problems with swig when building the R and C# plugins
+-!- sonne|osx [~sonne@89.204.137.114] has joined #shogun
+ besser82	iglesiasg: everything else works for me on FC19 - FC21  :)
+ besser82	iglesiasg: and testsuite && memtests PASS!
+ besser82	iglesiasg: Do have any error msg to paste?
+ sonne|osx	wtf
+ sonne|osx	why is python_modular crashing
+@iglesiasg	besser82, not really
+@iglesiasg	besser82, this guy in the mailing list found some problems using python modular with SWIG directors in Fedora 17
+ sonne|osx	iglesiasg: I don't think this is fedora related ...
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 752b3cf / src/interfaces/modular/Machine.i,src/shogun/distance/DirectorDistance.h: https://github.com/shogun-toolbox/shogun/commit/752b3cf821cd14e9e210928c5d33bf51771920a8
+ shogun-notifier-	shogun: drop get_*real* from director distance to fix compile error
+@iglesiasg	sonne|osx, besser82, survey received?
+ sonne|osx	iglesiasg: no
+@iglesiasg	shit
+ sonne|osx	iglesiasg: or did you mean the old email from a few days ago?
+@iglesiasg	nope
+@iglesiasg	I meant the old one
+ sonne|osx	iglesiasg: or the one from today where you write that I should have received some?
+@iglesiasg	sonne|osx, sonne@debian.org??
+ sonne|osx	yeah the old one I received
+ sonne|osx	iglesiasg: all addr's work :D
+@iglesiasg	hehe
+@iglesiasg	I just used the ones Heiko had used in his mail
+ sonne|osx	lisitsyn: http://www.youtube.com/watch?v=4pk6BNXXCHU
+@iglesiasg	all right guys, see you later
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+ sonne|osx	iglesiasg so the [ADoodle.org] TEST: Shogun foundation managers ?
+-!- sonne|osx [~sonne@89.204.137.114] has quit [Quit: sonne|osx]
+ shogun-buildbot	build #1936 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1936
+-!- zxtx [~zv@c-98-223-198-47.hsd1.in.comcast.net] has quit [Ping timeout: 246 seconds]
+ besser82	iglesiasg: survey recieved && completed  :)   Fedora 17 is fully EOL, he should update to F18+ and try again; will build && work  :)
+ shogun-buildbot	build #2012 of deb3 - modular_interfaces is complete: Failure [failed test python modular test ruby modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2012  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- zxtx [~zv@129-79-241-148.dhcp-bl.indiana.edu] has joined #shogun
+@sonney2k	iglesiasg - survey received!
+-!- new_lido [~walid@41.218.174.44] has joined #shogun
+@wiking	do we need like 50% votes? as then we are ready :P
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- HeikoS [~heiko@97e0a10b.skybroadband.com] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has quit [Quit: freedom, friends, features, first ---> fedoraproject.org]
+ lisitsyn	85%
+ lisitsyn	:) wiking
+@wiking	Have voted  14   100%
+--- Log closed Thu Nov 07 00:00:14 2013

@@ -1,0 +1,1561 @@
+--- Log opened Mon May 07 00:00:37 2012
+-!- blackburn [~qdrgsm@83.234.54.222] has quit [Quit: Leaving.]
+-!- gsomix [~gsomix@188.168.4.126] has quit [Ping timeout: 252 seconds]
+-!- vikram360 [~vikram360@117.192.165.53] has quit [Ping timeout: 272 seconds]
+-!- vikram360 [~vikram360@117.192.171.225] has joined #shogun
+-!- vikram360 [~vikram360@117.192.171.225] has quit [Ping timeout: 276 seconds]
+-!- vikram360 [~vikram360@117.192.167.45] has joined #shogun
+-!- vikram360 [~vikram360@117.192.167.45] has quit [Ping timeout: 252 seconds]
+-!- vikram360 [~vikram360@117.192.181.205] has joined #shogun
+-!- vikram360 [~vikram360@117.192.181.205] has quit [Ping timeout: 272 seconds]
+-!- av3ngr [~av3ngr@106.70.204.200] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- blackburn [~qdrgsm@83.234.54.222] has joined #shogun
+@sonney2k	blackburn, did you make progress on mc?
+ blackburn	sonney2k: no - looks crazy..
+ blackburn	it should be subset thing..
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+@sonney2k	blackburn, yeah I think so too
+@sonney2k	it is really hard to trace for me too
+@sonney2k	I guess heiko could do that much better...
+ CIA-113	shogun: Soeren Sonnenburg master * re6ca6cf / examples/undocumented/libshogun/library_indirect_object.cpp : fix memory leak in example - http://git.io/9JGvZQ
+ CIA-113	shogun: Soeren Sonnenburg master * r3141ae8 / examples/undocumented/libshogun/Makefile : add more heavy valgrind check options - http://git.io/2XwnFw
+@sonney2k	blackburn, maybe you have a look at converter_stochasticproximityembedding
+@sonney2k	it has a mem leak
+@sonney2k	should be easy to trace
+@sonney2k	got to leave train now
+ blackburn	ok
+-!- vikram360 [~vikram360@117.192.174.33] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+ wiking	hey
+ sonne|work	wiking: ho
+ wiking	sorry i couldn't help until now, but the weekend actually i took off :P
+ sonne|work	wiking: well we kept some tough ones only for you :D
+ wiking	great :)
+ blackburn	btw we have holidays here
+ blackburn	:D
+ blackburn	up to 9th
+ wiking	i've just fetched the latest shogun and building just now
+ wiking	yeye it's been built
+ sonne|work	wiking: install and go to ../examples/undocumented/libshogun
+ sonne|work	then run make valgrind-check
+ sonne|work	or check-valgrind :)
+ wiking	ok
+ sonne|work	all the ones that still have errors > 1 need inspection
+ blackburn	sonne|work: not trivial in spe :/ no idea what is wrong yet
+-!- uricamic [~uricamic@2001:718:2:1634:f2de:f1ff:fecf:a6a5] has joined #shogun
+ sonne|work	blackburn: hmmhh it looked easy
+ sonne|work	but I cannot look at it before this evening
+ blackburn	what is wrong for sure is delete instead of free
+ sonne|work	hmm not so sure about it
+ sonne|work	but  I have some work now
+ blackburn	no delete[] after calloc is wrong
+ blackburn	ok
+ sonne|work	uhh
+ sonne|work	we should never use delete[]
+ sonne|work	*never* ever
+ blackburn	yeah
+ wiking	oookeeey it's building
+ wiking	and actually now valgrinding
+ wiking	heheh ok i'll put the output to pastebin
+ wiking	so that we know where are still errors
+ wiking	lol yeah mc linear machine is full with leaks
+ sonne|work	yeah that is our fav
+ wiking	yeah i can see why ;\0
+ wiking	:>
+ wiking	put this in the topic please: http://pastebin.com/uF4pv3vP
+ blackburn	sonne|work: fixed
+ CIA-113	shogun: Sergey Lisitsyn master * rb66f1ac / src/shogun/converter/StochasticProximityEmbedding.cpp : Fixed memleak in SPE - http://git.io/XAlFXg
+ blackburn	wiking: could you please paste the output of valgrind ./converter_isomap?
+ blackburn	I have no errors there..
+ wiking	blackburn: just a sec
+ wiking	blackburn: http://pastebin.com/cWW3fVVe
+ blackburn	ehhh
+ blackburn	wtf
+ blackburn	wiking: why does it use some ImageLoader??
+ wiking	you ask me?
+ wiking	i've just ran the command u asked me to do
+ blackburn	wiking: what is os you are using?
+ wiking	psx
+ wiking	*osx
+ blackburn	oh..
+ wiking	but this is your real leak: =81281== 24 bytes in 1 blocks are definitely lost in loss record 2 of 10
+ blackburn	wiking: it is os specific I guess :)
+ blackburn	yes
+ blackburn	the problem is that it gives no line
+ blackburn	my valgrind gives :P
+ blackburn	hehe
+ blackburn	wiking: could you please add --leak-check=full option?
+ wiking	it was with that
+ blackburn	damn :(
+ blackburn	ahh
+ blackburn	wiking: you have no arpack - that's why you see it
+ CIA-113	shogun: Sergey Lisitsyn master * r8539b0f / src/shogun/converter/MultidimensionalScaling.cpp : Fixed memleak in mds - http://git.io/9iAbkw
+ blackburn	wiking: could you please try latest?
+-!- av3ngr [~av3ngr@106.70.204.200] has quit [Quit: That's all folks!]
+ wiking	fyi: [ERROR] KernelMulticlassMachine: No left hand side specified
+ blackburn	wiking: which example?
+ wiking	mkl
+ wiking	./classifier_mklmulticlass
+ blackburn	aham!
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ sonne|work	blackburn: hmm
+ sonne|work	did that ever work?
+ blackburn	sonne|work: mkl?
+ blackburn	should be yeah
+ sonne|work	is that a subset thing again? the  error it doesn't really make sense to me
+ sonne|work	I meankernels should still be there.
+ blackburn	sonne|work: can be
+ blackburn	I don't know whether multiclass machines
+ blackburn	do handle custom kernels in a proper way
+ blackburn	and combined too
+ blackburn	ah right
+ blackburn	kernel multiclass machine won't work at all..
+ blackburn	however..
+ blackburn	sonne|work: does alex have broken '_' key?
+ blackburn	unreadable methods
+-!- eric___ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric___	hi all
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric_	hi
+-!- eric___ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Ping timeout: 245 seconds]
+ eric_	allo ?
+ blackburn	eric_: hey
+ blackburn	sonne|work: do you know gcc has __PRETTY_FUNCTION__ macros?
+ sonne|work	what for?
+ sonne|work	no
+ blackburn	sonne|work: outputs name of function
+ blackburn	I think it worths to add it to SGIO
+ blackburn	to make debug easier
+ sonne|work	feel free
+ eric_	sonne|work: do you know if there is some advancement in code for multiclass crossvalidation ? Is there a repository where I can find smthg to improve/debug ?
+ sonne|work	blackburn: actually
+ sonne|work	http://gcc.gnu.org/onlinedocs/gcc/Function-Names.html
+ sonne|work	__func__ seems to be a C99 compat way
+ sonne|work	ok we are using C++ but hey maybe some c++ compilers support it nevertheless
+ blackburn	sonne|work: hehe I'd rather enable it only for GCC and C++
+ blackburn	the only men need it is we
+ sonne|work	eric_: due to current transition things are broken
+ wiking	eric_: couldn't done anything about it yet sorry
+ eric_	sonne|work, wiking: ok thx. the best way to follow advancement of this subject is to come here and ask again ?
+ wiking	eric_: well check the commit logs
+ wiking	:)
+ eric_	wiking: official github ?
+ wiking	eric_: i'm just testing now the multi class crossval with a libsvm dataset example
+ wiking	and i'll see what are the actual errors
+ wiking	eric_: yep
+ blackburn	eric_: we don't have any other dev line
+ eric_	wiking: ok thanks, It would be great to test it too as soon as you thing it is commitable. good dev.
+ wiking	how do i read the labels with AsciiFile?
+ eric_	wiking: I read data (features, labels) with cv import/export yml files. It handles stl multimap. Then I "push_back" in SG matrix.
+ wiking	eric_: heheh yeah but i rather use shogun api
+ eric_	wiking: sure
+ eric_	wiking: and load method with CFile* arg doesnt work ?
+ wiking	eric_: the problem is that i can do get_matrix with ascii file
+ wiking	but i suppose that'll have only the features in the matrix
+ wiking	not the labels
+ wiking	but maybe i'm mistaken and the first column is actually is going to be the labelling
+ wiking	but currently i still have a problem with calling get_matrix :D
+ blackburn	wiking: examples/libshogun/classifier_multiclasslinearmachine.cpp
+ eric_	is there smthg like labels SGSerializable* Labels [ version_parameter int32 1 labels SGVector<float64> 20 ({8}{8}{5}{5}{4}{4}{9}{9}{1}{1}{7}{7}{6}{6}{3}{3}{2}{2}{0}{0}) subset SGSerializable* null [] ] in your ascii file ?
+ wiking	blackburn: but here the labeling and the features are in two separate file
+ wiking	blackburn: i thought we have an api for libsvm/svmlight file
+ blackburn	no idea :D
+ wiking	heheh well yeah
+ sonne|work	yes we have or at least had at some point
+-!- vikram360 [~vikram360@117.192.174.33] has quit [Ping timeout: 276 seconds]
+ blackburn	I see only header
+ sonne|work	I guess that method just got erased
+ sonne|work	removed I mean
+ wiking	sonney2k blackburn  yeah
+ sonne|work	llooks like we should keep it :)
+-!- vikram360 [~vikram360@117.192.171.228] has joined #shogun
+ wiking	i guess we should put it back or reimplement it
+ wiking	:)
+ blackburn	I don't think we should contain a lot of IO
+ wiking	well just for being able to use dataset straight from libsvm/svmlight
+ wiking	afaik it should be supported
+ wiking	moreover we say on shogun's webpage that we support that format
+ blackburn	wiking: :D
+ wiking	heheh ok CContingencyTableEvaluation works only with binary labelling
+ wiking	ok now i'm getting there
+ wiking	store_model_features is not implemented for MulticlassLibSVM
+ wiking	eric_: ok so i think i know now what's the problem
+ wiking	eric_: what svm are u using
+ blackburn	wiking: how would it work with multiclass? ;)
+ wiking	blackburn: yeah well realized... anyways now there's another problem
+ wiking	with neither having data_locking support nor store_model_features...
+ wiking	in none of the multi class machines
+ wiking	so this way there's no way one can do a xval
+ blackburn	wiking: hmm feel free to implement ;)
+ wiking	now at least i know why :)
+ blackburn	looks not so difficult
+ wiking	I'm just wondering which one could be done faster
+ blackburn	sonne|work: about openmp - I want to check (or somebody to check) if it is really slower
+ blackburn	if not I believe we should use openmp - much faster to develop
+ blackburn	wiking: do you have openmp experience?
+ wiking	yeah some
+ blackburn	wiking: any performance issues?
+ wiking	it really depends how u use it
+ blackburn	yeah I know
+ wiking	so when the first time i've used it it wasn't so good
+ blackburn	but still - some sources claim it is even faster than openmp
+ wiking	but then again if u use the threads in a good way
+ wiking	then it is significant
+ wiking	i mean the performance difference
+ blackburn	errr
+ blackburn	than pthreads
+ wiking	yep
+ blackburn	I believe it can be possible but need to check in shogun context
+-!- pluskid [~pluskid@li400-235.members.linode.com] has joined #shogun
+ blackburn	I should force myself to continue preparing for exam
+ pluskid	sonney2k, sonne|work  around?
+ blackburn	wiking: it will really reduce LoC
+ pluskid	I'm skimming through the git log, and find a place that was changed back and forth by you and me
+ pluskid	sonney2k: in MulticlassOneVsOneStrategy.cpp, train_prepare_next
+ pluskid	note the returning SGVector (subset) has a different length from the original created one. If you prefer this solution, I think at least we should re-assign the length of the "subset" object to "tot" before returning
+ blackburn	pluskid: sorry I have to continue my preparations - but could you please test if with your changes multiclasslinearmachine example do not fail?
+ pluskid	blackburn: ok
+ sonne|work	pluskid: yes that was correct
+ pluskid	sonne|work: so you'll fix it?
+ sonne|work	pluskid: no it is correct the way it was before your fix
+ pluskid	hmm, let me think...
+ eric_	wiking: CLibSVMMultiClass
+ sonne|work	tot is the total length in the end
+ sonne|work	pluskid: please think loud ... there is always the option that I made a mistake too
+ sonne|work	s/too//
+ pluskid	sonne|work: I don't think tot will be the total length in the end
+ sonne|work	pluskid: ok why not? it is inc' in the if and the else branch
+ sonne|work	total length times
+ pluskid	if ... else if
+ sonne|work	ahh
+ blackburn	what are you talking about?
+ blackburn	I can't stand
+ blackburn	mc machine?
+ sonne|work	blackburn: prepare your exam!
+ pluskid	in multiclass, OvO only a pair of class is trained one time, so some examples are skipped, so tot will be less than total
+ sonne|work	pluskid: I will do subset.resize(tot) then
+ blackburn	tot is number of vectors of only 2 classes
+ pluskid	sonne|work: yes, that's also good
+ sonne|work	pluskid: that explains the crashers right?
+ pluskid	which crasher?
+ CIA-113	shogun: Soeren Sonnenburg master * r090a330 / src/shogun/multiclass/MulticlassOneVsOneStrategy.cpp : resize SGVector to match total size - http://git.io/n2izQg
+ sonne|work	in linearmulticlassmachine?
+ sonne|work	and other stuff
+ pluskid	in the latest code?
+ pluskid	I fixed several yesterday
+ pluskid	just back from the hospital today, I'll check if there's still some crashes in mc
+ sonne|work	can someone try if make check-valgrind works now in examples/undocumented/libshogun?
+ blackburn	I can :D
+ sonne|work	pluskid: uhh? badly sick or 'just' cold?
+ sonne|work	blackburn: youuu...!
+ blackburn	I can do everything but not to prepare
+ pluskid	sonne|work: maybe badly cold...
+ blackburn	hmm may be I should wash floor here
+ pluskid	much better after 4 days of intravenous curing
+ wiking	eric_: ok so i'm just doing the fix ...
+ sonne|work	yeah not good
+ blackburn	sonne|work: not compileable
+ blackburn	sg vector has no resize
+ eric_	wiking: great
+ sonne|work	blackburn: just try it
+ sonne|work	^ openmp I mean
+ sonne|work	what?
+ blackburn	sonne|work: I will
+ sonne|work	ahh
+ sonne|work	it is called resize_vector
+ blackburn	aham
+ blackburn	here it comes
+ sonne|work	maybe we should shorten these function names
+ CIA-113	shogun: Sergey Lisitsyn master * r545afa3 / src/shogun/multiclass/MulticlassOneVsOneStrategy.cpp : Fixed wrong method call - http://git.io/1ea3CA
+ sonne|work	pluskid: then get well soon!
+ CIA-113	shogun: Sergey Lisitsyn master * r3bae7fc / (2 files): Checks for multiclass svms - http://git.io/8TMyEw
+ pluskid	sonne|work: thanks, that's also my hope
+ blackburn	I have prepared 3 of 35 questions for my exam :D
+ pluskid	blackburn: then continue
+ blackburn	quite easy and this makes me procrastinate even more
+ pluskid	what course btw?
+ shogun-buildbot	build #852 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/852  blamelist: sonne@debian.org
+ blackburn	pluskid: digital signal processing
+ pluskid	oops
+ blackburn	qdrgsm@qdrgsm-laptop:~/Shogun/shogun/examples/undocumented/libshogun$ python classifier_multiclasslinearmachine.cpp
+ blackburn	  File "classifier_multiclasslinearmachine.cpp", line 13
+ blackburn	    using namespace shogun;
+ blackburn	                  ^
+ blackburn	SyntaxError: invalid syntax
+ blackburn	:D :D :D
+ CIA-113	shogun: Sergey Lisitsyn master * rcbb46be / examples/undocumented/libshogun/classifier_multiclasslinearmachine.cpp : Fixed multiclass linearmachine example - http://git.io/yJpibg
+ blackburn	sonne|work: YAY
+ blackburn	all ok??
+ sonne|work	did you check?
+ sonne|work	well we will see what the buildbot says...
+ pluskid	how to only run python_modular check-examples?
+ shogun-buildbot	build #853 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/853
+ blackburn	sonne|work: structure dynprog crashes
+ blackburn	terribly with double free
+ blackburn	pluskid: random ECOC is a little unstable
+ pluskid	blackburn: producing SG_ERROR?
+ blackburn	complains he failed to make a codebook within given number of iterations
+ sonne|work	blackburn: the dynprog stuff should be easy to fix
+ pluskid	blackburn: yes, I can disable the SG_ERROR though
+ blackburn	pluskid: will it work then?
+ pluskid	blackburn: no
+ blackburn	:D
+ blackburn	pluskid: can you explain why does it fail?
+ pluskid	I don't get any good idea here
+ pluskid	it produce random coding
+ pluskid	codebook
+ blackburn	huh that's clear from name ;)
+ pluskid	with sparsity, so zero is also produced
+ blackburn	do you ignore zeroes?
+ pluskid	consider a row of all-zero
+ pluskid	or only zero and +1; or only zero and -1
+ blackburn	pluskid: does it happen sometimes?
+ pluskid	if it happens in a single row, the whole codebook should be discarded
+ pluskid	or *column*, in the usual sense of how the ECOC codebook is put
+ blackburn	pluskid: can we launch something crazy here to resemble everything?
+ blackburn	what is distribution?
+ pluskid	rand(0, 1)
+ pluskid	0.3 zero, 0.35 +1 0.35 -1
+ pluskid	uniform distrib
+ pluskid	maybe our num class is small here
+ pluskid	only 4 classes, random sample 4 numbers in {0,-1,+1}
+ blackburn	I think if some shuffle changes anything here
+ pluskid	it is very likely to get 4 numbers without +1 or -1
+ blackburn	yeah
+ pluskid	my previous solution is to continue iteration until a good codebook is found
+ blackburn	yeah it converges I believe
+ pluskid	but it runs tooooooooooooo long sometimes
+ pluskid	so I do this and let the user know...
+ pluskid	I don't know which is better
+ pluskid	currently we've already using 10000 iterations
+ sonne|work	pluskid: why not sample from good codebooks
+ pluskid	the suggested num-iter in the paper is ... let me find
+ sonne|work	i.e. generate all valid ones
+ sonne|work	and then permute
+ blackburn	sonne|work: ??
+ blackburn	and where to store?
+ pluskid	sonne|work: impossible i think
+ pluskid	exponential
+ blackburn	yeah
+ blackburn	would be shogun-codebooks repo
+ blackburn	:D
+ blackburn	pluskid: may be some reshuffling can help there?
+ sonne|work	you don't have to store them all in memory
+ sonne|work	I mean you want only a certain number many
+ pluskid	blackburn: what do you mean by that?
+ sonne|work	pluskid: you generate only valid codebooks
+ blackburn	pluskid: hmm no any heuristics would break probabilities
+ blackburn	pluskid: can we set 0 probability to 0 in example?
+ pluskid	sonne|work: how to generate only valid codebooks? I'm currently generating and discarding invalid codebooks
+ pluskid	blackburn: that would then be the RandomDenseECOC
+ blackburn	:D
+ blackburn	0.01?
+ blackburn	:D
+ blackburn	just to make example less random
+ blackburn	however still probability to fail
+ blackburn	I don't like any probabilities here
+ sonne|work	pluskid: how do you check a codebook is valid?
+ pluskid	sonne|work: both +1 and -1 occur
+ blackburn	sonne|work: contains +1 and -1
+ pluskid	hmm, suggested max-iter in the paper is also 10,000
+ pluskid	maybe we can simple remove the random sparse ecoc from example
+ pluskid	since it is virtually the same as random dense, except the prob of 0
+ blackburn	pluskid: or give working codebook to it?
+ sonne|work	so each example get +1 or -1 assigned or what?
+ blackburn	sonne|work: each element of codebook
+ sonne|work	blackburn: ?
+ blackburn	sonne|work: it contains rows
+ blackburn	like 0 1 0 1 - 1 0 -1
+ blackburn	for each class
+ blackburn	describing how group of classes interact
+ pluskid	haha, blackburn totally forgot about his exam
+ blackburn	:D
+ blackburn	pluskid: am I right?
+ pluskid	yes
+ sonne|work	blackburn: what is the shape of a codebook?
+ pluskid	<blackburn> pluskid: or give working codebook to it?
+ sonne|work	as in #rows, #cols
+ blackburn	len of code
+ blackburn	and num of classes
+ pluskid	yes
+ pluskid	<blackburn> pluskid: or give working codebook to it?
+ sonne|work	len of code can be arbitrary?
+ pluskid	^^^^ what does this mean?
+ blackburn	sonne|work: yes
+ blackburn	pluskid: can we set given codebook?
+ sonne|work	blackburn: and what do 0 -1 1 stand for?
+ blackburn	sonne|work: hmm for example 1 -1 -1 -1 is OvR
+ sonne|work	not used, neg class, pos class?
+ pluskid	blackburn: yes, but that would not be the RandomSparseECOCEncoder any more
+ blackburn	yes
+ blackburn	pluskid: I mean some generated by random sparse ecoc encoder codebook?
+ blackburn	sonne|work: for 3 classes OvR is
+ blackburn	1 -1 -1
+ blackburn	-1 1 -1
+ blackburn	-1 -1 1
+ sonne|work	and the problem is that when you sample you sometimes don't have a +1 and -1 in there right?
+ blackburn	sonne|work: exactly
+ blackburn	only zeros
+ blackburn	or only zeros and 1
+ blackburn	or anything like that
+ pluskid	blackburn: I mean we have a ECOCStrategy which can use any valid codebook, what's failing here is not our Strategy but an Encoder that failed to produce a valid codebook
+ sonne|work	so why not select 1 position for +1 and one for -1 and then do the standard random sampling you do?
+ sonne|work	the position can be selected by randomly shuffling
+ blackburn	sonne|work: breaks probabilities (probably :D)
+ sonne|work	why? I mean if you drop invalid codings later anyways?
+ blackburn	sonne|work: valid encodings are still pure random
+ sonne|work	no
+ sonne|work	they have a +1 and a -1
+ blackburn	sonne|work: does probability of containing +1 and -1 changes
+ sonne|work	so if you choose a position for +1 and -1 randomly and the rest in the same way it is random in the same way
+ blackburn	if you set it unconditionally?
+ sonne|work	blackburn: well pluskid can veryify
+ blackburn	sonne|work: I am unsure but tend you are right
+ sonne|work	just do both approaches and plot the distribution :)
+ pluskid	I'm not sure, too
+ blackburn	kind of base stuff we can't experiment here :D
+ sonne|work	blackburn: no but we can verify if what we do is correct
+ blackburn	I mean to do it w/o any experimental support
+ sonne|work	why that? this 'experiment' takes a few minutes only anyways
+ blackburn	sonne|work: I mean we can do it w/o any checking
+ blackburn	can't
+ blackburn	:E
+ blackburn	damn
+ sonne|work	yeah
+ sonne|work	agreed
+ blackburn	sun is shining the weather is sweet
+ pluskid	ok, I'll check that
+ blackburn	how can I prepare to my exam damn :D
+ sonne|work	blackburn: throw your computer out of the window, close the curtain and let someone lock you in
+ blackburn	:D
+-!- vikram360 [~vikram360@117.192.171.228] has quit [Ping timeout: 256 seconds]
+-!- vikram360 [~vikram360@117.216.144.237] has joined #shogun
+ blackburn	hmm vapnik textbook seem to be so interesting when you have to learn other stuff
+ blackburn	sonne|work: have you ever tried to read vapnik stuff in russian? :D
+ sonne|work	pluskid: I think we cannot help blackburn
+ blackburn	:D :D
+ blackburn	okay back to dsp
+ sonne|work	 /kick blackburn
+ blackburn	:D
+ pluskid	haha
+ pluskid	don't worry, he said it is easy
+ blackburn	stupid easy sometimes
+ sonne|work	w/ numpy :)
+ pluskid	blackburn, sonne|work : the prob does changes
+ pluskid	https://gist.github.com/2627521
+ pluskid	but I think this solution can be a good idea, though
+ blackburn	analytics? ;)
+ pluskid	blackburn: yes, I think this is better than code experiment :D
+ pluskid	bad thing is that we can no longer share code between RandomSparse and RandomDense :p
+ blackburn	not always :)
+ blackburn	I like fourier and other integral transforms sooo much
+ pluskid	really?
+ blackburn	yeah
+ blackburn	and spectral things too
+ blackburn	I am not religious but I want to keep some underlying concept for some reason :D
+ blackburn	pluskid: I've felt in love with spectral stuff when I was young ^W working on dimensionality reduction :D
+ blackburn	it is really cool to see how swissroll unroll using some alignment matrix
+ pluskid	haha, true
+ pluskid	do you love Riemannian Geometry?
+ pluskid	btw: go back to your exam, please~~
+ blackburn	pluskid: I wish I understood anything from riemannian geometry
+ blackburn	hehe ok
+ blackburn	pluskid: now I am really curious to try mellin transform
+ pluskid	never heard about that
+ blackburn	it is scale invariant
+ pluskid	it is for what?
+ blackburn	just like fourier, laplace, etc
+ blackburn	but scale invariant :)
+ blackburn	shit
+ blackburn	I want to implement it right now and try
+ blackburn	:D
+ pluskid	haha
+ pluskid	wait a day
+ blackburn	yeah!
+ blackburn	I can :D
+ pluskid	brb
+-!- vikram360 [~vikram360@117.216.144.237] has quit [Ping timeout: 248 seconds]
+ blackburn	sonne|work: 8/35 :P
+ blackburn	time to shogun! :D joke
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 260 seconds]
+ blackburn	pluskid: but you said it changes probabilites?
+ blackburn	ah
+ blackburn	I see description in header
+ pluskid	blackburn: yeah, I think this is an acceptable solution
+ blackburn	agree
+ CIA-113	shogun: Chiyuan Zhang master * r32a078c / (4 files): A new method for ECOC Random Sparse to avoid invalid code - http://git.io/DBs7hg
+ CIA-113	shogun: Chiyuan Zhang master * r01dff0d / src/shogun/multiclass/ecoc/ECOCRandomSparseEncoder.h : get_default_code_length no longer needed to be virtual - http://git.io/6o6dmg
+ CIA-113	shogun: Sergey Lisitsyn master * ra6dd589 / (4 files): Merge branch 'ecoc-random-sparse' of https://github.com/pluskid/shogun - http://git.io/Q8bJDQ
+ blackburn	pluskid: is it possible to codebook OvO?
+ pluskid	blackburn: yes, there's already one
+ pluskid	ECOCOVOEncoder
+ blackburn	yeah I missed it somehow
+ blackburn	pluskid: then I do not understand it at some point
+ pluskid	however, they are slightly different from traditional OvO & OvR, because of decoding
+ pluskid	i.e. how to get the final classification result from a bunch of binary results
+ blackburn	pluskid: is there any differencies in ovr and ovo encoding?
+ pluskid	blackburn: ovr vs. ovo ?
+ blackburn	yes
+ pluskid	blackburn: yes, ovr is dense, ovo is sparse :D
+ blackburn	oh right
+ blackburn	I see now
+ blackburn	OvO has N(N-1)/2 length
+ pluskid	yeah
+ blackburn	pluskid: I've got some crasher with random ecoc hmm
+ pluskid	blackburn: hmm, how to produce it?
+ blackburn	let me try with valgrind (it is pretty slow)
+ pluskid	ok
+ blackburn	uh wow
+ blackburn	pluskid: not ecoc issue probably..
+ pluskid	hmm
+ blackburn	some crazy things out there :D
+ pluskid	what's happening?
+ blackburn	==8764== Source and destination overlap in memcpy(0x15ca7040, 0x15ca7040, 5944320)
+ blackburn	==8764==    at 0x4C2A1C4: memcpy (mc_replace_strmem.c:635)
+ blackburn	==8764==    by 0x11B0FB4D: get_copy(void*, unsigned long) (modshogun_wrap.cxx:5169)
+ pluskid	what's modshogun_wrap.cxx:5169 ? SWIG would be hard to debug...
+ blackburn	pluskid: I guess something wrong with my script
+ blackburn	this can't be true :D
+ pluskid	haha
+-!- karlnapf [~heiko@host86-182-166-18.range86-182.btcentralplus.com] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+@sonney2k	Re
+@sonney2k	blackburn, can you check how much they overlap
+@sonney2k	actually they are the same
+@sonney2k	memcpy(0x15ca7040, 0x15ca7040, 5944320)
+@sonney2k	blackburn, is len of  5944320 reasonable?
+ blackburn	sonney2k: no idea :D
+@sonney2k	6MB?
+ blackburn	yes should be something like that
+@sonney2k	blackburn, how big is the stuff you copy?
+@sonney2k	ok
+@sonney2k	then it makes sense
+@sonney2k	pluskid, just reading your gist
+ blackburn	I can't stop valgrind with that example :D
+@sonney2k	don't understand it yet but I guess you are saying things are differnent
+ pluskid	sonney2k: yes, different if I'm correct, but acceptable
+ pluskid	I mean acceptable if we explicitly document it
+ pluskid	and since the user generally never care about the probabilities
+@sonney2k	pluskid, I don't really udnerstand what you wrote
+ pluskid	sonney2k: I'm calculating the prob of getting 0, +1 and -1 for a position
+@sonney2k	ok so if uniformly sampling it is all 1/3
+@sonney2k	right?
+ pluskid	yes
+ pluskid	if we use our alternative method
+ pluskid	to get 0, first you should not be randomly selected as the two positions
+* sonney2k watches valgrind - yay the examples work again :)
+ pluskid	the prob is C(2,N-1) / C(2,N)
+ pluskid	here N is num classes, assume it is 4
+@sonney2k	pluskid, ok
+@sonney2k	pluskid, actually the 1/3 is not correct since we remove cases where we don't have a -1 and +1 at least
+ pluskid	yes
+@sonney2k	I mean even in the uniform sampling case
+ pluskid	sonney2k: no
+ pluskid	sonney2k: we are rejecting the whole codebook, not single code position
+@sonney2k	pluskid, why? I thought we drop all cases
+@sonney2k	ahh
+@sonney2k	ok
+@sonney2k	but still
+@sonney2k	the whole codebook then needs modelling
+@sonney2k	basically concatenation of one code then
+@sonney2k	err to one code
+@sonney2k	and there will be more +1/-1s than usual in there
+ pluskid	that's true, we are not sampling from the space of all codebooks
+ pluskid	not uniform sampling from all codebooks
+@sonney2k	yeah
+@sonney2k	I fail to solve this analytically
+@sonney2k	have to leave train
+@sonney2k	pluskid, thanks for the fix and cu hopefully tomorrow
+ pluskid	sonney2k: haha, cu
+ pluskid	time to sleep soon here
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+-!- pluskid [~pluskid@li400-235.members.linode.com] has quit [Quit: Leaving]
+-!- uricamic [~uricamic@2001:718:2:1634:f2de:f1ff:fecf:a6a5] has quit [Quit: Leaving.]
+ CIA-113	shogun: Heiko Strathmann master * r302bc24 / (2 files):
+ CIA-113	shogun: m_values variable is now split to array/length instead of SGVector due to messy
+ CIA-113	shogun: problems. Parameter registration removed - http://git.io/WlOeNw
+ CIA-113	shogun: Heiko Strathmann master * rcd00a95 / src/shogun/modelselection/ModelSelectionParameters.h : serialization is now forbidden - http://git.io/VQKUZg
+ CIA-113	shogun: Heiko Strathmann master * r8105d5f / (2 files):
+ CIA-113	shogun: Merge pull request #503 from karlnapf/master
+ CIA-113	shogun: get rid of SGVector<void/char> - http://git.io/VDh6YA
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+ n4nd0	yaay! back to normal life :)
+ blackburn	n4nd0: oh congrats
+ blackburn	how was your exam?
+ n4nd0	blackburn, I think it was ok, we'll see
+ blackburn	n4nd0: do you have results of other exams yet?
+ blackburn	I have last one on DSP
+ blackburn	tomorrow
+ n4nd0	not yet
+ n4nd0	I didn't even get the one I did two Thursdays ago yet
+ blackburn	I see
+ blackburn	n4nd0: so you are free to do some stuff?
+ n4nd0	yeah!
+ blackburn	n4nd0: you were talking about some umls?
+ n4nd0	yes, Nico suggested to prepare them
+ n4nd0	I saw he started some code sketch in gist as well
+ blackburn	I just tried to sketch some domain adaptation example
+ blackburn	:D
+ blackburn	can't enhance accuracy
+ blackburn	it is 1.0 :D
+ n4nd0	in gist you mean?
+ blackburn	no
+-!- gsomix [~gsomix@178.45.90.39] has joined #shogun
+ blackburn	??????????? ???????
+ karlnapf	I love the new SGVector system :)
+ gsomix	hi all
+ karlnapf	hi
+ blackburn	karlnapf: is there any bugs so far?
+ karlnapf	blackburn, dont know, I am currently another one
+ karlnapf	but the --enable-trace-mallocs still doesnt work
+ karlnapf	which would be an enormous help
+ blackburn	gsomix:
+ gsomix	in progress
+ karlnapf	I did not mean to stress anybody btw :)
+ blackburn	karlnapf: it is ok, RIGHT GSOMIX? :D
+ karlnapf	lol :D
+ gsomix	blackburn, yes, master.
+ blackburn	karlnapf: index_t in subsets is confusing for python :(
+ karlnapf	blackburn, what?
+ karlnapf	doesnt compile?
+ blackburn	karlnapf: subsets are SGVector<uint32_t>
+ blackburn	but in python default int is signed
+ blackburn	so you have to explicitly set type
+ karlnapf	where did I do the uint32_t
+ blackburn	actually I think we can handle this
+ blackburn	karlnapf: orrr
+ blackburn	ah
+ blackburn	karlnapf: sorry not u
+ karlnapf	kk :)
+ blackburn	but still doesn't fit
+ blackburn	karlnapf: hmm let me check default type
+ karlnapf	index_t = int32_t
+ blackburn	yes
+ karlnapf	i am using index_t everywhere
+ blackburn	karlnapf: yes that's ok
+ blackburn	karlnapf: ah! got it
+ blackburn	it seems swig does not generate while it is index_t
+ blackburn	and default int in python is 64
+ blackburn	:D
+ blackburn	I guess it can be solved with typemaps
+ karlnapf	mmh
+ gsomix	>> 0 Blocks are allocated:
+ gsomix	horray!
+ blackburn	sonney2k: have you seen? http://google-opensource.blogspot.com/2012/05/introducing-ceres-solver-nonlinear.html
+ blackburn	it is portable - callback classes
+-!- PhilTillet [~philippe@vir78-1-82-232-38-145.fbx.proxad.net] has joined #shogun
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Ping timeout: 276 seconds]
+ blackburn	karlnapf: need advice
+ karlnapf	blackburn, yes?
+ blackburn	what does low auROC and high accuracy mean?
+ karlnapf	ehm
+ karlnapf	auROC = area under ROC curve?
+ blackburn	yeah
+ blackburn	accuracy =  0.5
+ blackburn	auROC =  0.745575
+ blackburn	accuracy =  0.5175
+ blackburn	auROC =  0.371575
+ blackburn	any idea what I have lost there?
+ blackburn	accuracy increased but ROC felt down
+ karlnapf	which problem?
+ karlnapf	might have to do with symmetry of the problem
+ blackburn	no, dataset is well balanced
+ karlnapf	you can get a bad classifier while the ROC score is large
+ blackburn	200 vs 200
+ karlnapf	mmmh
+ blackburn	I am doing some experiments with domain adaptation
+ blackburn	first one is SVM trained on source domain
+ blackburn	applied to target domain
+ karlnapf	I usually dont use ROC because of all these caveats one might run into
+ karlnapf	let me think isnt there a case when you can have high accuracy but low roc?
+ blackburn	and second one is SVM trained on subset of target domain regularized against SVM trained on source domain
+ blackburn	hmmm
+ blackburn	it really depends on parameters..
+ blackburn	accuracy =  0.5
+ blackburn	auROC =  0.73045
+ blackburn	accuracy =  0.6575
+ blackburn	auROC =  0.788975
+ blackburn	much better now :D
+ karlnapf	what did you do?
+ blackburn	changed C
+ karlnapf	well
+ karlnapf	how is the ROC computed anyway?
+ blackburn	two C and two widths
+ blackburn	crazy
+ karlnapf	we dont have the signoid fitting for SVMs
+ karlnapf	what score is used?
+ blackburn	why do you need to have sigmoid fitting there?
+ karlnapf	ROC needs a non-binary classifier score
+ karlnapf	what is used here?
+ blackburn	outputs of svm
+ karlnapf	a i see
+ blackburn	FP/(FN+TN)
+ blackburn	TP/(FP+TP)
+ karlnapf	sorry then, if the classes are balanced I dont know where this should come from
+ blackburn	karlnapf: me too
+ blackburn	karlnapf: ah one more q
+ karlnapf	have you tried f1 measure?
+ blackburn	not yet
+ karlnapf	thats usually the most robust
+ blackburn	I just don't know how to fit values here
+ karlnapf	which ones?
+ blackburn	C, width
+ karlnapf	mmh you might use my mighty grid-search framework :)
+ blackburn	karlnapf: that's a crazy case here..
+ karlnapf	start with a coarse search (exponential 2^-5 to 2^10 or so)
+ karlnapf	find best pair and refine from there
+ blackburn	karlnapf: I have 4 parameters :D
+ karlnapf	oh
+ blackburn	C of source svm
+ karlnapf	well, you only told me about 2 :)
+ blackburn	width of source kernel
+ blackburn	C of target svm
+ blackburn	and no idea if width should be the same
+ karlnapf	and the domain is different?
+ blackburn	yes
+ karlnapf	then probably not the same
+ karlnapf	I would let that run over night
+ blackburn	karlnapf: I do not really want results but to grasp how does it change
+ blackburn	however slight improvement is here and I should be happy
+ karlnapf	with 4 parameter I would say one cannot really imagine that
+ blackburn	yeah 4d spaces are hard to grasp :D
+-!- vikram360 [~vikram360@117.216.144.237] has joined #shogun
+ blackburn	pff everything is so ill-posed
+ blackburn	karlnapf: it seems your supervisor is the expert in things like kernel mean matching, right?
+ blackburn	karlnapf: hahaha I should make it linear probably
+ blackburn	got 1.0 finally
+-!- PhilTillet [~philippe@vir78-1-82-232-38-145.fbx.proxad.net] has quit [Remote host closed the connection]
+ karlnapf	blackburn, congrats :)
+ blackburn	:D
+ blackburn	okay now I see it works more or less
+ karlnapf	blackburn, yes, arthur does a lot of kernel based statistical stuff
+ blackburn	karlnapf: is he overloaded with his work?
+ karlnapf	well scientists tend to be overloaded all the time :)
+ blackburn	I mean is there a chance I ask him for some advice?
+ karlnapf	he's quite busy, but you can probably send him a mail
+ karlnapf	whats the problem though?
+ blackburn	nothing just estimate for my future work
+ blackburn	karlnapf: KMM is useful for DA
+ blackburn	so if there is the expert like arthur I can ask him if I am stucked :D
+ karlnapf	lol i dont know both of these abreviations :)
+ blackburn	kernel mean matching
+ blackburn	domain adaptation
+ karlnapf	k
+ karlnapf	mmh
+ karlnapf	kernel mean matching is?
+ karlnapf	the MMD metric?
+ blackburn	karlnapf: no I don't think so
+ blackburn	karlnapf: it is a method to match test and train domains
+ karlnapf	mmh, I mean you can still ask :)
+ karlnapf	but I am unsure whether he has time to dig into that -- which is probably necessary
+ blackburn	heh ok
+ blackburn	http://dl.dropbox.com/u/10139213/share/0000_0_0_0_15_0_1.pgm
+ blackburn	http://dl.dropbox.com/u/10139213/share/0000_02176.pgm
+ blackburn	karlnapf: ^ that's how my domains look like
+ karlnapf	what is the overall image in this kind of stuff?
+ blackburn	karlnapf: what do you mean?
+ karlnapf	explain to me what you are doing?
+ karlnapf	 :)
+ blackburn	karlnapf: 3d image is source (train) domain
+ blackburn	real image is target (test) domain
+ blackburn	karlnapf: I do binary classification on that data
+ karlnapf	what are the classes?
+ blackburn	two different guys
+ gsomix	karlnapf, about trace-mallocs.
+ karlnapf	k, well nice stuff is that
+ karlnapf	gsomix, yes?
+ karlnapf	is it working :) ?
+ gsomix	karlnapf, I'm afraid, but it seems, that it works... again
+ gsomix	hehe =___=
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+ karlnapf	nice :)
+ gsomix	karlnapf, can you merge it?
+ karlnapf	yes let me check
+ gsomix	karlnapf, ok, just few minutes
+ blackburn	oh shit
+ blackburn	exam
+ blackburn	:D
+ n4nd0	hey guys, a question
+ blackburn	n4nd0: yes?
+ n4nd0	I think my background in optimization is rather low
+-!- cronor [~cronor@g225030209.adsl.alicedsl.de] has joined #shogun
+ n4nd0	it will probably be quite good for me to read about it
+ n4nd0	do you have any recommendation?
+ blackburn	aham!
+ n4nd0	I mean for example the different optimization problems that arise with SVMs
+ blackburn	yes
+ n4nd0	with the different formulations and the like
+ n4nd0	do you think it is a good idea to read about that from a more general point of view?
+ blackburn	n4nd0: ftp://cmp.felk.cvut.cz/pub/cmp/articles/franc/Franc-PhD05.pdf
+ n4nd0	let me see
+ blackburn	well formulations of binary svm are pretty similar
+ blackburn	they are not really changing
+ blackburn	except some crazy (like DA stuff) things
+ blackburn	formulations of multiclass svm are much more interesting I think :D
+ karlnapf	n4nd0
+ karlnapf	there is a very nice book about convex optimization
+ karlnapf	Stephen Boyd
+ karlnapf	Department of Electrical Engineering
+ karlnapf	Stanford University
+ karlnapf	Lieven Vandenberghe
+ karlnapf	Electrical Engineering Department
+ karlnapf	University of California, Los Angeles
+ karlnapf	I think its free to download
+ karlnapf	if not, I might have a digital copy floating around somewhere
+ blackburn	karlnapf: that 6** pages thing?
+ karlnapf	well not everything
+ karlnapf	I mean for understanding the SVM stuff
+ blackburn	:D
+ karlnapf	you basically need to understand only the Lagrangian stuff
+ blackburn	yeah it is pretty simple
+ blackburn	n4nd0: are you able to derive dual from primal?
+ karlnapf	but n4nd0, dont worry, this takes some time to get
+ blackburn	and do you know what is primal and dual?
+ n4nd0	blackburn, yes
+ blackburn	yes for both?
+ n4nd0	blackburn, yeah
+ karlnapf	I would start with optimizing quadratic forms, do newton, line search and Lagrangian stuff
+ karlnapf	then you already can do a lot
+ n4nd0	blackburn, right now it would probably take some minutes
+ n4nd0	blackburn, but that is something I learnt last year in a course
+ blackburn	n4nd0: SO is very similar to C-S multiclass
+ blackburn	let me write it down
+ n4nd0	what does C-S stand for?
+@sonney2k	crammer singer :)
+ blackburn	http://latex.codecogs.com/gif.latex?\min_{w}%20\sum_w%20\|w_m\|^2%20+%20C%20\sum_i%20\xi_i,%20\\%20\langle%20w_{y_i},%20x_i%20\rangle%20-%20\langle%20w_{m},%20x_i%20\rangle%20\leq%20d(y_i,m)%20-%20\xi_i,%20\\%20\text{where}~~~%20d(y_i,m)%20=%20[y_i=m]
+@sonney2k	blackburn, yes it is the natural extension
+ blackburn	n4nd0: IIRC in wikipedia there is a formulation of SO
+@sonney2k	only problem is that the argmax can be very expensive
+@sonney2k	karlnapf, still there?
+ karlnapf	sonney2k, yes
+ blackburn	n4nd0: you could try to derive dual and match how SO can be C-S
+ karlnapf	sonney2k, I found the reason for the error with the x-val and regression example
+@sonney2k	karlnapf, I was wondering about model selection / serialization with the new SGVector / Matrix stuff
+ karlnapf	the locking is responsible
+@sonney2k	karlnapf, what was it?
+ karlnapf	subset/locking related thing
+ blackburn	n4nd0: http://www.stanford.edu/~boyd/cvxbook/ that's the book
+ karlnapf	havent completely found out, but training without locking works
+ karlnapf	sonney2k, what did you mean with that?
+@sonney2k	karlnapf, hmm
+ blackburn	hahah my formulation is wrong sorry
+@sonney2k	karlnapf, locking is supposed to fix the data and precompute the kernel matrix
+@sonney2k	no more right?
+ blackburn	d(y_i,m) = 1 - [y_i = m]
+ karlnapf	yes, but it adds subsets to the custom kernel for that, and also to labels
+@sonney2k	karlnapf, ok what I mean is that I don't know how we can serialize/deserialze with new sgvector
+ karlnapf	I am in the process of figuring it out :)
+@sonney2k	karlnapf, I recall that we were just using ptrs + len and did fill things in
+ karlnapf	oh you mean version wise?
+@sonney2k	but now you need correct refcounts too
+@sonney2k	version wise is even worse
+ n4nd0	blackburn, and what about the sum over w?
+ blackburn	n4nd0: hah
+ blackburn	totally wrong sorry
+@sonney2k	i changed a couple of double* / int class member variables but that certainly will no longer work when loading
+ blackburn	sum over ms
+ n4nd0	blackburn, :)
+ karlnapf	sonney2k, you mean de-serialising a vector in general?
+@sonney2k	n4nd0, so did you finish your exam? all good?
+ n4nd0	sonney2k, pretty tiring but it was ok
+ blackburn	sonney2k: have you seen my cool pics? ;)
+-!- vikram360 [~vikram360@117.216.144.237] has quit [Ping timeout: 265 seconds]
+ n4nd0	sonney2k, I still find very curious when they make us in the exams step by step the convolution of two pulses
+ n4nd0	after five years doing the same :D
+ n4nd0	they make us do*
+@sonney2k	blackburn, about ceres - yes I have seen it. You think we should better just use it for least squares stuff?
+ blackburn	sonney2k: it should be cool
+ blackburn	hey it comes from google
+ blackburn	:D
+ blackburn	I believe we can fit it there pretty nice
+@sonney2k	karlnapf, yes
+@sonney2k	karlnapf, and not that soon sgmatrix etc will follow
+ blackburn	n4nd0: I am going to take some convolutions tomorrow
+ blackburn	and Z transforms
+ blackburn	hehe
+@sonney2k	I mean it seems things compile now so I can continue with SGMatrix/ SparseMatrix / StringList
+@sonney2k	because I *really* like the new SGVector stuff
+ blackburn	MOAR BLOOD
+@sonney2k	soooo much easier to use
+ karlnapf	yes indeed
+ karlnapf	very nice stuff
+ n4nd0	blackburn, you'll have some fun there :D
+ karlnapf	mmh, I still dont really get the problem you mentioned sonney2k
+ blackburn	n4nd0: now recalling FFT :D
+@sonney2k	now we just need a few more helper functions to do general tasks with vectors / matrices and then all good
+@sonney2k	karlnapf, do all libshogun examples run for you?
+ n4nd0	blackburn, you know what? FFT is actually very useful
+@sonney2k	because here base_map_parameters.h has a problem
+@sonney2k	.cpp
+ blackburn	n4nd0: I am a big fan of any transforms
+ blackburn	I said it today already to pluskid :D
+ karlnapf	sonney2k, yes, in my last patch that example worked
+@sonney2k	karlnapf, ==17961== Invalid free() / delete / delete[] / realloc()
+@sonney2k	ok
+@sonney2k	let me git pull
+@sonney2k	karlnapf, btw does that mean we cannot use SGVector/Matrix etc in x-validation?
+ karlnapf	yes we can
+@sonney2k	n4nd0, good to hear
+@sonney2k	karlnapf, that is what I wanted to hear :D
+ karlnapf	its only that the parameter tree cannot be serialised :)
+@sonney2k	karlnapf, what did you remove
+ n4nd0	blackburn, DFT is used in wifi, 3G and 4G! it is everywhere :)
+ karlnapf	however, currently only two types are supported
+@sonney2k	ahh why would one want to do that anyways?
+ blackburn	n4nd0: yes I know ;)
+ karlnapf	sonney2k, yes indeed, I replaces this generic vector for the values by array/len to get rid of SGVector<char>
+ karlnapf	model-selection for matrices, I wonder if anybody will ever request this :D
+* sonney2k never needed fft/dft ...
+@sonney2k	karlnapf, in 2 years :)
+ karlnapf	yes :) shogun 2.0
+ karlnapf	also comes with cluster support :D
+@sonney2k	karlnapf, we hope to have shogun 2.0 this year btw
+@sonney2k	we are changing too much to justify a 1.x release
+ blackburn	sonney2k: there should be a room for some transforms in genomes :D
+ blackburn	sonney2k:  hmm wait some operations can be done with fft
+@sonney2k	blackburn, I know viruses that can :D
+ karlnapf	nice
+ karlnapf	but we only had shogun1.0 and 1.1
+ blackburn	sonney2k: but matching?
+ blackburn	it can be done in fourier domain
+@sonney2k	what do you want to match?
+ blackburn	sequences may be? I am not an expert you know :)
+ n4nd0	blackburn, what matching are you talking about?
+ n4nd0	blackburn, matched filter?
+ n4nd0	wow 20 seconds lag ...
+ cronor	hey guys
+ karlnapf	gotta go, take care all
+ n4nd0	karlnapf, bye, take care you too
+ cronor	bye karlnapf
+@sonney2k	karlnapf, there are still errors
+@sonney2k	in base_map_parameters
+ blackburn	n4nd0: hmm I lost my idea :D
+@sonney2k	karlnapf, base_load_file_parameters
+@sonney2k	karlnapf, base_load_all_file_parameters
+@sonney2k	karlnapf, to reproduce run make check-valgrind
+ blackburn	sonney2k: isn't matching of two sequencies important in bioinf?
+@sonney2k	seems like these are memory leaks in there
+@sonney2k	blackburn, yes but even considering dft or so on dna sounds a lot slower than doing the matching...
+ blackburn	sonney2k: O(n log n)
+ blackburn	are other matchers faster?
+@sonney2k	linear time (in query)... but it depends on what you want to do
+@sonney2k	alright then
+@sonney2k	I guess I should continue with SGMatrix now
+@sonney2k	and blackburn - don't you have an exam?
+ blackburn	sonney2k: not now
+ blackburn	:D
+ blackburn	in 13 hours
+ blackburn	too much time
+@sonney2k	- 2 hrs sleep
+@sonney2k	11 hrs
+@sonney2k	yeah
+@sonney2k	blackburn, go fix some bugs!
+ blackburn	sleep? what for? :D
+ blackburn	sonney2k: do we have any?
+@sonney2k	gsomix, btw did you do the reformatting changes in the code? you had a couple of if(...)
+ blackburn	I'd rather learn DSP :D :D
+@sonney2k	blackburn, haha
+ gsomix	sonney2k, aha.
+* sonney2k opens pandoras box
+@sonney2k	aka SGMatrix
+ blackburn	sonney2k: I tried chris' DA svm
+ blackburn	works!
+ blackburn	sonney2k: ah 1 minute
+ blackburn	I asked karlnapf before may be you know
+ blackburn	what does low auROC but high accuracy mean?
+ n4nd0	wooow I have passed databases!!!
+ blackburn	n4nd0: congrats ;)
+ blackburn	we knew that
+@sonney2k	blackburn, data is unbalanced
+ n4nd0	I did so !%# bad the exam
+ blackburn	bad?
+ n4nd0	I was not sure at all
+@sonney2k	err wait no
+ n4nd0	terrible
+ blackburn	wait so bad or passed? :D
+@sonney2k	blackburn, what are the numbers?
+ n4nd0	I did it terrible, bat managed to pass
+ n4nd0	haha
+ n4nd0	but*
+ blackburn	sonney2k: was something like 0.6 accuracy and 0.2 auROC
+@sonney2k	n4nd0, thats all that counts
+@sonney2k	blackburn, 0.2 auROC???
+ blackburn	yes
+@sonney2k	blackburn, you know that 0.5 is the worst you can get
+@sonney2k	(random classifier)
+ n4nd0	sonney2k, yeah! :) 9 credits less left
+ blackburn	there is a bug then
+ blackburn	orrr
+@sonney2k	so 1-(your classifier)
+@sonney2k	works better
+ blackburn	sonney2k: yes I fixed that alraedy
+@sonney2k	and gets 80% auROC
+@sonney2k	blackburn, fixed what?
+ blackburn	normalization and parameters
+ blackburn	but was curious what does it mean
+@sonney2k	blackburn, of what?
+ blackburn	of svms
+ blackburn	sonney2k:
+ blackburn	source->target
+ blackburn	accuracy =  0.8125
+ blackburn	auROC =  0.925625
+ blackburn	DA
+ blackburn	accuracy =  0.8775
+ blackburn	auROC =  1.0
+@sonney2k	blackburn, it sounds like you swapped labels +1 <-> -1
+@sonney2k	on test data
+ blackburn	source is http://dl.dropbox.com/u/10139213/share/0000_0_0_0_15_0_1.png
+ blackburn	target is http://dl.dropbox.com/u/10139213/share/0000_02176.png
+ blackburn	sonney2k: cool example isn't it?
+@sonney2k	I don't get it
+ blackburn	sonney2k: I train svm on source 3d data
+ blackburn	and train svm regularized against that source svm on 10 examples of target real photo
+@sonney2k	btw, how shall we do sgvector refcount business?
+ blackburn	and apply to whole target data
+ blackburn	sonney2k: ?
+@sonney2k	I mean shall we have a common base class for SGMatrix/Vector ...?
+ blackburn	sonney2k: what can it share?
+ blackburn	ref?
+@sonney2k	the ref/unref
+ blackburn	not really needed I think
+@sonney2k	not so sure
+@sonney2k	code is > 100 lines
+@sonney2k	times 5
+@sonney2k	classes
+@sonney2k	better use inheritance...
+ blackburn	sonney2k: I don't mind
+@sonney2k	any ideas for a proper name
+ blackburn	SGDataStructure :D
+@sonney2k	blackburn, and then only have refcounts in there :D
+ blackburn	sonney2k: no idea!
+ blackburn	really no idea
+@sonney2k	or we use SGBase and also derive SGObject from ti
+@sonney2k	it
+@sonney2k	hmmhh sgobject is different ... it is always used as ptr
+ blackburn	sonney2k: what will SGBase contain?
+ blackburn	no
+@sonney2k	blackburn, refcounting only
+ blackburn	that wouldnot work
+ blackburn	moreover we planned to try shared ptrs
+ blackburn	sonney2k: may be we can sell a place for some adv there?
+ blackburn	SGCocaCola?
+@sonney2k	blackburn, SGGarbageCollector?
+ blackburn	may be SGAlways - I always love their advertisement
+ blackburn	ehm
+@sonney2k	or SGRefCounter
+ blackburn	it is not a garbage collector
+ blackburn	and not a ref counter
+@sonney2k	blackburn, https://en.wikipedia.org/wiki/Reference_counting
+ blackburn	sonney2k: yes - not a collectOR
+@sonney2k	why not?
+ blackburn	sonney2k: because collector is an entity that does garbage collecting
+@sonney2k	so what is ref/unref doing?
+ blackburn	sonney2k: SGReferencedStructure
+ blackburn	sonney2k: so each vector is a GC?
+@sonney2k	it is a garbage collection algroith
+@sonney2k	algorithm
+ blackburn	no that name is wrong - it is confusing
+@sonney2k	blackburn, SGRefcountedObject ?
+@sonney2k	or SGReferenceCountedObject?
+ blackburn	sonney2k: we need to make a borderline between SGObject and that class ;)
+ blackburn	isn't SGObject ref counted?
+@sonney2k	wiking, n4nd0, karlnapf, gsomix - any other opinions?
+@sonney2k	blackburn, yes that is why I wanted to have a common base class
+ blackburn	sonney2k: that can be bad
+@sonney2k	but it doesn't really work - we use SGObjects as ptrs only
+@sonney2k	so the whole mechanism is different
+ blackburn	I'd call it SGReferencedStructure
+@sonney2k	it is an object...
+ blackburn	SGReferencedData
+@sonney2k	ok
+@sonney2k	lets use this
+ blackburn	if we put an Object word here we would make it confusing
+ n4nd0	I don't see clear what we need here about this
+ blackburn	because they would be both Objects
+@sonney2k	n4nd0, a name for a class
+ blackburn	both referenced
+ blackburn	but one called referenced
+ blackburn	and one not
+@sonney2k	the base class of SGVector/Matrix ...
+@sonney2k	that will do refcounting
+ blackburn	SGRDAO!
+ blackburn	:D
+ blackburn	Shogun referenced data access object :D
+@sonney2k	 SGReferencedData it is!
+ blackburn	I like ref'd data
+ blackburn	n4nd0: if you want to do some intrusive penetration
+ blackburn	:D
+ blackburn	you can separate labels
+ blackburn	binary/multiclass
+ wiking	sonney2k: have to read the log
+ n4nd0	what about structured labels?
+@sonney2k	n4nd0, but I recall that you didn't finish the benchmark for the covertrees or did you?
+ blackburn	hah
+@sonney2k	wiking, go ahead :)
+ blackburn	sonney2k: I think we should start with labels
+ wiking	blackburn: please don't implement a garbage collector for cpp, there's a good reason why it does not have one
+ blackburn	wiking: ?? I don't want to :D
+@sonney2k	fear and loathing on #shogun
+ n4nd0	sonney2k, the next step was to try it out doing the distance computation using lapack
+ blackburn	sonney2k: n4nd0: I'll do this benchmark when I will be changing neighbors searching in EDRT
+@sonney2k	blackburn, n4nd0 the 2xy thing?
+ wiking	i would go with the KISS story: why we don't do a shared pointer story?
+ blackburn	love story
+ wiking	of course the problem now would be (as it's implemented in boost) that we would need to redefine all the function arguments
+ wiking	but then again if we do the SGReferencedData
+ n4nd0	sonney2k, I think we talked about doing the norm or distance with blas
+ wiking	then you would inherit SGMatrix from that?
+@sonney2k	hmhh - the assignment operator= is class specific right?
+ wiking	or you would have SGMatrixReferenced?
+ n4nd0	sonney2k, not even doing the 2xy trick
+ blackburn	sonney2k: yeah
+@sonney2k	n4nd0, that doesn't work - blas doesn't have a function for that
+@sonney2k	wiking, yes
+@sonney2k	blackburn, ok
+ wiking	so we would have SGMatrix and then do the referenced trick with SGMatrixReferenced
+ wiking	well in that case that would require as well a whole lot of function arg rewriting in a lot of functions as far as i can see now, or?
+ n4nd0	sonney2k, then it would be with the 2xy trick
+@sonney2k	wiking, no
+ gsomix	karlnapf, done
+ wiking	sonney2k: how?
+@sonney2k	we do SGRef* and derive SGMatrix from that class
+@sonney2k	done
+ wiking	ok i see
+ wiking	but still currently the api is like
+ wiking	something(SGVector/SGMatrix....
+ wiking	or?
+ wiking	or SGMatrix/SGVector something (....)
+@sonney2k	what?
+ wiking	a typical function i mean.. in shogun
+ wiking	it looks like that, in case of SGMatrix/Vector
+ wiking	ok sorry i see what you mean
+@sonney2k	gsomix, why did you remove the hashset example?
+ wiking	the only question here is, that now we are doing our own way, but for example in c++11 we already would have std::shared_ptr. so i'm just wondering why we wouldn't just implement shared_ptr in case there's no support for it, i.e. if there's no c++11 support, and use that?
+@sonney2k	gsomix, otherwise the patch looks good to merge from my side
+ wiking	i mean essentially we'll do the same thing with SGReferencedData
+ gsomix	sonney2k, oh. I will do new CSet and examples for CMap and CSet later.
+ wiking	but imho it'd be good if we try to go with some standards too...
+@sonney2k	wiking, it is a very simple mechanism w/o overhead
+@sonney2k	gsomix, ok
+ blackburn	wiking: help me to convince sonney2k to use more stl :D
+ CIA-113	shogun: Evgeniy Andreev master * r15cb774 / (4 files in 2 dirs): deleted CSet, added CMap - http://git.io/EMhyAA
+ CIA-113	shogun: Evgeniy Andreev master * r074c5da / (4 files in 3 dirs): CSet<MemoryBlock> to CMap<void*, MemoryBlock> - http://git.io/2QZdMg
+ CIA-113	shogun: Evgeniy Andreev master * r0e70022 / (src/shogun/lib/Map.h src/shogun/lib/memory.cpp): fixes for tracing mallocs - http://git.io/TpoyHw
+ CIA-113	shogun: Soeren Sonnenburg master * rf04183b / (8 files in 4 dirs):
+ CIA-113	shogun: Merge pull request #504 from gsomix/CSet
+ CIA-113	shogun: ?Map for mallocs tracing - http://git.io/Q8hg1w
+ blackburn	I admit I do not really like we have to give gsomix tasks like that
+@sonney2k	blackburn, ?
+ wiking	sonney2k: yes simple but none-standard. and imho there's a good reason to go with standard solution if one is available
+ blackburn	sonney2k: he spent time reimplementing map
+ blackburn	and debugging it
+ gsomix	oh, politics :)
+ blackburn	while it is already available
+ wiking	sonney2k: i don't want to say stupid things so i'll check it now, but i think std::shared_ptr (just as in case of boost) is intended to be implemented with template inline functions... and if that's true, i don't see any overhead
+ shogun-buildbot	build #859 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/859  blamelist: gsomix@gmail.com
+ gsomix	wut?
+ wiking	sonney2k: moreover things like being thread-safe would be solved as well...
+ wiking	and if you do thread-safe implementation for SGReferencedData then you are basically at the same state...
+ blackburn	wait wait
+ blackburn	SGVector is not thread safe??
+ blackburn	hey that sucks
+ blackburn	wiking: how does it work with shared ptrs?
+ wiking	blackburn: as usual
+ blackburn	is it shared_prt<Class>?
+ wiking	using some kind of a locking mechanism that is atomic
+ wiking	yeah otherwise it's like that
+ wiking	you pass around shared_ptr<Class>
+ blackburn	wiking: I se
+ blackburn	e
+ wiking	shared_ptr has been developed as part of boost library for some time now, so it has became quite standard and it has became the part of std in c++11
+ CIA-113	shogun: Sergey Lisitsyn master * r5238cb0 / src/shogun/features/Labels.cpp : Removed wrong include - http://git.io/hWgiQA
+ wiking	i mean thread safeness is required for ref counting, if we use threads
+ blackburn	we tend to not use sgvectors in threads
+ blackburn	but python can
+ blackburn	hmm
+ blackburn	oooooor
+ blackburn	it can't sorr
+ wiking	blackburn: well you were just talking about openmp ;)
+ blackburn	wiking: there would not be any sgvectors actually
+ wiking	blackburn: not this time :D
+ wiking	i mean how can u assure that at a moment there won't be an implementation that doesn't use the same sgvector from different threads... the only thing you can do of course is to explicitly say that SGVector should not be used from threads.
+ wiking	but then again this is not another story
+ wiking	i was just really talking about reference counting
+ blackburn	yes it shouldn't be used from threads
+ gsomix	karlnapf, try to trace.
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Ping timeout: 276 seconds]
+ gsomix	oh, my android phone said, that it's time to sleep
+ gsomix	I'm trying to set the schedule of sleep
+ gsomix	hehe
+ gsomix	good night guys
+ blackburn	HE HE
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+-!- vikram360 [~vikram360@117.216.144.237] has joined #shogun
+ blackburn	n4nd0: ok if you ready I have a plan
+ blackburn	copy labels class
+ blackburn	rename it
+ blackburn	and make multiclass machines use it ;)
+ blackburn	all the other stuff later
+ n4nd0	MulticlassLabels?
+ n4nd0	I mean the name for the new class
+ blackburn	yes
+-!- gsomix [~gsomix@178.45.90.39] has quit [Ping timeout: 265 seconds]
+ n4nd0	what future plans do you have in mind for this class later?
+ blackburn	n4nd0: int32_t instead of float64_t here
+ blackburn	and some checks
+ blackburn	like no negatives
+ n4nd0	no -1 label right?
+ blackburn	sure
+@sonney2k	blackburn, wait the multiclass label stuff etc is on pluskids todo list
+@sonney2k	so label though is not
+ blackburn	sonney2k: he didn't start yet I think?
+@sonney2k	not so clear how so label should look like though
+@sonney2k	blackburn, but he has a plan
+ n4nd0	I agree, probably it makes more sense that Pluskid does it
+ blackburn	sonney2k: how can we solve get_label problem?
+ n4nd0	blackburn, what do you think?
+@sonney2k	and we both thought that so labels are totally separate
+ blackburn	n4nd0: agree
+@sonney2k	so it makes sense to develop sth for that
+ blackburn	sonney2k: no base?
+@sonney2k	no base (at least for now)
+ blackburn	sonney2k: machine??
+@sonney2k	n4nd0, maybe wiking knows a couple of matching labels
+ n4nd0	so far I do not see what use can we make of a base for so and binary/multiclass labels
+@sonney2k	n4nd0, the only thing we came up with is get_num_labels()
+ n4nd0	sonney2k, I am afraid I don't know what do you mean with matching labels :S
+@sonney2k	n4nd0, examples for SO labels
+ n4nd0	ah all right
+@sonney2k	n4nd0, I for example know a segmentation :)
+ n4nd0	like parse trees
+@sonney2k	yes
+ n4nd0	sequence of integers for HM-SVMs
+ wiking	n4nd0: yeah for labels i have something for you and for psi i have a request based on sonney2k implementation on gist
+@sonney2k	for segmentation a single label would be y=[1,2,0,3,5,9]
+@sonney2k	n4nd0, that could be represented as CStringList<int>
+ n4nd0	sonney2k, there is a sequence class in shogund, isn't it?
+@sonney2k	n4nd0, for that you need some functions like to compare label with ground truth etc
+@sonney2k	n4nd0, CStringList :)
+ n4nd0	aha ok
+@sonney2k	like hamming distance etc
+ blackburn	sonney2k: we can make labels void* and redefine get/set labels then
+@sonney2k	needed fro slack/ margin rescaling
+ n4nd0	I thought it was something called like sequence
+@sonney2k	blackburn, bah :(
+ blackburn	sonney2k: how can we keep machine if labels are different?
+@sonney2k	n4nd0, other examples are trees, graphs, some 2d structures appearing w/ images - but wiking is the expert there
+ n4nd0	sonney2k, yeah
+ blackburn	get/set labels should appear in concrete machines like kernel/linear/multiclass
+ n4nd0	I think that bounding boxes may be also labels
+ n4nd0	wiking, is that right?
+ blackburn	yes
+ wiking	n4nd0: yes
+ wiking	but afaik that should be left for the user to implement
+ wiking	that's the cleanest
+ n4nd0	sonney2k, however, do we aim at providing a complete set of classes that may be use as labels?
+ wiking	the only thing you can do is pre implement some 'standard' ones
+ n4nd0	wiking, exactly, I agree with you
+ blackburn	wiking: will you implement sliding window one?
+ n4nd0	for example, the one we need for HM-SVMs
+ wiking	blackburn: ?
+ n4nd0	wiking, so, what is the request for psi?
+ blackburn	wiking: or how does it work? :D
+ blackburn	with bounding box?
+@sonney2k	n4nd0, I think you should start with segmentations for labels
+@sonney2k	that is easiest - you can use CStringList
+ blackburn	sonney2k: segmentation of?
+@sonney2k	and you can real world examples.
+@sonney2k	blackburn, anything
+ blackburn	sonney2k: anything would be hard to implement ;)
+ n4nd0	sonney2k, hmmm I thought the plan was first to implement the optimization algorithm
+ n4nd0	SO-SVM
+ n4nd0	and later try it out (implement the application-dependent parts) with HM-SVMs
+ blackburn	but can't we make it template??
+ n4nd0	blackburn, what? SO-SVM for example?
+ blackburn	n4nd0: labels?
+ n4nd0	blackburn, aham
+ n4nd0	my idea was to have an abstract class there
+ n4nd0	e.g. CStructuredLabel
+ n4nd0	that is the one used from the optimization algorithms
+ blackburn	yes exactly
+ blackburn	derived from CLabels<Structure>?
+ n4nd0	mm I don't know about that
+ blackburn	hmmm
+ n4nd0	are we going to make CLabels with templates?
+ blackburn	wiking: can we store pointer to CLabels<?>?
+ blackburn	like in java
+ blackburn	I guess no..
+-!- vikram360 [~vikram360@117.216.144.237] has quit [Ping timeout: 255 seconds]
+ CIA-113	shogun: Chiyuan Zhang master * r876d4b2 / src/shogun/multiclass/ecoc/ECOCRandomSparseEncoder.h : Correct the equations in comment. - http://git.io/Wy6Fdw
+ CIA-113	shogun: Soeren Sonnenburg master * rae429c4 / src/shogun/multiclass/ecoc/ECOCRandomSparseEncoder.h :
+ CIA-113	shogun: Merge pull request #502 from pluskid/ecoc-random-sparse
+ CIA-113	shogun: Correct the equations in comment. - http://git.io/tPESxw
+ n4nd0	blackburn, but what is the problem to make an abstract class and derive the others from it
+ blackburn	n4nd0: no general ancestor..
+ n4nd0	e.g. CStructuredLabel <-- CParseTree
+ blackburn	??? get_labels()
+ n4nd0	but this CStructuredLabel could derive the general ancestor
+ n4nd0	thus all the others
+ blackburn	n4nd0: what could it share with ancestor?
+ n4nd0	mmm I don't think I see your point
+@sonney2k	n4nd0, no templates for SO labels at least for now
+ n4nd0	have to go now, dinner time
+ blackburn	n4nd0:  what returns get_label?
+ n4nd0	be back later
+@sonney2k	I think for segmentation uint16 should be sufficient
+@sonney2k	at least we only ever had a handful of segemnts
+@sonney2k	segments
+ blackburn	sonney2k:
+ blackburn	how can we
+ blackburn	derive anything from clabels
+ blackburn	and change return type of get_labels
+ blackburn	set_labels, etc?
+@sonney2k	n4nd0, ahh and you will need labels for that
+@sonney2k	blackburn, not possible
+ blackburn	sonney2k: so what do you suggest?
+@sonney2k	blackburn, I don't understand
+@sonney2k	what do you mean?
+ blackburn	sonney2k: what is hierarchy of labels classes?
+ blackburn	do they have common ancestor?
+@sonney2k	no
+@sonney2k	well SGObject
+ blackburn	sonney2k: does machine contain no m_labels then?
+@sonney2k	blackburn, true
+ blackburn	sonney2k: should be a BInaryMachine then
+ blackburn	to group linear machine and kernel machine
+ blackburn	sonney2k: is it really working for image segmentation?
+@sonney2k	sry got disconnect
+@sonney2k	what is working?
+@sonney2k	SO?
+ blackburn	sonney2k: yes
+@sonney2k	yes sure - there are examples to distinguish e.g. back from foreground
+ blackburn	sonney2k: I start to think svm can everythink
+ blackburn	g
+ blackburn	*
+ blackburn	:D
+ blackburn	sonney2k: may be even predict traffic jams? :D
+@sonney2k	could do jam / non jam segementations too :)
+@sonney2k	costly maybe
+@sonney2k	think of millions of km of road networks :)
+@sonney2k	or meters ;)
+ blackburn	sonney2k: hmm what is length of roads in berlin?
+@sonney2k	don't know
+ blackburn	sonney2k: btw why do you use train?
+ blackburn	not a car..
+@sonney2k	maybe 1 million km?
+ blackburn	48/57 pages done :D
+ blackburn	some hard shit in the end
+@sonney2k	blackburn, I cannot code and drive
+ blackburn	ahh
+@sonney2k	otherwise I would prefer bike
+ blackburn	sonney2k: what bike do you have?
+ wiking	sonney2k: can i have a question about store_model_features and data_lock story?
+@sonney2k	wiking, ask
+ wiking	sonney2k: since neither of it is implemented in multi class machines, except in inn, so we currently crossval won't work on those machines
+@sonney2k	as long as you don't want to convince me that std != evil
+ blackburn	sonney2k: it is not
+@sonney2k	wiking, yeah true
+ wiking	sonney2k: hahah i have long ago gave up to convince you about that, but i still will tell my opinion ;)
+@sonney2k	wiking, karlnapf introduced these to get crossval to work on kernel machines
+ blackburn	anything we do in means of datastructure is a lame std you can't decline it :)
+@sonney2k	wiking, we badly needed those to store feature vectors together with alphas
+@sonney2k	wiking, before that we only ever used indices into training data
+@sonney2k	and kept the whole data set around
+@sonney2k	wiking, you are not alone
+@sonney2k	wiking, maybe it takes another decade before I break in :D
+ wiking	sonney2k: yeah and as far as i understood implementing store_model_features should be done on the level of shogun/machine/KernelMulticlassMachine.h
+ wiking	no
+ wiking	i meant
+ wiking	yeah i was right
+ wiking	so if i implement store_model_features on that level, then all the multi class kernel machines, i.e. multi class svms would be covered
+@sonney2k	wiking, yes
+ wiking	and then we would actually need to implement for MulticlassLibLinear and MulticlassOCAS
+ blackburn	what for?
+ wiking	since they are inherited from directly multiclassmachine
+ wiking	CLinearMulticlassMachine that is...
+ blackburn	wiking: why you need to reimplement it there?
+ wiking	blackburn: which one do you mean now? :)
+ blackburn	wiking: OCAS and LibLinear
+ wiking	blackburn: well i'm not sure that we could implement store_model_features on CLinearMulticlassMachine level or MulticlassMachine for that matter..
+ blackburn	why not?
+ wiking	blackburn: but if we can of course i'm not against it, i just want to implement either store_model_features or data_lock mechanism for multi class machines since we - and i personally really - in need for xval support
+ blackburn	what does it do? :D
+ wiking	blackburn: quote from Machine.h for store_model_features:
+ wiking	                /** Stores feature data of underlying model.
+ wiking	                 * After this method has been called, it is possible to change
+ wiking	                 * the machine's feature data and call apply(), which is then performed
+ wiking	                 * on the training feature data that is part of the machine's model.
+ wiking	                 *
+ wiking	                 * Base method, has to be implemented in order to allow cross-validation
+ wiking	                 * and model selection.
+ wiking	for data_lock:
+ wiking	** Locks the machine on given labels and data. After this call, only
+ wiking	                 * train_locked and apply_locked may be called
+ wiking	and since neither train_locked nor apply_locked is implemented in any of the multi class machine
+ wiking	it thought the easier would be to go with store_model_features implementation
+@sonney2k	wiking, you don't need store model features in linear MC svm
+ blackburn	ehm so all you need in linear mc machine
+@sonney2k	because you have w
+@sonney2k	and b
+ blackburn	hah
+ blackburn	really
+@sonney2k	you only need that for kernel / distance machines
+ wiking	sonney2k: ok so in that case it's an empty implementation
+ blackburn	yes
+@sonney2k	where you have to keep a copy of the data (data is part of the model)
+ wiking	sonney2k: then that is an easy fix :)
+@sonney2k	like in KNN
+@sonney2k	you need to keep all training data
+ blackburn	kernelmachine is not working at all
+ wiking	sonney2k: ok then i'll do the one for linear MC
+ blackburn	so no problem here :D:D:
+ wiking	blackburn: ????
+ blackburn	wiking: subset stuff is still unimplemented
+ blackburn	no way for xval here
+@sonney2k	blackburn, I thought it is now?
+ blackburn	135 ????????virtual void add_machine_subset(SGVector<index_t> subset)
+ blackburn	136 ????????{
+ blackburn	137 ????????????SG_NOTIMPLEMENTED;
+ blackburn	138 ????????}
+@sonney2k	blackburn, do you know if it is sufficient to implement the = operator in a base class
+@sonney2k	will it then be called in derived classes?
+ wiking	sonney2k: http://pastebin.com/mvDSMgiN
+ blackburn	sonney2k: I don't think so..
+ wiking	would u accept?
+ wiking	if so i'll commit and send you the pull request
+@sonney2k	wiking, have a look at LinearMachine
+ wiking	sonney2k: yeah it's the same there :)
+ wiking	ah ok
+@sonney2k	then copy the comment too!
+ wiking	i'll copy the doxygen comment
+ wiking	heheh i was slower
+ wiking	yeah i'm doin git
+ blackburn	sonney2k: 12.4 http://www.parashift.com/c++-faq-lite/assignment-operators.html
+ blackburn	doin' git
+ wiking	;)
+ wiking	done https://github.com/shogun-toolbox/shogun/pull/505
+ CIA-113	shogun: Viktor Gal master * rd301049 / src/shogun/machine/LinearMulticlassMachine.h :
+ CIA-113	shogun: Add vanilla store_model_features for LinearMulticlassMachine
+ CIA-113	shogun: So one can actually do a cross-validation with multiclass linear
+ CIA-113	shogun: machines - http://git.io/Q2YSIg
+ CIA-113	shogun: Soeren Sonnenburg master * r4f67612 / src/shogun/machine/LinearMulticlassMachine.h :
+ CIA-113	shogun: Merge pull request #505 from vigsterkr/master
+ CIA-113	shogun: Add vanilla store_model_features for LinearMulticlassMachine - http://git.io/d8xqKg
+@sonney2k	blackburn, yay!
+@sonney2k	However if you do not create your own assignment operator, the one that the compiler creates for you will automatically call your base class's assignment operator.
+@sonney2k	blackburn, ^ so it is sufficient
+ blackburn	hmm
+ blackburn	nice
+@sonney2k	that simplifies SGVector drastically
+@sonney2k	the only thing we need is unref() in destructor
+@sonney2k	all the rest is encapsulated in SGReferencedData
+@sonney2k	hmmhh
+@sonney2k	github down?
+ wiking	worksforme
+@sonney2k	hmmhh
+@sonney2k	not here
+@sonney2k	blackburn, btw nice ptr to the faq
+@sonney2k	we have another subtle bug
+@sonney2k	self assignment
+ blackburn	yes
+@sonney2k	I am not 100% sure
+@sonney2k	whether
+@sonney2k	            if (this == &orig)
+@sonney2k	                return *this;
+@sonney2k	is the solution to our potential problem
+@sonney2k	I mean if one has
+@sonney2k	SGVector x;
+@sonney2k	and does x=x;
+@sonney2k	it should be ok
+ blackburn	should not it be pointers?
+@sonney2k	no
+ wiking	mmm is there a reason why we don't store support vectors at least on the level of MulticlassSVM?
+@sonney2k	wiking, not per default you mean?
+@sonney2k	consider a data set of size 32GB
+@sonney2k	with *lots* of SVs
+ wiking	mm
+ wiking	true
+@sonney2k	then copying data is EOUTOFMEMORY
+ wiking	i'm just thinking about store_model_features
+@sonney2k	dammed github is not working...
+ wiking	sonney2k: http://status.github.com/
+@sonney2k	the website is but not git pull
+ wiking	it says all system is operational
+@sonney2k	git push github
+@sonney2k	Connection closed by 207.97.227.239
+@sonney2k	fatal: The remote end hung up unexpectedly
+ CIA-113	shogun: Soeren Sonnenburg master * r25d336a / (4 files in 2 dirs):
+ CIA-113	shogun: derive SGVector from SGReferencedData to avoid code duplication
+ CIA-113	shogun: - later SGMatrix/SGStringList/SGNDArray/SGSparseMatrix will all use
+ CIA-113	shogun: this - http://git.io/8QQZuQ
+ CIA-113	shogun: Soeren Sonnenburg master * r51c39a6 / src/shogun/lib/SGReferencedData.h : retun *this on self assignment - http://git.io/TUc88g
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Quit: Ex-Chat]
+ wiking	sonney2k: any hints for store_model_features for a multi class kernel machine?
+-!- PhilTillet [~philippe@vir78-1-82-232-38-145.fbx.proxad.net] has joined #shogun
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Client Quit]
+ CIA-113	shogun: Heiko Strathmann master * r8830799 / src/shogun/machine/Machine.cpp : added debug messages - http://git.io/laJX5w
+ CIA-113	shogun: Heiko Strathmann master * r52e449e / (3 files in 3 dirs):
+ CIA-113	shogun: Merge pull request #506 from karlnapf/master
+ CIA-113	shogun: fixes a memory error in one example - http://git.io/DRD16g
+ CIA-113	shogun: Heiko Strathmann master * r17d92f5 / src/shogun/evaluation/CrossValidation.cpp : code whitespace - http://git.io/6GxBrw
+ CIA-113	shogun: Heiko Strathmann master * r423cc95 / examples/undocumented/libshogun/base_map_parameters.cpp : fix a memory error - http://git.io/HfU4gg
+ wiking	mmm evaluation/CrossValidationSplitting.cpp:13:10: fatal error: 'shogun/lib/Set.h' file not found
+ wiking	i guess they just left out when set.h was removed
+ wiking	https://github.com/shogun-toolbox/shogun/pull/507
+ wiking	for fixing
+ wiking	sonney2k: do you want such an example in lib shogun: evaluation_cross_validation_multiclass.cpp
+ wiking	?
+ blackburn	wiking: feel free to add :)
+ wiking	ok
+ wiking	currently it works with MCLiblinear
+ wiking	but i'll valgrind it first
+ wiking	heiko please come here!
+ wiking	definitely lost: 11,752 bytes in 56 blocks
+ wiking	doh
+ CIA-113	shogun: Viktor Gal master * r80b01ce / (2 files): Remove unused shogun/lib/Set.h includes - http://git.io/o7IJZg
+@sonney2k	argh
+@sonney2k	sgvector patch will be massive again
+@sonney2k	err sgmatrix
+ shogun-buildbot	build #869 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/869
+ wiking	blackburn: here?
+ blackburn	yes
+ wiking	ok so
+ wiking	CLabels* CMulticlassMachine::apply() line 89
+ wiking	that's true far all machines?
+ wiking	i.e. that the returned clables is going to be SG_REF-ed
+ wiking	?
+ wiking	or at least we can assume this?
+ blackburn	wiking: yes makes sense
+ wiking	as currently we have a leak
+ blackburn	wiking: ref is 0 on new
+ blackburn	leak? why?
+ wiking	and that's because if u check
+ wiking	CrossValidation.cpp:294
+ wiking	and line 296
+ wiking	the returned CLabels* result_labels=m_machine->apply(m_features);
+ wiking	will be SG_REF-ed again
+ blackburn	oh
+ wiking	so when on line 302
+ wiking	we call SG_UNREF
+ wiking	that won't delete that
+ wiking	so it will leak
+ wiking	i'm just asking so that i can remove this extra ref
+ wiking	in crossval
+ blackburn	wiking: no you can remove it in multiclass
+ blackburn	there is no ref in kernelmachine
+ blackburn	so it works w/o
+ wiking	yeah this is the thing
+ wiking	i was just wondering where we should remove the extra ref
+ wiking	ok
+ wiking	i'll then remove form apply ()
+ wiking	ok doing a check with valgrind to be sure
+--- Log closed Tue May 08 00:00:37 2012

@@ -1,0 +1,209 @@
+--- Log opened Sat Mar 30 00:00:18 2013
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- hoijui [~hoijui@dslb-088-075-046-171.pools.arcor-ip.net] has quit [Ping timeout: 260 seconds]
+ shogun-buildbot	build #338 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/338
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Ping timeout: 245 seconds]
+-!- hoijui [~hoijui@dslb-088-075-046-171.pools.arcor-ip.net] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	sonney2k: good morning, around?
+ n4nd0	blackburn: ah you are also here :)
+ blackburn	n4nd0: yes
+ n4nd0	blackburn: I started taking a look yesterday to these tests that fail
+ n4nd0	I ma not really sure about a couple of things
+ n4nd0	blackburn: so the likeliest is that the errors are inside the data files I understand, the ones that are written in matlab
+ blackburn	n4nd0: most of errors are due to wrong parameter setting or introduced bugs
+ n4nd0	blackburn: and to find out if the data used makes any sense at all
+ n4nd0	one can plot it I guess
+ blackburn	n4nd0: I don't think the data is broken
+ blackburn	it is here from the very beginning
+ n4nd0	mm I understand
+@sonney2k	n4nd0, blackburn good morning!
+@sonney2k	about the failing string kernel tests:
+@sonney2k	it would already help to see if the kernels do sth reasonable
+@sonney2k	this could be done by generating some simple sequences say all contain letter 'A'
+@sonney2k	and are of lenght say 50
+ n4nd0	ok
+@sonney2k	consider you have 20 sequences like this
+@sonney2k	you could introduce in 10 of them a couple of 'C's in the middle (or somewhere)
+@sonney2k	and then just compute the kernel matrix
+@sonney2k	you should see a block structure
+@sonney2k	with largest values on the diagonal
+-!- lambday [0e8b614d@gateway/web/freenode/ip.14.139.97.77] has joined #shogun
+-!- hoijui [~hoijui@dslb-088-075-046-171.pools.arcor-ip.net] has quit [Quit: Leaving]
+ lambday	for the log-determinant of sparse matrix, shall I take eigen's sparse matrix as input? I thought of using SGSparseMatrix but it seems like an adjacency list and I don't know how to get the dimensions from it
+ n4nd0	sonney2k: http://pastebin.com/L1iaNB20
+ n4nd0	that is the test you have suggested above
+ n4nd0	I see block structure but no large values on the diagonal
+ n4nd0	lambday: SGSparseMatrix::num_vector SGSparseMatrix::num_features maybe help you to get dimensions??
+ n4nd0	num_vectors*
+ lambday	n4nd0: ummm... I think it would be tough.. say, size of a sparse matrix can be 100x100 and say only 10 columns have non-zero entries, so SGSparseMatrix would have only 10 num_vector entries I am guessing..
+ n4nd0	lambday: no, I don't think so
+ n4nd0	for me it makes sense that num_vectors and num_features would both be 100
+ n4nd0	then there will be only stored 10 numbers
+ n4nd0	it is like if you do size of a sparse matrix in matlab
+ n4nd0	I mean the other elements exist, they are just zero so they are not explit. stored in memory
+ n4nd0	anyway, I am not testing right now what I am telling you - so don't trust me 100% :)
+ lambday	n4nd0: I'
+ lambday	I'm testing... will let you know :)
+@sonney2k	n4nd0, could you put the 'A' strings all as the first 10 and the ones with C to the end?
+@sonney2k	and then do
+@sonney2k	from pylab import *
+@sonney2k	pcolor(kmatrix)
+@sonney2k	colorbar()
+ n4nd0	sonney2k: ok, doing right now
+@sonney2k	n4nd0, I am changing the code to use the sqrtdiagnormalizer by default
+@sonney2k	I think that makes a lot of sense
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * d07ddb4 / src/shogun/kernel/PolyKernel.cpp: https://github.com/shogun-toolbox/shogun/commit/d07ddb485b8c4fbde7bef821791fbdb88c87a77a
+ shogun-notifier-	shogun: move normalizer assignment to init() to avoid code duplication
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * f33e4f3 / src/shogun/kernel/string/LocalAlignmentStringKernel.cpp: https://github.com/shogun-toolbox/shogun/commit/f33e4f35d5786227dc7493988f803db75208ecb0
+ shogun-notifier-	shogun: normalize LA kernel to have norm 1 on the diagonal
+-!- travis-ci [~travis-ci@ec2-174-129-144-237.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/5918779
+-!- travis-ci [~travis-ci@ec2-174-129-144-237.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #847 of deb2 - static_interfaces is complete: Failure [failed test python_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/847  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ n4nd0	sonney2k: https://dl.dropbox.com/u/11020840/km_train.png
+ shogun-buildbot	build #1030 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1030  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ n4nd0	sonney2k: I have no real idea how it should work but the blue part looks sort of weird, maybe it should be more uniform like the red??
+@sonney2k	n4nd0, look at https://dl.dropbox.com/u/31480471/website-cbase.png
+ n4nd0	sonney2k: oh looking cool :)
+ n4nd0	but I guess we have to decide where to put it
+ n4nd0	we won't have the logo twice
+@sonney2k	n4nd0, regarding the inhomogenity of the blue part
+@sonney2k	could you put the 'C' just at one fixed position in the sequence
+@sonney2k	then it should go away
+@sonney2k	(I hope...)
+ n4nd0	sonney2k: for all the sequences?
+@sonney2k	n4nd0, for the second half only
+ n4nd0	yes
+@sonney2k	the other are still just 'A's
+ n4nd0	I mean if for all the sequences with two 'C'
+ n4nd0	these two 'C' in the same position among all those sequences
+@sonney2k	errm?
+@sonney2k	yes
+@sonney2k	n4nd0, regarding the website
+@sonney2k	maybe we could put c-base in the middle
+@sonney2k	and gsoc announcement as the long thing?
+ n4nd0	sonney2k: yeah, it sounds good
+@sonney2k	only issue is we don't have much room for a workshop advertisement
+ n4nd0	sonney2k: why not to advert the workshop in the long thing?
+ n4nd0	on the rhs of the logo on top
+@sonney2k	n4nd0, or that yes
+ n4nd0	sonney2k: fixing the 'C' ends with inhomogenity, I see only three colors now
+@sonney2k	and then gsoc
+@sonney2k	n4nd0, this kernel is really weird
+@sonney2k	looks like it is not positive
+@sonney2k	but the result makes sense
+@sonney2k	I assume that the red block are just the 'A's
+ n4nd0	yes
+@sonney2k	and the blue block where the ones with A and C
+ n4nd0	yes
+@sonney2k	and since it computes all possible local alignments between to sequences
+ n4nd0	and now there is a new block with darker blue that corresponds to only 'C's
+@sonney2k	we did have a quite inhomogenious blue block
+@sonney2k	the problem really is that 'AAA's align very well
+@sonney2k	so they will have the highest score
+ n4nd0	sonney2k: how do see that it doesn't look positive? (I guess positive semi-definite)
+@sonney2k	and there are not that many alignments of sequences that have a C
+@sonney2k	n4nd0, it's diagonal should have the largest values
+@sonney2k	in any case IMHO sanity check passed
+@sonney2k	just do the same with the other 2 string kernels
+ n4nd0	sonney2k: mmm OligoKernel gives me a completely uniform matrix
+ n4nd0	all values equal to 1
+@sonney2k	investigating
+@sonney2k	n4nd0, do the other in the meantime
+ n4nd0	size_cache=10, k=3, width=1.2
+ n4nd0	PolyKernel is the other one I guess
+ n4nd0	ah no
+ n4nd0	SimpleLocalityImproved
+@sonney2k	try a much larger width
+@sonney2k	say sth like length of the strings
+ n4nd0	still the same with width 50
+@sonney2k	that's weird
+ shogun-buildbot	build #974 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/974  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ n4nd0	sonney2k: and the last one looks pretty weird too
+ n4nd0	maybe I set nonsense parameters: length=5, inner_degree=5, outer_degree=1
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * dc0b603 / src/shogun/kernel/string/LocalAlignmentStringKernel.cpp: https://github.com/shogun-toolbox/shogun/commit/dc0b60389353019bbb2454a4b287346dbf22b83f
+ shogun-notifier-	shogun: add missing include to fix compile error
+@sonney2k	n4nd0, image?
+@sonney2k	could you try inner_degree=1
+ n4nd0	https://dl.dropbox.com/u/11020840/2013-03-30-124548_1600x900_scrot.png
+ n4nd0	that is with inner_degree=5, let me change
+@sonney2k	this certainly needs some normalization too
+ n4nd0	https://dl.dropbox.com/u/11020840/2013-03-30-124805_1600x900_scrot.png
+ n4nd0	with inner degree 1, ^
+ shogun-buildbot	build #1031 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1031
+@sonney2k	n4nd0, strange
+-!- travis-ci [~travis-ci@ec2-107-21-142-105.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/5919085
+-!- travis-ci [~travis-ci@ec2-107-21-142-105.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	n4nd0, please email me the code I will have to investigate
+ n4nd0	sonney2k: ok
+ n4nd0	sent
+ shogun-buildbot	build #848 of deb2 - static_interfaces is complete: Failure [failed test python_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/848  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #975 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/975  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ n4nd0	ok, I've got a plane to take :) see you on Tuesday again
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ wiking	sonney2k: can u plz change fbsd bot to clang
+ wiking	it should be fine now...
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- lambday [0e8b614d@gateway/web/freenode/ip.14.139.97.77] has quit []
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection reset by peer]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	shogun-buildbot, force build "bsd1 - libshogun"
+ shogun-buildbot	build forced [ETA 5m38s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	Hey! build bsd1 - libshogun #843 is complete: Success [build successful]
+ shogun-buildbot	Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/843
+@sonney2k	wiking ^ all good
+ blackburn	sonney2k: did you notice anything wrong with these kernels?
+@sonney2k	blackburn, LocalAlignment kernel looked ok
+@sonney2k	I still have to check the others
+ blackburn	so what to do with it then?
+@sonney2k	I've changed the default kernel normalizer to something I consider more reasonable - just generate new data for the la-kernel and good
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 640ab7f / src/shogun/kernel/string/SimpleLocalityImprovedStringKernel.cpp: https://github.com/shogun-toolbox/shogun/commit/640ab7f4a1bf93d0c073e662ae59babac77d5c2d
+ shogun-notifier-	shogun: normalize diagonal to one for LIK by default
+-!- travis-ci [~travis-ci@ec2-54-234-19-227.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/5925728
+-!- travis-ci [~travis-ci@ec2-54-234-19-227.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #1032 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1032  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 39c115e / src/shogun/kernel/string/SimpleLocalityImprovedStringKernel.cpp: https://github.com/shogun-toolbox/shogun/commit/39c115eaf37ce691968d8e4a6808ef15d30acfdd
+ shogun-notifier-	shogun: include normalizer after kernel header file to fix compile error
+-!- travis-ci [~travis-ci@ec2-23-20-101-65.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/5925926
+-!- travis-ci [~travis-ci@ec2-23-20-101-65.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #1033 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1033
+@sonney2k	blackburn, I've checked the LIK kernel
+@sonney2k	it also works as I expect it to work
+ blackburn	sonney2k: quite strange it fails..
+@sonney2k	it is just that parameter choice is crucial
+ shogun-buildbot	build #849 of deb2 - static_interfaces is complete: Failure [failed test python_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/849  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	blackburn, Oligokernel is weird. I get only 1's in the km
+@sonney2k	blackburn, do you know how to see the git log when a file was moved?
+ blackburn	sonney2k: no not really
+@sonney2k	blackburn, git log --follow  shogun/kernel/string/OligoStringKernel.cpp
+ blackburn	well that's just history?
+@sonney2k	blackburn, exactly what I want
+ blackburn	dirk messages in the bottom
+ blackburn	sonney2k: did you fire him?
+ blackburn	:D
+@sonney2k	blackburn, no university kicked him out because he failed to enroll in time
+ blackburn	oh he writes poetry in commits
+@sonney2k	but we helped him to get his state back (our secretary went with him to the right people and all solved)
+@sonney2k	blackburn, I think the bug is in oligokernel for 5 years or so
+ blackburn	ha which means
+ blackburn	nobody is using it
+@sonney2k	yes implementation in shogun is too slow anyway and the WD kernels are just much much more fast
+@sonney2k	in 2009 I 'slightly sped up the oligokernel' haha
+@sonney2k	maybe it is broken since then
+ shogun-buildbot	build #976 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/976  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ blackburn	argh another day of dental thing is setting me to sleep
+ blackburn	sonney2k: I am now spending each saturday at dentist :D
+ blackburn	sonney2k: I'll take a look at sgd again tomorrow
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+--- Log closed Sun Mar 31 00:00:18 2013

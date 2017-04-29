@@ -1,0 +1,494 @@
+--- Log opened Wed May 16 00:00:40 2012
+-!- emrecelikten [~Anubis@217.131.4.22] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- av3ngr [av3ngr@nat/redhat/x-yunsofbtsbsqzqam] has joined #shogun
+-!- wiking [~wiking@c-98-231-171-175.hsd1.md.comcast.net] has joined #shogun
+-!- wiking [~wiking@c-98-231-171-175.hsd1.md.comcast.net] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- emrecelikten [~Anubis@217.131.4.22] has quit [Read error: Connection reset by peer]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- av3ngr [av3ngr@nat/redhat/x-yunsofbtsbsqzqam] has quit [Remote host closed the connection]
+-!- av3ngr [av3ngr@nat/redhat/x-zfabiwenfrymddtr] has joined #shogun
+ CIA-113	shogun: iglesias master * r22685c6 / src/shogun/features/DotFeatures.cpp : * minor indent fix in DotFeatures - http://git.io/3SJosQ
+ CIA-113	shogun: iglesias master * r07bc029 / (2 files): * minor indent fixes - http://git.io/0Yrjng
+ CIA-113	shogun: iglesias master * rf586c7e / (2 files): * minor fixes - http://git.io/dMYIaQ
+ CIA-113	shogun: Soeren Sonnenburg master * r6051a71 / (5 files in 2 dirs): Merge pull request #530 from iglesias/fix-indent - http://git.io/m9hqOA
+-!- gsomix [~gsomix@188.168.2.22] has quit [Ping timeout: 245 seconds]
+-!- VarAgrawal [cf2e371e@gateway/web/freenode/ip.207.46.55.30] has joined #shogun
+-!- VarAgrawal [cf2e371e@gateway/web/freenode/ip.207.46.55.30] has quit [Client Quit]
+-!- wiking [~wiking@c-98-231-171-175.hsd1.md.comcast.net] has joined #shogun
+-!- wiking [~wiking@c-98-231-171-175.hsd1.md.comcast.net] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Client Quit]
+-!- av3ngr [av3ngr@nat/redhat/x-zfabiwenfrymddtr] has quit [Quit: That's all folks!]
+-!- blackburn [~qdrgsm@188.122.250.167] has joined #shogun
+ CIA-113	shogun: Sergey Lisitsyn master * rf4b1c9e / (9 files in 2 dirs): Restored data in ASP (+7 more commits...) - http://git.io/sSAn7A
+ blackburn	whoa I shouldn't did that
+ shogun-buildbot	build #943 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/943  blamelist: vipin@cbio.mskcc.org
+-!- n4nd0 [~nando@n173-p203.kthopen.kth.se] has joined #shogun
+-!- gsomix [~gsomix@188.168.13.216] has joined #shogun
+ gsomix	hi all
+ blackburn	the optics expert in da house
+ gsomix	blackburn, huh :]
+ n4nd0	hi gsomix
+-!- wiking [~wiking@c-98-231-171-175.hsd1.md.comcast.net] has joined #shogun
+-!- wiking [~wiking@c-98-231-171-175.hsd1.md.comcast.net] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- n4nd0 [~nando@n173-p203.kthopen.kth.se] has quit [Read error: Operation timed out]
+-!- n4nd0 [~nando@n173-p203.kthopen.kth.se] has joined #shogun
+-!- wiking [~wiking@70.42.157.22] has joined #shogun
+-!- wiking [~wiking@70.42.157.22] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Client Quit]
+ n4nd0	sonne|work: hi! do you have a moment?
+ sonne|work	n4nd0: whats up?
+ n4nd0	sonne|work: so I have been thinking about the features issue we talked about
+ n4nd0	sonne|work: I am not sure if I am getting the design properly
+ n4nd0	take a look here a moment
+ n4nd0	http://dl.dropbox.com/u/11020840/FeaturesSO.pdf
+ n4nd0	so in the VanillaSOMachine
+ n4nd0	I see that we can use this CJointFeatures::dot and pass it the weight vector
+ n4nd0	to compute a dot product w*psi(x,y)
+ n4nd0	BUT
+ n4nd0	inside this method dot, I don't think we can avoid computing psi(x,y) explicitily
+ n4nd0	we need a function there that computes psi(x,y) and returns an SGVector or an SGSparseVector
+ n4nd0	sonne|work: or did I miss something?
+ sonne|work	n4nd0: that is half true
+ n4nd0	tell me the other half then ;)
+ sonne|work	n4nd0: you only have to have a way to compute the non-zero indices of psi(x,y)
+ sonne|work	so for very sparse Psi/x/y this can be *a lot* less work
+ sonne|work	for example consider you have sparse x with say 1% of the components non-zero
+ sonne|work	and Psi(x,y) is some block thing (x for each y stacked together) you have to touch just 1% of the data
+ n4nd0	well I understand that is an example of when one would like to return an SGSparseVector
+ sonne|work	why?
+ n4nd0	then a function Psi(x,y) that returns a vector is required in the model
+ sonne|work	the dot product returns just a scalar
+ sonne|work	so you need to touch only 1% of the components of w
+ n4nd0	sorry not to return ^, but to use SGSparseVector in the dot product
+ sonne|work	n4nd0: the dense_dot() function is supposed to return just one scalar
+ n4nd0	yes
+ sonne|work	so you never have to compute anything else other than this dot product
+ sonne|work	but instead of precomputing some vector you directly compute the dot product
+ sonne|work	so instead of computing a sparse vector, you look up the indices of w - and you only need to look at these indexes that Psi(x,y) is non-zero) multiply with the Psi value and sum them up and return the result
+ n4nd0	mmm woulnd't the trick be not to compute the elements of Psi(x,y) which corresponding w element is zero?
+ sonne|work	no
+ n4nd0	I am reading it as: instead of Psi(x,y)?w, do f(x,y,w)
+ sonne|work	the trick is to not compute Psi(x,y) for dims which are 0
+ n4nd0	how can you know where Psi(x,y) is zero before computing it?
+ sonne|work	n4nd0: because you know psi
+ sonne|work	in the simplest case psi is the identity
+ sonne|work	wrt x and block structure wrt y
+ n4nd0	I am sorry but I think I don't see it
+ sonne|work	have a look at e.g.shogun/src/shogun/features/SparseFeatures.cpp  line 307ff
+ sonne|work	or shogun/features/PolyFeatures.cpp line 143ff
+ sonne|work	or shogun/features/ImplicitWeightedSpecFeatures.cpp lines 172ff
+ n4nd0	sonne|work: I am afraid that we may be talking about different things
+ n4nd0	the function Psi is not a doc product
+ n4nd0	dot*
+ sonne|work	n4nd0: we are talking about Psi(x,y)?w
+ sonne|work	right?
+ n4nd0	we are talking about the possibility of not computing Psi(x,y) explicitily and doing the product Psi(x,y)?w
+ sonne|work	which is computing Psi(x,y)?w :)
+ n4nd0	ok :)
+ sonne|work	and that is what these functions above do
+ sonne|work	with a more simple Psi not dependent on y
+ n4nd0	I but all those functions above have the equivalent to Psi(x,y) already computed
+ sonne|work	no
+ n4nd0	remove I ^
+ sonne|work	they compute the index to the non-zero idx=Psi(x)
+ sonne|work	idx of Psi(x)
+ n4nd0	from PolyFeatures
+ n4nd0	for (int j=0; j<vec2_len; j++)
+ n4nd0	{
+ n4nd0	float64_t output=m_multinomial_coefficients[j];
+ n4nd0	for (int k=0; k<m_degree; k++)
+ n4nd0	{
+ n4nd0	output*=vec[m_multi_index[cnt]];
+ n4nd0	cnt++;
+ n4nd0	}
+ n4nd0	sum+=output*vec2[j];
+ n4nd0	}
+ n4nd0	there the loop is done for all the elements
+ n4nd0	the loop on j
+ sonne|work	n4nd0: well x is considered to be dense here
+ n4nd0	and in the case it is sparse you will just jump over the zero elements
+ n4nd0	but that can be done because you know the elements that are zero
+ n4nd0	then you already know this Psi(x)
+ sonne|work	n4nd0: no I don't jump over zero elements
+ sonne|work	I only touch the non-zero ones
+ sonne|work	because I only store those
+ sonne|work	that would be the sparsefeatures example
+ sonne|work	please paste it too :)
+ n4nd0	yes, I understand that case
+ sonne|work	ok
+ sonne|work	by doing it this way you can support dense and sparse x
+ sonne|work	and even strings etc
+ sonne|work	in the same framework
+ n4nd0	so what you suggest is, instead of defining Psi(x,y), an application dependent function in SO
+ n4nd0	let's define Psi(x,y)*w
+ sonne|work	yes
+ sonne|work	whcih also defines w <- w + alpha*psi(x,y)
+ sonne|work	same principle...
+ sonne|work	n4nd0: note that this enabled me to train on 50mio examples in a 10 million dimensional feature space
+ sonne|work	of-the-shelve-machine
+ n4nd0	sonne|work: :)
+ sonne|work	I can tell that this trick is much better than thinking about kernels and SO
+ n4nd0	sonne|work: where does this come from by the way?
+ sonne|work	what?
+ n4nd0	the trick
+ sonne|work	it is mine...
+ sonne|work	n4nd0: this paper with vojtech http://sonnenburgs.de/soeren/publications/SonFra10.pdf
+ n4nd0	sonne|work: I am going to read it, I hope it will help me to understand better what I've to do here
+ n4nd0	and more important, why ;)
+ CIA-113	shogun: Soeren Sonnenburg master * ra60c648 / (9 files in 3 dirs): Merge pull request #527 from pluskid/multiclass-ecoc (+5 more commits...) - http://git.io/aeaOjg
+ sonne|work	n4nd0: one big advantage is that you have to develop just one SO learning algorithm
+ sonne|work	n4nd0: that algorithm will work with all feature types, dense, sparse, strings etc
+ sonne|work	no need to change a line
+ n4nd0	sonne|work: that sounds very nice
+ sonne|work	n4nd0: for example linear svms are usually tweaked for sparse data
+ sonne|work	but since we have dotfeatures in shogun
+ sonne|work	we have them tweaked for sparse, dense, strings...
+ sonne|work	and one can even mix (as in concatenate) dense and sparse features...
+ n4nd0	CombinedDotFeatures
+ sonne|work	so if you want speed and kernels are no option (which they are not for SO) you want that
+ n4nd0	sonne|work: why is it that kernels cannot be used in SO?
+ n4nd0	where does the lack of speed come from?
+ sonne|work	kernel evaluations everywhere
+-!- nicococo [~nico@lacedcoffee.ml.tu-berlin.de] has joined #shogun
+ n4nd0	hey nicococo!
+ nicococo	buenos fernando
+ n4nd0	buenas Nico ;)
+ n4nd0	nicococo: sonne|work suggested to move our discussions to the channel here, is that ok for you?
+ nicococo	the sonney.. well why not :)
+-!- emrecelikten [~Anubis@217.131.4.22] has joined #shogun
+ n4nd0	nicococo: so a couple of things I wanted to let you know about
+ sonne|work	nicococo: any objections in using COFFIN aka dotfeatures from the beginning for SO stuff?
+ nicococo	one thing i would change for so toolbox is the CStructuredLoss
+ sonne|work	s/in/to
+ n4nd0	nicococo: it is about the loss that I wanted to tell you
+ n4nd0	nicococo: look http://www.shogun-toolbox.org/doc/en/current/classshogun_1_1CLossFunction.html
+ n4nd0	I think this is exactly what we need, and it is already in shogun
+ nicococo	i suspected that ;)
+ n4nd0	I should have looked for it from the beginning, my bad :D
+-!- Francis_Chan [~Adium@58.194.224.120] has joined #shogun
+ nicococo	but i am not sure it is applicable here  ..
+ n4nd0	why so?
+ nicococo	loss(prediction, label)
+ nicococo	that's fine for svm loss(pred,label) = max(0,1-label*pred) but not so for so
+ nicococo	(structured output)
+ n4nd0	nicococo: maybe this one then http://www.shogun-toolbox.org/doc/en/current/classshogun_1_1CLoss.html
+ nicococo	we need a loss(x)
+ nicococo	yeah.. that is what i am looking for :)
+ n4nd0	but I don't really like how it is implemented there ... with macros
+ n4nd0	I would prefer something similar to the CLossFunction I showed you before
+ nicococo	yep and second derivative is missing
+ nicococo	i know you think it is more elegant, right..
+ nicococo	but they don't make a big difference.. so it is unlikely to play a lot (at least with convex ones) with loss functions in your application
+ n4nd0	nicococo: what about what you said in the beginning, what would you change of CStructuredLoss?
+ n4nd0	aham, I see
+ nicococo	when you say structured loss everybody expects the delta loss and not the surrounding loss function
+ nicococo	just a matter of naming
+ n4nd0	nicococo: yeah, I agree with you, it is confusing to use that name
+ nicococo	anyway, is there a possibility to extend the CLossFunction in our sense??
+ n4nd0	yes
+ n4nd0	I think that is the best possibility
+ nicococo	it would be nice to use them, right?
+ n4nd0	to put there some methods loss(z)
+ n4nd0	first_derivative(z)
+ n4nd0	and so on
+ nicococo	and some indicator functions (convex,smooth,...)
+ n4nd0	these are just like constants for every loss function right?
+ nicococo	yep
+ n4nd0	is it interesting to have them as indicator functions for any special reason?
+ n4nd0	or boolean members are just fine
+ n4nd0	stupid question, already in gist...
+ nicococo	well when you use a CRF and have a loss function which states smooth=1 then you can use LBFGS which should be faster than any non-smooth optimization
+ n4nd0	all right
+ n4nd0	nicococo: now related to what sonne|work asked you about COFFIN, we have been discussing about it for quite a while :D
+ nicococo	ohh.. wait one more issue
+ n4nd0	yeah tell me
+ nicococo	you added an apply-function for the SOMachine.. put this should be only a wrapper calling the apply-function of SOModel (which is missing)
+ nicococo	the reason is that in SOModel is already the argmax (=apply) code that is application specific
+ n4nd0	aham I see
+ n4nd0	not exactly a wrapper though, I think
+ n4nd0	since argmax does it just for one feature vector and apply may work on a whole set of features
+ n4nd0	but it should be basically to call iteratively argmax
+ n4nd0	or?
+ nicococo	so, if apply is for multiple samples then yes
+ n4nd0	it may be for multiple or just for one, it depends on the arguments (it is overloaded)
+ n4nd0	apply() -> the whole CFeatures* member
+ n4nd0	apply(CFeatures*) -> all the features in the argument
+ nicococo	okay..
+ n4nd0	apply(int) -> just to the indexed
+ nicococo	so, overall a pretty nice job so far :) i am almost sure it will work
+ nicococo	99%
+ n4nd0	:)
+ nicococo	wanna talk about the test application?
+ n4nd0	can we talk a moment about the COFFIN thing?
+ n4nd0	I have been a bit stuck with that
+ n4nd0	I understand that the idea would we to provide functions in CStructuredModel to compute w*Psi(x,y) and w <- w + alpha*Psi(x,y)
+ n4nd0	instead of the actual Psi(x,y)
+ nicococo	okay
+ nicococo	is the sunny-boy here and can give some ideas?
+ n4nd0	sonne|work: around?
+ nicococo	coffin
+ nicococo	did you already talked to fernando about that?
+ sonne|work	y
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+ n4nd0	nicococo: but do you thing that the function definitions will change a lot?
+ nicococo	well that was a short.. n4and0 soeren suggested to put additional functions into SOModel?
+ n4nd0	nicococo: http://www.shogun-toolbox.org/irclogs/%23shogun.2012-05-16.log.html
+ n4nd0	take a look from 14:59
+ n4nd0	I think that is interesting that
+ n4nd0	sonne|workn4nd0: one big advantage is that you have to develop just one SO learning algorithm15:50
+ n4nd0	sonne|workn4nd0: that algorithm will work with all feature types, dense, sparse, strings etc
+ n4nd0	since it covers what you said the last day about supporting sparse representation of the joint features
+ nicococo	yep, i have read the coffin paper but never worked with it, so i have no experience at all here ... i guess the trick is to find a way around dot-product here, right?
+ nicococo	is it an application thing (SOModel) or more a linear learning machine thing (LinearSOMachine). i prefer the latter one
+ n4nd0	I thought of that
+ n4nd0	I think it is an application thing
+ n4nd0	since we cannot make an abstraction on how Psi looks internally for this
+ nicococo	it is not completely uncoupled. but it is concerned with the representation while learning which is a machine thing ..
+ nicococo	computation of the dotproduct w'psi
+ n4nd0	in order to do w*Psi(x,y) without computing Psi(x,y) explicitily, it is required to know what Psi does
+ n4nd0	I am trying to think of it as a representation thing not learning
+ nicococo	thats true, if you need to know, then it has to be in the SOModel.. but what about the CResult struct .. it is rendered useless, right
+ n4nd0	yeah, this definetely changes CResult
+ nicococo	i mean, you need a special SOModel and a special LearningMachine
+ n4nd0	I don't think you need a spacial LearningMachine for it
+ nicococo	then we have to change the interface again...
+ n4nd0	it is just like instead of making a function Psi(x,y) in the model
+ n4nd0	we do another f(v,x,y) = v*Psi(x,y)
+ n4nd0	where v is any vector
+ nicococo	instead of computing w'psi in the learning machine it is moved to SOModel
+ n4nd0	yes
+ n4nd0	later, from the learning machine, one call it as f(w,xi,yi)
+ n4nd0	does that make sense for you?
+ nicococo	yes
+ n4nd0	I think it makes too, but this consideration is quite general
+ nicococo	well maybe it works perfectly in general
+ nicococo	but i don't know
+ nicococo	yet
+ n4nd0	it could be a good idea to think how this would change the function in a particular example, let's say hmm
+ nicococo	(crf, so-svm, optimization schemes.. what about latent structures)
+ n4nd0	at first sight it could be applied to latent defining a function g(w,h,x,y)
+ nicococo	for hmm the computations are okay with that (i am pretty sure)
+ n4nd0	where h in the latent feature vector
+ n4nd0	but I should talk to wiking about it first
+ nicococo	but you need to construct one contraint per iteration where you need aaccess to the psi(x_i,y_i)-psi(x_i,y_hat)
+ n4nd0	is it that in the latent or the general case?
+ nicococo	in the general case
+ n4nd0	do you mean https://gist.github.com/2634487 lines 35 and 36?
+ nicococo	okay.. i think the coffin idea may work for algorithm where you can explicitly access the dot-products, right
+ nicococo	?
+ nicococo	but when you have a generic QP solver that is not the case
+ n4nd0	when you said psi(x_i,y_i)-psi(x_i,y_hat)
+ n4nd0	is it that for doing w*( psi(x_i,y_i)-psi(x_i,y_hat) ) ??
+ n4nd0	or the other way round in the difference according to the gist
+ nicococo	in the gist on line 40
+ n4nd0	solve qp??
+ nicococo	you call a QP solver with a inequality constraint matrix A
+ nicococo	Ax <= b
+ nicococo	this matrix A has a block structure and containts all psi(x_i,y_i)-psi(x_i,y_hat) ever constructed
+ nicococo	(here x has also a block structure and contains our solutaion vector w)
+ n4nd0	what do you mean with block structure?
+ nicococo	if you solve a primal svm
+ nicococo	the solution vector x (delivered by QP solver) consists of [w, slacks]
+ nicococo	so this is a block structure
+ n4nd0	ok
+ nicococo	nothing special, just that the vector consists of several variables
+ nicococo	but if we need the psi-psi_hat then for this machine the coffin makes no sense, right?
+ n4nd0	why? In order to do that operation?
+ nicococo	because we cannot replace the dot-product calculation of the qp-solver
+ n4nd0	but we can give it directly psi-psi_hat
+ nicococo	but then we need an explicit vector for that.. the coffin idea is to avoid that if i understand it correctly
+ nicococo	(e.g. when using 100mio dimensions)
+ n4nd0	we can still avoid it when we do w*Psi(x,y)
+ n4nd0	in the other cases, to pass it to the QP solver, we can just give it Psi-Psi_hat directly
+ nicococo	still an explicit vector
+ n4nd0	yes, that's true ...
+ n4nd0	I don't know, I am kind of confused with this coffin idea
+ n4nd0	:(
+ nicococo	me too :))
+@sonney2k	guys then read the paper
+ nicococo	read it already.. there are some brackets missing :)
+@sonney2k	nicococo, heh
+ n4nd0	sonney2k: I have read half of it
+ nicococo	table 1 ;)
+@sonney2k	nicococo, isn't Psi huge in practise?
+@sonney2k	c
+@sonney2k	how can you even solve it?
+ nicococo	well if you think 2000 is huge
+@sonney2k	I mean when you have Psi-Psi_hat's - and I guess one per iteration?
+ nicococo	yes
+@sonney2k	so your feature space is exploding with #iterations?
+@sonney2k	or do you compress them somehow?
+ nicococo	no not my feature space it is the amount of constraints given to the qp solver
+ nicococo	feature space still doesn't exceed 10000 dims
+ nicococo	and stays the same in one application
+ nicococo	so, i understand when using coffin, one can use high dim feature spaces, right?
+ nicococo	but you have to replace any dot-product
+@sonney2k	yeah but it is #iterations * dim(Psi-Psi_hats)
+@sonney2k	so the only idea I have here is to return a sparse result for a Psi-Psi_hat difference
+@sonney2k	nicococo, yup
+ nicococo	well, the difference is usually dense
+@sonney2k	w <- alpha w*Phi(x)
+ nicococo	this means that using coffin in the whole application and then calling a qp solver makes no sense, right?
+@sonney2k	nicococo, these ops http://shogun-toolbox.org/doc/en/current/classshogun_1_1CDotFeatures.html
+@sonney2k	nicococo, not true
+@sonney2k	it makes sense
+ nicococo	?
+@sonney2k	one could use million dim feature spaces
+@sonney2k	on many sequences /inputs
+ nicococo	(with qp solver i mean mosek or something where i don't have access to)
+@sonney2k	that fit in memory
+@sonney2k	which wouldn't otherwise
+@sonney2k	you just have to have few iterations to get convergence
+@sonney2k	we have the same problem with ocas
+@sonney2k	(primal CP svm)
+ nicococo	 if i cannot access the solveer to replace the w'psi ?
+@sonney2k	but usually things converge fast
+@sonney2k	nicococo, yes you explicitly compute psi-psi_hat
+@sonney2k	but you just have these things a few hundred times
+@sonney2k	and so can probably only use million dim spaces
+ nicococo	again, for using that trick i need to avoid expand the feature vectors, right or wrong?
+@sonney2k	wrong
+@sonney2k	you can do that
+@sonney2k	just not very often
+@sonney2k	if you have say 100000 sequences
+@sonney2k	you don't need to compute psi for all of them upfront
+ nicococo	okay, i see what you mean..
+@sonney2k	just for your solver
+@sonney2k	so you can squeeze them in memory
+@sonney2k	can work with any kind of input features (strings, sparse, dense vectors)
+ nicococo	but for the vanilla linear so svm with say mosek  i don't gain anything
+@sonney2k	yes for the solver not
+@sonney2k	but I suspect that won't take most time anyway but argmax etc
+ blackburn	oh how many messages..
+@sonney2k	blackburn, have you been hiding under a rock again?
+ nicococo	but when i start writing my own solver based on unconstrained formulations i can possibly gain a lot
+@sonney2k	nicococo, indeed
+ blackburn	sonney2k: something like that
+@sonney2k	liblinear etc can directly use that
+@sonney2k	nicococo, ocas also has the same problem
+@sonney2k	we have to store the CP
+* sonney2k has to leave the train
+@sonney2k	...soon
+ nicococo	a bientot
+@sonney2k	so I guess uricamics
+@sonney2k	stuff will help here too
+@sonney2k	(fewer iterations)
+@sonney2k	and vojtech knows ocas and coffin...
+* sonney2k off
+ n4nd0	nicococo: so what do you think then?
+ n4nd0	should we define these functions w*Psi(x,y) too?
+ nicococo	n4nd0: it is much clearer know :) and still interesting but need more time to think about it therefore i suggest to start the test multiclass application, what do you think?
+ n4nd0	nicococo: agree
+ nicococo	should we talk friday again??
+ n4nd0	nicococo: sure
+ n4nd0	nicococo: I will fix the loss issue and start with the vanilla SO finally
+ n4nd0	luckily we will be able to discuss about the multiclass application on Friday ok?
+ nicococo	n4nd0: good idea.. and good work too!
+ n4nd0	thank you!
+ n4nd0	I have to go now running :)
+ nicococo	see you on friday (i go biking)
+-!- Francis_Chan1 [~Adium@2001:da8:203:1823:ddae:d847:31d9:bf46] has joined #shogun
+ n4nd0	running = I'm a rush :P
+ nicococo	:)
+ n4nd0	in
+ n4nd0	bye!
+ nicococo	bye
+-!- n4nd0 [~nando@n173-p203.kthopen.kth.se] has quit [Quit: leaving]
+-!- nicococo [~nico@lacedcoffee.ml.tu-berlin.de] has left #shogun []
+-!- Francis_Chan [~Adium@58.194.224.120] has quit [Ping timeout: 244 seconds]
+-!- gsomix [~gsomix@188.168.13.216] has quit [Ping timeout: 245 seconds]
+-!- Francis_Chan1 [~Adium@2001:da8:203:1823:ddae:d847:31d9:bf46] has quit [Quit: Leaving.]
+ blackburn	sonney2k: I am really dying with removing vec_index!
+-!- blackburn [~qdrgsm@188.122.250.167] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.122.250.167] has joined #shogun
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Quit: Page closed]
+-!- Marty28 [~marty@cable-158-181-77-81.cust.telecolumbus.net] has joined #shogun
+-!- Marty28 [~marty@cable-158-181-77-81.cust.telecolumbus.net] has quit [Quit: Colloquy for iPad - http://colloquy.mobi]
+-!- blackburn [~blackburn@188.122.250.167] has quit [Quit: Leaving.]
+-!- blackburn [~qdrgsm@188.122.250.167] has joined #shogun
+@sonney2k	blackburn, dying is no option!
+@sonney2k	shall I do it or what?
+ blackburn	sonney2k: no I'll continue
+ blackburn	sonney2k: but I would rather do it sgreferenced data first
+@sonney2k	blackburn, it really looks like piece of cake
+ blackburn	sonney2k: removing index?
+@sonney2k	blackburn, give me 10 minutes - it really should be easy
+@sonney2k	yes
+ blackburn	hmm it is referenced from sparse features, ascii file, etc
+ blackburn	and even in typemaps
+ blackburn	I gave up in typemaps
+@sonney2k	whatever let me just do it
+ blackburn	sonney2k: it is up to you - I can continue
+@sonney2k	IMHO very little work but we will see
+@sonney2k	woah git pull is taking ages..
+ blackburn	yes it is slow today
+ blackburn	sonney2k: have you seen my commit on merging new asp version?
+@sonney2k	yeah
+ blackburn	I am afraid it was mistake but no idea whether I should revert it
+ blackburn	student of gunnar asked me to merge it
+@sonney2k	no idea - I don't have time to maintain it...
+@sonney2k	vipin?
+ blackburn	yes
+@sonney2k	yeah
+@sonney2k	he takes care of these things at least a bit
+@sonney2k	pull finished
+ blackburn	I said that he should rather use PR
+* sonney2k removes stuff
+ blackburn	but merged for the first time
+ blackburn	sonney2k: wait wait
+ blackburn	I can commit my changes
+ blackburn	shall I?
+@sonney2k	no
+ blackburn	I'll continue with openmp then
+-!- gsomix [~gsomix@37.61.181.74] has joined #shogun
+@sonney2k	blackburn, I think there is one possible use case for vec_index ... when one uses caching of vectors...
+@sonney2k	together with subsets
+@sonney2k	then one would need the orig index...
+ blackburn	sonney2k: yes I saw something like that
+@sonney2k	but crap we should simplify that
+ blackburn	sonney2k: I do not think we should focus on that right now
+@sonney2k	and remove caches etc and only when we really need them do better versions...
+ blackburn	just stay as it is
+ blackburn	sonney2k: how cool compilation is with ccache :D I found out what was wrong 1-2 weeks ago
+ blackburn	'sudo make' breaks everything
+@sonney2k	?
+ blackburn	sonney2k: if I do 'sudo make' ccache is not used
+ CIA-113	shogun: Soeren Sonnenburg master * red95843 / (26 files in 6 dirs): drop vec_index from SGSparseVector - http://git.io/1QhrrQ
+ blackburn	hmm so simple
+ blackburn	gsomix: so how it is with directors?
+@sonney2k	blackburn, I hope I didn't miss a corner case though
+* sonney2k continues with Labels
+ blackburn	hmm my openmp dotfeatures are seems to be b0rken
+ shogun-buildbot	build #239 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/239
+ blackburn	sonney2k: OctaveInterface.cpp:352: error: 'struct shogun::SGSparseVector<double>' has no member named 'vec_index'
+ gsomix	blackburn, nohow.
+ shogun-buildbot	build #946 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/946
+ shogun-buildbot	build #866 of cmdline_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/866  blamelist: sonne@debian.org
+ shogun-buildbot	build #845 of r_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/845  blamelist: sonne@debian.org
+ shogun-buildbot	build #755 of octave_static is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/755  blamelist: sonne@debian.org
+ shogun-buildbot	build #832 of python_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/832  blamelist: sonne@debian.org
+ blackburn	nice
+ CIA-113	shogun: Soeren Sonnenburg master * r3db552b / examples/undocumented/libshogun/features_copy_subset_sparse_features.cpp : just use i for vector index in examples - http://git.io/9TIR0w
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Ping timeout: 244 seconds]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ shogun-buildbot	build #833 of python_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/833
+ shogun-buildbot	build #867 of cmdline_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/867
+ shogun-buildbot	build #846 of r_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/846
+-!- wiking [~wiking@c-98-231-171-175.hsd1.md.comcast.net] has joined #shogun
+-!- wiking [~wiking@c-98-231-171-175.hsd1.md.comcast.net] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ wiking	morning :D
+ blackburn	O_O
+ blackburn	ah right use
+ blackburn	usa :D
+ wiking	:P
+ blackburn	wiking: what is conf?
+ CIA-113	shogun: Sergey Lisitsyn master * r7e00d0e / (src/shogun/features/Labels.cpp src/shogun/features/Labels.h): Added get_binary_for_class method that presents multiclass labels as binary subtask - http://git.io/4n-DYA
+--- Log closed Thu May 17 00:00:40 2012

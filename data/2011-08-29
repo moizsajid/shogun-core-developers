@@ -1,0 +1,382 @@
+--- Log opened Mon Aug 29 00:00:20 2011
+--- Day changed Mon Aug 29 2011
+ blackburn	55k$ per year?! the default salary in ohloh.net calculator rocks
+ blackburn	sonney2k: lets sell shogun :D
+@sonney2k	heh
+ blackburn	currently my salary is 3k/year ahaha
+ blackburn	sonney2k: make in examples currently requires doc for .class files
+ blackburn	in java
+@sonney2k	what?
+ blackburn	documentation for "MatrixTest.class" (file "descriptions/modular/MatrixTest.txt") missing
+ blackburn	documentation for "MatrixTest.java" (file "descriptions/modular/MatrixTest.txt") missing
+@sonney2k	erase the class files before doing make doc or fix the generate_documented.sh to exclude .exe  / .class files
+@sonney2k	matrix/vector test should be removed btw
+ CIA-3	shogun: Sergey Lisitsyn master * r2b3ca25 / (2 files): Remove Matrix/VectorTest from java modular examples - http://git.io/pEV2Zw
+ CIA-3	shogun: Sergey Lisitsyn master * r28ce82a / (6 files): More doc for examples - http://git.io/pTtd-w
+ CIA-3	shogun: Sergey Lisitsyn master * rfb4ddae / (20 files): Kernel examples doc - http://git.io/zFOd6Q
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+ shogun-buildbot	build #182 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org:5347/builders/libshogun/builds/182  blamelist: blackburn91@gmail.com
+ serialhex	HA!!! blackburn GOT BLAMED!!!!!  IT'S UR FAULT!!!!!!
+ serialhex	btw, is sonney2k around still??
+ serialhex	hmm, asleep probably, i'll e-mail ya the problem i'm getting (same problem, 2 files)
+ blackburn	serialhex: definitely not my fault ;)
+ serialhex	no?? shogun-buildbot says different: "blamelist: blackburn91@gmail.com"
+ blackburn	yeah but take a look on log
+ blackburn	compiler got segfault hah
+ serialhex	ooh, lovely!
+ serialhex	you just got blamed b/c you were the last to commit, and with a bunch of textfiles
+ blackburn	yeah
+ serialhex	i would think it would blame everyone who commited between the time it last built & the time it compiled
+ serialhex	hey, do you have python modular compiled & installed??
+ serialhex	^ blackburn
+ blackburn	serialhex: I could compile now
+ serialhex	well i want to test something, if it's not too much of a pain for you
+ serialhex	though the ruby would be better
+ shogun-buildbot	build #163 of octave_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org:5347/builders/octave_modular/builds/163  blamelist: blackburn91@gmail.com
+ serialhex	cause then i could give you the code thats bein a pain for me
+ blackburn	so what to install?
+ blackburn	ruby-modular?
+ shogun-buildbot	build #147 of ruby_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org:5347/builders/ruby_modular/builds/147  blamelist: blackburn91@gmail.com
+ blackburn	buildbot goes crazy
+ blackburn	serialhex: got python installed, what to do?
+ serialhex	see if distribution_histogram_modular.py in examples/undoc.../pyth_mod works
+ serialhex	(yes, ui'm lazy)
+ serialhex	when i run the ruby version iget a wonky error, and i'm not sure if it's just ruby or if it's shogun in general
+ blackburn	serialhex: yeah it works
+ blackburn	what is the error you get?
+ serialhex	...i'll gist it
+ serialhex	https://gist.github.com/1fe53c321c001132e6c4
+ serialhex	maybe it's soemthing silly i'm missing in the translation between python & ruby....
+ serialhex	^ blackburn
+ shogun-buildbot	build #174 of cmdline_static is complete: Exception [exception git]  Build details are at http://www.shogun-toolbox.org:5347/builders/cmdline_static/builds/174  blamelist: blackburn91@gmail.com
+ shogun-buildbot	build #152 of python_modular is complete: Exception [exception git]  Build details are at http://www.shogun-toolbox.org:5347/builders/python_modular/builds/152  blamelist: sonne@debian.org
+ blackburn	serialhex: yeah I know what the error is
+ serialhex	??? please tell!!!
+ blackburn	serialhex: check if your load_dna removes '\n' char
+ blackburn	if yes so it could be typemap error
+ serialhex	hmm, ok
+ blackburn	serialhex: there are 120 lines in fm_test_dna.dat
+ blackburn	err
+ blackburn	92 in train_dna
+ serialhex	hmm, it was joining them nto an array, each line a new element in the array
+ blackburn	so hist[0]=92
+ blackburn	is number of '\n's
+ blackburn	does it remove \n char?
+ serialhex	yes, it did, but then i changed it to put the entire file into the array, or just use the entire file, nothing :(
+ blackburn	serialhex: try to cut lines
+ serialhex	hmm... something wonky is going on...
+ blackburn	e.g. take half of all of them
+ serialhex	oh, derr....
+ blackburn	if it is still failing - I suspect only typemap
+ blackburn	serialhex: so how?
+ serialhex	i forgot, the version of modshogun.rb i'm using is *not* being loaded, so nothing i do in it will fix anything, but i'm going to copy it over and see if i can fix the problem...
+ blackburn	serialhex: but it is ruby load
+ blackburn	not modshogun.rb related
+ serialhex	well the modshogun.rb has the load_whatever functions in it
+ blackburn	ahhhh
+ blackburn	I see
+ blackburn	okay
+ blackburn	serialhex: just make a try with some not loaded data but ACTG
+ serialhex	hmm, ok
+ blackburn	you can be sure in this way there are no '\n'
+ serialhex	hmm... with or w/o the \n i get a new error with this: traindna = "ACTG"
+ serialhex	distribution_histogram_modular.rb:16:in `set_features': Wrong arguments for overloaded method 'StringCharFeatures.set_features'.
+ serialhex	^ is trhe new error :P
+ blackburn	serialhex: try array of "ACTG" "TCGA"
+ blackburn	[] or so don't know how it is in ruby
+ blackburn	:)
+ serialhex	nope, same error as before with traindna = ["ACTG\n", "TGCA\n"]
+ blackburn	wrong number??
+ blackburn	hmm
+ serialhex	also w/o the newlines it dosnt work...
+ serialhex	so i'm thinking the typemap...
+ blackburn	serialhex: so [] things doesn't work anyhow?
+ serialhex	nope, apparently not
+ blackburn	serialhex: so what returns load_dna ?
+ blackburn	[] too
+ blackburn	serialhex: okay sorry but it is 4-35 there already :) I have to sleep
+ serialhex	["GAGACGGACCGTATGGGCAGGAT",
+ serialhex	 "GCGCATATTGTAGAGTATGGAGG",
+ serialhex	... and so on
+ blackburn	hmm wait
+ serialhex	ok, np... i'll e-mail sonney2k & sploving
+ blackburn	so how can ["ACTG", "TACG"] doesn't
+ blackburn	work
+ blackburn	but ^ do?
+ serialhex	it dosnt
+ serialhex	none of them work
+ blackburn	serialhex: I mean when you use load_dna it have different error about alphabet?
+ blackburn	but if shorter ACTG version it says about wrong num of argz
+ serialhex	nope, when it's not in an array i get a different error, but when it's in an array i get the: [ERROR] ALPHABET too small to contain all symbols in histogram
+ blackburn	can't understand the difference between load_dna result and []
+ serialhex	with or without newlines
+ serialhex	load_dna result is a longer array
+ blackburn	serialhex: so will ["ACTG", "TACG"] produce alphabet error?
+ serialhex	yes
+ serialhex	and so will ["ACTG\n", "TGCA\n"]
+ blackburn	serialhex: how many histogram elements there are with "ACTG" ?
+ blackburn	5?
+ serialhex	2 it says
+ blackburn	no
+ blackburn	hist[] =
+ blackburn	how many records of this form ^
+ blackburn	?
+ serialhex	hist[0]=2
+ serialhex	hist[65]=2
+ serialhex	hist[67]=2
+ serialhex	hist[71]=2
+ serialhex	hist[84]=2
+ blackburn	5
+ blackburn	okay
+ blackburn	and with ACTG\n?
+ serialhex	hist[0]=2
+ serialhex	hist[10]=2
+ serialhex	hist[65]=2
+ serialhex	hist[67]=2
+ serialhex	hist[71]=2
+ serialhex	hist[84]=2
+ blackburn	serialhex: I have a fix but you probably have to recompile
+ serialhex	ok... i should prob do that anyway with the latest :P
+ blackburn	serialhex: can you please gist script you used for ^?
+ serialhex	yes
+ serialhex	https://gist.github.com/1fe53c321c001132e6c4
+ serialhex	thats the latest v of the file & error
+ blackburn	compiling
+ blackburn	serialhex: the problem is for some *STRANGE* reason baozeng copies len+1 of string chars
+ blackburn	in "in" typemap
+ serialhex	hmm, ok
+ blackburn	serialhex: so ACTG is something 6567718400
+ serialhex	ok, sounds like a fun error :P
+ shogun-buildbot	build #165 of octave_static is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org:5347/builders/octave_static/builds/165  blamelist: blackburn91@gmail.com
+ blackburn	serialhex: got wrong number of args..
+ serialhex	hmm... really?
+ blackburn	yeah
+ blackburn	strange
+ serialhex	yes, it is :-/
+ blackburn	serialhex: w/o \n produces wrong number of args
+ blackburn	w/ - alphabet error
+ serialhex	well, get to bed, i'll e-mail sonney2k & sploving about it and maybe we can come up with something?
+ serialhex	huh...
+ serialhex	i dunno :(
+ blackburn	serialhex: let they know that string takes *one* char more than needed
+ blackburn	it is pretty certain
+ serialhex	ok, will do
+ blackburn	but no fix yet
+ blackburn	okay 5-06 time to sleep ahah
+ blackburn	see you
+-!- blackburn [~blackburn@109.226.89.85] has quit [Quit: Leaving.]
+ shogun-buildbot	build #151 of r_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org:5347/builders/r_modular/builds/151  blamelist: sonne@debian.org
+-!- in3xes [~in3xes@180.149.49.227] has quit [Remote host closed the connection]
+ shogun-buildbot	build #154 of csharp_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org:5347/builders/csharp_modular/builds/154  blamelist: sonne@debian.org
+ shogun-buildbot	build #166 of octave_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/octave_static/builds/166
+ shogun-buildbot	build #164 of octave_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/octave_modular/builds/164
+@sonney2k	serialhex, seems like the NULL is in the string
+ serialhex	ahh, ok
+@sonney2k	guess the fix is trivial
+@sonney2k	just not use len+1 in the typemap but len
+ serialhex	ok cool
+ CIA-3	shogun: Soeren Sonnenburg master * r50aac3e / src/interfaces/ruby_modular/swig_typemaps.i : don't use len+1 for the string but len - http://git.io/ET0xow
+@sonney2k	this ^ should help
+ serialhex	ok, i'll pull & try
+ shogun-buildbot	build #183 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/libshogun/builds/183
+ shogun-buildbot	build #163 of python_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/python_static/builds/163
+@sonney2k	serialhex, did you make some progress on examples?
+ serialhex	i've got a bunch... i think like10-20 or something?  a lot of them just won't work though
+ serialhex	...like the preprocesor examples, i can't find the modules :-/
+@sonney2k	serialhex, what happens?
+ serialhex	well, like preprocessor_hessianlocallylinearembedding_modular.rb, i can't find a Modshogun::Hessian* anything....
+@sonney2k	serialhex, then you don't have atlas/blas/lapack installed
+ serialhex	ahh, ok
+ serialhex	where is that in debian?  just apt-get atlas??
+@sonney2k	do apt-get install libblas-dev liblapack-dev libatlas-base-dev
+@sonney2k	then recompile and then it will work
+ serialhex	ok, recompiling...  my machine is slow so i'll know later in the am
+@sonney2k	serialhex, btw we had the same issue w/ '\0' being in the string in other $LANG
+@sonney2k	so I am pretty sure that this fixes
+@sonney2k	it
+ serialhex	ahh, ok...
+ serialhex	i'll let you know tomorrow
+ serialhex	or later today :P
+@sonney2k	the script you had first should work - the one where you add '\n' won't
+ serialhex	ok
+ shogun-buildbot	build #155 of csharp_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/csharp_modular/builds/155
+ shogun-buildbot	build #150 of ruby_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/ruby_modular/builds/150
+ shogun-buildbot	build #152 of r_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/r_modular/builds/152
+ shogun-buildbot	build #153 of java_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/java_modular/builds/153
+ shogun-buildbot	build #153 of lua_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/lua_modular/builds/153
+-!- heiko [~heiko@134.91.52.61] has joined #shogun
+-!- heiko [~heiko@134.91.52.61] has quit [Ping timeout: 258 seconds]
+-!- heiko [~heiko@134.91.52.61] has joined #shogun
+@sonney2k	heiko, hi!
+ heiko	sonney2k, hi
+ heiko	dont worry I will finish the migration soon
+@sonney2k	how is it going?
+ heiko	fine here, what about you?
+@sonney2k	ok, so soon means hours or days?
+ heiko	It is already working, I am trying out some more examples to eliminate some possible bugs
+ heiko	One thing sucks: I forgot my Laptop power cable at home and my remaining time is only 30mins
+ heiko	I think I will send a pull request tomorrow
+@sonney2k	it would be optimal if we could try to work on the migrations this evening
+@sonney2k	uh
+ heiko	then we will have to add the migraion methods to each class that has a changed parameter
+@sonney2k	yes - I would have wished to start that tonight if you are that far already
+@sonney2k	we have only 2 days before the intended release data so time is pressing a bit now
+ heiko	yes true
+ heiko	mmh, I have some urgent stuff to do this evening, I will move out of my flat on friday and nothing is done yet
+ heiko	Lets do it like this
+@sonney2k	so if you have an example that shows how to use migrations and your migrations don't break anything I would like to merge even sooner
+ heiko	I will go home now and work there offline
+@sonney2k	ok
+ heiko	then I will put a "pull"-able  patch together
+ heiko	and come to university this evening to send it
+@sonney2k	or internet cafe or so
+ heiko	yes, but its not far away from here
+@sonney2k	k
+ heiko	I think it should work pretty fine
+ heiko	at least for numerical stuff
+@sonney2k	would be great - we have everything running now http://shogun-toolbox.org:5347/waterfall
+@sonney2k	(all examples work)
+ heiko	the most important parts are the actual migrate methods, which have to be written by hand for each changed parameter
+ heiko	cool
+@sonney2k	and documentations is also updated http://shogun-toolbox.org/doc/en/latest/
+@sonney2k	heiko, yeah but we didn't do *huge* changes
+@sonney2k	mostly additions
+@sonney2k	or sgvector replacement
+ heiko	yes, I am trying that out in the moment
+@sonney2k	so if you have an example on how to ignore new things / sgvector stuff then we should be able to get the old test suite to work
+ heiko	the map stuff works and also recursively replacing parameters using the migrate method
+ heiko	ok, I will do that now and then send a patch this evening
+@sonney2k	ok
+@sonney2k	thanks
+ heiko	I will be here working on it tomorrow before noon also
+ heiko	Ok then, see you this evening
+@sonney2k	so there is a chance we can do it
+@sonney2k	cu
+-!- heiko [~heiko@134.91.52.61] has quit [Ping timeout: 258 seconds]
+-!- alesis-novik [~alesis@188.74.87.206] has joined #shogun
+-!- blackburn [~blackburn@188.168.2.146] has joined #shogun
+ CIA-3	shogun: Soeren Sonnenburg master * race079d / (28 files): add further c# examples - http://git.io/WkwKjA
+@sonney2k	blackburn, heiko said that he will be back w/ a patch tonight :)
+ blackburn	sonney2k: nice
+@sonney2k	in the evening already
+ blackburn	any other news?
+@sonney2k	so we might give the transitions a shot
+@sonney2k	more c# examples
+@sonney2k	from daniel
+ blackburn	I'm pretty busy today with all the moving to samara from my home
+@sonney2k	when are you leaving?
+ blackburn	already in samar
+ blackburn	a
+@sonney2k	ahh
+ blackburn	so now unpacking aha
+ blackburn	:D
+@sonney2k	gzip -d
+ blackburn	will do something with examples or so this night
+@sonney2k	blackburn, hopefully you have some time tonight - maybe we can get the first few migration related things to work
+@sonney2k	if things run smoothly - then we are good
+@sonney2k	blackburn, btw octave is broken on the buildbot (still) so tests related to it might be a bit unreliable...
+ CIA-3	shogun: Soeren Sonnenburg master * rfc63be5 / src/CONTRIBUTIONS : mention daniel in contributions - http://git.io/74eg_Q
+ blackburn	sonney2k: why octave is broken?
+-!- blackburn [~blackburn@188.168.2.146] has quit [Ping timeout: 258 seconds]
+-!- blackburn [~blackburn@188.168.5.154] has joined #shogun
+@sonney2k	debian unstabe mess
+-!- sonney2k [~shogun@7nn.de] has left #shogun ["Leaving"]
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+-!- heiko [~heiko@134.91.52.61] has joined #shogun
+-!- blackburn [~blackburn@188.168.5.154] has quit [Ping timeout: 258 seconds]
+ heiko	sonney2k, I just made my last "test"-example work, I will put together an example with a SGVector transition now
+ heiko	argh found another error
+@sonney2k	kk
+ heiko	ok scalars work now
+ heiko	mmh sgvectors still make problems
+ heiko	remeber that "treated in the same way as scalar variables" thing?
+-!- blackburn [~blackburn@188.168.5.129] has joined #shogun
+ CIA-3	shogun: Sergey Lisitsyn master * ra4d19ca / (6 files): Added few examples descriptions - http://git.io/E-ON_g
+@sonney2k	heiko, I don't understand...
+ heiko	i got problems with these new container types
+ heiko	CT_SGVECTOR etc
+ heiko	but I just thought of a way how to handle it
+@sonney2k	ok
+ heiko	it will do it for SGVector for now
+ heiko	then you can have a look before i do the other ones
+ heiko	this is getting more and more complicated
+ heiko	but at least: scalars work :)
+ heiko	type changes, name changes, no changes - everything
+ blackburn	I have bad connection, what's up here?
+ blackburn	sonney2k: any help I can do?
+-!- alesis-novik [~alesis@188.74.87.206] has quit [Remote host closed the connection]
+-!- blackburn [~blackburn@188.168.5.129] has quit [Read error: Operation timed out]
+ heiko	sonney2k, sorry the sgvector migration leads to a bunch of new problems
+ heiko	i will not finish this today
+@sonney2k	 what problems?
+ heiko	copying Tparameter instances (with their data) is complicated with these types
+ heiko	every time, an SGVector has to be allocated, along with its data
+ heiko	and this has to be done when migrating
+ heiko	I am currently changing the migration method to be able to use already allocated data
+ heiko	sorry that this takes so long, but the stuff is even more complicated than the model selection stuff
+ heiko	sonney2k, I gotta go now, my girlfriend is killing me already, we have to clear up our flat. I will be back tomorrow morning and continue
+@sonney2k	hmmhh seems like the problem is more w/ this SGVector stuff
+ heiko	yes
+ heiko	normaly it is easy to create a new TParameter instance
+ heiko	simply copy the m_parameter memory
+@sonney2k	if we 'just' had double* stuff it would work I guess
+ heiko	but with SGVector this is not possible like this
+@sonney2k	but can't you do the same thing with the SGVector stuff?
+@sonney2k	you just say a=b
+ heiko	no, the m_parameter field contains a vector
+ heiko	this has to be copied
+ heiko	but also the ->vector field
+@sonney2k	the vector has to be copied too?
+@sonney2k	not just the ptr?
+ heiko	currently, yes
+ heiko	but i will change this
+ heiko	also, a=b only works if the types are clear
+@sonney2k	ptr should be sufficient
+@sonney2k	a=b is the same like memccpy in our case
+@sonney2k	do you copy the double* ptr's or do you copy memory for that too?
+ heiko	memory too
+ heiko	but i will change it
+@sonney2k	ok that definitely needs to be changed
+ heiko	when a parameter does not change from one version to next one
+ heiko	yes
+@sonney2k	doesn't make sense to copy memory around
+ heiko	work in progress...
+ heiko	it is there because of this:
+ heiko	when a migration is performed, a type may change or something else may happen with the data
+ heiko	so that is cannot be used, but has to be converted somehow
+ heiko	in this case, migrate returns a new TParameter instance (with allocated memory) with the converted data
+ heiko	and this data has to be deleted afterwards (because of multiple migration steps)
+ heiko	i did this as a first step
+ heiko	and then noticed that sometimes, data does not get changed
+@sonney2k	I would say one should assume that things that are migrated from have to stay constant
+ heiko	in this case, no copy has to be returned, but also this stuff must not be deleted afterwords
+@sonney2k	and the things we migrate to might have to be clones
+ heiko	yes, thats how i want to do it
+ heiko	but just realised it
+@sonney2k	ok
+@sonney2k	yeah it seems really much more involved than I ever imagined
+ heiko	yes, its complicated stuff
+@sonney2k	what is important now is that we get something to work good enough for the initial migration
+ heiko	yes
+@sonney2k	we can polish this later on I would say
+@sonney2k	current migrations aren't too difficult - so it shouldn't be too hard
+ heiko	yes, but the infrastructure has to be capable of more complex migrations so that we avoid doing all this stuff all over again in the next release
+@sonney2k	that is true
+ heiko	but is has not to be implemented yet
+ heiko	sonney2k, I will go for it tomorrow and hopefully it will go then, I have the feeling that "it will work soon" for quite some time now
+@sonney2k	yeah that's not goo
+@sonney2k	d
+@sonney2k	ok
+@sonney2k	thanks!
+@sonney2k	apologies to your gf
+ heiko	 :) thanks
+ heiko	so cu
+@sonney2k	cu
+-!- heiko [~heiko@134.91.52.61] has quit [Ping timeout: 258 seconds]
+-!- blackburn [~blackburn@188.168.4.41] has joined #shogun
+-!- blackburn1 [~blackburn@188.168.4.53] has joined #shogun
+-!- blackburn [~blackburn@188.168.4.41] has quit [Ping timeout: 245 seconds]
+ blackburn1	have read the logs
+ blackburn1	didn't understand what's up with serialization :)
+--- Log closed Tue Aug 30 00:00:37 2011

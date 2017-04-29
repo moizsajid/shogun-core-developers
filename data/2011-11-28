@@ -1,0 +1,154 @@
+--- Log opened Mon Nov 28 00:00:59 2011
+-!- blackburn [~blackburn@83.234.54.62] has quit [Quit: Leaving.]
+-!- in3xes [~in3xes@180.149.49.230] has joined #shogun
+-!- blackburn [~blackburn@188.168.4.251] has joined #shogun
+ sonne|work	moin blackburn
+ blackburn	hi
+ sonne|work	I finally understood the typemap issue
+ sonne|work	typecheck typemaps are only called when there is ambiguity
+ blackburn	oh
+ blackburn	and what is called if no?
+ sonne|work	e.g. if there are 2 functions named e.g. set_vector(float64_t*,int32_t)  / set_vector(SGVector<> v)
+ sonne|work	if not then the function is *always* called
+ blackburn	hmm
+ sonne|work	so it needs to check the type too
+ sonne|work	that's all
+ sonne|work	I will rework the typemaps hopefully tonight
+ blackburn	anyway we should remove float64_t*, int32_t stuff
+ blackburn	sonne|work: I ran tests yesterday, did HMM fail before?
+ sonne|work	blackburn: the problem only occurs when the float64_t* stuff is *not* there
+ blackburn	sonne|work: heh I see
+ sonne|work	blackburn: re HMM I don't remember
+ sonne|work	you need to test it
+ sonne|work	btw regarding your valgrind question
+ sonne|work	you can use valgrind surpressions
+ blackburn	sonne|work: that is not about supression but necessarity of testing with valgrind
+ sonne|work	there used to be a suppression file somewhere in /usr/share/doc/python*
+ sonne|work	then you will only see shogun errors not the python ones
+ sonne|work	(which are in fact false alarms)
+ blackburn	i.e. if there is grep shogun then something goes wrong
+ blackburn	sonne|work: IIRC I would need to recompile my python to use it, it is not the problem I describe
+ sonne|work	no you don't need to recompile python for that
+ sonne|work	it is just a list of errors to ignore
+ sonne|work	...that you pass to valgrind
+ blackburn	sonne|work: I would like you to test HMM cause I really don't know how to use it
+ blackburn	the results are different from ones we have now
+ sonne|work	did the tests fail in 1.0.0 ?
+ blackburn	sonne|work: ah do you suggest to test it with 1.0.0?
+ blackburn	hmm why not ok
+ sonne|work	I mean then we know whether we introduced this problem in 1.1...
+ blackburn	sonne|work: I started playing with SVMs and noticed that classifier/svm is like a dark forest
+ blackburn	so much 'unstructured' code
+ sonne|work	what do you mean?
+ blackburn	well there are a lot of files with strange names
+ sonne|work	you mean like SVM, LDA, PCA, :D
+ blackburn	no codestyle in sources
+ blackburn	i.e. some of them are uppercase
+ blackburn	some are lower
+ blackburn	etc
+ sonne|work	please be more specific
+ sonne|work	or give me an example
+ blackburn	sonne|work: the code is impossible to maintain
+ blackburn	at least for me
+ sonne|work	which code?
+ blackburn	what if there is an error?
+ blackburn	any svm
+ blackburn	sonne|work: I have no idea how to maintain it properly
+ sonne|work	you mean the deep internals of svm algo's?
+ blackburn	yes
+ sonne|work	yes that is impossible for non-experts
+ sonne|work	that is why everyone uses e.g. libsvm's code as black box
+ sonne|work	well ok I did a couple of changes to libsvm but tested them
+ sonne|work	and you can only do it when you have read their paper...
+ blackburn	sonne|work: hmm I think it is the same for dimreduction and you
+ blackburn	my code is as well non comprehensive
+ blackburn	:D
+ sonne|work	exactly :)
+ sonne|work	it takes a *long* time to understand it...
+ blackburn	sonne|work: especially in the case of LLE
+ blackburn	I did it with alignment and it is not as in the paper
+ blackburn	that's why it $\infty$ times faster than any other impl
+ blackburn	I wonder, sonne|work did you ever heard anything about elections in russia this week?
+ blackburn	I think nobody even knows what is going one cause nobody cares :)
+ blackburn	but still interested
+ sonne|work	no
+ sonne|work	what happened?
+-!- in3xes [~in3xes@180.149.49.230] has quit [Quit: Leaving]
+ blackburn	sonne|work: well we all know who will be elected :D
+ blackburn	government party cheats way too much..
+ sonne|work	like everywhere...
+ blackburn	sonne|work: you can't imagine how much
+ blackburn	sonne|work: we know who will be president for 4 years already
+ blackburn	sonne|work: yes, there is an regression with HMM between 1.0.0 and 1.1.0
+-!- blackburn [~blackburn@188.168.4.251] has quit [Quit: Leaving.]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackburn	hah my new lcd screen for the notebook has finally arrived
+ blackburn	67 days in the loong way home :D
+ blackburn	crazy, it took 67 days to move from GB to Russia
+ sonne|work	blackburn: congrats
+ blackburn	sonne|work: have 3 mins?
+ sonne|work	blackburn: regarding the HMM regression - could you do a git bisect to figure out the commit that is causing the trouble?
+ blackburn	sonne|work: sure, this night
+ blackburn	sonne|work: what is the multiclass SVM you would suggest to use?
+ sonne|work	ask but I may have to leave
+ sonne|work	GMNPSVM
+ blackburn	I used larank
+ sonne|work	(true multiclass)
+ blackburn	is it worse?
+ sonne|work	one is online one not
+ blackburn	GMNPSVM looks to took infinity time
+ sonne|work	larank can be faster on more data
+ sonne|work	sure
+ blackburn	will it produce better accuracy?
+ sonne|work	how many classes /data points
+ sonne|work	I would expect so
+ blackburn	43 classes, 200-600 each
+ blackburn	LibSVMMultiClass was slightly worse, 84% accuracy
+ blackburn	and with LaRank I got ~87%
+ sonne|work	precompute kernel matrix?
+ sonne|work	ok but then you are already pretty good
+ blackburn	sonne|work: gaussian on HOG  :)
+ blackburn	can I expect any other impact on accuracy with GMNPSVM?
+ blackburn	it is pretty good indeed but others got almost 99 with convolutional neural networks
+ blackburn	I would like to beat them hah
+ blackburn	I guess you had to leave :)
+ sonne|work	well convolutional NN are very hard to beat
+ sonne|work	for such obj. recognition tasks
+ blackburn	sonne|work: aren't they overfitted?
+ blackburn	are they really so good?
+ sonne|work	http://yann.lecun.com/exdb/mnist/
+ sonne|work	they can be when done right
+ sonne|work	alright back to work
+ blackburn	ok
+ blackburn	hmm I'm in doubts
+ blackburn	I guess I have to try CNNs..
+ sonne|work	I would be very interested in the results
+ sonne|work	btw, did you use larank from shogun?
+ sonne|work	did you normalize your data?
+ sonne|work	did you add virtual examples (by rotating/shifting objects?)
+ sonne|work	scaling etc
+ sonne|work	all these things help
+ blackburn	sonne|work: me too, from shogun, normalized but didnot extract RoI, no
+ blackburn	sonne|work: I don't like any neural nets, what about you? :)
+ sonne|work	me neither
+ sonne|work	too many local minima
+ sonne|work	very hard to control
+ blackburn	I don't have much SVM experience
+ blackburn	but it seems to be better
+ sonne|work	well it is a convex optimizationproblem so local minima == global minima
+ sonne|work	it helps a lot when you know that the same choice of model parameters leads to the same result
+ blackburn	as I understand
+ blackburn	SVM will have similar results on slightly different data
+ blackburn	but NN could get totally wrong
+ blackburn	right?
+ blackburn	like ill-posed things in linalg
+ sonne|work	like trying to find the root's of a polynomial with *many* variables
+ blackburn	time to go to gym :)
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- blackburn [~blackburn@188.168.5.8] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+ blackburn	7 steps..
+ blackburn	3 left
+ blackburn	damn
+ blackburn	I failed to determine the reason
+--- Log closed Tue Nov 29 00:00:59 2011

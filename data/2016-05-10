@@ -1,0 +1,154 @@
+--- Log opened Tue May 10 00:00:49 2016
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+ CaBa	wiking: yes
+-!- besser82_ [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82_] by ChanServ
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 250 seconds]
+-!- besser82_ [~besser82@fedora/besser82] has quit [Ping timeout: 260 seconds]
+ Saurabh7	wiking, any idea how to solve this:
+ Saurabh7	CDynamicObjectArray -> get_element() always returns SGObject pointer
+ Saurabh7	which cannot be cast to anything else in say python interface
+ Saurabh7	and some functions do return those arrays
+-!- atwer [3b5ddb51@gateway/web/freenode/ip.59.93.219.81] has joined #shogun
+-!- atwer [3b5ddb51@gateway/web/freenode/ip.59.93.219.81] has quit [Quit: Page closed]
+@wiking	CaBa: well the subset is not thread safe
+@wiking	which is a long standing feature request actually :)
+@wiking	to make it thread safe
+-!- ptizoom [~christian@host-92-3-89-217.as43234.net] has quit [Remote host closed the connection]
+-!- besser82_ [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82_] by ChanServ
+-!- ptizoom [~christian@host-92-3-89-217.as43234.net] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-224-179-192.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's lambday's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/129088957
+-!- travis-ci [~travis-ci@ec2-54-224-179-192.compute-1.amazonaws.com] has left #shogun []
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+@wiking	yo
+-!- travis-ci [~travis-ci@ec2-54-159-248-219.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's lambday's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/129127181
+-!- travis-ci [~travis-ci@ec2-54-159-248-219.compute-1.amazonaws.com] has left #shogun []
+ CaBa	Saurabh7: I saw some classes provide a static function obtain_from_generic() that does the cast...
+ CaBa	Saurabh7: so adding such a function to ParameterCombination would probably "fix" the problem from yesterday
+ CaBa	wiking: do you work with python?
+@wiking	CaBa: i try not to :)
+ arianepaola	hello everyone
+ arianepaola	wiking: ping
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has joined #shogun
+ sanuj	wiking: there?
+@wiking	y
+@wiking	just a sec
+ sanuj	cool
+ CaBa	wiking: C++ then?
+@wiking	CaBa: yes
+ CaBa	I begin to wonder if I should do the ML stuff natively right away, too...
+ sanuj	besser82_: yo \o/
+ sanuj	Saurabh7: hello :)
+ sanuj	besser82_: how do i get started with dynaplugz
+ Saurabh7	CaBa, ah yes that should do it, complicated it too much in my head :)
+ Saurabh7	sanuj, Hey
+ sanuj	Saurabh7: did you register on Payoneer?
+ Saurabh7	sanuj, I had account from back in '14
+ sanuj	okay
+ Saurabh7	any issues ?
+ sanuj	there is some issue regarding INR and USD that i saw on the gsoc mailing list
+ sanuj	confused me
+ sanuj	what did you do about it
+ sanuj	Saurabh7: ^
+ Saurabh7	i used USD and its still the same
+ Saurabh7	was better back then dont know current state actually
+ Saurabh7	usd was better
+ sanuj	so the bank converts that for you
+ CaBa	wiking: i'm trying to parallelize model selection in python but something seems fishy... as if all threads are blocked while one is doing cross validation...
+ sanuj	Saurabh7: what about taxes?
+ Saurabh7	sanuj, yup
+@wiking	CaBa: hahah yeah
+@wiking	shit can happen with python in multiprocessing
+@wiking	sanuj: what'sup
+ sanuj	wiking: i managed to get SWIG working with some simple c++ code
+@wiking	hey
+@wiking	but wait
+@wiking	i mean there's a whole framework
+@wiking	of swig
+@wiking	in current code
+@wiking	so dont start from nothing
+ sanuj	and i understand how proxy classes work and how swig manages templates
+ sanuj	okay
+ sanuj	yeah i looked at that
+ CaBa	wiking: anything i should know about? i'm fairly new to python i must admit, but the code i wrote seems fairly parallel unless i enter x-validation ;)
+@wiking	CaBa: read about GIL = global interpreter loc
+@wiking	*lock
+@wiking	python is a ridicolous language
+@wiking	:)
+ sanuj	wiking: what is the best approach to take for the swig interface for tags framework
+ sanuj	i'll have to write that from scratch
+@wiking	mmmm
+@wiking	lets first concentrate on shogun-base
+ sanuj	wiking: and shogun-base is dynaplugz?
+ CaBa	wiking: in other words - i can't parallelize shogun logic on the python level?
+ sanuj	i mean its obviously incomplete for now
+@wiking	CaBa: dunno never tried
+@wiking	Heiko would know it better
+@wiking	or mailing list
+ CaBa	wiking: this is pretty frustrating... Do I understand this correctly, python provides threading but pretty much nothing is executed concurrently?
+ CaBa	or at least the reference interpreter doesn't allow concurrency?
+@wiking	well there's multiprocessing package
+@wiking	but yeah it's a bit hacky
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has quit [Ping timeout: 250 seconds]
+@wiking	and it's totally non posix
+ CaBa	i see. all of this smells like major headache :(
+-!- HeikoS [~heiko@nat-235-93.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- sanuj [0e8bc402@gateway/web/freenode/session] has joined #shogun
+ sanuj	HeikoS: wazzup? :)
+@HeikoS	sanuj: wazuuup :D
+ sanuj	are we hosting the cookbook pages anywhere yet?
+ sanuj	i am about to graduate
+ sanuj	going back home on 14th
+@HeikoS	great congrats
+ sanuj	thanks
+@HeikoS	yes they are at shogun.ml/cookbook/latest
+@HeikoS	but its not ready to be announced yet
+@HeikoS	so dont spread
+ sanuj	yes, i wont ;)
+@HeikoS	need to work on design and some details
+ sanuj	just wanted to check what all pages we have till now
+ sanuj	was thinking about which cookbook page i should write next
+@HeikoS	I see
+@HeikoS	yeah would be good to add more
+@HeikoS	basically all the standard ML algos should come first
+-!- sanuj [0e8bc402@gateway/web/freenode/session] has quit [Ping timeout: 250 seconds]
+-!- HeikoS [~heiko@nat-235-93.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@nat-235-93.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-235-93.internal.eduroam.ucl.ac.uk] has quit [Client Quit]
+-!- sanuj [0e8bc402@gateway/web/freenode/session] has joined #shogun
+ sanuj	besser82_: there?
+-!- travis-ci [~travis-ci@ec2-54-159-248-219.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/129207812
+-!- travis-ci [~travis-ci@ec2-54-159-248-219.compute-1.amazonaws.com] has left #shogun []
+-!- sanuj_ [0e8bc402@gateway/web/freenode/session] has joined #shogun
+-!- sanuj [0e8bc402@gateway/web/freenode/session] has quit [Ping timeout: 250 seconds]
+ CaBa	what's the purpose of the SG_REF macro?
+-!- sanuj_ [0e8bc402@gateway/web/freenode/session] has quit [Changing host]
+-!- sanuj_ [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has joined #shogun
+@wiking	CaBa: ++ the reference counter of an object
+@wiking	the pair of it is SG_UNREF
+ CaBa	wiking: for what? gc?
+@wiking	hehehe c++ doesn't have a gc
+@wiking	u manage your own memory
+ CaBa	i'm aware of that. thats why i'm asking whether that's the way *you* do gc ;)
+-!- sanuj_ [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has quit [Ping timeout: 250 seconds]
+-!- mizari [~mizari@95-174-213-100.nts.su] has quit [Ping timeout: 265 seconds]
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has joined #shogun
+@wiking	yep
+ CaBa	CKernel* casted=dynamic_cast<CKernel*>(kernel);
+ CaBa	REQUIRE(casted, "CKernel::obtain_from_generic(): Error, provided object of class \"%s\" is not a subclass of CKernel!\n", kernel->get_name());
+ CaBa	wiking: how is that a valid subclass check?
+ CaBa	wiking: https://github.com/shogun-toolbox/shogun/compare/develop...lkuchenb:fix/ParameterCombinationCast
+ CaBa	wiking: do i still need any checking for this to be proper? and how about that ref counter...
+ CaBa	wiking: other obtain_from_generic() implementations often derive from known base classes which have known members to check their type... I found CKernel casts SGObject and has this wirred REQUIRE check that I posted...
+-!- sanuj [0e8bc402@gateway/web/freenode/ip.14.139.196.2] has quit [Ping timeout: 250 seconds]
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-162-192.as43234.net] has quit [Quit: Leaving.]
+--- Log closed Wed May 11 00:00:51 2016

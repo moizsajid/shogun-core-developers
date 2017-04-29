@@ -1,0 +1,158 @@
+--- Log opened Wed Nov 23 00:00:27 2016
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has quit [Quit: Leaving.]
+-!- HeikoS1 [~heiko@host-92-0-178-129.as43234.net] has joined #shogun
+-!- HeikoS1 [~heiko@host-92-0-178-129.as43234.net] has quit [Ping timeout: 244 seconds]
+@sukey	Pull Request #3534 "LinalgRefactor - Cholesky"  synchronized by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3534
+@sukey	Pull Request #3534 "LinalgRefactor - Cholesky - CPU only" - https://github.com/shogun-toolbox/shogun/pull/3534
+@sukey	Pull Request #3562 "LinalgRefactor - Matrix elementwise product"  opened by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3562
+-!- praisethemoon [~praisethe@41.226.248.123] has joined #shogun
+ CaBa	hey people
+ praisethemoon	CaBa, o/
+-!- HeikoS [~heiko@217.138.5.14] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- praisethemoon [~praisethe@41.226.248.123] has quit [Quit: Leaving]
+-!- HeikoS [~heiko@217.138.5.14] has quit [Ping timeout: 268 seconds]
+-!- HeikoS [~heiko@217.138.5.14] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@217.138.5.14] has quit [Ping timeout: 244 seconds]
+ CaBa	wiking: happen to be around?
+@wiking	yes
+ CaBa	wiking: given a CParamterCombination object, can i iterate through the tree and access the parameters?
+ CaBa	wiking: or doesn't it offer a public interface for that?
+@wiking	mmm
+@wiking	good questuin
+@wiking	*question
+@wiking	if not then we should expose it
+@wiking	what does doxygen say?
+@wiking	http://shogun.ml/api/latest/classshogun_1_1CParameterCombination.html
+ CaBa	wiking: well there is a get_parameter(const char *name, CSGObject *parent) function - i'm not sure if it is for that...
+@wiking	doesn't look like you gonna get
+@wiking	i mean that you can iterate through with that api
+ CaBa	wiking: with that get_parameter() function?
+@wiking	yes
+@wiking	it'll give you a param
+@wiking	with a given name and parent
+@wiking	but this way
+@wiking	you would need to know
+@wiking	the name and parent
+@wiking	i guess if you have the reference
+ CaBa	what's the parent?
+@wiking	parent of the given param
+@wiking	so manually
+@wiking	if you have the reference on the ROOT item in the tree
+ CaBa	so how do i get one step down from the root using this function?
+@wiking	then you could say
+@wiking	get_parameter("name of param", ROOT);
+@wiking	and then like this
+@wiking	one by one
+@wiking	you can iterate through the whole tree
+ CaBa	so i do
+@wiking	i'm wondering whether this is the only way
+ CaBa	root->get_paramter("name", root)
+ CaBa	?
+@wiking	i would hope that there's
+ CaBa	i pass root to itself?
+@wiking	a better function for this
+@wiking	but i never really looked into this part of shogun unfortunately
+@wiking	didn't dare to ;)
+@wiking	yeah
+@wiking	http://shogun.ml/api/latest/ParameterCombination_8cpp_source.html#l00250
+@wiking	as you can see
+@wiking	this is the implementation
+ CaBa	wiking: #255 will never evaluate true for the root node
+ CaBa	wiking: hm, maybe it doesn't have to...
+@wiking	255?
+ CaBa	line
+ CaBa	from your lin
+ CaBa	link
+@wiking	if (m_param)
+@wiking	?
+ CaBa	yes
+ CaBa	m_param is a Parameter* member, which should be a nulptr for root i think
+@wiking	btw just for the record
+@wiking	http://shogun.ml/api/latest/ParameterCombination_8cpp_source.html#l00307
+@wiking	this will print you the tree
+@wiking	if yo udont wanna print
+@wiking	there's the logic
+ CaBa	wiking: yes, that's what i want to do from the outside
+@wiking	how to actually traverse the tree
+@wiking	ok so there's the code
+@wiking	right?
+ CaBa	wiking: no, whats in that function does not work through public interfaces
+@wiking	ok
+@wiking	so create a PR
+@wiking	that uses that logic
+@wiking	and does
+@wiking	iterator()
+ CaBa	>.<
+@wiking	and basically you implement an iterator for that whole thing
+@wiking	pretty simple
+@wiking	you have there the code yourself how to iterate through the tree
+@wiking	but instead of printint
+@wiking	printing
+@wiking	you return always the next element
+@wiking	it's almost a copy paste shit
+@wiking	and you are done
+ CaBa	no, extremely frustrating if that whole logic of that data structure is a mystery to you...
+@wiking	yeah but
+@wiking	it's not
+@wiking	there's the src
+@wiking	this is why it's opensource
+@wiking	you can see what's happening under the hood
+@wiking	and add new functionality
+@wiking	that might be interesting for other people as well
+@wiking	and in this case
+@wiking	that request that you have
+@wiking	is super valid
+@wiking	as well as that the solution for it is super easy
+@wiking	as you just copy paste shit
+ CaBa	i know it's probably unfair to complain, but the level of documentation is really not such that one can easily understand the code by reading it
+@wiking	are you serious?
+@wiking	i have not
+@wiking	ever looked into this src
+@wiking	just now
+@wiking	and in 2 minutes i gave you an answer
+@wiking	how you could do it
+@wiking	so please
+@wiking	but
+@wiking	if you think that it's not adequate enough
+@wiking	please go ahead
+@wiking	and send in PRs
+@wiking	for having better documentation
+@wiking	we are an open source project
+@wiking	with 0 income
+@wiking	all of us does this out of passion
+@wiking	this is as much we could do free
+@wiking	if you think that there's some more need to be fixed
+@wiking	please go ahead
+@wiking	we know that we are not perfect
+@wiking	and never will be
+@wiking	but we are trying to make things better as much as we can
+ CaBa	i know, that's why i raised the fairness disclaimer. i totally sympathise with your situation, really do...
+@wiking	so ok
+@wiking	then if you want
+@wiking	patch it
+@wiking	and send it
+@wiking	:)
+@wiking	other than that
+@wiking	unfortunately personally
+@wiking	i have other priorities
+@wiking	in this project
+@wiking	so i wont be able to help you with it
+@wiking	but again
+@wiking	the solution
+@wiking	is pretty simple
+ CaBa	wiking: i know. i also didn't expect you to. i just wanted to know if i was overlooking an interfae that's there. totally aware that if there wasn't any, nobody was going to make me one..
+@wiking	mmm based on the
+@wiking	interface of that class
+@wiking	it seems there's no iterator for it
+@wiking	but
+@wiking	i could imagine that there's somewhere else
+@wiking	but there's just a small chance for it
+@wiking	:)
+ CaBa	wiking: wirred bug costed me half my day today... i patched something in shogun to take an std::function and used it from my program code... shogun i build with gcc-6 (for openmp) and my own code i build with clang...
+ CaBa	wiking: that didn't go well at all... for whatever reason the std::function object didn't make it to the shogun world. only after i started building also my own code with gcc-6 it worked fine.
+ CaBa	wiking: c++11 foo still seems to be weak at some points between compilers / libc implementations...
+ CaBa	even with the latest and greatest xcode and gcc-6...
+ CaBa	maybe just the former...
+--- Log closed Thu Nov 24 00:00:29 2016

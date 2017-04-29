@@ -1,0 +1,266 @@
+--- Log opened Mon Aug 22 00:00:16 2016
+-!- OXPHOS [4441a916@gateway/web/freenode/ip.68.65.169.22] has joined #shogun
+@wiking	OXPHOS: y0
+ OXPHOS	wiking: hey
+-!- OXPHOS [4441a916@gateway/web/freenode/ip.68.65.169.22] has quit [Ping timeout: 264 seconds]
+ Saurabh7	wiking: there ?
+@wiking	yep
+ Saurabh7	wiking: was thinking if I should make a cpp for TreeMachine.h, to put the generate_matrix there
+ Saurabh7	since eigen is used
+@wiking	yeah
+@wiking	sounds reasonable
+ Saurabh7	ah crap its treemachine is templated
+@wiking	Saurabh7, why's that a problem?
+@wiking	i mean actually
+@wiking	would be great
+@wiking	to have a random rotation
+@wiking	of not only float64_t
+@wiking	i mean this could be a simple linalg module right/
+@wiking	i mena a random rotation matrix itself
+@wiking	:)
+ Saurabh7	yes it can be anywhere
+@wiking	as it actually depends on linalg operators right?
+@wiking	and actually would be great to have a version
+@wiking	that could use later linalg with gpu backend
+@wiking	(as the paper suggests that with inputs of bigger feature sets than 1000
+@wiking	it'd be better to use gpu)
+@wiking	see what i mean?
+ Saurabh7	yes Larger rotation matrices can be computed with GPU assistance
+@wiking	so
+@wiking	i suggest
+@wiking	let's create actually a patch for linalg backend :D
+@wiking	and ping OXPHOS there
+@wiking	and it's a linalg operator
+@wiking	to create a RR matrix
+ Saurabh7	so i move this PR there ?
+@wiking	ok
+@wiking	so close this PR
+@wiking	it's a good start but
+@wiking	we need to create a branch
+@wiking	based of her linalg feature branch
+@wiking	lemme see
+ Saurabh7	ok and that colwise() thing too, I couldn't find that one in linalg too
+@wiking	https://github.com/shogun-toolbox/shogun/tree/feature/linalg_refactor
+@wiking	ok so use this as a base one for your PRs
+@wiking	and lets do it from there
+@wiking	ok?
+ Saurabh7	yep
+@wiking	and then we check with OXPHOS
+@wiking	how she likes it
+@wiking	lemme look into the whole story of randoms
+@wiking	https://github.com/viennacl/viennacl-dev/issues/128
+@wiking	shit :(
+@wiking	ok we should add actually a random generator for gpu matrix
+@wiking	http://cas.ee.ic.ac.uk/people/dt10/research/rngs-gpu-mwc64x.html
+@wiking	:)
+@wiking	anyhow that's not important now
+@wiking	just to ship this into linalg
+@wiking	so there we can leverage the gpu backend
+@wiking	i reckon there are a lot of operators not supported atm
+@wiking	(QR decomposition etc....)
+@wiking	but it'll get there
+ Saurabh7	uhm yes some more operators are needed
+ Saurabh7	cl
+@wiking	Saurabh7: that's ok... we can start from somewhere
+@wiking	:)
+ Saurabh7	ye sure:)
+ Saurabh7	wiking: that feature branch might need rebase
+@wiking	i can rebase it
+@wiking	that's no problem
+@wiking	Saurabh7, oh wait :)
+ Saurabh7	lol its showing heikos comments
+@wiking	couldn't you just take the
+@wiking	last 2 commits
+@wiking	that you did
+@wiking	like
+@wiking	git format-patch -2
+@wiking	then checkout the feature branch
+@wiking	from that create a new branch
+@wiking	apply the 2 patches
+@wiking	and create the pr :)
+@wiking	i closed this one
+ Saurabh7	wiking: yes the branch missing quite some changes to randomforest tho
+ Saurabh7	and also to distance
+@wiking	mmm
+@wiking	lemme try to rebase
+@wiking	Saurabh7, we have a little problem
+@wiking	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/distance/EuclideanDistance.cpp#L94
+@wiking	this does not use linalg::dot
+@wiking	right?
+ Saurabh7	yes it doesnt
+@wiking	is it because it is a CDotFeautres?
+ Saurabh7	inside dotfeatures->dot i think cmath:dot is used
+@wiking	ok that'll need to change
+@wiking	but that's ok
+ Saurabh7	wiking: I will just send the PR with commits, not much is overlapping in this case
+ Saurabh7	* with 2 commits
+@wiking	ok i mean i've managed to rebase the branch
+@wiking	but i would need to double check with OXPHOS
+@wiking	before overwriting her stuff
+@wiking	:)))
+@wiking	needed some pretty straightforward merges to be done
+@wiking	but still wanna make sure that she is ok with them
+@wiking	could you do those 2 commits for RRforest
+@wiking	on top of her branch?
+ Saurabh7	yes will do ,
+@wiking	thnx a lot
+ Saurabh7	done, except my branch is called "linala" :P
+@wiking	ok
+@wiking	Saurabh7, added some comments
+@wiking	as now you are tailoring the matrix operations for eigen
+@wiking	where that branch already should have the basic operations for matrix
+@wiking	there
+@wiking	so those should be used instead of direct eigen calls
+-!- sanuj [~sanuj@117.220.49.100] has joined #shogun
+ Saurabh7	ok will replace them
+ sanuj	Saurabh7, do you get the mail if i mail to shogun-list?
+ sanuj	no right?
+@wiking	mailing list if foobar?
+ Saurabh7	sanuj: I am subscribed why wont I ? :)
+-!- sanuj [~sanuj@117.220.49.100] has quit [Ping timeout: 276 seconds]
+ CaBa	hi everyone
+ Saurabh7	CaBa: hey
+ CaBa	http://pastebin.com/EGzpVx1b <- i'm slightly confused with rows and columns and SGMatrices...
+ CaBa	this matrix should have 5 rows and 2 columns...
+ CaBa	am i missing something here? CCSVfile has a bool transpose member, which should be false by default... also it doesn't say "transposes output" but something like "assumes input to be transposed" in the docs...
+ CaBa	*confused*
+@wiking	CaBa: in shogun the data is columnar oriented
+@wiking	it has been like this for the last 15 years
+@wiking	while lately other libraries start to realise why is it better like this :P
+@wiking	    SGMatrix<float64_t> test_matrix(5,2);
+ CaBa	wiking: are you talking about how the matrix is represented in memory?
+@wiking	 = 5 columns and 2 rows
+@wiking	mmm no
+@wiking	yeah that should be actually 2 columns and 5 rows
+@wiking	but the columns are actually rows
+@wiking	in memory
+@wiking	but you dont care about that
+ CaBa	there is no such thing as columns and rows in memory...
+@wiking	so i dont get what's the problem
+@wiking	CaBa: yes there is
+@wiking	 :)
+ CaBa	??
+@wiking	but yeah nevermind1
+@wiking	so what's the confusion?
+ CaBa	but i do mind
+ CaBa	well the confusion is that the constructor doc says (nrows, ncols) and the CSV representation is transposed
+@wiking	?
+@wiking	i see from the comment
+@wiking	that your output is actually
+@wiking	2x5
+@wiking	ok
+@wiking	lemme check
+@wiking	where does the transposition happens
+ CaBa	thanks
+@wiking	CaBa, ok so apparently we think in csv that the 'standard' is row oriented matrix
+ CaBa	wiking: so the transposition is only an output matter?
+@wiking	hence yep
+@wiking	so it'll just transpose the output
+@wiking	not the matrix itself
+@wiking	so if you do
+@wiking	out_file.set_transpose(true);
+@wiking	then you should get the right output format
+@wiking	but it will not touch the matrix itself
+@wiking	you should get the right (5x2) csv
+@wiking	but could you please doublecheck it plz
+@wiking	but yeah actually i have a refactor already in place in a feature branch for IO
+@wiking	but i had other stuff to be fixed first
+@wiking	(see windows and javascript
+@wiking	but will try to clear up the chaos with IO
+ CaBa	wiking: with set_transpose(true) wirred things happen
+@wiking	lolface
+@wiking	what happened?
+@wiking	CaBa, we apparently have a unittest for csvfile
+@wiking	lemme check how's that passing at all
+@wiking	:)))
+ CaBa	hrhr
+ CaBa	wiking: http://pastebin.com/KP9nXqtR
+@wiking	CaBa, btw
+ CaBa	wiking: dimensionality is right, but now i have duplicate values ;-)
+@wiking	can you please try this
+@wiking	i mean its very stupid
+@wiking	but still
+ CaBa	^^
+@wiking	out_file.set_matrix(test_matrix.matrix, test_matrix.num_cols, test_matrix.num_rows);
+@wiking	:)
+@wiking	(instead of test_matrix.save(&out_file);
+@wiking	this is just a shitty patch for your problem
+@wiking	but yeah IO backend obviously needs fixing
+ CaBa	wiking: that yields a new version
+ CaBa	0,5,6.947329467503763e-310,6.054570769733804e-310,0
+ CaBa	1,6,6.947329468445254e-310,0,0
+ CaBa	reading memory that it shouldn't be reading..
+@wiking	muhaha
+@wiking	and if you flip the args?
+ CaBa	ah wait
+ CaBa	that was probably the second case with transposed on...
+@wiking	yeah dont turn that on
+@wiking	:)
+ CaBa	anyways, without transpose...
+ CaBa	0,1
+ CaBa	2,3
+ CaBa	4,5
+ CaBa	6,7
+ CaBa	8,9
+ CaBa	i now get a different representation of my memory
+ CaBa	no we are talking "by row" vs "by column" representation of matrices
+ CaBa	*now
+@wiking	CaBa, btw
+@wiking	test_matrix[i] returns a row
+@wiking	right? :)
+ CaBa	shouldn't
+@wiking	i mean what should it retunr?
+@wiking	i mean in this case column
+ CaBa	T&
+@wiking	but stull
+@wiking	still
+@wiking	you are not setting the whole matrix
+-!- sanuj [~sanuj@117.220.49.100] has joined #shogun
+@wiking	with that for loop
+@wiking	ok yeah
+ CaBa	wiking: yes i am... the subscript operator gives access to the linear in-memory representation
+@wiking	actually you should be able to
+@wiking	but now the output is good no? :)
+ CaBa	no, i think save() gives the correct output
+@wiking	shouldn't you get a 5x2 output
+@wiking	?
+@wiking	i mean with a SGMatrix<float64> x(5,2);
+ CaBa	wiking: it delinearizes the wrong way
+ CaBa	wiking: http://pastebin.com/qdcMt0es
+ CaBa	whatever - i don't mind much about the output, i just wanted to make sure it's just an output related confusion
+@wiking	it is
+@wiking	but a good catch
+@wiking	:))))
+@wiking	in memory it should be in a good way
+@wiking	but yeah seems the serialization is totally fucked up
+@wiking	:))))
+@wiking	jesus this library :)
+@wiking	no wonder nobody uses it
+@wiking	we cannot even get CSV in/out normally
+@wiking	lisitsyn, ^ :D
+ lisitsyn	meh
+ lisitsyn	rewrite
+@wiking	yep
+@wiking	gsomix wrote that
+@wiking	where is he? :D
+@wiking	:))
+ lisitsyn	wiking: married
+ lisitsyn	:D
+ lisitsyn	= died
+@wiking	:>>>>>
+ sanuj	lisitsyn, lambday is about to die soon then
+ lisitsyn	walking dead
+ sanuj	:D
+ sanuj	lisitsyn, i have started reading deeplearningbook.org
+ sanuj	it's good
+-!- sanuj [~sanuj@117.220.49.100] has quit [Ping timeout: 265 seconds]
+-!- sanuj [~sanuj@117.220.49.100] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Ping timeout: 240 seconds]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- sanuj [~sanuj@117.220.49.100] has quit [Ping timeout: 244 seconds]
+-!- sanuj [~sanuj@117.220.49.100] has joined #shogun
+ sanuj	lisitsyn, there?
+-!- sanuj [~sanuj@117.220.49.100] has quit [Remote host closed the connection]
+-!- Saurabh7 [Saurabh7@gateway/shell/panicbnc/x-zwjvdqctftciggcl] has quit [Ping timeout: 260 seconds]
+-!- Saurabh7 [Saurabh7@gateway/shell/panicbnc/x-tncuxhokicjeekbn] has joined #shogun
+--- Log closed Tue Aug 23 00:00:17 2016

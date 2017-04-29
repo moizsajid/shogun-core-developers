@@ -1,0 +1,357 @@
+--- Log opened Fri Oct 25 00:00:56 2013
+ shogun-buildbot	build #80 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/80  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- new_lido [~walid@41.218.173.31] has quit [Quit: Leaving]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+ shogun-buildbot	build #99 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/99  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- FSCV [~FSCV@50.7.50.60] has quit [Quit: Leaving]
+-!- zxtx [~zv@129-79-241-133.dhcp-bl.indiana.edu] has quit [Ping timeout: 268 seconds]
+-!- zxtx [~zv@c-50-129-227-197.hsd1.in.comcast.net] has joined #shogun
+-!- sonne|osx [~sonne@c-67-180-92-246.hsd1.ca.comcast.net] has joined #shogun
+@sonney2k	shogun-buildbot, force build --branch=develop precise
+ shogun-buildbot	no such builder 'precise'
+@sonney2k	shogun-buildbot, force build --branch=develop 'precise - libshogun'
+ shogun-buildbot	build forced [ETA 19m47s]
+ shogun-buildbot	I'll give a shout when the build finishes
+-!- HeikoS [~heiko@c-67-180-92-246.hsd1.ca.comcast.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	r?ln s?lm
+ shogun-buildbot	build #245 of precise - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/245
+-!- besser82 [~besser82@77-20-92-33-dynip.superkabel.de] has joined #shogun
+-!- besser82 [~besser82@77-20-92-33-dynip.superkabel.de] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+@wiking	ookeeey
+@wiking	we have docker image for shogun
+@wiking	https://index.docker.io/u/vigsterkr/shogun/
+@wiking	but this is a simple shogun image
+@wiking	i'll make soon the python modular image as well
+@HeikoS	whooo :)
+@sonney2k	wiking, nice :)
+-!- HeikoS [~heiko@c-67-180-92-246.hsd1.ca.comcast.net] has quit [Quit: Leaving.]
+@wiking	just try this
+@wiking	sudo docker pull vigsterkr/shogun
+@wiking	and i thought that this only distributes the Dockerfile, i.e. how to create the image...
+@wiking	but not
+@wiking	it is actually distributing the fs
+@wiking	so the binaries...
+@wiking	let's hope today we get the fedora stuff and that it runs the latest open stack
+@wiking	because then we can play with the new docker images :P
+@wiking	i'll have to keep updating both of the images...
+@wiking	i suppose it'll be done by a nightly script
+@wiking	;)
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 2fb5664 / src/interfaces/modular/SGBase.i: https://github.com/shogun-toolbox/shogun/commit/2fb5664754ac1ad37ff14bdd8863d94391b9e650
+ shogun-notifier-	shogun: fix hdf5 / ascii pickle deserialization
+@wiking	besser82: ping
+ besser82	wiking: pong  :D
+@wiking	besser82: any news?
+ besser82	wiking: storage for cloud-appliance is nearly finshed  ;)
+@wiking	meaning? :)
+@wiking	or ETA?
+@sonney2k	wiking, well rather one per *final* release :)
+@sonney2k	wiking, except for the demos we are in release shape now
+@sonney2k	wiking, if you can do anything about matlab / the usr/local install'd issue that would be good
+ besser82	wiking: just need to format and mount the storage....
+ besser82	wiking: any preference?  Filesystem? Mountpoint?
+@wiking	sonney2k: well i though to have shogun:latest (that is following the develop repo)
+@wiking	sonney2k: and i thought like shogun:<release version>
+@wiking	so people can choose ;P
+@wiking	sonney2k: docker supports tagging... so that's a good thing ;)
+@wiking	besser82: simple ext4 should be fine
+@wiking	besser82: or is this a ramfs?
+ besser82	wiking: but running version of openStack, doesn't yet  :(
+ besser82	wiking: no, real hdd storage
+@wiking	besser82: ah then simple ext4 should be fine
+@wiking	and just mount it for /mnt
+@wiking	besser82: you mean the running version of openstack doesn't support docker?
+@wiking	besser82: it's not that big a deal...
+ besser82	wiking: ahh, ok  :)
+ besser82	wiking: are you sure with mounting in /mnt?
+@wiking	besser82: can u copy paste `uname -a` ?
+@wiking	besser82: where else?
+ besser82	wiking: I'd propose /srv/$somewhat
+@wiking	besser82: fine...
+ besser82	wiking: by meanings of SElinux contexts that would be safer
+@wiking	it's good for me basically
+@wiking	anything would be fine ;)
+@wiking	just let's have it running already
+ besser82	wiking: kernel on the machine is 3.11.X
+@wiking	besser82: ah ok then we can haz docker by our own
+@wiking	;)
+@wiking	it needs 3.8
+@wiking	but just put it together and let's see if we can ssh ;
+@wiking	:P
+ besser82	wiking: 3.8 is old-school by fedora means  :-P
+ besser82	wiking: no even in officail repos anymore for F18+  ;)
+ besser82	wiking: so, I'll setup c-a after my next coffee && cig
+ besser82	sonney2k: I'm on that problems with cmake, but unfortunately some stuff is _really_ problematic, e.g. correctly building the SWIG'ed java-bindings
+@wiking	besser82: why is that a problem?
+ besser82	sonney2k: Actually it fails for me by any meanings
+ besser82	wiking: ^^^
+@wiking	why?
+@wiking	i mean it worksforme status now :P
+@wiking	so that's why i wonder what's your issue with java modular
+ besser82	wiking: at first javac complains about not finding ....*.java
+ besser82	wiking: got that fixed then
+ besser82	wiking: then it fails on building Loader.class
+@wiking	besser82: u r talking now about your new cmake scripts or with current cmake files?
+ besser82	wiking: no package org.shogun...
+ besser82	wiking: current
+@wiking	besser82: and which java r u trying to use
+ besser82	wiking: openJDK 1.7.0
+@wiking	oracle java or some opejdk
+@wiking	aaah
+@wiking	well i guess you have your answer ;)
+ besser82	wiking: WTF?!?
+@wiking	yeps
+ besser82	wiking: Who used the oracle sh*t?
+@wiking	openjdk is really not the best shit for java
+@wiking	well everybody who uses java
+@wiking	i mean openjdk is a nice dream
+@wiking	but it's really bad
+@wiking	regardless of shogun
+-!- sonne|osx [~sonne@c-67-180-92-246.hsd1.ca.comcast.net] has quit [Quit: sonne|osx]
+ besser82	wiking: even hadoop, mesos && mahout are running fine with it
+@wiking	besser82: i had problem both with mahout and solr
+ besser82	wiking: no, problems here on the redhat/fedora-front  ;)
+@wiking	besser82: that's unrelated of the distro
+ besser82	wiking: I know, but we actually got it working  ;)
+ besser82	wiking: by no means ready for production, but it runs...
+ besser82	wiking, sonney2k: but if you wouldn't mind, I can get some folks from the fedora-java-sig to make it running  ;)
+ shogun-buildbot	build #80 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/80  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@wiking	besser82: sure... get the c-a runnning ;)
+* wiking off 4 a c&c break as well
+ shogun-buildbot	build #81 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/81  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- lisitsyn1 [~lisitsyn@80.252.20.67] has quit [Quit: Leaving.]
+-!- new_lido [~walid@41.218.173.166] has joined #shogun
+ shogun-buildbot	build #100 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/100  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@wiking	besser82: y
+@wiking	y0
+ besser82	wiking: wassup?
+@wiking	besser82: mkfs.ext4 status?
+@wiking	:)
+ besser82	running  ;)
+@wiking	cool
+@wiking	ssh ip? :)
+ besser82	will setup in few minutes...
+@wiking	ok w8ing
+@wiking	i'm finalizing the docker image for shogun + ipython
+-!- new_lido [~walid@41.218.173.166] has quit [Ping timeout: 260 seconds]
+-!- new_lido [~walid@41.218.178.152] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@wiking	ok shogun + ipython docker image is done
+@wiking	i'm just pushing it atm
+@wiking	mmm i think there's still a problem with it but i'll fix after commit
+-!- new_lido [~walid@41.218.178.152] has quit [Quit: Leaving]
+@wiking	tada: https://index.docker.io/u/vigsterkr/shogun-python/
+@wiking	besser82: ping?
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+-!- new_lido [~walid@41.218.178.152] has joined #shogun
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:b854:c0fd:3503:f6c] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- new_lido [~walid@41.218.178.152] has quit [Read error: Operation timed out]
+@wiking	besser82: no news?
+-!- new_lido [~walid@41.218.172.46] has joined #shogun
+@wiking	oookeey so instructions has been sent to the mailing list
+-!- new_lido [~walid@41.218.172.46] has quit [Ping timeout: 252 seconds]
+@iglesiasg	wiking, hey! I just read the mail. It sounds pretty awesome. I will spend some time with it during the weekend
+@iglesiasg	looking forward to it
+@wiking	iglesiasg: it's pretty cool
+@wiking	no need for compilation
+@wiking	nada
+@wiking	just get the docker binary working and then it's running out of box
+@wiking	and it's really cool that they provide a repository for sharing images ;P
+@iglesiasg	nada haha
+@wiking	iglesiasg: we'll use this for the cloud arch
+@wiking	as this is a pretty good way of jailing an ipython notebook server
+@wiking	for each ipython session a new docker container will fired up
+@wiking	and then basically when the session is over the container is destroyed ;P
+@wiking	the good thing is that this doesn't involve any VM stuff... i.e. it runs natively on the system
+@wiking	of course there's no native client for it atm on OSX
+@wiking	but for that they prepared a vagrant image
+@wiking	;P
+@iglesiasg	neat
+@wiking	but you should be able to have it on archlinux
+@wiking	only thing is that u have to take care of the right kernel settings
+-!- new_lido [~walid@41.218.175.73] has joined #shogun
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:b854:c0fd:3503:f6c] has left #shogun ["Ex-Chat"]
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:b854:c0fd:3503:f6c] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- parijat [~parijat@223.225.79.127] has joined #shogun
+ parijat	hi, I wanted to know that if I make changes in the shogun cpp files, how can I put these changes into effect? do i have to run cmake and make in the root directory again?
+ thoralf	parijat: Just recompile everything and run the unit tests (in case you broke something).
+-!- new_lido [~walid@41.218.175.73] has quit [Ping timeout: 252 seconds]
+-!- parijat_ [~parijat@223.184.194.14] has joined #shogun
+-!- parijat_ [~parijat@223.184.194.14] has quit [Client Quit]
+-!- parijat_ [~parijat@223.184.194.14] has joined #shogun
+ thoralf	wiking: Comments to you're email: Why do I have to run ipython as root?
+-!- parijat [~parijat@223.225.79.127] has quit [Ping timeout: 248 seconds]
+ parijat_	thanks @thoralf. Just to make sure recompile everything means to run cmake and then make in the root directory (ie shogun-develop) right?)
+ thoralf	parijat_: Yes.  "make -j<#processes> (all|shogun-unit-test|unit-tests|install)"
+ parijat_	ok thanks. let me try.
+-!- parijat_ [~parijat@223.184.194.14] has quit [Quit: Leaving]
+@wiking	thoralf: doh?
+@wiking	thoralf: i mean it's chrooted
+@wiking	thoralf: so it's not that big of a deal
+ thoralf	wiking: That's true, but if I'm trying to play around on a system on which I'm not sudoer?
+@wiking	thoralf: aaah wait... you are now talking about docker commands?
+ thoralf	wiking: Sorry, missing context.  Yes. ;)
+@wiking	thoralf: that's out of my scope... talk with docker developers
+@wiking	why do u need sudo
+@wiking	but imo it's all about the kernel apis it's using
+@wiking	and that they are not available by default for simple users
+@wiking	but then again i'm not sooo familiar with docker internals
+@wiking	i'm just following the official docker documentation
+@wiking	which uses sudo everywhere for docker
+@wiking	if u wanna know more: /join #docker or write to mailing list
+ thoralf	Thanks.
+ thoralf	http://docs.docker.io/en/latest/use/basics/#why-sudo
+ thoralf	Yeah. ;)
+@wiking	there u go... it depends on your docker setup... but then again by default it shoudl be sudo... :P
+@wiking	thoralf: "Just to make sure recompile everything means to run cmake and then make in the root directory (ie shogun-develop) right?)"
+@wiking	that was actually wrong...
+@wiking	not in the root but in the build...
+ thoralf	root directory (ie shogun-develop) <-- I thought shogun-develop is his build dir.
+ thoralf	Not clear.
+ thoralf	Hmm.
+ thoralf	Btw. rebuilding everything shouldn't be neccessary any more, right?
+@wiking	hehe yeh i hope so :D
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun-web: Soeren Sonnenburg :master * cac1ff4 / templates/home.html: https://github.com/shogun-toolbox/shogun-web/commit/cac1ff45a24e1fab7553294e2bc8c0833083950d
+ shogun-notifier-	shogun-web: link screenshots
+@sonney2k	alright guys
+@sonney2k	iglesiasg, wiking, lisitsyn, thoralf besser82 - release sprint!
+@iglesiasg	let's do it
+ lisitsyn	sonney2k: good catch I am more or less available
+ lisitsyn	though have a bus in 2 hrs
+ lisitsyn	iglesiasg: how can we make that notebook
+ lisitsyn	:D
+-!- FSCV [~FSCV@50.7.50.60] has joined #shogun
+@iglesiasg	lisitsyn, do you have any idea about it written down so far?
+ lisitsyn	no I was a bit stucked
+@wiking	besser82: ping ping ping
+@sonney2k	heiko is writing long blog posts currently
+@sonney2k	buildbots are all green
+@sonney2k	and I will do demos
+@wiking	sonney2k: no they are not
+@wiking	sonney2k: there's at least one major concurency error
+ lisitsyn	iglesiasg: lets join some google doc then
+@iglesiasg	lisitsyn, sure
+@sonney2k	wiking, well next release we can do better then
+@iglesiasg	lisitsyn, I have time to work on this this evening after dinner and during the weekend
+@wiking	sonney2k: you can run the demos in docker image
+ lisitsyn	iglesiasg: uhmm I guess sonney2k wants it asap :D
+@sonney2k	wiking, well they are running already but we can switch later
+ lisitsyn	iglesiasg: when is your dinner?
+@wiking	sonney2k: where r they running atm?
+@sonney2k	wiking, fatbot.shogun-toolbox.org/regression/svr
+@sonney2k	etc
+@iglesiasg	lisitsyn, long to come still
+@iglesiasg	lisitsyn, like in about 4-5 hours
+@wiking	ok so fatbot
+ lisitsyn	hah
+@sonney2k	so if you see sth to polish please do it
+@sonney2k	I mean documentation
+@sonney2k	READMEs
+ lisitsyn	okay I'll start and pass it over to you
+@sonney2k	website
+@wiking	sonney2k: there's heaps of issues still..
+@iglesiasg	lisitsyn, sounds good!
+@sonney2k	wiking, which?
+@wiking	sonney2k: https://github.com/shogun-toolbox/shogun/issues?milestone=3&state=open
+@wiking	first 4 could be closed by 1 fix
+@sonney2k	wiking, well we won't have workshop videos
+@sonney2k	so what lets move them to 3.1
+ lisitsyn	iglesiasg: I think I want to cover just 5 methods
+@wiking	sonney2k: what's the sudden rush?
+@iglesiasg	lisitsyn, we can get the theory from tapkee's website
+@sonney2k	nothing release critical
+ lisitsyn	yes iglesiasg
+ lisitsyn	sonney2k: agree, these data races are not major
+@wiking	sonney2k: we have a thread sync error, and that's not critical?
+@sonney2k	wiking, no
+@wiking	who's a data race not critical?
+@sonney2k	it is just one bug among many
+@iglesiasg	lisitsyn, so probably there is not much cost including many methods
+ lisitsyn	wiking: I think it is not
+@wiking	lisitsyn: and how is it not a critical?
+@wiking	:D
+@iglesiasg	lisitsyn, so we could present a couple of figures with embeddings
+@sonney2k	and it is 'minor'
+ lisitsyn	wiking: no I get your message but we have other bugs as well
+ lisitsyn	we won't release any day if we approach to fix everything
+ lisitsyn	just lower your threshold ;)
+@wiking	lisitsyn: not eveyrthing we've moved quite some stuff already to 3.1
+@iglesiasg	lisitsyn, any idea how could we compare the results of different methods applied to the same data set?
+ lisitsyn	iglesiasg: not yet
+@sonney2k	wiking, if you have time fix as much as you can and then we will release with that
+@iglesiasg	lisitsyn, maybe for some labelled data set we apply knn in the original space
+@iglesiasg	lisitsyn, and then the same using the data after dim red
+@sonney2k	wiking, we just have to release *very soon* or we will never
+@iglesiasg	lisitsyn, and we make a table or a bar plot of classification accuracy using different dimred methods and that's pretty much it. What do you think?
+@wiking	sonney2k: ok then at least give this weekend
+ lisitsyn	iglesiasg: sounds good but no idea what the outcome would look like
+@iglesiasg	haha me neither
+@sonney2k	wiking, we will prepare everything today - if you can fix (the critical cmake erros) ws videos - that is much more important than some function crashing sometimes
+-!- sonne|osx [~sonne@c-67-180-92-246.hsd1.ca.comcast.net] has joined #shogun
+@iglesiasg	oh
+@iglesiasg	sonney2k, so release today?!
+@sonney2k	iglesiasg, I am on the plane with heiko today so we try to get everything blog / release post like in shape
+@wiking	sonney2k: can we have the release on monday?
+@iglesiasg	ok
+@sonney2k	iglesiasg, and I will write some shell script to do the release tgz
+@sonney2k	wiking, what exactly do you still want to do / fix?
+@sonney2k	wiking, cmake with matlab? cmake with /usr/local/* or ws videos?
+@wiking	and other static interfaces
+@wiking	yes
+@sonney2k	wiking, I mean why delay? these issues are open for months
+@wiking	sonney2k: yeas
+@wiking	but this weekend i have time
+@wiking	unlike other weekends...
+@wiking	i mean i'm not fulltime working on shogun (not like during summer)
+@sonney2k	wiking, ok then we will prepare everything then so we just have to push a button
+@sonney2k	wiking, fix what you can / want to
+@sonney2k	wiking, but we *will* release monday latest
+@wiking	ok monday 12:00 UTC
+ lisitsyn	monday would be better for me cause I can prepare better notebook
+@wiking	i'll have things ready by sunday night
+@wiking	or at least as much as i can
+-!- new_lido [~walid@41.218.174.46] has joined #shogun
+-!- new_lido [~walid@41.218.174.46] has quit [Ping timeout: 241 seconds]
+@sonney2k	lisitsyn, well the sooner the better
+-!- new_lido [~walid@41.218.174.155] has joined #shogun
+-!- sonne|osx [~sonne@c-67-180-92-246.hsd1.ca.comcast.net] has quit [Quit: sonne|osx]
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:b854:c0fd:3503:f6c] has quit [Quit: Ex-Chat]
+-!- new_lido [~walid@41.218.174.155] has quit [Ping timeout: 252 seconds]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Quit: Leaving.]
+-!- zxtx [~zv@c-50-129-227-197.hsd1.in.comcast.net] has quit [Ping timeout: 260 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- new_lido [~walid@193.227.20.2] has joined #shogun
+-!- new_lido [~walid@193.227.20.2] has quit [Quit: Leaving]
+-!- thoralf [~thoralf@enki.zib.de] has quit [Quit: Konversation terminated!]
+-!- new_lido [~walid@193.227.20.2] has joined #shogun
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- lisitsyn [~lisitsyn@109-226-82-69.clients.tlt.100megabit.ru] has joined #shogun
+@iglesiasg	lisitsyn, hey
+@iglesiasg	lisitsyn, what's up
+ lisitsyn	iglesiasg: hey
+ lisitsyn	iglesiasg: I haven't managed to write anything interesting yet :)
+@iglesiasg	lisitsyn, no problem. I was thinking about starting an script to check this knn after dim red idea
+ lisitsyn	oh would be nice!
+@iglesiasg	lisitsyn, are you ok with it?
+@iglesiasg	cool
+ lisitsyn	yes totally
+@iglesiasg	any idea for the data set to use?
+@iglesiasg	if not, I will take this portion of MNIST I used for the LMNN notebook
+@iglesiasg	or I could go with the metagenomics data set
+@iglesiasg	sort of high dimensional, so it can be interesting in this case
+ lisitsyn	iglesiasg: yeah metagenomics one sounds more interesting
+@iglesiasg	lisitsyn, 85 examples with 1472 features, 3 classes
+ lisitsyn	good!
+@iglesiasg	http://nbviewer.ipython.org/6576096
+@iglesiasg	there is the result applying td-sne
+ lisitsyn	iglesiasg: pretty big stuff
+ lisitsyn	:0
+ lisitsyn	:)
+--- Log closed Sat Oct 26 00:00:57 2013

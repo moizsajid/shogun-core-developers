@@ -1,0 +1,285 @@
+--- Log opened Wed Aug 29 00:00:17 2012
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- sr___ [u5548@gateway/web/irccloud.com/x-fxvqghaankjqwlrp] has joined #shogun
+ shogun-buildbot	build #80 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/80
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Client Quit]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- av3ngr [~av3ngr@60-241-222-244.static.tpgi.com.au] has joined #shogun
+-!- av3ngr [~av3ngr@60-241-222-244.static.tpgi.com.au] has left #shogun []
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 246 seconds]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- fjig [~fjig@orange-10.csc.kth.se] has joined #shogun
+-!- fjig is now known as n4nd0
+ blackburn	n4nd0: new nickname? :)
+ n4nd0	blackburn: connected from university :)
+ n4nd0	irssi took my username in this network
+ n4nd0	blackburn: when are we planning to release btw?
+ n4nd0	do you think everything is prepared?
+ blackburn	n4nd0: heiko made me happy about serialization
+ blackburn	it is broken :D
+ n4nd0	fuck... really?
+ n4nd0	everything related to serialization?
+ n4nd0	it sounds like a big issue
+ blackburn	I am unsure what exactly is broken
+ blackburn	worst thing heiko can't take care of that
+ n4nd0	mmm I think I could try to look at it tonight
+ n4nd0	is there any test where it breaks? to have sth to start with
+ blackburn	n4nd0: I asked heiko - lets wait for answer
+ n4nd0	ok
+ blackburn	n4nd0: we have quite a few serialization examples in examples/libshogun
+ blackburn	you could try to track errors with valgrind
+ n4nd0	ok
+ blackburn	I am going to get home soon so I will try to track down errors tonight too
+ n4nd0	ok
+ n4nd0	I will see you there then
+ n4nd0	I am going to class now
+ n4nd0	bye
+-!- n4nd0 [~fjig@orange-10.csc.kth.se] has quit [Quit: leaving]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+ CIA-52	shogun: Soeren Sonnenburg master * r5398c6e / (3 files in 3 dirs): fix up clustering evaluation example - http://git.io/_AL1pg
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- gsomix [~gsomix@178.45.88.247] has joined #shogun
+ gsomix	good evening
+ n4nd0	hi
+-!- gsomix [~gsomix@178.45.88.247] has quit [Remote host closed the connection]
+@sonney2k	shogun-buildbot, force build nightly_default
+ shogun-buildbot	build forced [ETA 37m15s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ n4nd0	hi sonney2k
+ n4nd0	did you read about this issue we were talking about yesterday related to using MKL with pnorm larger than one?
+-!- gsomix [~gsomix@178.45.88.247] has joined #shogun
+ shogun-buildbot	build #81 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/81
+-!- audy [~audy@unaffiliated/audy] has quit [Quit: ZNC - http://znc.sourceforge.net]
+-!- audy [~audy@heyaudy.com] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@188.168.5.215] has joined #shogun
+@sonney2k	blackburn, hey... what is wrong with the string kernels? why are they suddently marked unstable?
+ blackburn	sonney2k: because they were and are failing tests
+@sonney2k	blackburn, the old regression tests? or which?
+ blackburn	yes, old ones
+@sonney2k	did they fail back then too?
+@sonney2k	(like when we released 1.0 last year?)
+ blackburn	for 1.0 and 1.1 yes
+@sonney2k	I can tell that noone can report anything
+@sonney2k	these are too involved
+ blackburn	sonney2k: I am going through serialization stuff now - not really understand anything
+ blackburn	sonney2k: yes and because of it I think they are unstable
+@sonney2k	blackburn, whats wrong with serializaton?
+ blackburn	sonney2k: heiko says it is broken somehow
+@sonney2k	in which way?
+@sonney2k	what is not working?
+ blackburn	I want to understand that too
+ blackburn	well it is leaking
+@sonney2k	blackburn, do the 'new' regression tests work?
+@sonney2k	'just' memory leaks?
+ blackburn	sonney2k: yes seems to be that only leaks
+ blackburn	sonney2k: unit tests are working yes
+@sonney2k	ahh ok then I know
+ blackburn	sonney2k: is there a code where sgvector is being created?
+@sonney2k	it is because of SGVector and friends I think
+ blackburn	on deserialization?
+@sonney2k	the reference count needs to be saved too IMHO
+ blackburn	yes it should
+ blackburn	I am confused with a lot of code there
+@sonney2k	blackburn, any other issues that need attention?
+ blackburn	no, I don't think so
+ blackburn	sonney2k: do you have time to check serialization?
+@sonney2k	blackburn, btw I learned that our 'regression' tests are called 'integration' tests
+@sonney2k	so I would rather rename them now
+@sonney2k	blackburn, no
+@sonney2k	that is too involved
+@sonney2k	I am afraid only heiko can fix things
+ blackburn	heiko is out now
+ blackburn	:)
+@sonney2k	blackburn, when is his deadline for handing in the masters thesis?
+ blackburn	he is busy till 8th
+@sonney2k	+ 2 days to recover
+@sonney2k	blackburn, I realize that we have quite some crappy examples under python_modular
+@sonney2k	not really functions
+@sonney2k	so not useful for integration tests
+@sonney2k	some even pull stuff of the web
+ blackburn	that's all pretty bad
+@sonney2k	also some have documentation on top
+@sonney2k	instead of descriptions/ folder
+ blackburn	sonney2k: are you back to your job already too?
+@sonney2k	no
+ blackburn	when will you?
+@sonney2k	but next week
+ blackburn	I see
+@sonney2k	will mean less time (can that be?)
+ blackburn	less?
+@sonney2k	too bad I got sick now that I in principle would have had time
+@sonney2k	at least I can type again ;)
+ blackburn	I don't know whether we could be ready
+@sonney2k	no idea either
+@sonney2k	if not then not
+ blackburn	sonney2k: I like rc concept so may be we could release 2.0rc
+ blackburn	:D
+ blackburn	it is actually seems to be a good idea for me
+ CIA-52	shogun: Soeren Sonnenburg master * r550727e / (264 files in 30 dirs): rename regression test directory into integration tests to avoid - http://git.io/ICIggQ
+ blackburn	because no way to release  2.0 without bugs we would have to fix in next 2-3 weeks
+@sonney2k	but why release RC then if we know the bugs :D
+@sonney2k	otherwise I am fine with rc's
+ blackburn	sonney2k: no we don't know all bugs
+ blackburn	I expect more anyway
+ blackburn	sonney2k: uhhhhh ref count currently is pain in the ass
+ blackburn	more or less I realized how that works
+@sonney2k	?
+ shogun-buildbot	build #381 of deb2 - static_interfaces is complete: Failure [failed test cmdline_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/381  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ blackburn	sonney2k: I don't know how to handle that at all
+ blackburn	sgvector could be referenced from basically every other object
+ CIA-52	shogun: Soeren Sonnenburg master * rfeafbf7 / src/Makefile.template : - adjust regression -> integration in makefile - http://git.io/4dlw7Q
+@sonney2k	blackburn, yes
+ blackburn	that means we can't determine actual refcount
+ blackburn	actually after deserialization it seems to be 1
+ blackburn	for every field
+ blackburn	I do not have any scenario with refcount=2 initially
+@sonney2k	blackburn, the only thing I can think of is that one has two RealFeatures objects sharing the same SGMatrix or so
+@sonney2k	( or CLabels)
+@sonney2k	then current serialization would save things twice
+ blackburn	yeah that's one
+ blackburn	after deserialization it will become correct again
+ blackburn	right?
+@sonney2k	blackburn, I think the proper fix would be to use gsomix' CMap class to store all the things that are to be mapped first
+@sonney2k	then later save them
+ blackburn	??
+@sonney2k	this way it can be deduplicated
+@sonney2k	and refcounts can be computed
+ blackburn	no I don't want to implement that now :D
+ blackburn	lets assume it is 1
+ blackburn	after deserialization
+@sonney2k	I didnt' say that this should be done *now*
+@sonney2k	but I think that this is the only clean way
+@sonney2k	otherwise we save things twice or even more often
+@sonney2k	and of course behavior changes since objects that were just pointers to the same memory location
+@sonney2k	are now clones
+ blackburn	sonney2k: okay I will add reset_refcount method and call it after deserialization
+ blackburn	that should fix the process a little
+@sonney2k	blackburn, why reset?
+@sonney2k	1 is OK
+ blackburn	sonney2k: reset = set to 1
+@sonney2k	blackburn, yeah but it is one no?
+ blackburn	why? where is that set?
+@sonney2k	what is it?
+ blackburn	okay you are creating machine
+ blackburn	play around with w
+ blackburn	w refcounter is 9
+ blackburn	then you load it
+ blackburn	hmmmmmm
+ blackburn	then no need to touch it??
+ blackburn	okay I lost the idea what I need to fix
+ blackburn	:D
+@sonney2k	yeah I also don't know
+@sonney2k	it should not create leaks
+@sonney2k	or heiko means some other leaks
+@sonney2k	maybe *when* (de)serializing?
+@sonney2k	I mean in that code?
+ blackburn	sonney2k: if you run any base or serialization or parameter libshogun example it leaks
+ blackburn	sonney2k: okay so what about 2.0rc on 1st of September and 2.0 in the end of September?
+ shogun-buildbot	build #483 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/483  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ blackburn	wiking: please fix latent svm unit test
+ shogun-buildbot	build #382 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/382
+ shogun-buildbot	build #484 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/484
+ wiking	blackburn: mmmm
+ wiking	ok
+@sonney2k	wiking, what are the required packages to run the unit tests and how?
+@sonney2k	blackburn, do you also get an error in regression_gaussian_process_modular.py
+ wiking	sonney2k: ubuntu?
+ wiking	sonney2k: you need google-mock
+ wiking	and need to install http://code.google.com/p/googletest/ as there's no package for it under ubuntu (just -dev package)
+@sonney2k	wiking, both debs?
+ wiking	sonney2k: haven't checked
+ wiking	maybe debian has it
+@sonney2k	libgtest-dev ?
+ wiking	sonney2k: have u managed to get the static-build work?
+ wiking	sonney2k: u would need libgtest0
+ wiking	http://packages.debian.org/squeeze/libgtest0
+@sonney2k	doing
+ wiking	so debian has it
+@sonney2k	(wheezy has it)
+@sonney2k	wiking, now what?
+ wiking	ok after this
+ wiking	run ./configure
+ wiking	and hopefully it'll detect the mocking framework for you
+@sonney2k	nope
+ wiking	mmm
+ wiking	can u paste me here the configure.log part?
+@sonney2k	I installed google-mock
+@sonney2k	/usr/bin/ld: cannot find -lgmock
+@sonney2k	/usr/bin/ld: cannot find -lgtest
+ wiking	yeah google-mock will install libgtest-dev
+ wiking	but not libgtest0
+ wiking	can u send me the compiling code?
+ wiking	what are the actual flags
+@sonney2k	wiking, I have /usr/lib/libgtest.so.0
+@sonney2k	but no libgmock or so
+ wiking	oooh
+ wiking	dpkg -L google-mock
+ wiking	does not install libgmock ?1
+ wiking	?!
+@sonney2k	nope
+ wiking	is this deb wheezy?
+@sonney2k	dpkg -L google-mock | grep .so
+@sonney2k	empty
+ wiking	rotfl
+@sonney2k	y
+ blackburn	sonney2k: I'll check but it was failing before, yes
+ wiking	what does it have then?
+@sonney2k	gmock_gen and a buch of headers
+ wiking	m,mmm
+ wiking	does it have maybe then libgmock ?
+@sonney2k	wiking,
+@sonney2k	The Google C++ Mocking Framework uses conditional compilation for some
+@sonney2k	things.  Because of the C++ "One Definition Rule", gmock must be
+@sonney2k	compiled with exactly the same flags as your C++ code under test.
+@sonney2k	Because this is hard to manage, upstream no longer recommends using
+@sonney2k	precompiled libraries.
+@sonney2k	so
+@sonney2k	the new recommendation is:
+@sonney2k	g++ -I/usr/src/gmock -c /usr/src/gmock/src/gmock-all.cc
+@sonney2k	g++ -I/usr/src/gtest -c /usr/src/gtest/src/gtest-all.cc
+@sonney2k	ar -rv libgmock.a gmock-all.o gtest-all.o
+@sonney2k	to build libgmock statically!
+ wiking	lol
+@sonney2k	everyone has to do it before running tests
+@sonney2k	wiking, same with libgtest btw!
+ wiking	yeah i gathered now
+ wiking	that this is why there's no libgtest0
+@sonney2k	exactly
+@sonney2k	actually squeeze still had libgtest
+@sonney2k	wheezy does not
+ blackburn	sonney2k: yeah failing still
+ blackburn	sonney2k: we are waiting for jacob's fix
+ blackburn	okay leaving now
+-!- blackburn [~blackburn@188.168.5.215] has quit [Quit: Leaving.]
+ naywhayare	hello there, can someone tell me if I am performing this task in the most computationally efficient way? (task to follow)
+ naywhayare	I have one dataset (no test/train split) and wish the find the K nearest neighbors (index of neighbors and distances) of each point in the dataset
+ naywhayare	the only way I can seem to find to do this is to use the KNN classifier, which is more than I want to do; I just want the neighbors, no classification
+ naywhayare	is there a way to do this?  currently I am using the command-line interface but it seems to me like that has less functionality than some other interfaces to the library
+ naywhayare	thanks in advance for any help.
+ gsomix	sonney2k, hey. :)
+@sonney2k	naywhayare, I guess the most effictive would be to create the kd-tree like k-nn does yourself but that would mean you have to get your hands dirty too
+@sonney2k	and write C++ cod
+@sonney2k	e
+@sonney2k	gsomix, hey...
+@sonney2k	wiking, do you intend to fix the gtest/gmock stuff?
+ gsomix	sonney2k, how can I add something in python_modular/tools?
+@sonney2k	just add it there...
+@sonney2k	but wnat do you need?
+ naywhayare	sonney2k: I don't mind getting my hands dirty; if there's not a nice way to do it through one of the interfaces I'll just write up a little C++ utility
+ naywhayare	thanks for th einfo
+ naywhayare	*the info
+@sonney2k	naywhayare, we actually don't mind you do it and share the code later on via a PR such that it can be used from some other interface
+ naywhayare	okay, I'll share the code but it'll be brutally simple and probably not useful to anybody but me
+ gsomix	sonney2k, add in repo.
+ gsomix	hm... I want classifier_multiclass_shared.py -> tools/multiclass_shared.py
+@sonney2k	gsomix, git mv classifier_multiclass_shared.py  tools/multiclass_shared.py
+ gsomix	sonney2k, ok
+* sonney2k Zzzzz
+ gsomix	sonney2k, nite
+ naywhayare	am I correct in understanding that the CKNN class either uses cover trees or does the naive O(n^2) computation?  I don't see kd-trees being created there
+ naywhayare	forgive me if I've missed something simple as I am unfamiliar with shogun internals
+--- Log closed Thu Aug 30 00:00:17 2012

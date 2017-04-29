@@ -1,0 +1,409 @@
+--- Log opened Sat Nov 26 00:00:32 2016
+@HeikoS	wiking: jo
+@HeikoS	lisitsyn:
+@wiking	ho
+@HeikoS	I just realised
+@HeikoS	if we separate out SWIG interface from the base shogun C++ code more
+@HeikoS	then we can do multiple inheritance
+@HeikoS	AKA interfaces
+@HeikoS	wiking: so about SWIG and plugins
+@HeikoS	we need a way to fix the SWIG interface and just exchange underlying .so libs
+@HeikoS	wiking: btw about the multiple inheritance thing, this is quite cool as we can do proper OOP inside
+@HeikoS	and then we just offer very simple things via SWIG
+@HeikoS	no need to re-create the class structure in SWIG
+@HeikoS	that is actually really cool
+@HeikoS	this solves many problems we have with the uglyness of the class structures
+@wiking	:>
+@sukey	New Commit "Avoid false sharing in EuclideanDistance OpenMP loops" to shogun-toolbox/shogun by vigsterkr: https://github.com/shogun-toolbox/shogun/commit/7347baf36c19c4a79a0f41a34a05b7ad4de67b4a
+@wiking	i'm working on fixing our fucking openmp shits
+@wiking	HeikoS, are you ready on the weekend for a 5.0.1? :)
+@wiking	the only remaining stuff
+@wiking	is the stupid GaussianARDKernel
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has quit [Ping timeout: 256 seconds]
+-!- travis-ci [~travis-ci@ec2-54-205-110-146.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/178965349
+-!- travis-ci [~travis-ci@ec2-54-205-110-146.compute-1.amazonaws.com] has left #shogun []
+@wiking	CaBa, one thing
+@wiking	i've just realised
+@wiking	if you want some speedup
+@wiking	add this to your CFLAGS and CXXFLAGS
+@wiking	"-march=native"
+@wiking	fuck CExponentialARDKernel is not thread safe
+@sukey	New Commit "Make ExponentialARDKernel::get_weighted_vector thread-safe" to shogun-toolbox/shogun by vigsterkr: https://github.com/shogun-toolbox/shogun/commit/8bb226ef0dc319f331f87fbed3c1766927b215df
+@sukey	New Commit "Make ExponentialARDKernel::get_weighted_vector thread-safe" to shogun-toolbox/shogun by vigsterkr: https://github.com/shogun-toolbox/shogun/commit/4c1dc333f66b01520810975b322d47bcfe51066c
+ shogun-buildbot	build #9 of clang - undefined behaviour analysis is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang%20-%20undefined%20behaviour%20analysis/builds/9
+-!- lambday [31cf36a1@gateway/web/freenode/ip.49.207.54.161] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+-!- travis-ci [~travis-ci@ec2-54-166-157-46.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/178983447
+-!- travis-ci [~travis-ci@ec2-54-166-157-46.compute-1.amazonaws.com] has left #shogun []
+-!- mizari [~mizari@95-174-213-100.nts.su] has joined #shogun
+@sukey	New Commit "some more doxygen for bigtesting" to shogun-toolbox/shogun by lambday: https://github.com/shogun-toolbox/shogun/commit/218aee4a30b1da08d536b79962e03574a34e52d5
+-!- lambday [31cf36a1@gateway/web/freenode/ip.49.207.54.161] has quit [Ping timeout: 260 seconds]
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@sukey	Wiki page: Home edited on shogun-toolbox/shogun by karlnapf
+@HeikoS	wiking: jo
+@HeikoS	yes up for it
+@wiking	?
+@wiking	up for what?
+@HeikoS	wiking: 5.0.1 on weekend
+@HeikoS	sorry you wrote that yesterday
+@HeikoS	I mean +++ for the reactiveX
+@wiking	ah ok
+@HeikoS	wiking: really cool
+@HeikoS	wiking: thing is
+@HeikoS	how to embed in shogun?
+@HeikoS	like concretely
+@HeikoS	algos have intermediate results
+@HeikoS	from the algorihtm perspective, how is this achieved
+@wiking	well
+@HeikoS	we need yet another internal interface for such things no?
+@wiking	just the concept
+@wiking	of observables
+@wiking	and observers
+@wiking	noup
+@wiking	no need for internal interface
+@wiking	http://reactivex.io/documentation/observable.html
+@HeikoS	so the developer marks some things in algo as observable
+@HeikoS	and the user then choose which of them to observe
+@wiking	ytes
+@wiking	but read the docs
+@wiking	worth to spend
+@HeikoS	yeah doing
+@wiking	like 20 mins on it
+@wiking	and then you can do many crazy stuff
+@wiking	with observables
+-!- lambday [31cf36a1@gateway/web/freenode/ip.49.207.54.161] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+@lambday	HeikoS: yo
+@wiking	trasnform it
+@HeikoS	lambday: jojo
+@wiking	etc
+@lambday	wiking: yo
+@HeikoS	http://reactivex.io/documentation/observable.html
+@HeikoS	lambday:  ^
+@wiking	join
+@wiking	merge
+@lambday	HeikoS: yeah checking that one
+@wiking	whatever u want
+@HeikoS	wiking: key here is that inside the shogun algos, things are very simple
+@HeikoS	and how the users select things they want
+@wiking	i mean the super crazy stuff would be
+@wiking	to make
+@wiking	sgobject observable
+@wiking	:)
+@HeikoS	so that a) it is easy to set up the algos when writing them
+@wiking	and then you can do almost whatever the fuck
+@HeikoS	b) easy for users to query
+@HeikoS	wiking: yeah true
+@lambday	HeikoS: user need to get somehow a list of intermediates that they can choose to save... and then sends a config to save a select set of stuffs
+@lambday	out framework saves only those
+@HeikoS	wiking: though in practice, we need to keep it simple as well
+@HeikoS	dont want to store all objects
+@HeikoS	just some few numbers
+@wiking	you observer
+@wiking	filter
+@wiking	whatever you want
+@wiking	http://reactivex.io/documentation/operators.html#filtering
+@HeikoS	yes I know
+@HeikoS	I am talking about concrete interfaces for users to do that
+@wiking	just go with the reactive interface
+@HeikoS	definitely not
+@wiking	why do u want to define yet another interface
+@HeikoS	because a user just wants to store the xvalidation indices
+@wiking	yeah ok
+@wiking	he subscribes to that
+@HeikoS	and that should be simpler than reactivex api
+@wiking	and that's it
+@wiking	i mean what's the big deal
+@HeikoS	SWIG interface
+@wiking	you make those indices observable
+@wiking	and?
+@HeikoS	!= reactiveX interface
+@HeikoS	yes
+@HeikoS	okok
+@HeikoS	let's prototype it
+@HeikoS	better way to discuss
+@HeikoS	I want to see how it looks a) inside algorithm, b) for user
+@wiking	what do yo umean
+@lambday	I can take a dig
+@wiking	a) b)?
+@HeikoS	a) somebody implements a new algo and needs to do this in a way that things can be observed, how much effort is that
+@HeikoS	b) a user just wants a single line call to get whatever he wants
+@HeikoS	so for that prototype is good
+@HeikoS	but let me read the docs first then :)
+@HeikoS	wiking, lambday I mean it would be cool to solve this generally in Shogun and apply it to all the algos where we currently have hacks in place
+@HeikoS	xvalidation, mmd, optimization, etc etc
+@wiking	yeah but that's all
+@wiking	i mean say you have a Future
+@lambday	HeikoS: yeah that was the general idea.. doing it shogun-wise
+@wiking	that generates values
+@wiking	like the
+@wiking	indicies for xval
+@wiking	you just wrap that to be observable
+@HeikoS	lambday: so lets come back to this once bigtest is merged
+@HeikoS	wiking: yep ++
+@lambday	HeikoS: almost there.. this morning I added another bunch of doxygen docs
+@wiking	https://github.com/Reactive-Extensions/RxCpp/blob/master/Rx/v2/examples/println/main.cpp#L48-L51
+@wiking	HeikoS,
+@wiking	that's almost the simplest way
+@wiking	to create an observable
+@wiking	and then you can map/flatmap/filter whatever you want
+@wiking	merge transform
+@wiking	subscribe
+@HeikoS	yes
+@HeikoS	keep in mind thats all internal API
+@wiking	?
+@HeikoS	for users, it has to be different
+@HeikoS	SWIG interface needs to be like
+@HeikoS	xvlidation.store_intermediate('param_name', schedule)
+@HeikoS	as an example
+@wiking	no
+@wiking	you dont want to store
+@wiking	:)
+@wiking	i mean it should be
+@wiking	up to the user
+@wiking	to store it somewhere
+@wiking	you just want to stream it
+@wiking	you dont want to take care of actually storing it somewhere
+@HeikoS	I understand
+@HeikoS	but there are standard use cases right?
+@wiking	mmm
+@wiking	i think you are mixing here stuff
+@wiking	that's what i meant already
+@HeikoS	maybe
+@wiking	in the email
+@wiking	if you wanna have a k/v store
+@HeikoS	I asked for clarification :)
+@wiking	then yeah
+@wiking	but for things
+@HeikoS	this reactive stuff is more for asynchronous implementations
+@wiking	i mean th ething is that it should 'stream' the updates of any variables
+@wiking	that is sane
+@HeikoS	there is no user ever instacting with them
+@wiking	to be streamed
+@HeikoS	just the framework
+@wiking	to the user
+@HeikoS	yeah
+@wiking	but storage
+@wiking	is a total different story
+@wiking	either you let the user
+@wiking	to deal with the storage of these streamed values
+@wiking	and so you dont care how it's handled
+@wiking	or
+@wiking	you actually provide
+@wiking	a k/v store
+@HeikoS	yes
+@wiking	and some extra helper functions
+@wiking	so that you have
+@HeikoS	the motivation for the discussion came for the second case
+@wiking	reactivex -> k/v store
+@HeikoS	yyes exactly
+@wiking	but those things should be separate
+@HeikoS	I agrere
+@wiking	first have one and the other
+@wiking	and then think about maaaaaaaaaybe providing
+@wiking	some 'usual suspects'
+@wiking	for the interaction between the two
+@wiking	but i would avoid if possible
+@wiking	to mix these 2 features
+@HeikoS	well we want the intermediate results popping out of algos in a nice way, that is the whole motivation
+@HeikoS	(optionally)
+@wiking	could you be more scientific
+@HeikoS	so user says (from SWIG)
+@wiking	because poping up is que?
+@wiking	i dont care from where
+@HeikoS	I want to run algrothm X
+@wiking	that should be language agnostic
+@HeikoS	and I want the following object's values in every iterations (indices)
+@wiking	ok but this is a clear cut observable, right?
+@wiking	subscribe to an observable
+@HeikoS	and in fact, the user should be able to ask the algorithm (what intermediate results can you generate)
+@wiking	that provides the idicies
+@wiking	heheh we are getting on corba level now :) (selfdescribing api
+@HeikoS	I am thinking use case here
+@HeikoS	not technology
+@wiking	i'm just saying
+@HeikoS	sure
+@wiking	tha this conceptually
+@HeikoS	but do you get my point?
+@wiking	that you've descirbed
+@wiking	is a simple
+@wiking	observable
+@HeikoS	ok sure
+@HeikoS	just a bit unsure how SWIG interface conretely looks like you know
+@wiking	https://en.wikipedia.org/wiki/Reactive_programming
+@HeikoS	the main example on that page
+@HeikoS	is not what I have in mind
+@HeikoS	but we are talking apples pears here
+@wiking	no
+@wiking	but ok
+@HeikoS	I agree with you how to do things internally
+@wiking	main example on the page )
+@wiking	anyhow
+@wiking	please try to understand conceptually
+@wiking	what is this
+@HeikoS	but I am missing the 2 lines that cause things to happen for users who want indeices
+@wiking	model.subscribe("whicheverparam)
+@wiking	model.subscribe("whicheverparam", self)
+@wiking	and then from that moment on
+@wiking	or better yet
+@wiking	say self is an observer
+@wiking	(conceptually)
+@HeikoS	can we have some python code?
+@wiking	me.subscribe(model.getobservable("the param i want"))
+@HeikoS	that is slightly more complete?
+@wiking	and from that moment on
+@wiking	me will receive
+@wiking	onNext()
+@wiking	onError
+@wiking	onComplete
+@wiking	functions
+@wiking	i mean function calls
+@wiking	based on the state of the chosen observable
+@wiking	please no python
+@wiking	anyhow this is just an example
+@wiking	how it could look like
+@HeikoS	SWIG any SWIG
+@HeikoS	octave
+@HeikoS	R
+@HeikoS	pick any ;)
+@lambday	haha
+@wiking	js
+@wiking	:)
+@HeikoS	wiking: haha, well any SWIG
+@wiking	anyhow
+@wiking	if you wanna serialize these in any format
+@wiking	then of course that needs extra work
+@HeikoS	can we please have a code listing?
+@HeikoS	because I am not following you at the moment, I dont understand what you have in mind
+@HeikoS	for now just the xval indices, just wanna see that
+@lambday	http://collabedit.com/vmbgu
+@HeikoS	http://collabedit.com/rnf8b
+@HeikoS	ha!
+@wiking	hahah
+@wiking	no fucking way
+@HeikoS	lets pick first
+@wiking	i'm gonna code now
+@wiking	it's 9pm
+@wiking	i have slept 4 hours
+@wiking	:)
+@HeikoS	man just give me the 4 lines
+@wiking	and still fucking fixing
+@wiking	multithreading fuckups
+@wiking	in shogun
+@wiking	:)
+@wiking	please please
+@wiking	read the doc first
+@HeikoS	I have just read most of it
+@HeikoS	we are talking about different things thats the problem
+@wiking	no
+@wiking	we are not
+@HeikoS	so lets have code
+@wiking	just that th einformation
+@wiking	doesnt go throw
+@HeikoS	I want to see how it looks
+@wiking	through
+@wiking	ok so it's saturday night
+@wiking	and now
+@wiking	we have to solve this
+@wiking	NOW
+@HeikoS	nono
+@HeikoS	no solve
+@wiking	ok
+@HeikoS	I just want to make the last 30 mins not waster
+@wiking	so this was an idea
+@HeikoS	wasted
+@wiking	there's the fw
+@HeikoS	I want to understand what you mean
+@wiking	use it :)
+@wiking	ok
+@wiking	once again
+@wiking	say you have model
+@wiking	or algo
+@lambday	just 4 lines of SWIG calls
+@wiking	i dont care
+@wiking	algo.getObservable(id)
+@wiking	id = the stuff u want to observer
+@wiking	you can advertise it
+@wiking	via
+@wiking	algo.getObservables(): Observable[]
+@wiking	(this actually scala now)
+@wiking	so
+@wiking	and then you have your own observer
+@wiking	which can even be a storage (k/s store)
+@wiking	and you just do
+@wiking	observer.subscribe(algo.getObservable(id))
+@wiking	right?
+@wiking	and then each fucking time
+@wiking	there's a new value
+@wiking	or update
+@wiking	observer.onNext(...) will be called
+@wiking	until the moment when there's
+@HeikoS	onNext is SWIG interface language code
+@wiking	a) error -> onError()
+@wiking	b) observable finished
+@HeikoS	form where is it called?
+@wiking	fuck man
+@wiking	can you read the fucking do
+@wiking	c?
+@HeikoS	nope man
+@wiking	http://reactivex.io/RxJava/javadoc/rx/Observer.html
+@HeikoS	sorry doest make sense
+@wiking	this is the fucking basic
+@wiking	of observable
+@HeikoS	Thats why I asked for code
+@HeikoS	but anyway
+@wiking	and observer
+@wiking	i asked you
+@lambday	it will be called automatically.. but somehow the user needs to override it
+@wiking	3 times
+@lambday	is it?
+@wiking	to read it
+@wiking	to be clear with the concept
+@HeikoS	ask another time
+@HeikoS	I got the concept
+@wiking	if you got it
+@wiking	then you know
+@wiking	that those are the basic
+@wiking	3 functions
+@wiking	that ever
+@wiking	every
+@wiking	observer
+@wiking	has
+@wiking	so if you have
+@wiking	LalalalStorage : Observer
+@wiking	then LalalalStorage has
+@wiking	.onNext
+@wiking	.onError
+@HeikoS	there we go
+@wiking	.onComplete
+@HeikoS	that is implemented in shogun
+@wiking	i mean fucking hell
+@HeikoS	C++
+@wiking	no
+@wiking	it's not
+@HeikoS	not in SWIG
+@wiking	jesus
+@HeikoS	ok I am leaving
+@wiking	why would it be
+@HeikoS	not good discussion
+@wiking	on c++/
+@HeikoS	bye
+@wiking	ta
+@wiking	for the record i believe i asked you 2 times very nicely to RTFM
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has quit [Ping timeout: 265 seconds]
+-!- lambday [31cf36a1@gateway/web/freenode/ip.49.207.54.161] has quit [Quit: Page closed]
+ CaBa	wiking: heya
+ CaBa	wiking: the '-march=native' - is that already set in shoguns cmake config and i shall set it for my own application or were you referring to building shogun?
+-!- mizari [~mizari@95-174-213-100.nts.su] has quit [Quit: Leaving]
+-!- lambday [31cf36a1@gateway/web/freenode/ip.49.207.54.161] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+-!- lambday [31cf36a1@gateway/web/freenode/ip.49.207.54.161] has quit [Ping timeout: 260 seconds]
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has quit [Remote host closed the connection]
+@sukey	Pull Request #3566 "change doc to disambiguate."  opened by hongguangguo - https://github.com/shogun-toolbox/shogun/pull/3566
+ CaBa	how comes not only the combined kernel but already the very basic kernel class has subkernels?
+--- Log closed Sun Nov 27 00:00:33 2016

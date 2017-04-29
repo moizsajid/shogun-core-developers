@@ -1,0 +1,1349 @@
+--- Log opened Thu May 10 00:00:37 2012
+-!- cronor [~cronor@g231216163.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- cronor [~cronor@g231216163.adsl.alicedsl.de] has joined #shogun
+ CIA-113	shogun: Sergey Lisitsyn master * ra0c2a2c / (2 files): Fixed crasher in HomogeneousKernelMap - http://git.io/MSLuYQ
+ CIA-113	shogun: Sergey Lisitsyn master * r469d3b4 / src/shogun/preprocessor/HomogeneousKernelMap.cpp :
+ CIA-113	shogun: Got HKM to work
+ CIA-113	shogun:  - http://git.io/2NKzkw
+-!- av3ngr [av3ngr@nat/redhat/x-roigqstaldablgrl] has joined #shogun
+ blackburn	argh
+ blackburn	I have to sleep :D
+ blackburn	did first openmp vs pthreads benchmark for dotfeatures
+ blackburn	all the same
+-!- blackburn [~qdrgsm@83.234.54.222] has left #shogun []
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 240 seconds]
+-!- vikram360 [~vikram360@117.192.181.205] has quit [Ping timeout: 248 seconds]
+-!- vikram360 [~vikram360@117.192.179.160] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- gsomix [~gsomix@85.26.165.210] has joined #shogun
+-!- gsomix [~gsomix@85.26.165.210] has quit [Ping timeout: 252 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection reset by peer]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- cronor [~cronor@g231216163.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- wiking_ [~wiking@huwico/staff/wiking] has quit [Quit: wiking_]
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- cronor [~cronor@g231216163.adsl.alicedsl.de] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.222] has joined #shogun
+-!- abn_ [av3ngr@nat/redhat/x-dxmxfeutkmfrzcsf] has joined #shogun
+-!- abn_ [av3ngr@nat/redhat/x-dxmxfeutkmfrzcsf] has quit [Client Quit]
+ sonne|work	blackburn: we should have a couple of divergences in shogun
+ sonne|work	https://en.wikipedia.org/wiki/Bregman_divergence
+ sonne|work	cool stuff
+ sonne|work	blackburn: sry fall asleep yesterday
+ blackburn	sonne|work: hehe
+ blackburn	sonne|work: and I lost my sleep
+ blackburn	but fixed some things
+ sonne|work	me too got woken up by someone very small
+* sonne|work is excited about KL/JS/Bregman divs
+ blackburn	sonne|work: how should it look like?
+ blackburn	distance?
+ sonne|work	it is a distance between distributions
+ sonne|work	I think I even implemented entroy/rel entropy in CMath:: many years back
+ sonne|work	actaully bregman divergence can be euclidian distance with appropriate choice of F
+ sonne|work	so I guess yes distance it is
+ blackburn	sonne|work: however it is a distance between samples
+ blackburn	may be some other base would be better
+ blackburn	sonne|work: I have idea how to shrink distances code
+ blackburn	they are all full of stuff get/free
+ blackburn	we need to redefine *only* computing routine
+ blackburn	given context of lhs and rhs vector
+-!- cronor [~cronor@g231216163.adsl.alicedsl.de] has quit [Quit: cronor]
+ sonne|work	blackburn: for same feature type - yes
+ blackburn	sonne|work: real distances
+ blackburn	at least
+ sonne|work	yeah
+ sonne|work	alright
+ sonne|work	work!
+ blackburn	yeah I have to go to job too
+ blackburn	sonne|work: try fugitive - for example workflow is :Gstatus - check files with '-' :Gcommit
+ blackburn	I agree with its description - it is so cool it should be illegal :D
+-!- av3ngr [av3ngr@nat/redhat/x-roigqstaldablgrl] has quit [Quit: That's all folks!]
+ n4nd0	blackburn: I am checking this fugitive thing, looks nice!
+ blackburn	n4nd0: are you using vim too?
+ n4nd0	blackburn: yes
+ blackburn	then try all these things too :)
+ blackburn	powerline is really neat
+ blackburn	and clang_complete is awesome
+ n4nd0	I have not heard about those
+ CIA-113	shogun: Sergey Lisitsyn master * raf84965 / (2 files):
+ CIA-113	shogun: Revert "Exposed Subset in modular #445"
+ CIA-113	shogun:  - http://git.io/X5s3kQ
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+-!- vikram360 [~vikram360@117.192.179.160] has quit [Read error: Connection reset by peer]
+-!- vikram360 [~vikram360@117.192.179.160] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.222] has quit [Quit: Leaving.]
+-!- av3ngr [~av3ngr@60-241-222-244.static.tpgi.com.au] has joined #shogun
+-!- nickon [~noneedtok@kotnet-147.kulnet.kuleuven.be] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ n4nd0	nicococo: hey! how is it going?
+ n4nd0	nicococo: do you have a moment?
+ sonne|work	nicococo: btw I don't think we should even consider SO with kernels
+ sonne|work	it has no relevance in practise
+ sonne|work	c
+ blackburn	sonne|work: did you notice I accidentally enlarged shogun by 10k LoC? :D
+ sonne|work	blackburn: why that?
+ blackburn	sonne|work: slep
+ blackburn	SLEP
+ sonne|work	oha
+ sonne|work	does anything in there work already?
+ blackburn	sonne|work: where?
+ sonne|work	slep + shogun?
+ blackburn	not now but first SGObject regressor to be merged soon
+ sonne|work	ic
+ sonne|work	back to work...
+ blackburn	sonne|work: I tried ecoc this night
+ sonne|work	which scheme?
+ blackburn	random d
+ blackburn	dense and sparse
+ blackburn	low performance
+ blackburn	lower than OvR
+ blackburn	so probably need data dependent scheme
+ sonne|work	blackburn: I guess this is only useful for *many* classes
+ sonne|work	random I mean
+ blackburn	yes and may be not linear models
+ blackburn	I can easily imagine some class pairs or so are not linearly separable
+ sonne|work	also I am no longer that convinced that the +1 / -1 choice in sampling scheme is that good ...
+ sonne|work	anayway back to work
+ blackburn	:D
+ blackburn	ok work work
+ blackburn	I have nothing to do here
+ blackburn	may be I shall drink tea
+ blackburn	hmm
+ n4nd0	sonne|work: no kernels used in SO in practise??
+ sonne|work	n4nd0: it is *very very very* slow
+ n4nd0	:(
+ wiking	blackburn: yo what happened with HKM :)
+ sonne|work	so even 100 sequences with kernels is HUGE SCALE
+ sonne|work	not largescale!
+ wiking	blackburn: since i'm just finishing up the example code for it
+ blackburn	wiking: fixed already
+* sonne|work work
+ wiking	blackburn: what was the problem? the bug was because of the sgvector/matrix changes?
+ blackburn	wiking: yes
+ wiking	blackburn https://fbcdn-sphotos-a.akamaihd.net/hphotos-ak-snc7/s320x320/576809_340925829308530_100001733476787_945068_1478954397_n.jpg
+ wiking	blackburn: "what's the does the acronym HELP stands for?" "???" "Bring a liter of vodka"
+ wiking	of course only works in hungarian
+ wiking	:)
+ blackburn	hungarian lessons
+ blackburn	:D
+-!- av3ngr [~av3ngr@60-241-222-244.static.tpgi.com.au] has quit [Quit: That's all folks!]
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric_	hi all
+ n4nd0	hey eric_
+ wiking	hey
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+ CIA-113	shogun: Viktor Gal master * rb8e0fa9 / (2 files):
+ CIA-113	shogun: Minor fixes for evaluation_cross_validation_multiclass
+ CIA-113	shogun:  - http://git.io/z2anIw
+ CIA-113	shogun: Soeren Sonnenburg master * rc4a34c1 / (2 files):
+ CIA-113	shogun: Merge pull request #518 from vigsterkr/master
+ CIA-113	shogun:  - http://git.io/irq-jA
+-!- wiking [~wiking@vpnd147.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpnd147.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ n4nd0	sonne|work: is there any problem with using friend classes?
+ sonne|work	n4nd0: avoid if possible - you must have a very good reason to use it...
+ n4nd0	sonne|work: I am going to think of it a bit more and if I still think that it makes sense I will try to convince you ;)
+ sonne|work	everyone is doing that these days
+ sonne|work	:D
+ blackburn	sonne|work: is it true that some editor said about your paper 'it is already in shogun'?
+ sonne|work	no
+ blackburn	chris said you had some issue like that
+ sonne|work	but someone said that we should try shogun - it must have faster methods than the one we presented
+ blackburn	ahahahaha
+ n4nd0	:D that's fun
+ sonne|work	I usually had the algorithms in shogun before even considering to write a paper
+ sonne|work	that *never* was a problem
+ blackburn	sonne|work: chris has some algo implemented
+ sonne|work	the only problem was that people used this and didn't know what to cite
+ blackburn	but not yet accepted
+ blackburn	to ECML
+ sonne|work	so it is good to have a tech report
+ sonne|work	or sth
+ blackburn	so we think whether to merge it before deadline
+ sonne|work	as I said I *never* had a problem wrt that
+ blackburn	hmm ok
+-!- pluskid [~pluskid@li400-235.members.linode.com] has joined #shogun
+ sonne|work	blackburn: I know a couple of people though that kept stuff secret and then it never went into shogun
+ n4nd0	:-O
+ blackburn	sonne|work: I'd say most of stuff is not worth secret
+ blackburn	SVM is worth for example :D
+ sonne|work	yeah but think of it - you have a toolbox with 1000 methods
+ sonne|work	now 1 new is in there with some strange name
+ sonne|work	so what?
+ sonne|work	who will even try this one out?
+ blackburn	hehe no one
+ sonne|work	exactly
+ blackburn	I don't think we have more than 100 users actually
+ sonne|work	a lot more
+ blackburn	*active* users
+ sonne|work	we have like 200 unique visitors on the website per day
+ blackburn	those are using it day by day?
+ blackburn	what do I think is we need to heavy promote 2.0
+ blackburn	we would need more applications though
+ sonne|work	well if everyone here does - yes
+ sonne|work	yes cool applications get you users
+ sonne|work	anyway
+ sonne|work	food
+ blackburn	work?
+ blackburn	ah
+ blackburn	food :D
+ blackburn	n4nd0: where do you want to establish friendship in shogun?
+ blackburn	:D
+ n4nd0	:)
+ n4nd0	I have to think a bit more about it, but I'll let you know soon probably
+ blackburn	n4nd0: does pluskid's concept fit to your ideas of SO labels?
+ pluskid	sonne|work: is the new CLabels hierarchy OK?
+ blackburn	pluskid: he is sonne|food now
+ pluskid	haha
+ blackburn	pluskid: but let me say it is ok for me :)
+ pluskid	cool!
+ n4nd0	it looks reasonable for me as well
+ pluskid	n4nd0: long time no see
+ blackburn	pluskid: would require casting but no other way I think
+ n4nd0	pluskid: exams ...
+ pluskid	n4nd0: how many remains?
+ pluskid	blackburn: yes, sad
+ n4nd0	pluskid: maybe one on the 30th, I am not sure if they will allow me to take it from here, otherwise I will skip it
+ pluskid	sounds complicated situation, are you visiting at another school?
+ blackburn	n4nd0: skip??
+ n4nd0	blackburn: do it next year
+ blackburn	I would like to be able to skip exams :D
+ blackburn	ah
+ blackburn	''nah I don't want to take this exam'
+ blackburn	:D
+ n4nd0	pluskid: I live and study a master in Sweden and have still some courses left from my degree in Spain
+ blackburn	n4nd0: if it was russian univ you could send they some money :D
+ pluskid	haha
+ n4nd0	:D
+ blackburn	n4nd0: how image would look like if you SVD it, leave only largest eigenvalues (and according vectors) and multiply it back?
+ n4nd0	leave largest singular values right?
+ blackburn	yeah sure
+ n4nd0	I guess it wouldn't look very detailed
+ n4nd0	but the strongest features would remain
+ blackburn	n4nd0: I asked my fellows year ago..
+ n4nd0	general shapes and so on
+ n4nd0	and?
+ blackburn	they DO NOT KNOW IT
+ blackburn	that should be impossible
+ blackburn	:D
+ blackburn	how can mathematician (I study mathematics as major as they do) do not know it
+ n4nd0	I don't know
+ n4nd0	maybe they got scared with the image thing
+ blackburn	n4nd0: it is called low rank approximation btw
+ n4nd0	might be so if it is the first time you face a problem like that
+ n4nd0	aham good to know, thanks!
+ blackburn	n4nd0: there are some related methods for kernels
+ blackburn	for example nystroem approximation
+ blackburn	that makes possible to estimate kernel matrix by a few values
+ blackburn	n4nd0: funny thing about MLOSS is that different toolkits do everything in different ways
+ blackburn	n4nd0: http://orange.biolab.si/blog/2012/04/30/multi-target-learning-for-orange/
+ blackburn	I do not understand what do they plan to do
+ n4nd0	looks interesting
+ blackburn	YAY
+ blackburn	I am free 14.05.2012 - 19.08.2012
+ blackburn	sonne|work: freedom! :D
+ n4nd0	blackburn: congrats!
+ blackburn	n4nd0: however I have to write thesis :D
+ n4nd0	what about?
+ blackburn	n4nd0: road sign recognition
+ blackburn	deadline is in three weeks
+-!- pluskid [~pluskid@li400-235.members.linode.com] has quit [Ping timeout: 260 seconds]
+ blackburn	n4nd0: my thesis is going to be *the only* work on domain adaptation available in russian :D
+ n4nd0	:D
+ blackburn	n4nd0: what is your bachelor's thesis about?
+ n4nd0	blackburn: I have not done any yet
+ blackburn	??
+ n4nd0	blackburn: in Spain we don't have this bachelor + master organization
+ blackburn	ahh
+ n4nd0	my degree, the one I started with is 5 years long
+ blackburn	but how did they accept you for masters?
+ n4nd0	they required 180 ECTS or three year of university studies
+ n4nd0	I had that ;)
+ n4nd0	180 ECTS is a Swedish bachelor
+ blackburn	ah credits
+ blackburn	I see
+ blackburn	n4nd0: we have no credits here :)
+ n4nd0	fuck
+ blackburn	only grades and pass/fail
+ n4nd0	in some very old degrees is like that
+ n4nd0	no credits and no grades either?
+ blackburn	for now I have got about 40 grades (possible values are 3,4 or 5)
+ blackburn	and about 20 'pass'
+ blackburn	however I have no 3 grades
+ blackburn	that means I am receiving a stipend :)
+-!- pluskid [~pluskid@111.120.48.205] has joined #shogun
+ n4nd0	aham
+ n4nd0	pluskid: hey, I would like to ask you about the new labels hierarchy
+ pluskid	n4nd0: so?
+ n4nd0	pluskid: I guess you will use some MulticlassMachine that inherits from CMahine, right?
+ pluskid	yes
+ n4nd0	CMachine has CLabels
+ n4nd0	and you'd probably like that the MulticlassMachine had CMulticlassLabels
+ pluskid	all machines has CLabels, but do cast in the run time, just like Features
+ n4nd0	all right
+ n4nd0	so the idea is to add casts wherever they are necessary
+ n4nd0	probably with one in a base method should be enough
+ pluskid	yes
+ n4nd0	ok :)
+ blackburn	n4nd0: what is you are working on?
+ n4nd0	blackburn: I am designing how SO class structure should look like
+ pluskid	and I guess you will create some CSOLabels, or to be specific CTreeLabels, CSeqLabels, etc
+ blackburn	agree
+ n4nd0	I agree with creating CStructuredLabels
+ n4nd0	but no CTreeLabels and so on
+ blackburn	n4nd0: ??
+ n4nd0	my idea is that, for example
+ pluskid	StructuredLabels might be too generic
+ blackburn	to override label class?
+ blackburn	concrete label I mean
+ n4nd0	a tree can be more than a label
+ blackburn	but what?
+ pluskid	e.g. in NLP, POS tagging is a tree?
+ blackburn	can't see any problem there..
+-!- blackburn is now known as blackburn|food
+ blackburn|food	:D
+ pluskid	...
+ n4nd0	:D
+-!- pluskid is now known as pluskid|some
+-!- pluskid|some is now known as pluskid
+-!- pluskid is now known as pluskid|is-there
+-!- pluskid|is-there is now known as pluskid
+ n4nd0	I think it makes sense to have CStructuredLabels as
+ n4nd0	CStructuredLabels : public CLabelsImpl< CStructuredData >
+ n4nd0	and one can define Tree, Sequence, and so on extending CStructuredData
+ sonne|work	pluskid: hmmh
+ pluskid	yes, but I think to have specific TreeLabels , SeqLabels helps you to specify what StructuredData (i.e. TreeData, SeqData) should be
+ sonne|work	the new label thing will certainly not work for structured labels where the type is some class
+ pluskid	sonne|work: why?
+ sonne|work	but I am not so excited about the templates too
+ sonne|work	pluskid: because you SGVector<type>
+ sonne|work	there
+ n4nd0	I think it is already done with some class in the PR
+ pluskid	I can use std::vector ... @_@
+ sonne|work	yeah you would have to use dynarray
+ pluskid	the underlying object will not be subclass of CSGObject I think
+ sonne|work	but for more complex labels you would want to return ptrs?
+ pluskid	can be something like SGVector (lightweight object wrapping some underlying heavy data)
+ sonne|work	you mean some kind of SGGraph / Tree whatever
+ pluskid	yes
+ pluskid	however, that will be up to n4nd0, whatever he need/like
+ sonne|work	pluskid: but why would one need get_vector in the main class anyways?
+ sonne|work	I mean in features we also don't have it
+ sonne|work	but only specialized classes doing this
+ pluskid	get_vector?
+ pluskid	what's get_vector?
+ sonne|work	get_label()
+ pluskid	you mean CLabelsImpl::get_label() ?
+ sonne|work	yes
+ sonne|work	in CFeatures we don't have any get/set feature matrix/vector
+ pluskid	that's for code sharing. CLabelsImpl defines get_label, then all classes derived from it automatically have this method
+ pluskid	CLabelsImpl will not be visible from users
+ pluskid	users only see the interface CLabels, and specific CBinaryLabels, etc
+ sonne|work	pluskid: you also have code sharing if you have just some real valued labels for mc/binary/regression
+-!- nickon [~noneedtok@kotnet-147.kulnet.kuleuven.be] has quit [Quit: ( www.nnscript.com :: NoNameScript 4.22 :: www.esnation.com )]
+ sonne|work	for SO labels things are different anyways
+ pluskid	sonne|work: yes, that's why I think it is not necessary to do refactoring at this time
+ pluskid	the new hierarchy will be also suitable for SO labels
+ pluskid	if we do refactoring, we should take into consideration SO
+ pluskid	or else no need to do refactoring
+ pluskid	since the current system works fine
+ sonne|work	pluskid: number of labels, confidence, subset all can be in the base class
+ pluskid	yes, they are in the base class
+ sonne|work	with SGVector<elem_t> m_labels - we can no longer access things as double* right?
+ sonne|work	and we would need new typemaps for each elem_t
+ sonne|work	trying to squeeze everything into a common base class with get_vector() being shared makes it too complicated imho
+ pluskid	sonne|work: can't we just work with CLabels in python?
+ pluskid	CLabels, CBinaryLabels, CMCLabels
+ sonne|work	I don't understand
+ pluskid	we don't expose the internal in Python
+ sonne|work	we currently need to set the values of the labels somehow
+ pluskid	so no need to have typemaps for internal structures like elem_t
+ pluskid	set labels can be set_label(float64_t)
+ sonne|work	so when you pass a numpy.array([1.0,2.0,3.0]) it will set an SGVector<float64_t> in labels
+ pluskid	set_label(float64_t) for binary and regression, set_label(int32_t) for MC
+ pluskid	that could also be supported
+ pluskid	simple to wrap
+ pluskid	set_labels(SGVector<T> labels)
+ pluskid	this method can be added easily
+ pluskid	without exposure of the internals
+ sonne|work	and then you internally copy?
+ sonne|work	and when you return things - copy again?
+-!- blackburn|food is now known as blackburn
+ sonne|work	I just wanted to get rid of this with the SGVector refcount stuff
+ pluskid	you mean return a big SGVector<float64_t>?
+ pluskid	we have a SGVector in CLabels, the memory is already there
+ sonne|work	yeah - I mean you would have too right?
+ sonne|work	but it is SGVector<elem_t>
+ pluskid	yes, we cannot return that to the users
+ pluskid	but do users need SGVector<int32_t> that often?
+ n4nd0	blackburn: hey, maybe you can help me a moment with this
+ sonne|work	well many methods need it for training
+ n4nd0	blackburn: http://dl.dropbox.com/u/11020840/shogun/Test.jpeg
+ n4nd0	blackburn: it is related to the friend classes I said before
+ pluskid	then a copy is needed
+ blackburn	n4nd0: uh..
+ blackburn	why structured model?
+ n4nd0	blackburn: to put together the pieces that are application specific
+ n4nd0	such as the compute_argmax and the computation of joint (input instance + label instance) features
+ blackburn	hmm makes sense
+ blackburn	ok and where are friends?
+ n4nd0	so as you see there
+ n4nd0	CLabels and CFeatures pop up everywhere
+ n4nd0	because they are required everywhere mainly
+ n4nd0	:)
+ n4nd0	I am looking for the best way to handle this
+ blackburn	n4nd0: no I don't think it should be like that
+ n4nd0	blackburn: let's think first on the labels for example
+ n4nd0	blackburn: CMachine has a class member for that, thus CSOMachine will have it
+ blackburn	yes
+ n4nd0	but now, how can we make it accesible for CStructuredModel and CStructuredLoss?
+ n4nd0	one option is just to put it as an argument of the methods that need them
+ blackburn	n4nd0: yeah seems fine to me
+ blackburn	better than friend
+ n4nd0	mmm why?
+ blackburn	or may be no, I am unsure
+ n4nd0	for me it makes kind of sense that CStructuredModel and CStructuredLoss have access to labels and features as if they were members
+ n4nd0	since they (CStructuredModel and the loss) are members of CSOMachine as well
+ blackburn	sonne|work: any opinion on that?
+ n4nd0	sonne|work: take a look to the attachment http://dl.dropbox.com/u/11020840/shogun/Test.jpeg if so
+ sonne|work	pluskid: if we don't use templates we can avoid this - I don't have time now to look into it further so I guess we have to postpone this
+ sonne|work	n4nd0: what?
+ pluskid	sonne|work: OK, I'm fine
+ pluskid	I'd continue to work with DECOC now
+ sonne|work	pluskid: yes thansk
+ sonne|work	n4nd0: what is the problem?
+ n4nd0	sonne|work: I think that it makes sense that CStructuredModel and CStructuredLoss have access to the features and the labels of CSOMachine as if they were their class members
+ sonne|work	ahh new paradigm here
+ n4nd0	CSOMachine contains: labels, features, model and loss
+ sonne|work	currently only the machine has the features
+ sonne|work	but now labels need features too
+ n4nd0	model and loss need features and labels
+ n4nd0	we can either pass them as arguments to their methods
+ n4nd0	or allow friendship between CSOMachine and CSModel
+-!- pluskid_ [~pluskid@li400-235.members.linode.com] has joined #shogun
+ n4nd0	and betweent CSOMachine and CSLoss
+ sonne|work	n4nd0: I prefer that features are set from Machine -> labels/losss/model
+ sonne|work	so you just set them upon train
+ sonne|work	and drop them when done
+ n4nd0	sonne|work:
+ sonne|work	so you can use them directly ...
+ blackburn	I prefer that too
+ n4nd0	sonne|work: ok, I can move features inside model
+ n4nd0	sonne|work: but loss needs them too so ...??
+ sonne|work	the machine needs the loss
+ sonne|work	so the machine can give the loss the features
+ n4nd0	ok
+ n4nd0	:D but it's the same issue
+ n4nd0	because model also needs the features
+ n4nd0	for compute_joint_feature
+-!- pluskid_ is now known as pluskid|watermel
+ sonne|work	?
+ sonne|work	machine can pass the features to model and loss - so what is the problem?
+-!- pluskid [~pluskid@111.120.48.205] has quit [Ping timeout: 260 seconds]
+ n4nd0	hmm
+ n4nd0	you just said that SOMachine shouldn't have the features as a member right?
+ n4nd0	sonne|work: but Loss could have them?
+ sonne|work	n4nd0: I said that SOMachine should have them and loss and whoever needs it
+ n4nd0	sonne|work: all of them as a class member?
+ sonne|work	yes
+ n4nd0	all right ...
+ n4nd0	then I don't understand when you said
+ n4nd0	14:17 < sonne|work> n4nd0: I prefer that features are set from Machine -> labels/losss/model
+ n4nd0	14:17 < sonne|work> so you just set them upon train
+ n4nd0	14:17 < sonne|work> and drop them when done
+ sonne|work	that is what I meant with that
+ sonne|work	within CSOMachien you do loss->set_features(m_features) etc
+ n4nd0	ok
+ n4nd0	it looks like problem solved then :)
+ n4nd0	I directly assumed that to have it as member in all the classes was not a solution
+ blackburn	why?
+ n4nd0	looks redundant
+ blackburn	friend looks worse anyway
+ sonne|work	blackburn has no friends
+ n4nd0	hahaha
+ blackburn	lol
+ blackburn	n4nd0: yeah I have no friends so I do not want friendship in shogun :D
+ n4nd0	but we do have friendship in shogun :P
+ n4nd0	I saw something in multiclass
+ n4nd0	that's why I am a bit surprised you don't like it guys
+ blackburn	hmm where?
+ n4nd0	SVM.h
+ n4nd0	friend of CSVMMulticlass
+ blackburn	what is friend?
+ blackburn	ah
+ blackburn	this can be avoided
+ n4nd0	SVM.h:268:friend class CMulticlassSVM;
+ blackburn	in future
+ blackburn	it is related to sv indices AFAIK
+ sonne|work	n4nd0: IIRC in pluskid|watermel's commit :)
+ blackburn	exactly
+ sonne|work	I also added some friends
+-!- pluskid|watermel is now known as pluskid
+ blackburn	hey guys try "git grep FUCK"
+ sonne|work	no idea how to avoid them
+ n4nd0	blackburn: you kidding?
+ blackburn	n4nd0: no I do not :D
+ blackburn	we have 2 'shit' word occurencies
+ blackburn	and one FUCK
+ pluskid	found it in ChangeLog...
+ n4nd0	haha true
+ sonne|work	only when you threaten to beat me up - you are allowed to commit commit msg containing F.CK
+ blackburn	sonne|work: did he threaten to beat you? haha
+ blackburn	but hey you are 1.9
+ blackburn	tall
+ blackburn	you should be able to beat up anyone :)
+ sonne|work	blackburn: by just jumping on him :D
+ blackburn	sonne|work: I can definitely kill someone by jumping on him (95kg :D)  -- feel free to ask
+ sonne|work	almost like kim schmitz
+ sonne|work	argh
+ sonne|work	I have to woooork!
+ n4nd0	:D
+ blackburn	sonne|work: I am not like that guy for sure :D
+ sonne|work	blackburn: megablackburn megashoguning
+ n4nd0	so what about SOLabels?
+ blackburn	n4nd0: pluskid and two commits containing 'shit' word are here too
+ blackburn	one is mine and one is of fabio di bona
+ n4nd0	the thing is that I don't see lot of sense in doing a class SGTree and later CTreeLabels
+ blackburn	n4nd0: why?
+ blackburn	well may be you are right
+ n4nd0	because we could end up having
+ n4nd0	CTreeLabels, CSeqLabels ....
+ blackburn	true I am ok with generic SO labels
+ n4nd0	that just differ in the type, whether SGTree or SGSequence
+ blackburn	no other specialization?
+ n4nd0	probably in internal functions
+ n4nd0	something that SGTree and SGSequence must implement
+ n4nd0	but I don't think that is even required right now, this specialization
+ n4nd0	since the methods required for SO will be implemented in a specialization of the StructuredModel
+ blackburn	ok then
+ n4nd0	but I have to think this aspect more carefully
+ blackburn	sonne|work: when do you plan to start with sparse and string stuff?
+ sonne|work	blackburn: I thought you do sparse I do string?
+ blackburn	sonne|work: yes - when do you plan to start with it?
+ sonne|work	no idea
+ blackburn	ok
+ blackburn	pluskid: I want a watermelon too
+ blackburn	:D
+ pluskid	blackburn: nothing left :D
+ blackburn	they are available only in september here
+ sonne|work	pluskid: before I forget: I made the unref() protected and added the x=SGVector() to force deletion
+ sonne|work	I couldn't make it private because it is not possible to call unref() in destructor (calling some virtual method)
+ pluskid	sonne|work: you mean destructor of some subclass?
+ sonne|work	yes I need to call unref() from there
+ cronor	Is there a toy dataset in shogun for regression, that does not have 100% accuracy?
+ pluskid	sonne|work: why not let the destructor of SGReferencedData to call unref() ?
+ sonne|work	pluskid: because it is not possible to call a virtual method in destructor
+ sonne|work	base class destructor
+ sonne|work	cronor: well generate one - sin(x)+rand ...
+ pluskid	sonne|work: OK, I see
+ pluskid	that's cool
+ sonne|work	but anyway it is sooo much nicer now
+ sonne|work	pluskid only problem now is SGStringList/SparseMatrix
+ pluskid	what's their problem?
+ sonne|work	they both use arrays of SGString/SparseVector
+ blackburn	sonne|work: imagine how it would be cool to get more 2012 features instead of 1985 ones ;)
+ sonne|work	and an overhead of 20 bytes per SGString/SparseVec
+ sonne|work	would be there with the new system
+ sonne|work	SGVector/Matrix is not really a problem
+ sonne|work	not sure if we just live with that or if we try to be smart
+ sonne|work	pluskid: ^
+ pluskid	maybe we can try to live with that, and see whether we really have a problem with that extra 20bytes in practice
+ blackburn	I don't mind these 20 bytes here
+ pluskid	if we really have problem, then we try to find a solution
+ sonne|work	pluskid: maybe you are right
+ sonne|work	the only example I have was some data set I trained years ago
+ sonne|work	50e6 examples
+ sonne|work	so overhead would be 1G
+ blackburn	sonne|work: 100mb overhead?
+ blackburn	emh?
+ sonne|work	50*20 =1000
+ blackburn	ah I was always weak in math
+ blackburn	;)
+* pluskid is not good at arithmetic 
+ sonne|work	I cannot even count
+ blackburn	sonne|work: what is dataset size?
+ sonne|work	~7G
+ blackburn	oh
+ blackburn	then huge overhead, right..
+-!- nicococo [~nico@lacedcoffee.ml.tu-berlin.de] has quit [Ping timeout: 245 seconds]
+ sonne|work	yeah strings were length 141
+-!- gsomix [~gsomix@85.26.235.137] has joined #shogun
+ sonne|work	14%overhead
+ blackburn	however we have to recall in modular interfaces everything is copied almost two times
+ sonne|work	only once
+ sonne|work	recall we have the new sg* stuff now
+ sonne|work	and for python there may even be ways :D
+ blackburn	sonne|work:sad it is not possible to map numpy matrices as sg stuff
+ n4nd0	gtg now guys
+ n4nd0	see you later!
+ sonne|work	blackburn: it is...
+ blackburn	sonne|work: how to handle references?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ pluskid	maybe SparseMatrix is used more often, and we can implement in some more efficient way (instead of simply array of SparseVector)?
+ sonne|work	pluskid: what is more efficient?
+ sonne|work	it is actually pretty fast now
+ pluskid	I mean memory efficient
+ blackburn	sonne|work: memory wise efficient
+ sonne|work	I see
+ sonne|work	well yeah if we keep some internal SGSparseVector type
+ sonne|work	let say SGSparse
+ blackburn	we can add intermediate class there
+ blackburn	yes
+ sonne|work	then we could convert these into SGSparseVector
+ sonne|work	but w/o refcount
+ sonne|work	and add a function that returns a copy w/ refcount
+ sonne|work	I am not aware of any sharing of SGSparseVectors yet
+ sonne|work	so it might be ok
+ pluskid	btw, sonne|work, since you are starting to like the automagic ref-counting in SGVector/SGMatrix, I would like to remind you that what you implemented in the new SGVector/SGMatrix is conceptually identical to a shared_ptr
+ pluskid	but a shared_ptr is more general
+ blackburn	sonne|work: and it is boost
+ pluskid	than SGReferencedData
+ blackburn	boost
+ blackburn	stl
+ blackburn	boost
+ blackburn	std
+ blackburn	vector map set
+ blackburn	boost!
+ sonne|work	pluskid: what overhead does shared_ptr come with?
+ pluskid	for example, let's denote our old un-ref-ed SGVector SGOldVector
+ sonne|work	wit SGRefD - I know it is 20 bytws
+ pluskid	sonne|work: the boost one's overhead is a bit heavier, because it has to work with anything
+ pluskid	but we can customize a simpler one
+ pluskid	with only those overhead as our SGRefD
+ pluskid	though with some limitations
+ sonne|work	which limitations btw?
+ pluskid	it will only work with our SG** type
+ sonne|work	I don't see any so far
+ pluskid	I mean, for SGRefD, you have to derive some class from that, and implement some method
+ pluskid	but with shared_ptr, you typedef shared_ptr<SGOldVector> SGNewVector
+ pluskid	then SGNewVector is the ref-counted vector
+ pluskid	the principles are the same, just if you use template, you write less code
+ pluskid	because the compiler write code for you
+ pluskid	anyway, just saying that
+ pluskid	the current SGRefD is already pretty cool
+ pluskid	we couldn't be too ambitious in a short time
+ sonne|work	pluskid: for SGObject we can use a more heavy solution but we have 2 weeks before things have to be more or less stable again
+ pluskid	sonne|work: yeah, I'm just saying
+ sonne|work	my experience with boost so far was that compile time went up 1000%
+ pluskid	sonne|work: hmm, that's the biggest problem
+ sonne|work	and wrapper code size too
+ sonne|work	(from swig)
+ sonne|work	and we already need ~3G to compile the wrapped code...
+ blackburn	sonne|work: we can do somthinng similar to shared_ptr
+ blackburn	not to use boost
+ pluskid	btw I mean the boost-way of writing our own shared_ptr, not to try to introduce boost as our dep
+ sonne|work	ok
+ pluskid	oops... 3G
+ pluskid	I see why my laptop hangs before I add more memory
+ sonne|work	pluskid: I would be more than happy if you start that after we release shogun 2.0 after GSoC
+ sonne|work	pluskid: if you use clang it is ok
+ blackburn	sonne|work: SGVector should contain not pointer but valarray I think
+ sonne|work	pluskid: if you have an idea how to split up a .cpp file into many - we could resolve the issue
+ pluskid	sonne|work: I'm just trying to remind you sth at some time to try to decrease your hate with template :p
+ sonne|work	pluskid: no I like templates
+ sonne|work	but only for simple types
+ sonne|work	for everything else it can become messy/slow
+ sonne|work	blackburn: :P
+ blackburn	sonne|work: ehm? how can template be slow
+ pluskid	blackburn: why valarray here?
+ sonne|work	blackburn: compile time
+ blackburn	pluskid: we need to check if it gives any advantage
+ blackburn	rumours are it is faster?
+ pluskid	blackburn: for math operations?
+ sonne|work	blackburn: than atlas?
+ blackburn	yes
+ blackburn	sonne|work: atlas is slow anyway
+ blackburn	:)
+ sonne|work	heh
+ sonne|work	gotoblas?
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+ blackburn	I need to check source
+ blackburn	what could make it faster?
+ pluskid	sonne|work would argue that valarray has extra overhead
+ pluskid	haha
+ blackburn	I thank gods sonne|work do not mind openmp
+ sonne|work	pluskid: indeed
+ sonne|work	I think it will have quite a bit of overhead
+ sonne|work	look when we tried to publish OCAS
+ sonne|work	(the fast SVM cutting plane solver)
+ sonne|work	it was very slow
+ sonne|work	and the reason was qsort in stdlib!
+ pluskid	qsort in C stdlib is slow
+ sonne|work	IIRC 10 times slower than what we do in shogun
+ pluskid	because it use function pointers
+ pluskid	do you mean C qsort or C++ std::sort ?
+ sonne|work	so I don't really trust third party stuff when it is about performance
+ sonne|work	C qsort
+ sonne|work	and memory efficiency
+ pluskid	sonne|work: then that would be reasonable
+ pluskid	function pointers are *very* slow
+ sonne|work	for the rest - I don't care
+ pluskid	I think std::sort could be fast
+-!- gsomix [~gsomix@85.26.235.137] has quit [Ping timeout: 244 seconds]
+ pluskid	in qsort, you have to do pointer derefence and  function context switch in every comparison of numbers
+ blackburn	sonne|work: are you sure std stuff is anyhow less efficient?
+ pluskid	that totally kill CPU prediction, time flow, etc.
+ pluskid	but std::sort doesn't have this problem
+ pluskid	it use functors, the function call can all be inlined
+ blackburn	pluskid: really? I did callback interface in my code
+ blackburn	are virtual functions better there?
+ sonne|work	blackburn: if you dont' do it often...
+ pluskid	blackburn: function pointers are slow, but if not like qsort (it is called so many times), I think you won't mind callbacks
+ blackburn	sonne|work: very often
+ pluskid	blackburn: virtual functions are also slow btw
+ blackburn	I did kernel(i,j) callback
+ blackburn	so is there any other way then?
+ pluskid	that's why functors are popular in STL
+ pluskid	I'm not sure of your scenario
+ pluskid	but if you want to use functors, template have to be introduced
+ blackburn	pluskid: I need a lot of kernel value computations
+ pluskid	or else we could embrace C++11 :D
+ blackburn	I don't mind templates there
+ pluskid	which defines std::function type, much better to use than a generic T type
+ pluskid	blackburn: maybe show me the code?
+-!- karlnapf [~heiko@host86-176-3-209.range86-176.btcentralplus.com] has joined #shogun
+ blackburn	pluskid: yeah I would like to show but it is available only locally on other machine
+ blackburn	I can do a little bit later
+ blackburn	pluskid: to provide flexible api I made a callback interface
+ blackburn	for example I pass a pointer to function that calls m_kernel->compute(i,j)
+ pluskid	blackburn: ok. the general idea is to replace function callback with a functor. just compare C qsort with std::sort (which accept a comparator IIRC?)
+ blackburn	probably I didn't notice any time-wise overhead because it works with virtual functions anyway
+ pluskid	virtual function is also kinda slow
+ pluskid	it's address has to be decided at run time
+ pluskid	so compiler can do nothing to optimize
+ pluskid	and the CPU cannot predict the address
+ pluskid	cache miss
+ pluskid	etc
+ blackburn	pluskid: no other way..
+ pluskid	btw: things might be better if JIT is presented (like in Java)
+ blackburn	pluskid: why functors are faster?
+ sonne|work	pluskid: are you sure these things happen if everything is available together at *compile time*
+ sonne|work	I would expect the compiler to optimize these things away
+ pluskid	sonne|work: compiler cannot determine the content of a pointer at compile time
+ pluskid	blackburn: functors's method is non-virtual, can be inlined
+ pluskid	void foo() is always faster than virtual void foo()
+ blackburn	got it
+ blackburn	pluskid: however virtual would stay still - so probably no need to optimize it here
+ pluskid	blackburn: virtual functions are not always evil, we would try not to over-optimize. I think We'd better do some profiling to see the bottleneck before trying hard to optimize some part
+ pluskid	BTW, I think there are some people in C++ that use heavy template and never use virtual functions
+ pluskid	they might hate virtual and dynamic things as much as sonne|work  hate STL :D
+ blackburn	yes
+ blackburn	I heard of that subculture :D
+ pluskid	blackburn: maybe boost guys are part of them
+ pluskid	however, using template this way is really sloooooooooooooow at compiling
+ blackburn	I will change everything once I take shogun over (HAHA! sonne|work)
+ blackburn	:D
+ pluskid	and as sonne|work said, the produced executable also glows very big, which would also produce large cache miss when running
+ pluskid	haha
+ blackburn	okay my long break is signed
+ blackburn	last day before 3 month work break tomorrow
+ pluskid	one more drawback with template is that the compile error is ......
+ pluskid	you might just want to die when presented with several hundred pages of compiling errors
+ blackburn	hahehe
+ blackburn	pluskid: I had one idea
+ blackburn	about multiclass machines
+ blackburn	do you think it makes sense to have not binary trees?
+ blackburn	containing multiclassmachines in nodes
+ blackburn	this can hardly be done with ecoc I think
+ pluskid	what's the advantage?
+ blackburn	pluskid: hmmm imagine you have 3 types of square road signs and 3 types of round road sings..
+ blackburn	signs*
+ pluskid	oh, you are writing your report
+ pluskid	haha
+ pluskid	then that makes sense
+ blackburn	pluskid: yes however my best results are with OvR still
+ pluskid	might better be a decision tree?
+ blackburn	pluskid: based on?
+ pluskid	based on your best-performed classifier haha
+ blackburn	I mean how to construct that tree?
+ blackburn	svms?
+ blackburn	in nodes
+ pluskid	first distinguish whether spare or round
+ pluskid	then do MC classification on each branch?
+ blackburn	yes that sounds exactly as what I said ;)
+ blackburn	however I think I have to implement it by myself
+ pluskid	yeah, easily hand-crafted for your specific problem
+ karlnapf	sonney2k, blackburn, I found the reason why the locked training doesnt work anymore:
+ karlnapf	https://github.com/shogun-toolbox/shogun/commit/e6525c711489c888cd0b433ce499e9cb87adb65b
+ karlnapf	will fix this later, gotta go now
+-!- karlnapf [~heiko@host86-176-3-209.range86-176.btcentralplus.com] has left #shogun []
+ blackburn	karlnapf whoops
+ blackburn	I'll fix that
+-!- gsomix [~gsomix@188.168.5.106] has joined #shogun
+ sonne|work	blackburn: that code has drastically changed
+ sonne|work	I think the reason is this line //index_t idx=params->indices.vector ? params->indices.vector[vec] : vec;
+ blackburn	sonne|work: it was looking like it wasn't used at all..
+ CIA-113	shogun: Soeren Sonnenburg master * rbee313d / src/shogun/machine/KernelMachine.cpp : fix subset & kernel machines - http://git.io/TUkW1Q
+ sonne|work	I think that is the fix
+ sonne|work	blackburn: true actually
+ blackburn	I hope so
+ sonne|work	shouldn't it be result->set_label(vec, kernel_machine->apply(idx));
+ sonne|work	?
+ blackburn	sonne|work: idx, idx?
+ sonne|work	idx
+ sonne|work	instead of vec
+ blackburn	sonne|work: I am lost there
+ CIA-113	shogun: Soeren Sonnenburg master * r717f885 / src/shogun/machine/KernelMachine.cpp : use idx - http://git.io/KqqOOw
+ blackburn	sonne|work: btw with openmp dot features are MUUUUCH more readable
+ sonne|work	another attempt
+ blackburn	and kernel machine would be more readable too
+ sonne|work	blackburn: benchmark and if things are still same speed - I am ok
+ blackburn	sonne|work: tried on d=1000, N=10000 - the same
+ blackburn	mmore to benchmark thoug
+ blackburn	sonne|work: good thing about openmp - no crazy ifdefs
+ blackburn	just simple pragma
+ sonne|work	I know
+ sonne|work	I used it...
+ blackburn	I am not trying to say you don't know ;)
+ blackburn	just emphasize it
+ blackburn	parallel code = serial code and that is nice
+ blackburn	http://www.tug.org/texshowcase/ShowcaseCircular.pdf
+ pluskid	I need to do histogram on each dimension of the features, then what kind of CFeatures should I require and cast to use?
+ pluskid	CSimpleFeature?
+ blackburn	pluskid: dot features or dense features
+ blackburn	pluskid: add_to_dense_vec is ok here I think
+ blackburn	so can be dotfeatures (a little more generally - supports sparsity)
+ pluskid	blackburn: so I just check whether it is a subclass of CDotFeatures?
+ blackburn	yeah just cast to dotfeatures
+ pluskid	blackburn: I need to access X(i,j)
+ pluskid	to compute the histogram
+ pluskid	maybe DotFeatures is too generic?
+ pluskid	I don't find suitable interfaces to do this
+ blackburn	pluskid: why do you need X(i,j) but not X(:,j)?
+ blackburn	float64_t* hist = SG_CALLOC(float64_t, f->get_dim_feature_space());
+ pluskid	blackburn: X(:, j) is also OK, but only part of the data points are counted
+ blackburn	for (int32_t i=0; i<f->get_num_vectors(); i++)
+ blackburn	{
+ blackburn	   f->add_to_dense_vec(i,hist,f->get_dim_feature_space());
+ blackburn	}
+ blackburn	why wouldn't it work?
+ blackburn	https://lh4.googleusercontent.com/-9X9YJsB0z5Q/T6Gslrwo-1I/AAAAAAAABqs/Wlu7S4X2svg/w497-h373/i0dNFqpMjLFv5.gif
+ pluskid	blackburn: I don't get your idea
+ blackburn	pluskid: oh sh sorry
+ blackburn	it is not a histogram
+ blackburn	then densefeatures would work if you need X(i,j)
+ pluskid	blackburn: ah, that's cool!
+ pluskid	thank you!
+ pluskid	btw: cool cat!!!
+ blackburn	bad I have no cat :(
+ blackburn	okay time to head to home
+ pluskid	but you have a bear
+ blackburn	hahah
+ blackburn	yeah right every russian has bear
+ pluskid	is this a classical story/joke? :D
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+ blackburn	these are the only russian things probably
+ blackburn	vodka balalayka
+ blackburn	medvedi
+ pluskid	nonsense to me
+ blackburn	vodka should make sense
+ blackburn	vodka always makes sense
+ gsomix	vodka \(^__^)/
+ pluskid	a kind of wine?
+ pluskid	Ah, I see
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric_	re!
+ blackburn	pluskid: yes but 40% of alcohol
+ blackburn	rather kind of sake :)
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 265 seconds]
+-!- wiking_ is now known as wiking
+ eric_	wiking: I didn't had much time to debug MC Xval but I ran the method using CMulticlassLibLinear as in your cpp example (evthg seems good in this way) and I compare the relusts with CGMNPSVM which give better MC perf when splitting the dataset manually, and give weird results when running Xval
+ eric_	all: any intuition why the MC Xval bug with some type of classifiers ,
+ pluskid	painful... should I support only float64_t Features?
+ blackburn	pluskid: where?
+ pluskid	a new ECOC encoder
+ pluskid	data-dependent encoder
+ pluskid	OK, require CDenseFeatures<float64_t> is reasonable
+ blackburn	hmm how does it work?
+ pluskid	CLinearRidgeRegression also requires this
+ blackburn	yes that would be ok
+ blackburn	easy to refactor anyway
+ pluskid	it compute some stats on the data to create a tree-style ECOC
+ blackburn	oh I see
+ blackburn	then yes just tight it to float64_t
+ pluskid	ok
+ blackburn	ok be back later
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- pluskid [~pluskid@li400-235.members.linode.com] has quit [Quit: Leaving]
+-!- nickon [~noneedtok@d54C1F8A8.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@vpnc166.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpnc166.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Read error: Operation timed out]
+ eric_	wiking: while CMulticlassLibLinear give correct/expected  Xval mean value, CMulticlassLibSVM or CGMNPSVM give false results
+ wiking	eric_: i guess u ran a crossval with the same setup with libsvm or something?
+ wiking	or how do u know that it's false for certain
+ eric_	Same kernel config for kernel machine and I tested with different manual split of dataset and got far better accuracy
+ wiking	mmhhm
+ eric_	wiking: but your Xval code seems good to me .. I don't get this : /
+ wiking	ehehhe it's not my xval code just the example
+ eric_	the example I "copy" I meant
+ eric_	did you try another kernel machine with the example and libsvm dataset ?
+ wiking	noup
+-!- blackburn [~qdrgsm@83.234.54.222] has joined #shogun
+ eric_	wiking: will check with another base tonight and keep you inform =()
+ eric_	bye all
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+ gsomix	rabotatch!
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Operation timed out]
+-!- wiking_ is now known as wiking
+-!- gsomix [~gsomix@188.168.5.106] has quit [Quit: Ex-Chat]
+-!- cronor [~cronor@g231216163.adsl.alicedsl.de] has joined #shogun
+@sonney2k	blackburn, please fix the warnings http://shogun-toolbox.org/buildbot/builders/libshogun/builds/912/steps/compile/logs/warnings%20(4)
+ wiking	sonney2k: this removes one of your warnings https://github.com/shogun-toolbox/shogun/pull/519
+ CIA-113	shogun: Soeren Sonnenburg master * rc019459 / src/shogun/machine/KernelMachine.cpp : initialize indices with NULL - this should fix the null ptr exception - http://git.io/f_G12A
+@sonney2k	wiking thx
+@sonney2k	I think kernel machines will work now too
+@sonney2k	even mc :)
+ wiking	sonney2k: we have some strange problem with xval and kernel mc
+ wiking	the results are very weak
+ wiking	i.e. there's a huge difference between a simple manual splitting and any amount of xval runs :)
+ CIA-113	shogun: Viktor Gal master * rb4815de / (2 files):
+ CIA-113	shogun: HKM: fix warning and pass vector by reference
+ CIA-113	shogun:  - http://git.io/DYIVeg
+ CIA-113	shogun: Soeren Sonnenburg master * r904ebab / (2 files):
+ CIA-113	shogun: Merge pull request #519 from vigsterkr/master
+ CIA-113	shogun:  - http://git.io/xFmxtg
+ blackburn	re
+ blackburn	sonney2k: can we make -fopenmp unconditional?
+ CIA-113	shogun: Sergey Lisitsyn master * r1b58787 / (3 files in 3 dirs): Removed a few SLEP warnings - http://git.io/aduPrA
+@sonney2k	blackburn, not yet - I mean if we cannot get rid of pthreads why have another dependency?
+ blackburn	sonney2k: gcc supports it natively
+@sonney2k	yes but whey 2 different systems?
+@sonney2k	I mean if we can I would rather convert to openmp completely
+ blackburn	sonney2k: I expect pthreads only in dim reduction
+ blackburn	yes we actually can
+@sonney2k	why?
+ blackburn	sonney2k: why expect?
+@sonney2k	yeah
+ blackburn	because quite a lot of work still to do and openmp conversion..
+ blackburn	this can never be finished
+ blackburn	ah btw
+ blackburn	I have a suggestion about locks
+@sonney2k	but you always work like this :D
+ blackburn	how?
+@sonney2k	total chaos
+ blackburn	do you work in some other way?
+@sonney2k	or maybe a hidden masterplan
+@sonney2k	yes I have a masterplan - isnt that obvious :D
+ blackburn	chaos is cool - universe was born by it
+@sonney2k	shogun too
+ blackburn	but I can say I didn't miss a task yet
+ blackburn	I get back to it at some point
+ blackburn	sonney2k: I'm actually currently doing multiclass DA liblinear, SLEP tree lasso and fixing bugs
+ blackburn	ah and openmp :D
+@sonney2k	and...
+ blackburn	I mean you shouldn't worry it looks like a chaos
+@sonney2k	wiking, btw how is your gsoc task developing?
+ blackburn	it seems things go by ok
+@sonney2k	wiking, do you have a concept / did you already start?
+ wiking	sonney2k: both
+ wiking	i've started and i have concept
+ wiking	the CCCP with OCAS
+ blackburn	lol
+ wiking	with -1/1 labeling
+ blackburn	I will never stop laugh at CCCP
+ wiking	blackburn: hehehe
+@sonney2k	blackburn, have you seen - libshogun examples pass make check-examples now
+@sonney2k	http://shogun-toolbox.org/buildbot/builders/cmdline_static/builds/836/steps/test_1/logs/stdio
+@sonney2k	still some valgrind errros though
+ blackburn	really? I just came back from jog - haven't seen anything yet
+ wiking	sonney2k: so i've used the concept of joachim's (svmlight) students paper and implementation adapted it to shogun without the structural part and using ocas
+ blackburn	svr fails?
+ blackburn	prunevarsubean? wtf/
+@sonney2k	?
+ blackburn	sonney2k: check url you pasted
+@sonney2k	static interfaces are broken it seems
+ blackburn	static fails hardly
+ blackburn	hard*
+ blackburn	okkk another task
+ blackburn	I'll try to get it unb0rken :D
+@sonney2k	yeah but the good thing is that libshogun examples work now
+ blackburn	sonney2k: I admit I do not hate static now
+ blackburn	as it was before
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+@sonney2k	blackburn, ???
+@sonney2k	why not
+ blackburn	sonney2k: why not hate?
+@sonney2k	yeah
+ blackburn	no idea
+@sonney2k	well I wish we had a cool cmdline / script interface
+@sonney2k	sometimes it sucks to be dependent on other scripting langs
+ blackburn	no I do not think we need it
+@sonney2k	but why do you not hate it then?
+ blackburn	sonney2k: it is ok :D
+@sonney2k	it is sooo much work and probably no one using it
+ blackburn	sonney2k: yeah *your* work
+ blackburn	sonney2k: how can you use your cmdline interface?
+ blackburn	sonney2k: I mean in python you always can visualize/modify/etc
+@sonney2k	on clusters - nice way to distribute jobs...
+ blackburn	I see no domain-specific language of machine learning
+ blackburn	on clusters hmm
+ blackburn	I've been thinking about it
+@sonney2k	or as background process similar to libsvm
+ blackburn	it should look like some worker class
+ blackburn	but it is really painful
+ blackburn	I think we should rather separate distributed shogun at some point
+ blackburn	we can use existent code for that
+ wiking	sonney2k: why?
+@sonney2k	blackburn, let me do some quick fixes to ui
+ blackburn	sonney2k: pozhaluysta ;)
+-!- cronor_ [~cronor@g231216163.adsl.alicedsl.de] has joined #shogun
+-!- cronor [~cronor@g231216163.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- cronor_ is now known as cronor
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 252 seconds]
+ blackburn	sonney2k: did you try clang_completE?
+ wiking	clang_complete++
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+@sonney2k	blackburn, please send me all the links to these things
+@sonney2k	I will try them out...
+ blackburn	sonney2k: a sec
+* wiking feels ignored 
+ wiking	n4nd0: here?
+ blackburn	https://github.com/tpope/vim-pathogen (pathogen system, just put to .vim and add 'call pathogen#infect()' to vim config)
+ blackburn	https://github.com/Rip-Rip/clang_complete (clang complete - just put to .vim/bundle)
+ blackburn	https://github.com/Lokaltog/vim-powerline (powerline - cool status bar, to make it work in my system requires some custom patched font in your terminal)
+ blackburn	https://github.com/tpope/vim-fugitive (git binding, commands like :Gstatus, :Gcommit)
+@sonney2k	wiking, whats up
+ CIA-113	shogun: Soeren Sonnenburg master * rcb41b3b / (4 files in 3 dirs): fix various crashers in static interface - http://git.io/OJe2yg
+ wiking	sonney2k: you've asked  :)
+@sonney2k	blackburn, what does pathogen do?
+@sonney2k	blackburn, so many!
+ blackburn	sonney2k: package system - makes you able to put plugins as is to bundle dir
+ blackburn	not to merge directories but bundle/clang_complete for example
+ blackburn	.vim/bundle/clang_complete
+ blackburn	however you still able to merge anything
+ blackburn	for example it wouldn't work for A
+ blackburn	sonney2k: I hope you use A?
+ blackburn	sonney2k: if you want to install  powerline  it needs some patching
+ wiking	sonney2k: and i was wondering that what has been the outcome of the conversation with vojtech about libqp?
+ blackburn	I had to add export TERM="xterm-256color" to my .bashrc
+ wiking	blackburn: buuuuuuuu for bash1
+ wiking	blackburn: why don't u use zsh?
+ blackburn	why?
+ blackburn	why?
+ blackburn	:D
+ wiking	blackburn: ok this is why: https://github.com/robbyrussell/oh-my-zsh
+ wiking	start from here
+ wiking	and you'll like it for sure
+ wiking	first of course install zsh
+ blackburn	wiking: any killer feature?
+ wiking	blackburn: many :)
+ wiking	blackburn: i like the git support
+ blackburn	one?
+ blackburn	what's with git support?
+ wiking	blackburn: ok let me dig out for u a screenshot
+ wiking	blackburn: but the autocompletion with tab is really great as well...
+ wiking	blackburn: same with ssh hosts
+ blackburn	wiking: I have autocomplete there in bash
+ wiking	blackburn: and the autocomplete of various shell commands as well
+ wiking	http://stevelosh.com/media/images/blog/2010/02/zsh-prompt.png
+ wiking	couldn't find better one now
+ wiking	but i might make u a screenshot of mine
+ blackburn	wtf is going on
+ blackburn	:D
+ wiking	blackburn: ?
+ blackburn	I do not understand what is going on
+ blackburn	sjl at ecgtheow in ~/lib/oh-my-zsh
+ blackburn	wtf??!
+ blackburn	:D
+ blackburn	meaow meaow ~~~ !!@! ~~~ :::: ?
+ blackburn	:D
+@sonney2k	blackburn, I installed the clang thing but how can I now complete what I typed?
+@sonney2k	do you perhaps have a config?
+ blackburn	sonney2k: just try to write this->
+ blackburn	in any source file
+@sonney2k	wiking, re vojtech - it is in the chat logs. basically all yes but no time now so later once so bmrm is done
+@sonney2k	he will do it or uricamic
+@sonney2k	and yes he liked the idea of getting pr loqo, tron, ... into libqp
+@sonney2k	the c++ interface is sth we have to think about though
+@sonney2k	the only guarantee we have is his support / standard interface
+ blackburn	sonney2k: my .vimrc https://gist.github.com/2655129
+ wiking	blackburn: wiking.jol.hu/zsh-git.png
+ blackburn	let g:clang_close_preview = 1
+ blackburn	let g:clang_complete_auto=1
+ blackburn	these ones are related to clang
+@sonney2k	then I get User defined completion ^U^N^P Pattern not found
+ wiking	sonney2k: vim .clang_complete
+ blackburn	hmm
+ wiking	and depending where u are at the shogun dir
+ wiking	you need to add -I
+ wiking	if u know what i mean :)
+ wiking	and then you'll be good to go
+ wiking	otherwise it cannot find the headers in your include path
+ blackburn	I did not do anythin - wiking what do you mean by -I?
+ wiking	blackburn: i guess you have shogun installed in a standard path?
+ blackburn	yes
+ wiking	blackburn: there u go
+ blackburn	ah
+ wiking	that's why u don't need -I
+ wiking	blackburn: do u understand the screenshot?
+ blackburn	wiking: yes
+ wiking	it's 2 in 1 actually: shows u how your prompt can be tweaked
+ wiking	and a little peak about the autocompletion feature
+ blackburn	ok I'll try it later
+ blackburn	I have to update my distrib in next days
+ wiking	and the other good thing is that autocompletion is case insensitive
+ n4nd0	wiking: tell me
+ wiking	and if for example you tab 'ogu'
+ wiking	and you have shogun at pwd
+ wiking	then it'll complete it to be shogun
+ wiking	and of course other directories/files that contains 'ogu' char*
+ wiking	n4nd0: over with your exams?
+ blackburn	huh cool
+ n4nd0	wiking: yeah
+ wiking	n4nd0: have time to talk now
+ n4nd0	wiking: yes
+ wiking	especially about where to put the PSI
+ wiking	and how in SO
+ blackburn	oh headache discussions
+ blackburn	Im off :D
+ wiking	blackburn: <ignore>
+ wiking	:D
+ n4nd0	wiking: I don't know if you have seen something in the logs before
+ n4nd0	there is a small UML diagram
+ wiking	n4nd0: yep i've checked that unreadable log
+ wiking	on gist
+ n4nd0	ok I will paste the diagram again
+ wiking	thnx
+@sonney2k	blackburn, http://shogun-toolbox.org/buildbot/builders/r_static/builds/816/steps/compile/logs/warnings%20%283%29
+@sonney2k	for you :D
+ blackburn	thanks
+ n4nd0	wiking: http://dl.dropbox.com/u/11020840/shogun/Test.jpeg
+ blackburn	I've been waiting for this moment whole my life ;0
+ n4nd0	wiking: so that function will go into CStructuredModel
+ blackburn	http://www.youtube.com/watch?feature=player_detailpage&v=5PUvcu8iDBU
+ wiking	n4nd0: compute_joint_feature_map?
+ wiking	i mean compute_joint_feature ()
+ n4nd0	yes
+ n4nd0	wiking: there are still pieces to think about there though
+ wiking	ok so here's my question
+ wiking	i come with an SO
+ wiking	and i want to define my own PSI
+ wiking	do i inherit from CstructuredModel?
+ n4nd0	yes
+@sonney2k	blackburn, you are the one on the very left right?
+@sonney2k	hah
+ wiking	n4nd0: why
+ n4nd0	wiking: why not?
+ blackburn	sonney2k: no next to the very right
+ n4nd0	wiking: one has to define application specific things in any case
+ wiking	n4nd0: so PSI is essentially (x,y) -> R^n
+ wiking	right?
+ n4nd0	wiking: is it an issue to do that inheriting from it?
+@sonney2k	blackburn, and I found you as a kid https://www.youtube.com/watch?v=c3badX897KM&feature=endscreen&NR=1
+ n4nd0	wiking: yes
+ wiking	n4nd0: well why don't just use callback method?
+ n4nd0	wiking: but we have to see how to adapt it for your latent thing
+ wiking	i mean why do you want to inherit a whole class
+ blackburn	sonney2k: guilty :(
+ wiking	so why don't u just make it as a function pointer that has to be passed
+ n4nd0	wiking: explain me how this callback work
+ wiking	n4nd0: function pointer
+ wiking	something like (Feature*) (compute_psi*) (feature x, feature y);
+ n4nd0	wiking: I see that
+ wiking	you implement that function
+ wiking	and pass the pointer to it
+ wiking	same with argmax
+ n4nd0	wiking: but where do we define that function?
+ wiking	n4nd0: in the header
+ blackburn	sonney2k: these warnings are impossible :D
+ n4nd0	wiking: how does CSOMachine access it?
+ wiking	i mean the prototype
+ wiking	n4nd0: well how does it access now ? :))
+ wiking	it's a public method
+ n4nd0	wiking: CStructuredModel is a member of it
+ wiking	or protected?
+ wiking	no worries if it's a member of it
+ wiking	you'll have the reference for it
+ wiking	and that's it
+ wiking	i mean that function is user defined
+ n4nd0	wiking: yes
+ wiking	so it will be implemented
+ wiking	and then you just pass a pointer to that function
+ n4nd0	wiking: where do you pass it?
+ wiking	and 'save' it in Smodel
+ wiking	who constructs Smodel?
+ n4nd0	wiking: when a StructuredModel is created?
+ wiking	n4nd0: essentially yes
+ wiking	check this
+ wiking	fuck where is it
+ n4nd0	wiking: and before I didn't mean the log in gist but the one this afternoon ;)
+ wiking	n4nd0: ah ok haven't seen that one
+ wiking	only the gist one
+@sonney2k	blackburn, ok then we just have to wait
+@sonney2k	buildbot is overloaded
+ wiking	n4nd0 https://github.com/vigsterkr/shogun/blob/latent/src/shogun/classifier/svm/LatentLinearMachine.h
+ n4nd0	wiking: but it's ok, I don't think you need to check it
+ blackburn	yeah these warnring already disappeared in libshogun compile
+ wiking	n4nd0: https://github.com/vigsterkr/shogun/blob/latent/src/shogun/classifier/svm/LatentLinearMachine.h#L22
+ wiking	and then L30
+ wiking	so basically you need to implement that function
+ wiking	and you call the ctor with that function pointer
+ wiking	and that's it
+ shogun-buildbot	build #804 of python_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/804
+ n4nd0	wiking: your solution looks much better actually
+ wiking	the thing is for me.... i have to be able to call this after each iteration
+ wiking	because i have PSI(x,y,h)
+-!- gsomix [~gsomix@188.168.14.199] has joined #shogun
+ wiking	and h is changing in each iteration
+ wiking	thus i need to recalculate PSI
+ wiking	for all the feature vectors
+ n4nd0	wiking: ok I will definetely go with pointer functions as you have suggested
+ wiking	and now that we are at it
+ wiking	since more or less we are going to share SModel
+ gsomix	sonney2k, moin. It's all ok, I'm working. I need approximately one evening for changes in code.
+ wiking	i'm not 100% if we should call it like that
+ wiking	ooor
+ wiking	that it needs to be implemented now
+ wiking	:)
+ n4nd0	wiking: but even with pointer functions, I see an issue
+ wiking	or i inherit from it
+ n4nd0	wiking: the psi you need for latent has different parameters than the normal one
+ wiking	anyways i'll need to inherit from it... since i have an extra parameter for PSI
+ wiking	n4nd0: depends
+ wiking	n4nd0: i mean if i want latent SO svm
+ wiking	then i have PSI(x,y,h)
+ wiking	but if i do latent svm
+ wiking	then it's PSI(x,h)
+ n4nd0	wiking: do you think it is a good solution to make psi(x,y,h)
+ wiking	n4nd0: well i would like to have it
+ n4nd0	wiking: and if it is going to be used for non-laten, h is not used
+ n4nd0	latent*
+ wiking	n4nd0: mono i mean psi(x,y,h) is just latent for sure
+ wiking	i.e. latent structural svm
+ n4nd0	yeah, I see that
+ n4nd0	but now
+ wiking	but for example since i first do simple latent svm
+ wiking	since we don't support yet SO
+ wiking	then essentially i would use the same PSI function as you
+ wiking	the meaning of it would be different of course
+ n4nd0	is it possible to have a StructuredModel that works for both (latent and not latent structural)?
+@sonney2k	gsomix, good to hear
+ wiking	since for me it's PSI(x,h) and for you it's PSI(x,y) but the function/class should not care about this
+ blackburn	oops
+ wiking	n4nd0: not for both
+ blackburn	I lost code because of git checkout
+@sonney2k	hey yeah
+@sonney2k	shogun-buildbot, love and kisses!
+ shogun-buildbot	What you say!
+ blackburn	help!
+ blackburn	can I about checkout?
+ blackburn	abort*
+ n4nd0	wiking: then you will need your own CStructuredModel?
+ wiking	n4nd0: i will need to derive a class that which can handle 3 parameters x,y,h
+ wiking	n4nd0: but that's only when you are ready with SO
+ wiking	SO svm that is
+ wiking	so for now
+ blackburn	PANIC!!
+ wiking	SModel as is would be fine for me
+ wiking	not realy
+ wiking	so i mean i would need to ad modifications to id
+ wiking	to it
+ wiking	but for example i could use it as a base class
+ wiking	so that's why i think that we should think about sharing this class
+ wiking	so that we don't do too much of a code duplication here
+ n4nd0	ok
+ wiking	because either now or on the end of GSoC we'll need to merge this
+ wiking	i mean it would be nice to be able to merge it
+ n4nd0	better to do it from the very beginning
+ n4nd0	to think of it
+ wiking	since as i said i want to have support for latent s-svm
+ blackburn	yay it is not lost!
+ n4nd0	blackburn: nice
+ n4nd0	wiking: ok, so let me prepare some code for the part I have shown you in the diagram
+ wiking	n4nd0: ok but then again as i said
+ n4nd0	wiking: and later we discuss again to ensure that everything fits
+ wiking	we should think about the naming :)
+ wiking	okok
+ n4nd0	wiking: sure
+ wiking	think about the function pointer in the case of PSI and argmax as well
+ n4nd0	wiking: what part of the naming do you refer to?
+ wiking	that it's actually StructuralModel
+ wiking	or StructuredModel
+ wiking	because for me that is LatentModel
+ wiking	so to say
+ wiking	;P
+ n4nd0	wiking: it makes no difference for me
+ wiking	n4nd0: yeah of course not
+ n4nd0	I mean, I don't know the difference between both
+ n4nd0	wiking: what is the difference?
+ wiking	n4nd0: well that's in the box it'll be essentially the same
+ wiking	but it has different semantical meaning :)
+ n4nd0	what is structured and structural?
+ wiking	but the functions inside
+ n4nd0	I have used both as synonyms this far
+ wiking	ah no i was meaning here structured vs latent
+ wiking	so you named CStruturedModel
+ n4nd0	oh ok, I misunderstood
+ wiking	but since i'd almost use the same class for myself
+ n4nd0	:D
+ wiking	then we should be able to name it in a more general way
+ wiking	but anyhow
+ wiking	we'll rename it later
+ wiking	just do the code part
+ wiking	and when u have that part ready
+ wiking	i'll try to cherry-pick from your git
+ n4nd0	I have already started that part today
+ wiking	and then somehow merge ithat part into mine
+ wiking	n4nd0: cool
+ n4nd0	so for tomorrow I will probably have that part I showed you in the diagram
+ wiking	n4nd0: do you have a branch for that dev?
+ wiking	that i could follow or something
+ n4nd0	wiking: not committed yet since it is in non-compilable state
+ wiking	yeye but if it's going to be commited
+ n4nd0	yes
+ wiking	i mean when it's going to be commited
+ wiking	you'll have a working branch for that or something
+ n4nd0	sure
+ n4nd0	it's called so
+ n4nd0	"so" (to avoid misunderstandings) :P
+ wiking	ahahhah
+ wiking	mmm github is slow
+ wiking	n4nd0: that branch is not yet published right? since i just see structure
+ n4nd0	wiking: no no
+ n4nd0	wiking: nothing committed yet
+ wiking	ok
+ wiking	i'll follow u on github
+ wiking	and then i'll get a notification
+ n4nd0	doesn't compile because I have not defined yet CStructuredLabels and the like
+ wiking	yeye sure
+ shogun-buildbot	build #838 of cmdline_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/838
+ wiking	thnx a lot
+ wiking	and lets see then in the upcoming days
+ n4nd0	:)
+ blackburn	http://i.imgur.com/EoqO9.gif
+ n4nd0	that cannot be for real
+ n4nd0	:O
+ blackburn	and in the end he is like
+ blackburn	YAY
+ CIA-113	shogun: Soeren Sonnenburg master * r3ac30d8 / (3 files in 3 dirs): remove free_{vector,matrix} from typemaps - http://git.io/CNovcQ
+ CIA-113	shogun: Soeren Sonnenburg master * r39b064e / src/shogun/classifier/svm/SVMLight.cpp : fix crasher in mkl / svmlight - http://git.io/PhoqIw
+ blackburn	regression fails here in libshogun
+ shogun-buildbot	build #819 of r_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/819
+ gsomix	good night guys
+ blackburn	sonney2k: so did you make it work?
+ n4nd0	see you tomorrow guys
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ blackburn	see ya
+-!- gsomix is now known as gsomix|z-z-z
+-!- karlnapf [~heiko@host86-176-3-209.range86-176.btcentralplus.com] has joined #shogun
+-!- nickon [~noneedtok@d54C1F8A8.access.telenet.be] has quit [Quit: ( www.nnscript.com :: NoNameScript 4.22 :: www.esnation.com )]
+-!- karlnapf [~heiko@host86-176-3-209.range86-176.btcentralplus.com] has left #shogun []
+-!- cronor_ [~cronor@g230123190.adsl.alicedsl.de] has joined #shogun
+-!- cronor [~cronor@g231216163.adsl.alicedsl.de] has quit [Ping timeout: 260 seconds]
+-!- cronor_ is now known as cronor
+ blackburn	sonney2k: with proper schedule and other options it is as fast as pthreads
+--- Log closed Fri May 11 00:00:40 2012

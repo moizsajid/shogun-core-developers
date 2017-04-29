@@ -1,0 +1,129 @@
+--- Log opened Sat Jan 12 00:00:38 2013
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- FSCV [~FSCV@187.210.54.162] has quit [Quit: Leaving]
+-!- FSCV [~FSCV@189.139.231.191] has joined #shogun
+-!- FSCV [~FSCV@189.139.231.191] has quit [Ping timeout: 248 seconds]
+-!- FSCV_ [~FSCV@189.139.159.26] has joined #shogun
+-!- FSCV_ [~FSCV@189.139.159.26] has quit [Quit: Leaving]
+-!- FSCV [~FSCV@189.139.159.26] has joined #shogun
+-!- FSCV [~FSCV@189.139.159.26] has quit [Quit: Leaving]
+-!- n4nd0 [0289e099@gateway/web/freenode/ip.2.137.224.153] has joined #shogun
+-!- n4nd0 [0289e099@gateway/web/freenode/ip.2.137.224.153] has quit [Client Quit]
+-!- n4nd0 [~nando@153.Red-2-137-224.dynamicIP.rima-tde.net] has joined #shogun
+-!- FSCV [~FSCV@189.139.159.26] has joined #shogun
+-!- FSCV [~FSCV@189.139.159.26] has quit [Quit: This computer has gone to sleep]
+-!- n4nd0 [~nando@153.Red-2-137-224.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+@sonney2k	blackburn, hurray ;-)
+@sonney2k	blackburn, btw I learned some stuff about clean programming etc
+ blackburn	sonney2k: clean programming?
+@sonney2k	like design patterns  :)
+@sonney2k	and principles
+ blackburn	hmm well I know patterns
+ blackburn	most of them
+ blackburn	:)
+ blackburn	so what have you learnt?
+@sonney2k	I would say shogun violates them all ;-)
+ blackburn	yes sure
+@sonney2k	and any production code I've seen too FWIW
+@sonney2k	but yes in an ideal world
+@sonney2k	I would go as far as saying that lots of stuff is not possible when you want things to be efficient
+ blackburn	I've seen a lot of code made by patterns
+ blackburn	like building blocks
+ blackburn	not very better
+@sonney2k	like the pointer / reference concept is killing encapsulation
+ blackburn	sonney2k: tapkee is nearly integrated
+ blackburn	come on it is a language concept
+@sonney2k	blackburn, yeah yeah
+ blackburn	inheritance kills encapsulation if we take that philosophically
+ blackburn	:D
+@sonney2k	it is true
+@sonney2k	that is why everything should be private and you should not inherit :D
+@sonney2k	I didn't know about package private in java
+ blackburn	inheritance is just a way to redup code
+@sonney2k	dedup
+@sonney2k	?
+ blackburn	yes sure
+@sonney2k	as are templates
+ blackburn	yeah
+@sonney2k	I didn't feel very comfortable with java's generics
+ blackburn	why? they are much better than templates
+@sonney2k	they allow a couple of things that are crazy
+@sonney2k	and stupid
+ blackburn	like?
+@sonney2k	and dangerous
+@sonney2k	stuff like
+@sonney2k	Bar<SuperType] foo[] = new Bar<SubType>[100]; is ok
+ blackburn	well
+@sonney2k	and then this <?>
+ blackburn	better is to write
+ blackburn	Bar<? extends SuperType>
+ blackburn	:)
+ blackburn	yes they cast parameters
+@sonney2k	I actullay like that <? extends X> and <? super X>
+@sonney2k	but the rest - hmmhh
+@sonney2k	what is dangerous in java is that you don't have const at all
+@sonney2k	so you can not safely pass objects around
+ blackburn	yes that's an issue
+ blackburn	it is successfully handled by defensive copies though
+@sonney2k	I realized that const can have some value (I never really liked it before) when you have a big project and you are a newcomer to the project
+@sonney2k	so you cannot shoot yourself in the foot
+ blackburn	good you learnt that :)
+@sonney2k	the hard way(tm)
+ blackburn	sonney2k: in C++ const has even more value
+ blackburn	bigger value I mean
+@sonney2k	anyway the major rule for any code should imho be: if you cannot parse a block of code within a few seconds - don't do it that way
+@sonney2k	and using generics may fall in this category :D
+ blackburn	sonney2k: where have you learnt all that stuff?
+@sonney2k	I heard some lecture/tutorial this week
+ blackburn	sonney2k: that rule is pretty hard to obey
+@sonney2k	really?
+ blackburn	sonney2k: parse like understand what it does?
+@sonney2k	yes
+ blackburn	pretty hard still
+@sonney2k	yeah it is...
+-shogungit:#shogun- [shogun] lisitsyn opened pull request #854: Tapkee library integration (master...tapkee_merging)  https://github.com/shogun-toolbox/shogun/pull/854
+@sonney2k	blackburn, btw I received some response from c-base
+ blackburn	sonney2k: like?
+@sonney2k	might be ok...
+@sonney2k	we should do the scheduling next week
+ blackburn	dense!
+ blackburn	they schedule june in january?
+@sonney2k	blackburn, no I mean ask c-base about the date
+ blackburn	ah
+ blackburn	argh what the heck I just commited
+ blackburn	I hate such big changes
+ blackburn	way too easy to lost a track
+ blackburn	lets see what travis says
+ blackburn	sonney2k: we can get randomizedpca from tapkee now
+ blackburn	in tapkee it is a matter of one parameter I mean
+@sonney2k	blackburn, yeah big changes are alway painful
+@sonney2k	that is why I think we should all mutually do code-reviews
+ blackburn	sonney2k: so don't mind to remove superlu now?
+@sonney2k	blackburn, does anyone use it?
+ blackburn	no, how?
+@sonney2k	superlu I mean
+ blackburn	let me just disable it by default
+ blackburn	no, nobody uses superlu
+ blackburn	it can be optionally used by tapkee but no need to do that
+ blackburn	oh
+ blackburn	travis has old eigen3
+ blackburn	sonney2k: all dimension reduction is dependent on eigen3 now
+ blackburn	sonney2k: can we raise eigen version?
+ blackburn	I am in trouble unless :)
+ blackburn	we need 3.1.0 which finally has sparse module
+@sonney2k	hmmhh there is unlikely any distribution shipping that yet
+@sonney2k	hhmm, debian wheezy will have it
+@sonney2k	but none of our buildbots
+ blackburn	trying to add some backward compat thing
+@sonney2k	can you somehow work with eigen3.0 and disable the parts that require 3.1?
+ blackburn	sonney2k: yes that part is tapkee
+ blackburn	:D
+ blackburn	well I am trying to adapt it now
+ blackburn	sonney2k: I need some sparse solver but it wasn't there :D
+@sonney2k	blackburn, there is no problem requiring 3.1 for *same* parts
+ blackburn	sonney2k: what do you mean?
+@sonney2k	so just some functionality would be not available
+ blackburn	yes but I need 3.1 when other parts do not
+ blackburn	sonney2k: oh it seems there is a way!
+ blackburn	yes it is possible with some ifdefs
+--- Log closed Sun Jan 13 00:00:38 2013

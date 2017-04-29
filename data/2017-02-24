@@ -1,312 +1,312 @@
 --- Log opened Fri Feb 24 00:00:38 2017
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	00:13
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]	00:18
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	00:21
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Remote host closed the connection]	00:22
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	00:22
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Read error: Connection reset by peer]	02:27
--!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	02:28
-@sukey	New Commit "replaced std::vector<index_t> with SGVector<index_t>" to shogun-toolbox/shogun by lambday: https://github.com/shogun-toolbox/shogun/commit/25f28f3b116f4c800a4abb85a788b8d9ffade88a	06:34
--!- lambday_ [c40f1710@gateway/web/freenode/ip.196.15.23.16] has joined #shogun	07:09
--!- mode/#shogun [+o lambday_] by ChanServ	07:09
--!- travis-ci [~travis-ci@ec2-54-80-85-96.compute-1.amazonaws.com] has joined #shogun	07:27
-travis-ci	it's lambday's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/204861542	07:27
--!- travis-ci [~travis-ci@ec2-54-80-85-96.compute-1.amazonaws.com] has left #shogun []	07:27
--!- lambday [31cf349d@gateway/web/freenode/ip.49.207.52.157] has quit [Ping timeout: 260 seconds]	07:30
-@sukey	Pull Request #3635 "LinalgRefactor - Memory Transfer Mutex"  synchronized by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3635	07:35
--!- mhlmz [4e0d7782@gateway/web/freenode/ip.78.13.119.130] has joined #shogun	10:13
--!- lambday_ [c40f1710@gateway/web/freenode/ip.196.15.23.16] has quit [Quit: Page closed]	13:04
--!- lambday [6a3317ac@gateway/web/freenode/ip.106.51.23.172] has joined #shogun	14:15
--!- mode/#shogun [+o lambday] by ChanServ	14:15
--!- goksinen is now known as wudayoda	15:54
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun	16:17
--!- mode/#shogun [+o HeikoS] by ChanServ	16:17
-@HeikoS	wiking: jojo	16:18
-@HeikoS	w	16:18
-@HeikoS	lambday: jo	16:18
-@lambday	HeikoS: hey	16:18
-@HeikoS	lambday: all good?	16:18
-@lambday	HeikoS: yeah	16:18
-@lambday	HeikoS: working on a benchmark :)	16:19
-@HeikoS	benchmarking what?	16:19
-@lambday	CDynamicObjectArray.get_element() vs std::vector::operator[]..	16:20
-@lambday	get_element() is quite slower.. takes 1.5x compared to vector []...  perf says it's mostly the SG_REF that takes up most of the time.. so tried with CDynamicObjectArray::get_array()[...], but even that's slower..	16:22
-@lambday	gotta see whether this makes any significant impact in our code.. cause if the usage is less, the difference won't be much	16:23
-@lambday	down to assembly now :D	16:23
-@HeikoS	lambday: no matter what	16:24
-CaBa	HeikoS: heya	16:24
-@HeikoS	we have to get rid of the std::vector	16:24
-@HeikoS	lambday: btw I wrote some comments on your last commit	16:24
-@lambday	let me check	16:24
-@HeikoS	CaBa: hi!	16:25
-CaBa	HeikoS: remind me, back then when we talked about building those ms-param trees for combined kernels - did we conclude that there was no way around creating a separate combined kernel for every subkernel parameter combination or did you still want to show me how that works properly through the ms-param interface? ^^	16:26
-@HeikoS	CaBa: ah I am unreliable	16:30
-@HeikoS	I dont know	16:30
-@HeikoS	but I do know that I wanted to write some code for you	16:30
-@HeikoS	lambday: hey	16:31
-@HeikoS	lambday: so re benchmarking	16:31
-@HeikoS	lambday: it is not the right time to do that	16:31
-@HeikoS	lambday: because it should be done after we fixed the problems in the code	16:31
-CaBa	HeikoS: http://stackoverflow.com/questions/40359913 <- remember, this one? ;)	16:31
-@HeikoS	lambday: now it takes time to do benchmarking and then it is less likely that the actual problems are fixed	16:31
-@HeikoS	lambday: and in the last commit, you make it worse in fact	16:32
-@HeikoS	more unsigned/signed comparisons, possible underflows, possible compile errors	16:32
-@lambday	HeikoS: was just checking before I replace vector<CSGObject> with DynamicObjectArray	16:32
-@HeikoS	it doesnt matter for now	16:32
-@HeikoS	because the std::vector has to go	16:32
-@HeikoS	otherwise bugs	16:32
-@HeikoS	once we have fixed that, we can speed it up	16:33
-@lambday	HeikoS: where? I replaced std::vectors with SGVector... next task is replacing vector<vector> with SGMatrix	16:33
-@HeikoS	and it is good to do that	16:33
-@lambday	so got rid of a few size_t's already	16:33
-@lambday	sending patch step by step, otherwise it's gonna be too big	16:33
-@HeikoS	my point is, while there is any of the std::vector guys active in loops that do index SG* structures, there should be no benchmarking	16:33
-@HeikoS	because benchmarking comes after working code, see what I mean?	16:34
-@HeikoS	lambday: agree on step by step	16:34
-@lambday	HeikoS: can you point me which line are you refering to?	16:34
-@lambday	IIRC there is no vector<index_t> anymore.. all SG	16:34
-@HeikoS	yes but there is the nested one	16:34
-@HeikoS	and also the one with CKernel in it	16:35
-@HeikoS	https://github.com/shogun-toolbox/shogun/blob/25f28f3b116f4c800a4abb85a788b8d9ffade88a/src/shogun/statistical_testing/internals/mmd/CrossValidationMMD.h#L108	16:36
-@HeikoS	lambday: gotta check travis logs	16:36
-@HeikoS	lambday: sorry dont want to be too picky here, but really there are priorities	16:37
-@HeikoS	brb	16:37
--!- HeikoS_mobile [~Mutter@eduroam-int-pat-8-161.ucl.ac.uk] has joined #shogun	16:38
-HeikoS_mobile	lambday: back on mobile	16:38
-@lambday	HeikoS_mobile: haha which client you're using..	16:38
-HeikoS_mobile	Mother	16:39
-HeikoS_mobile	lambday: let's do the benchmarking in another feature branch once this one is merged	16:40
-HeikoS_mobile	lambday: merging has top priority and there are quite a few things missing yet	16:40
-@lambday	HeikoS_mobile: nah I was benchmarking a separate code that I have written.. just two different types of kernel mgr.. one with dynamic object array and another with vector... benchmark was just the access operator..	16:41
-@lambday	HeikoS_mobile: cool..	16:41
-HeikoS_mobile	lambday: you see the fact that we never work in mere but always get distracted with some other thing while merge status is 90% is what let to all these problems	16:42
-HeikoS_mobile	More than happy to speed all the structures up and benchmarking them of course after	16:42
-@lambday	HeikoS_mobile: yeah I agree	16:42
-@lambday	HeikoS_mobile: what about vectors that don't contain CSGObjects?	16:44
-@lambday	HeikoS_mobile: CDynamicArray<T> ??	16:44
-HeikoS_mobile	Yes for basic types that	16:44
-HeikoS_mobile	What is your T?	16:44
-@lambday	HeikoS_mobile: custom structs...	16:45
-HeikoS_mobile	And other question is: do you need dynamic size	16:45
-@lambday	HeikoS_mobile: yes	16:45
-HeikoS_mobile	Why is that? All loop sizes should be known before no?	16:45
-@lambday	HeikoS_mobile: nah those are run-time variables	16:46
-HeikoS_mobile	So?	16:46
-HeikoS_mobile	I can't imagine a case in kernel testing where you can't know the size before you run something	16:47
-@lambday	HeikoS_mobile: so the size is dynamic..	16:47
-HeikoS_mobile	Runtime size is fine	16:47
-HeikoS_mobile	I mean you should know size at allocation time	16:47
-HeikoS_mobile	Since loop sizes are known	16:47
-@lambday	HeikoS_mobile: yeah..	16:47
-@lambday	HeikoS_mobile: or maybe not.. cause imagine kernel selection, where the user simply adds kernels	16:48
-HeikoS_mobile	Yeah, so?	16:48
-@lambday	HeikoS_mobile: when he's done, he tests it.. can't know at allocation time	16:48
-HeikoS_mobile	That's a single reallocate	16:49
-HeikoS_mobile	With zero recycling of content	16:49
-* CaBa imagines HeikoS_mobile like this right now... https://files.photomics.org/tmp/moirc.jpg	16:49
-HeikoS_mobile	Or am I missing something?	16:49
-HeikoS_mobile	CaBa: yep ;)	16:49
-HeikoS_mobile	In Talk	16:49
-CaBa	whatever that is ^^	16:50
-@lambday	HeikoS_mobile: I am not sure what you mean.. so we allocate a space for 10.. if the number exceeds that, we allocate 10 more.. then do something like shrink_to_fit/leave it as it is?	16:50
-HeikoS_mobile	Though I am using the phone in portrait	16:50
-HeikoS_mobile	lambday: these guys can be put to a dynamic one	16:50
-HeikoS_mobile	But once the algorithm runs	16:50
-HeikoS_mobile	You don't need resize as you know how many kernels there are	16:50
-HeikoS_mobile	lambday: btw that's how dynamic array works	16:51
-@lambday	HeikoS_mobile: yeah resizing is not required in this use-case..	16:51
-@lambday	HeikoS_mobile: yeah	16:51
-HeikoS_mobile	Allocating 10 more	16:51
-@lambday	HeikoS_mobile: so that's what we need, right	16:51
-HeikoS_mobile	And also std vector iirc	16:51
-HeikoS_mobile	You can even is list	16:52
-HeikoS_mobile	Because once you start, you can copy al pointers into a static array	16:52
-@lambday	HeikoS_mobile: yeah.. before the move semantics, std::vector did realloc/copy-ctor once the space got exhausted.. but since cpp11, std::move saves up a lot of time	16:52
-HeikoS_mobile	I see	16:52
-@lambday	HeikoS_mobile: static array?	16:53
-HeikoS_mobile	Well still there is no need for resize in your code loops	16:53
-@lambday	HeikoS_mobile: copying ptrs to another array is not required, we can simply access the underlying contiguous array..	16:54
-HeikoS_mobile	Yep sure	16:54
-HeikoS_mobile	So Our discussion was about the need for resize	16:54
-@lambday	plus, some of the use-cases may have unique_ptr and not ptrs, so not really copy-able	16:55
-HeikoS_mobile	And my point was that you know the size of all structures once you start running the algorithm	16:55
-HeikoS_mobile	Hence no need for resize	16:55
-HeikoS_mobile	Within any loop	16:55
-@lambday	HeikoS_mobile: okay will create a new vector in that case	16:56
-@lambday	if size changes in future calls, it will create new memory	16:57
-HeikoS_mobile	The size doesn't change anyways most of the time iirc, or does it?	16:57
-HeikoS_mobile	Resize vector btw pads with zeros	16:57
-@lambday	it can change in use-case similar to this : mmd.set_num_null_samples(100), mmd.perform_test(), mmd.set_num_null_samples(200), mmd.perform_test()....	16:58
-@lambday	if you want to plot varying number of null-samples	16:58
-HeikoS_mobile	But just once right?	16:58
-HeikoS_mobile	Once per change	16:59
-@lambday	once per change...	16:59
-HeikoS_mobile	That was my point, neglectable delay, big improvement in semantic clarity	16:59
-@lambday	HeikoS_mobile: okay, realloc it is..	17:00
-@lambday	HeikoS_mobile: agreed on clarity	17:00
-HeikoS_mobile	I guess the dynamic object array can sts vector thing will have a bigger impact	17:00
--!- wudayoda [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Read error: Connection reset by peer]	17:00
-HeikoS_mobile	So really worth looking into that	17:00
-HeikoS_mobile	Once the code size t thing is resolved	17:00
-HeikoS_mobile	*Vs are vector	17:01
-@lambday	HeikoS_mobile: hehe yeah got that.. yeah will have a look	17:01
--!- wudayoda [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun	17:02
-HeikoS_mobile	Btw also please watch out for compiler warnings like the one I posted above	17:02
-@lambday	HeikoS_mobile: stl vectors have improved a lot (at least on gcc/clang) over time..	17:03
-@lambday	HeikoS_mobile: yeah will grep for size_t once I am done with this..	17:03
-HeikoS_mobile	lambday: yeah we should investigate these speedups, and then apply it to shoguns structures	17:04
-HeikoS_mobile	Big ++ from my side	17:04
-HeikoS_mobile	Detox and benchmark project relevant	17:04
-HeikoS_mobile	But let's do that shogun wide, not just in testing code	17:05
-HeikoS_mobile	lambday: Grep doesn't help you as much as watching compiler warnings ;)	17:05
-HeikoS_mobile	lambday: maybe we can internally change the backend of shoguns vectors to stl at some point	17:11
-@lambday	HeikoS_mobile: gotta be careful in that :) we have SGVectors passed by value at many places.. changing with stl is gonna make deep copy in that case... const& always..	17:13
-HeikoS_mobile	lambday: also talked with wiking to check this numfocus project on data structures and potentially using it	17:13
-HeikoS_mobile	lambday: sure sure I meant more the backend of dynamic array	17:14
-HeikoS_mobile	Not sg*	17:14
-HeikoS_mobile	That's more this numfocus lib	17:14
-HeikoS_mobile	Interesting stuff definitely	17:14
-@lambday	HeikoS_mobile: yeah for these common data structures we shouldn't use things written from scratch.. unless we want a finer control over the allocator.. it's better to use some lib.. custom allocators can be done with stl	17:15
-HeikoS_mobile	Yep ++	17:15
-HeikoS_mobile	Improve shogun with this stuff	17:15
-@lambday	only thing to worry is the swig..	17:16
-HeikoS_mobile	Ok, but for now, let's fix the branch ;) I'll brb in a bit	17:16
-@lambday	HeikoS_mobile: yeah..	17:16
-@lambday	I like stl cause we don't add an extra dependency on yet another library... it comes with the pkg and it is continuously improving..	17:18
--!- HeikoS_mobile [~Mutter@eduroam-int-pat-8-161.ucl.ac.uk] has quit [Quit: Mutter: www.mutterirc.com]	17:18
--!- mhlmz [4e0d7782@gateway/web/freenode/ip.78.13.119.130] has quit [Ping timeout: 260 seconds]	17:29
-@HeikoS	lambday: yep!	17:52
-@HeikoS	wiking: you awake?	17:54
-@HeikoS	lambday: still running?	17:57
-@HeikoS	lambday:  I just had this thought we better merge the branch soon since we are currently reviewed for GSoC	17:57
-@HeikoS	lisitsyn: ^	17:57
-@lambday	HeikoS: no.. was moving to eclipse	17:57
-@HeikoS	the editor ? ;)	17:57
-@lambday	HeikoS: only for refactoring though :P	17:58
-@lambday	HeikoS: for the rest, vim for the win :D	17:58
-@HeikoS	hehe	17:58
-@lambday	HeikoS: when shall we merge back?	17:58
-@HeikoS	green CI was the goal	17:59
-@lambday	apart from that one test being diva, we're good!	17:59
-@HeikoS	and the left column of your project	17:59
-@lambday	HeikoS: yeah.. I'll do that asap.. but it's not causing failure	17:59
-@HeikoS	yeh I know	18:00
-@HeikoS	it is just the input parser bug	18:00
-@HeikoS	lambday: im hesitant to merge without the consent of us three	18:00
-@HeikoS	though I think we should do it today, even if there is still this last error	18:00
-@HeikoS	because of the review thing	18:01
-@HeikoS	it should at least compile	18:01
-@lambday	wiking: there?	18:01
-@HeikoS	well one more day wont harm	18:01
-@HeikoS	size_t is kind of a blocker actually	18:01
-@HeikoS	so lets see tomorrow	18:01
-@HeikoS	lambday: btw we should have a hangout when things are done with testing, and you share some of the profiling insights you got	18:04
-@lambday	HeikoS: totally	18:05
-@lambday	HeikoS: once I am done with this, I was thinking of writing a small plan for the performance project.. about the right tools, about things to look for.. etc etc	18:06
-@lambday	HeikoS: may also put a link to this video : https://www.youtube.com/watch?v=nXaxk27zwlk	18:06
-@HeikoS	yep good	18:06
-@HeikoS	yeah cool	18:07
-@HeikoS	if you have concrete mini projects we can do in shogun, please write them down	18:07
-@HeikoS	we can put that into gsoc	18:07
--!- OXPHOS [92bd305b@gateway/web/freenode/ip.146.189.48.91] has joined #shogun	18:16
-OXPHOS	@HeikoS: there?	18:20
-@HeikoS	OXPHOS: hi yes	18:20
-@HeikoS	good to see you here!	18:20
-@HeikoS	OXPHOS: was just thinking about attempting to rebase your branch	18:20
-OXPHOS	hi! :)	18:20
-@HeikoS	OXPHOS: I thought we should have a little plan of what is left to merge	18:21
-@HeikoS	OXPHOS: you know these new github project things?	18:21
-@HeikoS	https://github.com/shogun-toolbox/shogun/projects	18:21
-@HeikoS	could have one for the linalg merge in there	18:21
-OXPHOS	@HeikoS: cool! Never used it before	18:23
-OXPHOS	A few things I want to confirm with you:	18:23
-@HeikoS	OXPHOS: its basically a sticky note todo list	18:23
-OXPHOS	that's good enough	18:24
-@HeikoS	would be goo dif you could opulate that then we all have an idea of hwats missing	18:24
-@HeikoS	OXPHOS: shoot	18:24
-OXPHOS	1. I'll remove the bool support of the linalg::sum methods since Eigen no longer supports bool addition	18:24
-@HeikoS	OXPHOS: thats fine!	18:25
-@HeikoS	doesnt make sense anyways	18:26
-OXPHOS	2. Cholesky works well with all versions of Eigen on my machine. So I guess it's not a Eigen version issue	18:28
-OXPHOS	@HeikoS: copy that	18:28
-OXPHOS	So I prefer to disable it	18:28
-@HeikoS	OXPHOS: the test you mean?	18:28
-OXPHOS	yes	18:28
-@HeikoS	OXPHOS: you know the eigen version of travis?	18:28
-OXPHOS	3.2.0-8	18:28
-@HeikoS	and that works on your machine?	18:28
-OXPHOS	yes	18:28
-@HeikoS	uff	18:28
-@HeikoS	weird!	18:28
-@HeikoS	and you could not reproduce the travis error, even when running the same docker image?	18:29
-OXPHOS	I did see the same error in Docker	18:29
-OXPHOS	on my machine	18:29
-@HeikoS	ah ok	18:29
--!- mikeling [uid89706@gateway/web/irccloud.com/x-xiyrisaihwgoizbh] has quit [Quit: Connection closed for inactivity]	18:29
-OXPHOS	I traced back to Eigen. So TriangularView.solve() returns inf instead of correct values	18:30
-@HeikoS	but the same eigen3 version on your own machine doesnt do that	18:30
-OXPHOS	nope	18:30
-@HeikoS	ok then. I suggest you disable the unit test, and then put it on your todo-before-merge list	18:31
-@HeikoS	so we can merge the PR I guess?	18:31
-@HeikoS	sorry I didnt get that it wasnt the eigen version	18:31
-@HeikoS	OXPHOS: shall I merge it?	18:32
-OXPHOS	@HeikoS: It's ready to merge on my end	18:32
-@sukey	Pull Request #3534 "LinalgRefactor - Cholesky - CPU only"  merged by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3534	18:33
-@sukey	New Commit "Merge pull request #3534 from OXPHOS/linalg_cholesky	18:33
-@sukey	LinalgRefactor - Cholesky - CPU only" to shogun-toolbox/shogun by karlnapf: https://github.com/shogun-toolbox/shogun/commit/c1d17d9e7173683de3b8f9612d5871099be843b2	18:33
-OXPHOS	yep it's nice to have an organized to-do list	18:33
-@HeikoS	OXPHOS: I just realised you cannot edit the projects page on github	18:33
-@HeikoS	OXPHOS: so whats missing?	18:33
-@HeikoS	lambday: you still around?	18:46
-OXPHOS	I feel like for the users who keep calling to_gpu() without gpu backends worth tons of warnings	18:47
-@lambday	HeikoS: yes.. arranging food..	18:47
-@HeikoS	OXPHOS: yes if you give it some love, then these projects look very nice	18:47
-@HeikoS	lambday: I think for projects, the best columns is:	18:47
-@HeikoS	"TODO, TODO optional, in progress, DONE,	18:47
-@HeikoS	just realised thats mostly aligned with this trello thing where you move things from left to right	18:47
-@HeikoS	OXPHOS: oh I agree	18:48
-@lambday	HeikoS: can't "milestones" do that?	18:48
-@HeikoS	lambday: they are for issues	18:48
-@HeikoS	but yes also	18:48
-@HeikoS	more like the "in progress" thing is good to hjvae	18:48
-@lambday	HeikoS: sounds exactly like JIRA :D	18:49
-@HeikoS	OXPHOS: I was just thinking of running a GPU implementation in Shogun  in a test or so	18:49
-@HeikoS	OXPHOS: but actually you are right	18:49
-@lambday	OXPHOS: yo	18:49
-@HeikoS	OXPHOS: they deserve :)	18:49
-OXPHOS	@lambday hi there!	18:49
-@lambday	OXPHOS: you're a superhero :)	18:49
-OXPHOS	@lambday why is that : )	18:50
-@lambday	OXPHOS: nice job with linalg :)	18:50
-OXPHOS	@lambday thanks!	18:50
-@lambday	although I haven't had a look lately... but it surely is nice	18:50
-@HeikoS	OXPHOS: btw, we can also add a project for the cereal stuff ... but thats after we merged	18:50
-OXPHOS	@HeikoS: sure	18:50
-OXPHOS	@HeikoS: I was thinking some devs may switch the backend on and off without muting to_gpu() everytime, we can offer them the -DENABLE_GPU_WARNING	18:51
-OXPHOS	@lambday yep haven't heard from you for a while	18:51
-@HeikoS	OXPHOS: yep sounds good	18:52
-@lambday	OXPHOS: yeah, had some personal commitments :) I'm back to shogun only from this week	18:53
-OXPHOS	@lambday glad to see you back!	18:55
-OXPHOS	I wasn't too engaged either. Slower than I thought	18:55
-@HeikoS	steady is more important that speedy!!	18:56
-OXPHOS	:D	18:57
-OXPHOS	heading for lunch	18:59
-OXPHOS	see u around	18:59
-@HeikoS	see you OXPHOS	19:02
-@lambday	HeikoS: I am going off for tonight.. will be back tomorrow..	19:17
-@HeikoS	lambday: cool see you tomorrow!	19:17
-@lambday	see you :)	19:17
--!- lambday [6a3317ac@gateway/web/freenode/ip.106.51.23.172] has quit []	19:17
--!- HeikoS_mobile [~Mutter@82-132-219-141.dab.02.net] has joined #shogun	19:29
--!- HeikoS_mobile [~Mutter@82-132-219-141.dab.02.net] has quit [Client Quit]	19:31
--!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 240 seconds]	19:39
--!- kmcquisten [d8338942@gateway/web/freenode/session] has joined #shogun	21:54
--!- kmcquisten [d8338942@gateway/web/freenode/session] has quit [Changing host]	21:54
--!- kmcquisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun	21:54
-kmcquisten	Hey all.  Hope you're well today.	21:54
-kmcquisten	I was wondering if someone was around to discuss a bit of difficulty I'm having.	21:55
--!- OXPHOS [92bd305b@gateway/web/freenode/ip.146.189.48.91] has quit [Ping timeout: 260 seconds]	22:01
-kmcquisten	Anyone here?	22:22
--!- kmcquisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]	22:33
--!- suhas2go [uid201652@gateway/web/irccloud.com/x-qtzwrunazcwxdoow] has joined #shogun	23:37
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Ping timeout: 240 seconds]
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Remote host closed the connection]
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Read error: Connection reset by peer]
+-!- goksinen [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+@sukey	New Commit "replaced std::vector<index_t> with SGVector<index_t>" to shogun-toolbox/shogun by lambday: https://github.com/shogun-toolbox/shogun/commit/25f28f3b116f4c800a4abb85a788b8d9ffade88a
+-!- lambday_ [c40f1710@gateway/web/freenode/ip.196.15.23.16] has joined #shogun
+-!- mode/#shogun [+o lambday_] by ChanServ
+-!- travis-ci [~travis-ci@ec2-54-80-85-96.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's lambday's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/204861542
+-!- travis-ci [~travis-ci@ec2-54-80-85-96.compute-1.amazonaws.com] has left #shogun []
+-!- lambday [31cf349d@gateway/web/freenode/ip.49.207.52.157] has quit [Ping timeout: 260 seconds]
+@sukey	Pull Request #3635 "LinalgRefactor - Memory Transfer Mutex"  synchronized by OXPHOS - https://github.com/shogun-toolbox/shogun/pull/3635
+-!- mhlmz [4e0d7782@gateway/web/freenode/ip.78.13.119.130] has joined #shogun
+-!- lambday_ [c40f1710@gateway/web/freenode/ip.196.15.23.16] has quit [Quit: Page closed]
+-!- lambday [6a3317ac@gateway/web/freenode/ip.106.51.23.172] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+-!- goksinen is now known as wudayoda
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	wiking: jojo
+@HeikoS	w
+@HeikoS	lambday: jo
+@lambday	HeikoS: hey
+@HeikoS	lambday: all good?
+@lambday	HeikoS: yeah
+@lambday	HeikoS: working on a benchmark :)
+@HeikoS	benchmarking what?
+@lambday	CDynamicObjectArray.get_element() vs std::vector::operator[]..
+@lambday	get_element() is quite slower.. takes 1.5x compared to vector []...  perf says it's mostly the SG_REF that takes up most of the time.. so tried with CDynamicObjectArray::get_array()[...], but even that's slower..
+@lambday	gotta see whether this makes any significant impact in our code.. cause if the usage is less, the difference won't be much
+@lambday	down to assembly now :D
+@HeikoS	lambday: no matter what
+ CaBa	HeikoS: heya
+@HeikoS	we have to get rid of the std::vector
+@HeikoS	lambday: btw I wrote some comments on your last commit
+@lambday	let me check
+@HeikoS	CaBa: hi!
+ CaBa	HeikoS: remind me, back then when we talked about building those ms-param trees for combined kernels - did we conclude that there was no way around creating a separate combined kernel for every subkernel parameter combination or did you still want to show me how that works properly through the ms-param interface? ^^
+@HeikoS	CaBa: ah I am unreliable
+@HeikoS	I dont know
+@HeikoS	but I do know that I wanted to write some code for you
+@HeikoS	lambday: hey
+@HeikoS	lambday: so re benchmarking
+@HeikoS	lambday: it is not the right time to do that
+@HeikoS	lambday: because it should be done after we fixed the problems in the code
+ CaBa	HeikoS: http://stackoverflow.com/questions/40359913 <- remember, this one? ;)
+@HeikoS	lambday: now it takes time to do benchmarking and then it is less likely that the actual problems are fixed
+@HeikoS	lambday: and in the last commit, you make it worse in fact
+@HeikoS	more unsigned/signed comparisons, possible underflows, possible compile errors
+@lambday	HeikoS: was just checking before I replace vector<CSGObject> with DynamicObjectArray
+@HeikoS	it doesnt matter for now
+@HeikoS	because the std::vector has to go
+@HeikoS	otherwise bugs
+@HeikoS	once we have fixed that, we can speed it up
+@lambday	HeikoS: where? I replaced std::vectors with SGVector... next task is replacing vector<vector> with SGMatrix
+@HeikoS	and it is good to do that
+@lambday	so got rid of a few size_t's already
+@lambday	sending patch step by step, otherwise it's gonna be too big
+@HeikoS	my point is, while there is any of the std::vector guys active in loops that do index SG* structures, there should be no benchmarking
+@HeikoS	because benchmarking comes after working code, see what I mean?
+@HeikoS	lambday: agree on step by step
+@lambday	HeikoS: can you point me which line are you refering to?
+@lambday	IIRC there is no vector<index_t> anymore.. all SG
+@HeikoS	yes but there is the nested one
+@HeikoS	and also the one with CKernel in it
+@HeikoS	https://github.com/shogun-toolbox/shogun/blob/25f28f3b116f4c800a4abb85a788b8d9ffade88a/src/shogun/statistical_testing/internals/mmd/CrossValidationMMD.h#L108
+@HeikoS	lambday: gotta check travis logs
+@HeikoS	lambday: sorry dont want to be too picky here, but really there are priorities
+@HeikoS	brb
+-!- HeikoS_mobile [~Mutter@eduroam-int-pat-8-161.ucl.ac.uk] has joined #shogun
+ HeikoS_mobile	lambday: back on mobile
+@lambday	HeikoS_mobile: haha which client you're using..
+ HeikoS_mobile	Mother
+ HeikoS_mobile	lambday: let's do the benchmarking in another feature branch once this one is merged
+ HeikoS_mobile	lambday: merging has top priority and there are quite a few things missing yet
+@lambday	HeikoS_mobile: nah I was benchmarking a separate code that I have written.. just two different types of kernel mgr.. one with dynamic object array and another with vector... benchmark was just the access operator..
+@lambday	HeikoS_mobile: cool..
+ HeikoS_mobile	lambday: you see the fact that we never work in mere but always get distracted with some other thing while merge status is 90% is what let to all these problems
+ HeikoS_mobile	More than happy to speed all the structures up and benchmarking them of course after
+@lambday	HeikoS_mobile: yeah I agree
+@lambday	HeikoS_mobile: what about vectors that don't contain CSGObjects?
+@lambday	HeikoS_mobile: CDynamicArray<T> ??
+ HeikoS_mobile	Yes for basic types that
+ HeikoS_mobile	What is your T?
+@lambday	HeikoS_mobile: custom structs...
+ HeikoS_mobile	And other question is: do you need dynamic size
+@lambday	HeikoS_mobile: yes
+ HeikoS_mobile	Why is that? All loop sizes should be known before no?
+@lambday	HeikoS_mobile: nah those are run-time variables
+ HeikoS_mobile	So?
+ HeikoS_mobile	I can't imagine a case in kernel testing where you can't know the size before you run something
+@lambday	HeikoS_mobile: so the size is dynamic..
+ HeikoS_mobile	Runtime size is fine
+ HeikoS_mobile	I mean you should know size at allocation time
+ HeikoS_mobile	Since loop sizes are known
+@lambday	HeikoS_mobile: yeah..
+@lambday	HeikoS_mobile: or maybe not.. cause imagine kernel selection, where the user simply adds kernels
+ HeikoS_mobile	Yeah, so?
+@lambday	HeikoS_mobile: when he's done, he tests it.. can't know at allocation time
+ HeikoS_mobile	That's a single reallocate
+ HeikoS_mobile	With zero recycling of content
+* CaBa imagines HeikoS_mobile like this right now... https://files.photomics.org/tmp/moirc.jpg
+ HeikoS_mobile	Or am I missing something?
+ HeikoS_mobile	CaBa: yep ;)
+ HeikoS_mobile	In Talk
+ CaBa	whatever that is ^^
+@lambday	HeikoS_mobile: I am not sure what you mean.. so we allocate a space for 10.. if the number exceeds that, we allocate 10 more.. then do something like shrink_to_fit/leave it as it is?
+ HeikoS_mobile	Though I am using the phone in portrait
+ HeikoS_mobile	lambday: these guys can be put to a dynamic one
+ HeikoS_mobile	But once the algorithm runs
+ HeikoS_mobile	You don't need resize as you know how many kernels there are
+ HeikoS_mobile	lambday: btw that's how dynamic array works
+@lambday	HeikoS_mobile: yeah resizing is not required in this use-case..
+@lambday	HeikoS_mobile: yeah
+ HeikoS_mobile	Allocating 10 more
+@lambday	HeikoS_mobile: so that's what we need, right
+ HeikoS_mobile	And also std vector iirc
+ HeikoS_mobile	You can even is list
+ HeikoS_mobile	Because once you start, you can copy al pointers into a static array
+@lambday	HeikoS_mobile: yeah.. before the move semantics, std::vector did realloc/copy-ctor once the space got exhausted.. but since cpp11, std::move saves up a lot of time
+ HeikoS_mobile	I see
+@lambday	HeikoS_mobile: static array?
+ HeikoS_mobile	Well still there is no need for resize in your code loops
+@lambday	HeikoS_mobile: copying ptrs to another array is not required, we can simply access the underlying contiguous array..
+ HeikoS_mobile	Yep sure
+ HeikoS_mobile	So Our discussion was about the need for resize
+@lambday	plus, some of the use-cases may have unique_ptr and not ptrs, so not really copy-able
+ HeikoS_mobile	And my point was that you know the size of all structures once you start running the algorithm
+ HeikoS_mobile	Hence no need for resize
+ HeikoS_mobile	Within any loop
+@lambday	HeikoS_mobile: okay will create a new vector in that case
+@lambday	if size changes in future calls, it will create new memory
+ HeikoS_mobile	The size doesn't change anyways most of the time iirc, or does it?
+ HeikoS_mobile	Resize vector btw pads with zeros
+@lambday	it can change in use-case similar to this : mmd.set_num_null_samples(100), mmd.perform_test(), mmd.set_num_null_samples(200), mmd.perform_test()....
+@lambday	if you want to plot varying number of null-samples
+ HeikoS_mobile	But just once right?
+ HeikoS_mobile	Once per change
+@lambday	once per change...
+ HeikoS_mobile	That was my point, neglectable delay, big improvement in semantic clarity
+@lambday	HeikoS_mobile: okay, realloc it is..
+@lambday	HeikoS_mobile: agreed on clarity
+ HeikoS_mobile	I guess the dynamic object array can sts vector thing will have a bigger impact
+-!- wudayoda [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has quit [Read error: Connection reset by peer]
+ HeikoS_mobile	So really worth looking into that
+ HeikoS_mobile	Once the code size t thing is resolved
+ HeikoS_mobile	*Vs are vector
+@lambday	HeikoS_mobile: hehe yeah got that.. yeah will have a look
+-!- wudayoda [~goksinen@rrcs-50-75-193-138.nyc.biz.rr.com] has joined #shogun
+ HeikoS_mobile	Btw also please watch out for compiler warnings like the one I posted above
+@lambday	HeikoS_mobile: stl vectors have improved a lot (at least on gcc/clang) over time..
+@lambday	HeikoS_mobile: yeah will grep for size_t once I am done with this..
+ HeikoS_mobile	lambday: yeah we should investigate these speedups, and then apply it to shoguns structures
+ HeikoS_mobile	Big ++ from my side
+ HeikoS_mobile	Detox and benchmark project relevant
+ HeikoS_mobile	But let's do that shogun wide, not just in testing code
+ HeikoS_mobile	lambday: Grep doesn't help you as much as watching compiler warnings ;)
+ HeikoS_mobile	lambday: maybe we can internally change the backend of shoguns vectors to stl at some point
+@lambday	HeikoS_mobile: gotta be careful in that :) we have SGVectors passed by value at many places.. changing with stl is gonna make deep copy in that case... const& always..
+ HeikoS_mobile	lambday: also talked with wiking to check this numfocus project on data structures and potentially using it
+ HeikoS_mobile	lambday: sure sure I meant more the backend of dynamic array
+ HeikoS_mobile	Not sg*
+ HeikoS_mobile	That's more this numfocus lib
+ HeikoS_mobile	Interesting stuff definitely
+@lambday	HeikoS_mobile: yeah for these common data structures we shouldn't use things written from scratch.. unless we want a finer control over the allocator.. it's better to use some lib.. custom allocators can be done with stl
+ HeikoS_mobile	Yep ++
+ HeikoS_mobile	Improve shogun with this stuff
+@lambday	only thing to worry is the swig..
+ HeikoS_mobile	Ok, but for now, let's fix the branch ;) I'll brb in a bit
+@lambday	HeikoS_mobile: yeah..
+@lambday	I like stl cause we don't add an extra dependency on yet another library... it comes with the pkg and it is continuously improving..
+-!- HeikoS_mobile [~Mutter@eduroam-int-pat-8-161.ucl.ac.uk] has quit [Quit: Mutter: www.mutterirc.com]
+-!- mhlmz [4e0d7782@gateway/web/freenode/ip.78.13.119.130] has quit [Ping timeout: 260 seconds]
+@HeikoS	lambday: yep!
+@HeikoS	wiking: you awake?
+@HeikoS	lambday: still running?
+@HeikoS	lambday:  I just had this thought we better merge the branch soon since we are currently reviewed for GSoC
+@HeikoS	lisitsyn: ^
+@lambday	HeikoS: no.. was moving to eclipse
+@HeikoS	the editor ? ;)
+@lambday	HeikoS: only for refactoring though :P
+@lambday	HeikoS: for the rest, vim for the win :D
+@HeikoS	hehe
+@lambday	HeikoS: when shall we merge back?
+@HeikoS	green CI was the goal
+@lambday	apart from that one test being diva, we're good!
+@HeikoS	and the left column of your project
+@lambday	HeikoS: yeah.. I'll do that asap.. but it's not causing failure
+@HeikoS	yeh I know
+@HeikoS	it is just the input parser bug
+@HeikoS	lambday: im hesitant to merge without the consent of us three
+@HeikoS	though I think we should do it today, even if there is still this last error
+@HeikoS	because of the review thing
+@HeikoS	it should at least compile
+@lambday	wiking: there?
+@HeikoS	well one more day wont harm
+@HeikoS	size_t is kind of a blocker actually
+@HeikoS	so lets see tomorrow
+@HeikoS	lambday: btw we should have a hangout when things are done with testing, and you share some of the profiling insights you got
+@lambday	HeikoS: totally
+@lambday	HeikoS: once I am done with this, I was thinking of writing a small plan for the performance project.. about the right tools, about things to look for.. etc etc
+@lambday	HeikoS: may also put a link to this video : https://www.youtube.com/watch?v=nXaxk27zwlk
+@HeikoS	yep good
+@HeikoS	yeah cool
+@HeikoS	if you have concrete mini projects we can do in shogun, please write them down
+@HeikoS	we can put that into gsoc
+-!- OXPHOS [92bd305b@gateway/web/freenode/ip.146.189.48.91] has joined #shogun
+ OXPHOS	@HeikoS: there?
+@HeikoS	OXPHOS: hi yes
+@HeikoS	good to see you here!
+@HeikoS	OXPHOS: was just thinking about attempting to rebase your branch
+ OXPHOS	hi! :)
+@HeikoS	OXPHOS: I thought we should have a little plan of what is left to merge
+@HeikoS	OXPHOS: you know these new github project things?
+@HeikoS	https://github.com/shogun-toolbox/shogun/projects
+@HeikoS	could have one for the linalg merge in there
+ OXPHOS	@HeikoS: cool! Never used it before
+ OXPHOS	A few things I want to confirm with you:
+@HeikoS	OXPHOS: its basically a sticky note todo list
+ OXPHOS	that's good enough
+@HeikoS	would be goo dif you could opulate that then we all have an idea of hwats missing
+@HeikoS	OXPHOS: shoot
+ OXPHOS	1. I'll remove the bool support of the linalg::sum methods since Eigen no longer supports bool addition
+@HeikoS	OXPHOS: thats fine!
+@HeikoS	doesnt make sense anyways
+ OXPHOS	2. Cholesky works well with all versions of Eigen on my machine. So I guess it's not a Eigen version issue
+ OXPHOS	@HeikoS: copy that
+ OXPHOS	So I prefer to disable it
+@HeikoS	OXPHOS: the test you mean?
+ OXPHOS	yes
+@HeikoS	OXPHOS: you know the eigen version of travis?
+ OXPHOS	3.2.0-8
+@HeikoS	and that works on your machine?
+ OXPHOS	yes
+@HeikoS	uff
+@HeikoS	weird!
+@HeikoS	and you could not reproduce the travis error, even when running the same docker image?
+ OXPHOS	I did see the same error in Docker
+ OXPHOS	on my machine
+@HeikoS	ah ok
+-!- mikeling [uid89706@gateway/web/irccloud.com/x-xiyrisaihwgoizbh] has quit [Quit: Connection closed for inactivity]
+ OXPHOS	I traced back to Eigen. So TriangularView.solve() returns inf instead of correct values
+@HeikoS	but the same eigen3 version on your own machine doesnt do that
+ OXPHOS	nope
+@HeikoS	ok then. I suggest you disable the unit test, and then put it on your todo-before-merge list
+@HeikoS	so we can merge the PR I guess?
+@HeikoS	sorry I didnt get that it wasnt the eigen version
+@HeikoS	OXPHOS: shall I merge it?
+ OXPHOS	@HeikoS: It's ready to merge on my end
+@sukey	Pull Request #3534 "LinalgRefactor - Cholesky - CPU only"  merged by karlnapf - https://github.com/shogun-toolbox/shogun/pull/3534
+@sukey	New Commit "Merge pull request #3534 from OXPHOS/linalg_cholesky
+@sukey	LinalgRefactor - Cholesky - CPU only" to shogun-toolbox/shogun by karlnapf: https://github.com/shogun-toolbox/shogun/commit/c1d17d9e7173683de3b8f9612d5871099be843b2
+ OXPHOS	yep it's nice to have an organized to-do list
+@HeikoS	OXPHOS: I just realised you cannot edit the projects page on github
+@HeikoS	OXPHOS: so whats missing?
+@HeikoS	lambday: you still around?
+ OXPHOS	I feel like for the users who keep calling to_gpu() without gpu backends worth tons of warnings
+@lambday	HeikoS: yes.. arranging food..
+@HeikoS	OXPHOS: yes if you give it some love, then these projects look very nice
+@HeikoS	lambday: I think for projects, the best columns is:
+@HeikoS	"TODO, TODO optional, in progress, DONE,
+@HeikoS	just realised thats mostly aligned with this trello thing where you move things from left to right
+@HeikoS	OXPHOS: oh I agree
+@lambday	HeikoS: can't "milestones" do that?
+@HeikoS	lambday: they are for issues
+@HeikoS	but yes also
+@HeikoS	more like the "in progress" thing is good to hjvae
+@lambday	HeikoS: sounds exactly like JIRA :D
+@HeikoS	OXPHOS: I was just thinking of running a GPU implementation in Shogun  in a test or so
+@HeikoS	OXPHOS: but actually you are right
+@lambday	OXPHOS: yo
+@HeikoS	OXPHOS: they deserve :)
+ OXPHOS	@lambday hi there!
+@lambday	OXPHOS: you're a superhero :)
+ OXPHOS	@lambday why is that : )
+@lambday	OXPHOS: nice job with linalg :)
+ OXPHOS	@lambday thanks!
+@lambday	although I haven't had a look lately... but it surely is nice
+@HeikoS	OXPHOS: btw, we can also add a project for the cereal stuff ... but thats after we merged
+ OXPHOS	@HeikoS: sure
+ OXPHOS	@HeikoS: I was thinking some devs may switch the backend on and off without muting to_gpu() everytime, we can offer them the -DENABLE_GPU_WARNING
+ OXPHOS	@lambday yep haven't heard from you for a while
+@HeikoS	OXPHOS: yep sounds good
+@lambday	OXPHOS: yeah, had some personal commitments :) I'm back to shogun only from this week
+ OXPHOS	@lambday glad to see you back!
+ OXPHOS	I wasn't too engaged either. Slower than I thought
+@HeikoS	steady is more important that speedy!!
+ OXPHOS	:D
+ OXPHOS	heading for lunch
+ OXPHOS	see u around
+@HeikoS	see you OXPHOS
+@lambday	HeikoS: I am going off for tonight.. will be back tomorrow..
+@HeikoS	lambday: cool see you tomorrow!
+@lambday	see you :)
+-!- lambday [6a3317ac@gateway/web/freenode/ip.106.51.23.172] has quit []
+-!- HeikoS_mobile [~Mutter@82-132-219-141.dab.02.net] has joined #shogun
+-!- HeikoS_mobile [~Mutter@82-132-219-141.dab.02.net] has quit [Client Quit]
+-!- HeikoS [~heiko@untrust-out.swc.ucl.ac.uk] has quit [Ping timeout: 240 seconds]
+-!- kmcquisten [d8338942@gateway/web/freenode/session] has joined #shogun
+-!- kmcquisten [d8338942@gateway/web/freenode/session] has quit [Changing host]
+-!- kmcquisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ kmcquisten	Hey all.  Hope you're well today.
+ kmcquisten	I was wondering if someone was around to discuss a bit of difficulty I'm having.
+-!- OXPHOS [92bd305b@gateway/web/freenode/ip.146.189.48.91] has quit [Ping timeout: 260 seconds]
+ kmcquisten	Anyone here?
+-!- kmcquisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+-!- suhas2go [uid201652@gateway/web/irccloud.com/x-qtzwrunazcwxdoow] has joined #shogun
 --- Log closed Sat Feb 25 00:00:39 2017

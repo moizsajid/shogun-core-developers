@@ -1,0 +1,277 @@
+--- Log opened Sun Aug 05 00:00:17 2012
+-!- zxtx [~zv@75-59-237-124.lightspeed.sntcca.sbcglobal.net] has quit [Remote host closed the connection]
+ shogun-buildbot_	build #44 of nightly_none is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/44
+ shogun-buildbot_	build #50 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/50
+ shogun-buildbot_	build #40 of nightly_all is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/40
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@193.Red-2-137-61.dynamicIP.rima-tde.net] has joined #shogun
+-!- n4nd0 [~nando@193.Red-2-137-61.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+-!- pluskid [~pluskid@108.171.196.83] has joined #shogun
+-!- pluskid [~pluskid@108.171.196.83] has quit [Ping timeout: 240 seconds]
+-!- n4nd0 [~nando@193.Red-2-137-61.dynamicIP.rima-tde.net] has joined #shogun
+-!- pluskid [~pluskid@1.204.109.16] has joined #shogun
+@sonney2k	pluskid, do you have a bit of time?
+@sonney2k	pluskid, why do you need to create multiple kernels?
+@sonney2k	(what for)
+-!- pluskid [~pluskid@1.204.109.16] has quit [Ping timeout: 246 seconds]
+-!- pluskid [~pluskid@108.171.196.83] has joined #shogun
+ pluskid	sonney2k: hi
+@sonney2k	pluskid, hi
+ pluskid	I have to create multiple kernel machines
+ pluskid	each machines has his own kernel
+ pluskid	those machines form a tree
+@sonney2k	pluskid, so these are kept in memory for classification - I see
+ pluskid	yeah
+@sonney2k	pluskid, then IMHO we should go with a clone() method or sth similar
+@sonney2k	the factory has even stronger limitations... btw currently you only work with gaussian kernel right?
+ pluskid	sonney2k: yeah, I think that would be a long-term goal if my estimate of amount of work is correct
+ pluskid	sonney2k: I can work with any kernel
+@sonney2k	so we could just implement clone() for gaussian (just for parameters) and that should do it
+@sonney2k	pluskid, but only with default args currently right?
+ pluskid	yeah
+ pluskid	sonney2k: you mean add a virtual clone() in CKernels with SG_NOTIMPLEMENTED, but implement that in GaussianKernel?
+@sonney2k	that is not useful in practice - kernel parameters change results *drastically*
+ pluskid	sonney2k: OK, I see
+@sonney2k	pluskid, add a clone() methdo to SGObject even with SG_NOTIMPLEMENTED yes
+@sonney2k	and then just do it for gaussian
+ pluskid	sonney2k: btw, the same problem applies to my construction of CLibSVM
+@sonney2k	pluskid, would that be ok for your (kernel -> clone) ?
+ pluskid	sonney2k: yes, of course
+ pluskid	I'll do that
+@sonney2k	pluskid, ok thanks
+ pluskid	ur wel~
+@sonney2k	what about your libsvm?
+@sonney2k	I still dont' understand it
+ pluskid	the problem is the same
+@sonney2k	you again create multiple libsvms?
+ pluskid	I have to create multiple SVMs
+@sonney2k	ok
+ pluskid	yes, actually, its because I create multiple SVMs that I create multiple kernels
+@sonney2k	but underneath you only work with the SVM interface right?
+ pluskid	sonney2k: yes, actually I can work with any binary kernel machine
+@sonney2k	I mean you call get_support_vectors() train() etc
+ pluskid	sonney2k: yes
+ pluskid	I only need # of SVs IIRC
+@sonney2k	for svms clone() is even simpler then - it would just copy the SVM C parameter / epsilon for now
+@sonney2k	pluskid, I think we should have a clone(bool all) or two different clone functions - one that just copies parameters over and one that really creates a complete copy
+ pluskid	sonney2k: maybe we can use a MACRO to easily define a simple clone which simply calls the copy constructor
+ pluskid	sonney2k: yes, I think you are right, but maybe we don't have to consider that much *for now*?
+@sonney2k	pluskid, but the copy constructor might also clone more than is needed, e.g. in kernels also the features ...
+@sonney2k	or we make it a convention that clone() just clones parameters but doesn not create an independent copy...
+ pluskid	sonney2k: hm, yes
+ pluskid	sonney2k: but sometimes we need a deeper clone
+ pluskid	sonney2k: like the bug I mentioned in my email
+@sonney2k	havent' seen you email yet but sure sometimes one needs this though almost no shogun object does have some deep_copy / clone
+@sonney2k	pluskid, I think in python this is called copy() / deep_copy() btw
+ pluskid	sonney2k: the bug is that Features's duplicate() function doesn't do a *copy* of subset-stack
+ pluskid	which mess x-val in KNN
+@sonney2k	pluskid, the call it shallow copy (when just references are increased) and deep copy (really everything is cloned)
+ pluskid	sonney2k: then shallow copy in shogun isn't merely SG_REF ?
+@sonney2k	shallow copy would be to create a clone of the object with all the subobject just being SG_REF'd etc yes
+@sonney2k	deep would create clones for subobjects too
+ pluskid	hmm, that makes sense
+@sonney2k	pluskid, and you only need shallow (even less actually but it is close to 0 overhead)
+ pluskid	yes, currently shallow copy only
+@sonney2k	pluskid, so what do you think should we introduce shallow_copy() and deep_copy() in SGObject? or should we just have a duplicate() or clone() function with a boolean as argument?
+@sonney2k	where bool ==   true denotes deep copy
+ pluskid	sonney2k: I'm OK with either
+@sonney2k	me too
+ pluskid	haha
+ pluskid	the captain has to make a decision
+@sonney2k	grmpf
+ pluskid	lautmalerei, f?r den biss in den eigenen hintern?
+@sonney2k	hahaha
+ pluskid	I googled that, no idea of what it is...
+@sonney2k	probably
+@sonney2k	google translate will use offensive wording I am afraid
+ pluskid	google translate gives: onomatopoeia, posterior to the bit in their own
+@sonney2k	pluskid, I would like to involve blackburn / heiko in the discussion so just do it one way renaming things later is not the problem
+ pluskid	sonney2k: OK
+@sonney2k	pluskid, but I tend to make things *explicit*, i.e. shallow_copy() / deep_copy()
+@sonney2k	explicit is usually much easier to read
+@sonney2k	no need to lookup for a boolean etc
+ pluskid	sonney2k: OK, I'll go with that before blackburn and heiko show their opinion
+@sonney2k	thanks for your patience
+ pluskid	:)
+@sonney2k	pluskid, btw about the documetnation and including examples - I meant you should include examples in the examples/ directory directly
+ pluskid	sonney2k: examples/what ?
+ pluskid	undocumented?
+@sonney2k	pluskid, and I don't mind if you also add  the example to the .tex with your nice syntax highlighting
+@sonney2k	pluskid, examples/undocumented/<interface your describe>
+@sonney2k	pluskid, then add the documentation to examples/descriptions
+@sonney2k	(for that example)
+@sonney2k	it will be prepended to the example
+ pluskid	sonney2k: examples for tutorials tends to more real world datasets, I think the buildbot will not be happy to run them so frequently
+@sonney2k	i.e. we generate documented examples from the undocumented ones
+@sonney2k	pluskid, it can work if you use very few training examples in the examples dir
+ pluskid	cheng suggested that we use a separate buildbot which runs only once several days specific for shogun-tutor codes
+@sonney2k	e.g. some parameter telling it to just take 10 examples or so
+ pluskid	sonney2k: I'll talk to you later, leave for supper
+@sonney2k	cu
+ CIA-18	shogun: Soeren Sonnenburg master * r3462abe / (tests/regression/data tests/regression/tests): adjust symlinks for regression tests - https://github.com/shogun-toolbox/shogun/commit/3462abe6979e27dcf92c4b83f4043cca5763756e
+@sonney2k	pluskid, I just now read your email... you basically suggest the same - very good :D
+ shogun-buildbot_	build #263 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/263  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ pluskid	sonney2k: maybe we'd better get blackburn and heiko involved in the discussion of how to organize the tutor example code, since they are also currently writing the tutor
+-!- blackburn [~blackburn@109.226.80.43] has joined #shogun
+-!- n4nd0 [~nando@193.Red-2-137-61.dynamicIP.rima-tde.net] has quit [Read error: Connection reset by peer]
+-!- n4nd0 [~nando@5.Red-2-137-19.dynamicIP.rima-tde.net] has joined #shogun
+-!- pluskid [~pluskid@108.171.196.83] has quit [Ping timeout: 244 seconds]
+-!- n4nd0 [~nando@5.Red-2-137-19.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+-!- pluskid [~pluskid@1.204.109.16] has joined #shogun
+ blackburn	pluskid: hey
+ blackburn	pluskid: ah nevermind, I got a little wrong :)
+ pluskid	blackburn: hi
+ blackburn	pluskid: I was confused with gaussian naive bayes and multivariate gaussian
+ blackburn	of course it is multivariate :)
+ pluskid	blackburn: am I mis-describing something about GNB? I didn't look at your algorithm very carefully
+ blackburn	pluskid: no, everything is correct
+ pluskid	blackburn: OK, cool
+ pluskid	blackburn: btw, do you think we should add at least one example for *every* algorithm described in the tutorial?
+ blackburn	example like real data usage?
+ pluskid	yes
+ blackburn	I don't really know
+ pluskid	hmm
+ blackburn	pluskid: I am now playing around with freak descriptor on road sign data
+ blackburn	interesting I managed to achieve 0.9% accuracy with 512 bit(!!!) features
+ pluskid	0.9%...
+ blackburn	argh
+ blackburn	:D
+ blackburn	0.9
+ blackburn	~90%
+ pluskid	64 byte, that's impressive
+ pluskid	it is a global feature?
+ blackburn	well I just use keypoint at center
+ blackburn	pluskid: actually I am learning a boolean function here :D
+ pluskid	boolean function? for what?
+ blackburn	pluskid: features are binary so actually it is a boolean function
+ blackburn	I have seen some DNF kernel around, will try it too
+ pluskid	oh, I see
+-!- pluskid [~pluskid@1.204.109.16] has quit [Quit: Leaving]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- n4nd0 [~nando@5.Red-2-137-19.dynamicIP.rima-tde.net] has joined #shogun
+-!- gsomix [~gsomix@109.169.130.0] has joined #shogun
+ gsomix	good evening
+ gsomix	I'm at home, woohoo :)
+-!- n4nd0 [~nando@5.Red-2-137-19.dynamicIP.rima-tde.net] has quit [Ping timeout: 250 seconds]
+ blackburn	gsomix: phew
+@sonney2k	gsomix, so finally you can work again :)
+@sonney2k	blackburn, pluskid needs some kind of clone or shallow_copy or so for kernels / kernel machines
+ gsomix	sonney2k, work, work, work! Waaagh!
+@sonney2k	blackburn, so what do you think shall we introduce a shallow_copy / deep_copy function like there is in python?
+ blackburn	sonney2k: I do not really understand what deep stands for here
+ blackburn	with features?
+ blackburn	with all related objects?
+@sonney2k	blackburn, same meaning as in python: shallow means the compound object is created from scratch copying over scalars etc but only increase references for 'fat' objects
+@sonney2k	blackburn, deep would create copies for 'fat' objects too
+@sonney2k	IMHO these functions should go to SGObject with SG_NOTIMPLEMENTED as default
+ blackburn	yeah
+ blackburn	agree
+@sonney2k	blackburn, then we have to consolidate a bit what we currently have - clone() / duplicate() :D
+ blackburn	clone
+ blackburn	should be all clone I mean
+@sonney2k	blackburn, you just want one clone function instead of deep/shallow copy?
+ blackburn	yes why not?
+ blackburn	ahh stop
+@sonney2k	how can you distinguish deep from shallow?
+ blackburn	do we really need deep?
+@sonney2k	there are cases where we do (but rare)
+@sonney2k	pluskid had one IIRC for KNN
+ blackburn	I can't really get the case
+ blackburn	in multiclass machines shallow is enough
+@sonney2k	blackburn, well there will be cases for sure
+@sonney2k	e.g. when you want to have a clone of the features etc
+ blackburn	this can be done manually
+@sonney2k	it is better to not do it manually
+ blackburn	it is pretty rare
+@sonney2k	but have it inplace
+@sonney2k	yes true
+@sonney2k	but will appear
+@sonney2k	I don't mind having copy() (like in python) do shallow copy only
+@sonney2k	and then add some deep_copy() later
+ blackburn	yeah clone for shallow and something deep for deep
+@sonney2k	deep_clone then
+@sonney2k	blackburn, btw I prefer copy to be closer to python syntax but not s strong preference
+ blackburn	sonney2k: clone is java way :)
+ blackburn	but actually we are mainly python
+ blackburn	so yes, may be copy is bettter
+@sonney2k	fork, duplicate, clone, copy ...
+ blackburn	sonney2k: are these names of methods we have?
+ blackburn	:D
+@sonney2k	no
+@sonney2k	any will do
+@sonney2k	however I would really like to make it explicit that this is a shallow operation
+@sonney2k	but I don't know
+@sonney2k	I guess deep copy will be tough (infinite recursion...)
+ blackburn	sonney2k: have you seen performance on road signs I obtained with freak?
+@sonney2k	actually shallow can lead to that too :D
+@sonney2k	90%?
+ blackburn	yeah but that's for grayscale yet
+ blackburn	I expect it to be better anyway
+ blackburn	I find it impressive for 512 bits
+ blackburn	earlier I've been using ~2100 floats
+@sonney2k	but you didn't tune for #bits
+ blackburn	sonney2k: it is somewhat not really important
+ blackburn	sonney2k: more bits won't do that better
+ blackburn	authors state it and actually it is already too dense with 512 pairs
+ blackburn	sonney2k: did you get the idea?
+@sonney2k	what idea?
+ blackburn	sonney2k: of FREAKs
+-!- n4nd0 [~nando@5.Red-2-137-19.dynamicIP.rima-tde.net] has joined #shogun
+@sonney2k	blackburn, no idea about it
+ blackburn	sonney2k: well it just a set of 1/0 according to pairs http://2.bp.blogspot.com/-biicFdgjVCw/T8dysvzxblI/AAAAAAAAF0A/RqxgcvG3ssE/s400/freakdescriptoor.JPG
+-!- gsomix [~gsomix@109.169.130.0] has quit [Quit: Ex-Chat]
+-!- gsomix [~gsomix@109.169.130.0] has joined #shogun
+ blackburn	each pair can be 1 if mean intensity of first point is more that mean intensity of second point
+ blackburn	0 otherwise
+ blackburn	so no reason to make more pairs actually
+@sonney2k	blackburn, isnt' that a bit similar to HOG?
+ blackburn	sonney2k: no, HOG is gradient based decriptor
+@sonney2k	at least it will be scale invarient again
+@sonney2k	brightness etc
+@sonney2k	blackburn, but in HOG they compute differences right?
+@sonney2k	blackburn, how are the points for the pairs chosen? seems crucial...
+ blackburn	sonney2k: well it is pretty general view, in hog you use gradient of image
+ blackburn	sonney2k: they are coarse-to-fine
+ blackburn	sonney2k: in freak you don't compute gradient, just differences of mean intensities
+ blackburn	sonney2k: pairs are selected in a data dependent fashion, general pattern is http://infoscience.epfl.ch/record/175537/files/2069.pdf (page 4 figure 4)
+-!- n4nd0 [~nando@5.Red-2-137-19.dynamicIP.rima-tde.net] has quit [Ping timeout: 272 seconds]
+ blackburn	sonney2k: do you have some camera in your car? :D
+@sonney2k	blackburn, I can install one :D
+ blackburn	road signs are a little different here so GTSRB training set is a different too
+ blackburn	however speed signs are mostly the same
+ blackburn	sonney2k: did you use LBP for these coffin paper examples?
+@sonney2k	blackburn, yes - vojtech did that experiment though
+@sonney2k	blackburn, FREAK really looks cool (damn fast...)
+ blackburn	sonney2k: I did not manage to optimize to use bools yet
+ blackburn	no idea how to that actually
+@sonney2k	blackburn, why bools? just use bytes
+@sonney2k	or even bit ops
+ blackburn	sonney2k: well actually FREAK implementation outputs in unsigned chars
+ blackburn	what I do now is
+ blackburn	extract bits and consturct 512 dimensional uint8_t dense features
+ blackburn	but that's really suboptimal
+ blackburn	sonney2k: would be cool to use SSE here but no idea how - it should be totally different solver
+ blackburn	actually SSE based kernel could be pretty fast
+ blackburn	will check
+ CIA-18	shogun: Soeren Sonnenburg master * rcd1f70c / tests/regression/python_modular/generator.py : adjust paths to tests in generator - https://github.com/shogun-toolbox/shogun/commit/cd1f70cfecd073f91010642884f6fa2ca111f824
+@sonney2k	blackburn, if you compute things on the fly it is probably more expensive than the dot etc stuff
+ blackburn	sonney2k: compute what?
+ blackburn	you mean extracting bits? yes, for linear machines it will be slower
+ blackburn	I am curious whether kernel thing would be fast enough here
+@sonney2k	blackburn, what for?
+@sonney2k	the dot features way is the fastest one ...
+ blackburn	sonney2k: I have seen DNF based kernel
+ blackburn	especially for binary features
+ blackburn	oops why i use uint8_t :D
+ blackburn	sonney2k: is uint8_t and bool equal perfomance-wise?
+@sonney2k	depends on cpu and bool impl. why do you even need a bool /uint?
+@sonney2k	I mean if you do x <y  ? 1 : 0 ?
+ blackburn	sonney2k: but I put precomputed features to densefeatures
+ shogun-buildbot_	build #264 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/264
+@sonney2k	blackburn, if you precompute things then it is probably best to bit encode things
+ blackburn	encode like?
+@sonney2k	0110010001 :D
+ blackburn	well it is already encoded
+@sonney2k	I mean instead of using 1 byte for 1 bit you use 1 byte for 8
+ blackburn	and redefine add and dot?
+--- Log closed Mon Aug 06 00:00:17 2012

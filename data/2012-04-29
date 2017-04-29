@@ -1,0 +1,672 @@
+--- Log opened Sun Apr 29 00:00:21 2012
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Remote host closed the connection]
+-!- pluskid [~pluskid@111.120.75.191] has joined #shogun
+ pluskid	sonney2k: I have no concern about new SGVector/SGIVector now, after reading last night's IRC log
+-!- emrecelikten [~emre@92.44.238.239] has joined #shogun
+-!- emrecelikten [~emre@92.44.238.239] has quit [Ping timeout: 265 seconds]
+-!- emrecelikten [~emre@92.44.124.86] has joined #shogun
+-!- pluskid [~pluskid@111.120.75.191] has quit [Quit: Leaving]
+-!- emrecelikten [~emre@92.44.124.86] has quit [Ping timeout: 246 seconds]
+-!- n4nd0 [~n4nd0@153.Red-2-137-55.dynamicIP.rima-tde.net] has joined #shogun
+ n4nd0	good morning
+-!- gsomix [~gsomix@109.169.253.0] has joined #shogun
+-!- n4nd0 [~n4nd0@153.Red-2-137-55.dynamicIP.rima-tde.net] has quit [Quit: Ex-Chat]
+-!- n4nd0 [~n4nd0@153.Red-2-137-55.dynamicIP.rima-tde.net] has joined #shogun
+ gsomix	good morning
+-!- n4nd0 [~n4nd0@153.Red-2-137-55.dynamicIP.rima-tde.net] has quit [Ping timeout: 246 seconds]
+-!- Marty28 [~marty@cable-158-181-78-199.cust.telecolumbus.net] has joined #shogun
+ Marty28	Moin
+-!- n4nd0 [~n4nd0@153.Red-2-137-55.dynamicIP.rima-tde.net] has joined #shogun
+-!- Marty28 [~marty@cable-158-181-78-199.cust.telecolumbus.net] has quit [Quit: Colloquy for iPad - http://colloquy.mobi]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- Priyans [~Priyans@115.248.130.148] has joined #shogun
+-!- Priyans [~Priyans@115.248.130.148] has left #shogun []
+-!- gsomix [~gsomix@109.169.253.0] has quit [Ping timeout: 246 seconds]
+-!- gsomix [~gsomix@95.67.182.154] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~n4nd0@153.Red-2-137-55.dynamicIP.rima-tde.net] has quit [Ping timeout: 246 seconds]
+-!- blackburn [~qdrgsm@85.114.185.217] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@vpna095.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpna095.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ CIA-64	shogun: Sergey Lisitsyn master * r549fddc / (7 files in 3 dirs): Moved rejectionstrategy - http://git.io/GGaHGw
+ shogun-buildbot	build #793 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/793  blamelist: blackburn91@gmail.com
+ shogun-buildbot	build #222 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/222
+ wiking	heheeey
+ wiking	blackburn: wazza u broke the ssyyyyystem!
+ blackburn	wiking: heh
+ CIA-64	shogun: Sergey Lisitsyn master * rda1d7b8 / (2 files): Fixed includes in external libs - http://git.io/tLBR2g
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Ping timeout: 246 seconds]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ wiking	ocas fix needed: : Exception in thread "main" java.lang.RuntimeException: Out of memory error, tried to allocate -12627258368 bytes using malloc.
+ blackburn	shogun-buildbot has bad health lately
+ CIA-64	shogun: Sergey Lisitsyn master * r1455284 / src/shogun/multiclass/MulticlassOCAS.cpp : Fixes memory allocation at ocas - http://git.io/mH2Lew
+-!- pluskid [~pluskid@li164-218.members.linode.com] has joined #shogun
+ pluskid	I defined  shogun::CECOCStrategy::CECOCStrategy(CECOCEncoder *,CECOCDecoder *)
+ pluskid	and exported to python_modular
+ pluskid	but in the python code, when constructing a CECOCStrategy object
+ pluskid	with a subclass of CECOCEncoder and a subclass of CECOCDecoder
+ pluskid	it complains that NotImplementedError: Wrong number or type of arguments for overloaded function 'new_ECOCStrategy'.
+ pluskid	https://github.com/pluskid/shogun/blob/multiclass-ecoc/examples/undocumented/python_modular/classifier_multiclass_ecoc_ovr.py
+ blackburn	pluskid: hmm strange
+ pluskid	blackburn: do you know why?
+ pluskid	I also tested in C++ with libshogun
+ blackburn	let me check
+ pluskid	seems OK
+ pluskid	this example is in C++, runs without problem: https://github.com/pluskid/shogun/blob/multiclass-ecoc/examples/undocumented/libshogun/classifier_multiclass_ecoc.cpp
+ blackburn	pluskid: all looks ok.. let me double check :D
+ pluskid	blackburn: thanks! I'm really confused
+ blackburn	pluskid: try to add
+ blackburn	class CECOCEncoder;
+ blackburn	class CECOCDecoder;
+ blackburn	right before definition of CECOCStrategy
+ pluskid	OK
+ blackburn	however this error looks strange
+ pluskid	the full output is this: http://pastebin.com/wUcmQ4sF
+ pluskid	re-compiling
+ pluskid	blackburn: OK this time...
+ blackburn	pluskid: it looks like he didn't get that your en- and de-coders are descendants
+ blackburn	works?
+ pluskid	works!
+ blackburn	hooray
+ pluskid	blackburn: you cool!
+ pluskid	SWIG sucks!
+ blackburn	:D
+ wiking	lol
+ wiking	something changed
+ wiking	i've rebased the shogun repo and now i'm getting better accuracy
+ wiking	:S
+ blackburn	wiking: ???
+ wiking	yeah go figure :)
+ blackburn	wiking: what is the timerange?
+ wiking	mmm good question
+ blackburn	classifier? features?
+ wiking	Sat Apr 14
+ wiking	i've rebased till here
+ wiking	commit c12e96c7f3c662512ebd1054fda4a89bcdc4bdca
+ wiking	Merge: 2f00592 d716ae0
+ wiking	Author: Heiko Strathmann <heiko.strathmann@gmail.com>
+ wiking	Date:   Sat Apr 14 13:27:52 2012 -0700
+ CIA-64	shogun: Chiyuan Zhang master * r1cac205 / (2 files in 2 dirs): Fix SWIG error of not recognizing class hierarchy. (+5 more commits...) - http://git.io/gZRA0w
+ wiking	but i cannot recall
+ wiking	what was the previous stage
+ blackburn	wiking: uh I'd rather pray the problem is solved already :D
+ wiking	but it's funny with the CombinedDotFeatures
+ wiking	i've created the combineddotfeatures with HKM
+ wiking	and the result is much worse
+ wiking	than simply joining the features
+ wiking	a
+ wiking	nd
+ wiking	 the
+ wiking	n do a hkm
+ wiking	but i'm using the same him
+ blackburn	wiking: no that shouldn't be
+ blackburn	it is the same
+ wiking	blackburn: the difference is HUGE
+ wiking	0.19 vs 0.80
+ wiking	accuracy wise
+ blackburn	wiking: it should be normalization issue then
+ blackburn	or something like that
+ wiking	blackburn: what i'll try now is that simply do a hkm on each feature
+ wiking	and then
+ wiking	concatenate the feature
+ wiking	and see if that makes a difference
+ blackburn	wiking: are you sure weighting is the same?
+ wiking	blackburn: weightening? :)
+ blackburn	why so? weighting sounds ok :D
+ wiking	blackburn: how do you weight? :)
+ blackburn	wiking: there are weights for each feature instance..
+ wiking	i'm using simple features<float64_t>
+ wiking	so where do u set the weight? :))
+ blackburn	wiking: set_subfeature_weights does the job
+ blackburn	however it needs to be obviously patched to make possible to use it from modular
+ wiking	hehehe
+ wiking	set_subfeature_weights(org.shogun.SWIGTYPE_p_double,int) in org.shogun.CombinedDotFeatures cannot be applied to (double[],int)
+ wiking	:)
+ blackburn	exactly what I said
+ wiking	lets see a quick fix for this :0
+ blackburn	wiking: just replace it with SGVector<float64_t>
+ wiking	that does not exits in java modular
+ wiking	but DoubleMatrix is equivalent for the story
+ wiking	or at least it was
+ blackburn	wiking: huh it looks like you do not know how this mapping works ;)
+ wiking	?
+ wiking	which :)
+ blackburn	wiking: what do you mean?
+ wiking	which mapping :)
+ blackburn	isn't it working in case of SGVector?
+ blackburn	SGVector -- DoubleMatrix
+ wiking	well sgvector doesn't exists per se in java
+ blackburn	SGMatrix -- DoubleMatrix
+ blackburn	does it exist in python?
+ wiking	but yeah doubleMatrix was till now sufficient in case when it was expecting an SGVector
+ blackburn	wiking: it should be sufficient right now too :)
+ wiking	still bitching
+ blackburn	wiking: I'll commit fix in a min
+-!- n4nd0 [02893bbe@gateway/web/freenode/ip.2.137.59.190] has joined #shogun
+ wiking	blackburn: yo this is now really strange
+ wiking	the combined dot vs concatenating story
+-!- n4nd0_ [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+ wiking	so now one additional thing. if i take the features, do the HKM on it one by one, but after that i don't use the combineddotfeatures but rather just simply concatenate the features
+ wiking	i'm getting very similar results to the one where first i concatenate all the features and then HKM it
+ wiking	there's something wrong with combineddotfeatures i'm guessing
+ CIA-64	shogun: Sergey Lisitsyn master * rccbdee1 / (3 files in 2 dirs): Fix for set subfeatures weights - http://git.io/STg1wg
+-!- pluskid [~pluskid@li164-218.members.linode.com] has quit [Ping timeout: 272 seconds]
+ blackburn	wiking: I don't mind you fixing it ;)
+ wiking	heheh i have no time for it today
+ wiking	but i'll look into it tomorrow
+ blackburn	yeah and it is not critical
+ blackburn	looks ok, no idea what can be wrong
+-!- pluskid [~pluskid@111.120.67.198] has joined #shogun
+ wiking	it looks as if it only uses one feature
+ wiking	i mean feature_obj
+ blackburn	uh code is pretty cumbersome
+-!- n4nd0 [02893bbe@gateway/web/freenode/ip.2.137.59.190] has quit [Quit: Page closed]
+-!- n4nd0_ is now known as n4nd0
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Quit: Ex-Chat]
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 265 seconds]
+-!- wiking_ is now known as wiking
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@vpna120.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpna120.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- emrecelikten [~emre@92.44.124.86] has joined #shogun
+-!- pluskid [~pluskid@111.120.67.198] has quit [Quit: Leaving]
+-!- emrecelikten [~emre@92.44.124.86] has quit [Quit: Leaving.]
+-!- emrecelikten [~emre@92.44.124.86] has joined #shogun
+-!- emrecelikten [~emre@92.44.124.86] has quit [Quit: Leaving.]
+-!- emrecelikten [~emrecelik@92.44.124.86] has joined #shogun
+-!- emrecelikten [~emrecelik@92.44.124.86] has quit [Client Quit]
+-!- emrecelikten [~emrecelik@92.44.124.86] has joined #shogun
+-!- emrecelikten [~emrecelik@92.44.124.86] has quit [Client Quit]
+-!- emrecelikten [~emrecelik@92.44.124.86] has joined #shogun
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Ping timeout: 246 seconds]
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+-!- karlnapf [~heiko@host109-148-116-163.range109-148.btcentralplus.com] has joined #shogun
+-!- in3xes [~in3xes@49.14.101.92] has joined #shogun
+@sonney2k	karlnapf, you ok too with the SGVector / SGIVector split?
+ karlnapf	sonney2k, tell me more about it
+@sonney2k	karlnapf, we agree on that we need some kind of SGVector that allows shared memory, i.e. one can call get_vector multiple times
+@sonney2k	and garbage collection takes care of cleaning things up
+@sonney2k	karlnapf, right?
+ karlnapf	so you want to create a vector class based on SGObject?
+ karlnapf	sonney2k, yes, agreed
+@sonney2k	so that means we need sth like we have w/ SGObject: refcount, thread locking, and potentially some flag that deleting is not required at all (just some ptr to some memory somewhere)
+@sonney2k	karlnapf, so I would create an SGVector that just has all the vector functions and a ptr to the data
+@sonney2k	e.g. double*, int
+@sonney2k	(for vector data, length of vector)
+ blackburn	I have doubts we need it at all..
+ karlnapf	sonney2k, when we last talked about it you were against the vector class, what made you change your mind?
+@sonney2k	karlnapf, the overhead
+ karlnapf	but its still there isnt it?
+@sonney2k	SGIVector will cost like 20 bytes or so more than SGVector
+@sonney2k	so for low-dim data that is *huge*
+ karlnapf	mmh, so now the idea is to split things so that the overhead is only there when the ref-couting is really needed
+@sonney2k	(8 bytes for ptr, >8 bytes for potential virtual functions, 4 bytes for refcount, 1 byte for boolean flag)
+@sonney2k	karlnapf, yeah - but almost everywhere we use SGIVector
+@sonney2k	only when performance matters *a lot* we don't
+ karlnapf	seems like a good idea to me
+ karlnapf	my only fear is the transition
+ karlnapf	in many cases in the code, its not automatically doable
+ karlnapf	because memory managment is done around the SGVector class
+@sonney2k	karlnapf, yes I know
+@sonney2k	rough road
+ karlnapf	and since our tests dont cover all the code where SGVector are used .....
+@sonney2k	but the hack we have currently makes things soo difficult
+ karlnapf	indeed
+ karlnapf	I encountered this with the subsets
+@sonney2k	karlnapf, that is why I want gsomix to do this asap
+ karlnapf	they are always copied currently
+ blackburn	sonney2k: I am sorry to ask but what is the problem we can't solve right now?
+@sonney2k	and then after a few weeks this transitions hsould be over
+ karlnapf	yes
+@sonney2k	blackburn, as I said shared vectors
+ karlnapf	asap is good
+@sonney2k	example
+@sonney2k	class A has a vector foo
+@sonney2k	you do a->get_vector()
+@sonney2k	in some class B
+@sonney2k	and in some class C
+@sonney2k	who is supposed to free foo now?
+@sonney2k	we have lots of issues with uselessly copying labels
+@sonney2k	but we could just have passed ptrs
+ blackburn	sonney2k: do we have such problem right now?
+ blackburn	A B C case
+ karlnapf	blackburn, its not really a problem, but the longer we wati with this, the more complicated it gets to change the system
+ karlnapf	in the new subset system this shared inices would be extremely useful
+@sonney2k	blackburn, karlnapf btw - I don't mind if we do a different naming like SGVector being the one with refcounting
+@sonney2k	blackburn, yes
+ blackburn	I feel really unhappy with all these things
+@sonney2k	with labels this appears everywhere
+@sonney2k	blackburn, which things/
+@sonney2k	?
+ blackburn	sonney2k: this sgvector hell :)
+@sonney2k	blackburn, what do you propose?
+ blackburn	sonney2k: nevermind I am just crying :D
+@sonney2k	blackburn, just recall last years gsoc
+@sonney2k	double* int -> sgvector was painful
+ gsomix	sonney2k, moin. I will console blackburn.
+@sonney2k	this here is piece of cake
+ blackburn	what? what will you do with me?
+ blackburn	sonney2k: it was clear what to do
+@sonney2k	blackburn, it is now too - we just need an SGVector with refcounts
+ karlnapf	blackburn, sonney2k, I think this will be easier than last year
+ blackburn	sonney2k: is feature_iterator overhead significant?
+@sonney2k	blackburn, huge
+ karlnapf	however, its important that it is done with care. Last year we missed some cases, but this wasnt a problem. One can fix these on the fly nowadays, but with the ref-counting we might run into unexpected memory issues if we forget cases
+@sonney2k	that is why I don't use it :)
+ blackburn	sonney2k: ehmm dotfeatures one?
+@sonney2k	blackburn, yeah
+@sonney2k	if possible don't use it
+ blackburn	sonney2k: how?
+@sonney2k	blackburn, try to express things with add* *dot
+ blackburn	I need to support both dense and sparse here (S in SLEP stands for sparse)
+@sonney2k	karlnapf, yes that is true
+ blackburn	sonney2k: I need A'*x operation..
+ blackburn	i.e. feature row multiplied with vector
+ blackburn	sonney2k: any other suggestions?
+@sonney2k	blackburn, dense_dot?
+@sonney2k	or is A sparse too?
+ blackburn	sonney2k: A is feature matrix
+@sonney2k	is x dense?
+ blackburn	sonney2k: yes
+@sonney2k	then dense_dot
+ karlnapf	sonney2k, blackburn, gotta go, will be back later this evening
+@sonney2k	karlnapf, thansk for your opinion
+ blackburn	sonney2k: dense dot performs dot product of each vector with given vector
+ blackburn	karlnapf: ok see you later
+ karlnapf	bye :)
+ blackburn	sonney2k: I need to multiply each *row* of feature matrix
+ blackburn	err to product
+ blackburn	with vector of size num_vectors
+ blackburn	dense_dot does different job
+@sonney2k	blackburn, because it is transposed you mean?
+ blackburn	sonney2k: yes
+@sonney2k	then store the data transposed
+ blackburn	sonney2k: I need both kind of operations..
+ blackburn	Ax and A'x
+@sonney2k	then no idea - one of these operations will be dog slow
+ blackburn	sonney2k: we have feature iterator in liblinear crammer-singer
+ blackburn	works pretty well though
+ blackburn	sonney2k: hmm it can be done with dot probably?
+@sonney2k	blackburn, yeah but I introduced this really only to be able to run things - it is not fast
+@sonney2k	blackburn, the memory access pattern is horrible for dense
+@sonney2k	for sparse I don't even know how to properly do it
+@sonney2k	gsomix, do you have time to work on the SGVector stuff *now*
+@sonney2k	gsomix, or when would you have time?
+@sonney2k	karlnapf, btw I suspect mostly double free errors ... and the memleaks we can figure out with --trace-mallocs
+@sonney2k	so it shouldn't be too bad
+ blackburn	sonney2k: can it be dense add?
+ blackburn	n_vectors additions?
+@sonney2k	blackburn, we have add_to_dense_vec if you mean that
+ blackburn	yes
+@sonney2k	blackburn, not sure what you are asking
+ blackburn	sonney2k: I broke my head - looks like Ax can be done with n_vectors calls of add_to_dense_vec
+-!- karlnapf [~heiko@host109-148-116-163.range109-148.btcentralplus.com] has quit [Ping timeout: 276 seconds]
+ gsomix	sonney2k, right now? Do I have one hour? Some case. ?)
+ gsomix	*:)
+@sonney2k	blackburn, ???
+@sonney2k	gsomix, 1 hour to finish you mean :D
+@sonney2k	gsomix, I would suggest to (for now) just add all the refcount features to SGVector
+@sonney2k	then add a int* ptr for the refcount
+@sonney2k	make the class destructor virtual
+@sonney2k	and copy the ref/unref stuff over from SGObject
+ blackburn	sonney2k: yes it can be done with add_to_dense_vec
+@sonney2k	blackburn, explain what you want to do please?
+ blackburn	sonney2k: Ax
+ blackburn	A - feature matrix
+ blackburn	x is a vector of n_vectors*1 size
+@sonney2k	and x any double* ?
+ blackburn	yes
+ blackburn	given double vector
+ gsomix	sonney2k, huh, ok. :]
+ blackburn	A'x is a dense dot range
+ blackburn	and Ax is a sum of dense add
+ blackburn	that's I was asking :)
+@sonney2k	blackburn, I cannot follow on the Ax part
+ blackburn	sonney2k: each ith feature vector is multiplied with x[i]?
+@sonney2k	gsomix, I think there is no way other than commiting this refcount enabled SGVector then and fixing all the breakage with everyone else together
+@sonney2k	blackburn, ahh
+@sonney2k	sure
+@sonney2k	np
+ blackburn	sonney2k: was not clear for me how to use add here - that's why I was asking :)
+ blackburn	so I guess I need to patch liblinear
+ blackburn	to use it too
+ blackburn	sonney2k: is it much faster?
+@sonney2k	blackburn, I can tell that this will be hundred times faster
+ blackburn	lol
+ blackburn	sonney2k: ooh different issue there..
+ blackburn	w_i[d_ind[m]]
+ blackburn	crazy indices
+@sonney2k	w_i == x?
+ blackburn	sonney2k: it is in liblinear
+ blackburn	in my slep code it is simple
+ blackburn	and can be done with add
+ blackburn	but in liblinear it is painful..
+@sonney2k	because of some subindices
+ blackburn	yeah
+ blackburn	sonney2k: btw do you think shrinking is possible for libocas?
+ blackburn	like in liblinear
+@sonney2k	blackburn, ocas usually needs <100 iterations
+@sonney2k	so what would you want to shrink?
+ blackburn	sonney2k: update only subset of ws
+@sonney2k	IIRC that was not the most time consuming operation
+ blackburn	yeah actually yes
+ blackburn	most time consuming is outputs
+@sonney2k	and that is even done in parallel (IIRC)
+ blackburn	sonney2k: yes my main concern is that it is still slower
+ blackburn	sonney2k: than liblinear's coordinate descent
+@sonney2k	blackburn, no way to fix it ...
+ blackburn	bad bad
+@sonney2k	for 2 classes it can be faster at times
+@sonney2k	it certainly is more accurate optimization wise
+ blackburn	sonney2k: results are equal but times slower :(
+@sonney2k	but that's about it
+ blackburn	sonney2k: about SLEP - do you think I can already put a gpl header and include files at least to my fork?
+@sonney2k	blackburn, did they answer?
+ blackburn	nothing after you did
+ blackburn	but intention is clear
+ blackburn	sonney2k: may be I should suggest to do it by myself and give them patched version?
+ blackburn	I admit they seems to be not very good in development stuff..
+@sonney2k	blackburn, good idea - sent them a patch with the added copyright and then continue
+ blackburn	sonney2k: have you seen the code?
+@sonney2k	no
+@sonney2k	n4nd0, btw how are you exams going? how many do you have left?
+ blackburn	sonney2k: http://pastebin.com/wyHWQnjG
+ blackburn	sonney2k: my intention was to include it as is but it looks I have to patch it seriously
+ blackburn	it is easier still though
+ blackburn	than do it from the paper :D
+@sonney2k	blackburn, yeah well it is not too bad I would say
+ blackburn	sonney2k: they do loop unrolling manually sometimes and other stuff I do not really like
+ blackburn	and codestyle is random
+ blackburn	totally random
+@sonney2k	certainly better than svmlight code :P
+ blackburn	hmm let me check svmlight
+@sonney2k	blackburn, yeah and twonorm is not an extra function
+@sonney2k	etc
+ blackburn	sonney2k: svmlight seems to be not that bad..
+ blackburn	oh
+@sonney2k	blackburn, what?
+ blackburn	no forget what I said
+@sonney2k	a lot worse
+ blackburn	chosen[i]=9999
+ blackburn	:D:D:D
+ blackburn	yaya
+ blackburn	wtf is going on
+ blackburn	omg
+ blackburn	sonney2k: what a detailed naming
+ blackburn	compute_matrices_for_optimization
+ blackburn	qp->opt_g0[i]=(learn_parm->eps[key[i]]-(float64_t)label[key[i]]*c[key[i]]) + qp->opt_g0[i]*(float64_t)label[key[i]];
+ blackburn	I have no idea how to handle this code
+* sonney2k has to stop watering plants before I have to swim home
+ blackburn	what?
+ blackburn	sonney2k: are you watering plants and chat?
+ gsomix	sonney2k - master
+ n4nd0	sonney2k, for the moment I have just one left on the 7th
+ n4nd0	sonney2k, so I can come back to the work :)
+ n4nd0	Shogun work I mean
+ blackburn	n4nd0: btw if you are free please consider fix doc warnings for JLCoverTree
+ n4nd0	blackburn, all right
+@sonney2k	gsomix, yes?
+ blackburn	:D
+@sonney2k	gsomix, you can also call me $DEITY
+@sonney2k	n4nd0, yeah that doc fix would be great
+@sonney2k	pretty annoying to see these warnings all the time
+@sonney2k	blackburn, yeah I am sitting outside in the garden
+ blackburn	sonney2k: heh that should be nice
+@sonney2k	gsomix, so whats up?
+ gsomix	sonney2k, thanks for new word in my vocabulary
+ gsomix	sonney2k, I'm ready.
+@sonney2k	gsomix, $ you mean :D
+@sonney2k	gsomix, you did SGVector you mean?
+ gsomix	sonney2k, yep.
+@sonney2k	ok, please show me
+ gsomix	sonney2k, bjjj, I'm ready to work, I mean.
+@sonney2k	gsomix, hehe
+@sonney2k	that is why I was asking
+ gsomix	ok, I see
+@sonney2k	gsomix, then please go ahead. btw we don't need the sgvector& stuff / typemaps
+@sonney2k	if this all works ok
+@sonney2k	gsomix, btw the other thing that is needed and very related to sgvector
+@sonney2k	is the remove Array/Array2/Array3 etc and replace it with SGVector/Matrix ...
+@sonney2k	gsomix, but please one step at a time
+@sonney2k	I will investigate which issues this will create...
+@sonney2k	and of course there are some :/
+@sonney2k	CArray2<CPlifBase*> PEN_state_signals
+@sonney2k	crap
+@sonney2k	CArray3<T_STATES> psi
+ shogun-buildbot	build #224 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/224
+@sonney2k	ahh T_STATES is just uint16_t or so
+@sonney2k	no problem w/ that
+ blackburn	?????
+ gsomix	blackburn, ?? ???????, ??????.
+ gsomix	sonney2k, small question. Should I add a new macroses for ref/unref? This macroses in SGObject works with pointers.
+ CIA-64	shogun: Sergey Lisitsyn master * rdc9d421 / src/shogun/classifier/svm/QPBSVMLib.cpp : Fixed wrong include - http://git.io/TLU5ag
+@sonney2k	gsomix, investigating
+ CIA-64	shogun: Sergey Lisitsyn master * reff395d / src/shogun/classifier/svm/SVMLight.cpp : Fixed wrong include - http://git.io/8ptmYQ
+@sonney2k	gsomix, urgs that sucks... SG_REF(&vec) seems to be the only half way consistent thing
+ blackburn	sonney2k: will somebody fix HMM? :D
+@sonney2k	gsomix, so lets just do it like that, if we prefer SG_VREF macros later (I don't think so) we can add them at some stage
+@sonney2k	blackburn, what happened?
+ blackburn	sonney2k: parallel training
+@sonney2k	blackburn, that is super tough
+ blackburn	yes I am too scaried to even take a look
+@sonney2k	so I guess not
+ blackburn	nice :D
+@sonney2k	the code for the parallel stuff in HMM is so messy that I can hardly understand it
+@sonney2k	the only way to fix it is to compare outputs at each iteration of a parallel vs. sequential HMM
+@sonney2k	*ly run HMM
+@sonney2k	blackburn, do you get emails on all pull requests comments in github?
+@sonney2k	because I for some reason only get some
+ blackburn	sonney2k: no, only for ones I had discussion in
+@sonney2k	blackburn, I am just now reading harshits help request
+ blackburn	sonney2k: yes I did not receive it too
+@sonney2k	and I think he might run things with different parameters
+ blackburn	sonney2k: yes I told that him before
+ blackburn	daaaaaaaaamn
+@sonney2k	ok let me reply in the pull request
+ blackburn	I always miss something
+ CIA-64	shogun: Sergey Lisitsyn master * r25b89ec / src/shogun/ui/SGInterface.cpp : Fixed wrong include - http://git.io/kg_gYQ
+ blackburn	my commit messages are terribly different today
+@sonney2k	blackburn, git clean -dfx and do a full compile...
+ blackburn	sonney2k: should be totally fixed now..
+@sonney2k	or totally b0rken :D
+ blackburn	sonney2k: I did find shogun/classifier | xargs grep to find out wrong includes
+ blackburn	no idea how I missed svmlight but know why I missed ui
+ blackburn	sonney2k: actually you are closer to truth - nevertheless it compiles we are b0rken
+ blackburn	sonney2k: do you know what is SLEP for?
+@sonney2k	no
+ shogun-buildbot	build #798 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/798
+ blackburn	sonney2k: ^ ;)
+@sonney2k	heh
+ blackburn	sonney2k: just fyi in particular we plan to integrate tree based stuff from slep
+ blackburn	cases are - features have tree structure
+@sonney2k	blackburn, do you have any suggestion what we could do about CArray2<CPlifBase*> PEN?
+ blackburn	or tasks have structure
+@sonney2k	i see
+ blackburn	or even outputs have structure of tree
+@sonney2k	your tree labels
+ blackburn	sonney2k: let me check api of array2..
+@sonney2k	how are trees encoded?
+ blackburn	sonney2k: internally some lists but I will build some api on top of that
+ blackburn	list of indices actually
+@sonney2k	blackburn, so you will create TreeFeatures ?
+ blackburn	sonney2k: noo
+ blackburn	it is only tree structure describing relations between features
+ blackburn	can be applied on top of any features
+ blackburn	(DotFeatures)
+ blackburn	I don't think we need to patch features for that
+@sonney2k	blackburn, wait you mean within each feature vector - the relation between individual dims?
+ blackburn	sonney2k: yes
+@sonney2k	blackburn, CArray2 is just a 2d-array
+ blackburn	yes I am checking
+ blackburn	why not to replace with sgmatrix?
+@sonney2k	blackburn, yeah exactly
+ blackburn	ah CPlifBase..
+@sonney2k	yeah
+ blackburn	sonney2k: would it be infeasible to patch to use flattened indexing?
+@sonney2k	I just don't want this code duplicateion
+ blackburn	it looks funny in fact
+@sonney2k	blackburn, no but it is nice
+ blackburn	if you would need 4d array
+ blackburn	would it be Array4? :D
+@sonney2k	heh
+ blackburn	sonney2k: then no idea how to redup code there
+ blackburn	I assume we deny non numeric in sg types
+@sonney2k	blackburn, I simply want to get rid of Array{,2,3} and use the SGVec* stuff
+ blackburn	sonney2k: I thought you deny any pointers in SGVector?
+@sonney2k	yeah
+@sonney2k	we never needed 2d arrays so far IIRC
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Ping timeout: 246 seconds]
+@sonney2k	and it creates huge overhead in swig interfaces
+@sonney2k	since we have to support all types
+@sonney2k	hmmhh what is this free_array for
+@sonney2k	seems to be a nop
+ blackburn	sonney2k: which free_array?
+@sonney2k	blackburn, I don't know if you like it but how about just moving this Array2/3 functionality into Dyn*Array
+@sonney2k	I mean if we add some access operators called element(int i, int j, int k) ...
+ blackburn	sonney2k: I don't mind at all
+@sonney2k	and other constructors accepting 2(or 3) indices
+@sonney2k	it could just be inside the same thing
+ blackburn	to be honest I actually  do not like this infrastructure at all.. :D
+@sonney2k	I mean not necessary to have 3 classes for that
+@sonney2k	whcih infrastructure?
+ blackburn	DynArray stuff, etc
+@sonney2k	blackburn, the one in Array*
+ blackburn	I do not really understand why it is better than some stl stuff
+@sonney2k	blackburn, great
+@sonney2k	which stl stuff?
+ blackburn	sonney2k: why not to use std vector instead of dyn array?
+ blackburn	sonney2k: like in multiclass machines
+ blackburn	sonney2k: 2d 3d stuff can actually be done in place using macroses I think
+@sonney2k	no macros
+@sonney2k	just functions
+ blackburn	sonney2k: functions of dyn arrays?
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has joined #shogun
+@sonney2k	yes
+-!- in3xes [~in3xes@49.14.101.92] has quit [Read error: Connection reset by peer]
+-!- n4nd0 [~n4nd0@190.Red-2-137-59.dynamicIP.rima-tde.net] has quit [Ping timeout: 246 seconds]
+ blackburn	In file included from ../shogun/lib/memory.h:16:0,
+ blackburn	                 from ../shogun/lib/common.h:15,
+ blackburn	                 from ../shogun/features/DotFeatures.h:15,
+ blackburn	                 from ../shogun/lib/slep/slep_tree_lsr.h:15,
+ blackburn	                 from lib/slep/slep_tree_lsr.cpp:11:
+ blackburn	/usr/include/stdio.h:30:1: error: expected unqualified-id before string constant
+ blackburn	O_O
+ blackburn	sonney2k: have you ever seen something like that?
+@sonney2k	blackburn, yes but I don't remember
+ blackburn	sonney2k: could you please edit my name in your g+ post? ;)
+ blackburn	sonney2k: reason: forgotten ; in other included .h
+@sonney2k	blackburn, Sergey?
+@sonney2k	or sth else?
+ blackburn	yes, Lisitsyn
+ blackburn	Sergej Lisityn currently
+ blackburn	I am ok with j but last name is wrong ;)
+@sonney2k	Sergey Lisitsyn then share it :D
+ blackburn	sonney2k: done ;)
+@sonney2k	heh
+@sonney2k	alright - I think adding CArray{1,2,3} to DynArray and DynamicArray should enable us to drop CArray* crap
+ blackburn	agree
+ gsomix	sonney2k, SG_REF(&vec) | hehe, but { if (x) { if ((x)->unref()==0) (x)=NULL; } }
+@sonney2k	reduced compile time all good
+@sonney2k	gsomix, yes?
+@sonney2k	what is the problem?
+@sonney2k	ahh
+@sonney2k	(x)=NULL?
+ blackburn	loses pointer lol
+@sonney2k	blackburn, even worse impossible
+ gsomix	sonney2k, aha.
+@sonney2k	gsomix, so SG_VREF it is then...
+ blackburn	yay! managed to compile first version of tree regularized shit
+ blackburn	sonney2k:
+ blackburn	install: cannot stat `libshogun.a': No such file or directory
+ blackburn	I get this error sometimes
+ blackburn	what can be a cause?
+@sonney2k	never seen it
+@sonney2k	really *never*
+ blackburn	sonney2k: it stays until I clean up..
+@sonney2k	blackburn, sounds like some dependency in makefile is not ok. i guess only you have the qualification to produce this error :D
+* gsomix is trying to defuse a new laptop.
+ blackburn	sonney2k: autogenerated or set before?
+ blackburn	sonney2k: there are routines in slep that solving problem requiring W vector to be w1>w2>w3>...>wn :D
+-!- karlnapf [~heiko@host109-148-116-163.range109-148.btcentralplus.com] has joined #shogun
+@sonney2k	blackburn, you mean increasing sparsity or reducting norm?
+@sonney2k	reducing
+ blackburn	sonney2k: lasso problem *but* coefficients are decreasing
+@sonney2k	ok makes sense
+ blackburn	sonney2k: looks like it would be hard to promote sparsity when features have wrong in means of influence order..
+ blackburn	sonney2k: that's why slep is of interest not only in multitask scope
+ blackburn	there are a lot of other problem solvers
+ blackburn	however they share same thing
+ gsomix	sonney2k, I need your review.
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+ PhilTillet	hello everybodyy
+ blackburn	hi
+@sonney2k	gsomix, done
+ gsomix	sonney2k, aha.
+ gsomix	sonney2k, so what about void free_vector()? I think it should go.
+-!- karlnapf [~heiko@host109-148-116-163.range109-148.btcentralplus.com] has quit [Ping timeout: 276 seconds]
+@sonney2k	gsomix, yes indeed
+@sonney2k	also destroy_vector
+@sonney2k	gsomix, ^
+ gsomix	sonney2k, and not needed to allocate m_refcount if do_free == false, isn't it?
+@sonney2k	yes set to NULL and good
+ gsomix	ok
+@sonney2k	but rename do_free
+@sonney2k	to what I said in comment
+@sonney2k	gsomix, once this is done nothing will compile
+ gsomix	sonney2k, aha.
+@sonney2k	gsomix, so the quick fix is to replace vec.destroy_vector() and vec.free_vector() with SG_VUNREF(vec)
+@sonney2k	once this compiles we commit this
+@sonney2k	and gradually (with help of hopefully many others) fix the rest
+@sonney2k	s/rest/the crashers/
+ PhilTillet	sonney2k, is there any documentation I can find to get a sense of how svm_train() works? Is it SMO?
+ blackburn	huh
+ PhilTillet	blackburn, i've been super unclear? :p
+ blackburn	PhilTillet: svm_train() of?
+ PhilTillet	SVM.h
+ PhilTillet	:p
+ PhilTillet	wait no
+ PhilTillet	fail
+ PhilTillet	><
+ PhilTillet	shogun_libsvm.cpp
+ PhilTillet	I heard libsvm was based on SMO, but not exactly SMO
+@sonney2k	PhilTillet, look at http://shogun-toolbox.org/doc/en/current/classshogun_1_1CSVM.html
+@sonney2k	which SVM do you mean :D
+ blackburn	we have a few :D
+@sonney2k	gsomix, I have to sleep now will be back tomorrow evening...
+@sonney2k	cu
+ PhilTillet	yep now I have read some litterature about svm training, chunking, interior points and SMO :p I want to start with SMO first, but I do not really know whether this is what libsvm implements :p
+ PhilTillet	good night sonney2k :)
+ gsomix	sonney2k, nite
+ blackburn	PhilTillet: are you familiar with dual / primal formulations?
+ PhilTillet	blackburn, well not super experienced but yes I know a bit about them
+ blackburn	formulations are the key I'd say
+ blackburn	PhilTillet: what do you want to learn exactly?
+ PhilTillet	I spent the last week reading a book about svms, but it is kinda complicated :p
+ PhilTillet	blackburn, nothing in particular, I want to start implementing something for OpenCL
+ PhilTillet	I thought about SMO cause Interior Points is somewhat not adapted to big datasets
+ PhilTillet	and chunking sounds outdated :p
+ blackburn	I think some gradient based methods would be more openclable
+ PhilTillet	well, no challenge :p it's just about using opencl-compatible linalg libs :p
+ PhilTillet	I have some papers who cuda-ized smo
+ PhilTillet	and had some impressive improvements ( 50x ...)
+ blackburn	no surprise there :)
+ PhilTillet	seems like a good challenge and it can be very fruitful :p
+ PhilTillet	I just do not know where to start :p is SMO what is used in classifier_libsvm.cpp?
+ blackburn	PhilTillet: http://www.csie.ntu.edu.tw/~cjlin/papers/libsvm.pdf libsvm is smo type but not exactly smo
+ PhilTillet	it's what I needed :)
+ PhilTillet	thanks ^^
+ gsomix	good night guys
+ PhilTillet	good night:)
+-!- gsomix [~gsomix@95.67.182.154] has quit [Ping timeout: 246 seconds]
+-!- blackburn [~qdrgsm@85.114.185.217] has quit [Quit: Leaving.]
+--- Log closed Mon Apr 30 00:00:37 2012

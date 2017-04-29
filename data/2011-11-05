@@ -1,0 +1,216 @@
+--- Log opened Sat Nov 05 00:00:13 2011
+ blackburn1	damn I can't solve it :(
+ blackburn1	oh.. it is a lapack bug
+-!- blackburn1 [~blackburn@188.122.237.76] has quit [Quit: Leaving.]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 245 seconds]
+-!- in3xes_ is now known as in3xes
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 252 seconds]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Remote host closed the connection]
+-!- blackburn [~blackburn@109.226.81.30] has joined #shogun
+-!- blackburn [~blackburn@109.226.81.30] has quit [Read error: Connection reset by peer]
+-!- blackburn [~blackburn@188.122.224.207] has joined #shogun
+-!- blackburn [~blackburn@188.122.224.207] has quit [Read error: Connection reset by peer]
+-!- blackburn [~blackburn@85.114.187.132] has joined #shogun
+-!- blackburn [~blackburn@85.114.187.132] has quit [Read error: Connection reset by peer]
+-!- blackburn [~blackburn@188.122.228.165] has joined #shogun
+-!- blackburn1 [~blackburn@31.28.36.115] has joined #shogun
+-!- blackburn [~blackburn@188.122.228.165] has quit [Ping timeout: 258 seconds]
+-!- blackburn [~blackburn@85.114.185.74] has joined #shogun
+-!- blackburn1 [~blackburn@31.28.36.115] has quit [Ping timeout: 260 seconds]
+ blackburn	sonney2k: around?
+ blackburn	sonney2k: my issue with thread unsafety was related to thread-unsafe DLAMCH routine, which determines machine eps
+ blackburn	it is fucking awful - the whole LAPACK is thread-safe but DLAMCH
+-!- blackburn1 [~blackburn@109.226.124.12] has joined #shogun
+-!- blackburn [~blackburn@85.114.185.74] has quit [Read error: Connection reset by peer]
+ CIA-37	shogun: Sergey Lisitsyn master * r4b6f385 / (3 files in 2 dirs): Removed float lapack wrappers - http://git.io/N57b8A
+ CIA-37	shogun: Sergey Lisitsyn master * rdafece0 / src/shogun/converter/LocalTangentSpaceAlignment.cpp : Optimized LTSA - http://git.io/sWLt1w
+ CIA-37	shogun: Sergey Lisitsyn master * r5280282 / src/shogun/converter/KernelLocalTangentSpaceAlignment.cpp : Optimized KLTSA - http://git.io/6YBvFw
+ CIA-37	shogun: Sergey Lisitsyn master * r59c976a / examples/undocumented/python_modular/converter_localitypreservingprojections_modular.py : Added LPP python modular example - http://git.io/c4MKsw
+ shogun-buildbot	build #312 of octave_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/312
+@sonney2k	blackburn1, it is a bit surprising - thought that lapack is 100% thread safe...
+@sonney2k	a bit weird for a lib of this kind
+ blackburn1	sonney2k: 3.3 is so, but 3.2.1's dlamch is not
+@sonney2k	blackburn1, well then add a test for that version and force unicore if <3.3
+ blackburn1	sonney2k: how can i test lapack version in runtime?
+@sonney2k	blackburn1, compile time - not runtime
+ blackburn1	ehh okay
+@sonney2k	blackburn1, but maybe the even have a api function for checking the version?
+ blackburn1	sonney2k: I don't know it yet
+@sonney2k	no idea - check the source :)
+@sonney2k	blackburn1, have you read Madeleines question on the mailinglist?
+ blackburn1	sonney2k: yes, but I'm afraid I can't help she
+ blackburn1	sonney2k: don't you think alessandro is a bit offensive? :D
+@sonney2k	blackburn1, no why?
+@sonney2k	he is right
+@sonney2k	if it doesn't work w/o jblas then it doesn't make sense to just print a warning
+@sonney2k	and one should fail instead
+@sonney2k	blackburn1, do we have MeanAbsoluteError?
+@sonney2k	in evaluation I mean?
+ blackburn1	sonney2k: mean squared error
+ blackburn1	sonney2k: I'm about his writing style :)
+@sonney2k	but that cannot do absoute right?
+@sonney2k	I just started writing it...
+ blackburn1	sonney2k: what is the difference?
+@sonney2k	one is ||.||^2
+@sonney2k	one ||.||
+@sonney2k	| |
+ blackburn1	sonney2k: does it have some 'fundamental' difference?
+@sonney2k	fundamental?
+@sonney2k	it will punish differences close to zero much more
+ blackburn1	eh nevermind, bad word
+ blackburn1	ah I see
+ blackburn1	sonney2k: you could meansquarederror -> meanerror
+ blackburn1	and add options to square or not
+ blackburn1	sonney2k: about madeleine question - I really do not understand much about her problem, it is related to things you are better with than me
+@sonney2k	blackburn1, ok implemented that mean absolute error thing
+ blackburn1	http://www.netlib.org/lapack/lapack-3.3.0.html
+ blackburn1	sonney2k: Thread safe xLAMCH: SLAMCH and DLAMCH were the only two routines not thread-safe in LAPACK-3.2. This is fixed: all routines in LAPACK-3.3 are now thread-safe.
+ blackburn1	it is really awful
+ blackburn1	sonney2k: could you please describe how to link shogun with my own lapack instead of atlas' one&
+ blackburn1	?
+ blackburn1	I spent too much time on it, decided to ask you instead
+@sonney2k	your own lapack?
+ blackburn1	hah
+@sonney2k	just set the library / include paths on configure?
+ blackburn1	again bad wording
+ blackburn1	sonney2k: yes a did a try
+ blackburn1	but it links with atlas' one :(
+ blackburn1	I did*
+ blackburn1	I'll make a try again
+ blackburn1	sonney2k: today I've tested kernel ltsa on 84x112 pictures
+ blackburn1	it was 80s faster than original LTSA with the same results
+ blackburn1	80x*
+ blackburn1	in fact I started writing a paper, what do you think, does this kind of algo extension worths to be published in any journal?
+ blackburn1	I'm a total newbie in science affairs hah
+@sonney2k	blackburn1, if the extension is not trivial and ltsa is some established algo - sure
+ blackburn1	sonney2k: what is the trivial extension?
+ CIA-37	shogun: Soeren Sonnenburg master * r857311c / (4 files in 2 dirs): introduce MeanAbsoluteError - http://git.io/H8jXVw
+@sonney2k	blackburn1, something obvious for experts
+@sonney2k	blackburn1, btw look at the copyright line in the above ^ commit
+ blackburn1	sonney2k: can I consider you as expert? hehe
+ blackburn1	why me?
+@sonney2k	blackburn1, no - I don't know anything about LTSA
+@sonney2k	blackburn1, I used your MSE code
+ blackburn1	sonney2k: do you know anything about SVD and kernel matrix?
+@sonney2k	kernel matrix? no clue what that could be
+ blackburn1	matrix of pairwise kernels?
+ blackburn1	k11 k12 k13 ...
+ blackburn1	sonney2k: in the ltsa algorithm there are right singular vectors of centered feature matrix [X-[mean feature vector]] are being computed
+ blackburn1	I proved that it is the same to find eigenvectors of centered gram matrix
+ blackburn1	=> faster, makes possible to use kernels
+ blackburn1	sonney2k: it is obvious for me, but I don't know if it is for anyone else
+ blackburn1	sonney2k: do not leave me alone when I'm ask stupid Qs :D
+-!- heiko [~heiko@host86-160-249-224.range86-160.btcentralplus.com] has joined #shogun
+ heiko	sonney2k, just read the mails regarding the modsel problem, will try to figure our what is going on now.
+ blackburn1	howdy!
+ blackburn1	saturday night fixing model selection show
+ heiko	hi blackburn
+ heiko	hehe, well just read the mail
+ heiko	and i just got a minute
+ heiko	very busy the rest of the time
+ heiko	everything ok in russia? :)
+ blackburn1	heiko: sure, we are vodka-enough
+ heiko	hehe :)
+ heiko	what about your studies, everything going well?
+ blackburn1	heiko: oh studies are going ok, though I have a little spare time because I started working at netcracker
+ heiko	netcracker?
+ blackburn1	heiko: yeah, http://netcracker.com/en/
+ heiko	ah ok, new job
+ heiko	cool
+ heiko	is it nice?
+ blackburn1	heiko: it would be better to say first job :)
+ blackburn1	not very nice but 2 pros: a) I'm paid b) I work part-time :)
+ heiko	ok :)
+ blackburn1	heiko: what about you? what do you do?
+ heiko	I am started with a master in machine learning in london
+ heiko	http://www.csml.ucl.ac.uk/courses/msc_ml/
+ heiko	really cool
+ heiko	but consumes all of my time
+ blackburn1	heiko: so sad you can't do shoguning :)
+ heiko	yes, indeed
+ heiko	but thigns will change
+ heiko	but for the moment it is like it is
+ heiko	think i will have some free time around january
+ heiko	and then in march
+ heiko	and then in the summer also
+ blackburn1	I guess we will never have much free time as we had in summer
+ heiko	yes i think so
+ heiko	btw current head does not compile here
+ blackburn1	heiko: error?
+ heiko	In file included from base/class_list.cpp:66:0:
+ heiko	./kernel/MultitaskKernelMaskPairNormalizer.h: In member function 'virtual bool shogun::CMultitaskKernelMaskPairNormalizer::init(shogun::CKernel*)':
+ heiko	./kernel/MultitaskKernelMaskPairNormalizer.h:76:7: error: 'string' is not a member of 'std'
+ heiko	guess include is missing
+ blackburn1	I would personally kick chris' ass for usage of std but he is moving to NY
+ heiko	;)
+ blackburn1	that would be hard to catch him
+ blackburn1	okay I'll take a look
+ heiko	blackburn can you help me with a little git problem?
+ blackburn1	heiko:
+ blackburn1	sure
+ heiko	I still have some work in my master branch and i committed it already to my github repo because i wanted to backup it
+ heiko	however, the code is not yet really working
+ heiko	but if i want to do a bugfix i cannot send pullrequests
+ heiko	because all my changes are in there
+ heiko	do you know how to move this stuff to another branch or something so that i can work on head without any of my other changes involved?
+ blackburn1	you can stash your changes for now
+ blackburn1	git stash
+ blackburn1	it will keep your changes until you will git stash pop it
+ heiko	does that even work if they are already in my github repo?
+ blackburn1	heiko: ah did you commit it?
+ heiko	yes
+ blackburn1	hmm
+ heiko	its also already pushed
+ heiko	you know i wanted to backup itonline, kind of stupid
+ blackburn1	not a stupid
+ heiko	but i was in a hurry and i did not want to loose all of my changes
+ heiko	moving to london, plane, laptop broken or anything...you know
+ heiko	but now I want to put them away to work on them later
+ blackburn1	huh that's difficult
+ heiko	yes.
+ heiko	i thought of perhaps to the brute force way and save my repo copy here and just reset my github account
+ heiko	and then work the stuff in again later
+ heiko	i have to reconsider it anyway
+ heiko	think i will jsut do this
+ blackburn1	heiko: I'm sorry but I have no idea how to change your base in this way
+ blackburn1	I'm still lame with some git issues
+ heiko	me too :)
+ heiko	reforking ...
+ blackburn1	heiko: I would know more if I was using forks and etc
+ blackburn1	but I commit right into the shogun and it is pretty simplified
+ heiko	yes, with all the forks and stuff -- thats pretty messy sometimes
+ heiko	well i just cloned it
+ blackburn1	heiko: from my experience it comes easy to have some dev branch
+ heiko	yes, true true, i normally do that
+ blackburn1	but even this becomes messy sometimes
+ heiko	but not this time :)
+ blackburn1	oh I really need to stop procrastinate and compiling lapack
+ blackburn1	and start research on road sign recognition
+ blackburn1	:D
+ heiko	for studies?
+ blackburn1	yeah, it is my bachelor's work or so
+ blackburn1	but if I go through it with high accuracy I would even get paid for that
+ heiko	that sounds cool
+ heiko	blackburn1, the file with the error is full of std::
+ heiko	i will just add an include or so
+ blackburn1	heiko: are you going to fix it? I can
+ heiko	i can do it
+ blackburn1	heiko: if you have time please do, cause it is not being reproduced on my
+ blackburn1	machine
+ heiko	done
+ blackburn1	heiko: does it work?
+ blackburn1	heiko: there are vector too, is it ok?
+ heiko	yes, but they are included in Kernel.h
+ blackburn1	ah ok
+ CIA-37	shogun: Heiko Strathmann master * r54afa01 / src/shogun/kernel/MultitaskKernelMaskPairNormalizer.h :
+ CIA-37	shogun: temporary added include to compile again
+ CIA-37	shogun: (string include was recently removed out of Kernel.h) - http://git.io/qOdR6w
+-!- heiko [~heiko@host86-160-249-224.range86-160.btcentralplus.com] has quit [Quit: Leaving.]
+-!- heiko [~heiko@host86-160-249-224.range86-160.btcentralplus.com] has joined #shogun
+ heiko	blackburn1 goodn8
+-!- heiko [~heiko@host86-160-249-224.range86-160.btcentralplus.com] has left #shogun []
+ blackburn1	heiko see you
+--- Log closed Sun Nov 06 00:00:19 2011

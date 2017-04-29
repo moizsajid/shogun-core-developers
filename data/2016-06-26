@@ -1,0 +1,328 @@
+--- Log opened Sun Jun 26 00:00:56 2016
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- arianepaola [~ariane@unaffiliated/arianepaola] has quit [Ping timeout: 276 seconds]
+-!- sonne|osx [~sonne@x5ce58487.dyn.telefonica.de] has joined #shogun
+-!- Saurabh7__ [Saurabh7@gateway/shell/panicbnc/x-wlacyikiyzqrkfcs] has joined #shogun
+ shogun-buildbot	build #28 of memleak - valgrind is complete: Failure [failed memory check generate html]  Build details are at http://buildbot.shogun-toolbox.org/builders/memleak%20-%20valgrind/builds/28  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, OXPHOS <engelzora@gmail.com>
+ shogun-buildbot	build #1029 of nightly_none is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_none/builds/1029  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, OXPHOS <engelzora@gmail.com>
+@wiking	Saurabh7__: y0
+ Saurabh7__	wiking: yo
+ Saurabh7__	sry having bfast :)
+@wiking	Saurabh7__: ok so i replied in the PR
+@wiking	no worries
+@wiking	but we should discuss things about the trees
+@wiking	as there are some stuff that needs to be fixed there
+@wiking	(see those static analytics errors as well)
+@wiking	lemme know when it's a good time for you
+ Saurabh7__	brb 5 min
+@wiking	k
+-!- sonne|osx [~sonne@x5ce58487.dyn.telefonica.de] has quit [Quit: sonne|osx]
+ Saurabh7__	wiking: there ?
+ Saurabh7__	so you mean the feature type itself
+ Saurabh7__	current implementation assumes some feature might be nominal , some continous
+ Saurabh7__	i.e feature1 is nominal, feature2 is continous
+ Saurabh7__	wiking: so you think we should allow stringfeatures and convert them internally ?
+@wiking	convert?
+@wiking	what do you mean?
+@wiking	i mean the thing is that trees should work
+@wiking	out of box on values like hot, cold etc
+@wiking	right?
+ Saurabh7__	yes thats right
+@wiking	ok so that's wha ti mean by
+@wiking	we shoudl support string features out of box
+@wiking	in case of trees
+@wiking	we shoudl not require anybody to encode them as floats or something
+@wiking	since trees usually should be able to handle string features
+@wiking	i mean the ohter thing is
+@wiking	CombinedFeatures
+@wiking	shoudl be supported by trees
+@wiking	which could consist of StringFeatures and DenseFeatures
+@wiking	and i've added some errors that are detected by static analysis of the code
+@wiking	that should be fixed as well
+@wiking	but more importantly
+@wiking	in trees we should totally fix this error
+@wiking	that we only support dense features
+ Saurabh7__	ok , combined features look good, we already know the underling types
+@wiking	yep
+ Saurabh7__	rather than the current way of passing a bool vector
+@wiking	but currenlty we cannot support string features
+@wiking	right?
+ Saurabh7__	no
+@wiking	ok so that should be priority here
+@wiking	to add support for that
+@wiking	as it's a bit nonesense
+@wiking	i mean it's great these speedup improvements
+@wiking	but then again this is a fundamental thing
+@wiking	:)
+ Saurabh7__	yes
+@wiking	i mean you dont have to do this within this pr
+@wiking	lets have those static analysis errors fixed in CARTree
+@wiking	but then i really reckon the next step should be fixing this in CART
+@wiking	(and in all other trees)
+ shogun-buildbot	build #1159 of nightly_default is complete: Failure [failed test test_1 notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1159  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Sanuj <sanuj.sharma.in@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, OXPHOS <engelzora@gmail.com>
+-!- arianepaola [~ariane@unaffiliated/arianepaola] has joined #shogun
+-!- sanuj [~sanuj@117.203.20.199] has joined #shogun
+@wiking	Saurabh7__: still here?
+ Saurabh7__	wiking: yes
+@wiking	ok so another question
+@wiking	shouldn't we actually make the RandomForest if not templateable
+@wiking	but at least to set the tree implementation
+@wiking	have like CART as a default tree
+@wiking	but have the option to use different tree implementation
+ Saurabh7__	ah so different trees
+@wiking	yeah because you could use
+@wiking	C4.5
+ Saurabh7__	yes that could be
+@wiking	or C5.0 for a random forest
+@wiking	or chaid for that matter
+@wiking	i mean the BaggingMachine is flexible
+@wiking	it can do bagging with *any* machine
+@wiking	now RandomForest should be a bagging machine with for all trees
+@wiking	maybe have a default tree it would use
+@wiking	but then again the user should be able to override this easily
+@wiking	imo
+@wiking	since there are sometimes cases when other trees are more appropriate
+ Saurabh7__	that makes sense, can be done by setting machien parameters differently
+ Saurabh7__	for random forest depending on the tree
+@wiking	yep
+-!- sanuj [~sanuj@117.203.20.199] has quit [Ping timeout: 260 seconds]
+-!- sanuj [~sanuj@117.203.20.199] has joined #shogun
+ sanuj	BZDMG, yo
+ sanuj	lo
+-!- HeikoS [~heiko@LFbn-1-4373-242.w92-170.abo.wanadoo.fr] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun-data: Sanuj :master * 11a34f8 / testsuite/meta/regression/ (2 files): https://github.com/shogun-toolbox/shogun-data/commit/11a34f8a699d1072bcce5d3c1b02742532406d7a
+ shogun-notifier-	shogun-data: rename mkl regression cookbook data
+ shogun-notifier-	shogun-data: Heiko Strathmann :master * 7087f26 / testsuite/meta/regression/ (2 files): https://github.com/shogun-toolbox/shogun-data/commit/7087f260ccaa013aabcbf61caf90bbf98245d632
+ shogun-notifier-	shogun-data: Merge pull request #109 from sanuj/mkl_regression
+ shogun-notifier-	shogun-data:
+ shogun-notifier-	shogun-data: rename mkl regression cookbook data
+ sanuj	HeikoS, hallo
+ shogun-notifier-	shogun-data: Sanuj :master * 60692de / testsuite/meta/neural_nets/feedforward_net_classification.dat: https://github.com/shogun-toolbox/shogun-data/commit/60692debc34dcc89b355059ed63bb88fe817b8e3
+ shogun-notifier-	shogun-data: add data for nn cookbook
+ shogun-notifier-	shogun-data: Heiko Strathmann :master * 494032f / testsuite/meta/neural_nets/feedforward_net_classification.dat: https://github.com/shogun-toolbox/shogun-data/commit/494032fefe41774692a3a40968567f3f4ef5ecd1
+ shogun-notifier-	shogun-data: Merge pull request #110 from sanuj/nn_cookbook
+ shogun-notifier-	shogun-data:
+ shogun-notifier-	shogun-data: add data for nn cookbook
+ shogun-notifier-	shogun-data: OXPHOS :master * c6f46ec / testsuite/meta/gaussian_processes/gaussian_process_classifier.dat: https://github.com/shogun-toolbox/shogun-data/commit/c6f46ec7eee5de0ecc7e1b101be31fd7fa39af25
+ shogun-notifier-	shogun-data: gp classifier cookbook integration test dataset
+ shogun-notifier-	shogun-data: Heiko Strathmann :master * 5bcd88d / testsuite/meta/gaussian_processes/gaussian_process_classifier.dat: https://github.com/shogun-toolbox/shogun-data/commit/5bcd88dc98fba0f01ff5a5fed9a5ff8b4bd56868
+ shogun-notifier-	shogun-data: Merge pull request #108 from OXPHOS/master
+ shogun-notifier-	shogun-data:
+ shogun-notifier-	shogun-data: gp classifier integration test dataset
+ shogun-notifier-	shogun: OXPHOS :develop * 7dccabb / src/shogun/multiclass/ShareBoost.cpp: https://github.com/shogun-toolbox/shogun/commit/7dccabb74eb1f2969b9099b2ad870513352ab805
+ shogun-notifier-	shogun: update error msg  in shareboost
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 3dbeb8a / src/shogun/multiclass/ShareBoost.cpp: https://github.com/shogun-toolbox/shogun/commit/3dbeb8ac48771518709577b5b030a6616dd2e64c
+ shogun-notifier-	shogun: Merge pull request #3298 from OXPHOS/shareboost
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: update shareboost error msg / update shareboost nonzero feat num boundary
+ shogun-buildbot	build #741 of trusty - libshogun - viennacl is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/741  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, OXPHOS <engelzora@gmail.com>
+ shogun-notifier-	shogun: OXPHOS :develop * a1fb210 / / (42 files): https://github.com/shogun-toolbox/shogun/commit/a1fb210118f49774ff5edd65184a528fdce05679
+ shogun-notifier-	shogun: separate classifiers in meta examples
+ shogun-notifier-	shogun: Heiko Strathmann :develop * d6353fe / / (42 files): https://github.com/shogun-toolbox/shogun/commit/d6353fe005027458da8cd510b46a751428026c85
+ shogun-notifier-	shogun: Merge pull request #3297 from OXPHOS/cookbook_index
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: separate classifiers in cookbook
+ shogun-buildbot	build #742 of trusty - libshogun - viennacl is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/742  blamelist: OXPHOS <engelzora@gmail.com>
+ shogun-buildbot	build #743 of trusty - libshogun - viennacl is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/743  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	Saurabh7__:
+@HeikoS	sanuj:
+ sanuj	HeikoS, hallo
+ sanuj	i was not able to solve the any.h destructor bug
+@HeikoS	sanuj: did you debug it?
+ sanuj	yes, i did that
+@HeikoS	so our question was: why is it called, from where
+ sanuj	need to share a link
+@HeikoS	kk
+ sanuj	HeikoS, when this happens https://github.com/shogun-toolbox/shogun/pull/3221/files#diff-9c3599c0d2090e493be261b079e9b63eR39
+ sanuj	this is called https://github.com/shogun-toolbox/shogun/pull/3221/files#diff-8ea96286d95b52029d31636117e0fe55R140
+ sanuj	and i think the destructor was called from here
+@HeikoS	this is because the old one is overwritten?
+ sanuj	not sure, but how is it overwritten?
+@HeikoS	sanuj: map[tag]
+@HeikoS	might contain another any
+@HeikoS	sanuj: so we have to solve this
+ sanuj	map[tag] should be empty right
+@HeikoS	sanuj: yeah it should
+ sanuj	it is the first time something is set
+@HeikoS	why would the destructor then be called?
+@HeikoS	is the assignment operator maybe doing it?
+ sanuj	HeikoS, shall i share the logs of ddd with you?
+@HeikoS	causing it
+@HeikoS	sanuj: we have two options
+@HeikoS	you figure it out, or I have a look
+@HeikoS	I prefer you doing it :D
+@HeikoS	but for that, you need to dig a bit
+ sanuj	HeikoS, setting was working fine before i made these changes....destructor was not being called before
+@HeikoS	sanuj: these changes as in?
+ sanuj	let me call ddd again, i did this yesterday so forgotten some stuff
+@HeikoS	what are "these changes"
+ sanuj	HeikoS, new protected set and calling set in init_params() with member variables
+-!- oxphos [c68f0c0c@gateway/web/freenode/ip.198.143.12.12] has joined #shogun
+@HeikoS	sanuj: I see
+@HeikoS	sanuj: ok then, I suggest:
+@HeikoS	sanuj:  you (partly) revert them for bug hunting
+@HeikoS	make it like this
+@HeikoS	sanuj: or actually, one more question
+ oxphos	@HeikoS hey I'm on my cellphone
+@HeikoS	so registering *member* variables inside a class worked before you made "these changes"?
+@HeikoS	oxphos: I see, hi! :)
+@HeikoS	oxphos: no worries then, just wanted to discuss a bit
+@HeikoS	oxphos: but no point on cellphone
+ sanuj	HeikoS, i was never registering member variables before
+@HeikoS	sanuj: why did you say that it worked then?
+ sanuj	and there is one more thing that worries me
+ sanuj	HeikoS, it was able to set random parameters
+ sanuj	before
+@HeikoS	sanuj: we need to be a bit more systematic if we want to solve this
+ sanuj	okay
+@HeikoS	sanuj: so let's do this then: make a backup of the changes you did
+@HeikoS	then revert them
+@HeikoS	then try to register a member variable
+@HeikoS	I am pretty sure you will get the same error
+@HeikoS	but we need to check
+ sanuj	okay, i also think so
+@HeikoS	and then finding it, we are not distracted by your latest changes
+ sanuj	let me do it
+@HeikoS	sanuj: we need to reduce the search space of potential error here
+ sanuj	okay
+@HeikoS	too many things at once and it is not clear what causes what
+@HeikoS	this statemeht "it worked before these changes", is neither checked nor true at this moment
+@HeikoS	so careful when thinking about things
+@HeikoS	need to really be sure whats going on
+ sanuj	HeikoS, sure sure
+@HeikoS	if one convolutes things in ones mind, then finding errors becomes very hard
+ sanuj	okay
+@HeikoS	right now we are not sure whether it is your update or a general problem that causes this member registering error
+@HeikoS	or maybe even the framework is not designed for registering member variables?
+ oxphos	HeikoS okay will revise the schedule in 6h and will be back to laptop client tmr
+@HeikoS	not clerar
+@HeikoS	oxphos: cool! perfect
+@HeikoS	sanuj: cool then, Ill see you later, lets keep going on this, try to think about what good next steps could be, dont stop if there is a problem
+@HeikoS	finally, if nothing else works, you can push everything to a local feature branch in your own shogun fork
+@HeikoS	sanuj: and then I can clone that and debug locally
+@HeikoS	good?
+-!- oxphos [c68f0c0c@gateway/web/freenode/ip.198.143.12.12] has quit [Quit: Page closed]
+ sanuj	HeikoS, yes
+ sanuj	HeikoS, danke :)
+@HeikoS	bitte :)
+-!- HeikoS [~heiko@LFbn-1-4373-242.w92-170.abo.wanadoo.fr] has quit [Remote host closed the connection]
+-!- sanuj [~sanuj@117.203.20.199] has quit [Quit: Leaving]
+ BZDMG	HeikoS_web: tldr what error?
+-!- sonne|osx [~sonne@x5ce58487.dyn.telefonica.de] has joined #shogun
+-!- sanuj [~sanuj@117.220.49.216] has joined #shogun
+ BZDMG	sanuj:
+ BZDMG	what's the bug you're talking about
+ sanuj	BZDMG!!!
+ sanuj	BZDMG, https://gist.github.com/sanuj/695d881295c060d5fbb99abd3552fcbb
+ sanuj	see error_2.txt
+ sanuj	BZDMG, it happens when _set is called in init_params() of MockObject
+ BZDMG	ok where is the actual one
+ BZDMG	MockObject?
+ sanuj	apparently Any destructor is called and deletes the member variable
+ sanuj	sending link
+ sanuj	BZDMG, https://github.com/shogun-toolbox/shogun/pull/3221/files#diff-4a319646835bd87fa05b41d8b1872184R22
+ BZDMG	you didn't call CSGObject ctor
+ BZDMG	in the MockObject ctor
+ BZDMG	I think the map is not really initialized
+ sanuj	so in this commit i have added a protected _set() in SGObject
+ sanuj	i undid this commit on my local
+ sanuj	and did the same thing with the old public set() in SGObject
+ sanuj	that seems to be working without SGObject ctor
+ BZDMG	https://github.com/shogun-toolbox/shogun/pull/3221/files#diff-4a319646835bd87fa05b41d8b1872184R9
+ BZDMG	you should call it anyway
+ sanuj	okay
+ BZDMG	I am not sure I understand what you did
+ BZDMG	what commit? :)
+ sanuj	BZDMG, this commit https://github.com/shogun-toolbox/shogun/pull/3221/commits/380f576e3615aea29b56f0afb721efe5485510ae?diff=unified
+ BZDMG	ehrr that's too many changes
+ BZDMG	did ctor help?
+ sanuj	wait let me switch branches and build it
+ sanuj	BZDMG, it's building, will take time
+ BZDMG	okie
+ sanuj	BZDMG, how's work?
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ BZDMG	sanuj: bit busy as you can see haha
+ sanuj	:D
+ BZDMG	starting some project soon
+ sanuj	okay
+ BZDMG	will be better soon
+ sanuj	BZDMG, do you read deepmind's papers?
+ BZDMG	nope
+ BZDMG	why?
+ sanuj	just asking
+ BZDMG	they are doing some atari reinforcement learning :)
+ sanuj	you are interested in deep learning
+ sanuj	yeah
+ sanuj	but some recent work is different
+-!- sonne|osx [~sonne@x5ce58487.dyn.telefonica.de] has quit [Quit: sonne|osx]
+ sanuj	things like
+ sanuj	neural turing machine (2014)
+ sanuj	neural programmer-interpreters
+ sanuj	and memory augmented nn
+ sanuj	are cool
+ sanuj	BZDMG, shogun doesn't have RNNs and LSTMs
+ BZDMG	yeap
+ BZDMG	actually I am not a fan of that synthetic stuff like neural turing machine
+ sanuj	BZDMG, were you ever talking about using tensorflow in shogun?
+ sanuj	haha
+ BZDMG	yeah I thought of that
+ BZDMG	but heiko said optimizer is in python
+ BZDMG	so we can't really do anything useful just from C++
+ sanuj	oh
+ sanuj	BZDMG, still segfaults
+ BZDMG	sanuj: is it the same error?
+ sanuj	BZDMG, yes
+ BZDMG	sanuj: I am pretty sure something is not initialized
+ BZDMG	you should probably check it with gdb
+ sanuj	i did that
+ sanuj	gives you lots of stuff
+ sanuj	i used ddd
+ BZDMG	sanuj: well may be you can print `self` in init_params
+ BZDMG	are you sure you've added base class ctor call and recompiled it?
+ sanuj	BZDMG, i did this
+ sanuj	CMockObject() : CSGObject()
+ sanuj	    {
+ sanuj	        init_params();
+ sanuj	    }
+ BZDMG	looks valid
+ BZDMG	it should not work w/o
+ BZDMG	or work by chance
+ BZDMG	which is not any better
+ sanuj	BZDMG, did you see protected _set that i added in SGObject?
+ BZDMG	yeah but I am a bit lost in _set set and _set
+ sanuj	i think protected _set() might be calling itself instead of private _set()
+ BZDMG	oh my god
+ BZDMG	are they of the same name ?
+ BZDMG	private and protected?
+ sanuj	yes :/
+ BZDMG	please dont do this :D
+ BZDMG	better call it kawabanga
+ sanuj	:D
+ sanuj	i'll call this add
+ BZDMG	call it set_init
+ BZDMG	add
+ BZDMG	whatever
+ sanuj	okay
+ sanuj	i thought it would differentiate with arguments
+ sanuj	let me see if this is causing the error
+ BZDMG	even if it does it is way too dangerous
+ sanuj	okay
+ sanuj	building will take time again
+ sanuj	BZDMG, btw is "add" fine or shall i call it something else?
+ BZDMG	add is fine to me
+ sanuj	BZDMG, if this is going to be the problem then i might bang my head on the wall :P
+ BZDMG	lol
+ sanuj	BZDMG, does it happen to you that you made some really silly mistake and spent lots of time debugging it ? :D
+ BZDMG	yeah
+-!- sonne|osx [~sonne@x5ce58487.dyn.telefonica.de] has joined #shogun
+ sanuj	BZDMG, there?
+-!- sanuj [~sanuj@117.220.49.216] has quit [Ping timeout: 260 seconds]
+-!- sanuj [~sanuj@117.220.49.216] has joined #shogun
+ sanuj	BZDMG, there?
+-!- sanuj [~sanuj@117.220.49.216] has quit [Ping timeout: 240 seconds]
+-!- sanuj [~sanuj@117.220.49.216] has joined #shogun
+-!- sonne|osx [~sonne@x5ce58487.dyn.telefonica.de] has quit [Quit: sonne|osx]
+-!- sanuj [~sanuj@117.220.49.216] has quit [Remote host closed the connection]
+--- Log closed Mon Jun 27 00:00:57 2016

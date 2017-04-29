@@ -1,0 +1,330 @@
+--- Log opened Sat May 10 00:00:42 2014
+-!- chakri [srichakrad@gateway/shell/bnc4free/x-dhavdmppdgxnhffn] has joined #shogun
+-!- pickle27f [~pickle27@216.191.231.218] has joined #shogun
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Ping timeout: 240 seconds]
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has joined #shogun
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has quit [Quit: PirosB3]
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has joined #shogun
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has quit [Client Quit]
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- utsavjain [~utsav@113.193.139.138] has joined #shogun
+-!- kislay [~Abhijeet@103.240.205.12] has joined #shogun
+-!- thoralf [~thoralf@91-65-137-23-dynip.superkabel.de] has joined #shogun
+ thoralf	Hey.
+-!- thoralf [~thoralf@91-65-137-23-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has joined #shogun
+-!- utsavjain [~utsav@113.193.139.138] has quit [Quit: Leaving.]
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	hey parijat
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has joined #shogun
+ parijat	hello iglesiasg
+@iglesiasg	parijat, all good?
+@iglesiasg	parijat, I am not sure how much time I'll spend around here, but at least enough to start the discussion about tree printing. So shoot!
+-!- parijat_ [671b082a@gateway/web/freenode/ip.103.27.8.42] has joined #shogun
+@iglesiasg	parijat_, connection prolems?
+ parijat_	iglesiasg: yup I think so, the page stops get updating..
+ parijat_	iglesiasg: about tree printing, I was saying that
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has quit [Ping timeout: 240 seconds]
+ parijat_	iglesiasg: I need the tree structure while printing the tree
+ parijat_	iglesiasg: if I make a separate class in shogun/io it would be difficult accessing the tree.. isn't it?
+ parijat_	iglesiasg: also I may traverse the tree in say save method in ID3Tree class, I cant think of ways to transfer the data between ID3Class and the graphviz class in shogun IO
+@iglesiasg	parijat_, did you see the last comment I wrote in github about the DOT file format?
+-!- kislay [~Abhijeet@103.240.205.12] has quit [Quit: Leaving]
+ parijat_	iglesiasg: ya I glanced over it once.. but my problem is DOT file writer is static method in another class , save method is in another class.. how to share data between two?
+ parijat_	iglesiasg: maybe I can pass using string arguments?
+@iglesiasg	parijat_, hold on a second, I don't see your point
+@iglesiasg	parijat_, there's no DOT file class yet as far as I can see, so what do you mean with "writer is a static method in another class"?
+@iglesiasg	parijat_, and the idea is that the File classes in io support both read (load) and write (save) operations
+ parijat_	iglesiasg: no I was saying that when I create once DOT file class, the writer method will be a method in that class right? I would need to pass on string parameters from save method in ID#Tree class to that write method in DOT File class
+@iglesiasg	parijat_, not exactly like that
+@iglesiasg	parijat_, the DOT File class would have a set of attributes that describe what is necessary to create the .dot
+@iglesiasg	parijat_, in ID3 there would be something like CID3::save(DOTFile*) which would basically set all these attributes
+@iglesiasg	parijat_, but no io takes place in that method
+ parijat_	iglesiasg: in this case, the kind of attributes needed describe a tree like nodes/linkages would not be available to the DOT File class unless we inherit it from CTreeMachine.
+@iglesiasg	parijat_, why not?
+@iglesiasg	parijat_, see io/UAIFIle.h
+@iglesiasg	parijat_, the attributes that it has
+ parijat_	iglesiasg: alright let me see.
+@iglesiasg	parijat_, it's got basically everything that is necessary to represent a factor graph (think about it as a graph if you are not familiarised with factor graphs)
+@iglesiasg	parijat_, and it does it without inheriting from CFactorGraph
+ parijat_	iglesiasg: ok.. let me have a look at how its done.
+@iglesiasg	parijat_, so the idea is basically that the io is done in only place
+@iglesiasg	parijat_, which is a file class (DOTFile or another name if you prefer)
+@iglesiasg	parijat_, the ID3, C4.5, etc, have methods that fill in the attributes of the file class
+@iglesiasg	afk, brb
+ parijat_	iglesiasg: ya I think I am getting the point here
+@iglesiasg	parijat_, great :)
+ parijat_	iglesiasg: actually I went through the CFactorGraph class.. it describes the graph using primitive Shogun data structures
+-!- kislay [~Abhijeet@103.240.206.110] has joined #shogun
+@iglesiasg	parijat_, ok. what do you want to say with that? :)
+ parijat_	iglesiasg: but in the tree case we are using self-defined data structures. Thats the difference.
+ parijat_	iglesiasg: so in UAIFile.. its easy to recreate the graph from CFactorGraph class
+@iglesiasg	parijat_, ok, that's a point
+ parijat_	iglesiasg: but in DOTFile its not that trivial
+ parijat_	iglesiasg: ya!
+@iglesiasg	parijat_, but if UAIFile can contain info to save a graph, it must be possible to do something similar to save trees
+@iglesiasg	parijat_, although in general we would want to support graphs as well because I think that the DOT file format supports both
+@iglesiasg	parijat_, so I think we should think it more in this direction
+@iglesiasg	parijat_, see what are the contents of a dot file and design data structures for that
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has quit [Remote host closed the connection]
+ parijat_	iglesiasg: let me try! I will have to find a way to recreate a graph or tree in DOTFile class
+ parijat_	iglesiasg: ie not using the data structures we have created for tree representation
+@iglesiasg	parijat_, at first sight, I'd say that a matrix of some general data type should do
+ parijat_	iglesiasg: ya but atleast in decision tree case, whats inside a node is also important apart from structure.. matrices only capture structures
+-!- kislay [~Abhijeet@103.240.206.110] has quit [Ping timeout: 250 seconds]
+ parijat_	iglesiasg: afk, brb
+@iglesiasg	parijat_, that's what I tried to say with some general data type
+@iglesiasg	parijat_, so apart from giving the adjacency information, there's room to store the node info
+ parijat_	iglesiasg: ok! Its clearer to me now. This conversion from one way to tree representation (using CTreeMachine) to other (using adjacency information) will be done in save method in ID3Tree class right?
+ parijat_	iglesiasg: its possible to do something like this.. let me try
+@iglesiasg	parijat_, yes
+@iglesiasg	parijat_, that is what makes sense to me
+ parijat_	iglesiasg: ok cool then!
+ parijat_	iglesiasg: I am also working on implementing C4.5 algo now
+@iglesiasg	parijat_, yeah, I read your mail :)
+@iglesiasg	parijat_, that's great
+@iglesiasg	parijat_, do you want to continue with that one and then once it is finished we work back the io part?
+ parijat_	iglesiasg: once that is done, we will no longer need the ID3 algo class as C4.5 encompasses all cases of ID3
+@iglesiasg	parijat_, oh, good
+ parijat_	iglesiasg: yes I think I will finish off C4.5 first and then get back to io
+@iglesiasg	all right
+@iglesiasg	feel free to close the PR if so
+ parijat_	iglesiasg: ya sure :-)
+@iglesiasg	parijat_, it was good you made it in any case, it is not work that will be lost
+-!- kislay [~Abhijeet@103.240.205.98] has joined #shogun
+ parijat_	iglesiasg: ya its actually helping me a lot in C4.5.
+@iglesiasg	great
+ parijat_	iglesiasg: I could re-use some parts of it.
+ parijat_	:-)
+@iglesiasg	parijat_, I will be leaving in a few minutes
+@iglesiasg	parijat_, what is your current time or timezone btw?
+ parijat_	iglesiasg: its 7:15 PM here.. UTC+5:30
+@iglesiasg	all right!
+@iglesiasg	so +3:30 wrt me
+ parijat_	iglesiasg: whats yours btw?
+-!- kislay [~Abhijeet@103.240.205.98] has quit [Ping timeout: 250 seconds]
+@iglesiasg	UTC+2
+@iglesiasg	CEST
+ parijat_	iglesiasg: ok cool
+ parijat_	iglesiasg: thats not much time difference, we can definitely find some common time to communicate in irc
+ parijat_	iglesiasg: also I am setting up my blog probably in octopress.
+@iglesiasg	parijat_, awesome
+@iglesiasg	parijat_, all right then, I hear from you and C4.5 then!
+@iglesiasg	parijat_, and enjoy the weekend ;)
+ parijat_	parijat_: yup! very soon hopefully!..
+ parijat_	iglesiasg: it was meant for you not ME
+@iglesiasg	haha yeah
+@iglesiasg	I have done that thousands of times
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- parijat_ [671b082a@gateway/web/freenode/ip.103.27.8.42] has quit [Quit: Page closed]
+-!- kislay [~Abhijeet@103.240.205.76] has joined #shogun
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Ping timeout: 240 seconds]
+-!- lisitsyn [~qdrgsm@5-28-31-38.clients.tlt.100megabit.ru] has joined #shogun
+-!- lisitsyn1 [~qdrgsm@5-28-31-38.clients.tlt.100megabit.ru] has quit [Ping timeout: 240 seconds]
+-!- lisitsyn [~qdrgsm@5-28-31-38.clients.tlt.100megabit.ru] has quit [Read error: Connection reset by peer]
+-!- sunil1337 [~AndChat56@183.83.134.244] has joined #shogun
+-!- sunil1337 [~AndChat56@183.83.134.244] has quit [Read error: Connection reset by peer]
+-!- sunil1337 [~AndChat56@183.83.134.244] has joined #shogun
+-!- sunil1337 [~AndChat56@183.83.134.244] has quit [Read error: No route to host]
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- lisitsyn [~qdrgsm@5-28-31-38.clients.tlt.100megabit.ru] has joined #shogun
+-!- kislay [~Abhijeet@103.240.205.76] has quit [Ping timeout: 250 seconds]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has quit [Quit: PirosB3]
+-!- kislay [~Abhijeet@103.240.205.33] has joined #shogun
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+ lambday	lisitsyn: hi!
+ lisitsyn	lambday: hey
+ lambday	lisitsyn: hey
+ lisitsyn	what's up?
+ lambday	lisitsyn: so I pushed few things to my fork!
+ lisitsyn	cool
+ lambday	lisitsyn: now I want to send a PR against feature/linalg in upstream
+ lambday	lisitsyn: how to do that?
+ lambday	choose different base?
+ lambday	lisitsyn: https://github.com/lambday/shogun/compare/feature;linalg
+ lisitsyn	lambday: you mean you want a PR against some not-develop branch
+ lisitsyn	?
+ lambday	lisitsyn: exactly
+ lisitsyn	well you can select these things
+ lambday	lisitsyn: so it won't matter that that branch doesn't exist there?
+ lambday	lisitsyn: it will create it?
+ lisitsyn	ah I guess you'd need it
+ lisitsyn	not sure about it
+ lisitsyn	lambday: just create it if it is not here
+-!- kislay [~Abhijeet@103.240.205.33] has quit [Quit: Leaving]
+-!- kislay [~Abhijeet@103.240.205.33] has joined #shogun
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has joined #shogun
+ lambday	lisitsyn: got it man! thanks :)
+@wiking	lambday: cmake mod is not good
+@wiking	i have now like 15 mins
+@wiking	why the hell do we need to set linalg backend compile time?
+ lambday	wiking: well firstly its just the global one - secondly its a lot faster
+ lambday	wiking: I mean we can always use any backend I want in my code
+@wiking	no u cant
+ lambday	if I just wanna leave it to default, then its easier way
+@wiking	and if so
+@wiking	why do you want it to set with a configure flag?
+ lambday	wiking: that's for inside shogun methods
+ lambday	wiking: I don't understand why its bad
+ lambday	wiking: you mentioned about shogun-linalg-eigen3 and shogun-linalg-viennacl
+ lambday	but how about we just leave things as they were? no explicit cmake option == eigen3 backend
+ lambday	and that's what we use in packages
+@wiking	ok i'm just commenting the hell out of your pr
+@wiking	ok more or less done
+ lambday	wiking: thanks for the comments :)
+@wiking	no
+@wiking	21:47 < lambday> but how about we just leave things as they were? no explicit cmake option == eigen3 backend
+ lambday	wiking: I'll take care of these
+@wiking	21:47 < lambday> and that's what we use in packages
+@wiking	this is actually a bad idea
+@wiking	lambday: how will u take care of  src/shogun/mathematics/linalg/linalg.h
+@wiking	?
+@wiking	that should be discussed as it's really really not a good design atm
+@wiking	and again
+@wiking	why can't we have a linalg backend simply set during runtime
+@wiking	even if it's in the init_shogun() case
+@wiking	i dont care
+@wiking	but deciding this during compile time is really not a good decision
+@wiking	especially if once ever we are going to be able to modularize shogun
+ lambday	wiking: well the idea behind keeping default backend is that - we cannot provide all default implementation for all linalg tasks - that's why having one as default sounded good to me
+ lambday	wiking: and regarding compile time and runtime - I noticed 10x speedup using compile time option
+-!- travis-ci [~travis-ci@ec2-54-198-29-194.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/24878994
+-!- travis-ci [~travis-ci@ec2-54-198-29-194.compute-1.amazonaws.com] has left #shogun []
+ lambday	wiking: I didn't get what you meant by taking care of linalg.h
+ lambday	could you please explain a bit?
+-!- abinash_panda [0126136e@gateway/web/freenode/ip.1.38.19.110] has joined #shogun
+@wiking	lambday: i've just managed to check your benchmarking code
+ lambday	wiking: alright
+@wiking	lambday: if u use 'switch (linalg_backend)' to decide what backend to use
+@wiking	that's obvious that you are going to have a big difference
+@wiking	u r adding to each call at least one extra branch
+ lambday	wiking: that will cause so much difference?
+ lambday	1 mil vector dot product
+ lambday	the difference is like 10x on my machine
+@wiking	get_dot_computer
+@wiking	with a reinterpret_cast
+ lambday	wiking: yeah its bad! but I didn't understand that time how else we can manage this
+ lambday	wiking: and its leading to super slow and *massive* code which seems totally unnecessary
+ lambday	wiking: I started trying out with the other option just because of that! else we had almost decided to go by this design
+ lambday	just imagine this has to be done for *all* the operations that we're gonna have! that's gonna be huge!
+@wiking	but because of this
+@wiking	i'm saying that it wasn't a good design
+ lambday	the factory one?
+@wiking	yes
+@wiking	this should have been done very differently
+ lambday	yeah that I felt too
+@wiking	the problem is that this way there's no fucking way in the future
+@wiking	to be able to have shogun that can support different linalg plugins
+ lambday	using config options you mean?
+@wiking	and what happens when u want to use 2 different linalg backends in one code?
+@wiking	say i know that some linalg i'm doing will be much better to be used with GPU based backend
+ lambday	wiking: I can always use any backend I want by explicitly mentioning it
+ lambday	wiking: I can choose not to use what backend was set globally
+@wiking	but then for other data it'll make like totally misreable because the data is so small
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Quit: Leaving]
+@wiking	that the memmove operation between cpu-gpu is just too big compared to the linalg op
+@wiking	lambday: how if u do this compile time?
+ lambday	wiking: that's why I kept it this way so that one can directly pass ViennaCL vectors or Eigen3 vectors
+ lambday	without hvaing to convert from SGVector each time
+@wiking	i wasn't talking about htis now
+@wiking	*this
+@wiking	i'm saying that i have a matrix and a vector in my code
+ lambday	wiking: well, using directly methods from implementation which takes backend as a template arg
+@wiking	i want u use viennacl for the matrix and i want to use eigen for the vectors
+ lambday	wiking: can be done
+@wiking	but then if so
+@wiking	then why the hell do we want to do anything compile time?
+ lambday	well, what i thought is that when we can do pretty much anything we want in runtime and in compile time, then I should use compile time because of speed
+ lambday	no overhead of virtual calls
+ lambday	templated methods which decides things when they are used
+@wiking	22:21 < lambday> wiking: can be done
+ lambday	in compile time
+@wiking	i'm repeating myself
+@wiking	you are saying that 22:21 < lambday> wiking: can be done
+@wiking	meaning no matter what u set for cmake, u can switch to another backend, right?
+ lambday	wiking: yep, if I wish! cmake option is global option but in my code I can choose any backend I want if I *know* that using this particular backend is going to be profitable
+ lambday	if I just wanna rely on globally set backend by cmake, then I just use linalg::method() without caring about backend
+@wiking	lambday: but then why do you want to set this with a cmake option
+@wiking	i really dont get this
+@wiking	why do you need cmake at all if this can be changed later
+@wiking	after build
+ lambday	wiking: not changed later - decided during compile time
+ lambday	wiking: and global is set   because not everytime we wanna specify backend for each method so for ease of use inside shogun
+@wiking	ok so now you then misunderstood my question
+@wiking	i said
+@wiking	i have shogun compiled as it is
+@wiking	say eigen backend
+ lambday	yep!
+@wiking	but what if i want to use viennacl
+@wiking	i have to recompile?
+ lambday	wiking: inside shogun or in some code that uses shogun
+ lambday	??
+ lambday	say, in examples
+ lambday	in a shogun example you use viennacl vector
+ lambday	shogun doesn't need to be recompiled
+ lambday	linalg its header only
+ lambday	*but*
+@wiking	both
+ lambday	if inside shogun you change a method to use viennacl backend from default one you'll of course need to recompile
+ lambday	if inside shogun you change anything of course you need to recompile, right?
+ lambday	but as a shogun user you wanna play around with a different backend in those methods - you don't have to recompile shogun for that
+ lambday	just recompile your application
+-!- abinash_panda [0126136e@gateway/web/freenode/ip.1.38.19.110] has quit [Ping timeout: 240 seconds]
+ lambday	so is it that bad?
+ lambday	I mean even relying on set_backend() calls - say, if I change inside shogun from set_backend(Eigen3) to set_backend(viennacl) we'll have to recompile shogun
+@wiking	yes
+@wiking	it's bad
+@wiking	because it's already a bad design decision that if one doesn't have say eigen
+ lambday	wiking: what flexibility are we losing here?
+@wiking	you dont have some major feature of shogun
+ lambday	wiking: that can be modified
+@wiking	GP related things are generally like hat
+@wiking	*that
+@wiking	#ifdef HAVE_EIGEN3
+@wiking	...
+@wiking	and then u totally miss a whole class if u dont have eigen
+@wiking	it was the same with lapack
+ lambday	that's true even now
+@wiking	"22:33 <@wiking> because it's already a bad design decision that if one doesn't have say eigen"
+@wiking	*already*
+ lambday	yeah
+@wiking	implying -> it's already like this
+ lambday	but the pt is, we can change that
+ lambday	so having eigen3 as default is not something you like
+@wiking	no
+@wiking	it's really not about that
+@wiking	it's about having a shogun class being glued to a shogun class
+@wiking	it's about having a shogun class being glued to a library
+ lambday	wiking: okay so the other option is - we can remove these HAVE_DEFAULT thing
+ lambday	no default per se
+ lambday	and it should work even when eigen3 is not there but viennacl is there to the rescue
+ lambday	right?
+@wiking	mmm
+@wiking	i dont know but i have a feeling that we are talking in parallel
+ lambday	okay did I get you right on this - you don't want shogun to be glued to any particular library
+@wiking	indeed
+@wiking	we already have that
+@wiking	which is of course hard to change
+@wiking	but at least we should try to not to add more things like this
+ lambday	alright then if I get you right, these linalg methods should work if *any* of the available backends are there
+ lambday	and if *none* of them are found, we're missing linalg library
+ lambday	(because we cannot write a whole linalg library on our own)
+ lambday	wiking:
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-laocytcyesefzakl] has joined #shogun
+-!- ChanServ [ChanServ@services.] has quit [shutting down]
+-!- ChanServ [ChanServ@services.] has joined #shogun
+-!- ServerMode/#shogun [+o ChanServ] by sendak.freenode.net
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 252 seconds]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 252 seconds]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Quit: Leaving.]
+--- Log closed Sun May 11 00:00:43 2014

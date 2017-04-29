@@ -1,0 +1,453 @@
+--- Log opened Thu Dec 22 00:00:19 2011
+-!- blackburn [~blackburn@188.168.2.99] has quit [Quit: Leaving.]
+-!- Ram108 [~amma@14.96.61.57] has joined #shogun
+-!- Ram108 [~amma@14.96.61.57] has quit [Ping timeout: 244 seconds]
+-!- Ram108 [~amma@14.96.183.218] has joined #shogun
+-!- axitkhurana [~akshit@14.98.107.235] has joined #shogun
+-!- axitkhurana [~akshit@14.98.107.235] has quit [Quit: Leaving.]
+-!- Ram108 [~amma@14.96.183.218] has quit [Ping timeout: 255 seconds]
+-!- puneetgoyal [~puneetgoy@117.197.162.106] has joined #shogun
+ puneetgoyal	hey, what can I check in the attachment , if it can contribute to probability of the mail being a spam or a ham
+-!- heiko [~heiko@p4FED50C1.dip.t-dialin.net] has joined #shogun
+ heiko	sonney2k, around?
+ sonne-work	yes
+ sonne-work	heiko: ^
+ heiko	sonney2k, finally we meet :)
+ sonne-work	yes, took a while... seems like summer aka spare time is over :)
+ heiko	indeed :)
+ heiko	how is it going?
+ sonne-work	so how is it going? do you have some time now over the years?
+ sonne-work	I am basically busy all the time nowadays
+ sonne-work	but I try to do small changes whenever possible
+ heiko	well same here, the UCL master is like crazy workload wise
+ heiko	but I have holidays until mid january now
+ heiko	I visit family and friends
+ heiko	but have some time in between
+ heiko	so it should be possible to do something in these weeks now
+ sonne-work	would be nice
+ sonne-work	I don't know if you received my email from today but maybe you explain a bit more what you have in mind
+ heiko	yes i did
+ heiko	well basically the most annoying problem is to allocate an "empty" parameter
+ sonne-work	not sure what that means but go on
+ heiko	so
+ heiko	currently, if you want to load a parameter from a file
+ heiko	you call load on the instance of the object you want to load
+ heiko	but all the memory is already allocated
+ heiko	all variables are registered etc
+ heiko	but now imagine you dont have a class instance and want to load something from memory
+ heiko	imageine a class has an SGVector as a variable
+ heiko	these normally are member variables
+ heiko	so you have to allocate a SGVector
+ heiko	and then also the actual memory in that sgvector
+ heiko	know what I mean?
+ heiko	It is quite hard to load data from file when you dont got the class instance to load into, in summary
+ heiko	the methods new_cont/delete_cont
+ heiko	do not work in this case
+ sonne-work	why don't you add load/save methods to SGVector?
+ sonne-work	then you could just say vec.load etc
+ sonne-work	One more thing I don't understand - when does it happen that you don't have a class instance and want to load sth?
+ heiko	This happens when you want to migrate parameters
+ heiko	you got a class with a parameter, but the one in the file is different
+ heiko	so you cannot load directly
+ heiko	but to migrate, you have to load somehow
+ heiko	Currently, when you got a sgvector
+ heiko	you have to
+ sonne-work	so you can load only basic types right?
+ heiko	yes
+ sonne-work	like scalars, or double*, int / SGVector<double>
+ sonne-work	each of them need extra treatment though
+ heiko	data=SG_MALLOC(SGMatrix<char>, 1);
+ sonne-work	no code reuse
+ heiko	yes
+ sonne-work	what is that data= line?
+ heiko	to be able to load data from a file you need a TParameter whichs parameters point to already allocated data
+ heiko	in case of sgmatrix, that sgmatrix is a class variable
+ heiko	thats why you have to do this line before loading
+ heiko	if you dont, new_data/delete_data of TParameter fails
+ heiko	but this gets completely messy if more types come in
+ sonne-work	what other types?
+ heiko	sgvector
+ heiko	vector
+ heiko	scalar
+ heiko	everytime this happens, a case distinction is needed, for all types.
+ sonne-work	yes
+ sonne-work	but I don't see a way around this
+ sonne-work	do you?
+ heiko	it would be nice to have a method that creates a TParameter with all corresponding data allocated
+ sonne-work	I understand that SGObject based classes can be created via new_sgserializable
+ heiko	?
+ sonne-work	maybe you could do the same thing for SGVector / SGMatrix / SGSparseMatrix / SGStringList
+ sonne-work	    CSGObject* new_sgserializable(const char* sgserializable_name,
+ sonne-work	                                        EPrimitiveType generic);
+ sonne-work	shogun/base/class_list.h
+ sonne-work	scalars still need extra treatment though
+ heiko	mmh
+ sonne-work	any other ideas?
+ heiko	I thought of what would be if this SGVector stuff would be done differently:
+ heiko	I find it very confusing that when registering the variables
+ heiko	that the adress of SGVector/SGMatrix are registered
+ heiko	why not only register the array and the length
+ heiko	then the wrapper stuff would still be ok.
+ heiko	but the problems with allocating SGVector structs would not be there
+ heiko	then the new_cont / delete_cont methods would only be operating on arrays
+ heiko	which would simplify things enoumously
+ heiko	then allocating empty structures is also more easy
+ heiko	Perhaps I am wrong with this
+ sonne-work	so what you are saying is that you would in the add(SGVector) method of parameter register the ptrs?
+ heiko	yes, just register the array and the length of the SGVector
+ heiko	then it would be completely out of  sight for the TParameter class
+ sonne-work	yes that would work
+ heiko	also then these things would not be appearing anymore:
+ heiko	data_start=&(((SGVector<char>*)m_parameter)->vector);
+ sonne-work	which is highly illegal anyways
+ heiko	(in new_cont)
+ heiko	yes this is dirty to the max
+ heiko	it is there because of the problem to get the array of a sgvector you dont know the type of
+ sonne-work	so to summarize: one would have the very basic types like, double, int, ..., then vector like things double*, int / and matrix/string/sparse matrix and SGObject
+ sonne-work	and we map SGVector etc to vector etc
+ heiko	yes
+ sonne-work	so we have the more basic representation underneath
+ heiko	true
+ sonne-work	certainly one way to do it
+ heiko	When using SGVector underneath, a lot of stuff has to be changed in the new_cont methods
+ sonne-work	the other would be to remove all this double*, int serialization stuff and replace it with SGVector stuff
+ sonne-work	yes
+ heiko	because everything in the low level parameter stuff is based to work on only arrays
+ sonne-work	which would totally go away
+ heiko	yes
+ sonne-work	I mean you could work with references only
+ sonne-work	no longer any pointers but just the object itself
+ heiko	yes, possible
+ heiko	but this means to change it at all places at once
+ sonne-work	but
+ sonne-work	no reference is possible with void
+ sonne-work	hah
+ sonne-work	so it would need extra treatment...
+ sonne-work	I certainly find the other alternative easier
+ sonne-work	so I would rather go for that one for now
+ heiko	this changing the new_cont methods all over is my horror when continuing with the current approach
+ sonne-work	I understand that
+ sonne-work	if we have had SGVector etc from the beginning things would not look so bad :)
+ heiko	yes, but this is always the case when developing software :D
+ sonne-work	anyway, it also makes sense to still have the legacy double*, int serialization
+ heiko	but this is easily possible isnt it?
+ heiko	the register methods still take arrays as parameter
+ sonne-work	well that still works as usual - so yes
+ heiko	so the sgvector register methods are only wrappers for these
+ sonne-work	I only meant if one would totally throw that away and convert to the SGVector etc stuff
+ heiko	ok
+ sonne-work	the only problem with the double* etc approach is that you need to ensure all variables in sgvector are serialized
+ sonne-work	hah
+ sonne-work	maybe you add some other register_serialization_varaibles() in sgvector itself
+ sonne-work	which is then called when you call add(SGVector) in Parameter
+ heiko	oh yes, you mean this do_free stuff etc?
+ sonne-work	yeah
+ heiko	ok possible, but how to deserialise?
+ sonne-work	in the same way
+ sonne-work	you have your SGObject where a SGVector vec lives
+ heiko	also there might be problems with the names of the sub-variables in SGVector
+ sonne-work	it is registering its parameters
+ sonne-work	and you fill in the values
+ sonne-work	problems with the names?
+ sonne-work	I guess devil is in the details again
+ heiko	nevermind the names,  just thinking ...
+ heiko	oif problems
+ heiko	I want to think of the migration to avoid more problems when doing this
+ heiko	still, how to load from a file without a instance
+ heiko	when there are only arrays, its easy
+ heiko	the boolean would be a normal variable
+ sonne-work	but you have that problem no matter where you register the parameter right ?
+ sonne-work	yes
+ heiko	which problem?
+ sonne-work	loading w/o object instance
+ sonne-work	I mean ok, you can load the varialbes into memory
+ sonne-work	and then do all the migration
+ sonne-work	and then later on - how does it get into the final object / SGVector?
+ sonne-work	ahh no I see
+ sonne-work	no problem nevermind
+ heiko	after the migration is complete the migrated data is copied into the actual registered array of the SGVector
+ heiko	and also the length
+ sonne-work	yes exactly
+ heiko	then the migration does not even see these wrapper types for vectors and matrices
+ sonne-work	so I don't see a problem w/ migration for now
+ sonne-work	yes
+ sonne-work	so you could give this a try
+ heiko	One problem might occur. people who have stored SGVectors in files would not be able to load anymore
+ sonne-work	but you could map that back to the old vector way or?
+ heiko	oh, theoretically .. yes
+ sonne-work	case CT_VECTOR: case CT_SGVECTOR:
+ sonne-work	actually - would it even be any work?
+ heiko	dont really know, but I changed some stuff to save/load SGVectors, they are handled a bit differently, will have a look
+ sonne-work	it looks like you treat them the same way like vectors and then only determined data start etc
+ sonne-work	and fill things in
+ sonne-work	so it seems like no problem
+ sonne-work	anyways - I would give this a go
+ sonne-work	so if you have time - it would be great if you could first cleanup Parameter*
+ sonne-work	and then continue with the migration
+ heiko	yes, this is the way
+ sonne-work	I will try to get buildbots to work more reliably
+ sonne-work	but it is tough
+ sonne-work	(but we have one for cygwin and for linux now)
+ sonne-work	osx is coming
+ heiko	basically, migration works, the SGVector stuff was the thing that caused all these problems that I coulnt solve in the summer
+ heiko	ah cool
+ heiko	cygwin? :)
+ sonne-work	sounds great
+ sonne-work	windows 7
+ heiko	really cool
+ sonne-work	and cygwin running there
+ heiko	I can still hear my old professor complaining that my bachelor stuff does not run on windows
+ heiko	(what they were using)
+ sonne-work	when we have these build bots running more reliably we can even create binary release-snapshots
+ heiko	that would also be great, especially for cygwin
+ heiko	well, ok will be off now for some sport, see you later, Ill inform you about the progress
+ sonne-work	thanks for continuing to work on this
+ sonne-work	would be very cool to have this feature!
+ sonne-work	see you
+ heiko	sonne-work, I just looked at Parameter.h
+ heiko	what we talked about would mean to change all the add* methods from using pointers to SG* to using copy-by-value right?
+ heiko	So void add(SGVector<bool>* param, const char* name,const char* description="");
+ heiko	gets
+ heiko	add(SGVector<bool> param, const char* name,const char* description="");
+ heiko	for all SGVector/SGMatrix entries, right?
+ heiko	what about the SGSparseVector SGString stuff? Is this also afected?
+ heiko	ah no...the length needs to be a the real thing, not a copy, sorry
+ sonne-work	yes everything is affected
+ sonne-work	we have SGStringList
+ sonne-work	SGSparseMatrix
+ sonne-work	SGMatrix
+ sonne-work	SGVector
+ sonne-work	all by reference yes
+ sonne-work	all these classes will copy their local variables in the copy constructor
+ sonne-work	so SGVector x = SGVector(foo, foo_len)
+ sonne-work	will have x.vector == fo and x.vlen==foo_len
+ sonne-work	heiko: btw one more thing - I am trying to write some print function to improve user experience from python_modular
+ sonne-work	that needs the list of parameters - but you return SGVector<char*> for that
+ sonne-work	but it would be much better to use SGStringList<char> for this
+ heiko	ehm
+ sonne-work	I changed the code already
+ sonne-work	but haven't committed yet
+ sonne-work	heiko: ahh and btw you can write
+ heiko	where is the method again?
+ sonne-work	SGVector<int>(x, x_len);
+ sonne-work	err
+ sonne-work	SGVector<int> my_vector(x, x_len);
+ sonne-work	to declare my_vector
+ heiko	instead of?
+ sonne-work	SGVector<int> my_vector = SGVector<int>(x, x_len);
+ heiko	ah ok, thx
+ heiko	modshogun_wrap.cxx: In Funktion >>void shogun_CSGObject___setstate__(shogun::CSGObject*, PyObject*)<<:
+ heiko	modshogun_wrap.cxx:5722:13: Fehler: expected >>;<< before >>fstream<<
+ heiko	make[1]: *** [modshogun_wrap.cxx.o] Fehler 1
+ heiko	when compiling python_modular
+ sonne-work	trying to reproduce this
+ sonne-work	did you do a git clean -dfx before building? (will delete all files not in git)
+ heiko	rebuilding ...
+ heiko	yes happens
+ heiko	still
+-!- Ram108 [~amma@59.161.189.110] has joined #shogun
+ sonne-work	I just rebuild here
+ sonne-work	doesn't happen
+ sonne-work	did you do make install etc?
+ sonne-work	heiko: please show me the offending line
+ heiko	fstream = new CSerializableAsciiFile(fname, 'r');
+ heiko	comes after:
+ heiko	if (!pickle_ascii)
+ heiko	                sg_io->message(MSG_ERROR,"SGBase.i", 346, "File contains an HDF5 stream but " \
+ heiko	                        "Shogun was not compiled with HDF5" \
+ heiko	                        " support! -  cannot load.")
+ sonne-work	ahh so a problem w/ hdf5
+ sonne-work	let me check
+ sonne-work	but that is ok
+ sonne-work	you just don't have hdf5 installed
+ sonne-work	heiko: how does this relate to the error above?
+ heiko	I thought because of the missing ; before fstream
+ heiko	because: modshogun_wrap.cxx:5722:13: Fehler: expected >>;<< before >>fstream<<
+ sonne-work	heiko: I meant just open modshogun_wrap.cxx in an editor
+ sonne-work	and then show me the surrounding lines
+ heiko	thats what I did
+ heiko	fstream = new CSerializableAsciiFile(fname, 'r');
+ heiko	is the line
+ heiko	and the other stuff comes before
+ sonne-work	and before that?
+ sonne-work	hmm
+ sonne-work	ahh after the print
+ sonne-work	fixed
+ CIA-1	shogun: Soeren Sonnenburg master * r5a8c07d / src/interfaces/modular/SGBase.i : add missing ';' - http://git.io/Z7HAIw
+ sonne-work	" support! -  cannot load."); instead of " support! -  cannot load.")
+ heiko	kk :)
+ shogun-buildbot	build #381 of python_static is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/381  blamelist: sonne@debian.org
+-!- blackburn [~blackburn@188.168.4.33] has joined #shogun
+ heiko	compiles for me now
+ blackburn	hey what's up
+ heiko	hey blackburn, sorry I was ust about to go :)
+ blackburn	heiko: when?
+ heiko	now
+ heiko	sorry, i have an appointment
+ heiko	will talk to you later :) bye
+ blackburn	ah
+ blackburn	sure
+ blackburn	bye
+ Ram108	hi
+ blackburn	Ram108: hi
+ blackburn	Ram108: will you be available in next hour?
+ Ram108	blackburn: could u help me out with the rest of it now that my exams are over and i am free :)
+ Ram108	yeah i ll be :)
+ blackburn	Ram108: yeah sure but not now
+ Ram108	sure take ur time :)
+ blackburn	just came home and now off for some dinner :)
+ Ram108	definitely wen u r free :)
+ Ram108	take ur time :)
+ blackburn	ok, I'll write to you soon
+ Ram108	:)
+-!- heiko [~heiko@p4FED50C1.dip.t-dialin.net] has left #shogun []
+-!- ishaanmlhtr [~ishaan@115.240.93.129] has joined #shogun
+ blackburn	Ram108: re
+ blackburn	Ram108:how can I help you?
+-!- Ram108 [~amma@59.161.189.110] has quit [Ping timeout: 244 seconds]
+-!- Ram108 [~amma@14.96.20.215] has joined #shogun
+ blackburn	sonne-work: sonney2k: any of sonnes around? ;)
+ blackburn	Ram108: I'm available
+ Ram108	lol :)
+ Ram108	thank u :)
+ Ram108	hmmm can we get started?
+ blackburn	Ram108: yeah
+ Ram108	i have made the realfeatures()
+ Ram108	now i have to get make the test and train vectors
+ Ram108	right?
+ blackburn	Ram108: ehmm one real features for test and one for train
+ Ram108	okay.........meaning after i create the test and train arrays i ll have to call the realfeatures shogun method and pass them to it right?
+ blackburn	yes, it is just object representing data
+ Ram108	k am working on it now........ am using all the data for train and just about 5 of them for test.........
+ blackburn	sure
+ Ram108	:)
+ puneetgoyal	hey, is there any function to remove the html tags?
+ blackburn	puneetgoyal: ehm from?
+ Ram108	it says train or test features dimension mismatch
+ Ram108	what do i have to do?
+ blackburn	Ram108: I guess you have to transpose matrix before creating realfeatures
+ Ram108	oh i have used all the data u gave on that webpage for test and for train i have spooled out some of them (about 5) and used it
+ Ram108	now transpose both and feed it to the realfeatures() method right?
+ blackburn	yes
+ Ram108	k
+ blackburn	feature matrix should have dim rows
+ blackburn	and N cols
+ puneetgoyal	blackburn: sry, I thought my problem was in removing the html tags...but it was not.....I was removing the stop words from the payload of an email, Its working...but not correctly...I mean most of the stop words are removed but not all of them
+ blackburn	puneetgoyal: I see, just try to find some python lib for that
+ puneetgoyal	I have searched a lot of them....its working but dont know why some problem is coming...like one of the stopword is 'the' ...its removing many of its instances in the payload...but not all of them
+ Ram108	blackburn: same error again
+ blackburn	Ram108: check feature matrices sizes
+ blackburn	both should have 4 rows
+ Ram108	yeah both does
+ Ram108	i ll use the same matrix for both test and train
+ Ram108	i ll see if that works
+ Ram108	this is the error i am getting:
+ Ram108	File "/usr/local/lib/python2.6/dist-packages/modshogun.py", line 20351, in train
+ Ram108	    return _modshogun.Machine_train(self, data)
+ Ram108	SystemError: [ERROR] label[-1717986918]=5.87727e-270 is not an integer
+ blackburn	yeah something is wrong with labels you use
+-!- heiko [~heiko@p4FED50C1.dip.t-dialin.net] has joined #shogun
+ heiko	blackburn, around?
+ blackburn	heiko: yeah
+ heiko	hi
+ heiko	how is it going?
+ heiko	blackburn, I noticed that all the python_modular tests are failing, is that also true for you?
+ blackburn	heiko: ALL?
+ heiko	yes, memerror.
+ blackburn	heiko: going fine, now some exams and other hard things with studies
+ blackburn	and you?
+ blackburn	memerror?
+ blackburn	ehm
+ heiko	At first I thought these were my changes
+ blackburn	let me check
+ heiko	but I reverted and they still fail
+ heiko	I am on holidays :) relaxing at my parents and writing applications for PHD.
+ blackburn	heiko: cool :)
+ heiko	btw: I finally got a new computer with an SSD to have no more harddisk erors :)
+ blackburn	hah
+ blackburn	you would have some in 5-6 years I guess ;)
+ heiko	yes, but i am using this trim stuff :)
+ heiko	however, its fast
+ heiko	awesomely fast
+ heiko	btw shogun 1.1, also all python_modular tests fail (git branch)
+ blackburn	?!!
+ blackburn	damn that's bad
+ heiko	but different error
+ heiko	perhaps its my installation or something
+ blackburn	heiko: compiling now
+ heiko	which one?
+ blackburn	latest
+ blackburn	heiko: btw we are now using git issues
+ blackburn	https://github.com/shogun-toolbox/shogun/issues?sort=created&direction=desc&state=open
+ heiko	yes I saw it, pretty cool
+ blackburn	feel free to open new, comment, etc
+ heiko	ok :)
+ heiko	just had to implement gaussian processes for my studies int matlab :)
+ blackburn	heiko: that would be awesome to have C++ one here
+ heiko	if I only had more time ... :)
+ heiko	aaah
+ heiko	I did not checkout data :(
+ heiko	that might be the reason for the error
+ heiko	sorry
+ blackburn	yay
+ blackburn	Segmentation fault
+ heiko	ah ok
+ heiko	well, then its not my fault at least :)
+ heiko	dinner is ready here, see you later!
+ blackburn	heiko: ok, see you :)
+ blackburn	I'm fucking shocked
+ blackburn	sonney2k: I guess you broke python modular
+ blackburn	totally
+ blackburn	:D
+ Ram108	blackburn: can i email u my code?
+ blackburn	Ram108: feel free
+ Ram108	blackburn: i feel lost........ did u feel the same way wen u started learning this feild?
+ Ram108	field*
+ blackburn	Ram108: some kind of
+ Ram108	sheesh i really dont kno were to start............ am not able to compile a code........ let alone making 1........ lol
+-!- heiko [~heiko@p4FED50C1.dip.t-dialin.net] has quit [Read error: Operation timed out]
+ blackburn	Ram108: well I could write some snippet, but tomorrow
+ Ram108	sure..... thanks.....
+-!- ishaanmlhtr [~ishaan@115.240.93.129] has quit [Quit: Leaving]
+ Ram108	well were do i really get started to learn machine learning?
+ blackburn	Ram108: not sure I understood Q?
+ Ram108	never mind......... lol well probably if i could get ur snippet tomorrow i could compare it with mine and fix all the errors
+ Ram108	i guess its more or less the same for all the other classifiers right?
+ blackburn	Ram108: yes, it doesn't matter that classifier do you use
+ Ram108	hmmm okay thanks........ :)
+ blackburn	anyway in shogun you will have to use features,labels and etc
+ Ram108	okay
+ Ram108	okay meet u tomorrow then its getting late here......... lol :)
+ Ram108	gd night :)
+-!- Ram108 [~amma@14.96.20.215] has quit [Quit: Ex-Chat]
+-!- blackburn [~blackburn@188.168.4.33] has quit [Ping timeout: 252 seconds]
+-!- blackburn [~blackburn@188.168.3.26] has joined #shogun
+-!- blackburn [~blackburn@188.168.3.26] has quit [Ping timeout: 252 seconds]
+-!- blackburn [~blackburn@188.168.4.242] has joined #shogun
+ puneetgoyal	blackburn: you there?
+ blackburn	puneetgoyal: yeap
+ puneetgoyal	blackburn: you asked me to compare the array from a test mail with some other array
+ puneetgoyal	['this','is','spam'] is 1.0 to ['this','is','spam'], but 0.6667 to ['this','is','sparta']
+ puneetgoyal	but, how do I find the list with which I have to compare it to
+ puneetgoyal	oh sry, I was having wrong results because I took only a little training emails...now I am getting somewhat good results
+-!- blackburn [~blackburn@188.168.4.242] has quit [Ping timeout: 240 seconds]
+-!- blackburn [~blackburn@188.168.4.225] has joined #shogun
+ blackburn	puneetgoyal: sorry bad connection
+ puneetgoyal	blackburn: no problem, Now I am done building a dictionary counting the no. of words....using which I trained one dictionary of words...Now I am trying to compare a test dict with the trained one
+@sonney2k	blackburn, what happens w/ python modular?
+@sonney2k	what is broken?
+@sonney2k	ahh you mean the examples are failing
+@sonney2k	yes sure I now return some short representation upon str instead of the serialized stuff
+@sonney2k	so that is ok
+ blackburn	sonney2k: yes, I'm talking about python_modular examples
+ CIA-1	shogun: Soeren Sonnenburg master * r38cbdc3 / (src/shogun/base/SGObject.cpp src/shogun/base/SGObject.h): use SGStringList<char> instead of SGVector<char*> - http://git.io/pNw3WQ
+ shogun-buildbot	build #390 of r_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/390  blamelist: sonne@debian.org
+ shogun-buildbot	build #394 of octave_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/394  blamelist: sonne@debian.org
+-!- heiko [~heiko@p4FED50C1.dip.t-dialin.net] has joined #shogun
+ CIA-1	shogun: Soeren Sonnenburg master * rcc60a77 / (5 files in 3 dirs):
+ CIA-1	shogun: Merge pull request #343 from karlnapf/master
+ CIA-1	shogun: changed internal storage of SGVector - http://git.io/Le6GCw
+ CIA-1	shogun: Heiko Strathmann master * r2b685fe / examples/undocumented/libshogun/serialization_file_formats.cpp : fixed a typo - http://git.io/9Hoiyg
+ shogun-buildbot	build #395 of octave_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/395
+ shogun-buildbot	build #392 of r_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/392
+--- Log closed Fri Dec 23 00:00:19 2011

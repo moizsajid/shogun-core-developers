@@ -1,0 +1,366 @@
+--- Log opened Mon Jun 24 00:00:02 2013
+-!- lisitsyn [~lisitsyn@5-28-21-24.clients.tlt.100megabit.ru] has left #shogun []
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has quit [Quit: Leaving.]
+-!- nube [~rho@49.244.57.252] has quit [Ping timeout: 246 seconds]
+-!- nube [~rho@49.244.83.216] has joined #shogun
+-!- foulwall` [~user@106.118.54.102] has joined #shogun
+ shogun-buildbot	build #437 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/437
+-!- hushell1 [~hushell@67.23.197.94] has quit [Ping timeout: 264 seconds]
+-!- nube [~rho@49.244.83.216] has quit [Quit: Leaving.]
+-!- foulwall` [~user@106.118.54.102] has quit [Ping timeout: 268 seconds]
+-!- FSCV [~FSCV@189.139.156.14] has quit [Quit: Leaving]
+-!- hushell1 [~hushell@c-67-160-139-116.hsd1.or.comcast.net] has joined #shogun
+-!- hushell2 [~hushell@c-67-160-139-116.hsd1.or.comcast.net] has joined #shogun
+-!- hushell1 [~hushell@c-67-160-139-116.hsd1.or.comcast.net] has quit [Ping timeout: 246 seconds]
+-!- hushell2 is now known as hushell
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has joined #shogun
+ hushell	sonney2k: Hello? Can SG_UNREF(var) called if var is NULL?
+ sonne|work	hushell: yes. it will even NULL var afterwards
+ sonne|work	(makes only sense if it was not of course)
+ hushell	sonne|work: Thanks! I just checked the doc: if (x) { if ((x)->unref()==0) (x)=NULL;
+ hushell	I should do this before :)
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- nube [~rho@116.90.239.3] has quit [Ping timeout: 240 seconds]
+-!- nube [~rho@116.90.239.3] has joined #shogun
+-!- vgorbati [~vgorbati@212.2.159.34] has joined #shogun
+-!- vgorbati [~vgorbati@212.2.159.34] has quit [Quit: vgorbati]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- gsomix [~Miranda@46.20.65.164] has joined #shogun
+ gsomix	hello
+ gsomix	one more exam is passed
+ gsomix	so, there is only one now
+ gsomix	sonne|work: sonney2k hey, glad to see you. :)
+ sonne|work	hey
+ sonne|work	gsomix: when is you last one?
+ gsomix	sonne|work: 27 June, state exam
+ gsomix	and then full-time job at shogun
+ sonne|work	yay!
+ sonne|work	gsomix: so until then you have no time I guess?
+ gsomix	sonne|work: yep :(
+ sonne|work	gsomix: then good luck but don't forget you weekly report (today!) though!
+-!- hushell [~hushell@c-67-160-139-116.hsd1.or.comcast.net] has quit [Quit: WeeChat 0.3.7]
+ gsomix	sonne|work: of course
+@iglesiasg	C++ question
+@iglesiasg	when does it actually matter to use a const return value?
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has joined #shogun
+ van51	hello
+ sonne|work	hey van51!
+ sonne|work	how is it going?
+ van51	sonne|work: hey!
+ van51	sonne|work: it's going ok :)
+ sonne|work	ohh and I hope you can do the language text example too. for the image one we already have some matlab code that porting won't need much time
+ van51	sonne|work: I wanted to ask you
+ van51	sonne|work: you mean the language detection?
+ sonne|work	yeah
+ van51	ok
+ van51	sonne|work: are you going to remove the SGString ?
+ van51	sonne|work: and the StringFeatures?
+ sonne|work	that should be rather easy to do. just n-grams and fetch ascii based languages from wikipedia for a few thousand articles
+ sonne|work	yes SGVector it will be
+ sonne|work	StingFeatures will stay of course
+ van51	sonne|work: I was thinking of moving the tokenization to an earlier stage of the pipeline
+ van51	and instead of storing the documents in stringfeatures and having to tokenize them when they are needed
+ van51	I was thinking of storing a list of tokens
+ van51	or a list of SGVectors
+ van51	for each document
+ van51	sonne|work: what do you think?
+-!- nube [~rho@116.90.239.3] has quit [Quit: Leaving.]
+ van51	also I think that the current way will be easier to be extended to streamed features
+ van51	sorry if I'm being overwhelming :)
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ lisitsyn	sonne|work: hey there
+ lisitsyn	votjakovr: van51: gsomix: pickle27: weekly reports please ;)
+@iglesiasg	and me too!
+@iglesiasg	:)
+ lisitsyn	iglesiasg: oops sorry missed you
+@iglesiasg	hehe no problem
+ lisitsyn	iglesiasg: as for your question
+@iglesiasg	lisitsyn: btw enlighten me
+@iglesiasg	yeah I was going to ask you about it right now :)
+ lisitsyn	const return value is useless
+ lisitsyn	I don't see any case
+@iglesiasg	you sure?
+ lisitsyn	like
+ lisitsyn	const Object f();?
+ lisitsyn	makes no sense to me at all
+ lisitsyn	const Object& would be something more interesting
+@iglesiasg	and const Object* as well I guess
+ lisitsyn	though that's dangerous and should be avoided
+ lisitsyn	const Object* or const Object* const yes
+ lisitsyn	iglesiasg: if you return by value just use value type
+ lisitsyn	I don't know any case when you restrict new object to be const
+ lisitsyn	that's the user preference to make it const
+@iglesiasg	the concepts of return by value and return by reference I understand
+@iglesiasg	BTW I started wondering because of https://github.com/shogun-toolbox/shogun/pull/1185/files#L10R66
+@iglesiasg	the two get_features methods there
+ lisitsyn	iglesiasg: hmm they are const
+ lisitsyn	not the return value
+@iglesiasg	the first return value is const
+ lisitsyn	ahhh
+@iglesiasg	cons CFeatures*
+ lisitsyn	const CFeatures*
+ lisitsyn	that's constant pointer
+@iglesiasg	yeah
+ lisitsyn	like we can't change where it points to
+@iglesiasg	pointer to constant rather?
+ lisitsyn	iglesiasg: no that's CFeatures* const
+@iglesiasg	mmm let me test it out
+ lisitsyn	iglesiasg: const char* - you can't change the pointer but you can change the string
+ lisitsyn	const char* const
+ lisitsyn	you can't change anything
+ lisitsyn	char* const - you can't change contents but you are free to move the pointer around
+@iglesiasg	I think it is the other way round
+ van51	how detailed must this weekly report be?
+@iglesiasg	char* const you can change pointer but no contents
+@iglesiasg	van51: like the ones they have already sent are quite fine I think
+ van51	iglesiasg: I'm almost done, but now that I read it, I'm thinking that someone not familiar with the project will probably not follow :(
+@iglesiasg	lisitsyn: http://pastebin.com/XK4sud5D
+@iglesiasg	van51: aham I understand
+@iglesiasg	van51: it should be something short that summarizes what you have done
+@iglesiasg	so for instance Shell's description I think is fine in length
+@iglesiasg	but it is difficult to define what the right length is
+@iglesiasg	it should be something not time consuming at all
+@iglesiasg	or at least that's the idea :) hehe
+@iglesiasg	van51: in any case, if you are done with the one for this week just send it around. Do not worry about improving it or so
+ lisitsyn	iglesiasg: yes it is what I said :)
+@iglesiasg	lisitsyn: haha ok, I misunderstood :)
+ van51	ok sent it
+ van51	iglesiasg: thanks :)
+ van51	btw I'm getting an error when I use the ALPHANUM alphabet
+ van51	[ERROR] bool shogun::CAlphabet::check_alphabet(bool): ALPHABET does not contain all symbols in histogram
+ van51	but all I use are letters :/
+ van51	any ideas?
+@iglesiasg	van51: what letters are you using?
+ van51	iglesiasg: upper case latin letters
+@iglesiasg	I have never used that code but I recall from some mail something like only C,A and another letter should be used
+@iglesiasg	but I am not sure at all, just recall that from some mail, it could be regarding another class though
+ van51	iglesiasg: I think that's when you use the dna alphabet
+@iglesiasg	it makes sense
+ lisitsyn	van51: check for \n and etc
+ van51	iglesiasg: I'm probably using something wrong
+ lisitsyn	EOL EOF
+ van51	ok solved it, turns out I had a larger length value in the SGString than I should
+ van51	any easy way to have it accept spaces as well now? :)
+-!- foulwall|mobile [~foulwall@117.136.0.113] has joined #shogun
+-!- foulwall|mobile [~foulwall@117.136.0.113] has quit [Quit: AndroIRC - Android IRC Client ( http://www.androirc.com )]
+-!- gsomix [~Miranda@46.20.65.164] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+ sonne|work	van51: if you can make the error message more meaningful please do it
+ sonne|work	van51: I am jsut not able to. it is ment to say that you have some symbols in your input that are not in the alphabet
+ sonne|work	and if you enable debug you would see the sysmbold
+ sonne|work	s
+ sonne|work	van51: sry was out for lunch.
+ van51	sonne|work: no worries
+ sonne|work	van51: when you don't have string features it makes IMHO already most sense to directly compute the hashed representation
+ van51	sonne|work: about that error, I fixed it
+ sonne|work	well a better error message is something you could help with
+ sonne|work	van51: so just write the converter string -> hashed n gram word features
+ sonne|work	actually it is string -> sparse features with hashes as indices
+ van51	sonne|work: yeah, that is what I have done
+ van51	sonne|work: I'm just wondering what would be better
+ van51	to tokenize the string once in the beginning, or on-the-fly as weel
+ van51	or do you mean already a token by string and not a document?
+-!- nube [~rho@49.244.46.85] has joined #shogun
+ sonne|work	van51: it depends what inputs you have: in the online / streaming case it makes sense to tokenize on-the-fly & do the hashing
+ sonne|work	if you have the whole set of strings already then you do the tokenize&hash pass
+ sonne|work	in one go later
+ sonne|work	both make sense and have their use case
+-!- nube [~rho@49.244.46.85] has quit [Ping timeout: 246 seconds]
+ van51	sonne|work: yes indeed. well, right now I tokenize and hash on-the-fly when the strings fit in memory
+ van51	should I change it?
+ sonne|work	I didn't git it
+ sonne|work	get
+ sonne|work	you have the whole strings in memory
+ sonne|work	and then you do the tokenize & hashing in one go right?
+ van51	sonne|work: well there is this possibility through the converter
+ van51	but the HashedDocDotFeatures, maintain the documents as a CStringFeatures object
+ van51	and whenever a dot product is needed, is tokenizes and hashes on the fly
+ sonne|work	totally OK!
+ sonne|work	the other other option is doing the same via the converter as you said
+ van51	sonne|work: should I make a PR so you can review it as I progress ?
+ van51	or Olivier,Benoit or Quoc
+ sonne|work	van51: sure! I prefer small snacks anyway
+ sonne|work	so if you have one small part working I would rather merge that already before you do the big thing in one go
+ van51	sonne|work: ok, let me change the commit a bit first then
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 246 seconds]
+ van51	on another note, if I want an alphabet that accepts spaces as well, I have to create a new EAlphabet type?
+ sonne|work	van51: jsut use RAWBYTE
+-!- foulwall [~foulwall@2001:da8:215:503:5466:91ea:7714:9bdb] has joined #shogun
+-!- nube [~rho@49.244.71.235] has joined #shogun
+ van51	sonne|work: ah cool! thanks
+ sonne|work	hey foulwall!
+ foulwall	hey sonne|work
+ sonne|work	did you finish your exams?
+ sonne|work	van51: np
+ foulwall	sonne|work: yes~
+ sonne|work	all good?
+ foulwall	sonne|work: yeah
+ foulwall	1. integrate the  data to the exisiting demos. (regression, clustering)
+ foulwall	2. merge the exisiting binary/multiclass classification demo into the framework.
+ foulwall	3. refractor the javascripts.
+ foulwall	4. find a better way to draw heatmap with contour.
+ foulwall	sonne|work: I planed to do these things this week.
+ sonne|work	foulwall: excellent plan!
+ sonne|work	let me know if you have questions / get stuck
+ sonne|work	foulwall: btw I started setting up a machine for you where you can run the demos...
+ sonne|work	not sure if internet access is fast for you (machine is in some data centre in berlin)
+ foulwall	sonne|work: wow
+ sonne|work	well it is just some (not so fast) virtual machine I did rent.
+ foulwall	sonne|work: that's alright.
+ lisitsyn	sonne|work: do you want to rent other machine?
+ lisitsyn	digital ocean is pretty low-cost
+ lisitsyn	tapkee website runs there
+ lisitsyn	5$ / month
+ sonne|work	no I have this machine for 3 months still and I am planning to cancel the contract past gsoc so all good
+-!- zxtx [~zv@cpe-66-68-190-37.austin.res.rr.com] has quit [Read error: Operation timed out]
+ lisitsyn	sonne|work: alright
+-!- thoralf [~thoralf@enki.zib.de] has joined #shogun
+ thoralf	Hey.
+ sonne|work	ho
+ van51	sonne|work: I've made a PR
+-!- iglesiasg [~nando@83.179.44.135] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- van51 [~van51@athedsl-408350.home.otenet.gr] has quit [Quit: Leaving.]
+-!- zxtx [~zv@12.231.120.253] has joined #shogun
+-!- zxtx [~zv@12.231.120.253] has quit [Ping timeout: 240 seconds]
+-!- foulwall [~foulwall@2001:da8:215:503:5466:91ea:7714:9bdb] has quit [Remote host closed the connection]
+-!- zxtx [~zv@12.231.120.253] has joined #shogun
+ lisitsyn	sonne|work: is that expensive to buy a sim-card for a few days in berlin?
+ thoralf	lisitsyn: About 10-15 Euro for the card plus 5-10 Euro for a data plan.
+ thoralf	lisitsyn: You need it for the workshop in july, right?
+ lisitsyn	thoralf: oh thanks
+ lisitsyn	thoralf: yes
+ lisitsyn	thoralf: just to coordinate with other guys
+ lisitsyn	thoralf: what is a data plan?
+ thoralf	lisitsyn: Oh, I guessed you need internet access (== data plan ;)).
+ lisitsyn	thoralf: ahh I see
+ lisitsyn	well would be good indeed
+ lisitsyn	thoralf: not that much! thanks for the info
+ lisitsyn	thoralf: may be I can ask you a bit more? ;)
+ thoralf	lisitsyn: Yes.
+ pickle27	lisitsyn: I am going to send mine out soon! (trying to finish something up)
+ lisitsyn	pickle27: thanks
+ pickle27	lisitsyn:
+ pickle27	is there any way built into shogun to test if a matrix is a permutation matrix?
+ pickle27	iglesiasg: ^
+ lisitsyn	pickle27: no I don't know any
+ pickle27	okay just thought I'd check before I coded something
+ pickle27	just finishing up porting the R example to c++, I think it will make a decent unit test
+-!- gsomix [~Miranda@46.20.65.164] has joined #shogun
+-!- zxtx [~zv@12.231.120.253] has quit [Read error: Connection reset by peer]
+ pickle27	lisitsyn: did my mail send out? (I feel like my own messages to the list probably don't get sent back to me)
+@iglesiasg	pickle27: yeah, got it
+ pickle27	thanks
+@iglesiasg	nice work btw
+ pickle27	thanks, you too!
+@iglesiasg	I like the cleaning code aka using Eigen definition :D
+ pickle27	haha yeah, I have this "inner loop" function in C from the R package that I'd like to slowly replace
+-!- foulwall [~foulwall@2001:da8:215:c252:59d9:be69:e4d9:cb89] has joined #shogun
+ lisitsyn	pickle27: yes your mail is here
+ lisitsyn	votjakovr: now please weekly report ;)
+ lisitsyn	gsomix: and you
+ votjakovr	lisitsyn: hi, ah, sure
+-!- foulwall [~foulwall@2001:da8:215:c252:59d9:be69:e4d9:cb89] has quit [Remote host closed the connection]
+-!- iglesiasg [~nando@83.179.44.135] has quit [Ping timeout: 268 seconds]
+-!- thoralf [~thoralf@enki.zib.de] has quit [Quit: Konversation terminated!]
+-!- mode/#shogun [+o sonney2k] by ChanServ
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ gsomix	lisitsyn: done
+ votjakovr	lisitsyn: me too
+ lisitsyn	thanks guys
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- zxtx [~zv@12.231.120.253] has joined #shogun
+-!- lisitsyn [~lisitsyn@46.20.65.164] has joined #shogun
+-!- vgorbati [~vgorbati@212.2.159.34] has joined #shogun
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 256 seconds]
+@sonney2k	wiking, new bugs: ../shogun/mathematics/Random.h:86: warning: integer constant is too large for 'long' type
+@sonney2k	and /usr/lib/gcc/i486-linux-gnu/4.4.5/include/emmintrin.h:32:3: error: #error "SSE2 instruction set not enabled"
+@sonney2k	In file included from ../shogun/lib/external/SFMT/SFMT.h:84,
+@wiking	sonney2k: mmm
+@sonney2k	wiking, let me try to fix the random +86 one
+@sonney2k	return random_64() & ((uint64_t(-1)<<1)>>1); does the same and makes the compiler happy
+@sonney2k	wiking, so now we need to fix the SSE2 one still
+@sonney2k	wiking, ohh and please upgrade json-c on the fbsd machine to v 0.11
+@sonney2k	0.10 is b0rken
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 432634e / src/shogun/mathematics/Random.h: https://github.com/shogun-toolbox/shogun/commit/432634edf169b28856da47c5921a14bdca2cdad0
+ shogun-notifier-	shogun: use equivalent formulation for masking out sign bit in rand functions
+@wiking	sonney2k: ok... just a sec
+@wiking	sonney2k: there's no 0.11 json-c port in fbsd ports system
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * a75ef21 / src/shogun/distance/CustomDistance.cpp,src/shogun/distance/CustomDistance.h: https://github.com/shogun-toolbox/shogun/commit/a75ef21c98d9627a2266a38978f1fd190d02950f
+ shogun-notifier-	shogun: move template function back to .h to fix compile error
+@wiking	sonney2k: json-glib would do it?
+@wiking	json-glib-0.14.2.tar.xz is possible
+@wiking	ok i see it's not :)
+ shogun-buildbot	build #1134 of bsd1 - libshogun is complete: Failure [failed test test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1134  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #966 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/966  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #1258 of deb3 - modular_interfaces is complete: Failure [failed compile python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1258  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- pickle27 [~kevin@rcv3-lab-pc.ee.queensu.ca] has quit [Quit: Leaving]
+ shogun-buildbot	build #967 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/967  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	wiking, no json-c :D
+@sonney2k	wiking, https://github.com/json-c/json-c/wiki
+ shogun-notifier-	shogun: Roman Votyakov :develop * 72fa7b7 / / (66 files): https://github.com/shogun-toolbox/shogun/commit/72fa7b71728721cafe56826e90f97f3ba964f2c3
+ shogun-notifier-	shogun: refactor gp framework
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 8ded361 / / (66 files): https://github.com/shogun-toolbox/shogun/commit/8ded361a74ff9949b96486f18233bc2302aefcfd
+ shogun-notifier-	shogun: Merge pull request #1187 from votjakovr/feature/gp_refactoring
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: refactor gp framework
+@sonney2k	wiking, our HAVE_SSE2 test is flawed
+@sonney2k	wiking, err actually no -msse2 is missing from compile flags
+ shogun-buildbot	build #1135 of bsd1 - libshogun is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1135  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- zxtx [~zv@12.231.120.253] has quit [Ping timeout: 248 seconds]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@sonney2k	iglesiasg, I had to move the templated customdistance function back to the .h file - all buildbots were failing due to the .h -> .cpp move
+-!- lisitsyn [~lisitsyn@46.20.65.164] has quit [Ping timeout: 255 seconds]
+@sonney2k	wiking, do you want to try?
+-!- zxtx [~zv@12.231.120.253] has joined #shogun
+@iglesiasg	sonney2k: thank you
+@iglesiasg	I noticed it gave trouble but preferred to discussed if there was a way to maintain it in the cpp first
+@sonney2k	iglesiasg, well at this stage it is important to keep the build green
+@iglesiasg	sonney2k: understood
+@sonney2k	iglesiasg, there are too many merges coming up
+@wiking	sonney2k: try what?
+@sonney2k	wiking, the sse2 issue
+@sonney2k	I cannot make sense of it
+@wiking	sonney2k: ah stupid ./configure
+@wiking	:)
+@wiking	we should finish cmake :PPP
+@sonney2k	just do it then though this is somehting subtle
+@sonney2k	I figured that gcc -msse2 will define __SSE2__ 1
+@sonney2k	which we did not do
+@sonney2k	but then even with -msse2 it still doesn't work
+@wiking	this is only with gcc i guess
+@sonney2k	gcc & ooold debian 6.0
+@wiking	aaah
+@wiking	ok
+@sonney2k	and i686
+@wiking	what's the gcc version?
+ shogun-buildbot	build #968 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/968  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Roman Votyakov <votjakovr@gmail.com>
+@sonney2k	4.4.5
+ shogun-buildbot	build #1136 of bsd1 - libshogun is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1136  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Roman Votyakov <votjakovr@gmail.com>
+-!- vgorbati [~vgorbati@212.2.159.34] has quit [Ping timeout: 268 seconds]
+ shogun-buildbot	build #1259 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1259
+-!- sonney2k [~shogun@7nn.de] has quit [Read error: Operation timed out]
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * a2cf857 / src/Makefile.template,src/configure: https://github.com/shogun-toolbox/shogun/commit/a2cf8579440f353074883c8032a9d1a75fe9f195
+ shogun-notifier-	shogun: use full gcc command line for gcc -MM based dependency generation
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 8c54b9f / src/Makefile.template: https://github.com/shogun-toolbox/shogun/commit/8c54b9fbe6dc459706d6c4822848fbe283decce2
+ shogun-notifier-	shogun: use CPP compflags in gcc -MM
+ sonney2k	wiking, now it is happy \o/
+ shogun-buildbot	build #969 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/969  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #970 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/970  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ sonney2k	wiking, btw we should also enable tests to detect sse3/sse4
+ sonney2k	these can really make a difference
+ sonney2k	I don't understand though why -march=native doesn't do that
+ shogun-buildbot	build #1137 of bsd1 - libshogun is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1137  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ sonney2k	actually it does!
+ sonney2k	...but it is written in the docs that this only works under linux
+ shogun-buildbot	build #1138 of bsd1 - libshogun is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1138  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has left #shogun ["Fallen asleep!"]
+ shogun-buildbot	build #1260 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1260  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Roman Votyakov <votjakovr@gmail.com>
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 1a9afee / src/configure: https://github.com/shogun-toolbox/shogun/commit/1a9afee6510f4f7c4af79171ea0c7b8ab8da1295
+ shogun-notifier-	shogun: compflags swig also needs -msse2
+--- Log closed Tue Jun 25 00:00:03 2013

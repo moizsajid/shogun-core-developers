@@ -1,0 +1,251 @@
+--- Log opened Tue Aug 07 00:00:17 2012
+-!- kyle__ [~kyle@173-165-60-19-Illinois.hfc.comcastbusiness.net] has joined #shogun
+ kyle__	I was trying to jump into shogun, but all the docs I can find for octave/matlab usage are examples.  Is there anyplace that spells out what feature types are available? Etc?
+ blackburn	kyle__: hello
+ shogun-buildbot_	build #265 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/265  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ blackburn	kyle__: are you using modular interface?
+ shogun-buildbot_	build #220 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/220  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ kyle__	blackburn: I just built the static one.
+ blackburn	kyle__: check that then http://shogun-toolbox.org/doc/en/current/static_tutorial.html
+ blackburn	but actually I'd recommend to use modular if possible
+ kyle__	Is the static one considered depricated or something?
+ kyle__	Or just not as full featured?
+ blackburn	kyle__: it works but it is not actually extended with time
+ kyle__	Ah ok.
+ kyle__	Sadly I only found shogun while working on a final for a machine learning class.  Right now I mostly just want to use it to run some kernel-based svms against a dataset that choked both matlab and octave with the methods we were given.
+ kyle__	(final is over, I'm just too damned stubborn)
+-!- gsomix [~gsomix@80.234.52.32] has quit [Ping timeout: 256 seconds]
+ blackburn	kyle__: if you consider using python it could worth it - we all are using it
+ kyle__	blackburn: I might for my own use (more of a ruby fellow myself, but py is good).
+ blackburn	kyle__: ruby as well
+ blackburn	kyle__: static is pretty ugly to use with all these commands
+ blackburn	but it is kind of legacy
+ kyle__	blackburn: if I use the module I don't have to do the sg('set_kernel'
+ blackburn	no, just objects
+ kyle__	sg('init... blah blah blah blah?
+ kyle__	OMFG.  I'm rebuilding now.
+ blackburn	http://shogun-toolbox.org/doc/en/current/ruby_modular_examples.html like that
+ blackburn	kyle__: something like kernel = GaussianKernel() and so on
+ kyle__	That's georgous.
+ kyle__	(compared to the little octave script I've got going on it now)
+ blackburn	probably we should strong that modular is better than static somewhere
+ blackburn	:)
+ kyle__	Yea.
+ kyle__	thanks, I'm off
+-!- kyle__ [~kyle@173-165-60-19-Illinois.hfc.comcastbusiness.net] has left #shogun []
+ shogun-buildbot_	build #52 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/52
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+-!- av3ngr [av3ngr@nat/redhat/x-lfobrminomteysop] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-lfobrminomteysop] has quit [Quit: That's all folks!]
+-!- uricamic [~uricamic@2001:718:2:1634:6597:d9ab:da69:d0d7] has joined #shogun
+-!- n4nd0 [~nando@92.Red-2-137-9.dynamicIP.rima-tde.net] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: shogun-buildbot_, octopine
+-!- K0stIa [~kostia@2001:718:2:1634:4a5b:39ff:fe99:cc49] has joined #shogun
+-!- Netsplit over, joins: shogun-buildbot_, octopine
+-!- alexlovesdata [~binder@goldenezahl.ml.tu-berlin.de] has joined #shogun
+@sonney2k	yay! blackburn, broke the build again!
+-!- K0stIa [~kostia@2001:718:2:1634:4a5b:39ff:fe99:cc49] has left #shogun []
+ n4nd0	uricamic: around?
+-!- blackburn [~blackburn@109.226.80.43] has joined #shogun
+ alexlovesdata	n4nd0: you called the wrong ghost and got blackburn
+ blackburn	sonney2k: I know I did
+ blackburn	:)
+ uricamic	n4nd0: yep
+ n4nd0	uricamic: I wanted to ask you a couple of details about using your bundle methods with the HM-SVM model
+ uricamic	n4nd0: sure
+ n4nd0	so
+ n4nd0	I need to do a risk function right?
+ uricamic	I think for that you will need the new version of risk function, which supports user data
+ uricamic	yep
+ n4nd0	do you know something about the risk function for the hm-svm?
+ uricamic	I am now finishing the last algorithm, got some compile problems, but when I will resolve them, I can submit PR just with the support for new risk functions
+ n4nd0	ok
+ uricamic	nothing particular, but I guess you just need to do dynamic programming in the risk function
+ uricamic	but definitely you will need the user data in the risk function
+ n4nd0	what do you mean with user data?
+ n4nd0	I understand that I need to provide that function
+ uricamic	in the current version there are just features and labels, but you need something more probably, no?
+ n4nd0	well you need an structured model too
+ uricamic	yep, you need to create that function, but in the recently merged version, there is just a structure for data, that you want to pass to a risk function and in that structure there is just a pointer to features and labels, nothing more
+ uricamic	in the new version, there is a class CRIskData from which u can inherit new one, like CHMRiskData and provide all things u will need inside that risk function
+ n4nd0	the structured model is not just a function, it is a class
+ uricamic	so, for example it will be sufficient for u, to just provide the pointer to the model class
+ uricamic	or maybe u will need something more, but when u will do this in the upcoming version, it will be simply implementable
+ n4nd0	aham ok
+ n4nd0	I thought that the risk function was going to be a part of the structured model too
+ n4nd0	as the argmax, or the loss function
+ n4nd0	apart from that
+ n4nd0	uricamic: what are the changes I should expect using the bundle methods wrt the cutting plane algorithm I am using right now?
+ uricamic	n4nd0: it could be, now it is standalone, it is hard to say, if it would be better to have it as a part of structured model
+ n4nd0	I guess that the bundle methods are faster
+ n4nd0	what about prediction results?
+ uricamic	basically the risk function is calling argmax on the features with loss function applied, to find the most violated constrain
+ uricamic	what u mean by prediction results?
+ n4nd0	let's say I train an HM-SVM using the PrimalMosekSOSVM
+ n4nd0	it takes 10 minutes to train
+ n4nd0	90% accuracy in train data and 80% in test data
+ n4nd0	just to put some numbers
+ uricamic	ok
+ n4nd0	what should I expect using a bundle methods?
+ uricamic	well, depends on how fast the risk function implementation will be, I guess
+ n4nd0	and about accuracy?
+ uricamic	with BMRM u can setup desired precision (gap between primal and dual solution) and the Proximal-Point BMRM is faster then the standard BMRM (even faster with some initial weight vector W)
+ uricamic	it depends on the data, of course, but if it is possible, u can end up with 100% accuracy on train data
+ n4nd0	uricamic: ok, thank you
+ n4nd0	gtg now, bye!
+ uricamic	the new algorithm in BMRM area basically just reduces the number of iterations needed to converge to epsilon solution, and usually the risk computation is the bottleneck of iterations
+ uricamic	n4nd0: you are welcome
+-!- n4nd0 [~nando@92.Red-2-137-9.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+ CIA-18	shogun: Sergey Lisitsyn master * r3af3329 / (4 files in 2 dirs): Fixes for slep based multitask - https://github.com/shogun-toolbox/shogun/commit/3af3329a6e73f030fbd0465e87c5a4c028508e74
+ shogun-buildbot_	build #162 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/162
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+ shogun-buildbot_	build #266 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/266
+ shogun-buildbot_	build #221 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/221
+-!- pluskid [~pluskid@111.120.20.27] has joined #shogun
+-!- n4nd0 [~nando@92.Red-2-137-9.dynamicIP.rima-tde.net] has joined #shogun
+-!- pluskid [~pluskid@111.120.20.27] has quit [Ping timeout: 252 seconds]
+-!- pluskid [~pluskid@66.85.151.216] has joined #shogun
+-!- gsomix [~gsomix@80.234.30.75] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Client Quit]
+-!- pluskid [~pluskid@66.85.151.216] has quit [Quit: Leaving]
+-!- uricamic [~uricamic@2001:718:2:1634:6597:d9ab:da69:d0d7] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@92.Red-2-137-9.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+ CIA-18	shogun: Heiko Strathmann master * r646d8d8 / (12 files in 4 dirs): Merge pull request #690 from karlnapf/master (+10 more commits...) - https://github.com/shogun-toolbox/shogun/commit/646d8d8d50f75205e1b8810691563c2c55838c08
+-!- heiko [~heiko@host86-178-85-194.range86-178.btcentralplus.com] has joined #shogun
+-!- alexlovesdata [~binder@goldenezahl.ml.tu-berlin.de] has left #shogun []
+-!- blackburn [~blackburn@109.226.80.43] has joined #shogun
+ CIA-18	shogun: Soeren Sonnenburg master * rd5bbf37 / (18 files in 9 dirs): Merge pull request #679 from pluskid/multiclass (+41 more commits...) - https://github.com/shogun-toolbox/shogun/commit/d5bbf37e16fa71a68ea3e517dc2291878a63e9b8
+@sonney2k	gsomix, are you alive?
+ gsomix	sonney2k, yep.
+ gsomix	I have problem in Labels.
+ gsomix	There is same problem in SGVector.
+ gsomix	valgrind doesn't help me...
+@sonney2k	gsomix, how is that different to what you have done with dense features?
+@sonney2k	I mean SGVector / SGMatrix don't really differ
+ gsomix	sonney2k, in DenseFeatures I use get_feature_matrix. in labels - get_labels().vector. that's all.
+ gsomix	I'm stuck on this.
+@sonney2k	gsomix, but densefeatures returns just SGMatrix: SGMatrix<ST> get_feature_matrix();
+ gsomix	nope, there is ST* CDenseFeatures<ST>::get_feature_matrix
+@sonney2k	gsomix, you shouldn't use that
+ gsomix	why?
+ gsomix	and what about ref count?
+@sonney2k	it will just give you the SGMatrix.matrix
+ blackburn	sonney2k: any idea how to do the ref increase trick?
+ shogun-buildbot_	build #268 of deb3 - modular_interfaces is complete: Failure [failed test ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/268  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ CIA-18	shogun: Heiko Strathmann master * r2a05bce / src/shogun/statistics/QuadraticTimeMMD.h : doc update - https://github.com/shogun-toolbox/shogun/commit/2a05bce78de42bfe8feaa1ec6c4978a17015973a
+ CIA-18	shogun: Heiko Strathmann master * r7d70763 / src/shogun/statistics/LinearTimeMMD.h : doc update - https://github.com/shogun-toolbox/shogun/commit/7d7076350f0e9580a08dfa9e575fbbd1738e7131
+ CIA-18	shogun: Heiko Strathmann master * r946feed / (5 files): -added documentation - https://github.com/shogun-toolbox/shogun/commit/946feedfed242c92a6b11a6b6e8f88816c9c0c1e
+ CIA-18	shogun: Heiko Strathmann master * ra345a5d / (7 files): Merge pull request #691 from karlnapf/master - https://github.com/shogun-toolbox/shogun/commit/a345a5d4c6aa92156140c02d21f8621427c72aa1
+ shogun-buildbot_	build #165 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/165  blamelist: Chiyuan Zhang <pluskid@gmail.com>
+ blackburn	haha
+ blackburn	okay
+ shogun-buildbot_	build #166 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/166
+ shogun-buildbot_	build #173 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/173  blamelist: Chiyuan Zhang <pluskid@gmail.com>
+ shogun-buildbot_	build #269 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/269  blamelist: Soeren Sonnenburg <sonne@debian.org>, Chiyuan Zhang <pluskid@gmail.com>
+-!- heiko [~heiko@host86-178-85-194.range86-178.btcentralplus.com] has left #shogun []
+ shogun-buildbot_	build #174 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/174
+ shogun-buildbot_	build #270 of deb3 - modular_interfaces is complete: Failure [failed compile python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/270  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ CIA-18	shogun: Sergey Lisitsyn master * r71a7c9c / src/shogun/evaluation/CrossValidation.h : Added get mean to CVResult - https://github.com/shogun-toolbox/shogun/commit/71a7c9ce9b040e2280aa884233ffe6891c5350da
+-!- n4nd0 [~nando@92.Red-2-137-9.dynamicIP.rima-tde.net] has joined #shogun
+-!- n4nd0 [~nando@92.Red-2-137-9.dynamicIP.rima-tde.net] has quit [Client Quit]
+ shogun-buildbot_	build #271 of deb3 - modular_interfaces is complete: Failure [failed compile python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/271  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- zxtx [~zv@c-71-227-187-90.hsd1.wa.comcast.net] has joined #shogun
+-!- gsomix_ [~gsomix@178.45.40.178] has joined #shogun
+-!- gsomix [~gsomix@80.234.30.75] has quit [Ping timeout: 265 seconds]
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+ gsomix_	sonney2k, it seems I have find solution. ?)
+ gsomix_	*have found
+ gsomix_	good night guys
+ blackburn	sonney2k: have you heard just anything about so called 'pussy riot' thing?
+ blackburn	some guys state everybody in germany knows :)
+-!- n4nd0 [~nando@92.Red-2-137-9.dynamicIP.rima-tde.net] has joined #shogun
+ n4nd0	blackburn: hey
+ blackburn	hey there
+ n4nd0	let me ask you something
+ n4nd0	why in SGVector we have two operators []
+ n4nd0	one that returns a const T&
+ n4nd0	and another T&
+ n4nd0	it says that one is for read only access
+ blackburn	that's kinda convention - you const is called when you do only read
+ n4nd0	and the other for read and write
+ n4nd0	but I don't really get how that works
+ blackburn	hmm
+ blackburn	a[3] = 4.0;
+ blackburn	is non const
+ blackburn	b = a[5];
+ blackburn	is const
+ n4nd0	I thought that one cannot defined two methods that are just different on the return type
+ n4nd0	why not use the non const always? it works for both cases
+ n4nd0	I am just wondering ... :)
+ blackburn	n4nd0: I am unsure about that
+ n4nd0	blackburn: ok, it is not really relevant though, I think
+ n4nd0	mainly curiosity
+ blackburn	n4nd0: actually I think it helps with optimizations
+ n4nd0	that's the only raeson I came up with
+ n4nd0	blackburn: that maybe the const case can be done faster than the non-cost or so
+ blackburn	n4nd0: a[i] + b[j] could be done faster if you assume it is const
+ blackburn	I think so :D
+ n4nd0	ok
+ blackburn	n4nd0: or not, I don't know
+ blackburn	n4nd0: anyway consts are helpful sometimes for optimizer
+ n4nd0	ok
+ n4nd0	sonney2k: around?
+@sonney2k	n4nd0, yes?
+@sonney2k	blackburn, I think we can drop the const one
+ blackburn	sonney2k: are you sure it is useless?
+@sonney2k	if we don't want to do extra stuff in that case
+@sonney2k	blackburn, yes const is totally useless
+ blackburn	sonney2k: I think it is ok to have it there
+@sonney2k	except for telling us that we should not modify the element
+ blackburn	sonney2k: there is an matlab issue in the mailing list I am afraid I can't afford to resolve
+-!- n4nd0 [~nando@92.Red-2-137-9.dynamicIP.rima-tde.net] has quit [Read error: Connection reset by peer]
+@sonney2k	blackburn, do you have an idea what issue gsomix_ is having?
+ blackburn	sonney2k: he sleeps already btw
+ blackburn	yes but probably he found the way already
+ blackburn	sonney2k: first he was messing with get_labels and get_feature_matrix stuff
+ blackburn	I suggested to increase ref counter with a trick but we actually have to decrease it too
+@sonney2k	blackburn, in sgvector you mean?
+ blackburn	yeah
+@sonney2k	why do you have to increase / decrease it manually?
+ blackburn	sonney2k: if I understand correctly we need to steal a pointer
+ blackburn	and to store it in the pyobject
+* sonney2k *argh* heiko again managed to screw up the build by inserting a zero length unicode space!
+-!- n4nd0 [~nando@119.Red-2-137-47.dynamicIP.rima-tde.net] has joined #shogun
+ n4nd0	I hate the internet connection here ...
+ n4nd0	sonney2k: did my messages before arrived?
+ n4nd0	arrive*
+@sonney2k	and I totally forgot how I fixed it last time
+@sonney2k	n4nd0, no
+ blackburn	sonney2k: lol
+ n4nd0	shit
+ n4nd0	I have got to work the HM-SVM + PLiFs
+ n4nd0	but I still keep the implementation I did at the beginning, the one that just works for discrete observations
+@sonney2k	n4nd0, yes makes sense
+ n4nd0	the user could choose between those using a boolean member (use_plifs)
+ n4nd0	sonney2k: so, does it make sense to keep it?
+@sonney2k	or even some other way where you have a HM SVM w/o and with plifs
+@sonney2k	n4nd0, yes sure!
+ n4nd0	ok
+ n4nd0	since the PLiFs work for both discrete and real data, I doubted it
+@sonney2k	n4nd0, well you could argue that your plif has just 1 support point and then it would be equal to what you have
+ n4nd0	mmm I don't understand what you mean
+ n4nd0	I know that using PLiFs with integer data, if the supporting points coincide with the possible values of the observations
+ CIA-18	shogun: Sergey Lisitsyn master * r91bbe7e / src/shogun/lib/slep/slep_solver.cpp : Restored mystery objective calculation code in slep - https://github.com/shogun-toolbox/shogun/commit/91bbe7e71d7b1f81a6feec0dd9952c40656a35fc
+ n4nd0	then it is the same to use the PLiFs or not
+ n4nd0	sonney2k: did you mean that?
+ n4nd0	anyhow, time to sleep now
+@sonney2k	n4nd0, hmmhh maybe it is not even possible to get this to be equivalent
+ n4nd0	good night guys!
+@sonney2k	because plif weights are learned
+ n4nd0	yes
+@sonney2k	it could turn any integer to be 'muted'
+ n4nd0	mmm what I meant is
+@sonney2k	so I meant if you had just one support point
+ n4nd0	tell me
+@sonney2k	that this then is just a factor in front of the integers
+@sonney2k	but then it can still rescale all of them in that state
+ n4nd0	ahm ok
+@sonney2k	maybe it is the same in the discrete HM-SVM and the plif-hm-svm (that will learn a weight for that and the plif)
+@sonney2k	but I don't know for sure
+--- Log closed Wed Aug 08 00:00:10 2012

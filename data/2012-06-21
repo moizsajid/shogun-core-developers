@@ -1,0 +1,358 @@
+--- Log opened Thu Jun 21 00:00:41 2012
+-!- emrecelikten [~emre@176.41.10.108] has quit [Ping timeout: 246 seconds]
+-!- emrecelikten [~emre@176.40.230.182] has joined #shogun
+-!- emrecelikten [~emre@176.40.230.182] has quit [Quit: Leaving.]
+-!- emrecelikten [~emre@176.40.230.182] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- emrecelikten [~emre@176.40.230.182] has quit [Quit: Leaving.]
+-!- uricamic [~uricamic@2001:718:2:1634:5cfb:a4b3:604d:78a] has joined #shogun
+-!- emrecelikten [~emre@176.40.230.182] has joined #shogun
+@sonney2k	uricamic: could n4nd0 directly compare his .mc-so code with your example ?
+ uricamic	I don't know if he tried, but it should be possible now
+@sonney2k	I mean you do mc via the so  framework but with bmrm right,?
+ uricamic	yes
+ uricamic	I told him that as soon as it will be finished, he can try to compare
+ uricamic	btw I have some problems with that pull request
+@sonney2k	I assume you cannot have a true bias term?
+ uricamic	is it possible to select only some commits for the PR?
+ uricamic	no
+@sonney2k	no what?
+ uricamic	the true bias term
+@sonney2k	well you need to create a new branch
+@sonney2k	so no bias term?
+ uricamic	I see, ok, and then it is possible to move commits to the new branch?
+ uricamic	yes, we are not using the bias term
+@sonney2k	in the worst case with git format-patch
+ uricamic	ok, thanks, I will look on that
+@sonney2k	alright gtg
+-!- pluskid [~pluskid@202.130.113.141] has joined #shogun
+ pluskid	hi sonney2k, sorry, just see the email
+-!- emrecelikten [~emre@176.40.230.182] has quit [Quit: Leaving.]
+-!- emrecelikten [~emre@176.40.230.182] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+@sonney2k	uricamic, did you manage to create a new pull request?
+@sonney2k	pluskid, I just wanted to say that it is Ok to merge - but we should use the shogun core functions to not have duplications everywhere
+@sonney2k	pluskid, but I guess it is better you have some working example before refactoring the code...
+ pluskid	sonney2k: you mean memory allocation?
+@sonney2k	pluskid, yes and the vector functions like \alpha x etc
+@sonney2k	pluskid, I would want to see if the sse optimized stuff brings any gain (which I don't expect)
+@sonney2k	the compiler usually does the same
+ pluskid	sonney2k: the lbfgs doc require that we use lbfgs_malloc to allocate memory, I still haven't look into its implementation to see what it has done, if it is just plain malloc, I think we can replace that with SG_MALLOC
+@sonney2k	pluskid, I looked at the code - they have their own malloc function and it uses malloc
+ pluskid	sonney2k: and by "\alpha x" you mean which code?
+@sonney2k	actually it does malloc + zeros the stuff
+@sonney2k	so SG_CALLOC would be the replacement
+ pluskid	sonney2k: OK, thanks!
+@sonney2k	https://github.com/shogun-toolbox/shogun/pull/590/files
+@sonney2k	look at arithmetic ansi
+ pluskid	sonney2k: ah, I see, you mean we replace those with SGVector stuff?
+@sonney2k	pluskid, yes
+ pluskid	I might be able to try to do this after I made ShareBoost working
+@sonney2k	or take their code if theirs is better
+@sonney2k	pluskid, it is very little amount of work
+@sonney2k	but yes
+@sonney2k	first some reference
+@sonney2k	otherwise it is hard to detect if one breaks things
+ pluskid	but I guess keeping the original code untouched will be easier for future upgrade (to newer version of liblbfgs), what do you think?
+@sonney2k	pluskid, the last update is years back
+@sonney2k	so no
+@sonney2k	this lib is basically unmaintained
+ pluskid	ok
+ uricamic	sonney2k: I have done it right now, had some troubles with moving the commits, but hope now it is ok
+@sonney2k	uricamic, "This pull request cannot be automatically merged."
+@sonney2k	so no it is not...
+ uricamic	hmm, I have done git cherry-pick, could this be because of that?
+@sonney2k	uricamic, my suggestion would be to update to the state of master
+@sonney2k	and then in a branch just apply the missing patches
+@sonney2k	uricamic, no idea - you have files in there that are already merged
+@sonney2k	for example I moved things from so -> structure a day ago or so
+@sonney2k	seems like you do the same thing now
+ uricamic	I know, I have done some commit and then before PR it introduced the conflict, so I resolved it, but it seems it was not good
+ uricamic	I will try to fix it
+@sonney2k	uricamic, look at https://github.com/shogun-toolbox/shogun/pull/593/commits
+@sonney2k	there is 'indention fixes'
+@sonney2k	which is long merged
+@sonney2k	uricamic, as I said I would suggest to do a git pull --rebase on your master branch
+@sonney2k	then resolve the conflicts
+@sonney2k	(git add the conflicting files afterwards)
+@sonney2k	and continue the merge
+ n4nd0	sonney2k: is there any reason why DynamicObjectArray is not includid in Library.i for the modular interfaces?
+ n4nd0	sonney2k: I have found it in ModelSelection.i but for some reason to do get_name from python fails with it, I want to include in Library and do the rename and so
+@sonney2k	n4nd0, yes please fix
+ n4nd0	ok
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: Lost terminal]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+@sonney2k	uricamic, did you get it to work?
+ uricamic	sonney2k: working on it, I think I have found the source of the problem, so I have decided to introduce new commits from scratch
+ uricamic	soon there will be a PR
+@sonney2k	uricamic, ok
+ uricamic	sonney2k: done. I hope now it will work
+ CIA-18	shogun: Michal Uricar master * r2cbb216 / (2 files): libbmrm fixes - http://git.io/IVx0MA
+ CIA-18	shogun: Michal Uricar master * r6e12559 / (3 files): minor RiskFunction change + MulticlassRiskFunction implementation - http://git.io/mh_HQg
+ CIA-18	shogun: Michal Uricar master * rd8c48bf / (2 files): DualLibQPBMSOSVM fixes due to changes in libbmrm and RiskFunction - http://git.io/J8BFaw
+ CIA-18	shogun: Soeren Sonnenburg master * ra53beb2 / (7 files): Merge pull request #594 from uricamic/BM_SOL2 - http://git.io/yWso-w
+@sonney2k	uricamic, alright
+@sonney2k	thanks
+@sonney2k	uricamic, so could n4nd0 use this for comparison to his MC-SO mosek based thing?
+ uricamic	I thank you for patience :)
+ uricamic	I think he can
+@sonney2k	uricamic, btw do you have the value objective at the end?
+@sonney2k	then you could both compare nicely...
+ uricamic	well now it is only written on output, I think, but it is there
+ uricamic	oh, I just realized, I haven't post the example to this PR
+ n4nd0	yes yes, I want to test my stuff! testing testing :D
+ n4nd0	sonney2k: btw, is there any way to compile and just show the warnings?
+ n4nd0	any flag or so
+ n4nd0	otherwise I will redirect the output and grep or something like that
+@sonney2k	n4nd0 ... I use vim and :mak it will directly stop at all warnings/errors
+ n4nd0	ok, thank you!
+ shogun-buildbot	build #1082 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/1082  blamelist: uricar.michal@gmail.com
+@sonney2k	uricamic, http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/1082/steps/compile/logs/stdio ?
+@sonney2k	seen the error?
+ uricamic	this is because ot that changes, I will fix it
+ shogun-buildbot	build #1083 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/1083
+ uricamic	but this is strange
+ uricamic	I just compiled it on my computer and everything works
+@sonney2k	uricamic, well you committed something that doesn't compile
+@sonney2k	and then later fixed it
+@sonney2k	and committed again
+@sonney2k	uricamic, next time please use git commit --amend
+@sonney2k	to create just one *but working* commit
+ uricamic	so it is ok now?
+@sonney2k	uricamic, yes ^ buildbot above said so
+ uricamic	aha, ok, thanks, next time I will be more careful
+ uricamic	I am trying to push also the example I forgot to push it into the last PR, but it seems something is wrong with my connection
+ uricamic	I have sent the PR with the example
+-!- uricamic [~uricamic@2001:718:2:1634:5cfb:a4b3:604d:78a] has quit [Quit: Leaving.]
+-!- pluskid [~pluskid@202.130.113.141] has quit [Ping timeout: 246 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- pluskid [~pluskid@111.120.60.54] has joined #shogun
+-!- blackburn [d557894d@gateway/web/freenode/ip.213.87.137.77] has joined #shogun
+ blackburn	hey there
+ blackburn	got bsc :)
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+-!- pluskid [~pluskid@111.120.60.54] has quit [Ping timeout: 264 seconds]
+-!- pluskid [~pluskid@202.130.113.141] has joined #shogun
+-!- blackburn [d557894d@gateway/web/freenode/ip.213.87.137.77] has quit [Ping timeout: 245 seconds]
+-!- pluskid [~pluskid@202.130.113.141] has quit [Quit: Leaving]
+-!- gsomix [~gsomix@188.168.14.46] has joined #shogun
+-!- alexlovesdata [c25faea9@gateway/web/freenode/ip.194.95.174.169] has joined #shogun
+@sonney2k	gsomix, how is it going? recovered from the tornado?
+ gsomix	sonney2k, huh. yes. minimal destruction.
+@sonney2k	gsomix, any updated regarding gsoc besides reconstruction works?
+ gsomix	sonney2k, not many, only drafts of examples. I'm little busy by last exams now. However, I'll finish with examples this week.
+@sonney2k	gsomix, when are your exams?
+ gsomix	sonney2k, last on 25 June. is there some job related to director classes except examples for machines and dotfeatures?
+ gsomix	and I have passed optics exam at 19 June.
+@sonney2k	gsomix, well I can think of sparse features, string features, multiclass machines, preprocessors, structured output machines, converters, loss, labels
+ gsomix	wow!
+@sonney2k	before midterm ...
+@sonney2k	then after that the other cool feature
+@sonney2k	python buffer protocol
+@sonney2k	that is not so easy to get to work
+@sonney2k	anyway, what it does is it will enable you to work with shogun densefeatures etc as if they are numpy matrices
+@sonney2k	so one can from python do x + y (with x being a shogun dense feature obj and y being a numpy array)
+@sonney2k	and even x+=y
+@sonney2k	such stuff
+@sonney2k	gsomix, for that you will need to write a simply python extension (stand-a-alone like for directors)
+@sonney2k	that just is some double* x, int len
+@sonney2k	some vector thingy
+@sonney2k	and then register a new pyobject for that type implementing the buffer protocol
+@sonney2k	if this works
+@sonney2k	the next step is to create a simple swig example which does the same
+@sonney2k	that will require a very recent version of swig though.
+@sonney2k	if that works - do this inside shogun and add some convenience operations to shogun features
+ alexlovesdata	is it possible that MKL is broken in 1.1.0??
+ gsomix	sonney2k, swig2?
+@sonney2k	maybe 2.0.6 or so
+@sonney2k	not sure
+ gsomix	ok
+ gsomix	>> with shogun densefeatures etc as if they are numpy matrices | it's cool feature. I think that cpp+python+swig is one of best "platform" for programming
+ gsomix	after lisp, haskell... huh, joke :)
+ CIA-18	shogun: Michal Uricar master * ra5c9046 / examples/undocumented/libshogun/so_multiclass_BMRM.cpp : BMRM SOL Multiclass example - http://git.io/urAKog
+ CIA-18	shogun: Soeren Sonnenburg master * r9c2be58 / examples/undocumented/libshogun/so_multiclass_BMRM.cpp : Merge pull request #595 from uricamic/BM_SOL_EXAMPLE - http://git.io/RVDxgw
+@sonney2k	gsomix, the director stuff is not a lot of work now that we know how it works
+@sonney2k	only dotfeatures is involving
+ gsomix	sonney2k, get it. so, thanks for further plan. you made my work easier. :)
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has quit [Ping timeout: 245 seconds]
+-!- gsomix [~gsomix@188.168.14.46] has quit [Remote host closed the connection]
+-!- blackburn [d557894d@gateway/web/freenode/ip.213.87.137.77] has joined #shogun
+ blackburn	hey there
+ blackburn	sonney2k: around?
+@sonney2k	blackburn, yes
+@sonney2k	blackburn, seen that you broke the tests with chris' stuff?
+@sonney2k	blackburn, ahh and congrats!
+ blackburn	sonney2k: yes yes yes
+ blackburn	thanks
+ blackburn	sonney2k: I'll fix tomorrow
+@sonney2k	too much vodka already?
+ blackburn	no had some headache after all
+ blackburn	so had to get some sleep :)
+@sonney2k	naah sleep ;-)
+ blackburn	I wish I had some vodka and had headache because of that :)
+ blackburn	sonney2k: ok my plans tomorrow include fixing that
+ blackburn	and sparsevector too
+ blackburn	the last thing to change for referenced data
+@sonney2k	string stuff yes
+ blackburn	sonney2k: what is purpose of cached vector?
+ blackburn	I mean how do we get any impact on performance
+@sonney2k	blackburn, simple err dense features don't need to be in memory
+ blackburn	that is the thing I am getting confused
+ blackburn	sonney2k: but they have matrix aren't they?
+@sonney2k	and preprocessors can apply things just one by one
+@sonney2k	blackburn, no
+@sonney2k	matrix is optional
+@sonney2k	so things can be cached
+ blackburn	how can we get densefeatures with no matrix but some contents inside?
+@sonney2k	that is why we have this get_feature_vector / free_feature_vector business
+ blackburn	for example in python
+@sonney2k	with these functions
+@sonney2k	things are fetched/preprocessed/computed on-demand
+ blackburn	sonney2k: did guys make some great progress on SO already?
+ blackburn	a lot of commits I am lost in
+@sonney2k	blackburn, well at least some progress - framework is merged and uricamics bmrm with application to MC is in there
+@sonney2k	n4nd0 needs to compare against it and make some progress
+@sonney2k	blackburn, nothing from wiking yet - no idea where he is stuck...
+ blackburn	sonney2k: isn't it easy to get basically anything to work after getting MC example to work?
+ blackburn	I do not understand that point
+@sonney2k	the GP stuff seems also to be progressing well
+@sonney2k	and gsomix you know probably better
+ blackburn	yes no news from wiking
+@sonney2k	and pluskid is working like 10 of us as usual
+@sonney2k	blackburn, yes MC is just the PoC
+ blackburn	PoC?
+@sonney2k	then one 'only' needs to change the argmax
+@sonney2k	proof-of-concept
+ blackburn	aham
+@sonney2k	but the argmax can be *very difficult* depending on so problem
+ blackburn	does that mean they can integrate some HMM or anything pretty easy
+ blackburn	?
+ blackburn	ahh
+@sonney2k	HM-SVM yes
+ blackburn	so argmax is the most hard to code thing?
+ blackburn	got it
+@sonney2k	blackburn, well HM-SVM is not so difficult
+ blackburn	I actually checked HM-SVM code
+@sonney2k	after all it is just viterbi algorithm
+ blackburn	I do not like it pretty much hehe
+@sonney2k	much more difficult is Semi HM-SVM
+ blackburn	your expertise :)
+@sonney2k	non-markovian behavior on segments
+@sonney2k	backtracking from hell
+ blackburn	semi-supervised?
+@sonney2k	no
+ blackburn	semi what then?
+@sonney2k	the markov property is relaxed
+ blackburn	how 'much'?
+@sonney2k	you can have arbitrary look back
+@sonney2k	so no longer p(x_t| x_{t-1})
+ blackburn	not limited?
+@sonney2k	limited!
+ blackburn	with?
+@sonney2k	but up to whole segment length
+ blackburn	ahh
+@sonney2k	so you can model things like length distribution of segment
+ blackburn	okay nice
+ blackburn	pretty complex thing
+@sonney2k	or frequencies of characters in segements
+@sonney2k	etc
+@sonney2k	whatever you want to compute for a whole segment
+ blackburn	is it called semi markov?
+@sonney2k	argmax on graphs is probably even worse
+@sonney2k	yes
+ blackburn	I see
+@sonney2k	sometimes generalized HM *
+ blackburn	it looks like you have some passion with that :)
+@sonney2k	blackburn, recall that I wrote the HMM code
+ blackburn	sonney2k: I recall you have master thesis on markov stuff
+@sonney2k	...which I no longer can parse since gunnar parallelized it
+@sonney2k	blackburn, no
+@sonney2k	student research project only
+ blackburn	am I wrong?
+ blackburn	ahhh
+ blackburn	what is your master thesis about then?
+@sonney2k	something before master thesis
+@sonney2k	hmm + top / fisher kernel + svm
+@sonney2k	for splice site recognition
+ blackburn	ah more non-understable stuff :)
+@sonney2k	so I tried a couple of things to detect splice sites
+@sonney2k	hmms
+@sonney2k	locality improved kernel on splice sites
+@sonney2k	then fisher/top kernel on hmms
+@sonney2k	and this in the end evolved into the weighted degree kernel :)
+ blackburn	it actually looks like some over-complexity for me
+ blackburn	isn't it?
+@sonney2k	blackburn, no
+@sonney2k	sometimes you don't know how to compare things
+@sonney2k	but you have some good probabilistic models
+@sonney2k	so you derive the fisher/top kernel from it
+@sonney2k	and use an svm and get much better results...
+@sonney2k	this *can* be very complex
+ blackburn	why to use svm if you have good prob model?
+@sonney2k	blackburn, because it is just some OKish model
+ blackburn	I see
+@sonney2k	blackburn, for example GNB is probably very close to poly kernel
+ blackburn	sonney2k: btw I want to know your opinion on semisupervised and transductive stuff
+@sonney2k	I mean the fisher kernel from GNB
+ blackburn	(btw because you said semi word and I am activated now :D)
+@sonney2k	blackburn, not really a success story so far
+ blackburn	sonney2k: I remember there is some relation between GNB and logit regression
+@sonney2k	blackburn, fisher kernel is just gradient of log(p(x))
+@sonney2k	(except for some normalization that no one uses)
+ blackburn	sonney2k: what do you consider as success story then?
+@sonney2k	well SVMs for classification
+@sonney2k	GPs for regression
+@sonney2k	linear methods in general
+@sonney2k	LDA, linear SVM ...
+@sonney2k	SO learning
+@sonney2k	not even true multiclass
+ blackburn	sonney2k: I want to push my gf to research GPs
+ blackburn	sonney2k: true multiclass is not kind of success for you?
+@sonney2k	well KNN is
+@sonney2k	and trees :D
+@sonney2k	blackburn, almost no gain compared to OvR
+ blackburn	sonney2k: yes, I actually gain really small % of accuracy on my road sign data..
+@sonney2k	ahh and PCA :)
+ blackburn	sonney2k: what is so cool about PCA?
+@sonney2k	that it is often relevant in practise
+@sonney2k	there is lots of stuff out there that is rarely useful but overly complicated
+ blackburn	sonney2k: I never managed to use it properly..
+@sonney2k	blackburn, to get an idea/ visualize data only I mean
+ blackburn	ah
+ blackburn	LLE is cool for that too I believe
+ blackburn	and isomap/mds
+ blackburn	ltsa, hlle, blabla is useless but these ones are cool
+@sonney2k	I like stuff that works *often*
+@sonney2k	and is not so difficult and potentially even fast
+ blackburn	mds and isomap work always
+@sonney2k	blackburn, work as in give useful results?
+@sonney2k	don't you need some distance for that?
+ blackburn	sonney2k: yes always constructs some embedding
+ blackburn	yes
+ blackburn	sonney2k: I will implement t-SNE soon in shogun I think
+ blackburn	it is probably the best 'visualizer'
+@sonney2k	oh well whatever method you choose - experience tells that you can gain much more by finding the right features
+@sonney2k	and this is actually the hard part
+ blackburn	sonney2k: http://homepage.tudelft.nl/19j49/t-SNE_files/mnist_large.jpg
+ blackburn	that's how t-SNE works on MNIST
+@sonney2k	impressive
+ blackburn	yes, very impressive
+ blackburn	sonney2k: http://homepage.tudelft.nl/19j49/t-SNE_files/vis_caltech101_small.jpg one more example
+ blackburn	but actually LLE can produce similar results
+@sonney2k	I think the distance function matters a lot here
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 246 seconds]
+ blackburn	exactly
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+ blackburn	but still method matters too
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	blackburn, the new buildbot will create documentation on nightly_default
+@sonney2k	if it doesn't fail of course
+ blackburn	cool
+@sonney2k	blackburn, so highest prio is to get the build back to green
+ blackburn	will do
+@sonney2k	blackburn, hmmhh I think I know some people on that image
+@sonney2k	blackburn, it will be under http://www.shogun-toolbox.org/doc/en/latest/ then
+@sonney2k	(if I didn't make a mistake :D
+ blackburn	sonney2k: know? really?
+ blackburn	it is caltech-101 dataset
+--- Log closed Fri Jun 22 00:00:20 2012

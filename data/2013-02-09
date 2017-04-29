@@ -1,0 +1,214 @@
+--- Log opened Sat Feb 09 00:00:43 2013
+ n4nd0	wiking: ping
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ wiking	pong
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- FSCV [~FSCV@187.210.54.165] has quit [Quit: Leaving]
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+ sumit	Oh cool BlackBurn :) :) , just returned from the classes and read your reply :) I shall get it done in an hour or so and get right back to you :) , thanks..Yet I feel I should grasp more about shogun toolbox b4 I develope codes compatible with Shogun :)
+ sumit	thanks !
+ blackburn	sumit: keep calm - you don't need to hurry
+ sumit	haha..ohk ,, thanks :)
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Quit: Page closed]
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+ n4nd0	wiking: so make in the tests dir run smooth yesterday
+ n4nd0	the tests are the ones under tests/integration right?
+ wiking	noup tests are under tests/unit
+ n4nd0	wiking: aham I see
+ n4nd0	so they have to be built apart too?
+ wiking	well if u run make in tests/unit
+ wiking	then they'll be built
+ n4nd0	I run yesterday make under tests I think
+ n4nd0	mmm no that cannot be
+ wiking	try to run a make under tests/unit
+ wiking	you should see some info about the unit tests if everything is ok
+ n4nd0	yeah
+ n4nd0	make is failing under tests/unit now for some reason
+ wiking	ok check the reason
+ n4nd0	a method is not found in CDataGenerator
+ wiking	mmmm interesting
+ n4nd0	a method that actually seems to be there
+ n4nd0	generate_gaussians
+ wiking	mmm maybe it's because i think that func needs some lib
+ wiking	like lapack or something?
+ n4nd0	right
+ n4nd0	probably I don't have it installed here
+ n4nd0	checking configure
+ n4nd0	wiking: I think that lapack is not detected by configure
+ n4nd0	can you check one thing a moment please?
+ n4nd0	I have seen that in the configure script there are checks for -llapack
+ n4nd0	however here whereis llapack doesn't find anything
+ n4nd0	I have to use whereis liblapack
+ n4nd0	it might be a naming thing?
+ wiking	mmm
+ wiking	well i guess it's more like it doesn't have the right library path to find your lapack
+ n4nd0	nvm
+ n4nd0	I checked configure.log, cblas.h is not found
+ n4nd0	installing atm
+ n4nd0	 /usr/bin/ld: libgmock.a(gtest-all.o): undefined reference to symbol 'pthread_key_delete@@GLIBC_2.2.5'
+ n4nd0	 /usr/bin/ld: note: 'pthread_key_delete@@GLIBC_2.2.5' is defined in DSO /usr/lib/libpthread.so.0 so try adding it to the linker command line
+ wiking	mmmm
+ wiking	i wonder why you dont have -pthread or -lpthread added to your linker flags
+ n4nd0	-pthread is included
+ n4nd0	the line that is just before the undefined reference message
+ n4nd0	c++ -I../../src -fPIC  -g -Wall -Werror-implicit-function-declaration -Wno-unused-parameter -Wformat -Wformat-security -Wparentheses -Wshadow -Wno-deprecated -O0 -pthread -I/usr/include -I/usr/src/gmock/include -DSWIG_TYPE_TABLE=shogun -DSHOGUN -DLINUX -DUSE_BOOL -DUSE_CHAR -DUSE_UINT8 -DUSE_UINT16 -DUSE_INT32 -DUSE_INT64 -DUSE_UINT64 -DUSE_FLOAT32 -DUSE_FLOAT64 -DHAVE_POWL -DHAVE_LGAMMAL -DHAVE_SQRTL -DHAVE_LOG2 -DHAVE_PTHREAD -DHAVE_
+ wiking	mmm
+ n4nd0	pthread is in there ^
+ wiking	can u replace -pthread with -lpthread
+ wiking	i mean just prepend the thing with l ;P
+ n4nd0	hehe I just copied the line and added the l
+ n4nd0	no error then
+ wiking	mmm this needs to be fixed
+ wiking	i just wonder how can we fix this
+ n4nd0	where are those flags set?
+ wiking	i guess the flag -pthread and -lpthread has changed
+ wiking	in one gcc version
+ wiking	what's your gcc version?
+ n4nd0	4.7.2
+ wiking	mmmm
+ wiking	interesting
+ n4nd0	why?
+ wiking	so it's kind of like the latest
+ wiking	because i thought that the older gcc had -lpthread flag
+ wiking	and the newer ones switched to -pthread
+ n4nd0	I don't really understand why it fails with -pthread
+ n4nd0	I thought they were basically quite the same
+ wiking	yeah me too
+ wiking	i thought that it's just a version difference
+ wiking	in gcc
+ wiking	 '-lpthread' means 'link with a library called pthread'.
+ wiking	        '-pthread' means 'do whatever you have to do to compile code that
+ wiking	complies with the pthreads standard so that it works'.
+ wiking	        '-lpthread' should not be used if '-pthread' is available unless you
+ wiking	have some very specific reason.
+ wiking	mmm
+ wiking	interesting
+ wiking	but obviously -pthread doesn't work for ya
+ wiking	:>
+ n4nd0	hehe yeah it seems so
+ wiking	so it did not do everything to get your code compiled
+ wiking	:)
+ n4nd0	hehe
+ n4nd0	this is weird
+ n4nd0	I am checking my gcc specs
+ n4nd0	and I think it actually links with -lpthread
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection reset by peer]
+-!- wiking [~wiking@info2k1.hu] has joined #shogun
+-!- blackburn [~blackburn@85.114.170.181] has quit [Remote host closed the connection]
+-!- blackburn [~blackburn@85.114.170.181] has joined #shogun
+ n4nd0	blackburn: ey
+ blackburn	n4nd0: hey
+ n4nd0	blackburn: have you seen this pthread issue ^?
+ blackburn	no, what is it?
+ n4nd0	so
+ n4nd0	-pthread gives me a compile error that is solved when I use -lpthread
+ n4nd0	but it seems from gcc that -pthread is actually also linking with -lpthread
+ blackburn	interesting
+ blackburn	does that happen only on your machine?
+ n4nd0	no idea
+ n4nd0	I guess wiking could compile without the erro
+ n4nd0	anyhow, gtg now maybe I can check it with him later
+ n4nd0	see you
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Quit: Page closed]
+-!- heiko1 [~heiko@5e033Fbc.bb.sky.com] has joined #shogun
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+ heiko1	sonney2k, blackburn, around?
+ blackburn	heiko1: yes
+ heiko1	already idea for gsoc projects?
+ heiko1	blackburn, I might have a nice one, and thinking of others, but wondering what you guys have in mind
+ blackburn	heiko1: well just suggest :)
+ blackburn	heiko1: I would like to have one dim reduction student
+ blackburn	heiko1: soeren asked andreas ziehe for ICA stuff
+ blackburn	heiko1: I will try to convince igor carron to lead something about compressive sensing
+ heiko1	ICA nice :)
+ heiko1	I would like to do something on computing Gaussian likelihoods for large models
+ heiko1	which involves iterative linear solvers, graph colourings, and sparse matrices
+ heiko1	blackburn, and would allow MCMC on those large models
+ heiko1	which is currently very very hard
+ heiko1	so a truly large-scale project :)
+ heiko1	I know a few people who could help me mentoring it
+ blackburn	heiko1: go ahead then :)
+ heiko1	cool, do we already have an ideas page?
+ blackburn	heiko1: would be nice if you describe it
+ heiko1	to put a description?
+ blackburn	not yet but I will add
+ blackburn	yes
+ heiko1	cool, so I will write a bit on this
+ blackburn	I hope we will get enough slots :D
+ blackburn	ah wait
+ blackburn	I hope we will get accepted
+ blackburn	ah wait
+ blackburn	I hope gsoc will be announced
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Ping timeout: 245 seconds]
+ heiko1	blackburn, hehe :)
+ heiko1	we will probably get many slots (if we can get as many mentors as last years)
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+ sumit	sorry the internet connection had failed ,anyways I shall get back to you soon with some good topics to code upon..thanks :)
+-!- wiking [~wiking@info2k1.hu] has quit [Read error: Connection reset by peer]
+-!- wiking [~wiking@info2k1.hu] has joined #shogun
+-!- wiking [~wiking@info2k1.hu] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Ping timeout: 245 seconds]
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Ping timeout: 245 seconds]
+@sonney2k	heiko1, I was hoping that you would rather mentor this year
+@sonney2k	heiko1, you can do your fun project anyways
+ heiko1	sonney2k, I was talking about mentoring this one
+ blackburn	sonney2k: hmm I realized I don't get whether heiko1 wants to mentor it or be a student
+ blackburn	:D
+ heiko1	I am not a student in the summer :)
+ blackburn	I thought so!
+ heiko1	sonney2k, dont worry :)
+ blackburn	right - you told that yesterday heiko1
+ heiko1	sonney2k, two more mentors this year
+ blackburn	it is difficult to live without brain..
+ blackburn	heiko1: or three
+ heiko1	what? :)
+ blackburn	heiko1: you mean two = you and me?
+ blackburn	or?
+ heiko1	oh
+ heiko1	yes
+ blackburn	then count wiking - he could mentor too
+ heiko1	blackburn, ok :) but with you and me I am sure
+ blackburn	parteigenosse wiking is reliable!
+ blackburn	:D
+ heiko1	haha :)
+ blackburn	heiko1: I tried to learn a bit of deutsch from 1992 book - they say I shouldn't call people genosse anymore but it is ok still
+ blackburn	that was kind of funny
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	shogun-buildbot, force build libshogun
+ shogun-buildbot	no such builder 'libshogun'
+@sonney2k	shogun-buildbot, force build "deb1 libshogun"
+ shogun-buildbot	no such builder 'deb1 libshogun'
+@sonney2k	shogun-buildbot, force build "deb1 - libshogun"
+ shogun-buildbot	build #799 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	shogun-buildbot, force build "bsd1 - libshogun"
+ shogun-buildbot	build #647 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	shogun-buildbot, force build "ubu1 - libshogun"
+ shogun-buildbot	build #185 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	heiko1, passing unit tests are now a requirement
+ heiko1	sonney2k, this is great!
+@sonney2k	heiko1, not sure if you've read the channel logs yesterday but o_O
+ heiko1	I will soon add some to the stuff I am currently implementing
+ heiko1	I will have  a look
+ shogun-buildbot	Hey! build bsd1 - libshogun #647 is complete: Success [build successful]
+ shogun-buildbot	Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/647
+@sonney2k	shogun-buildbot, force build "deb1 - libshogun"
+ shogun-buildbot	build #800 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+@sonney2k	wow!
+@sonney2k	build 800...
+@sonney2k	didn't we install this just last summer?
+ shogun-buildbot	Hey! build deb1 - libshogun #799 is complete: Success [build successful]
+ shogun-buildbot	Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/799
+ shogun-buildbot	build #800 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/800
+-!- heiko1 [~heiko@5e033Fbc.bb.sky.com] has quit [Quit: Leaving.]
+@sonney2k	wiking, ^ please fix this failure - I guess you used exact comparisons for floating point stuff?
+ shogun-buildbot	build #185 of ubu1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ubu1%20-%20libshogun/builds/185
+-!- heiko1 [~heiko@5e033Fbc.bb.sky.com] has joined #shogun
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+--- Log closed Sun Feb 10 00:00:45 2013

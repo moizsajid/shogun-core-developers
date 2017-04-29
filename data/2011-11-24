@@ -1,0 +1,123 @@
+--- Log opened Thu Nov 24 00:00:13 2011
+--- Day changed Thu Nov 24 2011
+@sonney2k	false alarm?
+@sonney2k	I mean how is it possible to have an invalid read of size one in this line
+ blackburn	sonney2k: ary/
+ blackburn	?
+@sonney2k	ary is a ptr
+ blackburn	how big is void pointer?
+@sonney2k	8 bytes
+@sonney2k	or 4
+@sonney2k	depending on 64/32bit system
+ blackburn	sonney2k: then I don't know
+ blackburn	sonney2k: don't you get segfault with that script?
+@sonney2k	didn't try
+ blackburn	could you please?
+ blackburn	I'm currently recompiling and will test again
+ blackburn	sonney2k: don't you think testing framework is something of interest for gsoc project?
+@sonney2k	yes agreed - but we need a concrete plan for that
+@sonney2k	and it requires heikos migrations
+ blackburn	sonney2k: we have time to think about
+ blackburn	wow too late already
+ blackburn	sonney2k: yes I got segfault again
+ blackburn	what a non-sense
+@sonney2k	the other thing I'd like to see is a cool tutorial with applications
+@sonney2k	blackburn, you should compile with optimizations disabled
+ blackburn	sonney2k: already
+@sonney2k	and then the usual stuff
+@sonney2k	decision trees
+ blackburn	ensembles
+@sonney2k	boosting etc
+@sonney2k	some new ML algos :)
+@sonney2k	anyway I am tired
+@sonney2k	have a nice sleep
+@sonney2k	cu
+ blackburn	have a nice sleep too
+ blackburn	see you
+ blackburn	wow
+ blackburn	Labels with same numpy array leads to already freed memory error
+ blackburn	that's crazy a lot
+-!- blackburn [~blackburn@188.168.4.253] has quit [Quit: Leaving.]
+-!- emrecelikten [~emre@92.44.235.73] has joined #shogun
+ emrecelikten	Hello there! Apparently Gaussian HMMs aren't supported in Shogun. Is there anybody working on it?
+-!- emrecelikten [~emre@92.44.235.73] has left #shogun []
+-!- emrecelikten [~emre@92.44.235.73] has joined #shogun
+ sonne|work	emrecelikten: noone is working on that
+ sonne|work	so you could be first :D
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackburn	sonne|work: forgot to say
+ sonne|work	yes?
+ blackburn	e.g. Labels([1,2,3])
+ blackburn	will lead to problems
+ blackburn	and we should do Labels(numpy.array([1,2,3]))
+ sonne|work	so the numpy one works the other not?
+ blackburn	yes
+ blackburn	I have too weak ideas what is going wrong but I know it is
+ blackburn	sonne|work: I managed to run this python example yesterday
+ sonne|work	great that you figured taht out
+ blackburn	sonne|work: if you have shogun available could you please run this:
+ blackburn	x = [1,2,3]
+ blackburn	for i in range(10):
+ blackburn	  l = Labels(x)
+ blackburn	if it fails I would get more sure about it
+ sonne|work	I recall that we had a similar report some time back but no one could reproduce the problem
+ blackburn	I shared the folder with that script to madeleine, no report yet
+ blackburn	but I hopt it will go smooth this time
+-!- blackburn_ [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Ping timeout: 265 seconds]
+-!- policecar [~policecar@141.23.79.130] has joined #shogun
+-!- policecar [~policecar@141.23.79.130] has quit [Quit: policecar]
+-!- blackburn_ [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- policecar [~policecar@141.23.79.130] has joined #shogun
+ policecar	hey, sorry to bother you(s) again but i can't seem to get PCA to work with sparse matrices... i currently run the code below (python) and can't get rid of
+ policecar	assertion features->get_feature_class()==C_SIMPLE failed in file preprocessor/PCA.cpp line 71
+ policecar	from shogun.Features import SparseRealFeatures, SparseIntFeatures
+ policecar	        from shogun.Preprocessor import PCA
+ policecar	        feats = SparseRealFeatures( data.astype(float) )
+ policecar	                
+ policecar	        preprocessor = PCA()
+ policecar	        preprocessor.init( feats )
+ policecar	        preprocessor.apply_to_sparse_feature_matrix( feats )
+ policecar	where data is a csc_matrix
+ policecar	could you gimme any hints as to what i'm doing wrong?
+ sonne|work	it doesn't work with sparse matrices - so you need to convert it to dense features and then apply PCA
+ policecar	oh
+ policecar	hehe, k, thx
+-!- policecar [~policecar@141.23.79.130] has quit [Quit: policecar]
+-!- blackburn [~blackburn@188.168.2.226] has joined #shogun
+ blackburn	sonney2k: my simple labels test does not reproduce the error anyhow
+@sonney2k	blackburn, it does
+@sonney2k	I can reproduce it here
+@sonney2k	but it is not reliable
+ blackburn	sonney2k: hmm ok
+@sonney2k	the issue occurs from time to time only
+@sonney2k	if I use Labels([0.0]*1000) it happens most of the time
+ blackburn	sonney2k: I guess it is something of 'list' type nature
+@sonney2k	but I totally don't understand why it crashes sometimes and sometimes not
+@sonney2k	yes but it is converted to narray
+ blackburn	sonney2k: is it?
+@sonney2k	but it crashes even before that(!!!)
+ blackburn	ah
+ blackburn	well no idea then
+@sonney2k	yes via PyArray_FromAny
+@sonney2k	me neither
+ blackburn	no one should use lists to have a conversation with shogun :)
+ blackburn	1st commendment
+@sonney2k	we could simply disable that
+@sonney2k	let me just do that
+ blackburn	sure, pretty unsafe
+@sonney2k	I still don't understand how it could crash
+@sonney2k	(I am in train home - network could fail at any time)
+ blackburn	wow
+ blackburn	you really do shogun all the time :D
+@sonney2k	stack overflow or so?
+@sonney2k	argh need to leave train
+@sonney2k	cu
+ blackburn	sonney2k: ok
+ blackburn	sonney2k: what stackoverflow?
+@sonney2k	blackburn, I mean I cannot make sense of this valgrind error nor the crash
+@sonney2k	and I don't understand why it still wants to accept lists
+@sonney2k	my only idea now is to explicitly reject lists
+ blackburn	why not
+-!- blackburn [~blackburn@188.168.2.226] has quit [Quit: Leaving.]
+--- Log closed Fri Nov 25 00:00:59 2011

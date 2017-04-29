@@ -1,0 +1,82 @@
+--- Log opened Fri Sep 30 00:00:45 2011
+-!- Guest56770 [~sonne@g229061048.adsl.alicedsl.de] has quit [Ping timeout: 256 seconds]
+-!- blackburn [~blackburn@188.168.5.42] has quit [Quit: Leaving.]
+ CIA-3	shogun: Sergey Lisitsyn master * r95df0a5 / (10 files): Added support of target dimensionality reducing with negative target dimensionality, improved some issues at NLDR preprocessors - http://git.io/92KVbA
+ CIA-3	shogun: Soeren Sonnenburg master * r7bb0e51 / (src/configure src/shogun/mathematics/Math.h): add lgammal detection to configure - http://git.io/HPt3Zw
+ CIA-3	shogun: Soeren Sonnenburg master * r1f78185 / src/configure : require pkg-config in configure - http://git.io/gB6LxA
+ CIA-3	shogun: Soeren Sonnenburg master * rb18d7b5 / src/configure : fix type pkg-config2 -> pkg-config - http://git.io/t7VDPQ
+-!- sonne|work1 [~sonnenbu@194.78.35.195] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: @sonney2k, sonne|work, CIA-3
+-!- Netsplit over, joins: @sonney2k, CIA-3
+-!- sonne|work1 is now known as sonne|work
+-!- heiko [~heiko@144.82.98.11] has joined #shogun
+-!- heiko [~heiko@144.82.98.11] has quit [Ping timeout: 260 seconds]
+-!- blackburn [~blackburn@188.168.4.53] has joined #shogun
+-!- ChrisD_ [43dc92a2@gateway/web/freenode/ip.67.220.146.162] has joined #shogun
+ ChrisD_	hi
+ blackburn	hi
+ ChrisD_	has anyone seen this error with shogun 1.0.0 when switching to a guassian kernel? [WARN] Thread creation failed (thread 0 of 14) with error:'Success'
+ blackburn	ChrisD_: no, what is your os?
+@sonney2k	ChrisD_, do you have a small example to reproduce?
+ ChrisD_	redhat
+@sonney2k	*small and reproducible*
+@sonney2k	and which $LANG is this
+ ChrisD_	python module
+ blackburn	sonney2k: would you mind to place arpack and lapack things into mathematics/libs?
+@sonney2k	blackburn, why not just mathematics/ ?
+ blackburn	sonney2k: well no difference
+ blackburn	hehe
+@sonney2k	ChrisD_, please give us an example such that we can debug
+ CIA-3	shogun: Soeren Sonnenburg master * rb6d03b7 / (6 files): move inline functions from .h to .cpp - http://git.io/FLiwIA
+ ChrisD_	sure just looking for the exact line where this fails
+@sonney2k	ChrisD_, thx
+@sonney2k	gtg
+@sonney2k	cu
+-!- blackburn [~blackburn@188.168.4.53] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.168.4.53] has joined #shogun
+@sonney2k	Re
+ CIA-3	shogun: Sergey Lisitsyn master * rf55f818 / (14 files in 2 dirs): Added single precision LAPACK and ARPACK support, changed preprocessors according to new interface - http://git.io/QZd-HQ
+ CIA-3	shogun: Sergey Lisitsyn master * r236bb14 / (8 files in 3 dirs): Merge branch 'master' of github.com:shogun-toolbox/shogun - http://git.io/PKr5ig
+ blackburn	sonney2k: single precision is now supported
+ blackburn	single precision NLDR preprocessors to go
+@sonney2k	OK
+ blackburn	OK? :)
+@sonney2k	you mean in addition to double precision
+@sonney2k	?
+ blackburn	sonney2k: yes
+ blackburn	sonney2k: in single precision we could embed even 20K vectors
+ blackburn	*on my machine
+ blackburn	*without so much pain
+@sonney2k	I see
+ blackburn	sonney2k: the only problem I see - how to template only for float32_t and float64_t?
+ blackburn	will implementing it only for float{32,64} work?
+ blackburn	ah nevermind, I will think about it
+@sonney2k	yes
+ blackburn	code duplicating is pretty bad way
+@sonney2k	ChrisD_, blackburn I found a simple way to trigger the issue: just run regression_svrlight_modular.py with 10 threads
+ shogun-buildbot	build #303 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/303  blamelist: blackburn91@gmail.com
+@sonney2k	ahh we need heiko
+ blackburn	oh
+ blackburn	my fault
+ ChrisD_	Thanks, how do i go about printing the line number where it occurs?
+ CIA-3	shogun: Sergey Lisitsyn master * rea5f083 / src/shogun/preprocessor/KernelLocallyLinearEmbedding.cpp : Removed wrong include from KLLE - http://git.io/rJAmzQ
+@sonney2k	obj.io.enable_file_and_line()
+@sonney2k	where obj is some shogun object
+@sonney2k	#$#J@KL$J%!?!!!
+@sonney2k	who thinks windows 7 is *the* evolution
+@sonney2k	one cannot even install it
+@sonney2k	blackburn, wouldn't it be nice to have some function in evaluation for the curve stuff that gives you the bias to achieve a certain fpr / tpr etc?
+@sonney2k	blackburn, could you please also move the inline functions from the evaluation/*.h to the .cpp?
+@sonney2k	blackburn, I think it is better to have just one arpack.h/cpp and then implement everything underneath via templates
+@sonney2k	ChrisD_, I don't understand why it is failing...
+@sonney2k	does not make any sense
+ ChrisD_	where can i find the necessary data files to run the example file?
+ ChrisD_	maybe i can make sure that code produces the same error
+@sonney2k	ChrisD_, just do git submodule update --init from the git root dir
+@sonney2k	shogun/ folder
+@sonney2k	(not shogun/src/shgoun)
+ blackburn	sonney2k: still here?
+ blackburn	(01:04:37 AM) sonney2k: blackburn, wouldn't it be nice to have some function in evaluation for the curve stuff that gives you the bias to achieve a certain fpr / tpr etc? ---------- didn't understand
+ blackburn	(01:04:37 AM) sonney2k: blackburn, wouldn't it be nice to have some function in evaluation for the curve stuff that gives you the bias to achieve a certain fpr / tpr etc? -------- will do
+ blackburn	(01:23:01 AM) sonney2k: blackburn, I think it is better to have just one arpack.h/cpp and then implement everything underneath via templates ---------- I can't because both single and double precision superlu headers will fail if described in one file
+--- Log closed Sat Oct 01 00:00:48 2011

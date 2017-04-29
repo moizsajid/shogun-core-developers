@@ -1,0 +1,372 @@
+--- Log opened Mon Jan 13 00:00:50 2014
+-!- sonne|osx [~sonne@f053041054.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx_ [~sonne@e178247164.adsl.alicedsl.de] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot	build #679 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/679
+@sonney2k	besser82, hurray http://hg.savannah.gnu.org/hgweb/octave/rev/b6b6e0dc700e - that will make swig work again
+-!- new_lido [~walid@41.218.177.73] has quit [Ping timeout: 252 seconds]
+-!- zxtx_ [~zv@c-98-223-196-32.hsd1.in.comcast.net] has joined #shogun
+-!- new_lido [~walid@41.218.177.223] has joined #shogun
+-!- sonne|osx [~sonne@f053041054.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+ besser82	sonney2k:  :D
+ besser82	sonne|work:  are you avail, yet?
+-!- new_lido [~walid@41.218.177.223] has quit [Ping timeout: 272 seconds]
+-!- new_lido [~walid@41.218.180.61] has joined #shogun
+-!- sonne|osx [~sonne@89.204.135.50] has joined #shogun
+-!- sonne|osx [~sonne@89.204.135.50] has quit [Quit: sonne|osx]
+ sonne|work	besser82: hey ho!
+-!- sonne|osx [~sonne@24-134-74-216-dynip.superkabel.de] has joined #shogun
+ besser82	sonne|work:  hey!
+ besser82	sonne|work:  you still need that rpm-stuff???
+ sonne|work	besser82: yes please
+ besser82	sonne|work:  to which mail-addy?
+ sonne|work	besser82: Soeren.Sonnenburg@tomtom.com
+-!- sonne|osx [~sonne@24-134-74-216-dynip.superkabel.de] has quit [Quit: sonne|osx]
+ sonne|work	besser82: btw have you seen the buildbot did build and run most of the osx tests
+ sonne|work	just 40 of 900 or so failed
+ besser82	sonne|work:  not yet; currently triaging all new info, which came in since yesterday  ;)
+ sonne|work	besser82: configuration was pretty difficult due to the mac having /usr/bin/python and /usr/local/bin/python (both the same 2.7.5 version...)
+ besser82	sonne|work:  lemme guess, one is sys other is mac-ports, rye?
+ sonne|work	besser82: no brew !
+ sonne|work	besser82: did you sent the .spec ?
+ besser82	sonne|work:  spec && example tarball just out
+ besser82	sonne|work:  so why there is two python interp on OSX???
+ sonne|work	besser82: well I don't use mac ports but brew!
+ besser82	sonne|work:  so one is sys other brew?
+ sonne|work	yes
+ besser82	sonne|work:  I see...
+ sonne|work	and the cmake python detection is just broken
+ besser82	sonne|work:  is it?
+ sonne|work	yes because when I give it the python in /usr/local/bin
+ sonne|work	it will choose the libs in /usr/lib/
+ sonne|work	-> kaboom
+ sonne|work	that is why wiking and others saw the crashes
+ besser82	sonne|work:  Then you'll need to pass the correct python-libs, too
+ sonne|work	so I needed to manually specify libs and includes and all good
+ sonne|work	yup
+ sonne|work	anyway we are in good shape to get stuff going now
+ besser82	sonne|work:  which is on all OS the same if ${ver_string} of interp and foreign libs match  :-P
+ sonne|work	well no
+ sonne|work	it should take the one from /usr/local first
+ besser82	sonne|work:  well cmake is supposed not to expect same versions from different builds on the same sys  ;)
+ sonne|work	alright .spec time
+* sonne|work off
+ besser82	sonne|work:  If it would prefer /usr/local and you use system's ver then the same will happen but different  ;)
+ sonne|work	besser82: indeed
+ besser82	sonne|work:  can you archieve what you intend with that spec-templ?
+ besser82	wiking:  mrunge says the problem is related to iscsi indeed
+ besser82	wiking:  you should possibly check the config of "Cinder"
+ besser82	wiking:  more he couldn't says to that actually, because someone setup thatopenStack with "devstack"  ;)
+ besser82	wiking:  which by far isn't the recommended way for production-systems  ;)
+ besser82	wiking:  https://www.berrange.com/posts/2012/11/20/what-devstack-does-to-your-host-when-setting-up-openstack-on-fedora-17/
+ besser82	wiking:  you possibly want to show the sys-admin this:  http://openstack.redhat.com/Main_Page
+ besser82	wiking:  that is a how-to-install openstack on CentOS / SL / Fedora  ;)
+ besser82	wiking:  for using that in production
+ besser82	sonne|work:  spec is sufficient?  Or need some help?
+ sonne|work	besser82: still messing with it - I guess it will do
+ besser82	sonne|work:  if you need some advise or sth; just ask
+ sonne|work	besser82: yeah one thing - what if the version number is not just 1.0.0 but I would want to attach some e.g. git hash or so?
+ besser82	sonne|work:  you should do that in Release:
+ besser82	sonne|work:  like Release: 1.${?githash}%{?dist}
+ besser82	sonne|work:  and set %global githash $sha in the uppeline of that spec
+ sonne|work	so I can add arbitrarily many dots at the back
+ sonne|work	at the end
+ besser82	sonney2k:  yes
+ besser82	sonney2k:  but the recommended way would be using that in Release
+ besser82	sonney2k:  since in Version: that might be a problem when comparing different version
+ besser82	sonney2k:  if you want, you can give me some toy-tarball and I can give you a working spec within few minutes
+ besser82	sonne|work:  ^^^
+ besser82	sonne|work:  since writing some spec for is like putting some butter on a slice of bread  :D
+ sonne|work	besser82: no no I want to do this myself - but thanks I will ask you
+ sonne|work	when I am stuck
+ besser82	sonne|work:  kk, as you wish  ;)
+ sonne|work	besser82: regarding version - in debian we do that by prepending the date
+ sonne|work	and then addign the git hash
+ besser82	sonne|work:  i know, but version comparison in rpm works a bit different
+ besser82	sonne|work:  if you need to write spec more frequently in future this might come in handy: https://fedoraproject.org/wiki/How_to_create_an_RPM_package
+ sonne|work	besser82: thx
+ besser82	sonne|work:  inp  ;)
+ besser82	sonne|work:  np  ;)
+ sonne|work	besser82: any idea how to force rpm creation to use legacy .gz and md5sum?
+ besser82	sonne|work:  rpmbuild-md5
+ sonne|work	besser82: the machine running things on is running *verystable*
+ besser82	sonne|work:  that is the legacy-rpm (rpm <= 4.0.0) generator
+ besser82	sonne|work:  NO whitespace before hiphen  ;)
+ sonne|work	well well
+ sonne|work	won't rpmbuild --define "_source_filedigest_algorithm md5"  \
+ sonne|work	   --define "_binary_filedigest_algorithm md5"
+ sonne|work	work too
+ sonne|work	besser82: ^^^ ?
+ besser82	sonne|work: should do the trick, too  ;)
+ besser82	sonne|work: but rpmbuild-md5 is guranteed to be avail in every RH-based dist until el5 will go EOL  ;)
+ sonne|work	yeah but I am not on a RH based distro atm :D
+ besser82	sonne|work:  so you are using rpmbuild on debian, rye?
+ sonne|work	heh
+ sonne|work	yes
+ besser82	sonne|work:  for such cases I can supply you tarball with basic chroot of el6 or Fedora  ;)
+ sonne|work	besser82: :P
+ sonne|work	besser82: is it possible to not strip the executables?
+ besser82	sonne|work:  yes, just moment...
+ besser82	sonne|work:  add "%global __os_install_post %{nil}" on top of spec  ;)
+-!- new_lido [~walid@41.218.180.61] has quit [Ping timeout: 245 seconds]
+-!- new_lido [~walid@41.218.172.145] has joined #shogun
+-!- new_lido [~walid@41.218.172.145] has quit [Ping timeout: 265 seconds]
+-!- new_lido [~walid@41.218.175.140] has joined #shogun
+-!- lisitsyn1 [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- lisitsyn1 is now known as lisitsyn_zwei
+ lisitsyn_zwei	:D
+-!- new_lido_ [~walid@41.218.175.140] has joined #shogun
+-!- new_lido_ [~walid@41.218.175.140] has quit [Remote host closed the connection]
+-!- new_lido_ [~walid@41.218.175.140] has joined #shogun
+-!- new_lido [~walid@41.218.175.140] has quit [Remote host closed the connection]
+-!- new_lido_ [~walid@41.218.175.140] has quit [Remote host closed the connection]
+-!- new_lido [~walid@41.218.175.140] has joined #shogun
+ besser82	lisitsyn_zwei:  hey ho!
+ besser82	sonne|work:  all went fine?
+ sonne|work	besser82: yes looks good
+ besser82	sonne|work:  nice to hear  ;)
+ besser82	sonne|work:  don't forget to remove the BuildArch:  tag if pkg contains binaries  ;)
+ sonne|work	besser82: did already :D
+ besser82	sonne|work:  ;)
+ sonne|work	besser82: how can I display information about the created rpm
+ sonne|work	like author / copyright etc
+ sonne|work	I so far only did rpm -qlp to check its content
+ lisitsyn_zwei	besser82: hey
+ sonne|work	lisitsyn_zwei: any notebook news?
+ besser82	sonne|work:  rpm --info -p $rpm
+ sonne|work	besser82: well not installed...
+ sonne|work	-qp
+ sonne|work	kthx
+ besser82	sonne|work:  sry, forgot that -q  ;)
+ sonne|work	alright
+* sonne|work food
+ besser82	sonne|work:  you may set an author by specifying that in "Vendor: " inside the spec...
+ besser82	lisitsyn_zwei:  sup?
+ lisitsyn_zwei	sonne|work: no not yet sorry
+ lisitsyn_zwei	sonne|work: finally broke my AC adapter yesterday spend a day trying to find a new one :D
+ lisitsyn_zwei	besser82: still doing some movements here? ;)
+ besser82	lisitsyn_zwei:  sure ;)
+-!- new_lido [~walid@41.218.175.140] has quit [Ping timeout: 276 seconds]
+-!- new_lido [~walid@41.218.178.232] has joined #shogun
+@wiking	besser82: it was that bug btw... thnx for the help though
+-!- lambday [67157e4d@gateway/web/freenode/ip.103.21.126.77] has joined #shogun
+ besser82	wiking:  allrighty!
+ sonne|work	besser82: seen that octave will have a patch to restore the version macro?
+ besser82	sonne|work:  yes, i've seen it  ;)
+ besser82	sonne|work:  thx 4 nfo!
+-!- FSCV [~FSCV@50.7.50.60] has joined #shogun
+-!- lisitsyn_zwei [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has left #shogun []
+-!- new_lido [~walid@41.218.178.232] has quit [Ping timeout: 260 seconds]
+-!- sonne|osx [~sonne@89.204.139.152] has joined #shogun
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+-!- sonne|osx [~sonne@89.204.139.152] has quit [Quit: sonne|osx]
+-!- zxtx_ [~zv@c-98-223-196-32.hsd1.in.comcast.net] has quit [Ping timeout: 272 seconds]
+-!- new_lido [~walid@41.218.175.88] has joined #shogun
+-!- zxtx_ [~zv@129-79-241-148.dhcp-bl.indiana.edu] has joined #shogun
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	hello hello
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has joined #shogun
+ pickle27	meeting?
+@iglesiasg	pickle27, we can start it
+@iglesiasg	:D
+ pickle27	I still worry I somehow messed up UTC
+@iglesiasg	I don't think so, the time is right
+@iglesiasg	otherwise, we are both wrong hehe
+@iglesiasg	pickle27, so we will become mentors this year!
+ pickle27	yeah! Im excited!
+ pickle27	you're going to mentor to? won't you still be eligible?
+@iglesiasg	yes, I think I will be
+@iglesiasg	but I am not sure I can handle full time job + gsoc hehe
+ lisitsyn	hey there
+@iglesiasg	and I just started here in Netherlands so I guess it would not be a good idea
+@iglesiasg	pickle27, still, I will be eligible a couple of years more as PhD, so maybe I come back to apply...
+ pickle27	yeah especially if you can basically work on your phd as gsoc
+@iglesiasg	yep
+ lisitsyn	hmm what can I mentor :D
+@iglesiasg	world domination!
+@iglesiasg	:D
+ lisitsyn	okay probably plugin framework
+-!- gsomix [~gsomix@185.6.237.120] has joined #shogun
+ gsomix	hey, happy hacking time
+@iglesiasg	wow!
+@iglesiasg	buildbot is badly broken! http://buildbot.shogun-toolbox.org/waterfall
+@iglesiasg	integration tests failing hm
+ pickle27	anyways I added a project on OpenCV integration and examples to the idea list which I'd be happy to mentor
+ pickle27	I'd also be happy to help on any other projects or just be an extra shogun contact on a project
+ lisitsyn	okay guys I added two projects I would like to mentor
+ lisitsyn	:D
+ lambday	pickle27: hey... mentoring this year :D
+ lisitsyn	one pure C++ hardcore and one medium stuff
+ lambday	lisitsyn: which ones?
+ lisitsyn	lambday: Implement a framework for plugin-based architecture
+ lisitsyn	Implement an easy to use modelselection API
+-!- sonne|osx [~sonne@f053041054.adsl.alicedsl.de] has joined #shogun
+ lisitsyn	plugin stuff is likely to be quite tough
+ lisitsyn	we need a rockstar here D:
+@iglesiasg	lisitsyn, mentor yourself :P
+-!- sonne|osx [~sonne@f053041054.adsl.alicedsl.de] has quit [Client Quit]
+ lisitsyn	yeah and then write letters my lazy student is full of bullshit
+ lisitsyn	:D
+-!- sonne|osx [~sonne@f053041054.adsl.alicedsl.de] has joined #shogun
+ lambday	lisitsyn: among 60+ applicants, we're surely find one like david gilmour :D
+ lambday	heiko didn't join the meeting :(
+@sonney2k	lisitsyn, plugin framework sounds like mission impossible for gsoc
+@sonney2k	too complex
+@sonney2k	if we don't have the very exact idea how it should work
+ lisitsyn	sonney2k: yeah lets keep it but only if we find a rockstar
+@sonney2k	good evening gents
+@sonney2k	:)
+ lisitsyn	and if I have any kind of prototype
+ lisitsyn	that's true
+ lambday	good evening sonney2k
+@sonney2k	lisitsyn, well no we just need a very exact idea / protype then it is totally OK for gsoc even
+@sonney2k	but I don't see that to happen in the next few weeks
+@sonney2k	iglesiasg, actually buildbot is in the shape - besser82 did fix our test checks and now tests that fail really do fail ...
+ lisitsyn	sonney2k: why has it to happen next weeks ;)
+ lisitsyn	we can keep any idea up to the decision date, ain't it that?
+@sonney2k	lisitsyn, 3 weeks until gsoc app deadline :P
+ lisitsyn	but that's only orgs deadline
+ lisitsyn	we are not going to settle ideas
+ lisitsyn	can change them
+@sonney2k	well we did last years...
+@sonney2k	but sure you can add more
+@iglesiasg	I can take care of putting the ideas on the website once the time comes btw
+@iglesiasg	IIRC I did last year so I guess it is the best option
+@sonney2k	dammed brew is in bad shape here
+@sonney2k	maybe I need to reinstall
+@iglesiasg	for the gsoc application, I guess it is completely fine to recycle last years' stuff?
+@iglesiasg	there was another google doc with it I believe
+ pickle27	i thought our gsoc site was deffs one of the better ones last yer
+@iglesiasg	great! :)
+@sonney2k	btw vojtech wants to mentor too this time libqp for real
+@iglesiasg	pickle27, I think the OpenCV can be a very good idea btw
+@iglesiasg	pickle27, even when simple stuff, it should be possible to get some eye-candy
+@iglesiasg	:%s/when/with
+ pickle27	yeah totally, plus we can kind of piggy back off of their popularity
+@iglesiasg	true
+@iglesiasg	about the libqp project
+@iglesiasg	maybe we could aim at getting something easier to maintain that the libbmrm?
+@sonney2k	so we can recycle a long standing gsoc entry :)
+@sonney2k	iglesiasg, yeah maybe we try to really separate things out
+@iglesiasg	yep, that would be great
+@sonney2k	iglesiasg, pickle27 - btw it would be cool if you both could be our publicity team
+@sonney2k	iglesiasg, pickle27 we really need tweets / blog stuff and support the poor people trying shogun ;)
+@iglesiasg	I am really careless with twitter... always forget to send updates if I am not reminded
+@sonney2k	pickle27, are you more active?
+ pickle27	not overly but I can try to be
+@iglesiasg	helping people at IRC and mailing list is cool for me
+ pickle27	Im getting more into twitter these days
+@sonney2k	pickle27, well every now and then - currently we twitter every 3 months 5 items or so
+@iglesiasg	I should be able to idle at IRC from the job soon
+@sonney2k	would be better to have 1 item every week or so
+ pickle27	best way to get publicity is to answer on stackoverflow
+ pickle27	at least thats what I've seen
+@sonney2k	who wants to do that?
+ pickle27	scitkit has their twitter hooked into github
+ pickle27	but its super annoying
+@sonney2k	yeah no
+@iglesiasg	not cool not cool
+@sonney2k	no automated crap
+@iglesiasg	we would get a peak of followers followed by a peak of unfollowers after max two days
+@iglesiasg	pickle27, answering any sort of questions in stack overflow ?
+ pickle27	no like machine learning ones and reference how to do it in shogun
+@iglesiasg	I see
+ pickle27	I think a good idea would be to tweet for each new notebook
+@sonney2k	pickle27, yeah agreed - we had like 5 more or so since 3.0.0
+ pickle27	anyways I'll make a concerted effort to talk, tweet and share shogun stuff!
+@sonney2k	pickle27, also about our debian etc packages
+@sonney2k	and even minor releases
+@sonney2k	pickle27, btw any progress with the website?
+@sonney2k	iglesiasg, pickle27 it is good that we have this kind of publicity split - I am busy enough doing mloss.org updates and freshmeat and g+
+ pickle27	sure! - I should use our official twitter account then - is there a way to give me access easily
+@sonney2k	lisitsyn, often does news on the mailinglist
+@iglesiasg	pickle27, I will send you the data right away
+@sonney2k	iglesiasg, thanks :)
+ pickle27	sonney2k: I got it running locally and then haven't worked on it yet, but I will!
+@sonney2k	pickle27, cool
+@iglesiasg	pickle27, done!
+@sonney2k	I am currently completely reinstalling the osx buildbot (brew was broken...)
+ pickle27	iglesiasg: got it!
+@sonney2k	would anyone in the meantime help to get the few failing tests in python modular fixed?
+@iglesiasg	perfect
+@sonney2k	 97 - integration-python_modular-tester-statistics_kmm (Failed)
+@iglesiasg	sonney2k, the integration ones?
+@sonney2k	219 - integration-python_modular-tester-kernel_histogram_word_string_modular (Failed)
+@sonney2k	228 - integration-python_modular-tester-statistics_linear_time_mmd (Failed)
+@sonney2k	266 - integration-python_modular-tester-evaluation_clustering_simple (Failed)
+@sonney2k	267 - integration-python_modular-tester-structure_mutliclass_bmrm (Failed)
+@sonney2k	271 - integration-python_modular-tester-statistics_mmd_kernel_selection_single (Failed)
+@iglesiasg	yep those ones I meant
+@sonney2k	287 - integration-python_modular-tester-statistics_quadratic_time_mmd (Failed)
+@sonney2k	299 - integration-python_modular-tester-statistics_mmd_kernel_selection_combined (Failed)
+@sonney2k	yeah
+@iglesiasg	I can have a look starting in a couple of minutes
+@iglesiasg	hopefully it is just about generating the data for the tests again?
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+ sonne|osx	shogun-buildbot: force build --branch=develop 'osx2 - python'
+ shogun-buildbot	build #3 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ pickle27	hey guys random question, whats the process for submitting a PR to shogun again, you submit it and then someone with push rights reviews and merges right
+ pickle27	do the people with push rights merge their own PRs or do they wait for someone else to review and merge it for them
+ pickle27	I don't have push so it doesn't affect me, Im just curious
+-!- lambday [67157e4d@gateway/web/freenode/ip.103.21.126.77] has quit [Ping timeout: 272 seconds]
+@iglesiasg	pickle27, it depends
+@iglesiasg	no real rules have been spoken for this
+@iglesiasg	some people commit and push directly to upstream
+ pickle27	okay cool!
+@iglesiasg	IMHO making PR and waiting for some other to merge it is a safer approach
+ pickle27	yeah I agree
+ pickle27	at work we merge our own but you ask 2 other devs for a code review and after they give it the okay you merge your own
+ pickle27	btw sonney2k can I get added to the shogun org on github? I don't need push rights but I'd like to be in the org, there is teams for controlling access etc
+@sonney2k	pickle27, sure
+@iglesiasg	but anyway, providing that we are very few devs here, it is true that waiting for some other to check your stuff and merge is not usually practical
+@sonney2k	pickle27, you are in :)
+ pickle27	wooooo!
+@iglesiasg	the team is getting larger and larger :)
+* sonney2k wonders what the buildbot is doing
+@sonney2k	takes ages...
+@iglesiasg	I started to check the kmeans++ PR so didn't look at the failing examples yet :S
+ sonne|osx	iglesiasg: please try it out for real - the last kmeans merge was pretty messy unfortunately...
+@iglesiasg	arrgh, sorry
+@iglesiasg	it is not ready to merge yet anyway
+ sonne|osx	iglesiasg: I mean the center vectors were one big vector not an SGMatrix... so rather obvious stuff..
+ sonne|osx	shogun-buildbot: whats up ?
+ shogun-buildbot	build #3 of osx2 - python is complete: Failure [failed test libshogun test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20python/builds/3
+ sonne|osx	finally some error
+ sonne|osx	shogun-buildbot: force build --branch=develop 'osx2 - python'
+ shogun-buildbot	build #4 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ sonne|osx	alright lets try with eigen3 installed...
+ shogun-buildbot	build #4 of osx2 - python is complete: Failure [failed libshogun]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20python/builds/4
+ sonne|osx	hmmhh interesting protobuf error
+-!- besser82 [quassel@fedora/besser82] has quit [Remote host closed the connection]
+@sonney2k	ohh man
+@sonney2k	osx is a nightmare
+@sonney2k	they dropped libstdc++
+@sonney2k	and ship a libc++ that is not compat
+ pickle27	yikes
+@sonney2k	so when you have both like what you have with brew
+@sonney2k	stuff occasionally fails
+-!- vf [d975d879@gateway/web/freenode/ip.217.117.216.121] has joined #shogun
+-!- besser82 [quassel@fedora/besser82] has joined #shogun
+-!- vf [d975d879@gateway/web/freenode/ip.217.117.216.121] has quit [Quit: Page closed]
+@iglesiasg	all right guys, good night!
+@sonney2k	besser82, wiking any idea how to check for osx?
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+@sonney2k	in cmake I mean?
+-!- new_lido [~walid@41.218.175.88] has quit [Read error: Operation timed out]
+@sonney2k	shogun-buildbot, force build --branch=develop 'osx2 - python'
+ shogun-buildbot	build #5 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #5 of osx2 - python is complete: Failure [failed libshogun]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20python/builds/5
+@wiking	sonney2k: noup
+@wiking	sonney2k: they did not dropped it
+@wiking	sonney2k: you just need to set -stdlib=libstdc++
+@wiking	but i've enforced that for *_modular on osx
+@wiking	sonney2k: instead of brew just use macports
+@wiking	much more mature than brew
+ pickle27	sonney2k: we should get a higher res gravatar for shogun
+-!- pickle27 [d8bfe7da@gateway/web/freenode/ip.216.191.231.218] has quit [Quit: Page closed]
+--- Log closed Tue Jan 14 00:00:51 2014

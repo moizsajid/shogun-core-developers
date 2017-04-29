@@ -1,0 +1,441 @@
+--- Log opened Wed Apr 16 00:00:07 2014
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Thoralf Klein :develop * 5d51505 / src/shogun/features/SparseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/5d5150534100932ab59a1093b4e44e81ce4256b5
+ shogun-notifier-	shogun: Fixing control flow error (and a memory leak) found by coverity.  CID 26646
+ shogun-notifier-	shogun: tklein23 :develop * e8c6b21 / src/shogun/features/SparseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/e8c6b21c1dfbd36810cb09985d5f4ef5b41a2fcb
+ shogun-notifier-	shogun: Merge pull request #2140 from tklein23/coverity_error_cid_26646
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix control flow error (and a memory leak) found by coverity CID 26646
+-!- rho__ [~quassel@41.199.131.211] has joined #shogun
+-!- HeikoS1 [~heiko@0541877d.skybroadband.com] has joined #shogun
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has quit [Quit: Leaving.]
+-!- rho__ [~quassel@41.199.131.211] has quit [Ping timeout: 276 seconds]
+-!- newlido [~quassel@41.218.181.20] has joined #shogun
+ HeikoS1	thoralf: hey
+ thoralf	Hey ;)
+ HeikoS1	thoralf: thanks for sending all those fixes, I really like that. Just sending some comments to let you know I read this stuff :)
+ HeikoS1	thoralf: do you want to discuss this subset stuff?
+ HeikoS1	thoralf: oh and please add your name to the NEWs for the things you do
+ thoralf	Yeah, I added a new comment on the issue.
+ thoralf	(subset stack thing)
+ thoralf	We can do it here, but I'm missing the markup. ;)
+ HeikoS1	ok
+ HeikoS1	lets do it on github then :)
+ thoralf	I think my last one should make it clean (if it wasn't before)
+ shogun-notifier-	shogun: Thoralf Klein :develop * 7341997 / src/shogun/base/SGObject.cpp: https://github.com/shogun-toolbox/shogun/commit/7341997ed99b678ce78bb9d43e3d65437b16ead4
+ shogun-notifier-	shogun: Fix uninitialized variables found by coverity CID 26595
+ shogun-notifier-	shogun: tklein23 :develop * d8c919a / src/shogun/base/SGObject.cpp: https://github.com/shogun-toolbox/shogun/commit/d8c919abda5efaed42edc9d26d341058d20478c3
+ shogun-notifier-	shogun: Merge pull request #2141 from tklein23/coverity_error_cid_26595
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix uninitialized variables found by coverity CID 26595
+ shogun-notifier-	shogun: Thoralf Klein :develop * 01decf1 / src/shogun/features/streaming/StreamingDotFeatures.h: https://github.com/shogun-toolbox/shogun/commit/01decf1d51a947735c337a57f84f0040ed6784de
+ shogun-notifier-	shogun: Fixing unused variable found by coverity CID 26592
+ shogun-notifier-	shogun: tklein23 :develop * 69d48b4 / src/shogun/features/streaming/StreamingDotFeatures.h: https://github.com/shogun-toolbox/shogun/commit/69d48b4ab4a0282b9f80d686bab789ed7db73cb1
+ shogun-notifier-	shogun: Merge pull request #2142 from tklein23/coverity_error_cid_26592
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixing unused variable found by coverity CID 26592
+-!- abinash_panda [75ef5e6f@gateway/web/freenode/ip.117.239.94.111] has joined #shogun
+ abinash_panda	thoralf: Hi
+ thoralf	Hey Abinash
+ abinash_panda	thoralf: Thanks for your guidance and suggestions, my PR finally got merged :)
+ thoralf	abinash_panda: Cool.
+ thoralf	abinash_panda: I heard you're interested in other projects as well?  Do you mind telling something about it?
+ thoralf	No preasure, I'm just curious.
+ abinash_panda	thoralf: Yeah, sure. I have applied for another project for implementation of inference algorithms.
+ abinash_panda	thoralf: The library "pgmpy" is very new and does not have any implementation of inference algorithms, so I thought of contributing over there also.
+ thoralf	I see.
+ thoralf	Whats the project you applied for?  Which algorithms?
+ abinash_panda	thoralf: My project was: "pgmpy: Implementing Algorithms". I was planning on implementing on Map inference algorithms like belief propagation and graph cut.
+ thoralf	Sounds familiar. ;)
+ abinash_panda	thoralf: Yeah, shogun was inspiration for my project :)
+ thoralf	Oh, I read your mail.  So you already decided?
+ thoralf	Cool, congrats.
+ thoralf	Let's wait for the projects to be approved by google (deduplication still running till end of this week I think)
+ abinash_panda	thoralf: I am also eagerly waiting for it :)
+ thoralf	HeikoS1: Update ;)
+ thoralf	HeikoS1: Sun Jun 3 15:33:16 2012 -0700 added create_centering_matrix
+ HeikoS1	thoralf:  update
+ thoralf	HeikoS1: update :D
+ thoralf	Cool.
+ thoralf	I feel convergence.
+ thoralf	https://www.youtube.com/watch?v=xW1fXL3s7bk#t=84
+* thoralf hums "Can you feel it..."
+ HeikoS1	haha :)
+ HeikoS1	just added another annoying commetn
+ HeikoS1	thoralf: we are after the same thing
+ HeikoS1	you want clean design, I want to keep clean API
+ thoralf	Man!  set_burst_mode() is not a clean API! ;)
+ thoralf	Okay.  One second.
+ thoralf	Have to read. ;)
+ HeikoS1	thoralf: problem is CFeatures::add_subset
+ HeikoS1	what about a boolean flag, see update
+ thoralf	lol
+ thoralf	Okay.  Not perfect, but better.
+ thoralf	This way the caller may not forget unsetting the "burst mode"... still a flag, but, yeah.
+ thoralf	add_subset(foo, true) <-- Burst
+ thoralf	add_subset(foo) <-- Normal?
+ thoralf	HeikoS1:
+ HeikoS1	thoralf: yes
+ HeikoS1	thoralf: require some changes, but at least no new methods everywhere
+ HeikoS1	I mean otherwise we also blow up the CFeaures/CLabels/CCustomKernel interface
+ HeikoS1	since the new method has to be mapped through
+ thoralf	You still have to map this new parameter through, right?
+ HeikoS1	thoralf: yes
+ HeikoS1	thoralf: actually, we can have a method in the subsetstack
+ thoralf	Hm.  Just curious, what about your burst parameter?
+ HeikoS1	but a flag in CFeatures/CLabels
+ HeikoS1	thats just one new method in subset_stack without any other changes
+ thoralf	Didn't you need to pass the parameter as well?
+ HeikoS1	feats.get_subset_stack().set_burst_mode(true)
+ HeikoS1	call before and after, all other calls stay the same
+ thoralf	Ah, hole-punching. ;)
+ thoralf	I see.
+ HeikoS1	its also safe to forget to unset this mode
+ HeikoS1	because it will cause an error
+ HeikoS1	so no wrong results or anything
+ HeikoS1	(error when removing subsets)
+ HeikoS1	thoralf: actually, I still like this more than chaning all the methods (even with default parameter)
+ HeikoS1	but the flag solution is also kind of ok
+ thoralf	HeikoS1: Well, we don't have to agree anyway.  If you like your approach more, go for it. ;)
+ HeikoS1	I enjoy discussing it
+ thoralf	I didn't expect this discussion to deflate so much.
+ HeikoS1	want the best thing, what do you prefer?
+ HeikoS1	me neither ;)
+ thoralf	:D
+ thoralf	want the best thing <-- What you mean?
+ HeikoS1	thoralf: I dont want my solution, but the one that is the best one, thats why I want to get your input
+ thoralf	I see.
+ thoralf	The problem with this discussions usually is, every solutions has drawbacks (otherwise it would be easy to agree on one).
+ thoralf	So you're usually trying to do a weighted sum of drawbacks and advantages... but with different weights. ;)
+ HeikoS1	true, but what is your opinion
+ HeikoS1	what to do
+ HeikoS1	if I wasnt there what would you do?
+-!- newlido [~quassel@41.218.181.20] has quit [Quit: No Ping reply in 180 seconds.]
+ thoralf	You mean, which of the two remaining solutions?
+-!- newlido [~quassel@41.218.181.20] has joined #shogun
+ HeikoS1	thoralf: yes
+ thoralf	Okay, I'll toss a coin: http://xkcd.com/221/
+ thoralf	The one with the additional flag to add subset. :D
+ HeikoS1	haha
+ thoralf	Indeed, I'd try to fix the classes somehow... but as it seems this wouldn't work because one cannot both use cases with classes.
+ thoralf	s/classes/subclasses/
+ HeikoS1	no we actually need a hybrid mode here
+ HeikoS1	a class that can do both
+ HeikoS1	unfortunately
+ HeikoS1	thoralf: I mean
+ HeikoS1	thoralf: its really just the same
+ HeikoS1	because the add_subset code has to distinguish a case
+ HeikoS1	its just where the flag is coming from: member, or parameter of method
+ HeikoS1	so I dont really see a difference
+ HeikoS1	and then I dont see a reason to go for the one with lots of work
+ HeikoS1	ah I am terrible ;)
+ thoralf	You're trying the compromise of a compromise of a compromise?
+ thoralf	You can try that. ;)
+ HeikoS1	no, one option is my original suggestion :)
+ thoralf	I know.
+ shogun-buildbot	build #249 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/249  blamelist: tklein23 <tklein23@users.noreply.github.com>, Thoralf Klein <thoralf@fischlustig.de>
+ thoralf	Doing compromised until you have what you want.
+ thoralf	Girls do this usually, right? ;)
+ HeikoS1	thoralf: thats unfair, we only converged because I did not understand you in the beginngin
+ HeikoS1	thoralf: (but yes ;)
+ thoralf	Haha.
+ shogun-buildbot	build #2866 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2866  blamelist: tklein23 <tklein23@users.noreply.github.com>, Thoralf Klein <thoralf@fischlustig.de>
+ HeikoS1	thoralf: whats the compromise?
+ HeikoS1	thoralf: that you made?
+ HeikoS1	thoralf: staying up late? :D
+ thoralf	You're mean!
+ thoralf	Go punching holes in shogun. ;)
+ HeikoS1	I just found this: http://shop.github.com/
+ HeikoS1	I dont get what you mean. Pls suggest a better way :P
+ HeikoS1	thoralf: I baked a bread today, its about to be finished
+ HeikoS1	thoralf: smells super nice in here
+ thoralf	Btw., I'm not commenting "the issue"[tm] any more unless something really new happens.
+ thoralf	Just because everything has been said from my side.
+ thoralf	Repeating myself doesn't help, because you seem to understand my idea and it won't change by hearing it again. ;)
+ HeikoS1	thoralf: we can still add the new methods to CFeatures/CLabels
+ thoralf	And: Received awesome 50 messages from github just because someone[tm] likes commenting on github as much as I do.
+ HeikoS1	haha ;)
+ HeikoS1	hopefully your google groups them for you
+ thoralf	My google, wait.
+ thoralf	Let me check.
+ thoralf	Can't find it.
+ HeikoS1	thoralf: I think we should go for the extra method
+ HeikoS1	just checked what is needed, its not too much
+ HeikoS1	no flag, no set_burst
+ HeikoS1	just a new method
+ HeikoS1	also avoids the if then else mess in add_subset
+ thoralf	Cool.
+-!- khalednasr [~k.nasr92@41.69.180.172] has quit [Quit: Leaving]
+ shogun-buildbot	build #676 of nightly_all is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_all/builds/676  blamelist: tklein23 <tklein23@users.noreply.github.com>, Thoralf Klein <thoralf@fischlustig.de>
+-!- thoralf [~thoralf@91-65-136-198-dynip.superkabel.de] has quit [Ping timeout: 276 seconds]
+ shogun-notifier-	shogun: Wu Lin :develop * 26a7c3b / / (3 files): https://github.com/shogun-toolbox/shogun/commit/26a7c3b6b9f4703090298ec3b66195c04bcf86ae
+ shogun-notifier-	shogun: add the variational example
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 9576a72 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/9576a72a9539795b1f19d49266026b15a0e380cf
+ shogun-notifier-	shogun: Merge pull request #2154 from yorkerlin/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: add the variaitonal example program with document
+-!- HeikoS1 [~heiko@0541877d.skybroadband.com] has quit [Ping timeout: 258 seconds]
+ shogun-buildbot	build #2867 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2867  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-dwzvwkhrmbxkgjwr] has quit [Quit: Connection closed for inactivity]
+-!- abinash_panda [75ef5e6f@gateway/web/freenode/ip.117.239.94.111] has quit [Ping timeout: 240 seconds]
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- travis-ci [~travis-ci@ec2-54-198-160-97.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23086846
+-!- travis-ci [~travis-ci@ec2-54-198-160-97.compute-1.amazonaws.com] has left #shogun []
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Thoralf Klein :develop * 6f88225 / src/shogun/lib/SGMatrix.cpp: https://github.com/shogun-toolbox/shogun/commit/6f882257da9795169eafbf6410d84dc9f76ec899
+ shogun-notifier-	shogun: Wrong precondition in SGMatrix::compute_eigenvectors found by coverity CID 25834
+ shogun-notifier-	shogun: tklein23 :develop * 67a0417 / src/shogun/lib/SGMatrix.cpp: https://github.com/shogun-toolbox/shogun/commit/67a04174f9d0807c63e123b0c80f40c37f3e61c5
+ shogun-notifier-	shogun: Merge pull request #2145 from tklein23/coverity_error_cid_25834
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Wrong precondition in SGMatrix::compute_eigenvectors found by coverity CID 25834
+-!- thoralf [~thoralf@91-65-136-198-dynip.superkabel.de] has joined #shogun
+ shogun-buildbot	build #2868 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2868  blamelist: tklein23 <tklein23@users.noreply.github.com>, Thoralf Klein <thoralf@fischlustig.de>
+ shogun-notifier-	shogun: Thoralf Klein :develop * 328de72 / src/shogun/classifier/mkl/MKLMulticlassGLPK.cpp: https://github.com/shogun-toolbox/shogun/commit/328de7264f74653b3512d45cb6043818d62275e6
+ shogun-notifier-	shogun: Memory allocation issue detected by coverity CID 25814
+ shogun-notifier-	shogun: tklein23 :develop * 86f768f / src/shogun/classifier/mkl/MKLMulticlassGLPK.cpp: https://github.com/shogun-toolbox/shogun/commit/86f768f217c2904fb172004286e41b6d5c7c01d3
+ shogun-notifier-	shogun: Replace CALLOC my MALLOC
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: For @karlnapf.
+ shogun-notifier-	shogun: tklein23 :develop * 5021b1b / src/shogun/classifier/mkl/MKLMulticlassGLPK.cpp: https://github.com/shogun-toolbox/shogun/commit/5021b1b8294593098edf4e772f3ae5b70d5a73a8
+ shogun-notifier-	shogun: Merge pull request #2147 from tklein23/coverity_error_cid_25814
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Memory allocation issue detected by coverity CID 25814
+ shogun-notifier-	shogun: Thoralf Klein :develop * e3af082 / src/shogun/classifier/svm/ (2 files): https://github.com/shogun-toolbox/shogun/commit/e3af082e480edcd3a1a81f76b3f2c1cb4cff170a
+ shogun-notifier-	shogun: Uninitialized members in OnlineLibLinear found by coverity CID 26565
+ shogun-notifier-	shogun: tklein23 :develop * b134e33 / src/shogun/classifier/svm/ (2 files): https://github.com/shogun-toolbox/shogun/commit/b134e330b4af188b70b693ff461b02cca893e37d
+ shogun-notifier-	shogun: Merge pull request #2148 from tklein23/coverity_error_cid_26565
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Uninitialized members in OnlineLibLinear found by coverity CID 26565
+ shogun-notifier-	shogun: Thoralf Klein :develop * 6334ddf / / (2 files): https://github.com/shogun-toolbox/shogun/commit/6334ddf147e97c04ea0e148d5d658602843f662b
+ shogun-notifier-	shogun: Fixing leak in example libshogun/base_load_file_parameters.cpp
+ shogun-notifier-	shogun: tklein23 :develop * 428e7b1 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/428e7b19801b3e49c3407a2f83d2c7626943da67
+ shogun-notifier-	shogun: Merge pull request #2150 from tklein23/fix_base_load_file_parameters_leaks
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixing leak in example libshogun/base_load_file_parameters.cpp
+ shogun-notifier-	shogun: Thoralf Klein :develop * cb75140 / examples/undocumented/libshogun/base_load_all_file_parameters.cpp: https://github.com/shogun-toolbox/shogun/commit/cb751404be682da70c25dc25c80941d49726fd3a
+ shogun-notifier-	shogun: Fixing leak in example libshogun/base_load_all_file_parameters.cpp
+ shogun-notifier-	shogun: tklein23 :develop * fd65281 / examples/undocumented/libshogun/base_load_all_file_parameters.cpp: https://github.com/shogun-toolbox/shogun/commit/fd65281afde7075c5c984ca677d87c98b7f92f04
+ shogun-notifier-	shogun: Merge pull request #2152 from tklein23/fix_base_load_all_file_parameters_leaks
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixing leak in example libshogun/base_load_all_file_parameters.cpp
+ shogun-buildbot	build #2869 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2869
+ shogun-notifier-	shogun: Thoralf Klein :develop * 97b5d43 / src/shogun/lib/SGSparseVector.cpp: https://github.com/shogun-toolbox/shogun/commit/97b5d43afbafd3cd0439d827c8f192bd5b2b1a0c
+ shogun-notifier-	shogun: Fixing style issues in SGSparseVector.cpp using astyle.
+ shogun-notifier-	shogun: tklein23 :develop * 95d868e / src/shogun/lib/SGSparseVector.cpp: https://github.com/shogun-toolbox/shogun/commit/95d868ea9bdd7306a80a4d3ed9eb8f85efba764e
+ shogun-notifier-	shogun: Merge pull request #2138 from tklein23/style_issues_sgsparsevector
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixing style issues in SGSparseVector.cpp using astyle.
+ shogun-notifier-	shogun: Thoralf Klein :develop * 2ca6b28 / src/shogun/structure/StructuredModel.cpp: https://github.com/shogun-toolbox/shogun/commit/2ca6b2891ad83e3ad5f2427045cbcb3474d7bed0
+ shogun-notifier-	shogun: Uninitialized member in CResultset found by coverity CID 26464
+ shogun-notifier-	shogun: tklein23 :develop * 0e47927 / src/shogun/structure/StructuredModel.cpp: https://github.com/shogun-toolbox/shogun/commit/0e479270e38ea6bda8b73c73a51ea07b1a82c37d
+ shogun-notifier-	shogun: Merge pull request #2143 from tklein23/coverity_error_cid_26464
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Uninitialized member in CResultset found by coverity CID 26464
+ shogun-notifier-	shogun: Thoralf Klein :develop * 97a00ed / src/shogun/classifier/svm/OnlineSVMSGD.cpp: https://github.com/shogun-toolbox/shogun/commit/97a00ed160057228fd0033f4334cb61a88921d02
+ shogun-notifier-	shogun: Memory allocation issue detected by coverity CID 25812
+ shogun-notifier-	shogun: tklein23 :develop * fe79a98 / src/shogun/classifier/svm/OnlineSVMSGD.cpp: https://github.com/shogun-toolbox/shogun/commit/fe79a98bf386613bb4be0853400cf0088597717e
+ shogun-notifier-	shogun: Merge pull request #2146 from tklein23/coverity_error_cid_25812
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Memory allocation issue detected by coverity CID 25812
+ shogun-buildbot	build #2211 of bsd1 - libshogun is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2211  blamelist: Thoralf Klein <thoralf@fischlustig.de>
+ shogun-buildbot	build #2870 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2870  blamelist: tklein23 <tklein23@users.noreply.github.com>, Thoralf Klein <thoralf@fischlustig.de>
+-!- kislay|exams [~kislay@117.239.94.112] has joined #shogun
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has joined #shogun
+ lisitsyn	https://issues.apache.org/jira/browse/MAHOUT-1510
+ lisitsyn	okay guys while we were single core MR became outdated :D
+ shogun-buildbot	build #2871 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2871  blamelist: tklein23 <tklein23@users.noreply.github.com>, Thoralf Klein <thoralf@fischlustig.de>
+ thoralf	lisitsyn: Cool.  Finally!
+ thoralf	Ah, reported by Sebastian Schelter... well, he's very active in Stratosphere IIRC.
+ thoralf	And sits in Berlin.  Also doing Big Data stuff, but on the Technical University.
+-!- travis-ci [~travis-ci@ec2-184-72-179-56.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's tklein23's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23100556
+-!- travis-ci [~travis-ci@ec2-184-72-179-56.compute-1.amazonaws.com] has left #shogun []
+ thoralf	lisitsyn: Damn.  Travis is failing because of a ../data/toy/variational/X_dataset1 which I didn't touch.
+ thoralf	Anything I'm missing?
+ lisitsyn	thoralf: ehmm no idea :D
+ lisitsyn	this is deffs not your file
+-!- thoralf [~thoralf@91-65-136-198-dynip.superkabel.de] has quit [Ping timeout: 250 seconds]
+-!- kislay|exams [~kislay@117.239.94.112] has quit [Ping timeout: 240 seconds]
+-!- travis-ci [~travis-ci@ec2-54-198-160-97.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's tklein23's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23100587
+-!- travis-ci [~travis-ci@ec2-54-198-160-97.compute-1.amazonaws.com] has left #shogun []
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has quit [Ping timeout: 265 seconds]
+-!- lisitsyn [~qdrgsm@80.252.20.67] has quit [Ping timeout: 276 seconds]
+ shogun-buildbot	build #250 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/250  blamelist: Thoralf Klein <thoralf@fischlustig.de>
+-!- travis-ci [~travis-ci@ec2-54-80-56-12.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's tklein23's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23100704
+-!- travis-ci [~travis-ci@ec2-54-80-56-12.compute-1.amazonaws.com] has left #shogun []
+-!- adrin [~adrin@guest-42.mpi-inf.mpg.de] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-198-160-97.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's tklein23's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23100751
+-!- travis-ci [~travis-ci@ec2-54-198-160-97.compute-1.amazonaws.com] has left #shogun []
+-!- newlido_ [~quassel@41.218.177.127] has joined #shogun
+-!- newlido [~quassel@41.218.181.20] has quit [Ping timeout: 276 seconds]
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has joined #shogun
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has quit [Ping timeout: 240 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- HeikoS1 [~heiko@0541877d.skybroadband.com] has joined #shogun
+-!- HeikoS1 [~heiko@0541877d.skybroadband.com] has quit [Client Quit]
+-!- travis-ci [~travis-ci@ec2-54-80-56-12.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's tklein23's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23100788
+-!- travis-ci [~travis-ci@ec2-54-80-56-12.compute-1.amazonaws.com] has left #shogun []
+-!- kislay|exams [~kislay@117.239.94.112] has joined #shogun
+-!- newlido_ [~quassel@41.218.177.127] has quit [Remote host closed the connection]
+-!- travis-ci [~travis-ci@ec2-54-198-160-97.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's tklein23's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23100854
+-!- travis-ci [~travis-ci@ec2-54-198-160-97.compute-1.amazonaws.com] has left #shogun []
+-!- kislay|exams [~kislay@117.239.94.112] has quit [Read error: Connection reset by peer]
+-!- [BNC]dhruv13j [dhruv13j@gateway/shell/bnc4free/x-zhvbyfoelcvhkhls] has quit [Remote host closed the connection]
+-!- chakri [srichakrad@gateway/shell/bnc4free/x-cdbhudoxjppmjuli] has quit [Remote host closed the connection]
+-!- besser82 [quassel@fedora/besser82] has quit [Remote host closed the connection]
+-!- travis-ci [~travis-ci@ec2-54-80-56-12.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's tklein23's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23100899
+-!- travis-ci [~travis-ci@ec2-54-80-56-12.compute-1.amazonaws.com] has left #shogun []
+-!- besser82 [quassel@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- HeikoS1 [~heiko@0541877d.skybroadband.com] has joined #shogun
+-!- chakri [srichakrad@gateway/shell/bnc4free/x-rxhfmpvvjlbmquyf] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 7294cc8 / / (11 files): https://github.com/shogun-toolbox/shogun/commit/7294cc8410b67413f2abd7676091d7f2896ad879
+ shogun-notifier-	shogun: -added new in-place interface for adding subsets (not implementation yet)
+ shogun-notifier-	shogun: -updated documentation for subsets
+ shogun-notifier-	shogun: -fixed a missing SG_REF
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 0e4744f / examples/undocumented/libshogun/CMakeLists.txt: https://github.com/shogun-toolbox/shogun/commit/0e4744f9f2063a438b8c0e4bd14e7d5b90911c52
+ shogun-notifier-	shogun: removed variational example since it breaks travis
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 6487481 / / (12 files): https://github.com/shogun-toolbox/shogun/commit/64874814fe1141bfa468509adb0a95eb8d4cf760
+ shogun-notifier-	shogun: Merge pull request #2155 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: added new in-place interface for adding subsets
+ shogun-buildbot	build #2872 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2872  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #2873 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2873
+ shogun-notifier-	shogun: Viktor Gal :develop * 67acad9 / examples/undocumented/libshogun/variational_approx_example.cpp: https://github.com/shogun-toolbox/shogun/commit/67acad91d1d3d6d919ad217f10469519e63e777d
+ shogun-notifier-	shogun: Fix path for data set of variational_approx_example.cpp
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 012227d / src/shogun/features/Features.h,src/shogun/labels/Labels.h: https://github.com/shogun-toolbox/shogun/commit/012227d0dc77ffe5c51c52c7e0eb6a26530d48b8
+ shogun-notifier-	shogun: fixed doc typos
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 399e42b / src/shogun/features/Features.h,src/shogun/labels/Labels.h: https://github.com/shogun-toolbox/shogun/commit/399e42be8e4d9f9f766789ed533030d7c79079c3
+ shogun-notifier-	shogun: Merge pull request #2157 from karlnapf/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fixed doc typos
+ shogun-buildbot	build #2212 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2212
+ HeikoS1	shogun-buildbot: nightly_all restart
+ HeikoS1	shogun-buildbot restart nighly_all
+ HeikoS1	shogun-buildbot: force build nightly_all
+ HeikoS1	argh
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+ HeikoS1	ah here we go
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-mgkdkqmcniifkbsv] has joined #shogun
+-!- PirosB3 [~pirosb3@217.203.246.5] has joined #shogun
+-!- lambday [67157d51@gateway/web/freenode/ip.103.21.125.81] has joined #shogun
+ shogun-buildbot	build #677 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+-!- prams [~pratheek@122.166.178.35] has joined #shogun
+ shogun-notifier-	shogun: pl8787 :develop * d7204e3 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/d7204e39aaff7c239d807dcff1953d2171b19b8e
+ shogun-notifier-	shogun: #2119 Add IndexFeatures to CustomKernel and add document.
+ shogun-notifier-	shogun: liqiang :develop * 24fecc0 / / (5 files): https://github.com/shogun-toolbox/shogun/commit/24fecc01ada69bd53d450a71a591279f71db4e2b
+ shogun-notifier-	shogun: Fix comments and ERROR information.
+ shogun-notifier-	shogun: liqiang :develop * 01ec6cc / / (5 files): https://github.com/shogun-toolbox/shogun/commit/01ec6cc6885f5908fa94a9e18ee328db1a480c81
+ shogun-notifier-	shogun: Fixed indentation and removed copy function.
+ shogun-notifier-	shogun: pl8787 :develop * 9305434 / tests/unit/kernel/CustomKernel_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/93054342b9e66819ea4b602efbba0dc9c4eab8e8
+ shogun-notifier-	shogun: Fixed travis bug, EXPECT_NEAR needed.
+ shogun-notifier-	shogun: Heiko Strathmann :develop * dc87c12 / / (5 files): https://github.com/shogun-toolbox/shogun/commit/dc87c127ec2013918a7a87eb282644e868e64a07
+ shogun-notifier-	shogun: Merge pull request #2122 from pl8787/indexfeatures
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: #2119 Add IndexFeatures to CustomKernel
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ shogun-buildbot	build #677 of nightly_all is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_all/builds/677
+-!- adrin [~adrin@guest-42.mpi-inf.mpg.de] has quit [Remote host closed the connection]
+-!- lisitsyn [~qdrgsm@80.252.20.67] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-184-72-179-56.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23117799
+-!- travis-ci [~travis-ci@ec2-184-72-179-56.compute-1.amazonaws.com] has left #shogun []
+-!- prams [~pratheek@122.166.178.35] has quit [Remote host closed the connection]
+ shogun-buildbot	build #251 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/251  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- lambday [67157d51@gateway/web/freenode/ip.103.21.125.81] has quit [Ping timeout: 240 seconds]
+-!- PirosB3 [~pirosb3@217.203.246.5] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@217.203.246.5] has joined #shogun
+-!- PirosB3 [~pirosb3@217.203.246.5] has quit [Client Quit]
+-!- kislay|exams [~kislay@117.239.94.112] has joined #shogun
+ shogun-buildbot	build #2214 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2214  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, liqiang <liqiang036@126.com>, pl8787 <pl8787@gmail.com>
+-!- kislay|exams [~kislay@117.239.94.112] has quit [Read error: Connection reset by peer]
+-!- travis-ci [~travis-ci@ec2-54-198-160-97.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23118093
+-!- travis-ci [~travis-ci@ec2-54-198-160-97.compute-1.amazonaws.com] has left #shogun []
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot	build #252 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/252  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+-!- thoralf [~thoralf@91-65-136-198-dynip.superkabel.de] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-80-56-12.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23125587
+-!- travis-ci [~travis-ci@ec2-54-80-56-12.compute-1.amazonaws.com] has left #shogun []
+ thoralf	Hey.
+ thoralf	shogun-buildbot: force build --branch=develop 'coverity analysis'
+ shogun-buildbot	Something bad happened (see logs)
+ thoralf	Why always me?
+ thoralf	shogun-buildbot: Are you nuts?
+@wiking	thoralf: 'coverity analysis' -> 'coverity analysis'
+@wiking	wrong quotation marks
+ thoralf	shogun-buildbot: force build --branch=develop 'coverity analysis'
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+ thoralf	Thanks :)
+ thoralf	wiking: fyi, I added a new modelling file, hoping that it will recognize SG_NOTIMPLEMENTED properly.
+ thoralf	Not sure if it works, because it's usages look a bit strange: No parents and no ;
+@wiking	mmmm
+@wiking	that might need some modification on the bot side as well...
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Thoralf Klein :develop * acf5d73 / src/shogun/lib/SGMatrix.cpp: https://github.com/shogun-toolbox/shogun/commit/acf5d731c8401d32d288c591deea02bf031ca195
+ shogun-notifier-	shogun: Fixing centering matrix bug - found by coverity CID 25867
+ shogun-notifier-	shogun: Thoralf Klein :develop * 85e38e8 / src/shogun/lib/SGMatrix.cpp,src/shogun/lib/SGMatrix.h: https://github.com/shogun-toolbox/shogun/commit/85e38e8eb09d0cc333ca89cbff630b18ba5f7aad
+ shogun-notifier-	shogun: Removing centering-matrix instead of fixing it.
+ shogun-notifier-	shogun: tklein23 :develop * 8de063a / src/shogun/lib/SGMatrix.cpp,src/shogun/lib/SGMatrix.h: https://github.com/shogun-toolbox/shogun/commit/8de063a37842d9594c5b0bf30ed9453c3b664cbd
+ shogun-notifier-	shogun: Merge pull request #2144 from tklein23/coverity_error_cid_25867
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixing centering matrix bug - found by coverity CID 25867
+ shogun-notifier-	shogun: Thoralf Klein :develop * 9418724 / src/shogun/evaluation/CrossValidationPrintOutput.cpp: https://github.com/shogun-toolbox/shogun/commit/9418724fcf293fb235bb5b6217d12ac3f4071d80
+ shogun-notifier-	shogun: Fix memory problem from coverity CID 26288
+ shogun-notifier-	shogun: Thoralf Klein :develop * bacc4b9 / src/shogun/distributions/HMM.cpp: https://github.com/shogun-toolbox/shogun/commit/bacc4b93e7c4609bfc3161f875a43aeb9df889b5
+ shogun-notifier-	shogun: Missing break statement found with coverity CID 26157
+ shogun-notifier-	shogun: Thoralf Klein :develop * 655f3e2 / src/shogun/classifier/svm/LibLinear.cpp: https://github.com/shogun-toolbox/shogun/commit/655f3e25b009c156828d4c813eaa0802b178c40d
+ shogun-notifier-	shogun: Uninitialized Gmax_init (dead code) found by coverity CID 25869
+-!- kislay|exams [~kislay@14.139.41.150] has joined #shogun
+ shogun-buildbot	build forced [ETA 16m48s]
+ shogun-buildbot	I'll give a shout when the build finishes
+-!- sunil1337 [0e8bd057@gateway/web/freenode/ip.14.139.208.87] has joined #shogun
+ shogun-buildbot	Hey! build coverity analysis #8 is complete: Success [build successful]
+ shogun-buildbot	Build details are at http://buildbot.shogun-toolbox.org/builders/coverity%20analysis/builds/8
+-!- sunil1337_ [0e8bd057@gateway/web/freenode/ip.14.139.208.87] has joined #shogun
+-!- sunil1337 [0e8bd057@gateway/web/freenode/ip.14.139.208.87] has quit [Ping timeout: 240 seconds]
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has joined #shogun
+-!- sunil1337_ [0e8bd057@gateway/web/freenode/ip.14.139.208.87] has quit [Ping timeout: 240 seconds]
+@wiking	thoralf: void SG_NOTIMPLEMENTED(...)
+@wiking	for this i have to change the bot side as well...
+-!- kislay|exams [~kislay@14.139.41.150] has quit [Remote host closed the connection]
+-!- kislay|exams [~kislay@117.239.94.112] has joined #shogun
+@wiking	thoralf: i've just did the change... so the next time it does analysis it'll be active
+@wiking	basically in the coverity build tools i had to change a bit the config/user_nodefs.h
+ thoralf	Cool, thanks.
+ thoralf	:)
+-!- lisitsyn [~qdrgsm@80.252.20.67] has quit [Remote host closed the connection]
+-!- lisitsyn [~qdrgsm@80.252.20.67] has joined #shogun
+ shogun-buildbot	build #439 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/439  blamelist: Thoralf Klein <thoralf@fischlustig.de>, liqiang <liqiang036@126.com>, pl8787 <pl8787@gmail.com>, Viktor Gal <viktor.gal@maeth.com>, Heiko Strathmann <heiko.strathmann@gmail.com>, tklein23
+ shogun-buildbot	<tklein23@users.noreply.github.com>
+-!- khalednasr [~k.nasr92@41.69.253.96] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-80-56-12.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's tklein23's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23145235
+-!- travis-ci [~travis-ci@ec2-54-80-56-12.compute-1.amazonaws.com] has left #shogun []
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+ shogun-buildbot	build #253 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/253  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, liqiang <liqiang036@126.com>, pl8787 <pl8787@gmail.com>
+-!- kislay|exams [~kislay@117.239.94.112] has quit [Quit: Leaving]
+-!- khalednasr [~k.nasr92@41.69.253.96] has quit [Quit: Leaving]
+ shogun-buildbot	build #2215 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2215  blamelist: tklein23 <tklein23@users.noreply.github.com>, Thoralf Klein <thoralf@fischlustig.de>
+-!- newlido [~quassel@41.218.177.127] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-184-72-179-56.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's tklein23's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/23145251
+-!- travis-ci [~travis-ci@ec2-184-72-179-56.compute-1.amazonaws.com] has left #shogun []
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+--- Log closed Thu Apr 17 00:00:09 2014

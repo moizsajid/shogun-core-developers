@@ -1,0 +1,171 @@
+--- Log opened Wed Apr 08 00:00:34 2015
+-!- travis-ci [~travis-ci@ec2-54-226-91-37.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Soumyajit De's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/57548889
+-!- travis-ci [~travis-ci@ec2-54-226-91-37.compute-1.amazonaws.com] has left #shogun []
+ shogun-notifier-	shogun: lambday :develop * f4c4bf7 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/f4c4bf74f17fc60f6641e9534246dfe79e4a7f33
+ shogun-notifier-	shogun: Added matrix-type independent add in linalg
+ shogun-notifier-	shogun: Soumyajit De :develop * 701191d / / (3 files): https://github.com/shogun-toolbox/shogun/commit/701191d6ec6bb7703aa1d147cf55aa9e2f4da242
+ shogun-notifier-	shogun: Merge pull request #2811 from lambday/feature/linalg
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Added matrix-type independent add in linalg
+ shogun-buildbot	build #282 of trusty - libshogun - viennacl is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/282  blamelist: lambday <heavensdevil6909@gmail.com>
+ shogun-buildbot	build #283 of trusty - libshogun - viennacl is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/283  blamelist: Soumyajit De <heavensdevil6909@gmail.com>
+-!- travis-ci [~travis-ci@ec2-54-226-91-37.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Soumyajit De's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/57561631
+-!- travis-ci [~travis-ci@ec2-54-226-91-37.compute-1.amazonaws.com] has left #shogun []
+-!- PirosB3 [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+@lambday	lisitsyn: there?
+ lisitsyn	lambday: hey
+@lambday	lisitsyn: how are things? :D
+ lisitsyn	lambday: fine
+ lisitsyn	what about you?
+ lisitsyn	currently mapreducing some stuff around :)
+@lambday	lisitsyn: haha that's great!
+@lambday	lisitsyn: I have been working on hypothesis testing a bit
+@lambday	and lately (thanks to wu lin) doing some stuffs in linalg as well
+ lisitsyn	hmm cool
+ lisitsyn	I am on my way to refactor neural nets a bit
+@lambday	lisitsyn: one thing I want your opinion on
+ lisitsyn	sure
+@lambday	lisitsyn: check this benchmark https://github.com/shogun-toolbox/shogun/pull/2806
+@lambday	it comes from a discussion here https://github.com/shogun-toolbox/shogun/issues/2801
+ lisitsyn	oh something big
+@lambday	so long story short -
+@lambday	wu lin was using linalg methods without specifying any backend
+@lambday	and he's using SGMatrix
+ lisitsyn	okay I've seen there is a bug
+ lisitsyn	some forgotten loading right?
+@lambday	so if someone sets viennacl for global backend, then we're doing all the CPU-GPU data transfer
+@lambday	which stabs the performance at the heart
+ lisitsyn	yeah that's obvious
+@lambday	lisitsyn: that is fixed - we just needed a variant that returned the result matrix/vector
+@lambday	ok so what I was thinking is
+@lambday	how about a cmake switch to make SGMatrix as GPU one shogun-wise?
+@lambday	we can just inherit from a separate base
+@lambday	based on some preprocessor flag
+@lambday	that way, we can milk the performance boost to the fullest when GPU is used
+@lambday	this is totally possible even now with explicitly using CGPUMatrix+ViennaCL backed
+ lisitsyn	hmm let me think
+@lambday	but how about we use the same SGMatrix everywhere - with the backend changed in a switch
+@lambday	I am mainly worried because you see in the benchmark the penalty is unbearable
+ lisitsyn	I see no crime in such switch for sure
+ lisitsyn	but I have doubts we can hide gpu
+@lambday	but when we use GPU memory then gain makes me drool :D
+ lisitsyn	I mean you always have to care whether you transfer data or not
+ lisitsyn	btw check torch
+ lisitsyn	https://github.com/torch/torch7
+@lambday	lisitsyn: checking..
+ lisitsyn	neural guys love to use it
+@lambday	lisitsyn: what I was saying is something like
+@lambday	struct CPUMatrix
+@lambday	{
+@lambday	}
+@lambday	;
+@lambday	struct GPUMatrix {};
+@lambday	#ifdef USE_CPU
+ lisitsyn	oh you finally talk C++ now I understand ;)
+@lambday	lol
+@lambday	you got the idea
+@lambday	so two bases
+ lisitsyn	can we get more flexible with less compile time stuff?
+@lambday	what do you see the problem with that?
+ lisitsyn	I am a bit worried about switching everything
+ lisitsyn	I mean if sgmatrix is in gpu
+ lisitsyn	some stuff would break right?
+@lambday	I'm thinking what would that be..
+ lisitsyn	most of code is not written for gpu so we should expect bugs here
+@lambday	well that makes sense..
+@lambday	so devs should explicitly use gpumatrix if they wanna use one..
+ lisitsyn	lambday: it seems to me that sgmatrix should be kind of dynamic about that
+ lisitsyn	maybe there is some solution to make it a bit more dynamic
+@lambday	lisitsyn: what do you mean by dynamic?
+ lisitsyn	like sometimes it is gpu but sometimes it is cpu
+@lambday	lisitsyn: that's what I meant..
+@lambday	#ifdef USE_CPU
+ lisitsyn	I mean not globally
+@lambday	lisitsyn: okay.. so some param
+ lisitsyn	well say in neural nets I have all these parameters in sgmatrix
+ lisitsyn	that's cool to have it as gpu matrix
+ lisitsyn	but some other algorithms do not expect gpu
+@lambday	lisitsyn: yeah that makes sense...
+ lisitsyn	this doesn't fit your template linalg idea though
+@lambday	lisitsyn: what I don't like is that now we have two different types of matrices
+ lisitsyn	that's ok they are really different
+ lisitsyn	it seems there is no magic to treat them in the same way
+@lambday	yep.. apparently so :(
+@lambday	in linalg we're anyway treating them differently
+ lisitsyn	yeah
+ lisitsyn	I think sgmatrix should be like tensor in torch
+ lisitsyn	they have some clean api it seems
+ lisitsyn	btw what about sgmatrix->sgtensor? ;)
+@lambday	lol we do have that multidimensional array thing right?
+@lambday	maybe make that more like tension
+@lambday	oops
+@lambday	tensor
+@lambday	totally didn't mean tension :D
+ lisitsyn	hah
+ lisitsyn	that's actually super cool thing
+ lisitsyn	that they can generalize
+ lisitsyn	say you have RGB image
+@lambday	I'm assuming that it is efficient as well
+ lisitsyn	and then you got RGB-D and its 3d
+ lisitsyn	nothing works
+ lisitsyn	:D
+@lambday	voxels ? :D
+ lisitsyn	yeah like these
+ lisitsyn	and when aliens get control of humanity
+ lisitsyn	we get to 4d
+ lisitsyn	would be bad to rewrite code again
+@lambday	gotta check it then!
+ lisitsyn	aha
+ lisitsyn	ohh these MR tasks go so slow
+@lambday	it's in C !
+ lisitsyn	yeah lua + C
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- lambday [6a33f00b@gateway/web/freenode/ip.106.51.240.11] has quit [Ping timeout: 246 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot	build #995 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/995  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>, Wu Lin <yorker.lin@gmail.com>, Soumyajit De <heavensdevil6909@gmail.com>
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 244 seconds]
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 256 seconds]
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- HeikoS [~heiko@05453a2b.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 246 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Wu Lin :develop * f3a5315 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/f3a53156500cd286d3f39e1c3133a86b436b6f9f
+ shogun-notifier-	shogun: added the FITC Laplace method using lbfgs
+ shogun-notifier-	shogun: Wu Lin :develop * 7c1d31f / src/shogun/machine/gp/ (2 files): https://github.com/shogun-toolbox/shogun/commit/7c1d31f9df70e021577c4750d674eedd6a222902
+ shogun-notifier-	shogun: add comments
+ shogun-notifier-	shogun: Wu Lin :develop * 92b55e5 / tests/unit/machine/gp/SingleFITCLaplacianInferenceMethodWithLBFGS_unittest.cc: https://github.com/shogun-toolbox/shogun/commit/92b55e52f12810776b3d6d4f059ebe6d02a8e4a6
+ shogun-notifier-	shogun: remove commented codes
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 202951f / / (3 files): https://github.com/shogun-toolbox/shogun/commit/202951f26b6c2e022d7f9cba38a50a06b3b11818
+ shogun-notifier-	shogun: Merge pull request #2804 from yorkerlin/fitc-lbfgs
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fitc lbfgs
+ shogun-buildbot	build #284 of trusty - libshogun - viennacl is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/trusty%20-%20libshogun%20-%20viennacl/builds/284  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+-!- travis-ci [~travis-ci@ec2-54-226-91-37.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/57622020
+-!- travis-ci [~travis-ci@ec2-54-226-91-37.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #3402 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/3402  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- HeikoS [~heiko@05453a2b.skybroadband.com] has quit [Quit: Leaving.]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 256 seconds]
+-!- HeikoS [~heiko@laptop-net.gatsby.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- PirosB3 [~pirosb3@host33-99-dynamic.181-80-r.retail.telecomitalia.it] has joined #shogun
+-!- HeikoS [~heiko@laptop-net.gatsby.ucl.ac.uk] has quit [Ping timeout: 244 seconds]
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 244 seconds]
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Read error: Connection reset by peer]
+-!- kshitijk [~kshitijk@220.227.149.86] has joined #shogun
+-!- kshitijk [~kshitijk@220.227.149.86] has quit [Ping timeout: 246 seconds]
+--- Log closed Thu Apr 09 00:00:35 2015

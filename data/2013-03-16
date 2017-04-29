@@ -1,0 +1,261 @@
+--- Log opened Sat Mar 16 00:00:13 2013
+-!- FSCV [~FSCV@206.225.135.24] has quit [Ping timeout: 276 seconds]
+-!- FSCV [~FSCV@108.60.131.13] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 264 seconds]
+-!- FSCV [~FSCV@108.60.131.13] has quit [Quit: Leaving]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- hoijui [~hoijui@dslb-088-074-124-160.pools.arcor-ip.net] has joined #shogun
+@sonney2k	blackburn, we still have crashes. as soon as make prepare-release works we can go further
+@sonney2k	blackburn, feel free to run that your own and fix the crashers
+@sonney2k	blackburn, I don't have time today to work on it so any progress helps
+ blackburn	sonney2k: okay
+ wiking	check this plz and if u agree then let's merge it: https://github.com/shogun-toolbox/shogun/pull/941
+-!- hoijui [~hoijui@dslb-088-074-124-160.pools.arcor-ip.net] has quit [Ping timeout: 256 seconds]
+-!- votjak [~votjak@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+ wiking	check this plz and if u agree then let's merge it: https://github.com/shogun-toolbox/shogun/pull/941
+ wiking	oh sorry
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	hey blackburn
+ n4nd0	where can I find the pictures that compose https://dl.dropbox.com/u/10139213/shogun/pics.png?
+ blackburn	n4nd0: hey
+ blackburn	oh let me find it
+ blackburn	wiking: so -a is more widespread than --append?
+ wiking	yes
+ wiking	only linux has --apend
+ wiking	*--append
+ blackburn	wiking: let it merge then
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :master * c758bf6 / Makefile: https://github.com/shogun-toolbox/shogun/commit/c758bf6f045a7e169c5696fef4e6c616c0c7d6e3
+ shogun-notifier-	shogun: use -a for tee as that's more widespread among OSes
+ shogun-notifier-	shogun: Sergey Lisitsyn :master * 3d7cf1a / Makefile: https://github.com/shogun-toolbox/shogun/commit/3d7cf1a359a310f1e22eff5334b9fb6a3b684ea8
+ shogun-notifier-	shogun: Merge pull request #941 from vigsterkr/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: use -a for tee as that's more widespread among OSes
+ blackburn	n4nd0: I found a script that produced that but lost images :D
+ n4nd0	blackburn: hehe ok, I will play around with faces then
+ shogun-buildbot_	build #807 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/807
+ blackburn	n4nd0: I will prepare road signs HOG features
+ blackburn	n4nd0: but we'd need your machine to handle that :D
+ n4nd0	blackburn: sure, no problem
+ n4nd0	blackburn: is it to put more tests in tapkee?
+ blackburn	n4nd0: no, it is rather example
+ blackburn	n4nd0: yikes, the data is 1.4 gb
+ n4nd0	blackburn: wow how many feature vectors and dimension?
+ blackburn	n4nd0: 39209 of 3200d
+ n4nd0	wow
+ blackburn	n4nd0: I'd reduce it to somewhat 400d I think
+ blackburn	or it gets pretty hard to embed in reasonable time
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ wiking	sonney2k: around?
+-!- wiking [~wiking@info2k1.hu] has quit [Quit: leaving]
+-!- hoijui [~hoijui@dslb-088-074-124-160.pools.arcor-ip.net] has joined #shogun
+-!- heiko [~heiko@5ac1f59f.bb.sky.com] has joined #shogun
+ heiko	blackburn:  hi
+ blackburn	heiko: hey
+ heiko	just reading MulticlassSVM header file
+ heiko	we really should not remove warnings if documentation is missing by putting /** @brief MulticlassSVM */
+ heiko	same for the methods :)
+ blackburn	heiko: heh right
+ heiko	thats way too lazy :D
+ blackburn	heiko: I forgot about that bug report
+ heiko	blackburn: no bug here
+ blackburn	running prepare-release now
+ blackburn	heiko: what is wrong?
+ heiko	the guy just wrote bad code
+ blackburn	ahh
+ heiko	uninitialised memory etc
+ heiko	everything works
+ heiko	Ill send him a nice example back
+ heiko	and add to libshogun
+ blackburn	well we are who to blame for that people can write bad code :)
+ heiko	blackburn: you are totally right
+ heiko	but he did not even init his label memory
+ heiko	so there is no way we can avoid that in c++
+ blackburn	heiko: I am not sure about that - may be there is a way
+-!- votjak [~votjak@host-46-241-3-209.bbcustomer.zsttk.net] has quit []
+ blackburn	heiko: dst.template triangularView<Upper>() = src.template triangularView<Upper>();
+ blackburn	heiko: ^ that's valid C++
+ blackburn	:D
+ blackburn	sometimes I wanna cry
+ heiko	blackburn: ? :)
+ heiko	what happens if you do it
+ blackburn	heiko: dst.template[Space here]<Upper>()
+ blackburn	heiko: crazy C++
+ heiko	blackburn: am I allowed to commit stuff?
+ blackburn	heiko: yes, for a year already :D
+ heiko	blackburn:  you are a scherzkeks
+ heiko	I mean does it interfer with your release work?
+ blackburn	heiko: ah no, I just test if it works
+ heiko	ok
+ heiko	blackburn:  just ran into another multiclass svm bug :(
+ blackburn	heiko: scherzkeks is kind of 'joker'?
+ heiko	blackburn:  yes :)
+ blackburn	heiko: what is da bug?
+ heiko	blackburn: I will add the example
+ heiko	then it will fail
+ heiko	and you are forced to solve it :D
+ heiko	REQUIRE(set_svm(idx, svm),"SVM set failed")
+ heiko	multiclasslibsvm
+ heiko	line 194 fails
+ heiko	depending on inpu data
+ heiko	another really nice bug
+ blackburn	heiko: ahh there was some issue with that
+ heiko	blackburn:
+ heiko	it only occurs with multiple classes
+ heiko	Ill add example
+ heiko	and you have to increase number of classes from two to 3 or something to see what fails
+ blackburn	heiko: btw would be nice to finally release asap or it gets forever
+ heiko	blackburn:  agreed
+ heiko	this bug would be nice to fix
+ heiko	(also mention it in NEWS)
+ blackburn	heiko: ok
+ heiko	and the guy from the mailing list would be happy
+ heiko	blackburn  https://github.com/shogun-toolbox/shogun/pull/942
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Heiko Strathmann :master * 51e5322 / examples/undocumented/libshogun/ (2 files): https://github.com/shogun-toolbox/shogun/commit/51e53229e94afb57b898ac86931ab5f6238fc9bb
+ shogun-notifier-	shogun: added a modelselection example for multiclass lib svm
+ shogun-notifier-	shogun: Heiko Strathmann :master * a88be17 / examples/undocumented/libshogun/ (2 files): https://github.com/shogun-toolbox/shogun/commit/a88be17180977f29fa5fee9bbfa58bc87e0eecc3
+ shogun-notifier-	shogun: Merge pull request #942 from karlnapf/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: new example for model selection multiclass svm
+ heiko	blackburn: set number of dimensions/classes to 3 and you see the problem. If it works, could you permantenly increase it?
+ heiko	blackburn: I gotta go now, will write to the mailing list and see you tomoroow
+ blackburn	okay
+ blackburn	heiko: I'll check
+ heiko	blackburn: thanks!
+ heiko	blackburn: and a set_autolock method for multiclass would be great
+ heiko	or even a lock method :)
+ heiko	but thats for later
+ heiko	the set_atuolock would prevent the warning that is outputted in the ex.
+ heiko	blackburn:  ok gotta run now. bye!
+-!- heiko [~heiko@5ac1f59f.bb.sky.com] has left #shogun []
+ blackburn	bye
+-!- zxtx [~zv@75.59.238.10] has joined #shogun
+ shogun-buildbot_	build #354 of rpm1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/354  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@sonney2k	blackburn, any progress towards release?
+ blackburn	sonney2k: yeah I'll fix a bug pretty soon
+ blackburn	sonney2k: I am not sure what you meant by crashes
+ blackburn	I ran prepare-release (takes \infty) and there were no real crashes
+@sonney2k	blackburn, really?
+@sonney2k	it crashed here
+ blackburn	sonney2k: what exactly?
+@sonney2k	classifier_perceptron in octave static
+@sonney2k	features_dot_wdfeatures.m
+@sonney2k	classifier_svmocas_objective.m
+ blackburn	sonney2k: I tried octave_static examples - all ran
+ blackburn	there are a lot of integration test errors, but we can't fix it yet
+@sonney2k	yeah sure not a blocker
+@sonney2k	blackburn, btw make prepare-release takes so long b'coz it compiles shogun for all $LANGs
+@sonney2k	so now you know why I would love to have lower compile times
+ blackburn	sonney2k: we'd have to speedup swig for that
+ blackburn	:D
+ blackburn	[0.993604,1.002475] with alpha=0.050000, mean=0.998039
+ blackburn	sonney2k: minor bug in xval :D
+ blackburn	sonney2k: conf interval is not cut by maximum possible value
+ blackburn	and we tell users accuracy is in between 0.99 and 1.002 hah
+@sonney2k	blackburn, not swig is the problem...
+ blackburn	sonney2k: compilation of classes is pretty fast
+@sonney2k	libshogun is fast
+ blackburn	sonney2k: at least getting faster with new versions of compilers
+@sonney2k	but we would need split up version of the swig wrapper
+@sonney2k	blackburn, ohh octave seems to work now - the environment variable needs to be OCTAVE_PATH no longer OCTAVE_LOADPATH
+@sonney2k	*sigh*
+ blackburn	heh
+ shogun-notifier-	shogun: Sergey Lisitsyn :master * a77b5ba / src/ChangeLog: https://github.com/shogun-toolbox/shogun/commit/a77b5baaa22e07fb8e0b597b4452adce1abefcd7
+ shogun-notifier-	shogun: updated changelog
+ shogun-notifier-	shogun: Sergey Lisitsyn :master * fc7f16e / src/ChangeLog: https://github.com/shogun-toolbox/shogun/commit/fc7f16e0ba181fbd2b0c4d27be0cfccf6b55a562
+ shogun-notifier-	shogun: updated changelog
+ shogun-notifier-	shogun: Sergey Lisitsyn :master * c77af73 / examples/undocumented/libshogun/ (2 files): https://github.com/shogun-toolbox/shogun/commit/c77af730f686f4d6b29f14b4a647e45c17436160
+ shogun-notifier-	shogun: Merge branch 'master' of github.com:shogun-toolbox/shogun
+ shogun-notifier-	shogun: Sergey Lisitsyn :master * ec6e149 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/ec6e14953a4b192a3c9d57ed1a9bb59d39220abc
+ shogun-notifier-	shogun: Fixed bug with libsvm 3 classes
+ blackburn	argh
+ blackburn	sonney2k: yikes, these two commits were produced by prepare-release
+ blackburn	I am not sure what changelog is used for though
+ blackburn	except gpl stuff
+@sonney2k	blackburn, yeah I know
+@sonney2k	next time git reset --hard
+ blackburn	sonney2k: git reset HEAD~1 is enough
+@sonney2k	blackburn, but that is a soft reset then right? and you still have this change lying around
+ blackburn	sonney2k: they are erased but next commits I think
+ blackburn	sonney2k: argh we failed to release on my bday :D
+ blackburn	56 seconds ago
+@sonney2k	blackburn, when was it?
+ blackburn	sonney2k: today for you, yesterday for me
+@sonney2k	blackburn, then congrats. now you are approaching the thirties quickly :D
+ blackburn	sonney2k: hah thanks
+ blackburn	sonney2k: 8 more years to approach it
+@sonney2k	blackburn, so you can still become professor before that :)
+ blackburn	sonney2k: phd in doing useless things :D
+@sonney2k	argh I need a faster machine
+@sonney2k	blackburn, for example machine learning ;)
+ blackburn	sonney2k: yeah pretty useless stuff mostly
+@sonney2k	blackburn, so go to guu and cure cancer!
+ blackburn	heh
+ blackburn	guu sounds funny
+@sonney2k	blackburn, our json serialization is broken :/
+@sonney2k	serialization_complex_example.lua died
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 0e282c7 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/0e282c746ca3711b46d31496e6351c33663cbcc1
+ shogun-notifier-	shogun: release fixes
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: - disable json serialization for now
+ shogun-notifier-	shogun: - rename OCTAVE_LOADPATH -> OCTAVE_PATH
+ blackburn	sonney2k: hmm
+ blackburn	sonney2k: any reason?
+ blackburn	sonney2k: I mean it worked before right?
+@sonney2k	no idea
+@sonney2k	yes
+ blackburn	quite strange then
+ blackburn	I do not remember any chagnes
+ shogun-buildbot_	build #355 of rpm1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/355  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@sonney2k	blackburn, I couldn't find any either
+@sonney2k	https://research.microsoft.com/pubs/155552/decisionForests_MSR_TR_2011_114.pdf
+@sonney2k	nice intro to random forests
+-!- hoijui [~hoijui@dslb-088-074-124-160.pools.arcor-ip.net] has quit [Ping timeout: 252 seconds]
+ blackburn	sonney2k: actually I never tried them (shame on me)
+@sonney2k	blackburn, they work as good as SVMs
+ blackburn	sonney2k: I beat them on GTSRB
+@sonney2k	I used them to predict whether a molecule is a drug or not back in the days :D
+@sonney2k	GTRSRB?
+ blackburn	sonney2k: german traffic sign recognition benchmark
+@sonney2k	ahh
+ blackburn	sonney2k: funny thing happened with GTSDB (detection instead of recognition)
+ blackburn	sonney2k: they all got 1.0 ROCs
+@sonney2k	blackburn, yeah they cannot provide realvalued outputs
+@sonney2k	it is a majority vote
+@sonney2k	100 trees...
+@sonney2k	btw, bagged KNN
+@sonney2k	works also very very well
+ blackburn	sonney2k: http://benchmark.ini.rub.de/?section=gtsdb&subsection=results
+@sonney2k	no idea if that also has a standard name
+ blackburn	sonney2k: never heard about special name for that
+ blackburn	sonney2k: bagging is effective thing for anything I guess
+ blackburn	efficient
+ blackburn	:D
+@sonney2k	blackburn, are you in this table?
+ blackburn	sonney2k: I wish I was
+@sonney2k	some ELL_SVM2 won?
+ blackburn	sonney2k: I started my research on recognition after GTSRB and I just had no time to do GTSDB
+ blackburn	sonney2k: not sure what ELL means
+ blackburn	sonney2k: second place is integral channel features with multiple scaling I guess
+ blackburn	according to its name
+@sonney2k	blackburn, alright I am off to bed.
+ blackburn	sonney2k: good night
+@sonney2k	blackburn, get drunk and celebrate!
+ blackburn	sonney2k: I have to finish paper stuff
+@sonney2k	I hope we get prepare release to work
+@sonney2k	blackburn, then get drunk and finish paper stuff :)
+ blackburn	sonney2k: 1.5 years of accident writing jmlr paper is crazy
+@sonney2k	blackburn, well you could have had the paper about 1 year ago but you took the long route
+* sonney2k Zzzzz
+ blackburn	sonney2k: good thing is that it is fast now
+ blackburn	and being used for real
+ blackburn	by chemists though :D
+ blackburn	I expected ML/data analysis hah
+-!- zxtx [~zv@75.59.238.10] has quit [Ping timeout: 240 seconds]
+-!- zxtx [~zv@75-59-238-10.lightspeed.sntcca.sbcglobal.net] has joined #shogun
+ shogun-buildbot_	build #356 of rpm1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/356  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- zxtx [~zv@75-59-238-10.lightspeed.sntcca.sbcglobal.net] has quit [Ping timeout: 264 seconds]
+ shogun-buildbot_	build #357 of rpm1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/357  blamelist: Soeren Sonnenburg <sonne@debian.org>
+--- Log closed Sun Mar 17 00:00:13 2013

@@ -1,0 +1,634 @@
+--- Log opened Sun Mar 18 00:00:19 2012
+ blackburn	what do you call generic?
+ PhilTillet	Well, in the user guide there's "The code provides support to include your own coding, decoding, and base classifiers"
+ PhilTillet	Should also be the case for the C++ version I suppose :)
+ blackburn	just some well-designed thing
+ blackburn	it shouldn't be very templated or so
+ PhilTillet	okay, that's what I wanted to know
+ PhilTillet	I have done an overdose of templates :p
+ blackburn	we have not much templates here
+ blackburn	only Features stuff
+ PhilTillet	Well, ECOC seems complicated but interesting :)
+ PhilTillet	is there some Information Theory  involved?
+ blackburn	yes, somewhere deep inside
+ blackburn	main challenge here is how to decompose these bits
+ PhilTillet	Yes, constructing the matrix they call Mc
+ blackburn	but with diff distances between codes it involves some inf. theory things
+ blackburn	I mean practical
+ blackburn	i.e. when you have 10 classes with some complex dependencies
+ PhilTillet	I see
+ blackburn	how many bits you would like to use? what will each bit discriminate? and etc
+ PhilTillet	I see, each bit kind of represents a feature in this class doesn't it?
+ blackburn	no, it represents one discriminative classifier
+ PhilTillet	oh, yes
+ PhilTillet	one-versus-all, one-versus one, etc
+ blackburn	pretty interesting thing is these schemes are just some concrete ECOC matrices
+ PhilTillet	I love concrete things ^^
+ PhilTillet	I was used to one-versus-all methods but ECOC seems really more powerful
+ blackburn	more complex though
+@sonney2k	'evening gentlemen!
+ PhilTillet	'evening sonney2k !
+ blackburn	????? ????
+ blackburn	;)
+ PhilTillet	?????
+ blackburn	sonney2k: what kind of insomnia brought you here?
+ blackburn	PhilTillet: my chars were more informative ;)
+ PhilTillet	indeed :)
+@sonney2k	well I can read PhilTillet's ones :)
+ blackburn	oh really? what did he write? ;)
+ blackburn	sonney2k: back to release
+@sonney2k	good evening
+@sonney2k	blackburn, yeah so how are things?
+ blackburn	sonney2k: did you take any japanese? ;)
+@sonney2k	any progress?
+@sonney2k	yes
+ blackburn	sonney2k: I need heiko's help here, he would help later
+ blackburn	I hope tomorrow actually
+@sonney2k	ok so we won't make progress today?
+ blackburn	exactly
+ blackburn	sonney2k: but we've got TWO new ideas suggestions
+ blackburn	one author is here btw ;)
+@sonney2k	2 even?
+ blackburn	yeah check ml
+@sonney2k	I read about deep learning on the ml
+ blackburn	yes and opencl
+ blackburn	sonney2k: I have totally mixed up opinion on any NNs
+ PhilTillet	yes, i'm here :p
+ blackburn	we are pretty tight with slots and no idea what could we abandon
+ PhilTillet	just to be clear, my mail told that I had already implemented NN using OpenCL, but making OpenCL code for SVM is also an option
+@sonney2k	yeah that is the problem - the opencl idea is nice though
+ blackburn	opencl and svms is pretty tough thing!
+ PhilTillet	Agreed :) I wanted to do SVM rather than NN at first, but SVM is just on the Math point of view more complicated
+@sonney2k	problem with opencl (or any graphics card based stuff) is that you need to fit data into GPUs
+@sonney2k	and I mean 100%
+@sonney2k	otherwise you waste all your time in i/o
+@sonney2k	and then you need to have a linear memory access pattern to be fast
+ PhilTillet	Well, I thought about that indeed, and my NN stopped working for very big datasets
+ PhilTillet	because all the data did not fit in memory
+ PhilTillet	but transfering from GPU to CPU is very fast
+ blackburn	sonney2k: I am going to extract multitask kernel normalizers to shogun/multitask
+@sonney2k	yeah - so it can speed up very expensive algorithms
+@sonney2k	blackburn, not before the release I hope
+ blackburn	sonney2k: in my fork!
+ blackburn	;)
+@sonney2k	do wahtever you want in your fork :)
+ blackburn	you should be happy - my multitask will be developed under pull request approach ;)
+@sonney2k	PhilTillet, YMMV - for example when one trains an algorithm like perceptron or SVMSGD - it usually just does one pass over the data to do the whole learning
+ blackburn	sonney2k: can I integrate linux kernel in my fork? ;)
+@sonney2k	so in this case memory access is everything
+@sonney2k	blackburn, my fork has it already :D
+ blackburn	sonney2k: well it would be nice to have kernel in shogun/kernel
+ blackburn	don't you think so?
+ blackburn	I believe it is a kernel so it should be in kernel
+ blackburn	;)
+@sonney2k	PhilTillet, how big is the memory on GPUs nowadays? 4G?
+ PhilTillet	sonney2k: Well, on some high end graphic cards yes
+@sonney2k	PhilTillet, blackburn I have an idea though: mini-batches for liblinear
+@sonney2k	e.g. one loads say '1GB' into GPU memory
+@sonney2k	then does multiple liblinear passes
+@sonney2k	and then continues with the next chunk
+@sonney2k	until convergence
+ blackburn	would it converge? ;)
+@sonney2k	sure
+ PhilTillet	yes, seems like a good idea indeed
+ blackburn	multiclass may not
+@sonney2k	but I suspect kernel based SVMs would benefit most
+ blackburn	sonney2k: my idea was to use PhilTillet experience with opencl but not as main project :)
+@sonney2k	blackburn, well look they even have a related paper about this http://www.csie.ntu.edu.tw/~cjlin/papers/kdd_disk_decomposition.pdf
+@sonney2k	so it can surely work
+ blackburn	ok ;)
+ PhilTillet	Kernel Based SVMs on GPU would sure be more complicated than NN :p
+@sonney2k	PhilTillet, no there has also been a paper maybe 5 years back about libsvm on GPU
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+@sonney2k	isn't opencl C-like?
+@sonney2k	then it shouldn't be too difficult
+ PhilTillet	true that
+ PhilTillet	just the way to think algorithm is different
+ PhilTillet	but for basic kernels it shouldn't be that difficult indeed
+ PhilTillet	and the benchmarks on CUDA are indeed great : http://mklab.iti.gr/project/GPU-LIBSVM
+@sonney2k	PhilTillet, the most expensive operation that is done for SVMs is usually this one http://shogun-toolbox.org/doc/en/current/classshogun_1_1CKernelMachine.html
+ blackburn	wrong link ;)
+@sonney2k	PhilTillet, so if you manage to pre-load these coefficients alpha_i and examples (aka support vectors) x_i into memory
+ PhilTillet	well, this operation is naturally parallel :p
+@sonney2k	and have a fast implementation of kernel in opencl then it should be fast
+@sonney2k	PhilTillet, I guess that would be a good starting point - try to get this as fast as possible with gaussian kernel http://shogun-toolbox.org/doc/en/current/classshogun_1_1CGaussianKernel.html
+ PhilTillet	can it replace the "small patch" ? :p
+@sonney2k	with big patch you mean :-)
+ PhilTillet	Well, can I use viennacl::norm2 ? :D
+ PhilTillet	(as I said in my mail, I'm a contributor to an OpenSource project which implements already every linear algebra operations)
+ PhilTillet	(so if I can reuse this code, the patch will be really small :) )
+@sonney2k	PhilTillet, well just use it - I guess later one can extract just the needed parts or make viennacl an optional dependency
+ PhilTillet	this one is more challenging : http://shogun-toolbox.org/doc/en/current/classshogun_1_1CGaussianShiftKernel.html
+ PhilTillet	:p
+@sonney2k	there are other more important kernels
+@sonney2k	like linear and poly kernel (easy again)
+ PhilTillet	Okay
+ PhilTillet	so my homework is to benchmark these against an OpenCL implementation?
+@sonney2k	PhilTillet, benchmark and then it would of course be nice to have this as a patch to shogun
+ PhilTillet	okay
+ PhilTillet	could I just have some pointer concerning the involved files/folders ?
+@sonney2k	the above doxygen doc's point to the file names
+@sonney2k	the apply() method is the one in kernel machine that does this a_i y_i K(x_i, x)
+@sonney2k	summing
+ PhilTillet	oh yes, I see
+@sonney2k	but no problem - just start an isolated dry-run first
+@sonney2k	when a kernel machine is applied you have to assume x is setting in CPU memory (and x_i on GPU)
+@sonney2k	blackburn, any idea where we could squeeze in PhilTillet ?
+ blackburn	sonney2k: squeeze?
+ blackburn	I do not understand..
+ n4nd0	sonney2k: hi! I have a couple of doubts related to the SO project, I asked Nico by mail but probably he didn't get time to answer yet, maybe you can help me though
+@sonney2k	n4nd0, when did you email him?
+ n4nd0	sonney2k: last Thursday, maybe I have not been patient enough :S
+ n4nd0	sonney2k: we already exchanged a first mail
+@sonney2k	I susspect he will answer on monday...
+ PhilTillet	sonney2k: just a quick question that can save me a lot of time : in the CFeatures* argument to apply(), are the features stored in lines or column?
+ n4nd0	all right, then there is no reason to worry about :)
+ blackburn	PhilTillet: in simplefeatures features are stored column-wise
+ n4nd0	I will continue improving an example for qda
+ blackburn	vector by vector
+ PhilTillet	Okay :) And, internally it is stored in a ublas::matrix ?
+ blackburn	huh strange guess
+ blackburn	;)
+ PhilTillet	:D
+ blackburn	just float64_t*
+ PhilTillet	okay :D
+ PhilTillet	plain old matrix :p
+ PhilTillet	okay, homework seems tough enough :)
+@sonney2k	PhilTillet, well do the benmark first with some simulated data...
+ PhilTillet	yes :)
+ PhilTillet	Gaussian Kernel is rather straightforward, but more complicated is the apply() formula :D
+ PhilTillet	but I like challenge !
+ blackburn	why is it more complicated?
+ PhilTillet	hmmm
+ PhilTillet	you're right, it's not
+ PhilTillet	depends on how efficient i want the code to be
+ PhilTillet	as always
+ PhilTillet	can I have an order of magnitude of the size of a feature vectors, and the size of a dataset?
+ blackburn	you mean in apply?
+ PhilTillet	yes
+ PhilTillet	the N of the formula, and the size of x_i
+ blackburn	KernelMachine?
+ PhilTillet	yes
+ blackburn	line 248
+ PhilTillet	I meant, in practice
+ PhilTillet	:p
+ blackburn	hmm?
+ PhilTillet	hmmmm, concretely, does the feature matrix have more row or more columns?
+ blackburn	depends on data
+ PhilTillet	ok, :p
+ PhilTillet	(yes my question was weird)
+ blackburn	no general answer here
+ PhilTillet	okay :)
+ blackburn	it may be 4 2000d vectors
+ blackburn	or 2000 4d
+ blackburn	ok I'm falling asleep
+ blackburn	PhilTillet: in fact you may rewrite compute_batch thing in kernel
+ PhilTillet	well i'll firstly do it on randomly generated data :p
+ PhilTillet	i'm falling asleep too
+ PhilTillet	:D
+ blackburn	I mean no need to add anything to kernelmachine
+ PhilTillet	okay :)
+ PhilTillet	It was an interesting conversation, but I need to sleep if I want to survive ! I'll probably come back tomorrow ! good night :)
+ blackburn	sure
+-!- PhilTillet [52e82691@gateway/web/freenode/ip.82.232.38.145] has quit [Quit: Page closed]
+ blackburn	me too
+-!- blackburn [~qdrgsm@188.122.253.192] has quit [Ping timeout: 246 seconds]
+-!- GenX__ is now known as GenX
+-!- vikram360 [~vikram360@117.192.166.196] has joined #shogun
+-!- vikram360 [~vikram360@117.192.166.196] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.166.195] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- vikram360 [~vikram360@117.192.166.195] has quit [Ping timeout: 264 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 240 seconds]
+-!- vikram360 [~vikram360@117.192.161.63] has joined #shogun
+-!- vikram360 [~vikram360@117.192.161.63] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.161.63] has joined #shogun
+-!- harshit_ [~harshit@182.68.139.59] has joined #shogun
+-!- harshit_ [~harshit@182.68.139.59] has quit [Remote host closed the connection]
+-!- adneus [~anuj@117.195.38.237] has joined #shogun
+-!- vikram360 [~vikram360@117.192.161.63] has quit [Ping timeout: 264 seconds]
+-!- vikram360 [~vikram360@117.192.185.187] has joined #shogun
+-!- adneus [~anuj@117.195.38.237] has quit [Quit: Leaving]
+-!- vikram360 [~vikram360@117.192.185.187] has quit [Ping timeout: 252 seconds]
+-!- vikram360 [~vikram360@117.192.190.55] has joined #shogun
+-!- vikram360 [~vikram360@117.192.190.55] has quit [Ping timeout: 244 seconds]
+-!- vikram360 [~vikram360@117.192.183.103] has joined #shogun
+-!- vikram360 [~vikram360@117.192.183.103] has quit [Ping timeout: 250 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- vikram360 [~vikram360@117.192.166.74] has joined #shogun
+-!- blackburn [~qdrgsm@188.122.253.192] has joined #shogun
+ n4nd0	hi people!
+ n4nd0	I just pulled and found a compilation error
+ n4nd0	swig error : Unrecognized option -builtin
+ n4nd0	Use 'swig -help' for available options.
+ n4nd0	make[1]: *** [modshogun_wrap.cxx] Error 1
+ n4nd0	any clue about it?
+ blackburn	n4nd0: you've got old swig
+ blackburn	<2.0.4
+ n4nd0	oh, yes it looks like that
+ n4nd0	whereis swig
+ n4nd0	swig: /usr/bin/swig /usr/share/swig1.3
+ blackburn	ubuntu 11.10?
+ n4nd0	yes
+ blackburn	use package swig2.0
+ n4nd0	the one in the repositories is ok?
+ n4nd0	ok, thanks!
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 244 seconds]
+-!- surtani [0e8b5206@gateway/web/freenode/ip.14.139.82.6] has joined #shogun
+-!- harshit_ [~harshit@182.68.171.83] has joined #shogun
+-!- harshit_ [~harshit@182.68.171.83] has quit [Quit: Leaving]
+-!- harshit_ [~harshit@182.68.171.83] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- vikram360 [~vikram360@117.192.166.74] has quit [Ping timeout: 276 seconds]
+-!- vikram360 [~vikram360@117.192.167.167] has joined #shogun
+-!- puneetgoyal [~puneet@115.242.75.148] has joined #shogun
+-!- harshit_ [~harshit@182.68.171.83] has quit [Remote host closed the connection]
+-!- puneetgoyal [~puneet@115.242.75.148] has quit [Ping timeout: 260 seconds]
+-!- puneetgoyal [~puneet@101.63.34.173] has joined #shogun
+-!- in3xes [in3xes@49.249.17.196] has joined #shogun
+-!- puneetgoyal [~puneet@101.63.34.173] has quit [Quit: Leaving]
+-!- in3xes_ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes [in3xes@49.249.17.196] has quit [Ping timeout: 250 seconds]
+-!- in3xes_ [~in3xes@180.149.49.230] has quit [Ping timeout: 252 seconds]
+-!- GenX [~Sambhav@14.139.82.6] has quit [Read error: Connection reset by peer]
+-!- GenX [~Sambhav@14.139.82.6] has joined #shogun
+-!- xiangwang [~xiangwang@123.116.114.145] has joined #shogun
+-!- in3xes [in3xes@49.249.17.138] has joined #shogun
+-!- xiangwang [~xiangwang@123.116.114.145] has quit [Quit: Leaving]
+-!- vikram360 [~vikram360@117.192.167.167] has quit [Ping timeout: 252 seconds]
+-!- surtani [0e8b5206@gateway/web/freenode/ip.14.139.82.6] has quit [Ping timeout: 245 seconds]
+-!- adneus [~anuj@117.195.34.137] has joined #shogun
+-!- gsomix [~gsomix@188.168.14.44] has joined #shogun
+ gsomix	hi
+-!- Varagrawal [7bc955a2@gateway/web/freenode/ip.123.201.85.162] has joined #shogun
+ Varagrawal	Hey there!
+ Varagrawal	I am going through the tutorial and the first code minimal.cpp is giving me undefined reference error. :(
+ Varagrawal	I just can't get what's wrong
+ Varagrawal	I ran sudo apt-get install libshogun-dev and then opened up vi and wrote that code
+ Varagrawal	finally when I compile, errors
+ blackburn	you should use latest git
+ blackburn	shogun is outdated in the repo
+ Varagrawal	ah
+ Varagrawal	I have the git
+ Varagrawal	compile by source it is then, thanks :D
+ Varagrawal	compiled by source, stii getting the same error :(
+ gsomix	Varagrawal, maybe the code will say more? http://pastebin.com/
+ n4nd0	blackburn: I prepared a colorful example with multiclass qda :P
+ blackburn	nice
+ n4nd0	blackburn: take a look, what do you think http://dl.dropbox.com/u/11020840/multiclass_qda.png
+ blackburn	cool!
+ n4nd0	:)
+ n4nd0	blackburn: matplotlib has lot of cool options, are you used to work with it?
+ blackburn	sure
+ n4nd0	I just worked with matlab/octave plotting stuff before
+ blackburn	I have never worked with it :)
+ n4nd0	so it is quite new for me, but I like it :)
+ blackburn	it is *very* flexible
+ n4nd0	yes
+-!- in3xes [in3xes@49.249.17.138] has quit [Read error: Connection reset by peer]
+ n4nd0	I'll try to learn a bit more of it
+ n4nd0	I think it is always nice to have some kind of nice visualization of the stuff
+ blackburn	n4nd0: I bet this picture is not possible with matlab/octave: http://dl.dropbox.com/u/10139213/shogun/lle.png
+ n4nd0	blackburn: haha I don't really know!
+ n4nd0	I've never seen it before in matlab at least
+ n4nd0	it's reallly cool
+ n4nd0	with one of your dimensionality reduction algos?
+ blackburn	yes, LLE
+-!- vikram360 [~vikram360@117.192.188.74] has joined #shogun
+-!- Varagrawal [7bc955a2@gateway/web/freenode/ip.123.201.85.162] has quit [Ping timeout: 245 seconds]
+-!- varagrawal [0e8b7952@gateway/web/freenode/ip.14.139.121.82] has joined #shogun
+ varagrawal	Hey1
+ varagrawal	I forked the repo and installed from source
+ varagrawal	but when I compile the minimal.cpp program, I get an undefined reference error
+ varagrawal	any help?
+-!- karlnapf [~heiko@host86-181-153-176.range86-181.btcentralplus.com] has joined #shogun
+ karlnapf	blackburn, around=?
+ n4nd0	varagrawal: hey! can you copy paster the error somewhere?
+ blackburn	yeah
+ n4nd0	varagrawal: try here http://snipt.org/
+ karlnapf	hi
+ karlnapf	so you were interested in the migration stuff ?
+ blackburn	karlnapf: hi. we probably need to update testsuite
+ karlnapf	ok
+ blackburn	how can we do that?
+ karlnapf	ok, I will explain what I did there :)
+ varagrawal	yes
+ karlnapf	I introduced this new flag PARAM_VERSION
+ varagrawal	"/tmp/ccND136M.o: In function `main'"
+ karlnapf	which is written into each serialised object
+ varagrawal	"minimal.cpp:(.text+0x24): undefined reference to `shogun::init_shogun(void (*)(_IO_FILE*, char const*), void (*)(_IO_FILE*, char const*), void (*)(_IO_FILE*, char const*), void (*)(bool&, bool&))' minimal.cpp:(.text+0x29): undefined reference to `shogun::exit_shogun()' collect2: ld returned 1 exit status"
+-!- in3xes [~in3xes@59.163.196.5] has joined #shogun
+ karlnapf	blackburch, btw do you have time or should we talk later?
+ blackburn	karlnapf: so you introduced it after testsuite was serialized?
+ blackburn	sure, I have a lot
+ karlnapf	Well so far nothing changed
+ karlnapf	The goal was this:
+ karlnapf	You have an isntance of an object which you put a lot of effort into, and you save it to a file
+ karlnapf	then a new shogun version comes out which has this great feature you want to use
+ karlnapf	however the nasty developers added a new variable in the class of that particular instance you saved
+ karlnapf	so if you want to load with the new version
+ n4nd0	varagrawal: ok, so you said you managed to fork the repo and get the code locally right?
+ karlnapf	it does not work
+ n4nd0	varagrawal: did you also manage to compile the project?
+ varagrawal	@n4nd0
+ varagrawal	the install works perfectly
+ karlnapf	(alternative: a type change, matrix from float64 to float32)
+ blackburn	karlnapf: what if name changed?
+ varagrawal	Compiling the minimal.cpp gives the issue
+ varagrawal	http://snipt.org/ugajf9
+ karlnapf	same thing, wouldnt work
+ blackburn	no way to make it work?
+ karlnapf	But we want to allow people loading old version files
+ karlnapf	yes, that what I did :)
+ blackburn	ok more concretely
+ blackburn	I renamed labels to m_labels
+ karlnapf	Every shogun object now has a parameter map variable
+ blackburn	what should I do to make it work
+ karlnapf	There you can secify changes of parameters in between version
+ karlnapf	s
+ karlnapf	when you just change the c++ variable name, nothing will happen, only if you change the registered parameter name by the SG_ADD
+ karlnapf	lets have a look at one example
+ n4nd0	varagrawal: did you try with some of the examples that come with the project?
+ varagrawal	I literally copy-pasted the code in the tut
+ blackburn	aha so I need to restore names better
+ blackburn	"labels" I mean
+ blackburn	instead of "m_labels"
+ varagrawal	1 sec, I'll do that
+ karlnapf	you can change them,
+ blackburn	btw karlnapf, you have added some new parameter about locking
+ karlnapf	yes
+ blackburn	so we can't read testsuite right now :)
+ karlnapf	from now on, everytime we ad d the structure of objects, we should put this change into the parameter map
+ blackburn	ahha
+ karlnapf	ah ok.
+ blackburn	where?
+ karlnapf	have a look at examples/libshogun/base_migration_dropping_and_new.cpp
+ karlnapf	There you got two classes which are the same except for some parameters that are new/dropped
+ karlnapf	You need to do two things:
+ varagrawal	I am trying to run the OCR example, but the python script throws an error saying "No Module named modshogun"
+ karlnapf	first: put the change in the parameter map (same place where parameters are registered)
+ karlnapf	second: override the CSGObject::migrate methods
+ karlnapf	methods
+ karlnapf	method
+ karlnapf	(only one)
+ karlnapf	For simple changes like a name change/new parameters/dropped parameters theres a helper function which does most of the wprlk
+ karlnapf	work
+ karlnapf	For new parameters its particulary easy
+ karlnapf	just need to register the new parameter, then its ignored while loading old files
+ blackburn	do you have time right now to make it work with row_subset
+ karlnapf	dropped parameters work out of the box, just delete them, they are also then ignored while loading
+ blackburn	I guess it is now a new parameter
+ n4nd0	varagrawal: did you build with python support?
+ karlnapf	yes, could do that
+ karlnapf	I have some changes in my branch, let me check them
+ karlnapf	I will get back to you later with a pull-request :)
+ varagrawal	I ran ./configure
+ blackburn	thanks!
+ varagrawal	didn't specify explicit parameters
+ blackburn	karlnapf: I guess it is better to get m_labels -> labels as before
+ blackburn	I mean name string
+ varagrawal	the installation guide said that it would be detected on its own
+ karlnapf	you can change that, just add to map
+ karlnapf	have a look into
+ n4nd0	varagrawal: I think you should configure with --interfaces=python_modular so you can use shogun from python
+ n4nd0	varagrawal: take a look here http://www.shogun-toolbox.org/doc/en/current/installation.html
+ blackburn	I understand but I think it is not really needed
+ varagrawal	Will do that
+ blackburn	adding "m_" does not affect anything but codestyle
+ karlnapf	m_number_to_keep variable in the example I mentioned
+ blackburn	yeah I checked it already
+ karlnapf	this m_ shouldnt be in registered names anyway in my opinion
+ blackburn	ha!
+ blackburn	karlnapf: then could you please add row_subset map?
+ blackburn	I hope that would make things work
+ karlnapf	yes will check that
+ karlnapf	should :)
+ karlnapf	sorry for breaking it
+ karlnapf	we should add this to shogun code style: whenever you add variable to existing class, add parameter map and miration method
+ varagrawal	"However, just running  ./configure  will autodetect and configure for the available interfaces."
+ blackburn	pain in the ass thingy
+ karlnapf	or least the mapping, so that loading still works, and initialise with reasonable values in constructor, thats missing sometimes
+ varagrawal	That's what I did
+ karlnapf	Yes, true, however, we are using c++ :(
+ blackburn	varagrawal: ./configure --interfaces=python_modular
+ varagrawal	Yeah, did that
+ varagrawal	Do I need to install swig?
+ blackburn	exactly
+ CIA-64	shogun: Sergey Lisitsyn master * rc087f70 / src/shogun/machine/Machine.cpp : Restored machine parameters names - http://git.io/JZN4fA
+ varagrawal	swig2.0 ?
+ n4nd0	varagrawal: yes
+ karlnapf	backburn, I really would like to integrate this john platt probability sigmoid fitting, have you thought more about that?
+ karlnapf	currently doing by hand for a project
+ karlnapf	but this sucks
+ karlnapf	and also we should do simila stuff for the one-against-all svms
+ blackburn	karlnapf: not really.. well we have LR regularized liblinear
+ blackburn	for 2 class things
+ karlnapf	mmh
+ karlnapf	its not a lot of work
+ blackburn	I mean it is prob output already
+ karlnapf	I remember there has been a probabilities variable in labels
+ karlnapf	one year ago or so
+ karlnapf	What about just adding it again
+ blackburn	ah
+ blackburn	wait
+ blackburn	the idea is
+ blackburn	Labels (base class)
+ varagrawal	yowza
+ varagrawal	Think it'll work now :D
+ blackburn	BinaryLabels, ProbabilisticBinaryLabels
+ blackburn	MulticlassLabels, ProbabilisticMulticlassLabels
+ blackburn	MultipleLabels
+ blackburn	or so
+ blackburn	but for now it is ok to add probabilities in labels
+ blackburn	(as I think)
+ karlnapf	the other stuff is a lot of work though, many changes
+ blackburn	karlnapf: I would need some help with other stuff btw
+ karlnapf	other stuff?
+ blackburn	check machine/MulticlassMachine.cpp
+ blackburn	:)
+ blackburn	OvO training would require some subsetting stuff
+ blackburn	can you implement it?
+ blackburn	it is ~20 lines of code probably though :D
+ blackburn	but I was lazy to get myself into your subsetting thing
+ karlnapf	I see :)
+ karlnapf	subsetting of the features you mean
+ karlnapf	or for the locking?
+ blackburn	but it is not of any priority
+ blackburn	yeah
+ blackburn	no
+ karlnapf	make it possible to use it for x-val you mean this subsetting? :)
+ karlnapf	ok
+ karlnapf	yes I can do this
+ blackburn	I mean there should be subset only for 2 classes
+ blackburn	and machine trained on top of that
+ karlnapf	though I am ultra busy this week
+ blackburn	ah
+ blackburn	nevermind then!
+ karlnapf	If its non-priority lets talk about it next week or so
+ blackburn	or month
+ blackburn	cause I'm getting busier day by day as well
+ blackburn	:D
+ karlnapf	What are you currently doing btw?
+ blackburn	well working and studying
+ karlnapf	anythign special when you say coure getting busier?
+ blackburn	oh yeah I have done nothing yet with some studies
+ blackburn	:D
+-!- varagrawal [0e8b7952@gateway/web/freenode/ip.14.139.121.82] has quit [Ping timeout: 245 seconds]
+ blackburn	probably that is the time to start
+ karlnapf	 do you also get this combined kernel example error in python_modular?
+ blackburn	karlnapf: in fact it is all full of ERROR
+ blackburn	no idea WTF
+ blackburn	karlnapf: with make run-testsuite you may see errors with params
+ karlnapf	kk
+ karlnapf	What about all these new guys around here? :)
+ blackburn	karlnapf: well #shogun is getting active againg
+ karlnapf	pretty good I guess
+ karlnapf	oh year now I see all the parameter errors...
+-!- varagrawal [0e8b7952@gateway/web/freenode/ip.14.139.121.82] has joined #shogun
+ varagrawal	How do I assign a kernel to the OCR application?
+ blackburn	varagrawal: it is hardcoded I am afraid
+ varagrawal	I keep getting the error
+ blackburn	which?
+ varagrawal	"Please specify a kernel"
+ karlnapf	blackburn, to make this mapping work, we have to increase the parameter version in the current git
+ blackburn	I don't mind increasing anything
+ blackburn	:D
+ blackburn	I don't even mind shogun 1254.0
+ blackburn	varagrawal: aha got it
+ karlnapf	ok then change it to 1 :)
+ varagrawal	?
+ blackburn	varagrawal: I guess we need to retrain it
+ blackburn	and upload new state
+-!- vikram360 [~vikram360@117.192.188.74] has quit [Ping timeout: 240 seconds]
+ karlnapf	blackburn, should I update the NEWS file a bit or do you want to do that yourself?
+ blackburn	feel free to do that ;)
+-!- adneus [~anuj@117.195.34.137] has left #shogun ["Leaving"]
+ karlnapf	blackburn, seems like there is a bug around, I got a crash now for the migration
+ blackburn	ha!
+ karlnapf	I cannot figure out which code causes it
+ karlnapf	comes after this:
+ karlnapf	cd ../..//../testsuite/python_modular && \
+ karlnapf	( LD_LIBRARY_PATH=//usr/local/lib \
+ karlnapf	PYTHONPATH="//usr/local/lib/python2.7/dist-packages" python test
+ blackburn	huh
+ karlnapf	I never touched the test-suite so far, how does it work?
+ blackburn	just runs .py from examples
+ blackburn	and checks equality
+ karlnapf	ehm
+ blackburn	comparing with ones saved before
+ karlnapf	I got no error in make tests
+ karlnapf	but a memleak in make run-testsuite
+ karlnapf	that makes no sense then?
+ blackburn	memleak? which one fails?
+ blackburn	I've got no memleaks
+ karlnapf	averaged percepton, but I just changed code to make it use the migrations
+ blackburn	hmm
+ karlnapf	weiiird
+-!- varagrawal [0e8b7952@gateway/web/freenode/ip.14.139.121.82] has quit [Quit: Page closed]
+ karlnapf	but it loads some serialised files, doesnt it?
+ blackburn	yeah
+ blackburn	it loads and compares
+ karlnapf	where is the code for that?
+ blackburn	testsuite/python_modular
+ karlnapf	found it, messy :)
+ blackburn	tester.py
+ karlnapf	aaah
+ karlnapf	think I got the error
+-!- puneetgoyal [~puneet@101.63.95.73] has joined #shogun
+-!- varagrawal [0e8b7937@gateway/web/freenode/ip.14.139.121.55] has joined #shogun
+ varagrawal	hey
+ varagrawal	OCR is working
+ varagrawal	But now when I try to run msplicer
+ varagrawal	I get this
+ varagrawal	ERROR IMPORTING MODULES, MAKE SURE YOU HAVE SHOGUN INSTALLED
+ varagrawal	:-/
+ karlnapf	blackburn, doesnt work now, I will get back to you on this. Hopefully next week :)
+ karlnapf	will go now, bye all
+ n4nd0	karlnapf: bye!
+ blackburn	karlnapf: oh okay
+ blackburn	see you
+-!- karlnapf [~heiko@host86-181-153-176.range86-181.btcentralplus.com] has left #shogun []
+-!- in3xes [~in3xes@59.163.196.5] has quit [Ping timeout: 260 seconds]
+-!- in3xes [~in3xes@210.212.58.168] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 264 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ varagrawal	:n4nd0
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ varagrawal	For msplicer I am getting the error, ERROR IMPORTING MODULES, MAKE SURE YOU HAVE SHOGUN INSTALLED
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 245 seconds]
+-!- varagrawal [0e8b7937@gateway/web/freenode/ip.14.139.121.55] has quit [Quit: Page closed]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+@sonney2k	blackburn, hey...
+ blackburn	sonney2k: hey
+ blackburn	what's up?
+@sonney2k	is the website change / announcement  / blog  etc I did OK?
+@sonney2k	or do you have any suggestions?
+ blackburn	or it is ok for sure
+ blackburn	oh*
+ blackburn	why do you care so much about that announcement?
+@sonney2k	that is how we get students looking at the project?
+@sonney2k	!
+ blackburn	heh take a look how many students we have already ;)
+ blackburn	I mean they would come anyway
+@sonney2k	I don't think so - in particular good ones might not. anyway I send announcements to the popular machine learning mailinglists and google+ / debian planet
+ blackburn	aahh
+ blackburn	i see
+@sonney2k	scipy is missing still but then done
+ blackburn	so if I had suggestions
+ blackburn	how can you edit it
+ blackburn	:D
+@sonney2k	it is a website
+@sonney2k	and a blog I can change at any time
+ blackburn	I see
+@sonney2k	why would I be asking otherwise?
+@sonney2k	anyway, any news regarding release progress?
+ blackburn	sonney2k: yeah we fucked up
+ blackburn	:D
+@sonney2k	which means what?
+ blackburn	sonney2k: ok I have no idea how to fix all the things in testsuite right now
+ blackburn	sonney2k: apart from testsuite it is ok
+@sonney2k	without the testsuite working we cannot release though
+@sonney2k	regressions are much more annoying than broken new features
+ blackburn	I am pretty sure we've got no new regressions
+-!- in3xes [~in3xes@210.212.58.168] has quit [Ping timeout: 240 seconds]
+ blackburn	sonney2k: in fact I receive ERROR for each test in python modular
+-!- harshit_ [~harshit@182.68.171.83] has joined #shogun
+ blackburn	sonney2k: do you?
+ harshit_	hi everyone, just one quick question is there any built in function in shogun to multiply two matrices.I found one for vectors in CMath but not for matrices
+ blackburn	use cblas_dgemm
+ harshit_	is that a library or a function ?
+@sonney2k	blackburn, compiling now...
+ blackburn	harshit_: BLAS function
+ blackburn	sonney2k: ok, please let me know cause I really see no OK there
+-!- puneetgoyal [~puneet@101.63.95.73] has quit [Ping timeout: 244 seconds]
+-!- puneetgoyal [~puneet@101.63.95.73] has joined #shogun
+ harshit_	can you please provide me its prototype. i am not able to find it
+ blackburn	http://www.netlib.org/blas/dgemm.f
+ harshit_	thanks
+-!- l0nr4n [~l0nr4n@unaffiliated/l0nr4n] has quit [Ping timeout: 265 seconds]
+-!- l0nr4n [~l0nr4n@g225108058.adsl.alicedsl.de] has joined #shogun
+-!- l0nr4n [~l0nr4n@g225108058.adsl.alicedsl.de] has quit [Changing host]
+-!- l0nr4n [~l0nr4n@unaffiliated/l0nr4n] has joined #shogun
+ n4nd0	sonney2k: hi
+ n4nd0	sonney2k: have you taken a look to the graphical multiclass qda example?
+ n4nd0	just wanted to know if you think it's ok or have any suggestion
+ n4nd0	you can check how it looks like here http://dl.dropbox.com/u/11020840/multiclass_qda.png
+@sonney2k	n4nd0, yeah looks great :)
+ n4nd0	sonney2k: :)
+ blackburn	sonney2k: any news?
+-!- harshit_ [~harshit@182.68.171.83] has quit [Ping timeout: 250 seconds]
+-!- puneetgoyal [~puneet@101.63.95.73] has quit [Ping timeout: 264 seconds]
+-!- harshit_ [~harshit@182.68.171.83] has joined #shogun
+-!- harshit_ [~harshit@182.68.171.83] has quit [Client Quit]
+ n4nd0	good night people!
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- gsomix [~gsomix@188.168.14.44] has quit [Ping timeout: 244 seconds]
+-!- novice [b4953264@gateway/web/freenode/ip.180.149.50.100] has joined #shogun
+-!- GenX [~Sambhav@14.139.82.6] has quit [Read error: Connection reset by peer]
+-!- GenX [~Sambhav@14.139.82.6] has joined #shogun
+-!- novice [b4953264@gateway/web/freenode/ip.180.149.50.100] has left #shogun []
+-!- blackburn [~qdrgsm@188.122.253.192] has quit [Quit: Leaving.]
+-!- in3xes [in3xes@49.248.244.12] has joined #shogun
+--- Log closed Mon Mar 19 00:00:19 2012

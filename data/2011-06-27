@@ -1,0 +1,348 @@
+--- Log opened Mon Jun 27 00:00:24 2011
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- blackburn1 [~blackburn@31.28.40.202] has joined #shogun
+-!- blackburn [~blackburn@31.28.40.202] has quit [Read error: No route to host]
+-!- blackburn1 [~blackburn@31.28.40.202] has quit [Quit: Leaving.]
+-!- alesis-novik [~alesis@188.74.87.206] has quit [Quit: I'll be Bach]
+-!- heiko [~heiko@main.uni-duisburg.de] has joined #shogun
+ heiko	sonney2k, are you there?
+@sonney2k	yes
+ heiko	i have a question for the subset stuff we talked about
+ heiko	you suggested to just add a getter for the subset variable and then to call set/remove methods directly on it
+ heiko	However, some feature classes require some post set/remove stuff
+ heiko	such as determine_maximum_string_length for string features
+ heiko	Yet, this was handled by the wrapper methods
+ heiko	I thought about perhaps registering a callback function or something
+ heiko	or do you have a better idea?
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+@sonney2k	heiko, I guess I don't understand the problem
+ heiko	if you have a subset
+ heiko	and you remove it
+@sonney2k	I meant the setters / getters are needed only to get the actual subset indices
+@sonney2k	resp. set them
+ heiko	then, it is sometimes necessary to do some stuff afterwards
+ heiko	for example the maximum string length
+ heiko	changes if the subset changes
+@sonney2k	heiko, ok - but?
+ heiko	so, then if a subset is set, the maximum string length is wrong
+@sonney2k	heiko, well you have to update it of course after setting
+ heiko	ok thats my point
+ heiko	if I call string_features::get_subset::set_idx
+ heiko	then string_features does not know when the subset has changed
+@sonney2k	heiko, now I understand - I was assuming that you create a subset object and set that
+@sonney2k	not change the index of an existing subset object
+ heiko	ok, I see
+ heiko	so the subsets are never changed but alyways newly created?
+@sonney2k	I would do it this way
+ heiko	Ok, good that I asked then :)
+ heiko	then the set_subset methods of CSubset can go
+@sonney2k	I am not really sure if this is consistent to what we do usually
+* sonney2k is pondering
+ heiko	mmh ---
+@sonney2k	with features - if you change the matrix - but applied preprocs before I don't think preprocs will be applied again
+@sonney2k	so I would say to have some kind of 'update' function
+@sonney2k	that can be called manually
+ heiko	Can you explain this some more?
+@sonney2k	heiko, in the respective feature class you could have some update function that can be called manually to e.g. check for string length, compute nnz elements etc
+ heiko	ok, but this may be simply called in the get/set methods for the CSubset variable
+@sonney2k	heiko, yes or manually if someone changes just the idx in subset
+ heiko	but this should not be possible, or?
+@sonney2k	heiko, if documented supported it could - as you wish
+ heiko	ok
+* blackburn is wondering how it would look like if sonney2k and heiko was discussing it in deutsch
+ heiko	hehe :) it would look very deutsch
+ blackburn	how much deutsch? :D
+@sonney2k	blackburn, ganz doll deutsch eben
+ blackburn	sonney2k: last word sounds very rude in russian :D
+@sonney2k	blackburn, german is a rude language :D
+ heiko	sonney2k
+ heiko	another question for the subset stufdf
+ heiko	If the num_vectors variable is not touched
+ heiko	then its usage has to be replaced by some get_num_vectors() method which returns the number of vectors of the possibly set subset
+ heiko	Initialliy, before gsoc, we had something like this
+ heiko	but you suggested to use another variable to avoid overhead
+ heiko	but now, If this is removed again and we have only one variable and this get_num_vectors method, I have to change it all over again
+@sonney2k	you are right (as always)
+@sonney2k	so one thing is more readable the other is faster
+@sonney2k	(maybe)
+@sonney2k	actually - I prefer the more readable variant in this case
+@sonney2k	in every performance critical loop one could fetch the number of vectors before doing anything
+ blackburn	I love the wrapper I'm writing now!
+ heiko	ok, alright
+@sonney2k	blackburn, being in love is always a good thing :D
+ blackburn	I should not tell my gf :D
+ bettyboo	he
+ blackburn	sonney2k: is it possible to 'borrow' that cover tree code by Langford?
+@sonney2k	blackburn, I think so
+ blackburn	sonney2k: the only thing - it should be some object-like, right?
+ blackburn	not just a couple of funcs :)
+-!- blackburn [~blackburn@31.28.40.202] has quit [Quit: Leaving.]
+-!- alesis-novik [~alesis@188.74.87.206] has joined #shogun
+-!- heiko [~heiko@main.uni-duisburg.de] has quit [Quit: Leaving.]
+-!- f-x [~user@117.192.198.247] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Read error: Connection reset by peer]
+@sonney2k	mlsec, around?
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.230] has joined #shogun
+-!- blackburn [~blackburn@31.28.40.202] has quit [Read error: Connection reset by peer]
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+ serialhex	bettyboo's been demoted??
+ bettyboo	serialhex: I had been sick for a while just like Chris, such a wonder - cold is going around Samara and Tuebingen both :D
+ serialhex	well i hope you're feeling better bettyboo
+ bettyboo	serialhex: whatev!! it sepends on who you're asking!
+ blackburn	serialhex: :D
+ bettyboo	^_^
+ serialhex	whats going on blackburn??
+ blackburn	serialhex: nothing special, day by day :)
+ serialhex	cool cool
+ blackburn	what about you?
+ serialhex	not too much, just went on an appt to sell some knives & didn't sell NOTHIN!!!
+ serialhex	really kinda bummed, i think i'm gonna dive into some more code here in a min
+ blackburn	ah bad
+ serialhex	yeah
+ blackburn	I'm now writing prettiest arpack wrapper :)
+ serialhex	really??  is that sarcasm i hear in your voice or is it really pretty?? :P
+ blackburn	yes I try to make it pretty
+ serialhex	cool cool, i like pretty code.  it makes life *SOOO* much easier
+ blackburn	well I hope nobody will have to touch it - I should make it good
+-!- f-x [~user@117.192.198.247] has left #shogun ["ERC Version 5.3 (IRC client for Emacs)"]
+ blackburn	hey he uses emacs for irc??
+ serialhex	really... thats kind of interesting
+ serialhex	what dosn't emacs do?? make toast???
+ blackburn	serialhex: I guess everything
+ blackburn	hey it have dildo-mode :D
+ blackburn	has*
+ serialhex	lol :P
+-!- f-x [~user@117.192.198.247] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.230] has quit [Ping timeout: 246 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes1 [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes__ [~in3xes@180.149.49.230] has joined #shogun
+-!- in3xes1 [~in3xes@180.149.49.227] has quit [Ping timeout: 258 seconds]
+-!- in3xes__ is now known as in3xes1
+-!- mrsrikanth [~mrsrikant@59.92.81.39] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 258 seconds]
+-!- in3xes__ [~in3xes@59.163.196.5] has joined #shogun
+-!- in3xes [~in3xes@210.212.58.111] has joined #shogun
+-!- in3xes1 [~in3xes@180.149.49.230] has quit [Ping timeout: 240 seconds]
+-!- in3xes__ is now known as in3xes1
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 258 seconds]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- in3xes1 [~in3xes@59.163.196.5] has quit [Quit: Ooops..!!]
+-!- blackburn [~blackburn@31.28.40.202] has quit [Ping timeout: 255 seconds]
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+-!- blackburn [~blackburn@31.28.40.202] has quit [Read error: Connection reset by peer]
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+ blackburn	landmark isomap is wrong..
+ blackburn	mlsec: around?
+@mlsec	Not really
+ blackburn	mlsec: have you worked with L-Isomap? if so will ask you for some help later
+@mlsec	Nope. Just used standard isomap
+ blackburn	okay
+ blackburn	thanks anyway
+-!- blackburn [~blackburn@31.28.40.202] has left #shogun []
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+ CIA-32	shogun: Sergey Lisitsyn master * r596755e / (2 files): Temporarly remove LandmarkIsomap - http://bit.ly/kWUDDb
+ blackburn	ah that would cause errors
+ CIA-32	shogun: Sergey Lisitsyn master * r1114044 / (2 files): Restore LandmarkIsomap with not implemented tags - http://bit.ly/jtREp6
+@sonney2k	blackburn, ?
+ blackburn	sonney2k: ? ;)
+@sonney2k	not enough vodka today?
+@sonney2k	man you need your fuel!
+ blackburn	sonney2k: hhaha
+ blackburn	something like that..
+ blackburn	well I thought that erroneus algo should be here, then recalled that it would cause errors
+@sonney2k	I feel like merging with my evil twin
+ blackburn	shouldn't*
+ CIA-32	shogun: Soeren Sonnenburg master * ra42094c / (14 files in 6 dirs):
+ CIA-32	shogun: Merge pull request #139 from karlnapf/master
+ CIA-32	shogun: first working version of subset support for SimpleFeatures - http://bit.ly/khm2PZ
+@sonney2k	f-x, around?
+ f-x	sonney2k: yes
+@sonney2k	f-x, what is the issue with calling free_feature_vector()?
+@sonney2k	f-x, simplefeatures work like this:
+@sonney2k	1. you have either a feature matrix (in memory)
+@sonney2k	or some method to get just one feature vector
+@sonney2k	2. on top of this there can be preprocessor chains
+@sonney2k	these preprocessors can be applied inplace to the feature matrix or only on-the-fly to the feature vector
+@sonney2k	3. for that reason you might get copies of the feature vector and have to call free_*
+@sonney2k	but usually (i.e. when working with a feature matrix) this is just a NOP
+@sonney2k	f-x, OK?
+ f-x	sonney2k: okay.. there isn't any issue with adding free_feature_vector()
+ f-x	it's just that i've done delete[] vector in release_example()
+ f-x	so i have to change a bit of the code there
+ f-x	(to make it work for examples extracted from a CSimpleFeatures object)
+@sonney2k	yes ok
+@sonney2k	regarding streamingfile changes
+@sonney2k	don't you think you should rather derive from streamingfile?
+ f-x	sonney2k: yes.. "StreamingFile" is becoming too broad a class for the things it handles
+@sonney2k	and then override just the functions to return the examples etc
+@sonney2k	I mean in principle StreamingSimpleFeatures shouldn't change when streamingfile's design is right or?
+ f-x	i guess, but i wouldn't commit on that
+ f-x	because for now the input source has always been the FILE* pointer in StreamingFile
+@sonney2k	I think you could just override the get_*_vector functions and return what is in simplefeatures and that's it
+ f-x	StreamingSimpleFeatures won't change, but InputParser code may change somewhat
+ f-x	okay, so a class derived from StreamingFile specific to SimpleFeatures?
+@sonney2k	f-x, I think that makes more sense
+ f-x	which has its input source as a CFeatures*
+@sonney2k	f-x, or SimpleFeatures even
+ f-x	sonney2k: correct.. but now i'm thinking there will be too many new files
+ f-x	while writing the code to use all this
+ f-x	one would have to know about all the different kinds of Streaming*File
+ f-x	and Streaming*Features etc
+ f-x	i was wondering if something more convenient could be made for the user
+@sonney2k	f-x, maybe you are right
+ f-x	sonney2k: my ideal implementation would be:
+ f-x	CStreamingSimpleFeatures* feat=new CStreamingFeatures(a CSimpleFeatures object)
+ f-x	<and then the rest the same as for a normal file input>
+ f-x	or new CStreamingFeatures(an explicit CStreamingFile object)
+ f-x	<and the rest the same>
+ f-x	for a file based input
+ f-x	*sorry 'new CStreamingSimpleFeatures' everywhere
+@sonney2k	f-x, exactly
+@sonney2k	that is the most convenient
+ f-x	sonney2k: maybe just a two-way split -- one for reading from files/sockets, etc., and the other from features objects?
+@sonney2k	f-x, what I don't like is that the file class is getting so messy
+ f-x	sonney2k: me too.. it's going to be difficult to edit later
+@sonney2k	(and that free_feature_vector is missing currently)
+* blackburn is staring to FLOAT K parameter at LandmarkIsomap
+ blackburn	garcon, vodka!
+ f-x	sonney2k: i think i'll make StreamingFile-like (or maybe derived) class to deal purely with getting vectors from features objects
+@sonney2k	f-x, I really wonder how to simplify streamingfile further
+ blackburn	sonney2k: just take some vodka, it helps
+@sonney2k	I mean - in the end you only need a few functions
+@sonney2k	f-x, like get_*_vector stuff or get_string
+@sonney2k	or get_sparse_vector
+@sonney2k	no more than that
+ f-x	get_*_vector, where * includes simplefeatures etc. right?
+@sonney2k	So maybe you should make 3 base classes - one for simplefeatures, one for sparse and one for strings
+@sonney2k	and then you can overload these for ascii
+@sonney2k	etc
+@sonney2k	(etc here would then be StreamingFileFromFeatures or so)
+@sonney2k	blackburn, I am trying chocolate instead
+ blackburn	sonney2k: just try vodka, I'm telling you as old alcoholic :D
+ f-x	sonney2k: that should work. thinking of where i may have problems with that...
+@sonney2k	f-x, currently it is really becoming to messy I think. But sleep one night over it - maybe tomorrow you will see the problems clearly :)
+@sonney2k	blackburn, you are a freshman - but I guess still very experienced alcoholic
+ blackburn	sonney2k: exactly I am
+ f-x	sonney2k: yeah and i dislike that we have to do that #define thing for all the template variations.. it's nice as a hack though..
+ blackburn	I have an polyurethane liver
+@sonney2k	f-x, yeah but it becomes unhandy when you have to do that massively as we do now
+ f-x	sonney2k: yup.. it's the kind of thing which drives people away from touching the code
+@sonney2k	yeah - so better change it while the streamingfeatures code is still fresh
+ f-x	sonney2k: hehe... that doesn't apply to my own code however.. at least for now :)
+@sonney2k	streamingfile code I meant
+ f-x	yeah, will do it now
+@sonney2k	f-x, thanks - btw you should add some small examples that read some data and do sth. otherwise we cannot check that things work
+@sonney2k	if you want just in C++ for now (in examples/undocumented/libshogun then)
+@sonney2k	blackburn, did you make any progress on arpack?
+ f-x	sonney2k: sure, i'll put up some files i made for testing myself
+ blackburn	sonney2k: writing wrapper step by step
+@sonney2k	f-x, thanks
+@sonney2k	blackburn the rapper
+@sonney2k	err wrapper ;-)
+ blackburn	sonney2k: in fact now I'm stucked with L-Isomap - it acts not like it should
+@sonney2k	blackburn, doesn't anyone else implement this?
+@sonney2k	I mean not even the matlab dim red toolbox?
+ blackburn	yes, it is in that toolbox
+@sonney2k	(such that you could check?)
+ blackburn	well I tried to understand that shity crap of shit
+ blackburn	and seems like they do it just like me
+@sonney2k	blackburn, but their code works right :D
+@sonney2k	sometimes shitty code is better than glossy code
+ blackburn	sonney2k: yes, but I can't really understand what was on their mind while they was writing it :D
+ blackburn	matlab + some optimizations = luv
+@sonney2k	blackburn, well if they do auxiliary calculations - try to check if you get the same results
+ blackburn	sonney2k: I just need to get comprehension how to do it in math - that way worked for all other algos
+ blackburn	found some python - should be compherensive
+ blackburn	sonney2k: btw why are you asking about arpack? :)
+@sonney2k	blackburn, because you wanted it - now I want results :D
+ blackburn	sonney2k: ah ok, working on it
+ f-x	sonney2k: in Leon's svmsgd, is there an online algorithm listed separately or i have to set epochs=1 in his svmsgd2.cpp and be done with it?
+@sonney2k	f-x, yeah epochs = 1 is what you need
+ f-x	sonney2k: so is there a need to refer back to the original code or the few minor modifications required in SVMSGD.cpp in shogun are sufficient?
+@sonney2k	f-x, in principle the few minor modifications should do
+@sonney2k	I mean in the end we only want 1 algorithm
+@sonney2k	SVMSGD in there
+@sonney2k	I guess you could add a reset_stream() function that restarts at the beginning (if possible)
+@sonney2k	so you could do multiple epochs even
+ f-x	sonney2k: that's an option when we're reading from a file, definitely
+@sonney2k	then SVMSGD code can work with streamingfeatures and only has to exist once
+@sonney2k	f-x, or simplefeatures
+@sonney2k	or dotfeatures etc
+@sonney2k	and if unsupported SG_ERROR :)
+ f-x	right, right.. forgot about that..
+ blackburn	to embed or not to embed
+ f-x	:)
+ blackburn	whether tis' isomap
+ blackburn	in the mind to suffer
+ blackburn	not to embed, i'll better wrap instead
+@sonney2k	blackburn!
+ blackburn	yes?
+@sonney2k	the new Goethe!
+ blackburn	:D
+ f-x	sonney2k: again, about the free_feature_vector(): since i'm using the SGVector<ST> get_feature_vector(int32_t num) which implicitly does free_feature_vector(), should i add something more to my code?
+ blackburn	isomap works cool, classicmds works cool, even landmark mds works pretty cool
+ blackburn	why this god damn landmark isomap is wrong
+@sonney2k	blackburn, ^ seen f-x's question?
+@sonney2k	sounds to me like we need another consolidation
+ blackburn	sonney2k: eh.. don't understand the issue
+@sonney2k	blackburn, in simplefeatures you can do get_feature_vector
+ blackburn	yes
+@sonney2k	but you always have to call *free_feature_vector* afterwards
+@sonney2k	now when SGVector has the same thing this is somehow double'd
+ blackburn	yeess
+ blackburn	sonney2k: why SGVector has the same thing?
+@sonney2k	blackburn, recall the do_free flag?
+@sonney2k	hmmhh
+ blackburn	sonney2k: I just don't recall if SGVector has destructor
+ blackburn	has it?
+@sonney2k	no
+@sonney2k	why?
+@sonney2k	it has a free_vector() function
+ blackburn	so can't see anything double
+ blackburn	doubled*
+ blackburn	what is doubled?
+@sonney2k	free_feature_vector  / free_vector
+ blackburn	ahh
+@sonney2k	more vodka please
+@sonney2k	but the free_feature_vector is a bit more general
+@sonney2k	it could be that the features are coming from some strange thing
+ blackburn	sonney2k: I will be smart some day, I swear :D
+@sonney2k	and so the free is some more complex function
+@sonney2k	blackburn, smart enough for my taste
+ blackburn	okay I see
+ blackburn	but can't see any way to avoid this
+@sonney2k	f-x, anyway for now please call just free_feature_vector()
+ f-x	sonney2k: okay..
+ blackburn	what exactly free_feature_vector could do?
+@sonney2k	blackburn, yeah but I would rather simplify things and avoid free_feature_vector
+ blackburn	I think I have a E.coli instead of my brain
+@sonney2k	blackburn, anything
+ blackburn	sonney2k: even mess around with girls?
+@sonney2k	for sure
+@sonney2k	blackburn, even date bettyboo
+ bettyboo	sonney2k: or should i do it side by side
+* sonney2k does not want further details
+ blackburn	bettyboo: would you like to have a luv time with some free_feature_vector() methods?
+ bettyboo	blackburn: I'm pretty new to the project but there's no c# interface from what I've seen in the code and documentation. I have no idea about the scale of the samples with regards to your second question so I'll let someone else more knowledgable answer that lol
+ blackburn	sonney2k: well how can it be possible to avoid that method?
+@sonney2k	blackburn, by restricting shogun to platonic love - and just allowing free_vector()
+ blackburn	sonney2k: well let it be this way if possible :)
+ blackburn	sonney2k: do you use some autocompletion in vim?
+@sonney2k	blackburn, I looked at the code - not so easy. if features are cached, free_feature_vector will unlock the cached row for example
+@sonney2k	so hmhhh don't want to touch it
+ blackburn	the only thing I lack - how to get e.g. at least param names of cblas_dgemm
+@sonney2k	blackburn, google
+ blackburn	sonney2k: google of course can help - but in vim??
+@sonney2k	blackburn, I don't use that autocompletion stuff...
+ blackburn	okaay
+-!- blackburn [~blackburn@31.28.40.202] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+-!- mrsrikanth [~mrsrikant@59.92.81.39] has quit [Quit: Leaving]
+--- Log closed Tue Jun 28 00:00:27 2011

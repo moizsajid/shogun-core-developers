@@ -1,0 +1,1413 @@
+--- Log opened Mon May 21 00:00:02 2012
+--- Day changed Mon May 21 2012
+ n4nd0	we won't have access to anything that is not defined in that class
+ n4nd0	right?
+-!- cronor [~cronor@g225026248.adsl.alicedsl.de] has quit [Ping timeout: 246 seconds]
+-!- cronor_ is now known as cronor
+ blackburn	n4nd0: right
+ blackburn	looks unsolvable
+ blackburn	:D
+ n4nd0	no wait
+ n4nd0	we would have access to the other stuff if we downcast
+ blackburn	yes but I so much do not like casting
+ n4nd0	well, but it must exist because of something and it solves the problem we get here :D
+ n4nd0	why don't you like it?
+ blackburn	nevermind I think I can live with it :D
+ n4nd0	tell me anyway
+ blackburn	I do not know - I simply do not like it
+ blackburn	it looks redundant
+ n4nd0	ok
+ blackburn	ok let me think what can we do here then
+ n4nd0	how can we do it in any case from other interfaces other that libshogun?
+ n4nd0	e.g. python
+ n4nd0	I have read about doing something like base_class_instance.__class__ = DerivedClass
+ n4nd0	that didn't work though
+ n4nd0	something like that operation can only be used with head variables
+ blackburn	no just lets live with casting :D
+ n4nd0	?
+ blackburn	I mean it is ok to do this casting I think
+ blackburn	I changed my mind :D
+ blackburn	n4nd0: however it looks really redundant
+ blackburn	see - you need *to know* which labels to use
+ n4nd0	yes
+ n4nd0	tell me why it is redundant
+ blackburn	n4nd0: because of that casting you need to do (and only in one proper way)
+ n4nd0	I don't see why you worry about redundancy here
+ n4nd0	probably I am missing something
+ blackburn	I just do not like that any user would need to cast apply result
+ blackburn	and know what is the result
+ n4nd0	mmm I see
+ n4nd0	I agree with you, in that sense it would be more comfortable that apply returns directly what is needed
+ n4nd0	but I see no way to have at the same time that advantage and a CMachine::apply that works for all the subclasses
+ blackburn	yes and this drives me mad
+ n4nd0	I don't think that the fact that the user needs to know this such a big deal in any case
+ n4nd0	isn't require to know something similar when creating features, for example?
+ CIA-113	shogun: Sergey Lisitsyn master * rfc7021d / (7 files): Some labels refactoring - http://git.io/wxrZTQ
+ CIA-113	shogun: Sergey Lisitsyn master * r101802d / (2 files in 2 dirs): Merge branch 'master' of github.com:shogun-toolbox/shogun - http://git.io/4nqqTQ
+ blackburn	yes but there should be a hack anyway
+ blackburn	for python at least
+ blackburn	n4nd0: ok I think I'd rather go sleep now
+ n4nd0	all right
+ n4nd0	good night
+ blackburn	n4nd0: if you are bored
+ blackburn	you may add these copy constructors
+ blackburn	n4nd0: just ERROR on wrong labels given
+ blackburn	in this way your way of casting should work
+ n4nd0	ok
+ blackburn	I hope I will feel better about all these things tomorrow
+ blackburn	see you
+-!- blackburn [~blackburn@188.122.250.167] has left #shogun []
+-!- wiking_ [~wiking@ip188.67-202-72.static.steadfastdns.net] has joined #shogun
+-!- wiking_ [~wiking@ip188.67-202-72.static.steadfastdns.net] has quit [Changing host]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 250 seconds]
+-!- wiking_ is now known as wiking
+-!- cronor [~cronor@e177093001.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- cronor [~cronor@e177093001.adsl.alicedsl.de] has joined #shogun
+-!- blackburn [~blackburn@188.122.250.167] has joined #shogun
+ blackburn	argh insomnia
+ blackburn	n4nd0: still here?
+ n4nd0	blackburn: yeah
+ n4nd0	blackburn: I cannot solve this :(
+ blackburn	solve what?
+ n4nd0	if we return CLabels
+ n4nd0	cast it to CMulticlassLabels in python
+ blackburn	hmm why?
+ blackburn	I thought copy constructor would enable this - no?
+ n4nd0	I did a constructor like this one
+ n4nd0	http://snipt.org/ujOj3
+ blackburn	right - and?
+ n4nd0	one of the examples explodes
+ blackburn	only one?
+ n4nd0	it was the second I tried
+ n4nd0	not a good percentage :D
+ blackburn	what is the error?
+ n4nd0	the common *** glibc detected *** python: free(): invalid pointer: 0x0ad330e8 ***
+ n4nd0	and a long trace
+ blackburn	heh
+ blackburn	ok but it is not the problem of copy constructor I think
+ n4nd0	this it gdb's trace
+ n4nd0	http://snipt.org/ujPb2
+ blackburn	not a constructor problem again :)
+ n4nd0	I think it must be related
+ n4nd0	since it is what the new changes have introduced
+ blackburn	no I can't believe that
+ blackburn	the problem is in wrong get_mean
+ blackburn	n4nd0: do you understand why it is wrong?
+ n4nd0	something is getting deleted twice
+ n4nd0	right?
+ blackburn	yes
+ blackburn	n4nd0: adding .clone() would be the simplest solution I think
+ n4nd0	I cannot believe that the error has nothing to do with this constructor thing
+ n4nd0	what else can it be otherwise?
+ n4nd0	I'd that probably something is not getting properly initialized
+ blackburn	n4nd0: no it is wrong anyway
+ n4nd0	what?
+ n4nd0	the constructor is wrong?
+ blackburn	ge_mean
+ blackburn	ahha anoooooother problem
+ blackburn	apply returns float64_t
+ blackburn	apply(int32_t)
+ n4nd0	where is that happening?
+ blackburn	cmachine
+ blackburn	or what?
+ n4nd0	haha don't know, you said it :P
+ n4nd0	why is that apply an issue?
+ n4nd0	for structured labels it is
+ n4nd0	I actually thought of that but forgot to mention :S
+ blackburn	yes for SO
+ n4nd0	arghh damn it
+ n4nd0	is templates = solution?
+ blackburn	no
+ blackburn	:D
+ n4nd0	why not?
+ blackburn	how?
+ blackburn	templating of what?
+ n4nd0	the type that represents a single label
+ blackburn	CMachine<T>?
+ n4nd0	what otherwise?
+ blackburn	CKernelMachiine : public CMachine<float64_t>?
+ blackburn	oh so complex
+ n4nd0	it gets nasty indeed
+ n4nd0	this shit is a huge change man ...
+ blackburn	I would rather remove apply by index
+ n4nd0	I bet it is not widely used
+ blackburn	in all libshogun examples
+ blackburn	:D
+ n4nd0	as long as it is in the examples and we don't screw lot of users
+ blackburn	we screwed everything already
+ blackburn	lets write down
+ n4nd0	so when we say that to make it templated may be difficult in terms of SWIG
+ n4nd0	it should be possible or?
+ blackburn	lets assure we have written down all ideas
+ blackburn	and freeze it :D
+ blackburn	I think yes should be possible
+ n4nd0	*but* if we template it
+ n4nd0	shouldn't CMachine be templated too?
+ n4nd0	how would we declare apply otherwise?
+ blackburn	yes be templated
+ blackburn	and everything should be
+ n4nd0	I don't like much the idea of making it templated too
+ blackburn	sounds infeasible
+ n4nd0	I think that downcasting is the best
+ blackburn	yes probably
+ n4nd0	in C++ or java is something we can do directly
+ n4nd0	we need to provide some functions to do it from other languages
+ n4nd0	maybe SWIG methods like the one the suggest in the link I pasted there
+ n4nd0	what do you think?
+ blackburn	n4nd0: for python there should be a hack I think
+ n4nd0	to make it transparent you mean=
+ n4nd0	?
+ blackburn	yes
+ blackburn	hah it is already dawn here
+ n4nd0	not yet here, but it'll be soon probably
+-!- av3ngr [av3ngr@nat/redhat/x-ouidhbnbsioxllxt] has joined #shogun
+ n4nd0	let's see if we can agree all on this soon
+ blackburn	I'll merge apply() and apply(CFeatures* data) now
+-!- av3ngr [av3ngr@nat/redhat/x-ouidhbnbsioxllxt] has quit [Read error: Connection reset by peer]
+ n4nd0	what changes?
+-!- av3ngr [av3ngr@nat/redhat/x-hjkimqqbpdpapkel] has joined #shogun
+ blackburn	n4nd0: just merge these two methods
+ blackburn	to apply(CFeatures* data=NULL)
+-!- av3ngr [av3ngr@nat/redhat/x-hjkimqqbpdpapkel] has quit [Read error: Connection reset by peer]
+ CIA-113	shogun: iglesias master * recc853c / src/shogun/classifier/QDA.cpp : ~ RealLabels to MulticlassLabels in QDA - http://git.io/kHTmcQ
+-!- abn_ [av3ngr@nat/redhat/x-pugqrqjzwcytawbe] has joined #shogun
+-!- vikram360 [~vikram360@117.192.171.164] has joined #shogun
+ blackburn	hmmm good way to get rid of insomnia
+ blackburn	now I want to die after such refactoring :D
+ CIA-113	shogun: Sergey Lisitsyn master * rad7e86b / (28 files in 7 dirs): Merged apply() and apply(CFeatures* data) into apply(CFeatures* data=NULL) - http://git.io/q4ZnsA
+-!- vikram360 [~vikram360@117.192.171.164] has quit [Ping timeout: 246 seconds]
+ blackburn	n4nd0: here?
+ n4nd0	yeah
+ n4nd0	tell me
+ n4nd0	blackburn: still insomnia :)?
+ blackburn	yes
+ blackburn	n4nd0: could you please move QDA to multiclass then?
+ n4nd0	sure
+ n4nd0	I am with another thing but I will do it ;)
+ blackburn	ok
+-!- Francis_Chan [~Adium@210.25.133.42] has joined #shogun
+-!- Francis_Chan [~Adium@210.25.133.42] has left #shogun []
+ blackburn	hmm no more insomnia
+ blackburn	I am powered off
+ blackburn	last commit
+ blackburn	:D
+ blackburn	n4nd0: I ran QDA on 39209 vectors of size 576
+ n4nd0	how did it go?
+ blackburn	is it a big mistake?
+ blackburn	15 mins elapsed or so
+ blackburn	no result yet :D
+ blackburn	n4nd0: am I right it requires to operate on 43(num classes) matrices of 576x576 shape?
+ CIA-113	shogun: Sergey Lisitsyn master * re8a662e / (8 files in 3 dirs): Moved GNB to multiclass folder - http://git.io/jAD8Vw
+ n4nd0	I didn't understand the last part soryr
+ n4nd0	sorry*
+ blackburn	n4nd0: I mean while dimension is 576
+ blackburn	and number of classes is 43
+ n4nd0	yes?
+ blackburn	it would require to construct 43 matrices
+ n4nd0	well, more than that actually :O
+ blackburn	but no n_of_vectors matrix?
+ blackburn	because 39K is too big for square matrices :D
+ blackburn	uh
+ blackburn	915s elapsed
+ blackburn	it trained!
+ blackburn	lets wait it applies
+ n4nd0	if I remember correctly no, no # vectors matrix
+ n4nd0	it will actually build one matrix, 2 ndarrays and one vector
+ blackburn	hmm apply is pretty slow
+ n4nd0	:(
+ blackburn	ah
+ blackburn	dgemms
+ n4nd0	maybe we could add there multi-threading or sth?
+ blackburn	oh line 103 is pretty bad
+ blackburn	you may use add_to_dense_vec here instead
+ n4nd0	it is an empty line :P
+ blackburn	X = features - means part
+ n4nd0	instead of the for?
+ blackburn	ah you need full matrix here
+ blackburn	can't it be avoided?
+ n4nd0	no idea
+ blackburn	nevermind
+ blackburn	we have broken shogun anyway
+ blackburn	:D
+ n4nd0	haha
+ n4nd0	c'mon, it will be fixed soon
+ n4nd0	what were you using QDA for btw?
+ n4nd0	just trying it out?
+ blackburn	same problem - road sign recognition
+ blackburn	yes just curious about results
+ n4nd0	ok
+ blackburn	still applying :D
+ n4nd0	oh not good
+ n4nd0	how many vectors?
+ n4nd0	in apply
+ blackburn	12630
+ n4nd0	those are quite a few too
+ blackburn	still..
+ blackburn	arrrrrrgh I can't wait no more
+ blackburn	hrrr
+ n4nd0	yeah, I am going to bed too
+ n4nd0	good morning
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@188.122.250.167] has quit [Ping timeout: 260 seconds]
+-!- abn__ [av3ngr@nat/redhat/x-jlcexhkeketlyesx] has joined #shogun
+-!- abn_ [av3ngr@nat/redhat/x-pugqrqjzwcytawbe] has quit [Ping timeout: 240 seconds]
+-!- cronor [~cronor@e177093001.adsl.alicedsl.de] has quit [Read error: Connection reset by peer]
+-!- av3ngr [av3ngr@nat/redhat/x-pjunzffxtdsfhgvr] has joined #shogun
+-!- abn__ [av3ngr@nat/redhat/x-jlcexhkeketlyesx] has quit [Ping timeout: 276 seconds]
+-!- vikram360 [~vikram360@117.192.161.161] has joined #shogun
+-!- cronor [~cronor@e177093001.adsl.alicedsl.de] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-pjunzffxtdsfhgvr] has quit [Read error: Connection reset by peer]
+-!- av3ngr [av3ngr@nat/redhat/x-crgfftiyumbtmlza] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-crgfftiyumbtmlza] has quit [Read error: Connection reset by peer]
+-!- abn_ [av3ngr@nat/redhat/x-ktzqmkcjqpbbiibl] has joined #shogun
+-!- abn_ [av3ngr@nat/redhat/x-ktzqmkcjqpbbiibl] has quit [Read error: Connection reset by peer]
+-!- abn_ [av3ngr@nat/redhat/x-aqwycomoiagytinn] has joined #shogun
+-!- abn__ [av3ngr@nat/redhat/x-mfgmdhkqdftcoqnz] has joined #shogun
+-!- abn_ [av3ngr@nat/redhat/x-aqwycomoiagytinn] has quit [Ping timeout: 244 seconds]
+-!- abn__ [av3ngr@nat/redhat/x-mfgmdhkqdftcoqnz] has quit [Read error: Connection reset by peer]
+-!- av3ngr [av3ngr@nat/redhat/x-nknzddjwccloowmq] has joined #shogun
+-!- abn_ [av3ngr@nat/redhat/x-fnazpdaeawkebpne] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-nknzddjwccloowmq] has quit [Ping timeout: 265 seconds]
+-!- abn_ [av3ngr@nat/redhat/x-fnazpdaeawkebpne] has quit [Read error: Connection reset by peer]
+-!- av3ngr [av3ngr@nat/redhat/x-hswmmepzjupurfpz] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-hswmmepzjupurfpz] has quit [Read error: Connection reset by peer]
+-!- av3ngr [av3ngr@nat/redhat/x-pkxftaaonwjygnkl] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-pkxftaaonwjygnkl] has quit [Read error: Connection reset by peer]
+-!- abn_ [av3ngr@nat/redhat/x-kcuzawowlelshpos] has joined #shogun
+-!- cronor [~cronor@e177093001.adsl.alicedsl.de] has quit [Quit: cronor]
+-!- cronor [~cronor@e177093001.adsl.alicedsl.de] has joined #shogun
+@sonney2k	morning
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+@sonney2k	n4nd0, how about the solution you and blackburn suggested?
+@sonney2k	I mean use apply_binary() and it will return BinaryLabels
+@sonney2k	apply_multiclass() -> MulticlassLabels etc
+ n4nd0	the one we referred to as to use interfaces?
+@sonney2k	and then in addition to enable people to use CMethod::apply()
+@sonney2k	a way to convert CLabels -> anything
+@sonney2k	if possible :)
+@sonney2k	so adding additional constructors CMulticlassLabels(CLabels* lab)
+@sonney2k	etc
+@sonney2k	I am fine with that
+ n4nd0	that's like providing all the strategies we talked about except from templates :D
+@sonney2k	templates?
+@sonney2k	you mean each machine gets a template label parameter?
+ n4nd0	to make CLabels templated
+@sonney2k	that won't help
+ n4nd0	yeah, CMachine should then be templated too
+ n4nd0	I do not like that much this though
+@sonney2k	actually it is sufficient if CMachine is templated
+@sonney2k	L* labels;
+ n4nd0	sonney2k: have you seen the google docs where we wrote some of this things?
+ n4nd0	these* things
+@sonney2k	not yet
+ n4nd0	but you have access to it, right?
+-!- pluskid [~pluskid@li164-218.members.linode.com] has joined #shogun
+ pluskid	hi sonney2k
+@sonney2k	n4nd0, I got the mail but my mail prg is refusing access
+@sonney2k	pluskid, there are a couple of issues we need to discuss about wrt the new label system
+ pluskid	I just got the email
+@sonney2k	pluskid, biggest problem is that some machines return binary labels *or* reallabels
+ pluskid	for example?
+@sonney2k	like kernel machines
+@sonney2k	so plan would be to use CMachine::apply() whcih always returns CLabels
+@sonney2k	and then inside the machines have a function like apply_binary() etc
+@sonney2k	returning the wanted label
+@sonney2k	and if there is just one alternative return it in apply()
+@sonney2k	based on label type one can then determine whats going on
+@sonney2k	argh
+@sonney2k	I have to leave train
+ pluskid	so apply_binary, apply_mc, apply_SO?
+@sonney2k	n4nd0, I please get pluskid up to date
+@sonney2k	yeah
+@sonney2k	gtg
+ pluskid	ok
+@sonney2k	will be back in 10-15 mins
+ pluskid	n4nd0: so what's the conclusion so far?
+ n4nd0	pluskid: I'll send you a link to a google doc where we wrote some of our thoughts
+ pluskid	the doc blackburn shared?
+ n4nd0	yeah
+ n4nd0	already got it?
+ n4nd0	I just sent you an invitation in any case
+ pluskid	Ah, got it
+ pluskid	but those are all questions
+ pluskid	not solutions
+ n4nd0	possible solutions are 1, 2 and 3
+ pluskid	hmm
+ n4nd0	I told you it was a doc with some thoughts in any case ;)
+ pluskid	1 will be killed by sonney2k
+ n4nd0	yeah
+ n4nd0	that one is there just because it could be possible
+ n4nd0	but imho to make CMachine templated is not a good idea
+ n4nd0	so I would discard it as well
+ n4nd0	I think that he is suggesting to provide both 2 and 3
+ pluskid	both?
+ n4nd0	just change "possible solutions" if you don't like that ;)
+ n4nd0	yeah, I think so
+ n4nd0	check what he said at 8:30
+ n4nd0	I don't know yet why both
+ pluskid	downcasting seems to be not very friendly to SWIG
+ n4nd0	I think the link is a way to do it
+ pluskid	i like 3 personly
+ pluskid	yes, but that's tedious
+ pluskid	have to write a func for every possible casting
+ n4nd0	do you think so?
+ n4nd0	it is just one for each Labels hierarchy leaf
+ n4nd0	shouldn't be that many
+ n4nd0	Binary, Multiclass, Regression (or Real) and SO
+ pluskid	hmm
+ pluskid	you are right
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+ sonne|work	Re
+ sonne|work	pluskid, n4nd0 so any thoughts?
+-!- uricamic [~uricamic@2001:718:2:1634:28fe:5862:cc8e:2234] has joined #shogun
+ n4nd0	sonney2k: why do we need both things? castings from Labels to any other thing *and* the interfaces?
+ n4nd0	wouldn't one of them suffice?
+ sonne|work	n4nd0: which interfaces?
+ sonne|work	you mean the apply_binary?
+ n4nd0	the approach 3 in the document
+ n4nd0	yeah
+ pluskid	sonne|work: so you put apply_binary in CMachine or CBinaryMachine?
+ sonne|work	pluskid: in kernel machine
+ n4nd0	pluskid: I think that would be in CBinary
+ sonne|work	I wouldn't introduce any CBinary or so
+ n4nd0	oh yeah, in kernel and linear machine probably
+ sonne|work	n4nd0: I just managed to open the document
+ n4nd0	good
+ sonne|work	1) isn't going to help as with the problem we are having
+ pluskid	sonne|work: so KernelMachine can return both CRealLabel and CBinaryLabel?
+ sonne|work	so 2) and 3) or apply_binary() etc are the only option
+ sonne|work	pluskid: yes
+ pluskid	why not make use of confidence in BinaryLabels ?
+ pluskid	I mean RealLabel is equivalent to BinaryLabels with confidence value
+ sonne|work	pluskid: no
+ sonne|work	real labels might have confidences too
+ sonne|work	pluskid: think of GPs
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: Lost terminal]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ pluskid	sonne|work: so KernelMachine can be used for both classification and regression?
+ pluskid	GP can return RealLabel with confidence
+ pluskid	KernelMachine can return BinaryLabel with confidence
+ sonne|work	pluskid: exactly
+ sonne|work	but kernel machine could also return real label with confidence
+ pluskid	so there's no need for KernelMachine to be able to return *both* RealLabel and BinaryLabel
+ pluskid	oops
+ pluskid	GP is a subclass of Kernelmachine?
+ sonne|work	no but it could be
+ sonne|work	and there are other techniques like it...
+ pluskid	hmm
+ pluskid	too bad that SWIG doesn't support interfaces
+ pluskid	I mean multiple inheritance with pure virtual superclass (like interface in Java)
+ pluskid	or else solution 3 looks good
+ sonne|work	well the other solution
+ sonne|work	would be to use templates in machines
+ sonne|work	like L* labels
+ sonne|work	but then again that doesn't help
+ sonne|work	in swig and friends we would need to do %template Machine<CBinaryLabels> BinaryMachine etc
+ sonne|work	actually 4) and 2) are more or less the same...
+ pluskid	sonne|work: though some machines can be used for both regression and classification
+ pluskid	or both binary or MC
+ pluskid	I think it's good to distinguish
+ pluskid	to create base class for binary, MC, regression and SO
+ pluskid	for example
+ pluskid	liblinear can do many things
+ pluskid	but we can wrap it as binary and mc
+ pluskid	different wrappers makes it "different" machines
+ pluskid	this might make things more clear
+ sonne|work	pluskid leaving aside the problem that then e.g. liblinear cannot be a linearmachine for both regression and classification, this would also mean apply() from CMachine is no longer useful
+-!- abn_ [av3ngr@nat/redhat/x-kcuzawowlelshpos] has quit [Read error: Connection reset by peer]
+-!- abn_ [av3ngr@nat/redhat/x-ofozcfboipspfgxn] has joined #shogun
+ sonne|work	except if we return CBinaryLabels casted as CLabels like now
+-!- uricamic [~uricamic@2001:718:2:1634:28fe:5862:cc8e:2234] has quit [Quit: Leaving.]
+ pluskid	if we make the hierarchy clear
+ pluskid	then CMachine would have no apply
+-!- abn_ [av3ngr@nat/redhat/x-ofozcfboipspfgxn] has quit [Read error: Connection reset by peer]
+ pluskid	apply() is moved to subclasses
+ pluskid	CBinMachine, CMCMachine, CSOMachine, etc.
+ pluskid	CBinMachine's apply return CBinLabels
+ pluskid	CSOMachine's apply return CSOLabels
+ pluskid	do you think this is a possible solution?
+-!- abn_ [av3ngr@nat/redhat/x-nxczvssnqswykuju] has joined #shogun
+ sonne|work	pluskid: yes except that we have code duplication because we also have KernelMachine etc
+ pluskid	hmm
+-!- abn_ [av3ngr@nat/redhat/x-nxczvssnqswykuju] has quit [Read error: Connection reset by peer]
+ pluskid	yes
+ pluskid	you are right
+ n4nd0	I don't like much the idea of removing apply() from the base class and have it in all the subclasses
+-!- abn_ [av3ngr@nat/redhat/x-kkqwvuqhxfnbucxt] has joined #shogun
+ pluskid	KernelMachine is in a different hierarchy
+ sonne|work	well ok CBinKernelMachine etc gives also too much stuff
+ sonne|work	Machines I mean
+ sonne|work	n4nd0: yeah I would prefer to have apply() in the baseclass too
+ sonne|work	problem then remains with casting
+-!- abn_ [av3ngr@nat/redhat/x-kkqwvuqhxfnbucxt] has quit [Read error: Connection reset by peer]
+-!- av3ngr [av3ngr@nat/redhat/x-whazgcqjivdomxue] has joined #shogun
+ sonne|work	I am not so worried about the casting stuff - what sucks though is that we need some extra treatment for the modular interfaces
+ n4nd0	sonne|work: why about the solution provided in the link in the google docs?
+ sonne|work	n4nd0: it is basically 4)
+ n4nd0	well, I think it is 2)
+ sonne|work	n4nd0: I would rather do a better one really for each machine doing something more clever
+ n4nd0	it is a way to provide this downcasting
+ sonne|work	as in no need to change python modular code at all
+ sonne|work	you just get the right CBinaryLabel object even if CMachine only returns CLabels
+ sonne|work	this can be done by %ignore CMachine::apply()
+ sonne|work	and adding a new apply() function in swig that returns the right type for each machine
+ sonne|work	but the problem remains - linear machines can return both binary and regression labels
+ sonne|work	some for kernel machines
+ n4nd0	I like that solution :)
+ sonne|work	so I don't have a solution for that other than doing 4) apply_binary() etc...
+ sonne|work	and lets say apply() per default returns the most powerful label descriptor like RealLabels in this case
+ n4nd0	could the same be applied but doing the %ignore in linear machine and kernel machine
+ n4nd0	and adding new apply in swig for every particular machine?
+ sonne|work	n4nd0: yes - the only issue we have is that one might want to serialize a machine
+ sonne|work	so when loading it you want to be able to call apply()
+ sonne|work	ok fix would be to rename apply to apply_machine()
+ sonne|work	but then one has to do the casting
+ sonne|work	or to serialize the real machine (LibLinearRegression) ...
+ sonne|work	n4nd0: actually no - that all should be ok. because one cannot cast down to CMachine from e.g. LibLinear anyways...
+ sonne|work	n4nd0: so I favor this approach. it will involve doing 4) as helper functions and some typemap magic in addition
+ n4nd0	sonne|work: but there is no need to make apply_binary and friends
+ pluskid	sonne|work: have a look at solution (5)?
+ sonne|work	n4nd0: the typemaps would need to call them
+ sonne|work	n4nd0: so better have that in the class
+ sonne|work	pluskid: looking
+ n4nd0	sonne|work: ok, I understand
+ sonne|work	pluskid: yes - I think we can avoid code duplication there by just having an independent CKernelMachine class that can be utilized
+-!- uricamic [~uricamic@2001:718:2:1634:2030:5375:f044:5459] has joined #shogun
+ sonne|work	I prefer 4) with typemap changes though
+ pluskid	yes, kind of that
+ sonne|work	let me write it
+ pluskid	ok
+ pluskid	but (5) can avoid that SWIG magic
+ sonne|work	hmmhh, so how do we come to a decision? I guess we should wait for blackburn
+ sonne|work	pluskid: yes
+ sonne|work	but it sacrifices the apply() interface
+ pluskid	there's no need for a generic apply() if we make the hierarchy clear
+ pluskid	isn't it?
+ sonne|work	pluskid: I think it is the same concept that we use for CMachine::apply(CFeatures* data)
+ sonne|work	we have general CFeatures* there
+ n4nd0	sonne|work: got a doubt here, let's say we have KNN
+ sonne|work	and only later check for the correct type
+ n4nd0	sonne|work: it will have two methods, apply() and apply_multiclass(), right?
+ pluskid	I think they are different
+ pluskid	a generic apply() returning a generic CLabel is not very useful
+ sonne|work	pluskid: so we don't have CRealMachines or so
+ n4nd0	sonne|work: are both methods supposed to be implemented?
+ sonne|work	pluskid: well one always has to cast to the correct type
+ pluskid	yes, if one has to do casting, then one knows what he is doing
+ n4nd0	sonne|work: or apply() will contain most of the stuff and apply_multiclass just() calls and cast the return type from CLabels* to CMulticlassLabels*
+ sonne|work	n4nd0: I would implement apply_multiclass() and let apply() { return apply_multiclass(); }
+ pluskid	if one know what he is doing, he should know what kind of machine he is using
+ pluskid	instead of a generic CMachine
+ sonne|work	pluskid: but why is this different wrt CFeatures? you know which feature type you want to use so you should use a machine that supports it
+ pluskid	there are machines that supports different kind of features
+ pluskid	but each machine supports only one kind of label
+ pluskid	(if we make the hierarchy clear as in (5))
+ sonne|work	pluskid: well one could say the same about machines & features. we would have RealKernels working only on realfeatures etc
+ sonne|work	so then they would only support one type of features
+ pluskid	but there are too many features, but only several kind of labels
+ pluskid	a kind of trade-off here
+ pluskid	anyway, maybe we should have blackburn in the discussion, too
+ sonne|work	pluskid: yes it is a trade-off... I am favoring the other solution simply because we already treat features differently and I think it is more consistent now with CLabels to do the same
+ pluskid	hmm
+ sonne|work	of course the other solution is to just use the 'new' label system as is
+ sonne|work	that is just real valued outputs
+ sonne|work	is what machines return in general
+ sonne|work	but CMachine::apply() still returns CLabels*
+ sonne|work	pluskid: I like it more the way you suggested with having binary machines return binary stuff though ...
+ pluskid	real valued output isn't suitable for SO I guess
+ pluskid	yes, Binary and Regression is not that different
+ pluskid	they can be combined
+ sonne|work	pluskid: SOmachines will return SOLabels of course... that all works with the CLabels* CMachine::apply() interface
+ sonne|work	pluskid: could you live with 4) btw?
+ sonne|work	wiking: any opinion?
+ pluskid	yes, of course :D
+ pluskid	I have no problem with (4), though I prefer (5) :p
+ sonne|work	yeah I know
+ sonne|work	pluskid: the other issue with 5) is that it is a lot of work
+ pluskid	that's true
+ sonne|work	a lot more than 4)
+ sonne|work	and I think 4) is already quite a bit
+ sonne|work	well ok mostly in typemaps
+ pluskid	so fast!
+ sonne|work	not so much in machines/labels - only base machines and labels have to be touched
+ sonne|work	pluskid: heh
+ pluskid	sonne|work: you win :D
+ sonne|work	n4nd0: you still ok with 4)?
+ n4nd0	sonne|work: sure
+ sonne|work	I hope blackburn can live with it too
+ sonne|work	we really need to get back into a stable state
+ n4nd0	the only problem I see with it is that apart from you I don't know who can take care of it since it requires dealing with SWIG
+ sonne|work	and a decision is the first thing we need... rest is easy
+ sonne|work	n4nd0: I can easily do an example
+ sonne|work	then the rest will be obvious and you all can help
+ n4nd0	all right
+ sonne|work	the changes to labels/machines can be done rather quickly
+ n4nd0	sonne|work: another topic, is it possible to use mosek from shogun?
+ sonne|work	n4nd0: we have no wrapper for mosek
+ sonne|work	n4nd0: so you are on your own
+ n4nd0	sonne|work: it turned out that we cannot use libqp for our problem :(
+ n4nd0	SO, I mean
+ sonne|work	uh!
+ sonne|work	that is not good
+ sonne|work	we have to discuss with uricamic & vojtech
+ sonne|work	n4nd0: we cannot use mosek by default
+ sonne|work	we need something open source...
+ n4nd0	no way to use mosek as a first instance?
+ sonne|work	n4nd0: would you mind doing a pull request for the labels - I mean for casting things?
+ sonne|work	n4nd0: no one can use it except you then
+ n4nd0	sonne|work: because of the license file?
+ sonne|work	not the build bot nor me ...
+ sonne|work	n4nd0: what do you need btw that you cannot use any of libqp?
+ n4nd0	check this
+ n4nd0	http://cmp.felk.cvut.cz/~xfrancv/libqp/html/
+ n4nd0	we need to solve something similar to the second problem
+ n4nd0	QP task with box constraints and a single linear equality constraint.
+ n4nd0	but our problem needs to handle inequalities like A?w <= b
+ n4nd0	or better A?x <= b using the notation there for the optimization vector
+ sonne|work	n4nd0: that is a general optimizer you need there - IIRC there is no open source one for that
+ sonne|work	is there no way around it?
+ n4nd0	I asked nico about it, he knows I asked him to use something open source
+ n4nd0	but he suggested mosek
+ n4nd0	so I guess there's nothing to do
+ n4nd0	no workaround either :S
+ n4nd0	afaik
+ sonne|work	uricamic: do you need sth as complex as n4nd0?
+ uricamic	hi there
+ sonne|work	n4nd0:  uricamic is creating some fast solver for SO problems
+ sonne|work	so he will know if he needs a Ax <=b constraint
+ uricamic	sonne|work: in my case the libqp is completely ok
+ sonne|work	uricamic: how come you don't have these constraints?
+ sonne|work	uricamic: btw is vojtech back?
+ uricamic	He should be at work today, but has not arrived yet
+ sonne|work	uricamic: ok maybe you ask him or tell us how you can do without Ax<=b :)
+ uricamic	I think for the BMRM we are using, it is sufficient to use the liqp_splx solver
+ sonne|work	uricamic: do you have the SO formulation you are solving somewhere on paper?
+ sonne|work	and could mail it around to all the SO guys?
+ n4nd0	I think that using the dual formulation one doesn't encounter that constraints
+ n4nd0	those*
+ uricamic	do you mean the original BMRM, or the version with our "improvements"
+ sonne|work	uricamic: look at the mails nico sent around - the first one had a .pdf with the problem they are trying to solve
+ sonne|work	so it is the original one IMHO
+ sonne|work	n4nd0: could you deal with labels now?
+ n4nd0	sonne|work: do you want me to include this apply_binary and friends methods?
+ sonne|work	n4nd0: no just the CMulticlassLabels(CLabels* label) stuff
+ n4nd0	ok
+-!- karlnapf [~heiko@host86-176-253-113.range86-176.btcentralplus.com] has joined #shogun
+-!- vikram360 [~vikram360@117.192.161.161] has quit [Ping timeout: 245 seconds]
+-!- vikram360 [~vikram360@117.192.169.190] has joined #shogun
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric_	hi all
+-!- av3ngr [av3ngr@nat/redhat/x-whazgcqjivdomxue] has quit [Quit: That's all folks!]
+-!- cronor [~cronor@e177093001.adsl.alicedsl.de] has quit [Quit: cronor]
+ n4nd0	sonne|work: can you take a look to the new PR a moment and tell me if that is what you wanted?
+ n4nd0	how can we stop with an error if the cast is not valid?
+ sonne|work	n4nd0: could you please check the label type?
+ sonne|work	base_labels->get_label_type() == LT_MULTICLASS
+ n4nd0	all right
+ sonne|work	ahh and btw isn't this an upcast :D
+ sonne|work	YMMV as usual :)
+ n4nd0	we have a CLabels and get a CMulticlassLabels
+ n4nd0	I understand that as downcast
+ n4nd0	how do you see it?
+ sonne|work	the other way round
+ sonne|work	I guess my trees grow the other direction
+ n4nd0	:D
+ sonne|work	n4nd0: what is CLabels* const base_labels for?
+ sonne|work	the const?
+ n4nd0	just to denote we do not point to another thing inside
+ n4nd0	that we won't do base_labels = ...
+ n4nd0	does it make sense?
+ sonne|work	you mean base_labels.something=somethign?
+ n4nd0	mmm no
+ n4nd0	that the pointer is constant
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+ sonne|work	n4nd0: but then it doesn't help or? I mean base_labels=NULL won't change a thing
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 265 seconds]
+-!- wiking_ is now known as wiking
+ n4nd0	sonne|work: I use just to make clear that base_class will point to the same thing after the call than before it
+ n4nd0	by the way I think I should assign the other members too
+ n4nd0	the confidences vector, the subset stack
+ sonne|work	n4nd0: but when you have foo(int i) you don't write const there right? because i=2 won't change outside anyway
+ sonne|work	ok anyway what is a problem is that we would need to steal the original labels etc
+ n4nd0	sonne|work: yeah it is base_class->something = .... we are not allowed to do that with the const
+ sonne|work	n4nd0: maybe it is better to not have that as constructor but static helper function then
+ n4nd0	sonne|work: why?
+ sonne|work	so just CMulticlassLabels* obtain_from_generic(CLabel* label)
+ sonne|work	and then return the cast' object
+ sonne|work	n4nd0: in constructor we cannot change the type of base_labels but have to copy all fields, like m_labels, m_confidences, ...
+-!- pluskid [~pluskid@li164-218.members.linode.com] has quit [Quit: Leaving]
+ n4nd0	ok
+ n4nd0	so just that with (CMulticlassLabels*) base_labels
+ sonne|work	yeah plus the label type check and an appropriate SG_ERROR msg
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+ eric_	What's the purpose of a MulticlassLbels class ?
+ sonne|work	eric_: when we designed shogun we just used double* as in /output labels
+ sonne|work	but that is not really nice/clean way
+ sonne|work	for example binarylabels should only have +/-1
+ sonne|work	and machines having them as input should output +/-1
+ n4nd0	wow I just got my package!
+ sonne|work	same with multiclass 0...<nr classes>
+ sonne|work	-1
+ sonne|work	so a binary classifier will return a binary label object
+ sonne|work	and we have outputs +/- 1
+ sonne|work	in internally confidences (the real valued outputs) from before
+ eric_	okay thx
+ eric_	sonne|work: I would like to point out smthg strange with multiclass Xvalid, I didnt find the problem but some multiclass machine give wrong Xvalid results
+ sonne|work	karlnapf: btw any thoughts about the new label stuff?
+ eric_	sonne|work: seems that only CMulticlassLibLinear works with that
+ karlnapf	sonne|work, hi, just looking into it
+ karlnapf	or could you give a brief overview?
+ eric_	sonne|work: CGMNPSVM or CMulticlassLibSVMgive wrong results. I said wrong coz I ve been testing splitting manually several times ..
+ sonne|work	karlnapf: not yet ready though - there is one big change still missing
+ sonne|work	karlnapf: in principle we drop the old label class
+ sonne|work	before we assumed all labels == doubles
+ karlnapf	and now instead?
+ sonne|work	now we introduce CBinaryLabels, CMulticlassLabels, CRealLabels etc
+ sonne|work	CStructuredOutputLabels
+ sonne|work	etc
+ sonne|work	and binary labels are just +1/-1
+ sonne|work	but all of them have confidences
+ karlnapf	ah thats nice
+ sonne|work	which for SVM would be the real valued outputs
+ sonne|work	so a svm would return binary labels
+ sonne|work	and one can access the actual predictions
+ sonne|work	with +1/-1
+ karlnapf	we can finally have the john plat sigmoid stuff :)
+ sonne|work	or the confidences for computing roc
+ sonne|work	that's about it
+ karlnapf	what about multiclass?
+ sonne|work	0...<nr_classes>
+ karlnapf	confidences?
+ sonne|work	confidence will be max f(x) in OvR
+ sonne|work	for others not clear
+ sonne|work	karlnapf: there are tons of implementation issues though
+ karlnapf	Will there be a way to get normed probabilities for multiclass?
+ sonne|work	biggest concern is that if we want apply() to still return labels
+ karlnapf	Because this currently has to be done in an extra class
+ sonne|work	we need to cast
+-!- blackburn [~blackburn@188.122.250.167] has joined #shogun
+ karlnapf	So if I call apply I get just Labels
+ karlnapf	but I know that these are binary labels so I would have to cast?
+ sonne|work	karlnapf: one can add those...
+ sonne|work	karlnapf: yes
+ karlnapf	uuuh
+ sonne|work	blackburn: morning. hope you didn't have nightmares
+ blackburn	hey
+ karlnapf	hi blackburn
+ n4nd0	blackburn: did you beat the insomnia?
+ sonne|work	karlnapf: you can check the actual type via labels->get_label_type() == LT_BINARY etc
+ karlnapf	ah ok
+ eric_	So if I undestand well: any calls to apply() with return a CLabel (base class for all derived labels ?)
+ karlnapf	mmmh, perhaps some way to do this automatically?
+ sonne|work	and we think about adding apply_binary() to return the actual CBinaryLabel type
+ sonne|work	karlnapf: not really. only way is to drop the apply() method from CMachine
+ sonne|work	blackburn: could you live with option 4) ?
+ karlnapf	mmmh
+ karlnapf	what about adding a method to the labels which casts itself (if possible, if not throws error), that would be dirty but might work
+ sonne|work	karlnapf: for binary labels we could add a estimate sigmoidal for the confidences
+ karlnapf	Label::get_binary_cast
+ n4nd0	sonne|work: PR updated, I think that is the idea
+ karlnapf	or so
+ sonne|work	or histogram based
+ eric_	if you add a apply_binary(), why not adding apply_multiclass() so ?
+ sonne|work	yeah nice
+ sonne|work	eric_: yes
+ sonne|work	eric_: we will do too
+ sonne|work	karlnapf: that is what we will add yes
+ blackburn	hehe sorry welcome package arrived
+ blackburn	re
+ karlnapf	why do we need an apply_binary then?
+ eric_	sonne|work: seems strange coz when apply is called, you know what type of CLabels is in argument no ?
+ blackburn	sonne|work: what is 4) option?
+ sonne|work	4) Introduce apply_binary(), apply_multiclass(), apply_regressor() to respective machines needing it. In addition we could have constructors in respective labels e.g. CBinaryLabels(CLabels* labels). In addition, one uses typemaps to %rename apply methods of CMachine etc and creates an apply method for each machine realization like LibLinear, LiblinearRegression returning the correct type always.
+ sonne|work	scratch constructors
+ sonne|work	converters like in n4nd0's pull requrest
+ blackburn	it is very similar to just add apply in appropriate machines
+ sonne|work	blackburn: yes - but from the C++ side we still have the CMachine::apply() interface
+ blackburn	do we really need it?
+ sonne|work	it is like having train() IMHO
+ sonne|work	the essence of a machine
+ sonne|work	being able to train() and apply()
+ blackburn	%rename is confusing then
+ sonne|work	I don't think so:
+ sonne|work	we only need this for languages that don't support types
+ sonne|work	and type casts
+ sonne|work	so for such $LANG it is still the same principle
+ sonne|work	you call apply() on a machine and get the correct label type
+ sonne|work	all others cast as necessary
+ n4nd0	I actually like this strategy quite a lot :)
+ n4nd0	blackburn: but I know you were not much in favour of casting :S
+ sonne|work	n4nd0: btw when you do fixes to a pull request. please use git commit --amend
+ sonne|work	so we only have one changelog entry
+ n4nd0	oh sorry, a bit too late for this one
+ sonne|work	n4nd0: sure just for the future
+ sonne|work	you might need to force push though
+ n4nd0	no problem with amend for commits that have already been pushed?
+ n4nd0	I thought that was not recommended to do
+ sonne|work	yeah that is not possible except you overwrite the thing with force push
+ blackburn	hahah I ca imagine change log of 2.0
+ blackburn	Dear all, everything is changed
+ sonne|work	n4nd0: btw you need to return NULL to suppress the compiler warnings
+ sonne|work	blackburn: so can you live with that or not?
+ blackburn	sonne|work: yes I can
+ sonne|work	yes we can!
+ sonne|work	so then not too much changes are required...
+ sonne|work	we need n4nd0's patch
+ sonne|work	then each machine should have a apply_binary() or so method
+ sonne|work	and apply() { return apply_binary(); } etc
+ sonne|work	I will add typemaps in the evening and we are back to normal
+ blackburn	sonne|work: rather apply(CFeatures* data=NULL)
+ sonne|work	or that
+ blackburn	no more apply()
+ blackburn	:D
+ sonne|work	blackburn: can you do these changes?
+ blackburn	I removed all of them I think
+ blackburn	yes
+ sonne|work	the apply_binary
+ sonne|work	apply_multiclass
+ sonne|work	apply_regression
+ sonne|work	blackburn: btw I think we can then even rename CRealLabels to CRegressionLabels
+ sonne|work	because everything is in confidences then
+ blackburn	yes
+ n4nd0	sonne|work: it should be ok by now
+ CIA-113	shogun: iglesias master * r89a638e / (2 files): + helper function to obtain MulticlassLabels from Labels, - previous constructor - http://git.io/Cl5hIA
+ CIA-113	shogun: iglesias master * r5f02a4a / (2 files): + constructor from base class in multiclass labels - http://git.io/YDdU3w
+ CIA-113	shogun: iglesias master * r4562bc0 / (6 files): + obtain from generic Labels in sub-label classes - http://git.io/HO5-0g
+ n4nd0	though the warnings didn't pop up here before
+ CIA-113	shogun: Soeren Sonnenburg master * r6630435 / (6 files): Merge pull request #537 from iglesias/fix-labels - http://git.io/VWH_yA
+ n4nd0	I included the last changes using amend :D
+ sonne|work	n4nd0: so did you need to force push?
+ n4nd0	yes
+ blackburn	instead of force push you also can git push :branchname and git push branchname
+ n4nd0	I think it does something similar internally
+ sonne|work	blackburn: ok so if you can please try to do the changes to all the machines... I will do typemaps this evening but now I have to eat/work for real :D
+ blackburn	ok I'll have to go in a hour I hope to get it changed
+ n4nd0	sonne|work: about the optimization problem, I understand by the mails that we skip that constraints for the moment and go with libqp right?
+ n4nd0	brb
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	rabotatsch!
+ n4nd0	blackburn, have you got your packet today?
+ blackburn	n4nd0: yes just 20 mins before
+ n4nd0	nice
+ blackburn	n4nd0: didn't you?
+ blackburn	n4nd0: but what about apply(idx)?
+ blackburn	any conclusion?
+ n4nd0	blackburn, apply(idx) is oficially dead according to the google docs
+ blackburn	oh I should check
+ n4nd0	blackburn, yeah, I got the package this morning too
+-!- vikram360 [~vikram360@117.192.169.190] has quit [Ping timeout: 246 seconds]
+ n4nd0	apply(idx) is still alive in the code though
+ blackburn	hmm I will remove it then
+ blackburn	karlnapf: hey what about apply_locked?
+ karlnapf	blackburn, sorry?
+ karlnapf	about the labels in apply_locked?
+ blackburn	karlnapf: apply -> apply_binary, apply_regression, ..
+ blackburn	yes
+ blackburn	what about apply_locked then
+ karlnapf	I think thats straightforward
+ blackburn	apply_locked_binary?
+ karlnapf	just like in apply
+ blackburn	oh my gosh
+ karlnapf	mmh
+ blackburn	I hate adding new code :D
+ karlnapf	not too nice all these new methods :)
+ blackburn	not really I even like it in some way
+ blackburn	you can use your trained svm for regression
+ blackburn	:D
+ karlnapf	lol :)
+ sonne|work	blackburn, karlnapf: how about adding a boolean to apply then?
+ blackburn	boolean??
+ sonne|work	I mean that would then say locked=true?
+ karlnapf	 locked/non-locked?
+ sonne|work	yeah
+ sonne|work	n4nd0: I discussed with nico on th ephone
+ karlnapf	what about even making this automatic?
+ karlnapf	ah
+ karlnapf	the signature is different
+ sonne|work	n4nd0: so as reference you can implement sth based on mosek #ifdef HAVE_MOSEK though
+ karlnapf	apply_locked has indices paramteers
+ n4nd0	sonne|work, all right, thank you
+ sonne|work	karlnapf: well if you just pass empty indices it would work or?
+ karlnapf	but apply then needs to have indices as parameter doesnt it?
+ blackburn	sonne|work: are you ok removing apply(idx)?
+ sonne|work	blackburn: from CMachine yes
+ sonne|work	iirc I commented it already
+ sonne|work	so it is RIP already
+ blackburn	no
+ sonne|work	but other machines can still use it
+ blackburn	you remember it wrong
+ blackburn	:)
+ sonne|work	what?
+* sonne|work checks
+ blackburn	you commented get_label
+ sonne|work	ahh
+ sonne|work	ok
+ sonne|work	same thing
+ sonne|work	yes die die
+ blackburn	I am confused
+ sonne|work	blackburn: btw some commit must have increased shogun repository size quite a bit
+ blackburn	I removed apply from linear machine already
+ sonne|work	I suspect that someone added a dataset to shogun
+ blackburn	sonne|work: yes, that commit of gunnar's student
+ sonne|work	and then removed it
+ blackburn	yes I removed
+ sonne|work	dammed
+ sonne|work	we cannot remove it from git now
+ blackburn	I realized it is bad later :(
+ sonne|work	we have serious trouble on buildbots due to it
+ blackburn	bad bad
+ blackburn	sonne|work: so it is something like +100 mb  now?
+ sonne|work	and everyone cloning shogun will not just get a few MB like before but over hundred I guess
+ blackburn	yes was something like 139
+ blackburn	shit
+ blackburn	we can't keep it
+ sonne|work	blackburn: we would have to rewrite all git history to get rid of it
+ sonne|work	invalidating all checkouts watches etc
+ blackburn	http://vkokoce.com/wp-content/uploads/2012/03/1317350717_facepalm_3.jpg
+ sonne|work	blackburn: do you remember the path of the file?
+ blackburn	yes
+ blackburn	applications/asp/data
+ sonne|work	ok good we will have to do that after labels are good
+ blackburn	eb07b040ce533393043d9b3241e79a62e8f390ba
+ blackburn	.git is 150M
+ blackburn	sonne|work: it seems filter-branch can save us
+ sonne|work	blackburn: later
+ sonne|work	now labels :)
+ blackburn	ok
+-!- karlnapf [~heiko@host86-176-253-113.range86-176.btcentralplus.com] has quit [Quit: Leaving.]
+ sonne|work	blackburn: could we do apply(data=NULL, subset=SGVector<index_t>()) ?
+ sonne|work	instead of having additional locked stuff?
+ blackburn	sonne|work: why not
+ blackburn	bad protocol though
+ blackburn	ah no
+ blackburn	it is ok
+ sonne|work	locked does sth else or?
+ blackburn	something like that I think
+ blackburn	ok be back in 2 hrs
+ n4nd0	StructuredLabels adapted to the new labels hierarchy :D
+ n4nd0	there are probably missing things and so on but it is a good step I guess
+ sonne|work	n4nd0: yeah we should get going
+ sonne|work	btw today is the first official gsoc day right?
+ n4nd0	yes
+ n4nd0	I will be back later
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@vpna132.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpna132.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 245 seconds]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- vikram360 [~vikram360@117.192.170.250] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 252 seconds]
+-!- wiking_ is now known as wiking
+-!- eric_ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+-!- vikram360 [~vikram360@117.192.170.250] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.179.211] has joined #shogun
+-!- eric___ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric___	hi again all
+ sonne|work	re
+ eric___	sonne|work: will you integrate a way to import/export samples features with their multiclasslabels ?
+ eric___	maybe there is smth that already exist ?
+ sonne|work	eric___: I don't know what you are saying
+ eric___	I look over all shogun examples and I don't find loading/saving example for Features and associated Labels
+ sonne|work	you have to same them separately
+ sonne|work	or use libsvm format
+ eric___	I wrote my own export/import to/from xml files and fill the CLabel, Features manually
+-!- gsomix [~gsomix@85.26.165.69] has joined #shogun
+ gsomix	hi all
+ sonne|work	hi gsomix
+ sonne|work	how is it going?
+ gsomix	sonne|work, on the way of improving director kernel.
+ sonne|work	gsomix: err?
+ sonne|work	I thought the plan was to do it in isolated steps?
+ sonne|work	there is no way you can get director kernel to work directly I would say
+ gsomix	sonne|work, hm, ok.
+ gsomix	I did 1-6 steps.
+ gsomix	It works fine.
+ gsomix	sonne|work, what to do next?
+ sonne|work	gsomix: show me the code :) I'd like to play with it too :)
+ gsomix	sonne|work, http://pastebin.com/qEx03QYC http://pastebin.com/fe5GhMKb http://pastebin.com/A65g5XN5
+ gsomix	there is one note. swig don't wrap protected methods/attributes without setting "allprotected" property.
+ sonne|work	I see so you cannot call/set things
+ sonne|work	gsomix: try the simplest possible class in shogun for that
+ sonne|work	gsomix: maybe CSet is a good starting point
+ sonne|work	or DynamicArray
+ gsomix	sonne|work, ok.
+ sonne|work	gsomix: when that works try CList
+ sonne|work	and then kernel :)
+* gsomix needs to take a shower
+ gsomix	sonne|work, google sent a cool notepad.
+ gsomix	it's happy day
+ sonne|work	just in time :)
+-!- gsomix [~gsomix@85.26.165.69] has quit [Quit: Ex-Chat]
+ sonne|work	hmmhh, mentors don't get any such toys
+-!- gsomix [~gsomix@83.234.54.15] has joined #shogun
+-!- gsomix [~gsomix@83.234.54.15] has quit [Remote host closed the connection]
+@sonney2k	gsomix
+@sonney2k	../../shogun/lib/DynamicArray.h:188: Warning 509: Overloaded method shogun::CDynamicArray< float64_t >::CDynamicArray(double const *,int32_t) effectively ignored,
+@sonney2k	../../shogun/lib/DynamicArray.h:102: Warning 509: as it is shadowed by shogun::CDynamicArray< float64_t >::CDynamicArray(double *,int32_t).
+@sonney2k	ahh you escaped
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- gsomix [~gsomix@188.168.5.191] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has quit [Client Quit]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@vpnb050.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpnb050.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:2030:5375:f044:5459] has quit [Quit: Leaving.]
+-!- eric___ [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+ blackburn	sh took more time
+ blackburn	back
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 252 seconds]
+-!- wiking_ is now known as wiking
+-!- karlnapf [~heiko@host86-176-253-113.range86-176.btcentralplus.com] has joined #shogun
+@sonney2k	blackburn, if you have something partial to commit please do
+ blackburn	sonney2k: yes both kernel and linear machine are ready but distance machine to finish
+ blackburn	sonney2k: I can but will be uncompileable
+@sonney2k	blackburn, why?
+@sonney2k	gsomix, <sonney2k> ../../shogun/lib/DynamicArray.h:188: Warning 509: Overloaded method shogun::CDynamicArray< float64_t >::CDynamicArray(double const *,int32_t) effectively ignored,
+@sonney2k	<sonney2k> ../../shogun/lib/DynamicArray.h:102: Warning 509: as it is shadowed by shogun::CDynamicArray< float64_t >::CDynamicArray(double *,int32_t).
+ blackburn	sonney2k: because distance machine is not finished yet
+@sonney2k	well you could commit kernel / linear machine only and push
+@sonney2k	then it would compile or?
+@sonney2k	anyway go on
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Read error: Connection reset by peer]
+ blackburn	sonney2k: no - I changed machine drastically
+@sonney2k	blackburn, uh?
+@sonney2k	blackburn, btw which apply functions do we have now
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has joined #shogun
+@sonney2k	apply(CFeatures*) ?
+@sonney2k	anything else?
+ blackburn	sonney2k: apply(CFeatures* data=NULL) in machine
+ blackburn	calls apply_binary
+ blackburn	apply_regression
+ blackburn	and apply_multiclass
+-!- cronor [~cronor@fb.ml.tu-berlin.de] has quit [Client Quit]
+ blackburn	depends on problem set in machine
+@sonney2k	blackburn, no I mean apply() functions
+@sonney2k	not apply_* functions
+ blackburn	ah
+ gsomix	sonney2k, ah, ok. I will fix it.
+ blackburn	apply(idx) in all submachines like
+ blackburn	linear and kernel
+@sonney2k	blackburn, apply(idx) will go away right?
+@sonney2k	in CMachine at least
+ blackburn	sonney2k: yes it can go but I did not remove it yet
+ blackburn	I removed it in machine already
+ blackburn	implementations are based on apply(idx) so would need some refactoring
+@sonney2k	blackburn, so I just rename the apply(CFeatures*) to apply_generic()
+ blackburn	huh why?
+@sonney2k	in typemaps
+ blackburn	ah
+ blackburn	sonney2k: let me finish distance machine
+@sonney2k	be fast
+ blackburn	a few mins
+ blackburn	damned
+ blackburn	domain adaptation stuff
+@sonney2k	hehe
+ blackburn	not my
+@sonney2k	blackburn, the buildbot has now twice the diskspace
+ blackburn	sonney2k: do you think we can go for removing that commit from history?
+ blackburn	ARGH SCATTER SVM
+@sonney2k	blackburn, yes but after labels
+ blackburn	sonney2k: argh! CFeatures* data=NULL should have impl in .cpp
+ blackburn	ok mostly done
+@sonney2k	yeah
+@sonney2k	ok
+ blackburn	sonney2k: apply(idx) -> apply_one(idx)
+ blackburn	sonney2k: guess the reason to rename
+-!- gsomix [~gsomix@188.168.5.191] has quit [Quit: Ex-Chat]
+ blackburn	sonney2k: here it goes
+ CIA-113	shogun: Sergey Lisitsyn master * rc3e643d / (19 files in 6 dirs): Refactoring of apply() methods - http://git.io/FtP79w
+-!- gsomix [~gsomix@188.168.14.173] has joined #shogun
+ CIA-113	shogun: Soeren Sonnenburg master * r8f5bf6e / src/shogun/machine/MulticlassMachine.cpp : apply -> apply_one - http://git.io/T9rYYQ
+ blackburn	oops
+ blackburn	sonney2k: so what you wanted to commit?
+-!- karlnapf [~heiko@host86-176-253-113.range86-176.btcentralplus.com] has quit [Ping timeout: 276 seconds]
+ CIA-113	shogun: Soeren Sonnenburg master * r39bb66e / (9 files in 3 dirs): do apply() renames in typemaps + misc fixes in labels - http://git.io/lX0fuA
+@sonney2k	blackburn, running out of battery.
+ blackburn	ok I'll continue
+ blackburn	sonney2k: ehm why do you add apply in distance machine? it should be done via get_problem_type - I'll change
+@sonney2k	committed
+@sonney2k	blackburn, why did you add apply_binary, apply_multiclass, apply_regression everywhere?
+ blackburn	sonney2k: junk
+ CIA-113	shogun: Sergey Lisitsyn master * rb60ea37 / src/shogun/machine/DistanceMachine.h : Replaced apply with apply_one in distance machine - http://git.io/KV7Y4A
+ blackburn	sonney2k: before I did it pure virtual in machine
+ CIA-113	shogun: Sergey Lisitsyn master * r615e2bb / .gitignore : Updated gitignore - http://git.io/li60AQ
+@sonney2k	blackburn, you forgot git pull --rebase ...
+ blackburn	I did not
+ blackburn	I did that
+@sonney2k	blackburn, I meant why do we need apply_binary etc everywhere?
+ blackburn	sonney2k: where everywhere?
+@sonney2k	I mean we could just use it for machines where it makes sense
+@sonney2k	in all machines
+ blackburn	sonney2k: I am removing it
+@sonney2k	I wouldn't even mention this in CMachine ...
+ blackburn	mention what?
+ blackburn	ah
+ blackburn	apply_binary?
+@sonney2k	I would keep apply() in all machines
+ blackburn	hmm why?
+@sonney2k	and return the most general label if there are multiple options
+@sonney2k	blackburn, because one can just call apply() in every machine
+ blackburn	yes it inherited from CMachine
+@sonney2k	and one gets the correct label type back
+@sonney2k	but why did you remove it from distance machine then?
+ blackburn	sonney2k: I forgot to set problem type as multicalss in distance machine
+ blackburn	this way it will call multiclass apply
+@sonney2k	ahh so CMachine calls the apply_* stuff based on problem type?
+ blackburn	yes
+@sonney2k	blackburn, btw while you are at it EClassifierType should probably be named EMachineType
+ blackburn	ok
+ blackburn	sonney2k: I think it should be a macros like
+ blackburn	BINARY_CLASSIFIER
+ CIA-113	shogun: Soeren Sonnenburg master * rfd4e728 / (2 files): rename apply -> apply_one - http://git.io/embBkA
+ blackburn	hmm
+ blackburn	cool
+ blackburn	:D
+ blackburn	our commits were merged somehow
+@sonney2k	I pushed this quite some time ago...
+ blackburn	sonney2k: no merge commit - I did rebase
+@sonney2k	no idea
+@sonney2k	blackburn, will you do the EClassifierType rename or shall I?
+ blackburn	sonney2k: already
+@sonney2k	k
+ CIA-113	shogun: Sergey Lisitsyn master * ra9363e1 / (56 files in 10 dirs): Renamed EClassifierType to EMachineType - http://git.io/_kzwyw
+@sonney2k	blackburn, I would change the SG_NOTIMPLEMENTED to some sg_error msg
+@sonney2k	ok?
+ blackburn	right
+@sonney2k	in Machine.cpp
+@sonney2k	doing
+ blackburn	you?
+@sonney2k	yes
+ blackburn	ok
+@sonney2k	blackburn, don't you think we should do the rename CRealLabels -> CRegressionLabels now too?
+ blackburn	yes
+ blackburn	I'll do
+@sonney2k	k
+ CIA-113	shogun: Sergey Lisitsyn master * r6e7f947 / src/shogun/machine/MulticlassMachine.h : Removed junk methods from multiclass machine - http://git.io/8WqIAA
+ CIA-113	shogun: Soeren Sonnenburg master * r60b2900 / examples/undocumented/python_modular/classifier_libsvm_modular.py : fix libsvm py example - http://git.io/bLmn0g
+ CIA-113	shogun: Soeren Sonnenburg master * r8d2101e / src/shogun/machine/Machine.cpp : output some more reasonable error messages in CMachine::apply_* methods - http://git.io/9mTGPw
+ blackburn	uh
+ blackburn	we have a few wrong usages of regression labels
+@sonney2k	blackburn, yes
+@sonney2k	many I suspect
+ blackburn	I'll fix
+@sonney2k	blackburn, we also need to fix Evaluation ...
+@sonney2k	blackburn, I am doing the typemap stuff
+ blackburn	ok
+ blackburn	sonney2k: I need to fix Machine.i
+@sonney2k	blackburn, ?
+@sonney2k	fix what?
+ blackburn	Real->Regression
+@sonney2k	blackburn, ok do
+ blackburn	and add LinearMulticlassMachine
+@sonney2k	blackburn, why is CGaussianNaiveBayes not deriving from MulticlassMachine?
+@sonney2k	blackburn, just do
+ blackburn	sonney2k: should be derived
+@sonney2k	blackburn, please do so too then
+@sonney2k	blackburn, CQDA should derive from MC then too
+ blackburn	just like conjugate shit
+@sonney2k	blackburn, please push when you are done touching Machine.i
+@sonney2k	I'd like to continue there
+ blackburn	30 sec
+ blackburn	done
+ blackburn	ehm
+ blackburn	done
+ CIA-113	shogun: Sergey Lisitsyn master * rd91047e / (44 files in 12 dirs): Renamed RealLabels to RegressionLabels - http://git.io/-XX30Q
+ blackburn	sonney2k: I want to add new class between GNB and MulticlassMachine
+ blackburn	to avoid adding stuff like prepare_machines, etc
+@sonney2k	blackburn, what label type should a one class machine return?
+@sonney2k	err LibSvmOneclass
+ blackburn	binary I think?
+ blackburn	PlainMulticlassMachine?
+ blackburn	are you ok with naming?
+@sonney2k	blackburn, what is plainmulticlassmachine?
+@sonney2k	TrueMulticlassMachine?
+@sonney2k	I mean one that natively does MC?
+ blackburn	yes
+@sonney2k	well then True or NativeMulticlassMachine
+ blackburn	GNB, ConjugateIndex
+ blackburn	oh native ok
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+@sonney2k	argh
+@sonney2k	I need a macro for doing that rename stuff
+@sonney2k	way too many classes
+ blackburn	what do you rename?
+@sonney2k	actually not the rename
+@sonney2k	but the %extend
+ blackburn	wait so you add it to every class?
+@sonney2k	blackburn, adding type customized apply's yes
+@sonney2k	all child classes...
+@sonney2k	wiking, where do I have to put the -I include config for the vim plugins to find the shogun headers?
+ wiking	sonney2k: in root of shogun dir
+@sonney2k	wiking, how exactly?
+ blackburn	Example .clang_complete file: > -DDEBUG -include ../config.h -I../common -I/usr/include/c++/4.5.3/ -I/usr/include/c++/4.5.3/x86_64-slackware-linux/
+ wiking	this is the line in it: -I./src -I/opt/local/include/libxml2
+ wiking	and then i open vim .
+@sonney2k	wait so in shogun/src I create a .clang_complete file?
+ wiking	sonney2k: i've created in ./shogun
+ wiking	sonney2k: so i have ./shogun/.clang_complete
+ blackburn	sonney2k: depends where do you run your vim I think
+@sonney2k	I see
+ wiking	blackburn: yep
+@sonney2k	ok works
+@sonney2k	thx
+ blackburn	sonney2k: do not forget to put let g:clang_close_preview = 1 to .vimrc
+ blackburn	really annoying to see that window above
+ blackburn	let g:clang_auto_select=0 is useful too - makes first suggestion selected from the very beginning
+ CIA-113	shogun: Sergey Lisitsyn master * r54eef53 / (5 files in 3 dirs): Made GaussianNaiveBayes a multiclass machine - http://git.io/SS-2Og
+@sonney2k	blackburn, in vimrc ?
+ blackburn	sonney2k: yes
+@sonney2k	blackburn, is it possible to use ctrl+space to trigger completion?
+ blackburn	sonney2k: yes default is Ctrl+X Ctrl+U
+ blackburn	let me find
+ blackburn	sonney2k:
+ blackburn	 88   inoremap <expr> <buffer> <C-X><C-U> <SID>LaunchCompletion()
+ blackburn	clang_complete/plugin/clang_complete.vim:88
+ blackburn	sonney2k: try to change that
+@sonney2k	well I failed but lets continue for now
+-!- vikram360 [~vikram360@117.192.179.211] has quit [Ping timeout: 246 seconds]
+ blackburn	sonney2k:
+ blackburn	 88   inoremap <expr> <buffer> <C-space> <SID>LaunchCompletion()
+ blackburn	 89   imap <C-@> <C-space>
+ blackburn	works
+-!- ckwidmer [~chris@HSI-KBW-046-005-237-106.hsi8.kabel-badenwuerttemberg.de] has joined #shogun
+@sonney2k	blackburn, seems like c-space is doing sth already here
+@sonney2k	pasting marked text
+@sonney2k	no idea how to undefine that
+ blackburn	 41 imap <Nul> <Space>
+ blackburn	 42 map <Nul> <Nop>
+ blackburn	 43 vmap <Nul> <Nop>
+ blackburn	 44 cmap <Nul> <Nop>
+ blackburn	 45 nmap <Nul> <Nop>
+ blackburn	~
+ blackburn	sonney2k: ^ to .vimrc
+ blackburn	it seems I know everything :D lol
+@sonney2k	what is that doing?
+ blackburn	sonney2k: undefining C+space
+@sonney2k	5 lines jsut for that?
+ blackburn	sonney2k: different modes
+ blackburn	insert, visual, .. you know
+@sonney2k	blackburn, bah still doesn't work
+@sonney2k	now c-space doesn't do anything
+ blackburn	did you add imap <C-@> <C-space> to clang_complete.vim?
+@sonney2k	no
+@sonney2k	I don't have that line
+ blackburn	(11:46:47 PM) blackburn:  88   inoremap <expr> <buffer> <C-space> <SID>LaunchCompletion()
+ blackburn	(11:46:47 PM) blackburn:  89   imap <C-@> <C-space>
+ blackburn	it should look like that
+@sonney2k	works!
+@sonney2k	thx
+@sonney2k	and now back to ...
+ blackburn	yeah
+-!- cronor [~cronor@e177093001.adsl.alicedsl.de] has joined #shogun
+@sonney2k	blackburn, did you 'fix' GPs too?
+@sonney2k	gaussianprocessregression that is
+ blackburn	sonney2k: why it needs a fix?
+@sonney2k	let me do it
+ blackburn	I am moving QDA right now
+ blackburn	oh and we need to indicate problem types in each machine
+@sonney2k	blackburn, ...and fix evaluations
+ blackburn	yes
+@sonney2k	blackburn, what if a machine can handle two problem types?
+ blackburn	sonney2k: just call appropriate
+@sonney2k	?
+ blackburn	apply_regression
+ blackburn	or apply_binary
+@sonney2k	I mean when indicating problem type
+ blackburn	or.. do you hide it?
+ blackburn	what is the example of two problems?
+@sonney2k	liblinear, libsvm ... I mean ok we can split them up to make things explicit
+ blackburn	split?
+ blackburn	sonney2k: problem type is something by default I think
+ CIA-113	shogun: Soeren Sonnenburg master * r7407407 / (11 files in 5 dirs): introduce macros to easy apply renaming - http://git.io/lMumfw
+@sonney2k	blackburn, no I mean if liblinear (in one class) handles regression, classification, multiclass
+@sonney2k	then we cannot set problem type in constructor
+ blackburn	sonney2k: no way
+ blackburn	:D
+ blackburn	we already have splitted that
+@sonney2k	so we need to split it up
+@sonney2k	yeah
+ blackburn	multiclass machines are totally different
+@sonney2k	fixing typemaps seems quite easy with these macros
+@sonney2k	not a lot of work now
+ blackburn	and even multiclass part of liblinear is not related at all
+@sonney2k	let me get a few python examples to work
+@sonney2k	blackburn, btw do libshogun examples work already?
+ blackburn	no I don't think they work at all
+@sonney2k	blackburn, evaluation / model selection certainly not
+@sonney2k	but the rest?
+* sonney2k checks
+@sonney2k	blackburn, indeed - but they are trivially fixed
+@sonney2k	doing
+ blackburn	I am little stucked with qda right now
+ CIA-113	shogun: Sergey Lisitsyn master * re9382f3 / (8 files in 3 dirs): Rebased QDA - http://git.io/7F20NQ
+ n4nd0	blackburn: speaking of which, I started to move it to multiclass this morning but faced some errors I didn't quite manage to solve
+ blackburn	n4nd0: already
+ n4nd0	blackburn: cool, thank you!
+ blackburn	hmm while you appeared
+ n4nd0	sorry I didn't get it done
+ blackburn	I would like to get you loaded :D
+ n4nd0	loaded of what man?
+ n4nd0	haha
+ blackburn	heh yeah not the best wording
+ blackburn	lets say overloaded
+ n4nd0	tell me
+ blackburn	hmm
+ blackburn	okay could you please add proper get_problem_type to *every* classifier? :D
+ n4nd0	ok
+ n4nd0	what are the possibilities
+ n4nd0	some according to labels?
+ n4nd0	like multiclass, binary
+ n4nd0	or?
+@sonney2k	blackburn, MulticlassMachines have no apply_one?
+ blackburn	n4nd0: check CMachine
+ n4nd0	blackburn: ok
+ blackburn	sonney2k: hmm it has I think
+@sonney2k	blackburn, please check - I am getting compile errros there
+ blackburn	checking
+ blackburn	sonney2k: works
+@sonney2k	n4nd0, python examples also need some treatment
+ blackburn	HEAVY MEDICAL TREATMENT
+ n4nd0	yeah
+ blackburn	oh n4nd0 sorry I need to clarify
+ blackburn	just 5 mins
+@sonney2k	should be easy though
+ n4nd0	sonney2k: what about the swig functions we talked about?
+ n4nd0	are they ready or something done?
+@sonney2k	n4nd0, they are all ready
+ n4nd0	the ones for ignore apply and apply_binary & co.
+ n4nd0	awesome
+@sonney2k	much easier than expected
+ blackburn	gsomix: ping
+@sonney2k	gsomix is hiding all day
+@sonney2k	err afternoon-> evening
+ n4nd0	blackburn: tell me when you get time since I have already started including methods
+@sonney2k	blackburn, could you please look at the libshogun classifier_multiclasslibsvm example?
+ blackburn	n4nd0: I think you'd rather should add a macros for that
+@sonney2k	apply_one doesn' t exist there
+ n4nd0	blackburn: why?
+ blackburn	n4nd0: less code
+ n4nd0	isn't it more typical around here to use methods?
+ n4nd0	like get_name and the like
+ blackburn	n4nd0: yes macros hiding method
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ gsomix	blackburn, wut?
+ n4nd0	blackburn: somethind like http://snipt.org/ujTc3
+ n4nd0	??
+ blackburn	n4nd0: exactly
+ blackburn	but naming could be just MULTICLASS_MACHINE
+ blackburn	BINARY_MACHINE
+ blackburn	REGRESSION_MACHINE
+ n4nd0	I was thinking to do the macro with an argument
+ n4nd0	you prefer one macro for each?
+ blackburn	no preference at all - up to you
+ blackburn	param macro is ok I think
+@sonney2k	blackburn, had a look?
+ blackburn	argh sec
+ blackburn	sonney2k: what is the problem?
+ blackburn	line 50 apply(i)?
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ blackburn	gsomix: what do you do?
+ blackburn	optics is not the anwer
+ gsomix	blackburn, warnings. fixing swig warnings.
+ CIA-113	shogun: Soeren Sonnenburg master * r4830bda / (16 files): various fixes for libshogun examples - http://git.io/t2NTaQ
+ CIA-113	shogun: Soeren Sonnenburg master * rc54276b / (9 files): fix remaining libshogun examples for new label system - http://git.io/i_LzSQ
+@sonney2k	blackburn, do we have apply_one there or what?
+ gsomix	blackburn, I'm reading some docs about renaming and ignoring.
+ blackburn	sonney2k: yes apply_one instead of apply I think
+@sonney2k	blackburn, but we have apply_one there
+@sonney2k	already I mean
+@sonney2k	it doesn't compile though becauce mc machine doesn't have it
+@sonney2k	so please check
+@sonney2k	most of the exmaples work now but these and the evaluation based ones / train/apply_locked ones
+ blackburn	oops
+ blackburn	who stole it?
+ blackburn	I?
+@sonney2k	certainly not me
+ blackburn	ok let me get it back
+ n4nd0	blackburn: I have just seen an small PR
+ n4nd0	blackburn: check it and tell if you like it like that and I will continue to the other machines
+ blackburn	ok a min
+ CIA-113	shogun: Soeren Sonnenburg master * r1a6ae98 / (3 files): rename apply(idx) -> apply_one(idx) - http://git.io/-bYF2Q
+ CIA-113	shogun: Soeren Sonnenburg master * r5f9d58b / (11 files): fix various python examples - http://git.io/cBOAog
+ blackburn	arght that conflicts with my commit
+@sonney2k	urgs I have to sleep now or I will die tomorrow
+@sonney2k	cu
+ blackburn	see you
+ blackburn	okay and I am the olny one left :D
+ blackburn	w/ commit rights
+ n4nd0	sonney2k: good night
+ blackburn	n4nd0: sorry a little more
+ n4nd0	no problem
+ blackburn	n4nd0: yes continue with it please
+@sonney2k	blackburn, btw why not have a get_problem_type() in CMachine
+ blackburn	sonney2k: ?? :D
+ blackburn	sonney2k: it is here
+ blackburn	returns PT_BINARY
+@sonney2k	have a EProblemType machine_type member variable
+@sonney2k	and just set the variable in constructors
+@sonney2k	or even better init()
+ blackburn	I think virtual method is better for that
+ blackburn	variable is pretty redundant
+* sonney2k checks how we do it with Features
+@sonney2k	get_feature_type()=0...
+@sonney2k	ok
+ blackburn	sonney2k: member is always harder to maintain I think
+ blackburn	okay apply_one is here again
+ CIA-113	shogun: Sergey Lisitsyn master * re496dce / (2 files): Restored apply_one method of multiclass machine - http://git.io/c-inWg
+@sonney2k	blackburn, yeah but please make it pure virtual - otherwise it is tough to debug why apply() is failing and if we missed a case
+ blackburn	??
+@sonney2k	or at least SG_ERROR
+ blackburn	what should be pure virtual?
+@sonney2k	get_machine problem type returns PT_BINARY
+@sonney2k	by default
+ blackburn	ah
+@sonney2k	that is not good
+ blackburn	yes should be pure virtual
+@sonney2k	it is hard to detect
+ n4nd0	I will remove that right now
+@sonney2k	SG_ERROR() or =0
+ blackburn	but I can't remove it before *ALL* machines
+ blackburn	are marked
+@sonney2k	all multiclass examples still die
+ blackburn	sonney2k: I thought you went to bed :)
+ n4nd0	I am going to bed soon too, too tired today :S
+ n4nd0	blackburn: this can wait until tomorrow or?
+ blackburn	n4nd0: yes
+ blackburn	I think yes
+ n4nd0	great
+@sonney2k	blackburn, you know I am like chuck norris: I can program while asleep
+ blackburn	hehe would be cool actually
+@sonney2k	blackburn, examples fail because e.g. QDA has PT_BINARY
+ blackburn	however my dreams are usually about some crazy shit like cat becoming jelly
+ blackburn	so my code would be bad I think
+ n4nd0	wtf
+ n4nd0	jelly? why?!
+ blackburn	n4nd0: no idea I had one dream like that day before yesterday
+ n4nd0	:DD never heard that in my life
+@sonney2k	blackburn, it is the shogun cat dissolving
+ CIA-113	shogun: Soeren Sonnenburg master * r8d4b65b / (4 files): fix a few MC examples - http://git.io/ZVhFFQ
+@sonney2k	ok some work now
+@sonney2k	rest is probably LT_BINARY crap due to wrong problem type
+* sonney2k off
+ n4nd0	well good night guys
+ blackburn	good night
+ blackburn	I tihkn I have one more hour to code
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+ blackburn	hmm ok let me fix evaluations then
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 245 seconds]
+-!- wiking_ is now known as wiking
+--- Log closed Tue May 22 00:00:05 2012

@@ -1,0 +1,167 @@
+--- Log opened Sat Jan 11 00:00:47 2014
+-!- FSCV [~FSCV@50.7.50.60] has quit [Quit: Leaving]
+@wiking	y
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has joined #shogun
+-!- zxtx_ [~zv@129-79-241-148.dhcp-bl.indiana.edu] has quit [Read error: Operation timed out]
+ bb_	besser82 are you there?
+ bb_	got the latest version from git and after installation when you run an example from python it gives segfault
+ bb_	seqmentation fault 11
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has quit [Ping timeout: 272 seconds]
+-!- zxtx_ [~zv@c-98-223-196-32.hsd1.in.comcast.net] has joined #shogun
+ shogun-buildbot	build #677 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/677
+-!- new_lido [~walid@41.218.173.170] has joined #shogun
+-!- new_lido [~walid@41.218.173.170] has quit [Quit: Leaving]
+@sonney2k	shogun-buildbot, force build --branch=develop 'deb3 - python_modular'
+ shogun-buildbot	no such builder 'deb3 - python_modular'
+@sonney2k	shogun-buildbot, force build --branch=develop 'deb3 - modular_interfaces'
+ shogun-buildbot	build forced [ETA 36m53s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #2130 of deb3 - modular_interfaces is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2130
+ besser82	sonney2k:  hey ho!
+ besser82	sonney2k:  I just couldn't find any CMake / build-infra related on the gdrive mock of gsoc proj; shall i add some?
+-!- sonne|osx [~sonne@e179136104.adsl.alicedsl.de] has joined #shogun
+-!- new_lido [~walid@193.227.20.2] has joined #shogun
+ besser82	sonne|osx: ping? or are out with da family?
+-!- new_lido [~walid@193.227.20.2] has quit [Remote host closed the connection]
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has joined #shogun
+ bb_	hi besser82 how have you been
+ besser82	bb_:  fine thanks!  And yourself?
+ bb_	doing well... how was your new year
+ bb_	i got the latest shogun from the git and the python examples give a segmentation fault
+ bb_	besser82 do you have any idea on this
+ besser82	bb_:  idea on what?
+ bb_	about the seg fault
+ besser82	bb_:  on which os?
+ besser82	bb_:  my new year started fine, btw;  how bout yours?
+ besser82	bb_:  sry, didn't read the backlog....
+ bb_	besser82 osx .. previusly it was working fine
+ bb_	besser82 but i wanted to get the latest one and now i get this problem
+ besser82	bb_:  on stuff related to osx, I actually have no ideas...  can you please run the example using valgrind?
+ bb_	besser82 i am not able to run any of the examples in python_modular
+ bb_	besser82 i deleted the older version of shogun may be i should go back to that
+ besser82	bb_:  then try to run `valgrind --track-origins  python $shogun_example.py`, plz and paste me it's output somewhere
+ besser82	bb_:  maybe that can give me some conclusion....
+ besser82	bb_:  you may have to install valgrind first using "brew"
+ bb_	besser82 sure let me get valgrind and then try it doing it now
+ besser82	bb_:  thanks!  that might give me some sure hints whats going wrong for u
+ bb_	besser82 is there any other program similar to valgrind i can use .. valgrind is not supported for osx 10.9 they support only till 10.8
+ besser82	bb_:  there might be gdb, but that is quite harder to use...
+ besser82	bb_:  maybe OSX itself ships sth like valgrind, i dunno...
+ besser82	bb_:  maybe wiking knows....
+ besser82	wiking:  ^^^ ping?
+ bb_	besser82 but what has changed from last time that it is seg faulting... i had a relatively new version
+ bb_	besser82 of shogun which i was happy with ...
+ besser82	bb_:  I dunno... maybe you compiled against the wrong python-libs?!?
+ besser82	bb_:  which would cause the segfaults when using a different py-interp...
+@wiking	besser82: pong
+ besser82	wiking:  is there sth. like "valgrind" for OSX 10.9?
+@wiking	besser82: dtrace
+@wiking	besser82: what's the problem
+ besser82	wiking:  bb_ has problems with segfaulting python_modular  :(
+@wiking	bb_: can u send the output of your cmake somewhere?
+ bb_	wiking i am getting segfault after everyting compiles in the latest shogun
+@wiking	bb_: when trying to use the interface or when compiling?
+ besser82	bb_:  does the libshogun it self segfault? did you try that?
+@wiking	besser82: for segfault it's better to use gdb/lldb
+ besser82	wiking:  yes, but that is quite harder for someone without debug-expirience...
+@wiking	bb_: i suppose the interpreter and lib does not match. u have macports right?
+ besser82	wiking:  valgrind atleast gives some useful hints what's wrong in a quite simple way ;)
+ bb_	wiking yes i have macports .. when i am trying to run the the example in pythong modular
+@wiking	bb_: i think what's happening maybe is that cmake detects your system's python but it tries to use the macports' python lib. or the other way around. i had those segfaults in this scenario
+@wiking	bb_: plz try to pastebin the output of your cmake
+@wiking	although i must say that i haven't tried to compile/use python modular lately on osx
+@wiking	so maaaaaybe there's another reason
+@wiking	this is my first guess
+ bb_	wiking here is the output for cmake http://pastebin.com/gjUZ3qRn
+ bb_	wiking it was working fine all these days with the older version of shogun and i decided to get the lastest one
+@wiking	mmm seems it's using system's python
+ bb_	wiking yes it was doing the same when it was working perfectly
+@wiking	bb_: do u use system's python interpreter or macports for running the example
+@wiking	i.e. what's the output of this: port select python
+ bb_	wiking systems python interpreter
+@wiking	mmmm
+@wiking	then i guess we have a bug
+ bb_	| => port select python Available versions for python: none (active) python25-apple python26-apple python27 python27-apple
+@wiking	looking at http://buildbot.shogun-toolbox.org/waterfall
+@wiking	does not surprise me
+@wiking	btw what is the example u try to run?
+ bb_	svm.py in graphical in undocumented python modular
+ bb_	wiking how can we work around this
+@wiking	dunno
+ bb_	wiking should i just revert back to the old one.. is there a way to get old version from git
+@wiking	bb_: yes
+@wiking	git checkout <commit version that worked for you>
+ bb_	wiking there is no way for me to know that..
+@wiking	life is cruel
+@wiking	oh man it's just a pain to see this shit protobuf cmake
+ bb_	wiking i am stuck here not sure which shogun i had earlier..
+ bb_	wiking let me know if you can think of a workaround or need something from with dtrace or will try to install valgrind
+-!- bb_ [458fc8de@gateway/web/freenode/ip.69.143.200.222] has quit []
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	hey guys
+@iglesiasg	about the Google docs
+@iglesiasg	do you happen to know who Christian Dersch is?
+@iglesiasg	I got a mail asking for permission to join the doc
+ besser82	iglesiasg:  yes, he is one me buddies
+@iglesiasg	besser82, all right, I will add him as a viewer
+ besser82	iglesiasg:  BSc astro-physics, currently doing MSc
+ besser82	iglesiasg:  just did so  ;)
+ besser82	iglesiasg:  He possibly wants to mentor sth. like openCV intergration or that Markov stuffs
+ besser82	iglesiasg:  thanks for asking!  :D
+@iglesiasg	no problem at all :)
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has joined #shogun
+ thoralf	Hey.
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Read error: Connection reset by peer]
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has joined #shogun
+-!- pickle27 [~kevin@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+ pickle27	sonney2k: looking at the website now, I see what you mean about the db, anyway you could dump the production database into sqlite3 and send me the file?
+ pickle27	or how do you usually work on the site? just live...?
+-!- thoralf [~thoralf@91-65-138-245-dynip.superkabel.de] has quit [Ping timeout: 260 seconds]
+@sonney2k	pickle27, no that is the problem - I can dump the mysql db but no idea how to get that into sqlite format
+@sonney2k	pickle27, btw want to mentor this year?
+-!- new_lido [~walid@41.218.176.242] has joined #shogun
+-!- new_lido [~walid@41.218.176.242] has quit [Ping timeout: 272 seconds]
+-!- new_lido [~walid@41.218.176.242] has joined #shogun
+ pickle27	sonney2k: I would love too!
+ pickle27	hmm can you send me the mysql dump? I'll try and figure it out
+@sonney2k	pickle27, what would you want to mentor?
+@sonney2k	pickle27, opencv integration?
+ pickle27	sure I could do that although I don't know if that scope is big enough for GSOC
+ pickle27	maybe integration plus some awesome examples
+@sonney2k	pickle27, yes sounds cool
+@sonney2k	pickle27, what is your google mail addr?
+@sonney2k	I give you write acces to the doc
+ pickle27	kevinhughes27@gmail.com
+ pickle27	sorry which doc?
+ pickle27	nvm
+@sonney2k	pickle27, ok sent you the dump
+@sonney2k	pickle27, if you figure sth out would be nice
+ pickle27	sonney2k: okay I'll see what I can with it
+@sonney2k	pickle27, and please add your idea / yourself as mentors in the google doc
+ pickle27	I will!
+ pickle27	also how tied are we to django for the site?
+ pickle27	flask might be simpler
+ pickle27	I'll probably stick with django but just thought I'd see what you thought
+@sonney2k	pickle27, lets just stick with django
+ pickle27	sounds good
+@sonney2k	pickle27, in principle we don't need the extensive stuff we have now in django but that is the way it is and at least people can admin the website w/o editing the code
+ pickle27	true
+ pickle27	sonney2k: look what I found: http://www.stat.berkeley.edu/~statcur/Workshop2/Assignments/Baseball/instructions.html
+ pickle27	seems to work
+@sonney2k	pickle27, *lol*
+@sonney2k	pickle27, but cool!
+@sonney2k	pickle27, just make sure you never expose the real db with user names etc in some PR or so
+ pickle27	good point
+@sonney2k	pickle27, the convert almost works...
+@sonney2k	pickle27, I have some weird \r in the output
+-!- new_lido [~walid@41.218.176.242] has quit [Quit: Leaving]
+ pickle27	seemed to work for me
+ pickle27	when I load the shogun page I get all the tabs and stuff now
+ pickle27	which is really all I needed
+ pickle27	ah I see what you mean
+ pickle27	I'll try and fix the script
+@sonney2k	pickle27, keep me posted - it is still much better with this script than w/o anything :D
+ pickle27	yeah this way you can play around locally at least
+--- Log closed Sun Jan 12 00:00:48 2014

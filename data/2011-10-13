@@ -1,0 +1,119 @@
+--- Log opened Thu Oct 13 00:00:39 2011
+-!- blackburn [~blackburn@188.168.4.95] has quit [Quit: Leaving.]
+-!- alesis-novik [~alesis@dhcp-90-089.inf.ed.ac.uk] has quit [Quit: Leaving]
+ CIA-3	shogun: Soeren Sonnenburg  * r1d5d860 / src/shogun/kernel/Kernel.cpp : Fix a bug in cache_multiple_kernel_row that gets triggered when support vector regression is performed with svr light and multiple threads. - http://git.io/MSI5yQ
+ shogun-buildbot	build #280 of python_static is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/280  blamelist: sonne@debian.org
+-!- alesis-novik [~alesis@dhcp-90-089.inf.ed.ac.uk] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- blackburn [~blackburn@188.168.4.89] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 248 seconds]
+ blackburn	uh rip dennis ritchie
+-!- blackburn [~blackburn@188.168.4.89] has quit [Ping timeout: 248 seconds]
+-!- blackburn [~blackburn@188.168.2.213] has joined #shogun
+ blackburn	sonney2k: I've got an idea of very fun task for next gsoc or just to one of us
+ blackburn	there could be some task to store visualization information to make easier to visualize something
+@sonney2k	visualization information?
+ blackburn	yeah something related to training process we could plot
+ blackburn	sonney2k: I've got a problem with new 'converter' folder, parallel and io are not visible for some reason
+ blackburn	any ideas?
+@sonney2k	no
+ blackburn	sad
+@sonney2k	blackburn, did you derive from SGObject?
+ blackburn	sonney2k: yes, I guess the problem is I forgot to implement get_name
+ blackburn	sonney2k: where should I add new modular .i files?
+@sonney2k	in modular/
+ blackburn	sonney2k: no, modshogun.i, somewhere else?
+@sonney2k	?
+ blackburn	nevermind
+ blackburn	fixed
+ blackburn	sonney2k: where did you declared python modules for workaround like shogun.Preprocessor, shogun.Classifier?
+@sonney2k	blackburn, that is in Makefile.template
+ blackburn	thanks
+@sonney2k	blackburn, we have to get memory requirements for compiling the interfaces below 1.5 G
+@sonney2k	better ~1G
+ blackburn	oh
+ blackburn	why?
+@sonney2k	none of the debs built
+-!- alesis-novik [~alesis@dhcp-90-089.inf.ed.ac.uk] has quit [Quit: Leaving]
+ blackburn	sonney2k: have you asked anyone from swig team how to reduce size?
+@sonney2k	no
+ blackburn	may be they have some tricks for that
+@sonney2k	I don't think so...
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Ping timeout: 240 seconds]
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+ blackburn	sonney2k: around?
+ CIA-3	shogun: Soeren Sonnenburg  * r74bf297 / src/shogun/kernel/WeightedDegreePositionStringKernel.cpp : fix lhs / rhs mixup in free_feature_vector (how did this ever work?!) - http://git.io/QCICng
+ CIA-3	shogun: Soeren Sonnenburg  * ra6e49bb / src/shogun/classifier/svm/WDSVMOcas.h : fix broken free_feature_vector call in wdsvmocas - http://git.io/Q9nfcQ
+ CIA-3	shogun: Soeren Sonnenburg  * r12a5173 / (2 files): introduce more efficient cleanup_feature_vectors function - http://git.io/Nx_h0g
+ CIA-3	shogun: Soeren Sonnenburg  * r18a93b9 / src/shogun/features/DotFeatures.cpp : always set dot feature property on init - http://git.io/ieu_ow
+ CIA-3	shogun: Soeren Sonnenburg  * r6356f26 / (3 files): fix static octave examples - http://git.io/OJKEJQ
+@sonney2k	yes
+@sonney2k	blackburn, busy watching http://www.youtube.com/watch?NR=1&v=pmw87w7i6rQ though
+ blackburn	sonney2k: I need an idea how to stole feature matrix from simple features
+ blackburn	safely
+@sonney2k	I don't think it is currently possible
+ blackburn	sonney2k: I would add leave_feature_matrix(), ok?
+@sonney2k	what exactly should this do?
+@sonney2k	get the ptr of the fm?
+ blackburn	sonney2k: yes, and make it not deleted when features will be
+@sonney2k	and then replace the fm ptr with yours?
+ blackburn	no
+ blackburn	I just want features to lose this pointer
+ blackburn	and when it is going to be deleted features won't free this matrix
+ blackburn	cause it will be used by another features
+ blackburn	I could do this with copying but it is pretty bad way in case of large-scale applications
+@sonney2k	yeah
+@sonney2k	so add a function that gets you the ptr and size
+@sonney2k	and internally drops/resets preprocs/ptr/sizes
+@sonney2k	SGMatrix<ST> get_feature_matrix_and_clear() ?
+@sonney2k	or *_and_reset() ?
+ blackburn	why not leave_feature_matrix()?
+@sonney2k	leave doesn't tell anything about that you steal it
+@sonney2k	well how about steal_feature_matrix()
+ blackburn	yeah
+ blackburn	sonney2k: I have almost done ->converters things
+@sonney2k	blackburn, very good
+ blackburn	and already moved all the examples
+ blackburn	and tested
+@sonney2k	I think I fixed all octave examples now that octave runs again under debian unstable
+ blackburn	final step - dimensionreductionpreprocessors proxy
+ shogun-buildbot	build #281 of python_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/281
+@sonney2k	I have high hopes taht the buildbot goes through now
+@sonney2k	ha :)
+ blackburn	sonney2k: we are doing nice progress last 1.5 months :)
+ blackburn	I'm running out of power with improving my dim reduction 'toolkit' though
+@sonney2k	one of the most important things is to keep git master compilable/ tests running
+ blackburn	I would be very disappointed being rejected with paper
+@sonney2k	and the debian package
+@sonney2k	blackburn, dont' expect that the paper will be accepted immediately
+ blackburn	sonney2k: month?
+@sonney2k	there will be at least one revision
+@sonney2k	months + that
+ blackburn	ah
+ blackburn	I see
+ blackburn	well at least after programming I can focus on paper
+ blackburn	I feel much happier with converters concept
+ blackburn	without any changes you can now embed features that doesn't fit in memory
+ blackburn	sonney2k: are kernels support this?
+ shogun-buildbot	build #288 of octave_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/288
+@sonney2k	strike :)
+ blackburn	nice
+@sonney2k	I don't understand what you are saying...
+ blackburn	sonney2k: can I init kernel with FileFeatures or so?
+@sonney2k	simplefeatures don't have to be in memory...
+@sonney2k	so partially yes
+ blackburn	I mean that most of methods are now working with any Features supporting distance/kernel
+@sonney2k	blackburn, btw the only way I see to get compilation below 1.5GB is to remove a few %template's
+@sonney2k	so I guess I should make them configurable
+@sonney2k	and drop as much as possible...
+@sonney2k	I see. but don't you need access to the full kernel/distance matrix?
+@sonney2k	or do you only access element pairs?
+ blackburn	unfortunately I need
+@sonney2k	well then you shouldn't care if features fit in memory
+@sonney2k	these will not be the bottleneck :)
+ blackburn	before it wasn't any possible
+ blackburn	cause it was working only with SimpleFeatures
+@sonney2k	the buildbot is now working on the modular interfaces again
+@sonney2k	finally...
+@sonney2k	blackburn, I see
+--- Log closed Fri Oct 14 00:00:09 2011

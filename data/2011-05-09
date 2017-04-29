@@ -1,0 +1,138 @@
+--- Log opened Mon May 09 00:00:50 2011
+ blackburn	I see
+ blackburn	sonney2k: do you plan to change internals for SGVector, etc usage?
+-!- blackburn [~qdrgsm@188.122.225.203] has quit [Quit: Leaving.]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- blackburn [~qdrgsm@188.122.225.203] has joined #shogun
+@sonney2k	blackburn, would love to
+@sonney2k	not sure if I have time to do it now.
+ blackburn	me too
+ blackburn	but I think we could do it during summer
+@sonney2k	maybe a first step is to put the struct definition in DataType.h
+ blackburn	I think we should make definition and then convert one algo to its usage
+@sonney2k	there is one problem though
+ blackburn	which?
+@sonney2k	typemaps need to be adjusted
+ blackburn	ah, yeap
+@sonney2k	so that means we have to add another round of typemaps
+@sonney2k	(to not break anything inbetween)
+@sonney2k	and then gradually remove the others
+ blackburn	so well when I will have holidays (mid of june - .. )
+ blackburn	may be I will do it for GaussianNaiveBayes
+ blackburn	with typemaps, etc
+ blackburn	if everything will work fine - we will convert others gradually
+ blackburn	sonney2k: can you recommend some BLAS/ATLAS tutorial?
+@sonney2k	blackburn, it may actually be simpler to do the typemaps...
+@sonney2k	with SGVector etc
+@sonney2k	blackburn, I only ever used this lapack / blas overview pdf that you find in the net
+@sonney2k	there is a book though
+ blackburn	ok
+@sonney2k	blackburn, I am currently finishing the malloc / realloc / free -> SG_MALLOC etc transition
+ blackburn	where?
+ blackburn	sonney2k: I need to use atlas for solving systems of linear equations, right?
+@sonney2k	yes
+ blackburn	and cblas for other routines, like dot product
+@sonney2k	otherwise it will be tough
+ blackburn	sonney2k: do we have example of atlas usage in shogun? I got stucked with setting it up
+@sonney2k	blackburn, PCACut.cpp or dot product in lib/Mathematics.h or in pr_loqo.cpp
+ blackburn	seems PCACut use only blas..
+ blackburn	same thing in Mathematics.h
+@sonney2k	compute_eigenvectors in Math uses dsyev
+@sonney2k	that is eigenvectors/values for symmetric doubl ematrix
+ blackburn	ah!
+ blackburn	thank you
+ blackburn	sonney2k: what is wrap_**?
+ blackburn	ah, I see
+ blackburn	it is in lapack.h
+ blackburn	sonney2k: the problem was related to my bad atlas installation
+@sonney2k	blackburn, yeah there are problems with when things are available in atlas or lapack only and different os / libs make a difference
+@sonney2k	ok
+ blackburn	sonney2k: question now is should I add needed functions to lib/lapack.h or can I use it straight?
+@sonney2k	blackburn, preferably add it to lapack.h (wrap_*) and then use it
+@sonney2k	in case one has to change it later it will be easier to modify it there
+ blackburn	aha! I see
+ blackburn	thanks! you helped me very much
+-!- [1]warpy [~warpy@bzq-79-183-44-64.red.bezeqint.net] has joined #shogun
+-!- [1]warpy [~warpy@bzq-79-183-44-64.red.bezeqint.net] has quit [Ping timeout: 260 seconds]
+ CIA-90	shogun: Soeren Sonnenburg master * r7890ec2 / (10 files): remove roc eval functions from static interfaces - http://bit.ly/mNbmUQ
+ CIA-90	shogun: Soeren Sonnenburg master * r6e92985 / (59 files in 13 dirs): Convert all memory functions to use the SG_* ones. - http://bit.ly/mbsY2g
+ CIA-90	shogun: Soeren Sonnenburg master * ra861f66 / examples/undocumented/matlab_and_octave/classifier_libsvmmulticlass.m : fix multiclass example - http://bit.ly/lXAmmo
+ CIA-90	shogun: Soeren Sonnenburg master * r84e585e / (src/libshogun/lib/memory.cpp src/libshogun/lib/memory.h):
+ CIA-90	shogun: Introduce SG_MALLOC, SG_FREE, SG_REALLOC.
+ CIA-90	shogun: These replacements to the stdlib functions will throw exceptions in case
+ CIA-90	shogun: of errors (never return NULL). - http://bit.ly/mUySQo
+ blackburn	sonney2k: what is the purpose of SG_MALLOC, SG_FREE, SG_REALLOC?
+ blackburn	ah I see
+ blackburn	in new code we should use SG_MALLOC, right?
+@sonney2k	blackburn, usually new[] new()
+@sonney2k	but never malloc / realloc / free but the SG_* things instead
+ blackburn	I see
+@sonney2k	it just has the advantage that you never need to check for NULL ptr's
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- blackburn [~qdrgsm@188.122.225.203] has quit [Quit: Leaving.]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- [1]warpy [~warpy@bzq-79-183-44-64.red.bezeqint.net] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- [1]warpy [~warpy@bzq-79-183-44-64.red.bezeqint.net] has quit [Ping timeout: 240 seconds]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- Daniel [50fa9238@gateway/web/freenode/ip.80.250.146.56] has joined #shogun
+ Daniel	Hi Sonney
+ Daniel	Sonney2K?
+ Daniel	You had told me to use ./configure --interfaces=libshogun,csharp  to compile the csharp typemap when it was ready
+ Daniel	but I got "Unknown interface: csharp"
+ Daniel	this was on the code where you had added the csharp folder
+ Daniel	I emailed you
+ Daniel	take care
+-!- Daniel [50fa9238@gateway/web/freenode/ip.80.250.146.56] has quit [Quit: Page closed]
+-!- blackburn [~qdrgsm@188.168.4.172] has joined #shogun
+@sonney2k	Daniel no I told you to use csharp_modular
+@sonney2k	sigh too late
+ blackburn	what's up, sonney2k?
+@sonney2k	blackburn, please have a look at the datatype
+ CIA-90	shogun: Soeren Sonnenburg master * ra996050 / src/libshogun/lib/DataType.h : draft definition for vector / matrix datatype - http://bit.ly/mOSESQ
+@sonney2k	blackburn, I think we should rename things to SGVector SGMatrix, SGSparseVector, SGSparseMatrix, SGString
+ blackburn	of course, I don't like T*
+@sonney2k	blackburn, but have a look first
+ blackburn	already
+ blackburn	sonney2k: what you think about implementing operations for it using blas, for example dot product
+ blackburn	do you*
+ blackburn	ehhrr my english is becoming worse every day :D
+@sonney2k	blackburn, makes sense - but we shouldn't over do it - there are many matrix/vector packages around that probably do a better job then us
+ blackburn	anyway it is better way
+ blackburn	because we can change all the things just changing implementation of sgvector
+@sonney2k	on the other hand it is very convenient and more clean - we could just implement the functions that are needed anyways
+@sonney2k	it will probably make some functions in *features and *math* obsolete
+ blackburn	sonney2k: what about +, * overloading? I think it is a bad practice
+@sonney2k	lets not do that now
+ blackburn	it looks undetermined
+ blackburn	sonney2k: do we really need template matrix type?
+ blackburn	I mean almost all of them are float
+@sonney2k	blackburn, almost all yes - but not e.g. images
+ blackburn	may be we could have some shorthand name
+ blackburn	SGFloatMatrix or so
+ blackburn	ohhh overloading [] for matrices could be goooood
+ blackburn	z_transposed[dim*j+d] -= feature_vector[d];
+ blackburn	pfff
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+@sonney2k	blackburn, overloading [] for 2d is not possible -
+ blackburn	ah.. yeah, forgot
+@sonney2k	I guess you want sth like set   / get functions
+ blackburn	yeap because that X*Y+Z is pretty unreadable if it is not your own code
+@sonney2k	and it can probably be done more efficiently using some matrix lib like eigen anyways
+@sonney2k	btw having SGFloatmatrix etc is not really necessary - typemaps can have type specific implementations if needed
+ blackburn	ok
+ blackburn	I don't know which is most efficient, but we should use that one :)
+@bettyboo	interesting
+@sonney2k	going to bed now
+@sonney2k	l8r
+ blackburn	good night
+@sonney2k	the mighty diaper master leaves the room
+ blackburn	:D
+--- Log closed Tue May 10 00:00:52 2011

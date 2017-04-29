@@ -1,0 +1,166 @@
+--- Log opened Fri Oct 14 00:00:10 2011
+--- Day changed Fri Oct 14 2011
+@sonney2k	blackburn, the only other idea regarding reducing 'wrapper code size' is to remove Array
+@sonney2k	I am afraid I don't know what else to remove...
+ blackburn	will it help that much?
+@sonney2k	no
+@sonney2k	but any templated class would
+@sonney2k	I mean currently each tempalted class exists for ~8 data types
+@sonney2k	-> 8 wrappers
+ blackburn	yes
+@sonney2k	grep template interfaces/modular/* | wc -l
+@sonney2k	258
+@sonney2k	grep template interfaces/modular/* | grep CArray | wc -l
+@sonney2k	30
+@sonney2k	better than nothing...
+ blackburn	sonney2k: how can I handle CCache with steal_feature_matrix?
+ blackburn	it corrupts stealed memory
+ blackburn	when deleting
+@sonney2k	Builds of shogun have failed on several architectures because
+@sonney2k	SWIG's output proved too much for their compilers to handle; per
+@sonney2k	https://buildd.debian.org/status/package.php?p=shogun&suite=sid
+@sonney2k	the build blew out on ruby on s390 and on octave on i386, ia64,
+@sonney2k	powerpc, and sparc.  Could you please take a look?
+ blackburn	uh
+@sonney2k	debian bug report
+ shogun-buildbot	build #226 of octave_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_modular/builds/226  blamelist: sonne@debian.org
+@sonney2k	ahh we are finally getting octave_modular bugs - very good :)
+ blackburn	I was wondering why it is not working:
+ blackburn	return SGMatrix<ST>(feature_matrix, num_features, num_vectors);
+ blackburn	feature_matrix = NULL;
+ blackburn	feature_matrix_num_vectors = 0;
+ blackburn	feature_matrix_num_features = 0;
+ blackburn	num_features = 0;
+ blackburn	num_vectors = 0;
+ blackburn	:D
+ blackburn	not a cache bug
+ blackburn	as expected
+@sonney2k	blackburn, clean the cache / preprocs
+ blackburn	sonney2k: ? how?
+@sonney2k	look at Features.h for preprocs
+ CIA-3	shogun: Soeren Sonnenburg  * r78c8694 / src/shogun/features/StringFeatures.h : fix documentation of clean_feature_vectors - http://git.io/hHd-yA
+ blackburn	sonney2k: how to handle with cache?
+ blackburn	there is no clean
+@sonney2k	feature_cache = NULL
+ blackburn	?!
+@sonney2k	also drop subset
+ blackburn	sonney2k: not really needed - it is intended that features will be deleted after stealing
+@sonney2k	still
+@sonney2k	if someone then accesses this object later it should die sanely
+@sonney2k	so better remove more
+ blackburn	k
+@sonney2k	java / ruby modular went through
+@sonney2k	python too
+@sonney2k	csharp had an internal error (gcc4.6)
+@sonney2k	blackburn, btw just one mad idea - shouldn't it be possible to somehow split the huge generated swig file?
+@sonney2k	and then later just join it for linking?
+ blackburn	no idea
+ blackburn	how can it help?
+ blackburn	swig file = .cxx?
+@sonney2k	blackburn, well compiling files of size 1MB is better than compiling files of size 20MB
+ blackburn	I guess compiling 20*1mb will took even a little more than 20mb
+@sonney2k	blackburn, but it can be done on multiple CPUs and won't require 3G of memory but 1/20th of that
+ blackburn	hmm yes
+ blackburn	I have no idea how to get it done
+ blackburn	uh there are a lot of files to commit
+ blackburn	I'm sorry but I have no power to split it into commits
+ shogun-buildbot	build #283 of python_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/283  blamelist: sonne@debian.org
+ CIA-3	shogun: Sergey Lisitsyn  * r04b6de9 / (110 files in 12 dirs): Introduced converters module, moved DR preprocessors to it, fixed examples, updated other classes according to changes - http://git.io/82jByg
+ blackburn	sonney2k: a little intrusive change :D
+ shogun-buildbot	build #284 of python_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/284
+@sonney2k	blackburn, I've learned at work some extreme programming...
+@sonney2k	and one rule there is that someone else has to review the code before it gets accepted into the project
+@sonney2k	I think it would be a nice idea to apply this here too
+@sonney2k	then we could each work on our local github forks
+@sonney2k	and issue pull requests for each other :)
+@sonney2k	and you would know what I am doing and vice versa
+ blackburn	sonney2k: for only two of us that would be a waste of time
+@sonney2k	I don't think so
+@sonney2k	it helps finding bugs early
+ blackburn	sonney2k: but doing all the things through pull requests is a good thing
+ blackburn	sonney2k: have you seen how it is done in scikit-learn?
+@sonney2k	what?
+ blackburn	sonney2k: they do a lot of pull requests
+ blackburn	I guess there is no direct access
+ blackburn	sonney2k: but we both doing a lot of small fixes, etc
+@sonney2k	well there is but I think it is just better that code gets a review...
+ blackburn	sure
+@sonney2k	I mean usually it is easy :)
+ blackburn	sonney2k: so you are doing *extreme* programming at your job?
+@sonney2k	I am doing extreme extreme programming
+@sonney2k	or extreme^3 programming even ;-)
+ blackburn	lucky one, I do only bugfixing on my job :D
+ blackburn	cause netcracker oss is a piece of shit made by crazy students
+ blackburn	(like me)
+@sonney2k	blackburn, what is this: examples/undocumented/python_modular/serialized_svm.bz2
+ blackburn	oh sh
+ blackburn	junk
+@sonney2k	and examples/undocumented/python_modular/vw_cache.dat.cache
+@sonney2k	in your last commit
+ CIA-3	shogun: Sergey Lisitsyn  * r864758f / (2 files): Removed junk from the last commit - http://git.io/CLvrTA
+@sonney2k	btw put the copyright to sth reasonable (to you for example)
+@sonney2k	blackburn, another crap file : src/interfaces/python_modular/Converter.
+@sonney2k	blackburn, and you forgot the documentation
+@sonney2k	blackburn, btw you can shorten statements like this:
+@sonney2k	SGMatrix<float64_t> new_feature_matrix = SGMatrix<float64_t>(m_target_dim,N);
+@sonney2k	SGMatrix<float64_t> new_feature_matrix(m_target_dim,N);
+ blackburn	I know
+ shogun-buildbot	build #210 of lua_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/lua_modular/builds/210  blamelist: blackburn91@gmail.com
+ shogun-buildbot	build #218 of csharp_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/csharp_modular/builds/218
+@sonney2k	blackburn, really lots of changes... but should be much nicer now
+@sonney2k	and one could even move the *obtain_from* functions from and turn them into converters
+ blackburn	at least we can do embeddings in more clear way
+@sonney2k	anyway it is late and time to sleep!
+ blackburn	I'm deadly tired :D
+ blackburn	O(you)
+@sonney2k	and I am sick even
+ blackburn	oh
+ blackburn	I hope you will recover soon
+@sonney2k	but slept long hours at day time
+@sonney2k	th
+@sonney2k	x
+@sonney2k	anyway
+@sonney2k	sleep time!
+ CIA-3	shogun: Sergey Lisitsyn  * r6e41476 / (3 files): Improved converters doc - http://git.io/pq4PgQ
+@sonney2k	blackburn:  error in preprocessor_isomap_modular.lua
+@sonney2k	================================================================================
+@sonney2k	lua: preprocessor_isomap_modular.lua:13: attempt to call method 'apply_to_feature_matrix' (a nil value)
+@sonney2k	stack traceback:
+@sonney2k	preprocessor_isomap_modular.lua:13: in function 'preprocessor_isomap_modular'
+@sonney2k	preprocessor_isomap_modular.lua:20: in main chunk
+@sonney2k	you missed one example it seems
+ blackburn	uh
+ blackburn	ok
+ blackburn	min
+* sonney2k hugs the buildbot
+ CIA-3	shogun: Sergey Lisitsyn  * r573e955 / src/interfaces/python_modular/Converter.i : Removed Converter.i junk from python_modular - http://git.io/ghESwg
+@sonney2k	blackburn, we need to get rid of ant in java
+ blackburn	sonney2k: what do you propose?
+@sonney2k	it is really a useless requirement
+ CIA-3	shogun: Sergey Lisitsyn  * r5cec685 / (2 files): Updated lua isomap example - http://git.io/7WEsTQ
+@sonney2k	just use jar manually to create the pkg
+@sonney2k	like I use gac for c#
+ blackburn	I'm not a pro with doing such things
+@sonney2k	me neither
+@sonney2k	but ant is really not required just to create a .jar
+@sonney2k	anyway I am done for now
+@sonney2k	cu
+ blackburn	see you
+-!- blackburn [~blackburn@188.168.2.213] has quit [Quit: Leaving.]
+ CIA-3	shogun: Sergey Lisitsyn  * r87344b7 / src/shogun/converter/LocallyLinearEmbedding.h : Fixed LLE doc - http://git.io/SYM1yw
+ shogun-buildbot	build #292 of octave_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/292  blamelist: blackburn91@gmail.com
+ shogun-buildbot	build #212 of python_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_modular/builds/212  blamelist: blackburn91@gmail.com
+ shogun-buildbot	build #212 of lua_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/lua_modular/builds/212
+ shogun-buildbot	build #213 of python_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_modular/builds/213
+ CIA-3	shogun: Soeren Sonnenburg  * r85b2e68 / (2 files in 2 dirs): fix documentation - http://git.io/_hbQIg
+ CIA-3	shogun: Soeren Sonnenburg  * r8097efe / (2 files): fix octave examples - http://git.io/wI3xYw
+ shogun-buildbot	build #211 of ruby_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/211  blamelist: sonne@debian.org
+ shogun-buildbot	build #215 of lua_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/lua_modular/builds/215  blamelist: sonne@debian.org
+ shogun-buildbot	build #212 of ruby_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/212
+ CIA-3	shogun: Soeren Sonnenburg  * rbcb7967 / src/NEWS : update news - http://git.io/aLDGXg
+ shogun-buildbot	build #216 of lua_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/lua_modular/builds/216
+ shogun-buildbot	build #213 of ruby_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/213  blamelist: sonne@debian.org
+-!- alesis-novik [~alesis@dhcp-90-089.inf.ed.ac.uk] has joined #shogun
+-!- blackburn [~blackburn@188.168.4.209] has joined #shogun
+-!- alesis-novik [~alesis@dhcp-90-089.inf.ed.ac.uk] has quit [Quit: Leaving]
+--- Log closed Sat Oct 15 00:00:51 2011

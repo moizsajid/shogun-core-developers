@@ -1,0 +1,454 @@
+--- Log opened Mon Jul 30 00:00:17 2012
+-!- emrecelikten [~emre@176.40.234.211] has left #shogun []
+-!- emrecelikten [~emre@176.40.234.211] has joined #shogun
+-!- needsch [~user@ip-176-198-229-75.unitymediagroup.de] has quit [Ping timeout: 246 seconds]
+-!- emrecelikten [~emre@176.40.234.211] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@109.226.92.17] has quit [Quit: Leaving.]
+-!- K0stIa [~kostia@alt2.hk.cvut.cz] has joined #shogun
+-!- gsomix [~gsomix@95.153.169.120] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- K0stIa [~kostia@alt2.hk.cvut.cz] has quit [Quit: Leaving.]
+-!- K0stIa1 [~kostia@alt2.hk.cvut.cz] has joined #shogun
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- K0stIa1 [~kostia@alt2.hk.cvut.cz] has left #shogun []
+-!- K0stIa1 [~kostia@alt2.hk.cvut.cz] has joined #shogun
+-!- K0stIa1 [~kostia@alt2.hk.cvut.cz] has left #shogun []
+-!- gsomix [~gsomix@95.153.169.120] has quit [Ping timeout: 264 seconds]
+-!- uricamic [~uricamic@2001:718:2:1634:6594:2095:459a:894f] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:6594:2095:459a:894f] has left #shogun []
+-!- uricamic [~uricamic@2001:718:2:1634:6594:2095:459a:894f] has joined #shogun
+-!- K0stIa [~kostia@2001:718:2:1634:76f0:6dff:fe92:4013] has joined #shogun
+ n4nd0	sonney2k: around?
+-!- pluskid [~pluskid@202.130.113.141] has joined #shogun
+-!- K0stIa [~kostia@2001:718:2:1634:76f0:6dff:fe92:4013] has left #shogun []
+-!- K0stIa [~kostia@2001:718:2:1634:76f0:6dff:fe92:4013] has joined #shogun
+-!- gsomix [~gsomix@95.153.174.248] has joined #shogun
+ K0stIa	Hi, all! I installed shogun for python and Gaussian, GMM are missing in my shogun.Distributions. My linux distribution is ArchLinux, I'm using python2.7.
+ K0stIa	can anyone help me with this issue..
+ n4nd0	K0stIa: hi
+ n4nd0	K0stIa: did you install from packages or from source?
+ K0stIa	n4nd0: Hi! from source.
+ K0stIa	I took it from github
+ pluskid	K0stIa: did you install LaPack?
+ n4nd0	K0stIa: let me check if Gaussian and GMM have some dependencias that you might not be using
+ n4nd0	exactly
+ pluskid	K0stIa: AFAIK, lapack in Arch do not have header files, which is needed for shogun to compile some of its components
+ pluskid	K0stIa: you will have to either install lapack manually or you can use the package atlas-lapack from AUR
+ K0stIa	pluskid: I'm using MKL.... and btw: still shogun didn't find it despite telling it implicitly through --libs, --inludes.
+ pluskid	K0stIa: see above, did you install lapack?
+ K0stIa	pluskid: no, I didn't.
+ K0stIa	pluskid: MKL is not enough ?
+ pluskid	K0stIa: I'm sorry, what do you mean by MKL?
+ pluskid	did ./configure report that it has detected a valid lapack?
+ K0stIa	pluskid: Math Kernel Library
+ K0stIa	pluskid: as I said ./configure didn't find it...
+ K0stIa	pluskid: however I built numpy with MKL successfully
+ pluskid	K0stIa: then I'm not sure
+ pluskid	K0stIa: in the ./configure script, there's a section for checking Intel MKL
+ pluskid	K0stIa: you might have to modify that to suit your situation :-/ I'm not familiar with this
+ pluskid	sonney2k: maybe you can help with this
+ n4nd0	K0stIa: so MKL can be a substitute of lapack for shogun?
+ n4nd0	I didn't know about that ...
+ pluskid	n4nd0: there's a section in ./configure that checks many provider of lapack, atlas is one provider (that I'm using), MKL seems to be another
+ K0stIa	n4nd0: as far as I know lapack is just some interface and MKL has also realization of it.. at least I built my numpy with it successfully and found it to be much faster then lapack library taken from AUR
+ pluskid	but not sure why it fails
+ K0stIa	n4nd0: i.e. atlas
+ n4nd0	aham, I had no idea about that
+ n4nd0	pluskid, K0stIa: thanks for the info
+ K0stIa	n4nd0: you are wellcome
+ pluskid	maybe blackburn can help with this when he shows up
+ K0stIa	pluskid:  ok, I will wait for him... and I can try on different machine.. I have another lapack there...
+-!- gsomix [~gsomix@95.153.174.248] has quit [Ping timeout: 250 seconds]
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ blackburn	K0stIa: hey still struggling with MKL?
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ K0stIa	blackburn:  sort of...
+ yoo	hi all
+ blackburn	K0stIa: did you add --includes and --libs flags?
+ K0stIa	blackburn: yes I did
+ blackburn	still not detected?
+ K0stIa	blackburn: yes
+ blackburn	okay when what did you add in there?
+ K0stIa	blackburn: something like ./configure --interfaces=python_modular \
+ K0stIa	    --prefix=/usr \
+ K0stIa	    --libs=/opt/intel/mkl/lib/intel64 \
+ K0stIa	    --includes=/opt/intel/mkl/include
+ koen-shogun	you should check configure.log , on what happened in the MKL checks
+ blackburn	koen-shogun: did you ever link shogun on mkl?
+ koen-shogun	it probably fails to compile (or to link) there
+ koen-shogun	no, but I had to fix the same issues for ATLAS on my machine
+ K0stIa	MKL is missing in my log...
+ koen-shogun	go to the "============ Checking for Intel MKL support ============"  in configure.log
+ koen-shogun	and copy the text underneath that :)
+ koen-shogun	until the part where it says "Result is: no
+ koen-shogun	##########################################"
+ K0stIa	koen-shogun: ok
+ koen-shogun	oh, and which version of MKL do you have?
+ K0stIa	============ Checking for Intel MKL support ============
+ K0stIa	#include <mkl_cblas.h>
+ K0stIa	void dpotrf(char* uplo, int* n, double* a, int* lda, int* info);
+ K0stIa	int main(int argc, char** argv)
+ K0stIa	{
+-!- K0stIa [~kostia@2001:718:2:1634:76f0:6dff:fe92:4013] has quit [Excess Flood]
+-!- K0stIa [~kostia@2001:718:2:1634:76f0:6dff:fe92:4013] has joined #shogun
+ pluskid	K0stIa: use some external service to paste large chunk of code :)
+ K0stIa	pluskid: for instance ? :)
+ pluskid	like gist from github
+ K0stIa	ok
+ K0stIa	:)
+ K0stIa	koen-shogun: pluskid: https://gist.github.com/3205809
+ K0stIa	koen-shogun: about version of mkl it's 2011_sp1.9.293
+ koen-shogun	it finds your include files ok
+ koen-shogun	but it fails on linking
+ K0stIa	koen-shogun: you mean I have to change --libs parameter?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ blackburn	K0stIa: I actually expect something is wrong with -l*
+ K0stIa	blackburn: then it's not my problem, right ?
+ koen-shogun	well, but you can fix it
+ koen-shogun	the Intel MKL changes the libraries to link against every other version
+ blackburn	K0stIa: can you paste somewhere contents of /opt/intel/mkl/lib/intel64 please?
+ K0stIa	blackburn: ok
+ koen-shogun	for example, I have a link line (for some other program) that looks like -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core
+ koen-shogun	oh, and the complete needed link line then needs "-Wl,--start-group -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -Wl,--end-group"
+ K0stIa	blackburn: https://gist.github.com/3205860
+ blackburn	koen-shogun: I expect thing we have for mkl now is outdated
+ koen-shogun	if you edit configure, go to "echocheck "Intel MKL support""
+ koen-shogun	and replace  -lmkl -lguide -lmkl_lapack twice with for example my link line, that might work
+ K0stIa	koen-shogun: thanks, I will try...
+ blackburn	K0stIa: lines 3168,3174,3176,3182
+ blackburn	try to replace it with
+ blackburn	-Wl,--start-group -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -Wl,--end-group
+ blackburn	and run configure
+ K0stIa	blackburn: still the same :(
+ koen-shogun	what does configure.log say now?
+ K0stIa	koen-shogun: https://gist.github.com/3205900
+ blackburn	interesting
+ blackburn	that's openmp missing I guess
+ blackburn	K0stIa: either replace intel_thread with sequential
+ blackburn	or add -fopenmp
+ koen-shogun	do you also use the intel compiler?
+ koen-shogun	because then it's -openmp
+ K0stIa	koen-shogun: no, gcc
+ koen-shogun	ok, and do you have a iomp5 library somewhere? then you'd need -liomp5 (plus an additional --libs path)
+ koen-shogun	maybe sequential is the easiest solution
+ K0stIa	ok, I have to go now... I will come back in 30-40 minutes, then I will inform you about my situation. koen-shogun, blackburn thanks for helping
+ blackburn	K0stIa: ok I will  be around
+ CIA-18	shogun: Sergey Lisitsyn master * r2fd15a1 / src/configure : Updated MKL linking flags - https://github.com/shogun-toolbox/shogun/commit/2fd15a161921a57c0dccd6db2bf1188e0d2829cc
+-!- needsch [~user@ip-176-198-229-75.unitymediagroup.de] has joined #shogun
+-!- emrecelikten [~emre@176.40.234.211] has joined #shogun
+ K0stIa	blackburn: I see someone updated ./configure, so I updated shogun from github, and tried to install it, it failed on make command. this is what it says: http://pastebin.com/6U8t2brg
+ blackburn	K0stIa: well at least it detected mkl :)
+ K0stIa	yes, that's true :)
+ blackburn	K0stIa: can you paste /opt/intel/mkl/include/mkl_cblas.h somewhere?
+ K0stIa	blackburn: yes
+ K0stIa	blackburn: http://pastebin.com/Qi6SF10x
+ blackburn	ohh
+ blackburn	K0stIa: please update and try again
+ CIA-18	shogun: Sergey Lisitsyn master * rda74d42 / src/shogun/mathematics/lapack.h : Removed wrong enum keywords in lapack wrappers - http://git.io/gXZgGA
+ K0stIa	blackburn: ok
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	K0stIa: so did that help
+ K0stIa	blackburn: http://pastebin.com/BTfxRtBv
+ blackburn	okay got it
+ CIA-18	shogun: Sergey Lisitsyn master * r77433fe / src/shogun/mathematics/lapack.cpp : Removed one more wrong enum in lapack - http://git.io/kJFZug
+ blackburn	K0stIa: hopefully should work now
+ K0stIa	blackburn: ok, I'll check
+-!- pluskid [~pluskid@202.130.113.141] has quit [Ping timeout: 272 seconds]
+-!- pluskid [~pluskid@111.120.36.210] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+ n4nd0	yaaay!!! \o/
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ n4nd0	I think I can say with confidence that my hm-svm implementation is correct!
+ yoo	n4nd0: where can we find the implementation of hm-svm with shogun ?
+ n4nd0	yoo: it is in my branch right now
+ n4nd0	yoo: I have to polished some things - lot of debugging code currently
+ n4nd0	yoo: do you want to use it?
+ yoo	n4nd0: it seems interesting :)
+ n4nd0	yoo: I will probably prepare a pull request today
+ yoo	n4nd0: I wanted to code one myself, then seeing yours would be cool. I am not enough still good with shogun anyway ..
+ yoo	n4nd0: nice:
+ n4nd0	yoo: so have you experience with hm-svm?
+ yoo	yea but code is creepy .. looks like hybrid svm-hmm , I thought to rewrite something in the near future
+ yoo	but since I have discovered your work in shogun, I would like to better understand the codes and mb contribute then.
+ yoo	I still have some bp understand some partsof  the code architecture
+ n4nd0	yoo: do you know about applications of it?
+ n4nd0	yoo: I am looking for something appealing to present in my thesis
+ yoo	I will take a look if you want .. no explosive idea in mind right now.
+ yoo	let me know if PR today ! +
+ yoo	what is the subject of your thesis btw ?
+ n4nd0	yoo: completely open right now
+ n4nd0	nothing decided
+ n4nd0	I just like the idea of using the work I have been doing during this summer since I feel that I've learnt interesting things
+ n4nd0	+ the ones I am still to learn :)
+ emrecelikten	n4nd0: Congratulations
+ emrecelikten	:)
+ n4nd0	emrecelikten: thanks!
+ CIA-18	shogun: Sergey Lisitsyn master * r1cee68b / (13 files in 3 dirs): Multitask crossvalidation support - http://git.io/hjS24Q
+-!- K0stIa [~kostia@2001:718:2:1634:76f0:6dff:fe92:4013] has left #shogun []
+-!- pluskid [~pluskid@111.120.36.210] has quit [Ping timeout: 248 seconds]
+-!- pluskid [~pluskid@202.130.113.141] has joined #shogun
+-!- gsomix [~gsomix@95.153.179.239] has joined #shogun
+-!- pluskid [~pluskid@202.130.113.141] has quit [Quit: Leaving]
+-!- heiko1 [~heiko@host86-181-156-213.range86-181.btcentralplus.com] has joined #shogun
+* sonney2k ohh man it feels so good - true broadband internet :D
+@sonney2k	gsomix, how are things?
+ heiko1	sonney2k, so you are finally back? :)
+@sonney2k	heiko1, yes I am
+ heiko1	hope you had a good time
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+ gsomix	sonney2k, still working on buffers for SG.
+ gsomix	I have some problems with it. Pointers crashes.
+@sonney2k	gsomix, lets talk tonight or tomorrow
+ gsomix	ok, tonight
+ gsomix	I can swim in the sea before. :D
+@sonney2k	heiko1, yes indeed :)
+ gsomix	sonney2k, did you receive my letters?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- gsomix [~gsomix@95.153.179.239] has quit [Ping timeout: 244 seconds]
+ blackburn	sonney2k: yes, did you receive his love letters
+ blackburn	?
+ blackburn	:D
+ CIA-18	shogun: Heiko Strathmann master * re532b28 / (5 files in 2 dirs): Merge pull request #680 from karlnapf/master (+6 more commits...) - http://git.io/4sj-9g
+-!- uricamic [~uricamic@2001:718:2:1634:6594:2095:459a:894f] has quit [Quit: Leaving.]
+-!- tiger_eye [~tiger_eye@rrcs-24-106-116-254.central.biz.rr.com] has left #shogun ["Leaving"]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+ CIA-18	shogun: Heiko Strathmann master * rda0380e / src/shogun/statistics/LinearTimeMMD.cpp : added threshold computation using inverse gaussian cdf - http://git.io/iBOAwg
+ CIA-18	shogun: Heiko Strathmann master * rb762388 / (4 files in 3 dirs): Merge pull request #681 from karlnapf/master - http://git.io/dndEcw
+ CIA-18	shogun: Heiko Strathmann master * rf3492a1 / (3 files in 2 dirs): added inverse gaussian cdf plus tests - http://git.io/gRkyfw
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- blackburn [~blackburn@109.226.92.17] has quit [Read error: Connection reset by peer]
+-!- puffin444_ [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~blackburn@109.226.100.87] has joined #shogun
+-!- heiko1 [~heiko@host86-181-156-213.range86-181.btcentralplus.com] has left #shogun []
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	hi there
+ n4nd0	sonney2k: around?
+ n4nd0	blackburn: do you know if sonney2k is/will be around here this evening?
+ blackburn	n4nd0: I only know that he was online tomorrow :)
+ n4nd0	blackburn: ehh ok
+ n4nd0	like he will be tomorrow right?
+ blackburn	ehm
+ blackburn	n4nd0: that's crazy but this happens with me for third time
+ blackburn	tomorrow = today
+ blackburn	:D
+ n4nd0	haha ok :)
+ blackburn	no idea what makes me mix these words
+ n4nd0	don't worry, these things happen
+ n4nd0	something I talk to myself
+ n4nd0	n4nd0: like this
+ n4nd0	:D
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 246 seconds]
+-!- gsomix [~gsomix@95.153.161.248] has joined #shogun
+-!- gsomix [~gsomix@95.153.161.248] has quit [Quit: Ex-Chat]
+-!- gsomix [~gsomix@95.153.161.248] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ gsomix	good evening
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 255 seconds]
+@sonney2k	gsomix, I am around just now...
+@sonney2k	gsomix, so what is the trouble with SG* ?
+@sonney2k	that these are not pointers?
+@sonney2k	gsomix, and yes I received your emails so I didn't have to worry :)
+@sonney2k	gsomix, I hope that you can fix this up within the next few days such that we can work on the model selection typemaps...
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	n4nd0: sonney2k
+ blackburn	have a good date
+ blackburn	:D
+@sonney2k	blackburn, what?
+@sonney2k	n4nd0, ???
+ blackburn	sonney2k: n4nd0 missed you
+@sonney2k	heh
+@sonney2k	I will go to bed soon but just now I am around :)
+ n4nd0	sonney2k: yes, I was writing my weekly report right now making you that question
+ blackburn	like the desert misses the rain
+ n4nd0	I will ask now instead
+@sonney2k	blackburn, :P
+ n4nd0	sonney2k: so now according to the timetable I should work on CRFs
+ n4nd0	sonney2k: but Georg cannot help me with that
+ n4nd0	Nico is still on holidays
+@sonney2k	n4nd0, does Georg have some other ideas?
+ n4nd0	and we didn't talk about how they should fit into our SO framework
+ blackburn	n4nd0: may be you just hang around with guys, have some beer?
+@sonney2k	I would expect CRFs to not be that different
+ n4nd0	sonney2k: yes, there is some things in the hmsvm toolbox that are not currently in my implementation
+ n4nd0	like the plifs
+@sonney2k	n4nd0, and then when nico comes back continue to do CRFs ?
+@sonney2k	n4nd0, plifs are some important thing - and they are in shogun already
+ n4nd0	sonney2k: I am afraid there won't be enough time to finish it before gsoc finishes
+ blackburn	mind to continue? ;)
+@sonney2k	so certainly a nice replacement to do instead of CRFs for now
+ n4nd0	sonney2k: I know how plifs work in the hmsvm toolbox, and I think it won't take much time to add them
+@sonney2k	n4nd0, well we all hope you stick around after gsoc ...
+ n4nd0	blackburn, sonney2k: sure I can work on that later
+ n4nd0	no problem for me
+ blackburn	n4nd0: life is ppain
+ n4nd0	but for Nico?
+ blackburn	gsoc is hell
+@sonney2k	n4nd0, look at the CPlif classes
+@sonney2k	they should do the plif business
+ blackburn	you are all tied to shogun support for ever
+ n4nd0	sonney2k: ok, I will prepare the pull request and later do that
+ n4nd0	blackburn: :)
+@sonney2k	blackburn, one shogun to rule them all or so :D
+@sonney2k	n4nd0, I would even say that adding plifs is more important than CRFs
+ n4nd0	sonney2k: ok
+ blackburn	how to use plifs?
+ n4nd0	sonney2k: but I mean, if I do it as they are done in the hmsvm toolbox
+ blackburn	it took 1.5 years for me to get what does it mean
+ n4nd0	sonney2k: it is not much code
+@sonney2k	so if you can do the hmsvm toolbox implementation in shogun too - getting same result as hmsvm toolbox that would be even better
+ n4nd0	sonney2k: right now I get the exact same results for integer data :)
+@sonney2k	blackburn, for what?
+ n4nd0	I am very happy with that
+@sonney2k	n4nd0, thats a start :D
+ blackburn	sonney2k: how to use plifs for anything?
+* sonney2k too
+@sonney2k	blackburn, ahh well consider that a linear function is not enough
+ n4nd0	sonney2k: believe me, it's more than that. At least in the hmsvm toolbox the code that is for the plifs changes very little compare to the other one
+@sonney2k	like svm
+@sonney2k	so you use a piece wise linear function
+ n4nd0	with the other one I mean just working with discrete observations
+ blackburn	sonney2k: but is plif a model or an output?
+ n4nd0	blackburn: it is part of the model
+@sonney2k	blackburn, not a model - just some transformation
+ n4nd0	oops
+@sonney2k	well or part of the model :D
+ n4nd0	:)
+ blackburn	so it just to support some broken hyperplanes?
+@sonney2k	for svms you can emulate that by using these binneddotfeatures
+ n4nd0	sonney2k: and what about the coffin idea in the SO framework?
+ blackburn	sonney2k: I never thought of that mean of binned dot
+@sonney2k	n4nd0, I thought you are doing it already - no?
+ n4nd0	sonney2k: mmm no
+@sonney2k	blackburn, binned dot is making the svm learn a piecewise linearfunction
+@sonney2k	with fixed 'stuetzstellen;
+ n4nd0	Nico told me I should talk to you about that once I had nothing else to do :D
+ blackburn	sonney2k: I got it already
+@sonney2k	n4nd0, hmmhh
+ blackburn	no f idea what is stuetzstellen
+ blackburn	sounds like luftwaffe
+ blackburn	or panzerkrieg
+@sonney2k	blackburn, supporting points or so
+@sonney2k	n4nd0, I was actually hoping that you can do that too...
+@sonney2k	ok gtg for now
+@sonney2k	will hopefully be around tomorrow too.
+ n4nd0	sonney2k: let's talk about it tomorrow then?
+ blackburn	n4nd0: can I help you with coffinization?
+ blackburn	I've got some experience with it
+ n4nd0	blackburn: nice, that would be great
+ blackburn	put your code into the coffin ya know
+ n4nd0	blackburn, sonney2k: I will focus on that after the PLiFs, ok?
+ blackburn	focus on what?
+ blackburn	n4nd0: guide me to some solver code
+ n4nd0	on the coffinization
+ n4nd0	blackburn: what do you mean?
+ n4nd0	you want to see the code of my solver I understand :)
+ blackburn	n4nd0: well I mean I could take a look to the code
+ n4nd0	sure
+ n4nd0	blackburn: https://github.com/iglesias/shogun/blob/so/src/shogun/structure/PrimalMosekSOSVM.cpp
+ n4nd0	I am sorry for the debug traces ... they are going out soon
+ n4nd0	train_machine
+ blackburn	n4nd0: I will never forgive you
+ blackburn	:D
+ n4nd0	I guess that the parts you are interested in are the ones related to the use of features
+ gsomix	sonney2k, hey
+ n4nd0	argmax function and compute_loss_arg
+ gsomix	oh, ok :)
+ blackburn	n4nd0: well compute_loss_arg is not really
+ blackburn	coffinizable
+ n4nd0	blackburn: tell me why
+ n4nd0	we should be using an special kind of features I am afraid
+ blackburn	n4nd0: I can't see where do you use features there..
+ n4nd0	something that has access both to the labels and features
+ blackburn	are we talking about the same?
+ n4nd0	the problem is that in SO learning
+ n4nd0	the vecotr that goes in the product with w looks like this
+ n4nd0	Psi(x,y)
+ n4nd0	x is a feature vector
+ n4nd0	y is a label
+ blackburn	so where do we have explicit access to data?
+ n4nd0	so to make it coffinizable I think it is required to use a special type of features for that
+ n4nd0	in the models
+ n4nd0	https://github.com/iglesias/shogun/blob/so/src/shogun/structure/HMSVMModel.cpp
+ n4nd0	CHMSVMModel::get_joint_feature_vector
+ blackburn	checking
+ blackburn	pretty complex thing huh
+ blackburn	n4nd0: from what I see now it is not really needed to make it use add and dot
+ n4nd0	what arguments for these add and dot?
+ blackburn	n4nd0: basically most solvers work using two operations
+ blackburn	add some train feature vector to some given vector
+ blackburn	and compute dot product of some train feature vector and given vector
+ n4nd0	ok
+ n4nd0	that is done in compute_loss_arg
+ n4nd0	here the train feature vector are psi_pred and psi_truth
+ n4nd0	just the dot product actually
+ blackburn	yeah
+ blackburn	that is not the point of coffin
+ blackburn	main point is that you don't need to have vectors itself explicitly
+ n4nd0	yes, I understood that when I read the paper
+ n4nd0	I didn't get though why it is so benefecious
+ n4nd0	and how to do it for SO
+ blackburn	n4nd0: first is easy question
+ blackburn	second is not :)
+ blackburn	n4nd0: okay imagine you have a set of images
+ blackburn	say 1M of images
+ blackburn	it is a common way to extend dataset using some transformations
+ blackburn	rotations may be
+ blackburn	so if you don't need to have all images explicitly
+ blackburn	and if you have some procedure to compute dot on transformed images as efficiently
+ blackburn	you easily extend your train set but your memory requirements do not raise up
+ n4nd0	ok
+ blackburn	or other example - you have fast preprocessing routine (homogeneous kernel map is very fast for example)
+ blackburn	by default it makes d = 3*d
+ blackburn	so you need to have 3x more memory
+ blackburn	n4nd0: see what I mean?
+ n4nd0	but it is something that takes more time than having everything stored in memory right? I understand that it is beneficious in any case because for large datasets everything won't fit in memory simply
+ n4nd0	blackburn: yes, but ^
+ n4nd0	just to be sure
+ blackburn	n4nd0: yes that can require more time
+ n4nd0	for the rotations example
+ blackburn	not the best example probably
+ n4nd0	the same rotation will be done more than once for example
+ n4nd0	:D
+ blackburn	what if we just cut
+ blackburn	various sliding window positions
+ blackburn	you need to have only one image and it can represent 100 vectors
+ blackburn	with the same memory req
+ blackburn	you just compute dot with different initial position or so
+ n4nd0	I didn't get this example
+ blackburn	0 0 0
+ blackburn	0 0 0
+ blackburn	0 0 0
+ blackburn	^ image
+ blackburn	1 1 0
+ blackburn	1 1 0
+ blackburn	0 0 0
+ blackburn	first window position
+ blackburn	0 1 1
+ blackburn	0 1 1
+ blackburn	0 0 0
+ blackburn	second..
+ blackburn	so on
+ n4nd0	ok
+ blackburn	n4nd0: it is not that costly to compute dot or add
+ blackburn	with just a region of image available
+ blackburn	n4nd0: sparse uses it too
+ n4nd0	I don't think I understand the real magic of coffin
+-!- gsomix [~gsomix@95.153.161.248] has quit [Ping timeout: 264 seconds]
+ blackburn	n4nd0: hmmm I am in search of good example :D
+ n4nd0	:)
+ n4nd0	maybe I am just looking for an easter egg
+ n4nd0	sonney2k told me that COFFIN was quite relevant
+ blackburn	n4nd0: well it is actually a good soft engineering example as well
+ blackburn	you don't have to dispatch what type of features you are working on
+ blackburn	you just make features do that for you
+ blackburn	so you don't care about storage/preprocessing/anytihng
+ blackburn	if you work with sparse vectors
+ blackburn	you can't get pointer to dense vector to add with
+ blackburn	you have to handle it somehow everywhere
+ blackburn	with coffin you don't care
+ CIA-18	shogun: Sergey Lisitsyn master * r7893db8 / (3 files): Removed multitask subset support - http://git.io/YOrJPA
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has quit [Ping timeout: 245 seconds]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 244 seconds]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+--- Log closed Tue Jul 31 00:00:17 2012

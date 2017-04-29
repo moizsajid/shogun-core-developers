@@ -1,0 +1,422 @@
+--- Log opened Fri Apr 01 00:00:36 2011
+@sonney2k	serialhex, I am listening...
+* sonney2k is just returning from the fsfe 10 years celebration
+ blackburn	sonney2k: hi, I said to you last week about a little modification of kNN (I'm doing it to get familiar with 'internals' of shogun)
+ blackburn	my idea is introducing a 'type' of classifier: if k=1, so we don't need to sort - and classification is very-very fast
+ blackburn	same thing with distance weighting of examples
+ blackburn	what's your opinion on that?
+@sonney2k	sounds valid
+ blackburn	should it be a different classifier, sth like 'generalized kNN'?
+ blackburn	*I know of being kNN not so useful, but It seems like a good way to learn about shogun development* :)
+ serialhex	sonney2k: so i was planning on doing the ruby bindings for GSoC, and i had a different question then... i have a better question now :P
+-!- blackburn1 [~qdrgsm@188.168.4.175] has joined #shogun
+-!- blackburn [~qdrgsm@188.168.4.22] has quit [Ping timeout: 240 seconds]
+@sonney2k	blackburn1, , I would introduce different train functions one for k =1 and one for general k. But I would always include an array with example weighting
+ blackburn1	but there is no difference when training
+ blackburn1	sonney2k: btw, sorry, disconnected, it is the only answer of you?
+@sonney2k	blackburn1, yes
+ blackburn1	okay
+ serialhex	sonney2k: i've been talking to a few people on #ruby-lang and they dont recommend SWIG bindings for various reasons... is there any specific reason i *should* or *would have to* use swig for that project?
+@sonney2k	blackburn1, sorry applying
+@sonney2k	serialhex, well then don't use ruby with shogun :)
+@sonney2k	serialhex, but python :) swig bindings for python are pretty good...
+ serialhex	sonney2k: no, what i was saying was, i *want* to do the project, i was just wondering if theres a specific reason you use swig?
+ serialhex	sonney2k: i mean from what i can tell there are a few nice tools within ruby that makes it easy to do all that... i'll have to explore a bit more but if it's gonna be frowned upon in my application then i'll have to get myself set up differently
+ blackburn1	sonney2k: so, should I implement something like 'classify_with_NN(...)'?
+ blackburn1	and with no respect to this->k, it should classify for k=1, with no sorting, am I right?
+@sonney2k	serialhex, the reason is that we can easily (if swig is bugfree for $LANG) support many different languages
+@sonney2k	blackburn1, exactly
+ blackburn1	sonney2k: and another one, 'classify_distance_weighted()', but there is a problem, how to describe distance weight function?
+ serialhex	sonney2k: hmm... ok
+@sonney2k	classify_one_nn() / classify_k_nn() would make sense / but always have an array with example importance weights
+@sonney2k	serialhex, so all we have to do is write the C++ code - no more work needed to write interface code
+ serialhex	sonney2k: that makes sense...
+ blackburn1	eh, not surely understand it, what kind of importance weights? as I see, there is no difference between examples:     classes[train_lab[j]]++;
+@sonney2k	blackburn1, I thought you wanted to introduce that?
+-!- aifargonos [~aifargono@46.18.27.35] has quit [Ping timeout: 248 seconds]
+ blackburn1	when using weights by distance we should e.g. classes[train_lab[j]] += inverse_distance_squared(dists[j]);
+@sonney2k	ahh I see
+@sonney2k	^^ blackburn1
+ blackburn1	not importance weights like example one is more important than example two, but example nearest to classifying object is more important than farest, etc
+-!- blackburn1 is now known as blackburn
+ blackburn	it could be even a rank function, like classes[train_lab[j]] += pow(0.5,j);
+ blackburn	how does it seems to you?
+ blackburn	btw, sonney2k, that did you mean saying '^^'? :)
+@sonney2k	blackburn, yes when I said I see I meant I understand. Before I was thinking that you might have some weights over examples - like some kind of certainty score that an example can be trusted more.
+@sonney2k	sorry but I have to leave for now.
+@sonney2k	cu tomorrow
+ blackburn	sorry for a little misunderstading
+ blackburn	see you, will implement that idea
+@sonney2k	bye
+ blackburn	misunderstanding*
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has joined #shogun
+-!- mode/#shogun [+o bettyboo] by ChanServ
+-!- blackburn [~qdrgsm@188.168.4.175] has quit [Quit: Leaving.]
+@knrrrd	hmmm, it's getting late
+@knrrrd	bye guys, i am also leaving.
+-!- shelhamer [~shelhamer@AMontsouris-152-1-50-9.w83-202.abo.wanadoo.fr] has joined #shogun
+-!- sploving [~root@124.16.139.196] has joined #shogun
+-!- shelhamer [~shelhamer@AMontsouris-152-1-50-9.w83-202.abo.wanadoo.fr] has quit [Quit: Get MacIrssi - http://www.sysctl.co.uk/projects/macirssi/]
+-!- sploving [~root@124.16.139.196] has quit [Ping timeout: 240 seconds]
+-!- sploving [~root@124.16.139.196] has joined #shogun
+-!- Ziyuan [~Ziyuan@116.23.213.66] has quit []
+-!- sploving [~root@124.16.139.196] has quit [Remote host closed the connection]
+-!- epps [~epps@unaffiliated/epps] has joined #shogun
+-!- sonney2k [~shogun@87.118.92.43] has quit [Ping timeout: 240 seconds]
+-!- sonney2k [~shogun@87.118.92.43] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+@bettyboo	sonney2k
+-!- epps [~epps@unaffiliated/epps] has quit [Ping timeout: 246 seconds]
+-!- Ryaether [~Ryaether@50-80-170-245.client.mchsi.com] has joined #shogun
+-!- epps [~epps@unaffiliated/epps] has joined #shogun
+-!- sonney2k [~shogun@87.118.92.43] has quit [Ping timeout: 240 seconds]
+-!- sonney2k [~shogun@87.118.92.43] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+-!- dvevre [b49531e3@gateway/web/freenode/ip.180.149.49.227] has quit [Ping timeout: 252 seconds]
+-!- shayan [~shayan@27.107.252.137] has joined #shogun
+-!- shayan [~shayan@27.107.252.137] has quit [Quit: Leaving]
+-!- shayan_ [~shayan@27.107.252.137] has joined #shogun
+-!- shayan_ is now known as shayan
+-!- epps [~epps@unaffiliated/epps] has quit [Ping timeout: 250 seconds]
+-!- shayan [~shayan@27.107.252.137] has quit [Quit: Leaving]
+-!- sploving [~root@124.16.139.196] has joined #shogun
+-!- siddharth__ [~siddharth@117.211.88.150] has joined #shogun
+-!- siddharth_ [~siddharth@117.211.88.150] has quit [Ping timeout: 276 seconds]
+-!- siddharth__ [~siddharth@117.211.88.150] has quit [Ping timeout: 276 seconds]
+-!- siddharth__ [~siddharth@117.211.88.150] has joined #shogun
+-!- sploving [~root@124.16.139.196] has quit [Quit: Leaving.]
+-!- siddharth_ [~siddharth@117.211.88.150] has joined #shogun
+-!- sploving [~root@124.16.139.196] has joined #shogun
+-!- siddharth__ [~siddharth@117.211.88.150] has quit [Ping timeout: 260 seconds]
+@knrrrd	back
+-!- aifargonos [~aifargono@46.18.27.35] has joined #shogun
+-!- seviyor [c1e20418@gateway/web/freenode/ip.193.226.4.24] has quit [Ping timeout: 252 seconds]
+-!- aifargonos [~aifargono@46.18.27.35] has quit [Ping timeout: 250 seconds]
+-!- aifargonos [~aifargono@193.206.186.107] has joined #shogun
+@knrrrd	hmmm
+-!- jabbok [56220ef5@gateway/web/freenode/ip.86.34.14.245] has joined #shogun
+-!- sploving [~root@124.16.139.196] has quit [Ping timeout: 240 seconds]
+-!- sploving [~root@124.16.139.196] has joined #shogun
+-!- siddharth__ [~siddharth@117.211.88.150] has joined #shogun
+-!- siddharth_ [~siddharth@117.211.88.150] has quit [Ping timeout: 248 seconds]
+-!- siddharth__ [~siddharth@117.211.88.150] has quit [Quit: Leaving]
+-!- sploving [~root@124.16.139.196] has quit [Ping timeout: 240 seconds]
+-!- sploving [~root@124.16.139.196] has joined #shogun
+-!- siddharth_k [~siddharth@117.211.88.150] has joined #shogun
+-!- AdaHopper [~Adium@vera2g59-166.wi-fi.upv.es] has joined #shogun
+ AdaHopper	good morning
+-!- Ryaether [~Ryaether@50-80-170-245.client.mchsi.com] has left #shogun []
+* sonney2k is also back...
+* sonney2k just replaced his defective router
+@knrrrd	hi sonney2k
+* sonney2k it feels soo good to be online :)
+-!- Ziyuan [~Ziyuan@116.23.213.66] has joined #shogun
+* Ziyuan hello
+@knrrrd	when did you router failed? today?
+-!- aifargonos [~aifargono@193.206.186.107] has quit [Ping timeout: 250 seconds]
+ Ziyuan	So we already have CSparseKernel and CSparseFeatures
+@sonney2k	knrrrd, 3 days ago... hansenet was quick to send a new one (took 1.5 days) ...
+@knrrrd	not bad.
+@sonney2k	Ziyuan, actually sparse kernel is not really used - dot features are a more general framework that replaced them
+@sonney2k	knrrrd, in particular considering that it took 14hrs until I finally connected it...
+-!- aifargonos [~aifargono@193.206.186.107] has joined #shogun
+@sonney2k	even b/g/n wlan
+@sonney2k	lets hope it proves stable...
+@knrrrd	is it a common brand, such as fritzbox?
+@sonney2k	no something called alice wlan 1421 or so
+@sonney2k	the interface is really for dummies... difficult to use for me (could hardly find the port forwarding...)
+@knrrrd	hehe
+ Ziyuan	Sonney, but aren't we supposed to implement the "Sparse Kernel Feature Analysis" this time?
+@sonney2k	what is interesting though is that it has a pppoe-passthrough. so my linksys router behind can do the real job ;-)
+@sonney2k	Ziyuan, the name is similar yes but it is something different - knrrrd will explain I hope :)
+ Ziyuan	OK~
+@knrrrd	Ziyuan: sparse kernel feature analysis is closely related to kpca
+ Ziyuan	Yes, I've read the two papers
+@knrrrd	in kpca, you have a set of vectors and your learn a new basis in the kernel-induced feature space.
+@knrrrd	each vector of this basis is a linear combination of all training examples
+@knrrrd	so if you have n training examples and look at the first 3 basis vectors, you are dealing with 3 * n examples
+@knrrrd	this is different with kfa, here the basis vectors are sparse.
+@knrrrd	that is, a basis vector is only associated with ONE example of the training data
+@knrrrd	if we are looking at the 3 first basis vectors, we are only dealing with 3 examples and thus can be very fast when processing larger data sets
+ Ziyuan	Yes
+ Ziyuan	I thought that we are to implement it via those two classes.
+@knrrrd	so the implementation of kfa does not requires any special kernel or feature representation
+@knrrrd	i think it would be best to put everything in a new class.
+@knrrrd	in principle it should work with any kernel object and feature vector (by virtue of kernels)
+@knrrrd	i guess sonney2k knows more on how feature vectors and kernel objects match in Shogun
+ Ziyuan	Thanks for your detailed explanation :)
+* knrrrd brb
+ Ziyuan	Before asking questions, I'll read the source code of that part at first.
+@knrrrd	sonney2k: are you still alive?
+@sonney2k	I am
+@sonney2k	just debugging something on mldata.org
+@knrrrd	I noticed that all kernel-based methods derive from CKernelMachine
+@sonney2k	yes
+@knrrrd	would it make sense to add KFA there? i am not sure. CKernelMachine rather looks like a generic SVM wrapper
+@sonney2k	knrrrd, I am not sure what KFA does
+@sonney2k	I mean what is the input and what is the output?
+@knrrrd	sonney2k: it's a sparse version of kpca
+@knrrrd	output: an new basis (array of array of vectors) ;)
+@sonney2k	knrrrd, then I would implement it als a preprocessor, have a look at KernelPCACut.h
+@sonney2k	that is what is doing kpca in shogun
+@knrrrd	looks very good
+@knrrrd	KernelPCACut.h is still under construction ;)
+@knrrrd	most of the code is commented out
+@sonney2k	knrrrd, yeah true but the kpca itself is done already just not the projection / applying things to features
+@knrrrd	yep i see.
+@knrrrd	so CSimplePreProc is a good starting point for KFA
+@sonney2k	knrrrd, I think so - there is one catch though. You might want to support features other than just real-valued vectors later
+@knrrrd	yes. I am wondering what the type 'ST' means?
+@sonney2k	simple type, e.g. int32_t or float64_t
+@knrrrd	ah ok. then we better derive from CPreProc
+@knrrrd	maybe something like CKernelPreProc
+@sonney2k	knrrrd, so it will work with any kind of inputs - strings etc?
+@knrrrd	yes
+@knrrrd	input set of strings, output n-dimensional representation
+@knrrrd	just like kpca
+@knrrrd	i think it will be straighforward. however, we can only support CFeatures* as input and need to get rid off apply_to_feature_vector
+@sonney2k	in this case preprocessors are not ideal - they have the (implicit) assumption that the feature type does not change. so I would recommend to introduce KFAFeatures that get as an argument the kernel
+@sonney2k	... and then produce the n-dimensional feature vectors later
+@knrrrd	ok. would have been my next question, how to change the feature type during conversion
+@sonney2k	so these coudl be derived from CSimpleFeatures<float64_t> and all you have to do is to store the feature_matrix
+@sonney2k	so if you manage doing kernel -> feature matrix you are done
+@knrrrd	there is still another catch. you can do kfa/kpca on one set of objects and then apply it on another
+@knrrrd	i think features can not handle this case.
+@knrrrd	so eventually, it is a CKernelMachine ;)
+@sonney2k	knrrrd, could be - I guess you have to override the 'classify' functions inside kernel machine then - (classify is misleading now - should be 'apply' then)
+@knrrrd	yes
+@knrrrd	similar to the clustering algorithms
+@knrrrd	okay. the more i think about it. KPCA and KFA can been as a regression with multiple outputs. so it's more a kernel machine
+@knrrrd	^been^been seen^
+ Ziyuan	And does KFA need to be regularized?
+@knrrrd	no
+-!- skydiver [c255a037@gateway/web/freenode/ip.194.85.160.55] has joined #shogun
+@knrrrd	its sensitive to outliers as kpca
+ Ziyuan	Hmm...
+@knrrrd	dim reduction can not really overfit. there are unsupervised
+ Ziyuan	Yep, I've got it.
+@knrrrd	anyone else here interested in kfa?
+@knrrrd	i am just curious
+ Ziyuan	me, me
+@knrrrd	;)
+ skydiver	hi Konrad
+ skydiver	i'm interested
+@knrrrd	okay. any questions?
+ skydiver	do you know can kfa be applied somehow to dna data?
+@knrrrd	skydiver: it can.
+@knrrrd	if you take a string kernel, you can compute a new basis for string data via kfa
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has left #shogun []
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has joined #shogun
+-!- mode/#shogun [+o bettyboo] by ChanServ
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has left #shogun []
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has joined #shogun
+-!- mode/#shogun [+o bettyboo] by ChanServ
+@knrrrd	something is going on, here. ;)
+@knrrrd	so i am thinking about applying kfa to string data
+ skydiver	how cutoff parameter (delta) can be selected for ACKFA?
+@knrrrd	it would allows us to have a set of strings as input and get a set of vectors as output
+ Ziyuan	So where would the new classes be placed according to the current class heirarchy?
+@knrrrd	skydiver: i don't know. i think it depends on the data and we have to test
+@knrrrd	Ziyuan: i have talking with sonney2k on this issue. The best would be to take CKernelMachine as a super-class, altough KFA is not a classifier
+ Ziyuan	Ah, I saw it.
+@knrrrd	i think it will not be too difficult. but also not extremely easy ;)
+ skydiver	@knrrrd if we have for example dataset 200000 features it would be great to reduce feature space size - i think AKFA can be applied
+@knrrrd	skydiver: exactly.
+@knrrrd	skydiver: especially if the data is not vectorial but discrete, such as trees and strings
+@knrrrd	skydiver: then we can compute vectors from the data by using the basis vectors of kfa
+ skydiver	@knrrrd as i see O(l * n^2) where n is size of input patterns, does size of feature space affect on complexity?
+@knrrrd	skydiver: yes. the size of the feature space is implicitly captured in the kernel computation
+-!- AdaHopper [~Adium@vera2g59-166.wi-fi.upv.es] has left #shogun []
+@knrrrd	but don't need to care for this. Shogun has several kernel functions available which are very efficient
+ skydiver	@knrrrd computation of kernel function of two vectors from R^d costs O(d)
+@knrrrd	skydiver: depends
+ skydiver	@knrrrd so i'd like to can it have affect on O( l * n ^ 2) in AKFA other than a constant
+ skydiver	*i'd like to know
+@knrrrd	skydiver: i don't think so.
+ skydiver	@knrrrd can you give example of trees and strings input data with lot of features? i haven't used string kernel and want to get some point
+@knrrrd	skydiver: basically you don't define the feature explicitly but implicity by using a kernel
+@knrrrd	skydiver: just have a look at papers on string kernels and tree kernels
+ skydiver	ok
+ skydiver	now i see
+@knrrrd	skydiver: often these kernel operate in vector space with millions or infinite many dimensions
+@knrrrd	skydiver: but they do this efficient and not in O(d) of course ;)
+@bettyboo	 :>
+-!- ziyuang [~Ziyuan@218.104.71.166] has joined #shogun
+@knrrrd	kpca has already been used for such applications
+@knrrrd	however, the basis vector of kpca are dense.
+@knrrrd	if you have a training set with millions of instances, each basis vector is a linear combination of these instances
+@knrrrd	-> bad and slow
+@knrrrd	for kfa, we only have one training instance per basis vector
+-!- Ziyuan [~Ziyuan@116.23.213.66] has quit [Ping timeout: 246 seconds]
+@knrrrd	that is, we can compute an n-dimensional vector from a set of objects by comparing each object only to n instances learned by kfa
+@knrrrd	anything else related to kfa?
+@knrrrd	i need to leave in about 10 minutes
+@knrrrd	btw. gsoc of shogun has been twittered by PASCAL. Cool ;)
+@bettyboo	funny!
+-!- ziyuang [~Ziyuan@218.104.71.166] has quit []
+-!- Ziyuan [~Ziyuan@218.104.71.166] has joined #shogun
+ skydiver	@knrrrd are there any kfa methods other than kpca, skfa and akfa?
+@knrrrd	http://twitter.com/#!/PASCALNetwork
+@knrrrd	skydiver: i guess there are many variants of kpca and spars kpca with different scope and applications
+@knrrrd	skydiver: most however try to improve kpca in terms of robustness and not run-time performance
+@knrrrd	skydiver: you are andrew, right?
+ skydiver	yes
+@knrrrd	Ziyuan: you are ziyuan. that wasn't too hard.
+ skydiver	@knrrrd i'm very interested to use kfa for my current work with dna data - thanks for some points
+ Ziyuan	Yes, I am Ziyuan Lin~
+ Ziyuan	There is "Kernel Correlation Feature Analysis"
+@knrrrd	ah ok. i guess there is a lot of "Kernel * * Analysis"
+@knrrrd	kica, kcca and so on
+@knrrrd	okay. nice talking to you.
+@knrrrd	bye
+ skydiver	bye
+-!- skydiver [c255a037@gateway/web/freenode/ip.194.85.160.55] has quit [Quit: Page closed]
+ Ziyuan	byu
+ Ziyuan	...bye
+ Ziyuan	Why the "ZeroMeanCenterKernelNormalizer" is implemented without the use of "center_matrix" in Mathematics.h?
+-!- aifargonos [~aifargono@193.206.186.107] has quit [Ping timeout: 276 seconds]
+ CIA-30	shogun: Christian Widmer boost_serialization * rae4a959 / (4 files in 3 dirs): - http://bit.ly/fZFVEk
+ CIA-30	shogun: Jonas Behr galaxy * ra73a80f / (6 files in 3 dirs): changes of structure interface for usage in galaxy framework - http://bit.ly/g3qfHL
+ CIA-30	shogun: Jonas Behr structure * r400aa70 / (3 files in 3 dirs): Debug code removed; possibly large array not on stack any more - http://bit.ly/dIHLTq
+ CIA-30	shogun: Christian Widmer boost_serialization * rfb8bd16 / (2 files): fixed problem with alphabet save_construct_data - http://bit.ly/hj72my
+ CIA-30	shogun: Soeren Sonnenburg master * rcbef0fb / (3 files in 2 dirs):
+ CIA-30	shogun: Implement snappy compression support (http://code.google.com/p/snappy/).
+ CIA-30	shogun: This code is still experimental and pending benchmarks. (+221 more commits...) - http://bit.ly/hMoOZv
+-!- ziyuang [~Ziyuan@218.104.71.166] has joined #shogun
+-!- Ziyuan [~Ziyuan@218.104.71.166] has quit [Ping timeout: 260 seconds]
+-!- ziyuang [~Ziyuan@218.104.71.166] has quit [Client Quit]
+-!- Ziyuan [~Ziyuan@218.104.71.166] has joined #shogun
+ CIA-30	shogun: Soeren Sonnenburg master * rbbf6afa / src/configure :
+ CIA-30	shogun: add flags to support lua,ruby and java via
+ CIA-30	shogun: ./configure --interfaces=libshogun,ruby_modular,lua_modular,java_modular
+ CIA-30	shogun: basic autodetection should work for java and ruby paths. Autodetection
+ CIA-30	shogun: for lua should be perfect. - http://bit.ly/gLxDwh
+ CIA-30	shogun: Soeren Sonnenburg master * rad96ba3 / (src/ChangeLog src/.authors): remove d.l.s email address from changelog - http://bit.ly/fKE3ez
+ CIA-30	shogun: Soeren Sonnenburg master * rcbef0fb / (3 files in 2 dirs):
+ CIA-30	shogun: Implement snappy compression support (http://code.google.com/p/snappy/).
+ CIA-30	shogun: This code is still experimental and pending benchmarks. - http://bit.ly/hMoOZv
+@sonney2k	Ziyuan, check if it is the same and if it is - submit a patch :)
+@sonney2k	Ziyuan, reason is probably that it didn't exist in lib/Mathematics.h at that time
+* sonney2k has just recreated the shogun repository for the sake of keeping peace on earth
+@knrrrd	bettyboo: What's up? Anything new
+@bettyboo	knrrrd: What's up? Anything new
+@knrrrd	bettyboo: ?
+@bettyboo	knrrrd: i am already feeling like a scientist here
+@knrrrd	:)
+ Ziyuan	Ok
+-!- ziyuang [~Ziyuan@116.23.213.66] has joined #shogun
+-!- Ziyuan [~Ziyuan@218.104.71.166] has quit [Ping timeout: 276 seconds]
+-!- siddharth_k [~siddharth@117.211.88.150] has quit [Ping timeout: 240 seconds]
+-!- aifargonos [~aifargono@193.206.186.107] has joined #shogun
+-!- aifargonos [~aifargono@193.206.186.107] has quit [Ping timeout: 260 seconds]
+@knrrrd	man, tcl is one annoying programming language
+@knrrrd	java s.length(), python len(s), tcl [string length s]
+-!- siddharth_k [~siddharth@117.211.88.150] has joined #shogun
+-!- ziyuang [~Ziyuan@116.23.213.66] has quit []
+@knrrrd	what a bloat: [string match pattern txt]
+-!- Ziyuan [~Ziyuan@116.23.213.66] has joined #shogun
+@knrrrd	!seen sonney2k
+@bettyboo	knrrrd, sonney2k is right here!
+@knrrrd	but idle.
+@sonney2k	knrrrd, all my screen is flashing ;-)
+@bettyboo	;D
+@knrrrd	hehe, that's good
+-!- aifargonos [~aifargono@193.206.186.107] has joined #shogun
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has left #shogun []
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has joined #shogun
+-!- mode/#shogun [+o bettyboo] by ChanServ
+-!- sploving [~root@124.16.139.196] has quit [Ping timeout: 240 seconds]
+@knrrrd	it took some time, but betty is fine now.
+@bettyboo	knrrrd: 3 days ago... hansenet was quick to send a new one (took 1.5 days) ...
+@knrrrd	i know
+@knrrrd	bettyboo, does shogun have a python interface?
+@bettyboo	knrrrd: does shogun have a python interface?
+@knrrrd	i getting nuts
+-!- Tanmoy [75d35896@gateway/web/freenode/ip.117.211.88.150] has joined #shogun
+-!- epps [~epps@84.18.157.200] has joined #shogun
+-!- epps [~epps@84.18.157.200] has quit [Changing host]
+-!- epps [~epps@unaffiliated/epps] has joined #shogun
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has quit [Quit: time to recycle]
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has joined #shogun
+-!- mode/#shogun [+o bettyboo] by ChanServ
+ Tanmoy	@sonney2k is there no method described for Vovariance matrix
+ Tanmoy	sorrie i mean Covariance matrix
+@sonney2k	Tanmoy, well PCA obviously needs it so the code is probably hidden in there (and should probably be moved into Mathematics)
+ Tanmoy	Kernel PCA too
+ Tanmoy	@sonney2k there is not mthods for regularisation for ill posed problems
+@sonney2k	that's true
+ Tanmoy	that way computations on the Covariance matrix could be reduced
+@sonney2k	yes
+ Tanmoy	even if its a dot prdocut
+ Tanmoy	@sonney2k so what preprocessing method is actually there apart from a Kernel Matrix because i anyway need to recompute that
+-!- epps [~epps@unaffiliated/epps] has quit [Quit: Leaving]
+@knrrrd	bettyboo: do you know any further code for pca and covariance?
+@bettyboo	knrrrd: yeah. a lot of work and not many results. so far
+-!- epps [~epps@84.18.157.200] has joined #shogun
+-!- epps [~epps@84.18.157.200] has quit [Changing host]
+-!- epps [~epps@unaffiliated/epps] has joined #shogun
+-!- aifargonos [~aifargono@193.206.186.107] has quit [Ping timeout: 264 seconds]
+-!- aifargonos [~aifargono@46.18.27.35] has joined #shogun
+-!- aifargonos [~aifargono@46.18.27.35] has quit [Ping timeout: 240 seconds]
+-!- aifargonos [~aifargono@46.18.27.35] has joined #shogun
+@knrrrd	http://www.bierpad.nl/
+-!- skydiver [4deac315@gateway/web/freenode/ip.77.234.195.21] has joined #shogun
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has quit [Remote host closed the connection]
+-!- bettyboo [~bettyboo@bane.ml.tu-berlin.de] has joined #shogun
+-!- mode/#shogun [+o bettyboo] by ChanServ
+-!- epps [~epps@unaffiliated/epps] has quit [Read error: Connection reset by peer]
+-!- epps [~epps@unaffiliated/epps] has joined #shogun
+@knrrrd	pretty cool host: @unaffiliated/epps
+ epps	thanks :)
+@knrrrd	makes you look very unaffiliated
+@knrrrd	;)
+@bettyboo	;>
+-!- seviyor [c1e20418@gateway/web/freenode/ip.193.226.4.24] has joined #shogun
+@sonney2k	Tanmoy, I don't understand your question...
+-!- rubic [75d35896@gateway/web/freenode/ip.117.211.88.150] has joined #shogun
+-!- rubic [75d35896@gateway/web/freenode/ip.117.211.88.150] has quit [Ping timeout: 252 seconds]
+ siddharth_k	sonney2k, do we have to compile it again?
+@sonney2k	knrrrd, I've updated the website http://www.shogun-toolbox.org/  and http://www.shogun-toolbox.org/jmlr10/ ... comments welcome
+@sonney2k	siddharth_k, you have to git clone and compile again yes.
+@sonney2k	sorry about that
+ siddharth_k	ok
+@knrrrd	okay i take a look.
+@knrrrd	betty: can you also go over the page and check. thx.
+@bettyboo	knrrrd: but you are interested in shogun?
+@knrrrd	bettyboo: yes but you could help here. seriously
+@bettyboo	knrrrd: seriously. shogun is great
+@knrrrd	hrhr
+@knrrrd	sonney2k: webpage looks good. though it is very wide now
+@knrrrd	i am not sure if this has been the case before you added gsoc
+@sonney2k	knrrrd, I don't recall either
+@knrrrd	we could ask betty, maybe she knows.
+@bettyboo	knrrrd: that way computations on the Covariance matrix could be reduced
+@knrrrd	;)
+@bettyboo	knrrrd, ;D
+@knrrrd	ROFL:ROFL:LOL:ROFL:ROFL
+@knrrrd	           |
+@knrrrd	  L   /---------
+@knrrrd	 LOL===       []\
+@knrrrd	  L    \         \
+@knrrrd	        \_________\
+@knrrrd	          |     |
+@knrrrd	anyway.
+@knrrrd	interesting post on google's new feature to translate pig latin: http://bit.ly/e3Cukz
+-!- blackburn [~qdrgsm@188.168.2.37] has joined #shogun
+-!- seviyor [c1e20418@gateway/web/freenode/ip.193.226.4.24] has quit [Quit: Page closed]
+ Tanmoy	@sonney2k what i mean is that what preprocessing methods are there for Kernel PCA
+-!- epps [~epps@unaffiliated/epps] has quit [Ping timeout: 240 seconds]
+-!- epps [~epps@unaffiliated/epps] has joined #shogun
+@knrrrd	Almost ready for the weekend
+-!- dvevre [b49531e3@gateway/web/freenode/ip.180.149.49.227] has joined #shogun
+-!- skydiver [4deac315@gateway/web/freenode/ip.77.234.195.21] has quit [Ping timeout: 252 seconds]
+-!- Tanmoy [75d35896@gateway/web/freenode/ip.117.211.88.150] has quit [Quit: Page closed]
+-!- seviyor [bc19cab5@gateway/web/freenode/ip.188.25.202.181] has joined #shogun
+-!- alesis-novik [~alesis@188.74.87.84] has joined #shogun
+-!- seviyor [bc19cab5@gateway/web/freenode/ip.188.25.202.181] has quit [Quit: Page closed]
+@sonney2k	*lol* http://mail.google.com/mail/help/motion.html
+-!- epps [~epps@unaffiliated/epps] has quit [Ping timeout: 260 seconds]
+ alesis-novik	Have you seen the old school youtube or 3d xkcd?
+-!- skydiver [c255a037@gateway/web/freenode/ip.194.85.160.55] has joined #shogun
+-!- epps [~epps@unaffiliated/epps] has joined #shogun
+--- Log closed Sat Apr 02 00:00:36 2011

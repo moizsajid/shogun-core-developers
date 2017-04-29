@@ -1,0 +1,184 @@
+--- Log opened Thu Jul 26 00:00:17 2012
+ wiking	blackburn: :D
+ wiking	blackburn: that define is actually funny
+ blackburn	yeah
+ wiking	mmmm i'm wondering what's going to go on with the new llvm 4 compiler
+ wiking	will see in 2 weeks i guess...
+ CIA-18	shogun: Sergey Lisitsyn master * r09b53b5 / src/shogun/lib/malsar/malsar_joint_feature_learning.cpp : Fixes for MALSAR JFL - http://git.io/C9axng
+ blackburn	wiking: do you have a lot of eigen3 warnings?
+ wiking	blackburn: noup
+ blackburn	wiking: is it enabled?
+ wiking	yep yep
+ wiking	ever since the new patch
+ blackburn	hmm
+ blackburn	ok I installed latest eigen and it is ok now
+-!- needsch175 [~user@ip-176-198-229-75.unitymediagroup.de] has quit [Ping timeout: 255 seconds]
+-!- blackburn [~blackburn@109.226.92.17] has quit [Quit: Leaving.]
+ shogun-buildbot	build #34 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/34
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has joined #shogun
+ n4nd0	good morning!
+-!- tiger_eye [~tiger_eye@rrcs-24-106-116-254.central.biz.rr.com] has quit [Ping timeout: 264 seconds]
+-!- uricamic [~uricamic@2001:718:2:1634:e1e9:d0ba:e300:28d3] has joined #shogun
+-!- tiger_eye [~tiger_eye@rrcs-24-106-116-254.central.biz.rr.com] has joined #shogun
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has quit [Ping timeout: 276 seconds]
+-!- pluskid [~pluskid@li411-226.members.linode.com] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ yoo	hi there
+ yoo	after adding (with blackburn)  ms_output->output_custom_evaluations(result_labels, m_labels) in crossvalidation->evaluate_one_run()  line 220, I add the same line 302 for machine with data unlocked (most machines I use) and I get a seg fault when calling m_custom_evaluations->get_num_elements()
+ yoo	could someone explain me why ?
+-!- needsch [~user@ip-176-198-229-75.unitymediagroup.de] has joined #shogun
+-!- pluskid [~pluskid@li411-226.members.linode.com] has quit [Ping timeout: 276 seconds]
+-!- pluskid [~pluskid@111.120.11.49] has joined #shogun
+-!- hoijui [~hoijui@dslb-088-074-122-056.pools.arcor-ip.net] has joined #shogun
+-!- thegruel [c1aa8a84@gateway/web/freenode/ip.193.170.138.132] has joined #shogun
+ thegruel	Hi all
+ thegruel	Is there a ModelSelection expert in the house?
+-!- pluskid [~pluskid@111.120.11.49] has quit [Quit: Leaving]
+ thegruel	Anyway... I was wondering if there is a model selection strategy in Shogun that allows selecting C1/C2 for libSVM but avoids the full grid search, ideally by enforcing C1=C2.
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has joined #shogun
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ blackburn	yoo: oops
+ blackburn	I just forgot to initialize it :D
+ CIA-18	shogun: Sergey Lisitsyn master * r57d6371 / (2 files in 2 dirs): Added missed initialization of custom evaluations array - http://git.io/RgVuwg
+ blackburn	thegruel: we are kinda working on it
+ blackburn	:)
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Ping timeout: 245 seconds]
+-!- thegruel [c1aa8a84@gateway/web/freenode/ip.193.170.138.132] has quit [Ping timeout: 245 seconds]
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has quit [Ping timeout: 252 seconds]
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ yoo	blackburn: hi
+ blackburn	yoo: hi
+ yoo	blackburn: I ve seen your fix but didnt solve the pb on my machine
+ blackburn	yoo: still segfault?
+ yoo	blackburn: yep, I am trying to reproduce the pb with simple shogun example
+ yoo	give me a minute
+ blackburn	would be nice
+ yoo	do you have the link I gave you last night ?
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has joined #shogun
+ yoo	blackburn: ok this one http://pastebin.com/c7wKje0H : change the inputs and add msoutput as well =)
+ blackburn	okay give me a minute
+ blackburn	yoo: so what exactly faults?
+ blackburn	adding a custom evaluation to output?
+ yoo	blackburn: CModelSelectionOutput *ms_output = new CModelSelectionOutput(); how adding a custom eval to this obj ?
+ blackburn	yoo: well actually it works here with latest git
+ blackburn	yoo: ms_output->add_evaluation(new CMulticlassAccuracy()) will output you a confusion matrix on each split
+ yoo	blackburn: ok sorry my bad, I didnt go throw your new add_custom function
+ yoo	blackburn: works perfectly
+ yoo	blackburn: btw what the best method if I want to store those matrices into files, is there interaction possible between msoutput and any filestorage obect  ?
+ blackburn	yoo: yeah I thought of it
+ blackburn	I can do that
+ yoo	blackburn: the object msoutput dont store anythg right ? it just print the matrices ?
+ blackburn	exactly
+ yoo	well
+ blackburn	yoo: I will just add output to ostream
+ yoo	sure but then evrythg ll be printed, mb it should be smthg like the msoutput store data and then interact with what ever we need ?
+ yoo	then we can draw smthg, compare different confusion matrices .. etc .. without parsing a file with every outputs ..
+ blackburn	yoo: hmm okay I will do that this way then
+ blackburn	I don't mind any
+ yoo	It is mb more the way msoutput is designed for since your passng the obj in argument .. dunno :p
+ yoo	thanks again for this great support !
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- uricamic [~uricamic@2001:718:2:1634:e1e9:d0ba:e300:28d3] has quit [Quit: Leaving.]
+-!- hoijui [~hoijui@dslb-088-074-122-056.pools.arcor-ip.net] has quit [Ping timeout: 272 seconds]
+-!- alexlovesdata [~binder@gwlan56.first.fraunhofer.de] has joined #shogun
+ alexlovesdata	Hi students, ... did anybody of you qualify for London Olympics, lol?
+ blackburn	alexlovesdata: I failed to :(
+ blackburn	for vodka pong
+ alexlovesdata	ye, in Russia competition for that discipline is indeed hard and your liver might not be fresh anymore
+ blackburn	being professional is a hard job
+ alexlovesdata	unfortunately unreadable code which still works is not accepted yet
+ alexlovesdata	otherwise I oculd have tried
+ blackburn	:D
+ alexlovesdata	no there was a mail by Carol Smith from google rumoring about that ... so the question has a grain of truth
+ blackburn	chances are it goes to the special olympics program
+ blackburn	very special :D
+-!- hoijui [~hoijui@dslb-088-074-122-056.pools.arcor-ip.net] has joined #shogun
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has joined #shogun
+ n4nd0	good evening people
+ blackburn	n4nd0: evening
+ blackburn	n4nd0: how is it going?
+ n4nd0	blackburn: fine, working hard these last days :)
+ n4nd0	blackburn: what about you?
+ blackburn	n4nd0: thinking about subsets :) very philosophical :D
+-!- blackburn [~blackburn@109.226.92.17] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@109.226.92.17] has joined #shogun
+ n4nd0	blackburn: haha, for your project or just for fun?
+ blackburn	n4nd0: well I have to make multitask stuff work with subsets
+ blackburn	thinking how to approach it better
+ n4nd0	good
+ blackburn	n4nd0: it is required to make xval work actually
+ n4nd0	blackburn: good luck with it then ;)
+ droopy	n4nd0, ;)
+ n4nd0	I am sure you will find a good approach
+ blackburn	heh thanks
+ blackburn	n4nd0: did you ever actually use that xval and model selection stuff?
+ n4nd0	blackburn: no!
+ n4nd0	but I think I must look into it
+ blackburn	n4nd0: yeah at some point
+ n4nd0	I know the concepts but I think I have never used them "for real"
+ n4nd0	so I am not familiarized with them
+ wiking	pijuuuuuu
+ wiking	droopy pong
+ droopy	wiking: and sgmatrix?
+ blackburn	n4nd0: do you still follow boyd cvxopt book?
+ wiking	alexlovesdata: yo
+ wiking	alexlovesdata: have u seen my email?
+ wiking	blackburn: btw this is some crazy ass russian movie: http://www.imdb.com/title/tt0445161/
+ blackburn	wiking: I've never seen
+ wiking	blackburn: u should, just for the fun of it :)
+ droopy	hihi
+ blackburn	wiking: my always-number-one is ??????? ??????
+ blackburn	wiking: http://www.imdb.com/title/tt1003080/
+ blackburn	oh the story on imdb is damn cool
+ n4nd0	blackburn: I have abandoned it for the last few weeks to tell the truth, why?
+ n4nd0	:(
+ blackburn	n4nd0: just interested
+ n4nd0	blackburn: ok, are you following it?
+ blackburn	n4nd0: no :) I am way too lazy
+ n4nd0	haha, I don't think so
+ n4nd0	I see you're busy around here
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has quit [Ping timeout: 246 seconds]
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has joined #shogun
+@sonney2k	!seen gsomix
+ droopy	gsomix (~gsomix@188.168.128.107) was last seen quitting from #shogun 1 day, 7 hours, 41 minutes ago stating (Read error: Operation timed out).
+ n4nd0	!see n4nd0
+ n4nd0	!seen n4nd0
+ droopy	n4nd0, go look in a mirror.
+ n4nd0	haha
+ n4nd0	sonney2k: you can keep track of us with this :D
+ blackburn	sonney2k: he did send PR yesterday I think
+ blackburn	but actually he is offline in jabber and irc :)
+@sonney2k	blackburn, he told me that he is on some long train ride...
+ blackburn	hmm
+ blackburn	to vladivostok?
+@sonney2k	heh
+ blackburn	it takes 8 days btw
+ blackburn	but I am sure he won't visit vladivostok :D
+ n4nd0	8 days in train without changing country, that's crazy :D
+ blackburn	n4nd0: if there was a better road it would take less time I think
+@sonney2k	n4nd0, in germany that is no problem - we have the 'deutsche bahn'
+@sonney2k	most reliable way to transport ever!
+ blackburn	sonney2k: I won
+ blackburn	t believe
+ blackburn	something in germany works bad
+@sonney2k	blackburn, won what?
+ blackburn	sonney2k: pressed enter by mistake :)
+ blackburn	read as one sentence
+@sonney2k	ahh
+@sonney2k	you should then :D
+ blackburn	sonney2k: no way, why?
+ blackburn	in russia we had 70 years of red madness and 20 years of robbery and thievery so there is a serious reason why all works so bad
+@sonney2k	blackburn, was it ever better?
+ blackburn	sonney2k: hmm is it better in west germany? :)
+@sonney2k	but I can assure you that things are not totally different in germany
+ blackburn	sonney2k: that's the only hope of immigrants don't take it away :D
+ n4nd0	good night!
+ blackburn	n4nd0: nite
+-!- alexlovesdata [~binder@gwlan56.first.fraunhofer.de] has left #shogun []
+-!- n4nd0 [~nando@h121n3-ksg-a11.ias.bredband.telia.com] has quit [Ping timeout: 250 seconds]
+-!- zxtx [~zv@33.sub-174-235-192.myvzw.com] has joined #shogun
+-!- hoijui [~hoijui@dslb-088-074-122-056.pools.arcor-ip.net] has quit [Quit: Leaving]
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Quit: Page closed]
+--- Log closed Fri Jul 27 00:00:17 2012

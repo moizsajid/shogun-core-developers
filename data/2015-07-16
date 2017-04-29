@@ -1,0 +1,245 @@
+--- Log opened Thu Jul 16 00:00:55 2015
+-!- PirosB3 [~pirosb3@host145-212-dynamic.26-79-r.retail.telecomitalia.it] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- PirosB3 [~pirosb3@host145-212-dynamic.26-79-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Remote host closed the connection]
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 240 seconds]
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 246 seconds]
+-!- HeikoS [~heiko@054421fa.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@054421fa.skybroadband.com] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@054421fa.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ lisitsyn	HeikoS: hey
+@HeikoS	hi lisitsyn
+ lisitsyn	howdy?
+ lisitsyn	HeikoS: I've got some time probably we could discuss things if you get some time too
+@HeikoS	lisitsyn: yeah I have
+@HeikoS	lets say in 10 min?
+ lisitsyn	yeah sure
+@HeikoS	cool
+-!- shaochuan [~shaochuan@2601:647:4600:fac5:e97c:656f:3d93:f749] has joined #shogun
+-!- shaochuan [~shaochuan@2601:647:4600:fac5:e97c:656f:3d93:f749] has quit [Ping timeout: 248 seconds]
+@HeikoS	lisitsyn: re
+ lisitsyn	HeikoS: yeap me too
+@HeikoS	lisitsyn:  want to talk about the modules?
+ lisitsyn	HeikoS: anything you're interested in
+@HeikoS	lisitsyn: yeah thats good, and also maybe a priority list of things that are important?
+@HeikoS	shall we start with latter?
+@HeikoS	kind of big picture
+ lisitsyn	HeikoS: hm yeah may be
+@HeikoS	because we got quite a few things started and not yet completely done
+@HeikoS	low hanging fruits
+@HeikoS	whats your opinion on general progress and all that?
+ lisitsyn	ok so the thing is that
+ lisitsyn	we probably overengineered things a bit
+ lisitsyn	i've got a feeling we got more than we need with CI and stuff
+ lisitsyn	we don't use it properly now
+@HeikoS	CI?
+@HeikoS	as in testing etc?
+@HeikoS	lisitsyn: is that blocking us from anything then?
+ lisitsyn	ah no
+ lisitsyn	just a random thought
+@HeikoS	i see
+@HeikoS	yeah maybe
+@HeikoS	I personally would live to drop all but the unit tests anyways
+ lisitsyn	HeikoS: there is a thing that blocks us
+ lisitsyn	it is that we don't have good concept or idea or whatever
+ lisitsyn	why we are better than something else
+@HeikoS	lisitsyn: not globally at least
+@HeikoS	I have an opinion on that though
+ lisitsyn	I am a bit lost about that
+@HeikoS	its the languages
+ lisitsyn	so would be happy to join :)
+@HeikoS	and the c++ core
+@HeikoS	i.e. modular while fast
+@HeikoS	we dont exploit the latter to much anymore
+@HeikoS	and the first we dont expose it
+@HeikoS	but I think thats the core strength of shogun
+ lisitsyn	what are the main languages you think?
+@HeikoS	a third one could be the amount of algorithms we implement
+ lisitsyn	it looks like python is the main thing while others are not interesting at all
+@HeikoS	lisitsyn: python, R, java, C++, lua, octave, and MATLAB
+@HeikoS	I dont agree
+@HeikoS	its just we dont support this properly
+@HeikoS	i.e. too hard to set up
+@HeikoS	and not exposed
+ lisitsyn	ok another thought then
+@HeikoS	so thats why people dont use them
+@HeikoS	I think for that
+ lisitsyn	we are too frameworkish
+@HeikoS	the two major improvements would be:
+@HeikoS	1. manual with the languages as we started
+@HeikoS	2. MATLAB Swig support
+@HeikoS	if we had that, we Shogun would have a massive leap over other projects
+@HeikoS	so thats something we could be good at
+@HeikoS	another thing we could be good at if we focussed is
+@HeikoS	single-machine large-scale
+ lisitsyn	hmm yeah
+@HeikoS	i.e. very efficient memory managment and intelligent GPU integration
+@HeikoS	but we dont have that in our development process
+@HeikoS	we focus more in reliability at the moment, which is good and comes first
+ lisitsyn	I have a feeling we should not dive into gpu things
+@HeikoS	but I think there is room to speed things up quite a bit
+ lisitsyn	or rely on some magic library
+@HeikoS	lisitsyn: why?
+ lisitsyn	it is a shitload of work
+@HeikoS	true
+@HeikoS	but I think there is lots of low hanging fruits again
+ lisitsyn	I don't have gpu
+@HeikoS	i.e. massive gains with little effort
+ lisitsyn	neither personally nor at job
+@HeikoS	like the basic operations in linalg
+@HeikoS	matrix product or inversion
+@HeikoS	no need to be super fancy
+@HeikoS	every compute has a GPU these days
+@HeikoS	maybe not a fast, but still gains
+ lisitsyn	HeikoS: you mean that thing in sandy bridge?
+@HeikoS	yeah
+ lisitsyn	I wouldn't bother
+@HeikoS	still way faster for those basic things
+ lisitsyn	not many things can exploit it very efficiently
+ lisitsyn	I meet IO bounds much more often
+@HeikoS	lisitsyn: yeah sure, but I am not talking about those cases
+@HeikoS	but those where IO doesnt block and the gains are big
+@HeikoS	I would ignore others
+@HeikoS	but if we have say a CG solver
+@HeikoS	its just faster on GPU without a lot of effort
+ lisitsyn	hmm
+@HeikoS	but you know what
+ lisitsyn	aren't matrices big?
+@HeikoS	thats details
+@HeikoS	I think more is to be gained when coding c++ properly
+@HeikoS	or more general, write performant code
+@HeikoS	currently we dont really do that
+ lisitsyn	yeah that's true
+@HeikoS	we dont have means of ensuring that we do that
+@HeikoS	like the unit tests for reliability
+ lisitsyn	to do that we should make a lot of tested functions
+ lisitsyn	to perform basic things
+@HeikoS	yeah
+@HeikoS	I dont really know how to do this
+ lisitsyn	good old C++ like we had
+ lisitsyn	is not really testable
+@HeikoS	I think the other two points are more important anyways
+ lisitsyn	well e.g. I pushed python-like range
+ lisitsyn	it kills a few possible problems
+ lisitsyn	such small things reduce complexity and improve code quality
+@HeikoS	the main problem for users is still 1) cannot install 2) dont know what shogun's strengths are
+ lisitsyn	oh
+ lisitsyn	yes that's true
+@HeikoS	internal I think 1) swig is too big 2) efficiency of linalg and others
+@HeikoS	so I see the aer as the most important internal change
+@HeikoS	and the manual thing as the most important external
+ lisitsyn	yeah agree
+@HeikoS	and in general I think external is more important than internal
+@HeikoS	the installation thing is going on for years
+ lisitsyn	yes
+ lisitsyn	ok actually
+ lisitsyn	pretty interface is not stable usually
+ lisitsyn	if we get really simple api
+ lisitsyn	we can stabilize it
+ lisitsyn	so users just use whether version they want
+@HeikoS	yeah
+@HeikoS	API is actuall another problem
+@HeikoS	point 3.) for external
+@HeikoS	we in fact need a major re-design of the public API
+ lisitsyn	yes
+@HeikoS	but well
+@HeikoS	thats not top priority
+@HeikoS	because we at least have something
+@HeikoS	as with the other points, we dont have it ;)
+ lisitsyn	I am personally interested :)
+ lisitsyn	hmm btw
+ lisitsyn	have you seen balasz kegl article
+ lisitsyn	on data science?
+@HeikoS	nope send it
+ lisitsyn	just a sec
+ lisitsyn	https://medium.com/@balazskegl/the-data-science-ecosystem-678459ba6013
+ lisitsyn	HeikoS: the thing is any person has some incentive :)
+ lisitsyn	may be we should all have our own incentive
+@HeikoS	oh btw and another thing that affect priority is projects that are started and then stalled. We do this quite often, starting something and then not finishing. If we finished all the stuff we started, that would already be a major step
+ lisitsyn	I am psycho about api :)
+@HeikoS	lisitsyn: yeah sure
+@HeikoS	lisitsyn: something I realised about open-source,
+@HeikoS	people do what they like
+@HeikoS	not what sneeded
+ lisitsyn	so we could have an angel for each point you listed
+ lisitsyn	so e.g. you push people to make it installable
+ lisitsyn	and I am obsessed with api, so on
+@HeikoS	lisitsyn: yeah true
+@HeikoS	I mean
+@HeikoS	its just about small steps in the end
+@HeikoS	but making sure the process of those is designed in such way that we gain something by those steps
+@HeikoS	often we invest work which actually pushed is back, because it made Shogun less maintainable or unreliable or etc
+@HeikoS	so I like to think in those processes
+@HeikoS	(rather than in the details)
+@HeikoS	but anyways
+@HeikoS	lets talk API
+ lisitsyn	just a sec
+@HeikoS	How would you like to proceed?
+ lisitsyn	I have no idea :)
+ lisitsyn	I started to send mails may be its the way
+ lisitsyn	did you get that property idea?
+@HeikoS	reading
+@HeikoS	get it
+@HeikoS	lisitsyn: sounds like a good idea
+@HeikoS	but I cannot judge
+@HeikoS	My first question would be: why not do the simplest way
+@HeikoS	which is
+@HeikoS	to only compile the parts of Shogun that one needs
+@HeikoS	and then expose all methods?
+@HeikoS	we dont have many getters/setters in fact
+@HeikoS	lisitsyn: and if you only want Shogun for say GPs, then its just like 20 classes anyways
+@HeikoS	maybe its a naive question, but what would speak against that?
+ lisitsyn	HeikoS: hmm yeah that's simple idea
+ lisitsyn	HeikoS: how do you want to enforce it is possible to compile different parts of shogun?
+@HeikoS	lisitsyn: isnt this possible through namespaces?
+@HeikoS	lisitsyn: or even automatically
+@HeikoS	lisitsyn: if doxygen can do that, we cannot cmake do ?
+@HeikoS	thoralf manages with bash
+ lisitsyn	??
+ lisitsyn	oops
+ lisitsyn	yeah I think it is easy
+@HeikoS	lisitsyn: see email
+ lisitsyn	we just compile separate parts
+@HeikoS	lisitsyn: just wondering how much effort that would be and how much we would gain
+@HeikoS	I have the feeiling its hard to beat in that respect
+@HeikoS	lisitsyn: another option that I thought about:
+ lisitsyn	I think we should use properties and that thing
+@HeikoS	pull out shogun-base
+@HeikoS	i.e. a library with the core parts of shogun
+@HeikoS	and then sub-parts cannot depend on each other, only on the base
+ lisitsyn	yes
+@HeikoS	but maybe thats much harder
+ lisitsyn	its harder but should be possible
+@HeikoS	lisitsyn: btw thoralfs thing compiled a LibSVM shogun in a minute
+@HeikoS	since just 10 classes or so
+ lisitsyn	ok sorry have to go
+@HeikoS	lisitsyn: another reason why shogun is so big is the ridiculous base class
+@HeikoS	lisitsyn: ah ok
+@HeikoS	lisitsyn: talk later then
+ lisitsyn	I ll be back in 20 mins
+ lisitsyn	or 25
+@HeikoS	i might be here then still
+ lisitsyn	ok cool
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 244 seconds]
+-!- HeikoS [~heiko@054421fa.skybroadband.com] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@host-92-25-65-117.as13285.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-25-65-117.as13285.net] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@193.61.17.254] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS1 [~heiko@dab-glb1-h-75-9.dab.02.net] has joined #shogun
+-!- HeikoS1 [~heiko@dab-glb1-h-75-9.dab.02.net] has quit [Client Quit]
+-!- HeikoS [~heiko@193.61.17.254] has quit [Ping timeout: 244 seconds]
+-!- HeikoS [~heiko@nat-163-62.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-163-62.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 252 seconds]
+-!- HeikoS [~heiko@dab-glb1-h-75-3.dab.02.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@dab-glb1-h-75-3.dab.02.net] has quit [Quit: Leaving.]
+--- Log closed Fri Jul 17 00:00:56 2015

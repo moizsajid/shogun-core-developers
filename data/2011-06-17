@@ -1,0 +1,213 @@
+--- Log opened Fri Jun 17 00:00:53 2011
+@sonney2k	f-x, could you please fix the copyright in the way john suggested that I can merge your patch?
+ CIA-32	shogun: Soeren Sonnenburg master * r5c71d64 / examples/undocumented/java_modular/classifier_libsvm_minimal_modular.java : polish minimal example to use jblas' signum / mean etc and simplify code slightly - http://bit.ly/lvOBau
+ CIA-32	shogun: Soeren Sonnenburg master * r40c6576 / (7 files in 4 dirs):
+ CIA-32	shogun: add missing functions to Distance/Kernel/LinearMachine such that
+ CIA-32	shogun: all examples run through at least. Minor fixes to example files. - http://bit.ly/mP5myl
+ f-x	sonney2k: submitted the patch. though i forgot to change the (C) -- it should be for Berlin Institute of Technology and Max Planck Society, right?
+ f-x	and thanks for the test - i have no idea why my laptop gives me totally opposite results...
+@sonney2k	f-x, yeah and what john said
+@sonney2k	f-x, I only see that both methods have the same speed
+@sonney2k	differences are totally negligible
+ f-x	i did add the part john mentioned in the mail, i guess
+ f-x	anything more to be added there with respect to that?
+@sonney2k	nope
+@sonney2k	then I guess only append the GPL header and the (C) line
+@sonney2k	(W)
+@sonney2k	too
+ f-x	there. that should hopefully do it.
+ f-x	btw the StreamingSimpleFeatures class seems to be working, but the parent StreamingDotFeatures class is currently purely abstract
+ f-x	i've defined all the functions in StreamingSimpleFeatures
+ f-x	i'll make a dummy pull request from that branch later just so you can see the changes easily
+@sonney2k	ok
+@sonney2k	but I guess it should be purely abstract anyways
+@sonney2k	I mean it is only to provide interfaces to StreamingSGD etc
+ f-x	agreed.. DotFeatures are supposed to necessarily provide a dot, dense_dot, add_to_dense_vec() operation for float64_t* vectors, right?
+ f-x	i mean those are the functions in DotFeatures.h
+ CIA-32	shogun: Shashwat Lal Das master * rfe6ab74 / (41 files in 11 dirs): Merge remote-tracking branch 'upstream/master' into streaming - http://bit.ly/iHPzmp
+ CIA-32	shogun: Shashwat Lal Das master * re14b29f / (src/libshogun/lib/IOBuffer.cpp src/libshogun/lib/IOBuffer.h): Changed copyrights in IOBuffer and made it derive from CSGObject. - http://bit.ly/iFvbpW
+ CIA-32	shogun: Shashwat Lal Das master * r6ce47b0 / (src/libshogun/lib/IOBuffer.cpp src/libshogun/lib/IOBuffer.h): More copyright changes to IOBuffer. - http://bit.ly/jEFy59
+@sonney2k	f-x, yes though now the algorithm probably first needs to fetch an SGVector
+@sonney2k	and then call these helper functions
+@sonney2k	I am not so sure about how this can work well with sparse / strings
+@sonney2k	I think one needs to assume that the current (feature) object is in memory as a member variable somehow
+ f-x	pull request made..
+ f-x	it was ok with dense features
+ f-x	sparse seems to be the challenge
+ f-x	i haven't seen properly how shogun handles sparse features yet
+ f-x	but in the current implementation, the features object always works with a "current example" only
+ f-x	and the dot(), dense_dot(), add_to_dense_vec() etc operate using that and any other specified vector
+@sonney2k	let me see
+@sonney2k	f-x, yeah makes sense
+@sonney2k	so there is no real challenge then
+@sonney2k	just operate on the fetched example
+@sonney2k	however you don't need to add the start/end parser stuff or?
+@sonney2k	I mean it now really makes sense to have a StreamingFeatures object in that hierarchy
+ f-x	sonney2k: that can be avoided
+ f-x	but then we should agree that start_parser should be called automatically sometime
+ f-x	end_parser will automatically run on object destruction
+@sonney2k	I mean CFeatures -> CStreamingFeatures (with the get_next*) -> whatever StreamingFeatures
+ f-x	sonney2k: problem with having a CStreamingFeatures is that anything having the parser as a member must be templated
+@sonney2k	f-x, one might want to manually start the parsing process
+@sonney2k	f-x, I see - so then again interfaces only!
+ f-x	but get_next_feature_vector(type** vec)
+@sonney2k	f-x, I think there is no way other than in the learning algorithm start the parser
+ f-x	 sonney2k: yes.. i've done it explicitly in the gist i sent
+ f-x	data->start_parser()
+@sonney2k	f-x, yes that is not possible
+@sonney2k	ok
+ f-x	sonney2k: but it really would be convenient to be able to dump that generic stuff into a parent class
+@sonney2k	so if SGD is modified to only use the operations from StreamingDotFeatures then it means it will never call get_next_feature_vector explicitly
+ f-x	exactly!
+@sonney2k	that will be done in the respective dotfeature class
+ f-x	it only uses the operations it provides
+ f-x	like dot, dense_dot, etc
+@sonney2k	and there only to compute the dense_dot etc
+ f-x	get_vector is a specialized function of the StreamingSimpleFeatures class
+@sonney2k	so all it needs to call is parser start / end
+@sonney2k	and fetch_next_example()
+@sonney2k	that's it
+ f-x	sonney2k: yes.. but is that sufficient for all algorithms?
+ f-x	never having to call get_feature_vector?
+@sonney2k	f-x, surely not - but these will require special feature objects then
+@sonney2k	and thus can use specific get_vector() etc functions
+ f-x	sonney2k: in the algorithms which currently work on DotFeatures, isn't this the case too?
+ f-x	get_feature_vector() is defined only for float64_t vectors (in DotFeatures)
+ f-x	for others, i guess it is up to the algorithm to do the conversion to CSimpleFeatures* and use the specialized functions
+ f-x	sonney2k: oh - and i have some news.. i will be out of town (compulsorily) on Sunday and Monday.. So I'm sorry, don't think i can work then :(
+@sonney2k	f-x, np - just announce (like you do now) that you are / when you are away
+ f-x	sonney2k: okay sure :) thanks
+@sonney2k	f-x, but the algorithms don't need the specialiced get_feature_vector functions
+@bettyboo	:)
+@sonney2k	I mean it does not need to know if it is operating on strings / sparse vectors etc
+ f-x	sonney2k: hmm.. i'm beginning to see it now...
+@sonney2k	ok
+ f-x	sonney2k: what should be my priority now? i see (after running the online SGD example) that the parser can be improved speed-wise, and it's probably easier to do now.. should i do the parser optimization or more features/algorithms conversion? maybe even a proper clean version of StreamingSGD?
+@sonney2k	I don't know how much time it will take to get streamingsgd to work
+@sonney2k	but definitely you should do the streamingstring/sparse/simple features
+@sonney2k	as we figured out it is not a lot of work
+@sonney2k	if these get a CStreamingFile (from proper type) then you can do ascii / binary etc support
+@sonney2k	though I would say for now just ascii - fancy stuff later
+ f-x	sonney2k: okay.. streamingsgd "works" minimally, and the code for that shouldn't change; only the code beneath it will
+ f-x	so now - streamingstring/sparse features
+@sonney2k	you won't have an algorithm for strings yet
+@sonney2k	I guess at some point you need to rip of code from some DotFeatures based object that is string based
+ f-x	for sgd? no. just inserted a few lines into whatever was there in the original SGD code
+@sonney2k	f-x, yeah well you have to do that properly rather soon
+ f-x	sonney2k: before/after streamingstring/sparse features?
+@sonney2k	f-x, streamingfeatures should be very little effort
+@sonney2k	so I would rather do these proper first
+@sonney2k	then SGD / streaming sgd proper ( I guess you need to rip out some code to not have too much code duplication - e.g. loss functions in some CLoss class)
+@sonney2k	and then streaming ascii reliability / speed improvements and some real test data set from e.g. http://largescale.ml.tu-berlin.de/
+ f-x	ok.. sounds like a plan. first i'll concentrate on doing these streaming features properly
+ f-x	sonney2k: guess it's time to sleep now.. will have those string and sparse features ready as soon as possible
+ f-x	good night, see you!
+@sonney2k	just keep us updated - send an email before you leave what the status (this weekly email thingy) is
+@sonney2k	f-x, cu
+ f-x	yeah, i haven't forgotten that :)
+ f-x	bye
+-!- f-x [~user@117.192.198.36] has quit [Quit: ERC Version 5.3 (IRC client for Emacs)]
+-!- f-x [~user@117.192.198.36] has joined #shogun
+-!- f-x [~user@117.192.198.36] has quit [Client Quit]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@59.163.196.121] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ is now known as in3xes
+-!- in3xes_ [~in3xes@210.212.58.111] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 258 seconds]
+-!- in3xes_ is now known as in3xes
+-!- Netsplit *.net <-> *.split quits: @mlsec
+-!- Netsplit over, joins: @mlsec
+-!- Netsplit *.net <-> *.split quits: @mlsec
+-!- heiko [~heiko@infole-06.uni-duisburg.de] has joined #shogun
+-!- Netsplit over, joins: @mlsec
+ heiko	hello, anybody here?
+ heiko	has someone a copy of lib/v_array.h ? I cannot compile without it
+ heiko	and it is not in the repo
+ CIA-32	shogun: Baozeng Ding master * r54bb0a1 / (25 files in 2 dirs): add some distance examples and kernel examples, fix kerenl.i to support distance - http://bit.ly/lfqqpM
+ CIA-32	shogun: Baozeng Ding master * r0724fd9 / examples/undocumented/java_modular/kernel_auc_modular.java : add kernel_auc_modular example, this example crash jvm, please help check it - http://bit.ly/inTtDW
+@sonney2k	heiko, around?
+ heiko	hi, yes
+@sonney2k	time to chat / talk?
+@sonney2k	if so I will call you
+ heiko	yes, in 5 mins?
+@sonney2k	k
+ heiko	k ready
+ CIA-32	shogun: Soeren Sonnenburg master * r3bbb4a5 / (2 files in 2 dirs): temporary fix for compiler errors - http://bit.ly/m6TuEM
+-!- heiko [~heiko@infole-06.uni-duisburg.de] has quit [Quit: Leaving.]
+ CIA-32	shogun: Shashwat Lal Das master * r9a5e66e / (3 files in 2 dirs): Removed StreamingFeatures.*, added v_array.h - http://bit.ly/lKjqjr
+ CIA-32	shogun: Shashwat Lal Das master * r4c1d91d / src/libshogun/lib/v_array.h : Fixed license of v_array.h - http://bit.ly/irvJ5J
+ CIA-32	shogun: Shashwat Lal Das master * r48ea63c / (27 files in 3 dirs): Commit for fixing compile errors. - http://bit.ly/k63TTY
+ CIA-32	shogun: Shashwat Lal Das master * r8768749 / src/libshogun/lib/v_array.h : v_array.h fix. - http://bit.ly/jnuOed
+-!- f-x [~user@117.192.200.96] has joined #shogun
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+ blackburn	wow how active is mailing list today!
+-!- Netsplit *.net <-> *.split quits: @mlsec
+-!- Netsplit over, joins: @mlsec
+-!- blackburn [~blackburn@31.28.40.202] has quit [Ping timeout: 255 seconds]
+-!- Netsplit *.net <-> *.split quits: @mlsec
+-!- Netsplit over, joins: @mlsec
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+-!- blackburn [~blackburn@31.28.40.202] has quit [Client Quit]
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+-!- f-x [~user@117.192.200.96] has quit [Remote host closed the connection]
+-!- blackburn [~blackburn@31.28.40.202] has quit [Read error: No route to host]
+-!- blackburn1 [~blackburn@31.28.40.202] has joined #shogun
+ blackburn1	sonney2k: wondering do we really need apply_to_feature_vector in preprocessors?
+@sonney2k	blackburn1, sure
+@sonney2k	consider there is no feature matrix in memory
+@sonney2k	but you just have a single vector at a time
+-!- blackburn1 [~blackburn@31.28.40.202] has quit [Ping timeout: 255 seconds]
+-!- blackburn [~blackburn@31.28.40.202] has joined #shogun
+ blackburn	bad bad bad
+ blackburn	sonney2k: LLE is wrong :(
+ blackburn	bad bad bad
+ blackburn	SUCCESS!
+ blackburn	sonney2k: http://imageshack.us/photo/my-images/26/image3d2d.png/
+@sonney2k	the swiss roll :)
+ blackburn	sonney2k: yes, now it is working *right*
+ blackburn	I'm very disappointed with I did it wrong :(
+ blackburn	sonney2k: so please merge pull request with fixes :)
+ CIA-32	shogun: Sergey Lisitsyn master * r7778ddf / src/libshogun/preprocessor/LocallyLinearEmbedding.cpp : Fixes for LLE - http://bit.ly/k3X4oW
+ blackburn	sonney2k: as you can see - abs(id_vector[j]) instead of id_vector[j] caused everything goes wrong :D
+ blackburn	sonney2k: do you have some new ideas about temporarly matrices like distance matrix?
+@sonney2k	blackburn, I think I should add a flag 'do_free' to these SGTypes
+@sonney2k	if true the caller has to delete[] the matrix
+ blackburn	sonney2k: so if do_free then on SGMatrix deletion it will delete it?
+ blackburn	nice. like it
+@sonney2k	blackburn, that is not so easy
+ blackburn	why?
+@sonney2k	I mean currently we create SGMatrix object on the stack and then return a copy of it
+ blackburn	ah
+ blackburn	oh shit
+ blackburn	:D
+@sonney2k	so when the object on stack is deleted and then the other one later kaboom
+ blackburn	I see, yes
+@sonney2k	only 'fix' would be to modify the object on copy constuctor
+@sonney2k	I mean disable deletion in the object that is to be copied, e.g A = SGMatrix() ;  B = A; then A won't have the delete flat set but only B - but I don't like it
+ blackburn	yes, don't like it too
+ blackburn	I have two suggestions about our projects and your project with heiko
+@sonney2k	or we add a member function release_matrix()
+@sonney2k	and everyone has to call it
+ blackburn	sonney2k: I am not very familiar with how swig works
+ blackburn	what's with SGMatrices in say python?
+ blackburn	I mean when I do get_some_matrix() what I use?
+ blackburn	some pointer to SGMatrix or so?
+ blackburn	saying it just because some idea is to place some warning in case we forgot to release it
+@sonney2k	then get_some_matrix() will return the SGMatrix object to some C code - there it is converted to to a python numpy matrix
+@sonney2k	that's it
+ blackburn	sonney2k: well but we anyway have to do 'release_matrix()' whenever we use float64_t** stuff or SGMatrix, right?
+ blackburn	so I think it is ok
+@sonney2k	blackburn, well no
+@sonney2k	before we always did copy
+@sonney2k	so we always deleted
+ blackburn	it looks like we are trying to add some garbage collector :D
+ blackburn	so some suggestions
+ blackburn	if you have time you would create tickets for out mid-term evaluations
+ blackburn	one student - one ticket
+ blackburn	and about framework project you could mind some scheme - I don't understand what are you planning to do and what are you did already - I think it will help both you and us
+@sonney2k	I am dead sleepy sorry
+@sonney2k	cu
+ blackburn	ok, later
+ blackburn	same thing, have been sleeping for less than 4 hours two days running
+ blackburn	even don't sure I speak very clearly :D
+--- Log closed Sat Jun 18 00:00:55 2011

@@ -1,0 +1,948 @@
+--- Log opened Sun Apr 01 00:00:19 2012
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 252 seconds]
+-!- romovpa_ [b064f6fe@gateway/web/freenode/ip.176.100.246.254] has quit [Ping timeout: 245 seconds]
+ gsomix	sonney2k, hey
+-!- blackburn [~qdrgsm@109.226.79.59] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- romovpa [b064f6fe@gateway/web/freenode/ip.176.100.246.254] has joined #shogun
+ gsomix	sonney2k, >:3
+-!- gsomix [~gsomix@85.26.234.192] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+-!- romovpa [b064f6fe@gateway/web/freenode/ip.176.100.246.254] has quit [Ping timeout: 245 seconds]
+-!- Vuvu [~Vivan_Ric@115.248.130.148] has quit [Remote host closed the connection]
+-!- Vuvu [~Vivan_Ric@115.248.130.148] has joined #shogun
+-!- blackburn [~qdrgsm@109.226.79.59] has quit [Quit: Leaving.]
+-!- blackburn [~qdrgsm@109.226.79.59] has joined #shogun
+ PhilTillet	blackburn, are you sleeping? :D
+ blackburn	no
+ PhilTillet	yay, i'm not the only one awake!
+ blackburn	yeah but I'm going to
+ PhilTillet	ok :D
+ blackburn	any news?
+ PhilTillet	tried to improve the precision of my GPU thing
+ PhilTillet	could it be possible that the shogun implementation is less precise?
+ PhilTillet	I computed some operations with octave to debug, and it appeared that the difference between the octave result and my GPU was 0
+ PhilTillet	while the difference between the octave result and the Shogun result was 10^-8
+ blackburn	hmm
+ blackburn	gaussian kernel right?
+ PhilTillet	yes
+ PhilTillet	but
+ PhilTillet	i changed the source to remove the exponential
+ PhilTillet	to isolate the roundoff error
+ PhilTillet	oooh
+ PhilTillet	static inline float32_t dot(
+ PhilTillet	00702             const float32_t* v1, const float32_t* v2, int32_t n)
+ blackburn	which source?
+ PhilTillet	shouldn't the result be float64_t???
+ PhilTillet	oops sorry for the 00702, it's a line number
+ blackburn	what is it?
+ PhilTillet	the CMath::dot
+ blackburn	there should be 64 one
+ PhilTillet	yes
+ PhilTillet	but the 64 one takes float64_t* as input
+ PhilTillet	while the features are float32_t
+-!- exodus [d078ac53@gateway/web/freenode/ip.208.120.172.83] has joined #shogun
+ PhilTillet	and we want a float64_t result
+-!- exodus is now known as Guest72523
+ PhilTillet	i'll try to change that
+ blackburn	why your features are 32?
+ PhilTillet	I took a test case from shogun's examples
+ PhilTillet	and the features were 32
+ PhilTillet	while the labels and alphas were 64
+ blackburn	ah that can cause the problem
+ PhilTillet	this way twice more features feat in memory
+ PhilTillet	fit*
+ PhilTillet	I mean, that 32 bit dot function is strange in any case
+ PhilTillet	cause the internal result is 64 bit
+ PhilTillet	but it casted at return time
+ blackburn	ah yes
+ blackburn	I agree
+ blackburn	that can be a patch
+ blackburn	if you want
+ PhilTillet	yes :p
+ PhilTillet	i will release it as a patch with my GPU apply function
+ blackburn	ok
+ PhilTillet	:p
+ PhilTillet	(which is not ready yet :D)
+ PhilTillet	(trying to fix that round off error first)
+ blackburn	so will you send proposal only for gpu stuff?
+ PhilTillet	Maybe for Built generic multiclass learning framework too
+ PhilTillet	but I mean
+ PhilTillet	my main proposal will be the OpenCL one
+ blackburn	ok I think it would be ok to to combine something
+ n4nd0	good night guys
+ PhilTillet	good night n4nd0
+ blackburn	n4nd0: good night
+ PhilTillet	blackburn, what do you mean?
+ blackburn	PhilTillet: I mean it is ok to propose some complex idea
+ blackburn	as I think
+ blackburn	anyway what would you suggest as OpenCL project?
+ PhilTillet	something big
+ PhilTillet	At least a complete SVM on GPU
+ PhilTillet	well at least for basic kernels
+ PhilTillet	i don't know if string kernels could be done on time
+ PhilTillet	I think yes
+ blackburn	string kernels can't be very optimized with gpu
+ blackburn	but linear svms are still there :)
+ PhilTillet	well, I was thinking about any kernel but string kernels, apply and training
+ PhilTillet	and if I have time, maybe custom kernels
+ blackburn	gpu accelerated liblinear sounds like something interesting I think
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 264 seconds]
+ PhilTillet	I could make custom kernels very neat using the tool i developed for ViennaCL (and wrote a paper for)
+ PhilTillet	but that tool (automatic OpenCL code generator) is not advanced enough yet at the moment
+ PhilTillet	so people could write custom kernels without any OpenCL knowledge
+ blackburn	I think you should focus on linear things
+ blackburn	and then start with kernels
+ PhilTillet	yes I think that too
+ PhilTillet	but linear thing would I think not require the whole summer
+ blackburn	depends.. :D
+ PhilTillet	well wait
+ PhilTillet	define "things"
+ PhilTillet	:p
+ blackburn	to port whole liblinear to gpu effectively is something hard to carry out I think
+ PhilTillet	I'll ask a newbish question, what's the difference between liblinear and libsvm?
+@sonney2k	blackburn, and I don't expect it to be fast either...
+@sonney2k	libsvm might be more worthwhile to port
+ blackburn	sonney2k: good morning
+ blackburn	:D
+@sonney2k	yeah good morning ;-)
+ blackburn	PhilTillet: liblinear is for training only linear svms
+ blackburn	and libsvm is for training kernel ones
+ PhilTillet	I see
+ blackburn	sonney2k: harshit complained today about ocas/liblinear idea
+ blackburn	I said it is pretty out of priority - hey both ocas and linear are up-to-date
+ blackburn	don't you think we could remove it?
+-!- Guest72523 [d078ac53@gateway/web/freenode/ip.208.120.172.83] has quit [Quit: Page closed]
+@sonney2k	blackburn, I expect new liblinear w/ regression support to appear soon (today?)
+ blackburn	today?
+ blackburn	oh yes
+@sonney2k	well they usually release on april 1
+ blackburn	it is released
+ blackburn	oh no
+ blackburn	:D
+ blackburn	2011
+@sonney2k	blackburn, harshit could implement a couple of dotfeatures
+@sonney2k	for example local binary patterns, hog, the approximations for histogram kernel directly as dotfeatures
+@sonney2k	etc
+ blackburn	sonney2k: makes sense probably..
+@sonney2k	PhilTillet, it makes sense to first speed up apply times for kernelmachines (like you do) and distancemachines
+@sonney2k	linear machines too if possilbe
+@sonney2k	but I don't think it is
+ PhilTillet	I see
+ PhilTillet	why not training time too?
+@sonney2k	because you only need to do w^T x (for lots of x)
+@sonney2k	much more difficult
+@sonney2k	one thing that would directly help is to compute the kernel with opencl
+@sonney2k	but that has to be done for *every* kernel / distance
+@sonney2k	and I guess none of the string kernels will benefit from this
+ blackburn	sonney2k: why liblinear team does not list us as wrapper?
+@sonney2k	no idea
+ blackburn	as interface*
+ blackburn	don't they like shogun? :D
+ PhilTillet	sonney2k, well, computing the kernel with OpenCL is what i'm doing for applying no?
+@sonney2k	PhilTillet, not only - you can store all SVs in GPU mem
+@sonney2k	that won't be possible for training
+ PhilTillet	oh, right
+ PhilTillet	makes things more complicated
+ PhilTillet	but well, some people have succeeded in doing full SVM on GPU!
+ PhilTillet	:p
+ CIA-64	shogun: Soeren Sonnenburg master * ra1f473c / (9 files in 5 dirs):
+ CIA-64	shogun: Merge pull request #405 from pluskid/gsoc-pullrequest-1
+ CIA-64	shogun: Accuracy Evaluation for Clustering (+5 more commits...) - http://git.io/D5p_vw
+ PhilTillet	and, concerning this round-off error, I changed that dot result but the result is still different
+ blackburn	see you later guys
+ PhilTillet	see you later
+@sonney2k	PhilTillet, don't you need all training data to be on GPU memory?
+-!- blackburn [~qdrgsm@109.226.79.59] has quit [Quit: Leaving.]
+ PhilTillet	sonney2k, yes, but every trick that can be used with the CPU when the data can't fit in ram can probably be applied to the GPU
+@sonney2k	PhilTillet, well lets assume data fits in ram
+@sonney2k	but not gpu mem
+@sonney2k	what then?
+ PhilTillet	good question
+ PhilTillet	how do you do on CPU when the data does not fits in ram?
+ PhilTillet	online learning?
+@sonney2k	we don't train an svm then
+@sonney2k	but nowadays you can have systems with 64G easily
+ PhilTillet	true, RAM can be clusterized
+ PhilTillet	not GPU RAM
+ PhilTillet	:p
+@sonney2k	and GPU has few 100 MB / max few GB right?
+ PhilTillet	well, few GPU have few 100 MB
+ PhilTillet	and these GPU probably offer poor GPGPU performance
+ PhilTillet	:p
+ PhilTillet	there are some dedicated GPU like the Tesla with 4GB
+@sonney2k	so one would need to somehow cache examples that don't fit in memory
+ PhilTillet	yes
+@sonney2k	well I would optimize not for dedicated hardware but common hardware
+ PhilTillet	yes :p
+ PhilTillet	but the GPU RAM can be obtained at runtime
+ PhilTillet	but it's true that training SVM on half of the dataset than on the other half is probably not equivalent to train it o the whole dataset
+@sonney2k	PhilTillet, well the most expensive operation is similar to the one you just speed up
+@sonney2k	problem is that the support vectors may change slightly over time
+ PhilTillet	Oh I see
+ PhilTillet	I thought we were talking about training?
+@sonney2k	yeah that is all that can be speed up in training
+@sonney2k	90% of the time is kernel comp.
+ PhilTillet	I see
+ PhilTillet	but no "Support Vectors Matrix" :D
+@sonney2k	yes a matrix of SV's
+@sonney2k	but of course this only holds for real-values inputs
+ PhilTillet	yes
+@sonney2k	if we talk about strings -> nogo
+ PhilTillet	string kernel computation on GPU must be super uber complicated
+ PhilTillet	okay, so for my application, should I focus on liblinear or libsvm?
+@sonney2k	i don't see how you could do anything for liblinear - or can you speed up w^T x when x is not in GPU mem?
+ PhilTillet	why wouldn't it be in GPU mem?
+@sonney2k	because it wouldn't fit
+ PhilTillet	well, chunks of x will always fit in memory
+ PhilTillet	and this is a linear operation
+ PhilTillet	so basically it would be about caching x in CPU
+ PhilTillet	and loop on transfer chunks on GPU, compute :p
+ PhilTillet	with PCI-E the transfer is super fast
+ PhilTillet	Oh, and I have confirmation that the precision error rather comes from shogun for that case
+@sonney2k	from where?
+@sonney2k	are kernel matrices the same
+@sonney2k	?
+ PhilTillet	I tested it on a quite simple case
+ PhilTillet	#define NUM 2
+ PhilTillet	#define DIMS 1
+ PhilTillet	#define NUM_SV 2
+ PhilTillet	hmm, i was not able to see the kernel matrices
+@sonney2k	please check whether kernel matrices return exactly the same thing
+ PhilTillet	how can I display the kernel matrice?
+ PhilTillet	(for CPU)
+@sonney2k	first do get_kernel_matrix and then CMath::display_matrix
+@sonney2k	for your proposal - I think it makes sense to focus on any computationally very intense problem so better O(n^2) effort algoritms
+@sonney2k	so kernel machine testing etc first
+@sonney2k	then svmlight training (similar operation that you need for testing)
+ PhilTillet	I see
+@sonney2k	libsvm on GPU - there is a paper about it - read it
+@sonney2k	and then liblinear
+@sonney2k	liblinear has some block-decomposition KDD paper
+@sonney2k	where they train when data doesn't fit in ram
+@sonney2k	so this idea could be used for GPU too
+ PhilTillet	I see
+ PhilTillet	display_matrix does not seem to work on SGMatrix
+@sonney2k	matrix.matrix
+@sonney2k	is the double ptr
+@sonney2k	I have to sleep now...
+ PhilTillet	ok, good night
+ PhilTillet	:)
+@sonney2k	keep us posted!
+ PhilTillet	haha ok :D
+ shogun-buildbot	build #413 of java_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/java_modular/builds/413  blamelist: pluskid@gmail.com
+ shogun-buildbot	build #409 of python_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_modular/builds/409  blamelist: pluskid@gmail.com
+ shogun-buildbot	build #405 of ruby_modular is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/405  blamelist: pluskid@gmail.com
+-!- romi_ [~mizobe@187.74.1.223] has quit [Ping timeout: 246 seconds]
+-!- romi_ [~mizobe@187.74.1.223] has joined #shogun
+-!- flxb [~cronor@e178183060.adsl.alicedsl.de] has quit [Quit: flxb]
+ PhilTillet	sonney2k, sent my pull request for fixing the precision issue :p
+-!- PhilTillet [~Philippe@tillet-p42154.maisel.int-evry.fr] has quit [Quit: Leaving]
+-!- vikram360 [~vikram360@117.192.168.95] has quit [Ping timeout: 246 seconds]
+ shogun-buildbot	build #415 of java_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/java_modular/builds/415
+-!- vikram360 [~vikram360@117.192.168.95] has joined #shogun
+ shogun-buildbot	build #407 of ruby_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/ruby_modular/builds/407
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- gsomix [~gsomix@85.26.232.54] has joined #shogun
+-!- vikram360 [~vikram360@117.192.168.95] has quit [Ping timeout: 276 seconds]
+ gsomix	hi
+-!- vikram360 [~vikram360@117.192.162.252] has joined #shogun
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+-!- blackburn [~qdrgsm@109.226.79.59] has joined #shogun
+ gsomix	blackburn, yo
+ blackburn	hi
+ n4nd0	already movement around here :)
+ n4nd0	good morning people
+ blackburn	n4nd0: hey good morning
+ gsomix	good
+ CIA-64	shogun: Chiyuan Zhang master * r92508eb / src/shogun/features/Labels.cpp :
+ CIA-64	shogun: Merge pull request #1 from pluskid/master
+ CIA-64	shogun: bug fix for CLabels::set_int_labels - http://git.io/bGvedw
+ CIA-64	shogun: Sergey Lisitsyn master * rdefbb68 / src/shogun/features/Labels.cpp : Merge branch 'gsoc-pullrequest-1' of git://github.com/pluskid/shogun - http://git.io/9JeaCQ
+ blackburn	whoa awful mergees
+ n4nd0	why so?
+ Marty28	morning
+ blackburn	n4nd0: look ^ he merged his master to feature branch
+-!- vikram360 [~vikram360@117.192.162.252] has quit [Ping timeout: 246 seconds]
+ n4nd0	aham I see
+-!- vikram360 [~vikram360@117.192.188.247] has joined #shogun
+ blackburn	n4nd0: check mailing list :)
+ n4nd0	blackburn: reading it right now :)
+ n4nd0	blackburn: I like the references ;)
+-!- vikram360 [~vikram360@117.192.188.247] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.186.146] has joined #shogun
+ harshit_	blackburn: Thanks for that mail, I was having hard time figuring that out . :)
+-!- blackburn [~qdrgsm@109.226.79.59] has quit [Ping timeout: 246 seconds]
+-!- vikram360 [~vikram360@117.192.186.146] has quit [Ping timeout: 240 seconds]
+-!- vikram360 [~vikram360@117.192.173.130] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 264 seconds]
+-!- blackburn [~qdrgsm@31.28.44.229] has joined #shogun
+-!- harshit_ [~harshit@182.68.67.61] has quit [Ping timeout: 244 seconds]
+-!- gsomix [~gsomix@85.26.232.54] has quit [Ping timeout: 246 seconds]
+-!- gsomix [~gsomix@85.26.233.102] has joined #shogun
+-!- gsomix [~gsomix@85.26.233.102] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+-!- gsomix [~gsomix@85.26.233.102] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- flxb [~cronor@e178169137.adsl.alicedsl.de] has joined #shogun
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+-!- harshit_ [~harshit@182.68.67.61] has quit [Client Quit]
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+-!- nickon [~noneedtok@dD5774105.access.telenet.be] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 246 seconds]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 245 seconds]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 252 seconds]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 276 seconds]
+-!- PhilTillet [~Philippe@tillet-p42154.maisel.int-evry.fr] has joined #shogun
+-!- gsomix [~gsomix@85.26.233.102] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+-!- gsomix [~gsomix@85.26.233.102] has joined #shogun
+-!- PhilTillet [~Philippe@tillet-p42154.maisel.int-evry.fr] has quit [Ping timeout: 248 seconds]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- gsomix [~gsomix@85.26.233.102] has quit [Quit: ????? ? ?? ??? (xchat 2.4.5 ??? ??????)]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Read error: Operation timed out]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 250 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- gsomix [~gsomix@188.168.3.96] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+ PhilTillet	Hi :p
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 264 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- harshit_ [~harshit@182.68.67.61] has quit [Remote host closed the connection]
+ Marty28	hi
+ blackburn	hi there
+ PhilTillet	hi blackburn
+ blackburn	PhilTillet: so did your fix solved your precision problem?
+ PhilTillet	yes :D
+ blackburn	merging then
+ PhilTillet	sent a pull request, but did a little mistake
+ blackburn	yes, that's me commented it
+ PhilTillet	i used blas_ddot instead of blas_dsdot
+ PhilTillet	:p
+ PhilTillet	not used to blas
+ CIA-64	shogun: Philippe Tillet master * r08f27a3 / (2 files): Bugfix in dot product for 32bit,32bit vector dot product computation - http://git.io/-TaIIg
+ CIA-64	shogun: Sergey Lisitsyn master * red87836 / (2 files): Merge branch 'master' of git://github.com/PhilippeTillet/shogun - http://git.io/-2Bwcg
+ PhilTillet	cool :)
+ shogun-buildbot	build #647 of libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/647  blamelist: blackburn91@gmail.com, Phil.Tillet@gmail.com
+ PhilTillet	oh
+ PhilTillet	dsdot does not exist?
+ blackburn	oh I had to check it
+ PhilTillet	that would be too bad if there is no function taking two float vectors and returning a double
+ PhilTillet	i was sure there was though :/
+ blackburn	PhilTillet: no that's ok
+ blackburn	wrong commit probably
+ blackburn	or...
+ PhilTillet	http://www.netlib.org/lapack/explore-html/d9/d47/sdsdot_8f_source.html dsdot seems to exist in fortran though
+ blackburn	PhilTillet: wait didn't you commit that?
+ PhilTillet	commited what?
+ blackburn	PhilTillet: dsdot
+ PhilTillet	oh oops no
+ PhilTillet	thought you would merge with it
+ blackburn	:D
+ blackburn	ok my bad sorry
+ blackburn	I'll fix it
+ PhilTillet	ok :)
+ blackburn	PhilTillet: dsdot is in blas so no worries
+ blackburn	this time I'll check whether it is working
+ PhilTillet	ok :)
+ blackburn	works
+ blackburn	PhilTillet: need your opencl expertise
+ blackburn	what kind of graphics card would I need? :D
+ PhilTillet	:D
+ blackburn	would GT 440 work well?
+ PhilTillet	well , should be ok
+ PhilTillet	I use GT 540 M
+ blackburn	I am actually using notebook with some shity integrated card but I'm going to buy some card for other machine
+ blackburn	shogun-buildbot: WORK
+ blackburn	ah
+ blackburn	:D
+ blackburn	yes I probably should commit before that
+ CIA-64	shogun: Sergey Lisitsyn master * rf334179 / src/shogun/mathematics/Math.cpp : Fixes precision issue fix - http://git.io/WP_HXw
+ CIA-64	shogun: Sergey Lisitsyn master * rb43c2ab / src/shogun/mathematics/munkres.cpp : Removed warnings - http://git.io/vVN51Q
+ CIA-64	shogun: Sergey Lisitsyn master * r067287a / (2 files): Added getter for support vector indices for MC liblinear - http://git.io/WOGelg
+ blackburn	shogun-buildbot: this time WORK
+ PhilTillet	Oh, seems like I still have some precision error... It's weird I was sure they were gone o_o
+ PhilTillet	okay, WEIRD
+ PhilTillet	sometimes, error = 0, sometimes, error = 10^(-8)
+ PhilTillet	no, i tested on my local changes
+ PhilTillet	so it should always work
+ PhilTillet	:o
+ PhilTillet	but still there is some stochastic behaviour
+ PhilTillet	hmmm
+ shogun-buildbot	build #648 of libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/libshogun/builds/648
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 245 seconds]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 272 seconds]
+ nickon	are there shogun devs that develop under windows using cygwin ? :)
+ blackburn	phew
+ n4nd0	nickon: none pay me for saying this but ... why?? why windows??
+ nickon	:D
+ nickon	you are probably right, putting cygwin on windows to develop on windows is pretty silly :)
+ n4nd0	believe me ... linux doesn't bite, nor anything
+ n4nd0	:D
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+ nickon	haha, I'm a windows user, but I've been using Linux regularly for some projects
+ nickon	I'm not gonna switch to linux for my everyday activity though :)
+ n4nd0	idk, that's a bit up to each one of course
+ n4nd0	but in my opinion, as a developer it is a must to use linux for the job/projects
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 276 seconds]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+ PhilTillet	That precision thing is really a headache
+ PhilTillet	The commit added stochasticity, now the result for an example is right 50% of the time (with random features betwen 0 and 1)
+ PhilTillet	before the patch it was never right :p
+-!- genix [~gsomix@188.168.3.118] has joined #shogun
+ blackburn	ehmm
+-!- gsomix [~gsomix@188.168.3.96] has quit [Ping timeout: 246 seconds]
+ blackburn	PhilTillet: that's pretty strange actually yes
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 264 seconds]
+ n4nd0	so here is a doubt
+ n4nd0	I get this message
+ n4nd0	terminate called after throwing an instance of 'shogun::ShogunException'
+ n4nd0	Aborted
+ n4nd0	in an example
+ n4nd0	it should appear the typical message caused by SG_ERROR, but it doesn't
+ n4nd0	any clue why?
+ blackburn	hmm
+ n4nd0	but I find it weird because, for example, when I compile with loglevel MSG_DEBUG
+ n4nd0	I cannot see from this example debug messages
+ n4nd0	I can see them from another with python_modular though
+ n4nd0	"this" example I am talking about is in C++
+ blackburn	n4nd0: ah you need to init shogun there
+ n4nd0	blackburn: it is done
+ n4nd0	blackburn: init_shogun, not init_shogun_with_deaults
+ n4nd0	will try with the 2nd one
+ n4nd0	cool
+ n4nd0	init_shogun_with_defaults made it appear
+ blackburn	n4nd0: other option is
+ blackburn	take a look at
+ blackburn	classifier_minimal_svm.cpp
+ n4nd0	ah all right
+ n4nd0	with the print message stuff
+ n4nd0	blackburn: so spe is taking good shape :)
+ blackburn	n4nd0: that's nice
+ n4nd0	blackburn: do you want to check the graphical example?
+ blackburn	did you test mds?
+ blackburn	sure
+ n4nd0	http://dl.dropbox.com/u/11020840/shogun/spe_helix.png
+ n4nd0	do you mean if I compared it to mds?
+ blackburn	damn you catch things really fast
+ n4nd0	:)
+ n4nd0	I have to prepare some details but the main work is done
+ n4nd0	I think I'll have soon it ready for a pull request so you guys can check if it is ok
+ blackburn	n4nd0: could you please add this example to applications/edrt?
+ blackburn	btw what is the result for isomap?
+ n4nd0	let me see
+ n4nd0	any parameter setting in particular?
+ blackburn	yes, k = 5-10
+-!- genix [~gsomix@188.168.3.118] has quit [Ping timeout: 244 seconds]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+ n4nd0	same results
+ blackburn	and with lle?
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 252 seconds]
+ n4nd0	before I answered too fast ...
+ n4nd0	http://dl.dropbox.com/u/11020840/shogun/helix_several.png
+ n4nd0	but actually the results of Isomap and LLE doesn't seem to be very related to the input helix
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+ blackburn	n4nd0: you get wrong probably
+ n4nd0	blackburn: oh you mean I am doing something bad?
+ blackburn	both isomap and lle gets *better* results
+ n4nd0	like wrong I mean
+ blackburn	no, everything else is ok :)
+ n4nd0	I lack a bit of theory in this stuff
+ blackburn	n4nd0: okay you helix is parametrized rgiht?
+ n4nd0	blackburn: yes
+ n4nd0	blackburn: no noise
+ blackburn	so there is probably two actual dimensions
+ blackburn	some angle and this parameter t
+-!- genix [~gsomix@85.26.235.110] has joined #shogun
+ blackburn	so isomap is almost ideal for me
+ n4nd0	yes
+ n4nd0	it's fun to see them together :D
+ blackburn	and some reversed lle heart
+ PhilTillet	blackburn, precision mistake is finally fixed
+ blackburn	PhilTillet: what caused it?
+ PhilTillet	the last problem came from a missing cast to double in my GPU implementation
+ blackburn	ah!
+ PhilTillet	double = float - float
+ PhilTillet	i guess it gave the right result when the last digit of the float was the same
+ PhilTillet	:D
+ blackburn	n4nd0: you probably should rather compare to mds
+ blackburn	PhilTillet: yes makes sense
+ n4nd0	blackburn: any particular setting?
+ blackburn	n4nd0: for mds? no parameters at all
+ PhilTillet	or something like that
+ PhilTillet	hmm wait
+ PhilTillet	maybe i've been too optimistic
+ PhilTillet	XD
+ n4nd0	blackburn: ah ok, stupid question ...
+ n4nd0	blackburn: btw, this SPE has two strategies, global and local
+ PhilTillet	I think there are a lot of problems who are stacking :D
+ n4nd0	blackburn: local really sucks, even with this helix (that I guess it is kind of easy)
+ blackburn	n4nd0: probably I need to refer this SPE paper
+ blackburn	n4nd0: no, helix is not easy
+ blackburn	n4nd0: can you imagine measures lying on helix? :D
+ blackburn	some parameters of system or so
+ n4nd0	blackburn: no, but I meant more like it at least seems easy to find a representation in 2D
+-!- genix [~gsomix@85.26.235.110] has quit [Ping timeout: 246 seconds]
+ blackburn	yes exactly
+ blackburn	it is not easy to map to 2d
+ blackburn	I think
+ n4nd0	blackburn: ok
+ n4nd0	blackburn: the results for this dataset are the sames (in terms of how the graphics look like) to the ones in the matlab toolbox
+ n4nd0	same*
+ blackburn	that's nice
+ n4nd0	blackburn: for global is ok, for local, sucks
+ blackburn	I have never checked other impls actually
+ blackburn	can you please do that?
+ blackburn	hmm however
+ blackburn	no, not needed
+ n4nd0	you mean with the other converters as well?
+ blackburn	I'm pretty sure
+ blackburn	yes :D
+ n4nd0	ok
+ blackburn	nevermind
+ n4nd0	I just used it as a sanity check
+ blackburn	right
+ n4nd0	to know that the impl is ok
+ harshit_	blackburn: I have send a new pull request and i dont think it will have any conflicts now.
+ blackburn	harshit_: yes
+ blackburn	harshit_: btw I talked to Soeren, he thinks liblinear will release soon
+ blackburn	and it makes sense to update it
+ harshit_	yeah i read that irc log
+ blackburn	aha
+ blackburn	nice
+ harshit_	So should i remove c5.0 from the list of things in my proposal.
+ blackburn	if you don't want to
+ harshit_	how much time do you think, It would take me to integrate new regression feature of liblinear
+ harshit_	just an estimate
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 272 seconds]
+ blackburn	I think 2 weeks would be fully enough
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+ blackburn	n4nd0: one request about spe
+ blackburn	just like mds it would be nice to have embed_distance method
+ blackburn	and apply can make use of it
+ PhilTillet	blackburn, I have fixed the precision issues, a still error remains though, that is, for 1000 examples of dim 1000, (1000 svs, too), the total error is 10^-14
+ PhilTillet	sounds ok :p
+ n4nd0	blackburn: tell me
+ blackburn	n4nd0: already
+ blackburn	;)
+ n4nd0	blackburn: yeah, I tend just to read the red lines :P
+ n4nd0	*higlighted*
+ n4nd0	blackburn: so let me do first a pull request for this and you can check if everything looks ok
+ n4nd0	blackburn: if it's, then I'll check for the other thing ok?
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 245 seconds]
+ blackburn	n4nd0: ah one more thing
+ blackburn	do you compute full distance matrix?
+ n4nd0	blackburn: yeah, I use the method from CDistance
+ n4nd0	blackburn: get_distance_matrix
+ blackburn	n4nd0: can you see disadvantage here?
+ n4nd0	blackburn: I think it is a requirement to have this data
+ n4nd0	blackburn: but maybe there is no need in having the full matrix stored
+ blackburn	yes exactly
+ n4nd0	blackburn: but that could turn out in re-calculations of the same distance
+ n4nd0	blackburn: if not stored
+ blackburn	yes makes sense to add option
+ n4nd0	so the user can choose whether to store or re-calculate?
+ blackburn	yes
+ blackburn	n4nd0: this can be done via custom distance
+ blackburn	if to store - compute custom distance with distance
+ blackburn	if not - just pass this distance
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+ blackburn	and use distance(i,j) method
+ blackburn	have you seen google maps today, guys?
+-!- harshit_ [~harshit@182.68.67.61] has quit [Ping timeout: 248 seconds]
+ n4nd0	no
+ n4nd0	oh
+ n4nd0	we're in bits
+ n4nd0	cool
+ n4nd0	fuck
+ n4nd0	there's no name in Spain
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+-!- vikram360 [~vikram360@117.192.173.130] has quit [Ping timeout: 246 seconds]
+-!- harshit_ [~harshit@182.68.67.61] has quit [Read error: Connection reset by peer]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 260 seconds]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- vikram360 [~vikram360@117.192.173.130] has joined #shogun
+ n4nd0	blackburn: oh man, an SG_UNREF(features) in SPE and valgrind log had no end!
+ n4nd0	just that was missing
+ blackburn	n4nd0: so you forgot to unref features? :)
+ n4nd0	blackburn: yeah
+ n4nd0	I have not really understood why is it needed though
+ n4nd0	wait
+ n4nd0	let me see
+ n4nd0	there must be sth doing SG_REF
+ blackburn	distance probably
+ blackburn	or so
+ n4nd0	it was me in the same method
+ n4nd0	LOL
+ blackburn	hahah
+ n4nd0	I am pretty sad sometimes
+ blackburn	keep up
+-!- harshit_ [~harshit@182.68.67.61] has joined #shogun
+ n4nd0	blackburn: do you have a good reference for SPE?
+ n4nd0	to include in the doc
+ blackburn	n4nd0: didn't laurens mention something?
+ n4nd0	blackburn: let me check
+ blackburn	Agrafiotis, D. K. (2003). Stochastic proximity embedding. Journal of Computational Chemistry, 24(10), 1215-1221. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/12820129
+ n4nd0	??????? :)
+ blackburn	hah
+ blackburn	de nada?
+ n4nd0	great
+ n4nd0	literally it is like
+ n4nd0	of nothing
+ n4nd0	haha
+ blackburn	n4nd0: what is like of nothing?
+ n4nd0	I like to do some literal translations Spanish - English, gets fun
+ n4nd0	de nada = of nothing
+ blackburn	hah
+ blackburn	mas que nada
+ blackburn	song
+ blackburn	multitran.ru told me it is 'you are welcome'
+ n4nd0	oh yeah
+ n4nd0	yeah yeah, it is right
+ blackburn	n4nd0: how to translate mas que nada?
+ n4nd0	blackburn: more than anything
+ blackburn	sounds senseless
+ blackburn	:D
+ blackburn	what is this song about
+ n4nd0	blackburn: well ... it's in Portuguesse :P
+ blackburn	you told me you are able to understand it a little :D
+ n4nd0	at least the one I know
+ n4nd0	let me check the lyrics
+ blackburn	yeah one by tom jobim or even black eyed peas hah
+ n4nd0	ah guy that wants to dance
+ n4nd0	he is feeling like party :)
+@sonney2k	blackburn, I have a question wrt https://github.com/shogun-toolbox/shogun/compare/a1f473c...defbb68
+@sonney2k	I think the patch is wrong
+ blackburn	sonney2k: do you think so?
+@sonney2k	yes
+ blackburn	why?
+ blackburn	what is source and dest?
+@sonney2k	because lab is the argument we want to set
+ blackburn	?!!
+ n4nd0	lol
+ blackburn	oh shit
+ blackburn	:D
+ blackburn	sorry
+@sonney2k	please check too
+ blackburn	this method makes no sense AT ALL
+@sonney2k	but I feel rather certain
+ blackburn	wait
+ blackburn	:D
+ n4nd0	I must admit I read it and thought the correction was ok
+ PhilTillet	hi sonney2k :)
+ blackburn	sonney2k: how can it set *lab*??
+ blackburn	I thought it sets labels with lab
+@sonney2k	blackburn, labels is the member variable that is inited with lab.vlen
+@sonney2k	and then it calls the function set_int_label()
+@sonney2k	which sets each individual label
+ blackburn	yes
+ blackburn	soo?
+@sonney2k	PhilTillet, hi - btw I also have concerns with https://github.com/shogun-toolbox/shogun/compare/defbb68...ed87836
+ blackburn	again, what is source?
+@sonney2k	blackburn, soo patch is wrong
+ blackburn	sonney2k: is 'lab' a source for labels and 'labels' a destination?
+ PhilTillet	well, with dsdot instead of ddot
+@sonney2k	PhilTillet, you use cblas_ddot for single precision floats in your patch
+ PhilTillet	:p
+ blackburn	sonney2k: it is fixed already
+@sonney2k	PhilTillet, ahh
+ PhilTillet	there were other precision mistakes on my GPU Code but they are fixed too
+ PhilTillet	now the precision is satisfactory
+@sonney2k	PhilTillet, but why use a double internally? I mean it was OK before
+@sonney2k	blackburn, yes
+ PhilTillet	sonney2k, well, no, the dot product is computed in single precision
+ PhilTillet	to be stored in a SGMatrix<float64_t>
+ PhilTillet	which is the kernel matrix
+ blackburn	sonney2k: dot is double internally and it is rather ok to use dsdot there
+ blackburn	(I think)
+@sonney2k	PhilTillet, I think the best fix would be to use float32_t r=0; internally
+ PhilTillet	Hmmmm
+ PhilTillet	why losing precision on the dot product?
+ PhilTillet	I mean, I understand the need to store features in float32_t
+ PhilTillet	to save memory
+@sonney2k	features are float32 anyways so it doesn't really matter much
+ PhilTillet	but scalars should be computed in double precision in my opinion
+ PhilTillet	hmmm
+ PhilTillet	the big error came from here
+@sonney2k	PhilTillet, it is also much faster of course to add things to float32_ts from float32_ts ...
+@sonney2k	PhilTillet, I don't understand how that could be? I mean you could use double features and so the error should be gone or?
+ n4nd0	sonney2k: just to give my opinion, I think that the patch of the labels was OK, the change was right
+ blackburn	I second this :D
+ PhilTillet	sonney2k, yes, I could use double features and the error was gone
+ PhilTillet	but it means double memory
+ PhilTillet	:p
+ blackburn	sonney2k: do you think is it so much slower to accumulate in double?
+@sonney2k	blackburn, so what about the label patch? do you agree that the patch is wrong?
+ blackburn	sonney2k: no, it looks right for me
+@sonney2k	blackburn, then lets go over it again
+ blackburn	lets
+@sonney2k	lab is the input
+ blackburn	yes
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Read error: Connection reset by peer]
+@sonney2k	then the member variable labels is created uninitialized with len lab.vlen
+@sonney2k	blackburn, OK?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	right
+ n4nd0	sorry lost internet
+ n4nd0	I missed the stuff after my message (if sth happened)
+@sonney2k	so then what we want to do is tranfer the content of lab to labels right?
+ n4nd0	sonney2k: yes
+ PhilTillet	sonney2k, I'll benchmark the use of float vs the use of double
+ blackburn	sonney2k: exactly
+@sonney2k	so we need to call set_int_label(i, lab.vector[i]);
+@sonney2k	not set_int_label(i, labels.vector[i]);
+ blackburn	yes exactly
+ n4nd0	sonney2k: yes
+@sonney2k	because labels is uninitialized
+ blackburn	that patch is was about that actually
+ n4nd0	sonney2k: exactly
+ blackburn	it changed labels to lab
+@sonney2k	ahh
+ blackburn	in set
+ blackburn	:D
+@sonney2k	OK then :)
+@sonney2k	my bad :D
+@sonney2k	so back to the dot thing
+ blackburn	sonney2k: moving back to dot thing I would suggest to measure
+@sonney2k	I am pretty sure that sse will parallelize the operation if one uses float32's
+ blackburn	PhilTillet is already planning to :D
+@sonney2k	but it cannot with double
+@sonney2k	s/parallelize/use the sse instruction to do 4 such multiplications at once/
+ blackburn	you point is reasonable but lets check
+@sonney2k	PhilTillet, benchmarking is a good idea - nevertheless when you use double everything should look fine right?
+@sonney2k	I mean very little error (1e-14 ...)
+ blackburn	sonney2k: do we need another linux buildbot?
+ blackburn	sonney2k: ah yes I'll get opencl compatible card soon so will be able to test things too
+@sonney2k	blackburn, we can build with opencl support even on machines that don't have a GPU
+@sonney2k	it will just be much slower when the opencl stuff is done by the CPU
+ blackburn	I see but I meant to test performance as well as you
+@sonney2k	blackburn, btw I liked your git summary mail - maybe you should put it as README.git into the repository
+ blackburn	ok, makes sense
+ blackburn	but a little later
+ blackburn	would need to elaborate it probably
+@sonney2k	and btw it makes a lot of sense to get us to use git commit --amend
+@sonney2k	blackburn, no - please put it there
+ blackburn	sonney2k: I'd rather avoid amends
+@sonney2k	then we can iterate
+@sonney2k	currently most commits have a broken commit followed by a hot fix
+@sonney2k	so buildbot fails every second time
+@sonney2k	exactly what amend will fix
+ blackburn	sonney2k: amend makes sense *only* before pushign
+@sonney2k	of course
+ blackburn	so it would rather cause problems
+@sonney2k	why?
+@sonney2k	if you notice that you forgot to add a file or broke the test suite
+ blackburn	yes that's ok
+@sonney2k	you should rather commit your next commit with --amend to fix it
+ blackburn	but if you amend by mistake..
+ blackburn	and pushed it before
+ blackburn	oh that's pain
+@sonney2k	then you git reset hard and done
+ blackburn	my point is to ask devs to consider bigger commits
+ n4nd0	I have changed to large commits, let's see if the new stuff doesn't break this time
+@sonney2k	no
+ blackburn	that do not bring shogun uncompileable
+@sonney2k	I like small commits
+ blackburn	and use amend in case of mistakes
+ n4nd0	mmmm
+@sonney2k	but every single commit should compile and pass test suite
+ blackburn	yes exactly
+@sonney2k	and that is what we don't have currenlty
+@sonney2k	we have often huge pull requests with 10 commits which are in fact one and 5 of the 10 don't build
+ blackburn	it is my practice actually
+ blackburn	not broken commits :D
+@sonney2k	so merging these together before issuing a pull request is a good idea
+ blackburn	sonney2k: can you remember by heart the date of slots being announced?
+@sonney2k	no
+ blackburn	but after deadline right?
+@sonney2k	after we ranked students IIRC
+@sonney2k	so somewhen mid april I think
+ blackburn	aha
+ n4nd0	sonney2k: what expectations do you have about slots?
+ blackburn	I pray for 8
+@sonney2k	15 proposals by now
+ n4nd0	blackburn: would be really nice
+ blackburn	(whie being an atheist) hah
+ blackburn	sonney2k: much lesser than year before, right?
+@sonney2k	yes a lot less
+ blackburn	last year it was 60
+ blackburn	or so
+@sonney2k	it paid of to require patches
+@sonney2k	>70 even
+-!- gsomix [~gsomix@188.168.14.10] has joined #shogun
+ n4nd0	anyway, there are still five days left
+ blackburn	that's probably bad we have a lot less proposals
+ n4nd0	and I guess this is a bit like homework, waiting to the last moment! haha
+@sonney2k	could mean fewer slots - no idea. proposals have much higher quality though
+ gsomix	sonney2k, moin.
+ blackburn	yes but do they ask about quality?
+ n4nd0	blackburn: if the number is a problem we can each send 20 proposals for shogun :P
+ blackburn	hahahah
+ blackburn	great idea lol
+ blackburn	funny if it *really* makes sense hahah
+ n4nd0	idk
+ n4nd0	would be kind of sad if it makes I'd say
+ blackburn	sonney2k: do you mind contact carol about that?
+ blackburn	:D
+ blackburn	<=5 would be catastrophic
+ n4nd0	blackburn: I thought of it today, it would be really so
+ n4nd0	let's see if we can do sth to improve the number of slots
+ n4nd0	but no idea what do they base it on
+ n4nd0	but how does this stuff work actually
+ blackburn	no chance we will get all 9
+ n4nd0	google says to each organization
+ n4nd0	of you got 5, and you 3 and you ...
+ blackburn	yes
+ n4nd0	and the org. chooses which students do the project
+ blackburn	yes
+ n4nd0	or google says this three students do it
+ blackburn	no
+ blackburn	only slots
+ n4nd0	got it
+ blackburn	org does all the ranking
+ harshit_	sonney2k: are you around ?
+ n4nd0	blackburn: they are talking in #gsoc about it if you want to check
+@sonney2k	n4nd0, yeah I asked there...
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Remote host closed the connection]
+ n4nd0	sonney2k: :)
+ harshit_	sonney2k: what all dot features can I include as part of my proposal, apart from local binary pattern features
+ harshit_	and lbp which implementation do you think would be best to port , i think opencv has got a nice one which we can use
+ blackburn	ah no logs there
+ gsomix	sonney2k, it seems I solved the problem with modelselections tests and python3.
+ blackburn	n4nd0: could you paste to it to directly me? ;)
+ n4nd0	blackburn: sure
+@sonney2k	harshit_, blackburn how about wikings new preprocessor as dorfeatures?
+ blackburn	makes sence
+@sonney2k	gsomix, nice - so what is missing now? conversion of examples with 2to3?
+ harshit_	whats wiking preprocessor ? is there any reference for that ?
+ blackburn	yes, check the doc
+@sonney2k	blackburn, n4nd0 - that's the essence https://code.google.com/p/google-summer-of-code/wiki/NotesonStudentAllocations
+ blackburn	yes checking
+ n4nd0	let's see
+ blackburn	sonney2k: 1) 2) fits pretty well
+ gsomix	sonney2k, hmm. I'm working on the problem with the types and typecodes now.
+ n4nd0	blackburn: I mean if they really take into account students that stay in the project
+ n4nd0	blackburn: we ge 20 at least with your work ;)
+ blackburn	n4nd0: yes no idea how they track that
+ nickon	I guess you have 16 proposals by now :) I just submitted my application, just to let you guys know
+ n4nd0	blackburn: 4 is nice for us too
+@sonney2k	unfortunately I totally forgot when we got student applications last year
+ blackburn	sonney2k: what do you mean 'when we got'?
+@sonney2k	I recall there were very few in the beginning but then some explosion in #applications towards the deadlines
+@sonney2k	so many that it became a huge problem to even read them all...
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+ gsomix	sonney2k, typecode of NPY_INT32 is not equal to typecode of NPY_INT. I want to completely verify types and typecodes.
+@sonney2k	so I hope we will have around *manageable* 30
+ n4nd0	I think much more will come in the last days
+ PhilTillet	sonney2k, you were super right
+ PhilTillet	:p
+ n4nd0	but anyway, reading this
+@sonney2k	at least once... :D
+ n4nd0	 E.g., if an organization receives 20% of the total applications for the program, then they'll receive ~20% of the student slots for the program
+ PhilTillet	dsdot was 2 times slower than sdot
+ blackburn	2 times?!
+ blackburn	whoaa
+ PhilTillet	on my mobile CPU yes
+ n4nd0	I said it before half joking but ... may it help if we send more applications for fun?
+@sonney2k	PhilTillet, makes sense - sse can do 4 ops instead of 2 in one go
+ PhilTillet	true
+ PhilTillet	:p
+ blackburn	sonney2k: PhilTillet: so shall I restore it to sdot?
+@sonney2k	n4nd0, no
+ PhilTillet	blackburn, yes :D
+ n4nd0	sonney2k: idea disregarded then
+ blackburn	here you go
+ CIA-64	shogun: Sergey Lisitsyn master * r3518f6d / src/shogun/mathematics/Math.cpp : Restored sdot at float32_t dot - http://git.io/O_nicA
+ harshit_	blackburn : whats wiking's preprocessor ?
+ blackburn	harshit_: HomogeneousKernelMap
+@sonney2k	PhilTillet, but still if you run everything in double you should get high precision
+ PhilTillet	yes, I did
+@sonney2k	harshit_, btw did you test your new newtonsvm code? does it still produce the same result like the matlab one?
+@sonney2k	PhilTillet, and?
+ PhilTillet	well I did it long ago, and made some fixes since them on precision, I just remember it was much slower :p
+ PhilTillet	i'll retry it now that I have done some fixes
+ harshit_	sonney2k:yes, it is producing same result for the final weight vector
+ harshit_	sonney2k : but there is one concern that i mentioned earlier
+ harshit_	the problem with float64_t precision
+ harshit_	need some way to use floatmax_t in matrix multiplication
+ blackburn	whoa I can't believe it operates on such small precision
+ harshit_	Actually it doesn't change the final weight vector or bias, but restricts the no. of iterations
+@sonney2k	harshit_, what do you need floatmax for?
+ harshit_	for calculating 2 values , and then taking ratio of those 2 values
+ harshit_	in float64_t 2 values become almost zero, so there ratio turns out to be undefined
+ harshit_	have a look : http://snipt.org/ugihg2
+ blackburn	g/h?
+ harshit_	in line no 14 and 13, two variables namely g and h are being computed
+ harshit_	yeah
+ harshit_	that turns out to be about 2 in last iteration in matlab
+ harshit_	but in C++ it is 0
+ blackburn	there should be a way to avoid underflow..
+ blackburn	harshit_: what are values you divide there?
+@sonney2k	harshit_, wait if you print out g and h in matlab and in C++ over the course of optimizations - what is going on?
+@sonney2k	you should see when/how these numbers deviate ...
+ n4nd0	blackburn: once I used some scaling method for HMMs, it might work here to avoid underflow
+ harshit_	the deviation is only in the last iteration
+ harshit_	when h and g becomes very small
+ harshit_	in MATLAB they are of order 1e-31
+@sonney2k	harshit_, is the deviation in  h and g visible?
+ harshit_	yes, but only in last iteration
+ blackburn	yay!
+ blackburn	1e-31
+ blackburn	shouldn't it stop on this g(radient?)
+ harshit_	actually the last iteration i am talking about is the loop which is calling line_search_linear
+ harshit_	blackburn : yeah it stops
+ harshit_	but the value of t is what troubles me
+ harshit_	ohhh wait.. they are vector multiplications not matrix
+ harshit_	sorry
+ harshit_	So i can make use of dense_dot here
+ harshit_	right ?
+ blackburn	yes if this vector is in train set
+ harshit_	sorry CMath::dot
+ blackburn	(this you want to dot with)
+@sonney2k	harshit_, which exact formula are you talking about?
+ harshit_	which formula are you asking for, in matlab code or my C++ code ?
+ harshit_	in matlab it is in line 13 and 14
+ harshit_	i want to make use of floatmax_t as datatype for g and h
+ harshit_	and also for the variables it is dependent upon
+ blackburn	oh how I love this meanless names in matlab code
+ blackburn	:D
+ harshit_	:)
+ blackburn	ddWQRet
+ blackburn	ASDASD[asdsadas] = adasdrewrq/;sad
+ harshit_	so wikings paper is the one which is going to be published in ieee pami
+ harshit_	sorry ieee cvpr
+ harshit_	sorry once again : is published *
+ blackburn	yes, it was published there
+ harshit_	btw, who is wiking
+ harshit_	andrea or andrew
+@sonney2k	harshit_, so how much are g and h deviating C++ vs matlab I mean?
+ blackburn	harshit_: no he is not the author
+ blackburn	he just implemented it
+ harshit_	wait i'll give you a complete picture of what is going on
+ harshit_	Recompiling shogun,taking time :(
+@sonney2k	harshit_, install ccache!
+@sonney2k	that really speeds up things - and compile with --disable-optimizations
+ n4nd0	oh! didn't know about ccache
+ n4nd0	the description looks promising
+ n4nd0	sonney2k: thank you very much :)
+ harshit_	didnt knw abt that
+-!- gsomix [~gsomix@188.168.14.10] has quit [Read error: Operation timed out]
+ CIA-64	shogun: Soeren Sonnenburg master * r72e11b3 / (66 files in 5 dirs):
+ CIA-64	shogun: Merge pull request #402 from shelhamer/add-param-macro
+ CIA-64	shogun: Convert parameter assignments to SG_ADD macro - http://git.io/zEHleA
+-!- nickon [~noneedtok@dD5774105.access.telenet.be] has quit [Quit: ( www.nnscript.com :: NoNameScript 4.22 :: www.esnation.com )]
+-!- gsomix [~gsomix@188.168.4.80] has joined #shogun
+ blackburn	sonney2k: it looks like liblinear did not release yesterday
+ blackburn	uh that was a nice tradition
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 244 seconds]
+ harshit_	sorry for such a long delay
+ harshit_	here is output comparison for toy dataset
+ harshit_	http://snipt.org/ugihi4/PHP%20Default
+@sonney2k	harshit_, could you please print using %.16g ?
+@sonney2k	otherwise we don't know the exact numbers
+@sonney2k	harshit_, and from matlab use format long G
+@sonney2k	to get the high resolution values?
+--- Log closed Mon Apr 02 00:00:13 2012

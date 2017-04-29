@@ -1,0 +1,790 @@
+--- Log opened Fri Oct 19 00:00:17 2012
+-!- audy [~audy@heyaudy.com] has quit [Read error: Operation timed out]
+-!- audy [~audy@heyaudy.com] has joined #shogun
+ shogun-buildbot	build #120 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/120
+ shogun-buildbot	build #137 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/137
+-!- adoniscik [~emre@c-50-131-104-102.hsd1.ca.comcast.net] has quit [Quit: Leaving]
+-!- abhshkdz [3ba3c4f0@gateway/web/freenode/ip.59.163.196.240] has joined #shogun
+ abhshkdz	anybody here?
+-!- abhshkdz [3ba3c4f0@gateway/web/freenode/ip.59.163.196.240] has quit [Client Quit]
+-!- blackburn [~blackburn@31.28.57.136] has joined #shogun
+ shogun-buildbot	build #560 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/560  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #452 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/452  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #561 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/561  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ wiking	blackburn: https://travis-ci.org/#!/vigsterkr/shogun/builds/2851675
+ wiking	so basically it's working now... apart from having troubles in the examples.. but that's not the setup's fault :P
+ wiking	i guess sonney2k is away atm :)
+ blackburn	yeah
+ wiking	blackburn i'll fix now still clang compilation problems and i'll send in a PR about this travis thing, see if u/soeren likes it
+ wiking	btw
+ wiking	i wonder why does regression_gaussian_process_ard fail there
+ wiking	and not on my machine :)
+ wiking	and same goes with base_map_parameters
+ wiking	that fails on my machine but not on travis
+ wiking	as well as converter_localitypreservingprojections
+ blackburn	it requires nlopt ?? ??
+ blackburn	oops
+ wiking	mmm
+ wiking	it needs an IFDEF then somewhere
+ wiking	:))
+ blackburn	about LPP
+ blackburn	no idea
+ wiking	blackburn: [ERROR] Failed to solve eigenproblem (6)
+ wiking	this is what i get vrom LPP
+ blackburn	wiking: bad data is used..
+ blackburn	it should not appear on the daily basis actually :D
+ wiking	my data repo is up-to-date
+ wiking	so i dont knwo how can it get bad data
+ wiking	nevermind
+ wiking	here's a fix for the regression shit
+ blackburn	wiking: no, normally it is bad data
+ blackburn	:D
+ blackburn	that fm_train_real is a little bad for dim reduction
+-!- n4nd0 [~nando@n175-p42.kthopen.kth.se] has joined #shogun
+ blackburn	a few linear dependent vectors in there
+ n4nd0	wiking: hey
+ blackburn	n4nd0: hey n4nd0 it's been a while :)
+ wiking	n4nd0: hey ! just a sec
+ wiking	be right back
+ blackburn	did your exam take place?
+ n4nd0	blackburn: yes
+ blackburn	how was it?
+ n4nd0	blackburn: I finished it barely half an hour ago
+ n4nd0	psee... just fine
+ wiking	blackburn: https://github.com/shogun-toolbox/shogun/pull/796
+ wiking	btw lol check out the PR's description bottom :D
+ wiking	it'll actually show now whether this really fixed it :DDD
+ wiking	cool
+ wiking	n4nd0: so here?
+ n4nd0	wiking: yes
+ wiking	lolface wtf is this https://travis-ci.org/#!/vigsterkr/shogun/builds/2852006
+ wiking	aaah ok
+ wiking	i know
+ wiking	n4nd0: so the thing is that i'm trying to use your mosek solver
+ wiking	but it's giving me bad results
+ wiking	thus i think the formulation is wrong
+ wiking	but then yesterday you've sent me the formula
+ wiking	and that's what i want to solve
+ wiking	soooo
+ wiking	actually i have a code for you
+ wiking	:)
+ n4nd0	so what does that but mean?
+ n4nd0	do you still think the formulation is wrong or not? :)
+ wiking	nono
+ wiking	it's good
+ wiking	it's what i want
+ wiking	blackburn: can u plz merge it?
+ n4nd0	ok
+ wiking	n4nd0: so here's the thing http://pastebin.com/hPSimMdA
+ wiking	n4nd0: this way of using mosek
+ wiking	for the same problem
+ wiking	i get much better results
+ wiking	you were using mosek more
+ wiking	so you might be able to tell me
+ wiking	where i'm going wrong :)
+ n4nd0	mmm but if you get better results
+ blackburn	wiking: merged
+ wiking	blackburn: thnx
+ n4nd0	shouldn't that be that your way is better?
+ n4nd0	hehe
+ wiking	n4nd0: i dont have a fuking clue
+ n4nd0	mmm ok
+ n4nd0	so what have you seen different from my implementation and that file you've sent me?
+ n4nd0	and I am no expert in mosek :P
+ wiking	well the Q0
+ wiking	how it looks like
+ wiking	it's tootaly different
+ wiking	with your implementation
+ wiking	Q0 = I
+ wiking	for me
+ n4nd0	mmm but Q0 = I is not something general
+ n4nd0	I might have used it for one of the models
+ wiking	yes
+ n4nd0	but you should be able to use any other Q if you wish
+ wiking	but i need to solve this
+ wiking	i know
+ n4nd0	for example the HM-SVM uses another one
+ wiking	but the thing is
+ wiking	that C = Q0
+ wiking	more or less
+ n4nd0	well yes ... more or less
+ n4nd0	part of it
+ wiking	so because
+ wiking	my equation and constraint looks like this
+ wiking	http://www.centrale-ponts.fr/personnel/pawan/publications/MKPGK-AISTATS2012.pdf
+ wiking	page 3
+ wiking	Algo. 1
+ wiking	sorry page 4
+ n4nd0	ok
+ wiking	C = 1 in my case
+ n4nd0	ok
+ wiking	i mean in Algo 1 C = 1
+ n4nd0	yes, I understand
+ wiking	and thus i though C matrix to be I
+ n4nd0	what about 1/n?
+ wiking	i scale PSI() vectors with that
+ wiking	so dont worry
+ wiking	that's solved
+ n4nd0	ok
+ n4nd0	then it should be identity matrix for Q
+ n4nd0	well sorry
+ n4nd0	the part 1/2 w' * C * w of the formulation I use
+ n4nd0	should be n/C in algorithm 1 IIRC
+ wiking	?
+ n4nd0	since you say that C = 1 and you are accounting for n somewhere else then it should be ok with the identity
+ wiking	yeah that's what i thought
+ n4nd0	I am not sure if you can actually account for n in the PSI() but I trust you have done that right :)
+ wiking	but then using that code with different Q
+ wiking	i get much better result
+ wiking	but everything else is the same
+ n4nd0	what is the different Q?
+ n4nd0	maybe you are actually encoding another value for C there
+ wiking	it's a Gramm matrix
+ n4nd0	ok
+ n4nd0	why don't you just show the matrices and vectors given to mosek in both cases?
+ n4nd0	if they are the same, then you must get the same result
+ shogun-buildbot	build #453 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/453  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ n4nd0	if they are different, well then it may be normal that you get other results
+ wiking	how can i debug that part?
+ wiking	i mean within mosek
+ n4nd0	you shouldn't need to debug in mosek
+ wiking	is there a func for that?
+ n4nd0	use it as a black box
+ n4nd0	I already put some methods to print the matrices and vectors given to mosek
+ n4nd0	let me check the name
+ n4nd0	I think it was display_problem
+ wiking	but that code i've given u
+ wiking	on pastebin
+ wiking	it's not part of shogun
+ wiking	but none the less
+ wiking	i'll print it
+ n4nd0	well.. use the same I used in the method I am telling you
+ wiking	but i just wonder
+ wiking	whether that mosek_qp_opt
+ wiking	code uses some differnt parts of mosek?
+ wiking	i mean different solver?
+ n4nd0	it could be
+ n4nd0	but that shouldn't give you a different answer
+ n4nd0	since the problem I solved is convex
+ n4nd0	so let's do this
+ n4nd0	display the problem
+ n4nd0	https://github.com/iglesias/shogun/blob/so/src/shogun/mathematics/Mosek.cpp
+ n4nd0	see CMosek::display_problem ^
+ wiking	ok lemme check
+ n4nd0	do that in shogun and in your code
+ n4nd0	and compare
+ wiking	ok
+ wiking	cool
+ n4nd0	let me know ;)
+ wiking	woooohooo
+ wiking	https://travis-ci.org/#!/vigsterkr/shogun/builds/2852182
+ wiking	works finally
+ n4nd0	what's that?
+ wiking	n4nd0: it's like buildbot
+ wiking	n4nd0: but it's nicely integrated with github
+ n4nd0	cool
+ wiking	n4nd0: so for example when somebody sends a PR
+ wiking	to the project
+ wiking	automatically tries to compile the code with that patch
+ wiking	and will tell on the PR page
+ wiking	whether that PR breaks the code or not
+ n4nd0	cool, it looks like something useful
+ wiking	yeah
+ wiking	wanna convince blackburn and sonney2k to use it
+ wiking	but there's still some shit with clang
+ wiking	so i have to fix that before sending in the PR about this
+ wiking	but i'll just go and get now some food/coffee
+ wiking	and try this mosek thingy
+ wiking	as it's more interesting now for me
+ shogun-buildbot	build #563 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/563  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #562 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/562  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #454 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/454  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ wiking	n4nd0: still here?
+ n4nd0	wiking: yep
+ wiking	||w||^2 = dot product right?
+ wiking	i mean this is completely unrelated
+ n4nd0	what is unrelated?
+ wiking	this question
+ wiking	from mosek
+ wiking	:D
+ wiking	l2-norm = dot prddcoduct
+ wiking	product
+ n4nd0	and yes ||w||^2 w'*w that is the dot product
+ n4nd0	I meant that the l2-norm squared is also w'*w
+ wiking	ok here it goes
+ wiking	printing out the problem :)
+ wiking	first compiling
+ n4nd0	looking forward :)
+ wiking	n4nd0: should i display it after each iteration?
+ n4nd0	wiking: the idea is to compare why you don't get the same results
+ n4nd0	so do it every time the optimization problem is to be solved
+ wiking	heh
+ wiking	yeah
+ wiking	then i have to dump it into a log file :)
+ n4nd0	hehe yeah
+ n4nd0	I did that for testing even for small problem instances
+ wiking	-rw-r--r-- 1 wiking staff 101M Oct 19 15:38 primal.mosek.log
+ wiking	:>
+ wiking	still growing
+ n4nd0	wtf ...
+ n4nd0	can't you make a smaller instance of the problem?
+ n4nd0	if they are different it should actually be possible to see it in a toy example
+ wiking	ok
+ wiking	it's pretty different
+ wiking	:D
+ n4nd0	hehe
+ n4nd0	you mean the Q, A etc matrices?
+ wiking	yes
+ wiking	while in your case as we defined
+ wiking	Q = I
+ n4nd0	then it's no wonder that the results were different ;)
+ wiking	Q = I*2191523.16
+ wiking	and the A vector is like
+ wiking	0,: = 1
+ n4nd0	maybe they are multiplying Q by n or a factor of some sense
+ n4nd0	to solve min ||w||^2 + C/n sum_i \xi_i
+ n4nd0	is equivalent to solve
+ wiking	here's en example
+ wiking	in your case
+ wiking	Variable Bounds, vectors lb and ub:
+ wiking	-1000000000000000019884624838656.00 1000000000000000019884624838656.00
+ wiking	Variable Bounds, vectors lb and ub: 0.00 1000000000000000019884624838656.00
+ wiking	so there's a similarity at least :DD
+ n4nd0	hehe
+ n4nd0	read that as -inf
+ n4nd0	the first one is not bounded
+ n4nd0	while the second one is forced to be positive
+ n4nd0	the second type is normally used for \xi_i
+ n4nd0	the first one for the elements in w
+ wiking	and the A is like this
+ wiking	atrix A:
+ wiking	(0,0)   1.00
+ wiking	(0,1)   1.00
+ wiking	whie in your case
+ wiking	Matrix A:
+ wiking	(0,0)   2.00
+ wiking	(0,1)   0.10
+ wiking	(0,2)   -0.07
+ wiking	pretty random numbers :)
+ wiking	in this other solver Matrix A is not even a matrix
+ wiking	it's just a vector
+ wiking	with about 56 elements that are exactly equal to 1.0
+ wiking	or that varies
+ wiking	so the number of element in matrix a grows after each iteration
+ n4nd0	they are not random numbers
+ wiking	and they are equal to 1.0
+ wiking	but in your case
+ n4nd0	take a look to the formulation to understand their meaning
+ wiking	Matrix A is a full-blown n*n matrix where n = dim(n)
+ wiking	n=dim(w)
+ wiking	and they are not 1.0
+ wiking	so i guess the formulation is just different :D
+ n4nd0	but if you want to solve the same problem
+ n4nd0	then the formulation cannot be different
+ wiking	hehehe
+ n4nd0	I am coming back later
+ wiking	okey
+ wiking	i should put this solver into shogun :)))
+ wiking	mmm
+ wiking	SVMLight.cpp
+ wiking	how's this related to svm^light?
+ wiking	:>
+ wiking	blackburn: here?
+ n4nd0	wiking: what solver?
+ n4nd0	the pastebin snippet?
+ wiking	n4nd0: no the whole thing around it
+ n4nd0	ok
+ n4nd0	I think that actually you should do an StructuredModel
+ wiking	this is a latent struct svm solver
+ wiking	http://www.cs.cornell.edu/~cnyu/latentssvm/latentssvm_v0.11.mosek.tar.gz
+ wiking	based on mosek
+ wiking	yeah i thought about the same that maaaybe with a very custom init_ops function
+ wiking	i could mimic it
+ n4nd0	we have that method already
+ n4nd0	init_opt
+ wiking	yeah i know
+ wiking	that's what i mean
+ wiking	because now it's very simple
+ wiking	Q = I
+ wiking	and that's i
+ wiking	it
+ wiking	but the problem is
+ wiking	that for example in this solver
+ n4nd0	so why don't you just re-implement the model and do what you need?
+ wiking	because as i was about to say
+ wiking	in this solver
+ wiking	after each iteration
+ wiking	Q changes
+ wiking	hence init_opt is not really a thign for me
+ wiking	as that only init-ed in the beginning
+ n4nd0	aham so Q changes
+ wiking	before the optimization cycle
+ wiking	cycles for that matter...
+ wiking	yeah
+ n4nd0	I don't think I took that into account
+ wiking	and A as well
+ n4nd0	that is taken into account
+ n4nd0	to put more constraints
+ wiking	within iterations?
+ wiking	ah ok yeah
+ wiking	yeah yeah i see that now
+ wiking	in primalmoseksosvm
+ wiking	and now i was just wondering how is svm^light included in shogun (really cannot figure it out with the original package)
+ wiking	as there's a version based on svm^light as well
+ wiking	as well as
+ wiking	mosek
+ wiking	and the other question here is of course
+ wiking	can this be used for simple structural learning
+ wiking	but afaik yeas
+ wiking	because the inner loop of a latent sosvm = a simple sosvm
+ wiking	so for that matter it would be good to port the svm^light based sosvm into shogun as well
+ n4nd0	sounds reasonable
+ wiking	and there basically it's just a simple switch between svm^light and mosek solver
+ wiking	basically it's a oneliner :)
+ wiking	anyhow i have no fucking clue how is svm^light integrated into shogun
+ wiking	as checking SVMLight.h/cpp
+ wiking	it seems pretty different from the original one :)
+ wiking	blackburn: where are u? :D
+ wiking	i mean the funny thing here all in all
+ wiking	that when i use your solver
+ wiking	primalmoseksosvm
+ wiking	i get very good PO
+ wiking	meaning it's better than the one i find with P3BMRM
+ wiking	but the performance on the test set is significantly worse
+ wiking	than P3BMRM
+ blackburn	wiking: here
+ blackburn	what's up?
+ wiking	sssblacksvmlight
+ wiking	information i need
+ wiking	do you know anything about it?
+ wiking	i mean how is it ported into shogun?
+ blackburn	wtf is with your message :D
+ wiking	hehehe i dont know :)))
+ wiking	i think mosh fscked it up
+ blackburn	well it is not a base svmlight
+ blackburn	see header
+ blackburn	  15 /*   THIS INCLUDES THE FOLLOWING ADDITIONS                             */
+ blackburn	  16 /*   Generic Kernel Interfacing: Soeren Sonnenburg                     */
+ blackburn	  17 /*   Parallizations: Soeren Sonnenburg                                 */
+ blackburn	  18 /*   Multiple Kernel Learning: Gunnar Raetsch, Soeren Sonnenburg,      */
+ blackburn	  19 /*                          Alexander Zien, Marius Kloft, Chen Guohua  */
+ blackburn	  20 /*   Linadd Speedup: Gunnar Raetsch, Soeren Sonnenburg
+ blackburn	so pretty rearranged
+ wiking	heheh yeah i saw that :)
+ blackburn	uh it is 1999 when sonney2k was young :D
+ blackburn	and I was 8
+ wiking	:>>>
+ wiking	hahahah 8 :)
+ blackburn	wiking: I can be sure I didn't patch it because when I was 8 I preferred to ride a bike or to read some books about rome or to play some games
+ wiking	dman it :)
+ blackburn	hmm one can not simply close skype in ubuntu
+ wiking	i hoped you wee already hacking some svms :P
+ wiking	at tat age i mean :)
+ wiking	man i have one char per minute on this stupid mobile net on the train
+ blackburn	heh
+ blackburn	where are you moving to?
+ blackburn	finally decided to visit bryansk?
+ wiking	nowhere
+ wiking	going home
+ blackburn	ah I can't get used you use trains to get home :D
+ blackburn	you and sonney2k at least
+ wiking	i was visiting a uni today for some collaborations
+ blackburn	I usually use trams and buses :D
+ wiking	yeah stupid westerneuropean thing.... they haven't heard of internetz "DDD
+ wiking	yah i'm taking a train for 50kms :)
+ blackburn	do you live 50 km far away from that uni?
+ blackburn	use bike!
+ blackburn	:D
+ wiking	soon my cell coverage is going to die :))
+ blackburn	so you joked and you are going to bryansk
+ blackburn	I can hardly believe there is no coverage
+ blackburn	:D
+ wiking	usually around half way to home there's a blind spot for about 20kms :D
+ wiking	2the ;ast two sentence took about 2.5 mins to be sent :)))
+ blackburn	huh and last one was corrupted
+ wiking	hehehe yeah :)))
+ wiking	crc :P
+ wiking	crc error
+ wiking	:)))
+ blackburn	we've got 3g internet all the 100km way from toliatti to samara
+ blackburn	you third world country
+ blackburn	:D
+ wiking	hehehehe seems so :D
+ wiking	and it's even expensive
+ wiking	they ask freaking 10 euros for 500megs
+ wiking	can u believe that ? :D
+ blackburn	even here it is cheapier :D
+ wiking	yeah i think  everywher lese is cheaper
+ blackburn	are you sure it is belgium not nigeria or somalia?
+ blackburn	:D
+ wiking	*else
+ wiking	dude i'm really not so shure
+ blackburn	I should be banned from visiting belgium after all these jokes :D
+-!- n4nd0 [~nando@n175-p42.kthopen.kth.se] has quit [Ping timeout: 246 seconds]
+ blackburn	and the last one before ban :D "EU doesn't deserve the Nobel prize! You participate in wars!"
+ wiking	yeyeah i'm looking forward to the day whe i can lift of from here :)
+ blackburn	to belarus?
+ blackburn	may be kyrgyzstan? it is like borat's country from the borat movie but worse :D
+ wiking	:>
+ wiking	arrived
+ wiking	blackburn: pong
+ wiking	hahahah
+ wiking	http://researchinprogress.tumblr.com/post/33884075941/we-are-pleased-to-inform-you-that-your-paper-has-been
+ blackburn	wiking: LOL
+ blackburn	that tumblr really rocks
+ wiking	:>
+ wiking	indeed
+ wiking	why u noooooooo compillles
+ wiking	base/class_list.cpp:614:85: error: expected a type
+ wiking	static CSGObject* __new_CCSOSVM(EPrimitiveType g) { return g == PT_NOT_GENERIC? new CCSOSVM(): NULL; }
+ blackburn	CCSOSVM??
+ wiking	CopyCatSOSVM
+ wiking	:)
+ wiking	since this is going to be the copy-cat of the so-svm of joachim's implementation
+ blackburn	it fails on that line?
+ blackburn	that's kinds strange
+ blackburn	didn't you forget about namespace or anything?
+ wiking	yeah maybe
+ wiking	no
+ wiking	i don't
+ blackburn	show me the code then :D
+ wiking	http://pastebin.com/GkwpXxyT
+ wiking	this is the definition
+ wiking	very very basic :))))
+ wiking	as i've just started to implemt it
+ wiking	i used have this problem before
+ wiking	but i cannot recall how i solved this
+ blackburn	can't see nothing wrong out there
+ wiking	ohcomeonwtf :D
+ blackburn	what?
+ wiking	i dont know why isnt' it working: D
+ wiking	i already did a make clean && make
+ wiking	nada
+ wiking	HELP!
+ blackburn	heh
+ blackburn	not yet?
+ wiking	nothing
+ wiking	it's the same
+ wiking	let's try another make clean && make
+ wiking	combo
+ blackburn	in hope it could be a combo breaker, yeah
+ wiking	so travis go/no-go?
+ wiking	btw heiko has some funky commits
+ wiking	'n instantiation of member function 'shogun::SGMatrix<unsigned long long>::operator==' requested here'
+ wiking	control may reach end of non-void function
+ blackburn	wiking: I am ok with travis
+ wiking	i meant that
+ wiking	should i PR the .travis.yaml?
+ blackburn	feel free :)
+ wiking	do you have admin right for the shogun repo?
+ blackburn	I am not sure
+ wiking	since the thing is
+ wiking	that imho
+ blackburn	probably not
+ wiking	that main repo should be linked with travis
+ blackburn	I mean I could push but not sure I can set up things
+ wiking	mmm
+ wiking	can u try this
+ wiking	https://github.com/shogun-toolbox/shogun
+ wiking	do you have there an Admin tab?
+ wiking	and i have still the same rror
+ wiking	error
+ wiking	base/class_list.cpp:614:85: error: expected a type
+ wiking	static CSGObject* __new_CCSOSVM(EPrimitiveType g) { return g == PT_NOT_GENERIC? new CCSOSVM(): NULL; }
+ blackburn	I do not
+ blackburn	wiking: is your .h included in classlist?
+ wiking	ok then you don't have admin access
+ wiking	so then only sonney2k can fix this
+ blackburn	yeah then we would have to wait
+ wiking	classlist?
+ wiking	shogun/base/class_list.cpp
+ wiking	?
+ blackburn	yes
+ wiking	mmm
+ wiking	damnfuck
+ wiking	it's not
+ wiking	where how? :)
+ wiking	hah lol
+ wiking	i renamed it to CCCSOSVM
+ wiking	and now it works
+ wiking	WHYYYY
+ wiking	nevermind i give a fuck
+ wiking	it compiles
+ blackburn	he
+ blackburn	we assume C*
+ wiking	still it was CCSOSVM
+ wiking	:)
+ wiking	so there was enough C in the beginning :D
+ blackburn	but header was CCSOSVM too?
+ wiking	you mean the header file?
+ wiking	yeah it was called CCSOSVM.h
+ wiking	so i guess then it was looking for CSOSVM.h
+ wiking	or something like that
+ wiking	:)
+ blackburn	exactly
+ wiking	ok let's shogunize 2 functions :)
+ wiking	s/double/float64_t/g
+ wiking	:D
+ wiking	what's long
+ wiking	int64_t?
+ blackburn	I have no idea actually
+ blackburn	long int long
+ blackburn	long long int
+ blackburn	:D
+ wiking	what is long :)
+ blackburn	long is kind of
+ blackburn	it is like a hint
+ blackburn	:D
+ blackburn	I don't like 64/32 thing actually
+ wiking	:D
+ blackburn	I am ok to have only 'double'
+ blackburn	or 'float'
+ wiking	mmm
+ wiking	where the fuck are the types defined ? :)
+ wiking	hahah
+ wiking	converter/Isomap.cpp:   inline double distance(const ISOMAP_COVERTREE_POINT& p) const
+ wiking	still some doubles left in the repo
+ blackburn	heh
+ blackburn	#define double float64_t okay
+ blackburn	:D
+ wiking	:DDDDDD
+ blackburn	wiking: #define true randn()>0.0  true
+ blackburn	wiking: #define true randn()>0.0 ? true : false
+ wiking	ultimate haxx0ring
+ blackburn	happy debugging it is called
+ wiking	funky type DOC **dXc; /* constraint matrix */
+ wiking	:>
+ wiking	wtf is DOC
+ wiking	:>
+ blackburn	DOC is DOC
+ wiking	heehhe
+ wiking	i guess :>
+ blackburn	why that inplace new fucks up!
+ blackburn	:(
+ blackburn	Y U CANT SIMPLY allocate
+ wiking	:)
+ wiking	BUUUUURN
+ wiking	lets FORK shogun :)))
+ wiking	and add STL and openmp
+ wiking	and all the funkiest shit eeeveeer!
+ wiking	:)))
+ blackburn	boost
+ wiking	and boost
+ wiking	!!!
+ wiking	yes
+ wiking	i was just about to write it
+ blackburn	a lot of boost
+ blackburn	:D
+ wiking	boost the motherfucker up!
+ blackburn	well actually there could be funny things
+ blackburn	with boost parsers we could parse kernels
+ wiking	nyamm
+ wiking	btw: what was the 'standard' parallel execution in shogun
+ blackburn	so one writes say ParsedKernel('exp(||x-y||^2)')
+ wiking	using simply posix pthread calls?
+ blackburn	pthreads
+ wiking	yooohoooo
+ wiking	funkyshiiiit!
+ wiking	http://www.phoronix.com/scan.php?page=news_item&px=MTIwNjE
+ wiking	6 days old news
+ wiking	:)
+ blackburn	wiking: shogun gave us a lot of lessons learnt
+ blackburn	at least design-wise
+ blackburn	I'd say implementing such library with all these lessons *learnt* could take much less time
+ wiking	yeah
+ wiking	what's in a library
+ wiking	just take it
+ wiking	:)
+ wiking	and dont include it
+ wiking	:))
+ wiking	libsvm
+ blackburn	:D
+ wiking	suppose that we have libsvm
+ wiking	liblinear
+ wiking	same
+ blackburn	I thought about linking to it
+ wiking	#include <liblinear....MOTHERFUCKA"
+ wiking	if u don't have it
+ blackburn	but no, it doesn't work
+ wiking	fuck UUU
+ wiking	if u dont have boost
+ wiking	fuck uuu
+ blackburn	haha
+ wiking	if you dont have STL
+ wiking	then well
+ blackburn	hahah no stl?
+ wiking	u dont have anythign to start with
+ blackburn	is that gcc 1.0?
+ blackburn	:D
+ wiking	go for lua lesson
+ wiking	:)
+ wiking	and FUCK U
+ wiking	of course
+ wiking	:)
+ wiking	no openmp
+ blackburn	wiking: actually about solvers I am really saddened we can't just include it
+ wiking	FUCK UUU
+ wiking	in fact
+ wiking	one would have to work really really hard
+ blackburn	because developers of such libraries are idiot savants
+ wiking	not to get fucked
+ wiking	:D
+ wiking	buut
+ wiking	that would be an awesome lightweight library :)
+ wiking	yeah i know
+ wiking	i mean fuck man
+ wiking	when u can segfault svmlight
+ wiking	with simply not giving enough arguments
+ wiking	then i say
+ wiking	FUCK U
+ blackburn	liblinear is unusable without our patches
+ blackburn	heh
+ blackburn	we sshould have FUCK_YOU  macro
+ wiking	hehehe
+ blackburn	#define REQUIRE(x) if (!x) FUCK_YOU;
+ wiking	:>>>
+ blackburn	most intolerant library ever
+ wiking	yeah
+ wiking	it's good enough though
+ wiking	to rely already on some basic stuff
+ wiking	like lapack
+ wiking	and eigen
+ wiking	but yeah
+ blackburn	no lapack
+ wiking	for that matter
+ blackburn	no more lapack
+ blackburn	:D
+ wiking	just eigen
+ wiking	and no SGVector
+ wiking	there's eigen
+ wiking	it's goodenough
+ wiking	:)
+ wiking	has everything
+ wiking	matrices
+ wiking	vectors
+ wiking	whaaateeeveeeeer
+ wiking	:D
+ blackburn	no more lapack in 21st century
+ wiking	no eigne
+ blackburn	:D
+ wiking	FUCK UUUUU
+ blackburn	eigen can be installed even on ARM
+ wiking	yeah
+ wiking	it has some nice neon optimized code
+ wiking	so it's really cool
+ wiking	mm
+ wiking	that would be an interesting thing
+ wiking	to try to replace SGMatrix with eigen's matrix
+ wiking	wonder how much time would it need :)
+ blackburn	sounds pretty tricky
+ wiking	but i guess the most pain would be
+ wiking	the interfaces part
+ wiking	:)
+ wiking	but as a first step
+ wiking	let's have c++11 STL and boost
+ wiking	:>
+ blackburn	heh
+ wiking	fork shogun -> fucku
+ blackburn	fuckun
+ wiking	fucku branch
+ wiking	:)
+ wiking	where's gsomix?
+ blackburn	somewhere in my room
+ wiking	maaaan it's amazing how everybody disappeared after the money has gone (~ gsoc)
+ blackburn	hah did you ever think it won't happen?
+ wiking	no not really
+ wiking	i remember when i've joined the channel last february
+ blackburn	it was me and soeren
+ wiking	that there was like the 2 of you and the bots
+ wiking	yeah
+ blackburn	and some accidental guests
+ wiking	and then suddenly
+ wiking	around march/april is it?
+ blackburn	yeah
+ wiking	when the gsoc people started like flooding
+ wiking	we had like contantly 11 people around
+ wiking	i bet it's going to be the same in 2013
+ blackburn	sure
+ wiking	but no more gsoc for me
+ wiking	although i'd like to mentor
+ blackburn	I will be eligible twice more but not sure it is a good idea
+ wiking	:>>>
+ wiking	why not
+ wiking	i mean if u can do it?
+ wiking	meaning you have time
+ wiking	then do it
+ blackburn	it probably makes more sense to find a similar money job now (what I am trying to do)
+ blackburn	and mentor
+ wiking	:>>
+ wiking	heheh
+ wiking	one of next year gsoc project should be
+ wiking	boost+stl
+ wiking	:DDD
+ blackburn	heh
+ wiking	i mean shogun+boost+stl
+ wiking	:>
+ wiking	that'd be totally worth it
+ blackburn	big project
+ wiking	ok
+ wiking	back to copy-cat solver
+ wiking	:>>>
+ wiking	let's see how i can hackdizshit together before i fall asleep
+ blackburn	just for experiment I want to develop templated CS liblinear solver
+ wiking	hahahaha
+ blackburn	with eigen
+ wiking	the reason i've asked about openmp
+ wiking	because p3bmrm is totally paralizable
+ wiking	or how the fuck u spell that shiat
+ blackburn	parallelizable yeah idiot word
+ wiking	parallelizible :)
+ blackburn	???????????????
+ blackburn	even more idiot in russian
+ wiking	you can fuckin even
+ wiking	distribute that
+ wiking	so basically that svm
+ wiking	is totallly map-reduceable
+ wiking	:)
+ wiking	yeah
+ wiking	this is a call for a mahout patch
+ wiking	:))))
+ blackburn	heh
+ wiking	seriously
+ blackburn	they seem to be not mature enough to use such complex methods :D
+ wiking	ahhaha lolface
+ wiking	:>
+ blackburn	may be you rather choose k-means
+ wiking	yeah i mean i love opensource projects
+ blackburn	or nearest centroid :D
+ wiking	where u send in a bug report + patch for fixing it
+ wiking	and then it takes about 4-5 months
+ wiking	to apply it
+ blackburn	yeah it is cool
+ wiking	BUT
+ wiking	not your patch
+ wiking	but the header rewritten patch
+ wiking	i.e. that they dont' even fucking give credit nowhere in the commit log
+ wiking	:)))
+ wiking	that's like totally fucking great :)
+ blackburn	heh
+ wiking	ok recoding
+ wiking	i feel like a fucking parser/translator
+ wiking	this thing could be totally done by a fucking LL(k) parser
+ wiking	blackburn: sgvector::resize does the whole reallocation thingy?
+ blackburn	no idea
+ blackburn	realloc probably
+ wiking	let'show
+ wiking	hop
+ wiking	e
+ wiking	:>
+ wiking	is there a good vim plugin
+ wiking	that can jump to the implementation and definition of a function?
+ blackburn	yes it is already in
+ blackburn	it works using ctags
+ blackburn	http://vim.wikia.com/wiki/C%2B%2B_code_completion for example
+ blackburn	or that
+ blackburn	http://codingfreak.blogspot.com/2009/12/ctags-vim-with-steroids.html
+-!- hoijui [~hoijui@dslb-092-078-178-050.pools.arcor-ip.net] has joined #shogun
+ blackburn	wiking: http://pastebin.com/acvpKc8P
+ blackburn	a sketch :D
+-!- hoijui [~hoijui@dslb-092-078-178-050.pools.arcor-ip.net] has quit [Quit: Leaving]
+--- Log closed Sat Oct 20 00:00:17 2012

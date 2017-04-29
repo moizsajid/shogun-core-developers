@@ -1,0 +1,187 @@
+--- Log opened Sat May 28 00:00:38 2011
+ CIA-32	shogun: Soeren Sonnenburg master * r8381b60 / src/configure : at least on debian based systems ruby libs are named libruby<VER>*.so* - http://bit.ly/lqKxF4
+ serialhex	sonney2k, i'm updating my shogun now, will test the ruby_modular interface when it's built
+ serialhex	fscking slow-ass computer!!!
+ serialhex	sonney2k, my ruby doesn't work with your change, so we'll have to find a medium somewhere in between, it gives me a '/usr/bin/ld cant find -lruby1.8' error (i'm trying different configs & stuff and lost the exact msg, but i'll post it when i try that again)
+ serialhex	also, i was having trouble loading modules, and i came across this: http://goo.gl/sHdbK and i went into each of the modules.  like it says, %module names should be lowercase, and since all of the modules (classifying, clustering, distance, etc...) are capitalized, we should do some non-break-backwards-compatibility thing like add either a test to see whether  we're compiling ruby or not in the Foo.i file, or in the ruby
+ serialhex	compile opt include the "-module foo" the first is probably easier & more direct
+ serialhex	my days have recently gotten very busy, as i *just* got a job (yay me!) so while i have some ideas on how to fix this stuff i might not get the time to actually do so...
+ serialhex	...and i just noticed sploving is on!
+ serialhex	...well, afk actually :P
+ serialhex	and i *really* wish my computer was faster, 20+ min to compile shogun is just sad!  but i got to sleep, so i'll see what i can find out tomorrow, and let sploving & sonney2k know what i find... take care!
+@sonney2k	serialhex, congrats on the job!
+@sonney2k	serialhex, I am doing the conditional rename for ruby now
+@sonney2k	serialhex, regarding configure - we will need a test to compile a minimal ruby extension? do you have an example for that?
+-!- blackburn [~qdrgsm@188.168.2.233] has joined #shogun
+ blackburn	ehh.. CMath::display_matrix is column major routine
+ blackburn	sonney2k: why it is?
+ blackburn	omg these matrices is rotating in LLE all the time
+ blackburn	damn it
+-!- blackburn [~qdrgsm@188.168.2.233] has quit [Ping timeout: 258 seconds]
+-!- blackburn [~qdrgsm@188.168.4.77] has joined #shogun
+ blackburn	sonney2k: reported ;)
+@bettyboo	;>
+@sonney2k	blackburn, all matrices are assumed to be column by column
+@sonney2k	that is the fortran way (tm)
+@sonney2k	blackburn, thnanks
+ blackburn	sonney2k: I had a problem with set_feature_matrix
+ blackburn	well I have eigenvectors as ROWS of matrix
+ blackburn	then I have to choose m of them
+ blackburn	and columns of that matrix is feature matrix
+ blackburn	everything seems to be ok, right?
+ blackburn	but when I set this feature matrix and print it in python - I have eh.. something like transposed
+ blackburn	right sizes - but not that order I think
+@sonney2k	blackburn, it could of course be that I introduced bugs in the new typemaps
+@sonney2k	it should be like 1 column == 1 vector
+ blackburn	for the moment I just i<->j
+ blackburn	I don't know exactly
+ blackburn	these matrix issues makes me mad
+@sonney2k	and matrix == mulltiple columns concatenated
+@sonney2k	does that match your assumption
+@sonney2k	?
+@sonney2k	if so try to set a feature matrix and get it afterwards
+ blackburn	in python?
+@sonney2k	then you will see if it is still the same
+ blackburn	sonney2k: have you seen pics in my report? looks like it doing the things right, but again I'm not confident with it
+ blackburn	anyway the possible 'error' could be only in this issue - changing feature matrix
+@sonney2k	blackburn, I suggest to sleep one night over this and then check again
+@sonney2k	I don't know...
+ alesis-novik	sonney2k, I assume code maintainability is more important than slight increase in performance.
+@sonney2k	alesis-novik, depends...
+ alesis-novik	As in using Gaussian class with GMM instead of having means and covariances in the GMM class itself
+@sonney2k	usually yes though
+@sonney2k	alesis-novik, how does having them in the gaussian class possibly slow down things?
+@sonney2k	I would keep them there...
+ alesis-novik	Well, moving stuff around will take a bit of time, but like I said, nothing major. Will need to completely redo the Gaussian code though.
+ alesis-novik	But since Gaussian isn't used anywhere else as far as I know, it won't cause any problems
+@sonney2k	alesis-novik, don't you have covariance matrix / mean vector in gaussian too? what else is missing?
+ alesis-novik	yeah, but I need to represent the covariance depending on the type used (as svd or diagonal or spherical).
+ alesis-novik	So the covariance field is effectively gone
+ blackburn	sonney2k: could you remind me the name of a tool for compile caching?
+ serialhex	hey blackburn, i think it's cmake
+ blackburn	hi, serialhex
+ serialhex	(i know, i'm like a half hour after the Q but whatev! i just got homw :P )
+ serialhex	how are ya?
+ blackburn	fine, but sitting at home all day long and having a sexual time with some dim reduction things :D
+ blackburn	and you?
+ serialhex	really?  you're having sex with some dim reduction stuff?? :P
+ serialhex	i'm doing well, just got done with my last day of training for my new job!!!
+* serialhex sees blackburn's spiffy 3d graph!!!
+ blackburn	what is your new job?
+ blackburn	serialhex: yeah it could show that method is working
+ blackburn	or not
+ blackburn	I don't know :D
+ blackburn	I have to check if neighborhood is 'saved' in 2d
+ blackburn	damn borg book about MDS have 612 pages
+ serialhex	yeah, that souds like it might work
+ serialhex	DAMN!!!
+ blackburn	seems they have wrote almost everything that they know
+ serialhex	well my new job is really kind of cool, i'm selling really spiffy high quality knives!!
+ serialhex	yes it does!
+ blackburn	selling knives sounds very profitable
+ serialhex	i sometimes dont like books like that because theres no "this is what you *REALLY REALLY* need to know about this stuff" section in the beginning... so you dont have to grok the whole book
+ blackburn	at least you can threat someone with your goods :D
+ serialhex	but still, it looks impressive on a shelf!! :D
+ serialhex	oh yeah!!
+ blackburn	'damn man i'll show you how sharp it is' :D
+ blackburn	hrshsh
+ serialhex	dude, you've probably never dealt with a cocanut in russia, but while i was in jamaica i had one and it took the dude 3 whacks with a machete to break open the sucker!
+ blackburn	hehe
+ serialhex	with the cleaver that my boss (whos really hot and really awesome) let me use, i split that thing in HALF with one swing!!!
+ serialhex	it was freaking awesome!!!
+ serialhex	so yeah, i think it's going to be a lot of fun and probably very profitable!
+ blackburn	nice to you :)
+ serialhex	tho i'm still working on some of the ruby things, but i gotta make it work first!! :(
+@sonney2k	serialhex, I hope you can recommend me a good knive now :)
+ serialhex	hellz yeah!!!  i can probably sell em to ya if you like, they're really spiffy!!!
+@sonney2k	all the ones I have here are just blunt
+@sonney2k	serialhex, made in germany ;-)
+ serialhex	well i'm not 100% sure if it'll work outside the US but they have a forever guarantee so you can get them sharpened whenever for the price of shipping
+ serialhex	theres a lot more to em, but i'll talk to my manager and see what i can do :D
+ blackburn	sonney2k: at least you have good cars :D
+@bettyboo	lolomat
+ serialhex	yes indeed!!  german cars rock!!!
+ serialhex	anyway, i'm going to work on a ruby example tonight, and some more probably sunday a bit, tho it's still not compiling for me
+@sonney2k	blackburn, I am riding a bike carrying to kids now
+@sonney2k	in some kind of trailer
+ serialhex	HAHAHA!!!
+@sonney2k	serialhex, yeah we need a test
+ serialhex	having fun sonney2k??
+@sonney2k	serialhex, sure
+@sonney2k	serialhex, some minimal ruby extension test...
+ serialhex	do you want something that loads up all the modules?
+@sonney2k	if you have that we could really check if things compile
+ serialhex	ok, i'll see what i can cook up
+@sonney2k	serialhex, ahh and btw, I tried lowercasing all module names but then the swig wrapped stuff stopped to work completely
+@sonney2k	I couldn't import e.g. features nor Features
+ serialhex	hmm... thats odd...
+@sonney2k	err require
+@sonney2k	serialhex, not sure if this is related to a pre 2.0 swig version here
+ serialhex	well i couldnt do that before either
+ serialhex	idk...
+* serialhex should probably find his old copy of vmware and install it
+@sonney2k	alesis-novik, I am not an expert in GMM - EM so ask vojtech what he thinks what is better
+ serialhex	i also can't link it with the -lruby1.8 thing, i'll gist my error msg now...
+@sonney2k	serialhex, just edit .config an replace the -lruby1.8 with -lruby
+@sonney2k	(occurs twice)
+ alesis-novik	sonney2k, I think this is more an aesthetic issue than anything else
+ serialhex	ok... i'll do that for now then
+@sonney2k	alesis-novik, I just don't know what EM for GMM will involve
+ blackburn	sonney2k: have you heard about some dim reduction for strings? just recalled that shogun is highly biased to it :)
+ alesis-novik	ok, I'll ask Vojtech for his opinion
+@sonney2k	alesis-novik, in the end vojtech and you decide what is reasonable - only if the code later looks really weird I will give comments :)
+@sonney2k	blackburn, nope ... well if they are kernel based then I guess you can use kpca
+@sonney2k	blackburn, and shogun is not *that* biased towards strings
+ blackburn	I just thinking about what to add to my project
+ alesis-novik	sonney2k, well, that's one point of writing this software: making it readable and manageable :)
+@sonney2k	heh
+@sonney2k	blackburn, whatever you like :)
+@sonney2k	blackburn, btw I would love to do the CClassifier -> CMachine rename
+@sonney2k	any objections?
+ blackburn	it takes no difference for me
+ blackburn	but sounds better, yes
+ blackburn	my worries is related to preproc 'framework'
+@sonney2k	blackburn, in which sense?
+@sonney2k	btw, serialhex we have one module name PreProc
+ serialhex	ok
+ blackburn	as I said earlier, mds and lle doesn't make sense at 'learning'
+@sonney2k	I guess that should then at least be called just Preprocessors
+ serialhex	ok, sounds good
+ blackburn	so init() in preproc and apply_to_feature_matrix() doesn't make sense at all
+ blackburn	calling init for one feature matrix and apply to another - makes no useful embedding
+ blackburn	*be back in 10 minutes
+@sonney2k	blackburn, I don't see a problem
+@sonney2k	blackburn, you just don't do anything in init()
+@sonney2k	and always do the embedding in apply*
+@sonney2k	to the current fm
+@sonney2k	serialhex, ok will rename it then
+ serialhex	oh, sonney2k, how were you doing the %module renaming?  something like #ifdef SWIGRUBY; %module foo; #endif; ??
+@sonney2k	serialhex, yes
+ serialhex	ok, i'll test that out then sonney2k, and see how it works on my end
+@sonney2k	serialhex, this is the patch https://gist.github.com/997253
+ serialhex	sweet!!!  thanks sonney2k, i'm compiling now but i'll get this applied once it's done (and recompile :P )
+@sonney2k	serialhex, blackburn: shall I name the PreProc module Preprocessor or Preprocessors?
+@sonney2k	I tend towards Preprocessor
+ serialhex	that works for me
+ blackburn	sonney2k: hehe i don't understand why I didn't choose this way (with do nothing in init)
+@sonney2k	brain twists...
+ blackburn	sonney2k: do we really need 'pre'?
+ blackburn	Preprocessor is better for me
+@sonney2k	blackburn, you mean Processor?
+@sonney2k	nah
+ blackburn	may be
+ blackburn	but it sounds not so 'sensefully', I agree now :)
+@sonney2k	should I also rename the preproc dir to preprocessor ?
+@sonney2k	and the PreProc class to Preprocessor?
+ blackburn	makes sense
+@sonney2k	doing ...
+ blackburn	PreProc is strange camel case
+ blackburn	caught an error a few times because of Preproc<->PreProc
+ blackburn	sonney2k: I think in preproc there should be a class for dim.reduction :)
+ blackburn	may be I'll add one later
+ blackburn	does it makes sense to you?
+ blackburn	anyway I'm going to bed now, tomorrow will be learning some shity game theory and so on, damn exams
+ blackburn	see you
+-!- blackburn [~qdrgsm@188.168.4.77] has quit [Quit: Leaving.]
+@sonney2k	best of luck...
+--- Log closed Sun May 29 00:00:41 2011

@@ -1,0 +1,314 @@
+--- Log opened Sun Apr 13 00:00:03 2014
+-!- khalednasr [~k.nasr92@41.69.160.123] has quit [Quit: Leaving]
+-!- HeikoS [~heiko@90.201.62.238] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- lisitsyn [~qdrgsm@109-226-124-25.clients.tlt.100megabit.ru] has quit [Quit: Leaving.]
+-!- lisitsyn [~qdrgsm@109-226-124-25.clients.tlt.100megabit.ru] has joined #shogun
+-!- diver-in-sky_ [uid28350@gateway/web/irccloud.com/x-mddxzutqvfaondva] has quit [Quit: Connection closed for inactivity]
+-!- lambday [67157d51@gateway/web/freenode/ip.103.21.125.81] has joined #shogun
+ lambday	HeikoS: hi
+ lambday	there?
+@HeikoS	lambday: hey
+@HeikoS	yes
+@HeikoS	how are things?
+@HeikoS	in fact was just about to write you an email
+ lambday	HeikoS: a bit slow
+ lambday	:D
+ lambday	HeikoS: this research took an exciting turn!
+ lambday	HeikoS: will it make into jmlr?
+@HeikoS	lambday: on the long run that might happen
+@HeikoS	lambday: for now, we have some other things in mind. did you see the abstract?
+ lambday	HeikoS: yeah
+ lambday	I didn't know what to comment :(
+@HeikoS	lambday: ah yeah read the email
+@HeikoS	lambday: you dont have to for now
+@HeikoS	yeah JMLR is the target goal
+@HeikoS	which would be amazing right?
+ lambday	yeah man!!
+ lambday	didn't even think that!
+@HeikoS	haha :)
+ lambday	so all the experiments should be redone and we'll use our shogun code
+@HeikoS	yeah exactly
+ lambday	ramstein song ;)
+@HeikoS	thats what my email will be about
+@HeikoS	some things have to be changed
+ lambday	okay... I was confused a bit regarding how to fit things exactly...
+ lambday	will have to discuss after reading your mail
+@HeikoS	what do you mean?
+ lisitsyn	night chat!
+ lisitsyn	:D
+ lambday	lisitsyn: nightbirds... :D
+ lambday	4:15AM here
+@HeikoS	lambday: for pre-gsoc, we should focus on getting this testing stuff done, but feature selection will be very similar in some ways
+ lisitsyn	% - 2hrs
+@HeikoS	lambday: ah man, you dont sleep ;)
+ lambday	HeikoS: I wake up at 1 :D
+@HeikoS	I see :)
+ lambday	HeikoS: alright... I am on it
+@HeikoS	lambday:  Ill just write mail. 1 sec
+ lambday	HeikoS: I was trying to draw a class diagram in this refactored scenario... not quite complete though
+@HeikoS	or in fact, 10 mins if you have :)
+ lambday	yeah
+ lambday	yeah I am here
+@HeikoS	lambday: ok sent
+ lambday	HeikoS: checking
+ lambday	HeikoS: alright... I get the points
+ lambday	there might be something that I am not currently seeing at this moment.. will discuss when I get there
+ lambday	and for streaming stuffs.. you meant that we should always rely on online mean/var algorithms, right?
+ lambday	so no storing but keep on computing
+ lambday	sum of kernel values without diag seems fine... two methods is better than flag
+@HeikoS	yeah
+@HeikoS	lambday: and then change quadratic time mmd thing
+@HeikoS	to just call sum
+@HeikoS	should be quite a bit faster when a custom kernel is used
+@HeikoS	for example for the permutation test
+ lambday	hmm yeah
+ lambday	HeikoS: I am a bit confused about what to do with H_A variances...
+ lambday	I mean, for example, we would have methods that computes \sigma^2_{k, A} in eq (2) of Dino's writeup
+ lambday	right?
+ lambday	but when do we actually use that?
+@HeikoS	for kernel selection
+ lambday	okay
+@HeikoS	lambday: dont worry about that for now
+ lambday	alright
+@HeikoS	for the testing, we just need the variance under the null
+ lambday	so p-value threshold they deal with var under null
+ lambday	yeah
+@HeikoS	yes exactly
+@HeikoS	so need to correct a few things,  now, but keep the old ways in this deprecated methods
+ lambday	okay
+ lambday	and what do we check our new codes against? should we make a matlab implementation or so?
+@HeikoS	lambday: I might have actually been wrong with one thing
+ lambday	HeikoS: what?
+@HeikoS	the within block direct restimation contains a matrix product
+ lambday	yeah
+@HeikoS	but maybe its possible to do that wihtout storing the matrix somehow, dont know, maybe think about it
+ lambday	ummm... but its just the kernel matrix for the current block, right?
+ lambday	I mean, how huge that would be?
+ lambday	and for the sum.. we need to specify blocks... because the kernel matrix is formed with merged samples of p_and_q
+ lambday	for one part we don't need diag elements.. for some parts we need
+ lambday	anyway I'll think about it
+@HeikoS	lambday: think big
+@HeikoS	lambday: blocks might be larger than 10000 which is maximum matrix size one can store
+@HeikoS	lambday: also efficiency! if you dont have to store things, dont store them if its not slower
+@HeikoS	and yes, feel free to adjust the interface of this sum operation to your needs
+@HeikoS	lambday: maybe it should even be average operation, have to think about a clean interface for this and via not using too many if then else statements in the middle
+@HeikoS	lambday: I will leave soon, let me know if you ahve more quetsions
+@HeikoS	lambday: and yes, another python draft of things to uniut test against and for us to proofread (easier in python than in c++) might be very helpful
+ lambday	HeikoS: alright...
+ lambday	HeikoS: I'll think about this a bit.. will mail you regarding further queries
+@HeikoS	yeah pls ask many questions!
+ lambday	for permutation test we got to sacrifice some power.. gotta store stuffs else it would be really slow
+@HeikoS	lambday: what do you mean?
+@HeikoS	lambday: ah yes, of course
+@HeikoS	lambday: so the thing about the permutation test is:
+@HeikoS	if possible: store, and dont call ::kernel in the loop, but rather let CCustomKernel loop over matrix
+@HeikoS	so try to precompute matrix in any case
+@HeikoS	like its now, it replaces the kernel by a custom kernel for the bootstrapping, you probably saw that
+ lambday	yeah
+@HeikoS	lambday: but if its not possible to allocate the memory for that
+@HeikoS	it should still be possible to do the test
+@HeikoS	so have a boolean setter do de-activate that
+ lambday	alright
+@HeikoS	and in fact, it would be cool if the precoimputing method would catch out of mem errors, print a warning that it will switch, and then do on-the-fly computing
+@HeikoS	and then if one sets this precomputign flag to false, the warning never appears
+ lambday	yeah that would be cool!
+@HeikoS	with that, the test should work for 100000 and more points (we should test that)
+@HeikoS	you can do unit test with 3 bootstrap iterations for such cases ;)
+ lambday	:D
+ lambday	alright... so I am thinking that starting with quadratic time mmd and its related dependencies (like the kernel sum/mean computation etc) would be good
+ lambday	HeikoS: then we'd deal with streaming cases
+ lambday	HeikoS: btw with the refactored design with many methods pulled out from LinearTimeMMD to StreamingMMD, I think we'd lose those preallocated vector comprised methods... but if those can be done in parallel then that's a sacrifice worth of
+@HeikoS	lambday:  which methods do you mean?
+@HeikoS	for streaming, no need to store anything right?
+@HeikoS	just the block-size
+ lambday	HeikoS: yeah.. wait let me show
+@HeikoS	where data has to be stored
+@HeikoS	and kernel should probably not be stored (one test only computes statistics once, one does twice, one has this matrix product where we have to see)
+ lambday	HeikoS: yeah... but its not related to that
+@HeikoS	lambday: multicore parallelisation might be interesting, but not for now btw
+ lambday	okay
+@HeikoS	lambday: first goal is to make things stable and efficient
+@HeikoS	then we can speed up
+@HeikoS	lambday: keep in mind precomputing kernel matrices is already parallelised
+ lambday	yeah what I was saying was related to multiple kernel stuff... in the method compute_statistic_and_Q
+@HeikoS	lambday: ah yeah
+ lambday	so it has these preallocated vectors...
+@HeikoS	(that might be good to do in parallel in fact)
+@HeikoS	ah thats fine
+ lambday	yeah
+@HeikoS	not many kernels so storing multiple there is pok
+@HeikoS	and yeah, this in fact SHOULD be done in parallel if easily possible
+ lambday	yeah...
+@HeikoS	lambday: but not too important, getting things to work is the first step
+@HeikoS	and have thorough unit tests
+@HeikoS	so that parallelisation can be tested easily, which makes it easier to develop it
+ lambday	okay... so you agree with starting with quadratic time mmd ?
+@HeikoS	yes!
+ lambday	although it may be useful to first think it all before changing - I'll do some planning tomorrow
+@HeikoS	lambday: yeah
+@HeikoS	lambday: planning is good
+@HeikoS	but maybe just to the point where you know how to do things in a way that its not woo much work to change to multicore
+@HeikoS	spending time with pthreads would be too much ;)
+ lambday	hehe
+ lambday	oh and for all these tests, we'll have two settings each, right? full and incomplete
+@HeikoS	yep
+ lambday	so enum?
+@HeikoS	the incomplete ones are not important for now though
+@HeikoS	yeah enum
+ lambday	and additional variance_under_alternative() methods for all
+@HeikoS	yeah, this can sometimes probably be computed on the fly with other thingfs
+@HeikoS	see linear time mmd
+ lambday	yeah
+ lambday	I meant whether we need a wrapper like compute_variance() that internally calls compute_statistic_and_variance()
+@HeikoS	lambday: I think its always a good idea to modularise
+@HeikoS	lambday: ok going to sleep now, see you later!
+ lambday	HeikoS: okay
+ lambday	HeikoS: yeah me too!
+ lambday	see you :)
+ lambday	gn
+@HeikoS	lambday: you should ;)
+ lambday	:D
+@HeikoS	bye, good night!
+ lambday	bye
+-!- lambday [67157d51@gateway/web/freenode/ip.103.21.125.81] has quit []
+@HeikoS	lisitsyn: still there?
+-!- HeikoS [~heiko@90.201.62.238] has quit [Ping timeout: 245 seconds]
+-!- lisitsyn [~qdrgsm@109-226-124-25.clients.tlt.100megabit.ru] has quit [Ping timeout: 276 seconds]
+-!- lisitsyn [~qdrgsm@109-226-124-25.clients.tlt.100megabit.ru] has joined #shogun
+ shogun-buildbot	build #673 of nightly_all is complete: Failure [failed compile test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_all/builds/673
+-!- khalednasr [~k.nasr92@41.69.137.37] has joined #shogun
+-!- khalednasr [~k.nasr92@41.69.137.37] has quit [Client Quit]
+-!- kislay|exams [~Abhijeet@117.239.94.112] has quit [Read error: Connection reset by peer]
+-!- Netsplit *.net <-> *.split quits: lisitsyn, sonne|work, pfm_, shogun-buildbot, @sonney2k, vvu|Log, soumyaC, @wiking
+-!- Netsplit *.net <-> *.split quits: chakri, [BNC]dhruv13j, @besser82, zxtx, @ChanServ, naywhayare
+-!- Netsplit over, joins: vvu|Log
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- besser82 [quassel@gateway/shell/bnc4free/session] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- zxtx [~zxtx@sunnythinking.org] has joined #shogun
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- ServerMode/#shogun [+o sonney2k] by sendak.freenode.net
+-!- lisitsyn [~qdrgsm@109-226-124-25.clients.tlt.100megabit.ru] has joined #shogun
+-!- [BNC]dhruv13j [dhruv13j@gateway/shell/bnc4free/x-zhvbyfoelcvhkhls] has joined #shogun
+-!- chakri [srichakrad@gateway/shell/bnc4free/x-cdbhudoxjppmjuli] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- ServerMode/#shogun [+o wiking] by sendak.freenode.net
+-!- sonne|work [~sonnenbu@91-64-78-194-dynip.superkabel.de] has joined #shogun
+-!- pfm_ [~hurr@hamilton.maths.tcd.ie] has joined #shogun
+-!- besser82 [quassel@gateway/shell/bnc4free/session] has quit [Changing host]
+-!- besser82 [quassel@gateway/shell/bnc4free/x-sjwrsczdlqfancsq] has joined #shogun
+-!- aditidatta [~aditidatt@117.194.118.32] has joined #shogun
+-!- aditidatta [~aditidatt@117.194.118.32] has quit [Client Quit]
+-!- ChanServ [ChanServ@services.] has joined #shogun
+-!- ServerMode/#shogun [+o ChanServ] by sendak.freenode.net
+-!- besser82 is now known as Guest41038
+-!- Guest41038 is now known as besser82
+-!- besser82 [quassel@gateway/shell/bnc4free/x-sjwrsczdlqfancsq] has quit [Quit: freedom, friends, features, first ---> fedoraproject.org]
+-!- besser82 [quassel@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- sunil1337 [0e8bd057@gateway/web/freenode/ip.14.139.208.87] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: @ChanServ
+-!- Netsplit over, joins: @ChanServ
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has joined #shogun
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- sunil1337 [0e8bd057@gateway/web/freenode/ip.14.139.208.87] has left #shogun []
+-!- lambday [67157d51@gateway/web/freenode/ip.103.21.125.81] has joined #shogun
+-!- pl8787 [9fe22b60@gateway/web/freenode/ip.159.226.43.96] has joined #shogun
+-!- pl8787 [9fe22b60@gateway/web/freenode/ip.159.226.43.96] has quit [Quit: Page closed]
+-!- pl8787 [9fe22b60@gateway/web/freenode/ip.159.226.43.96] has joined #shogun
+-!- khalednasr [~k.nasr92@41.69.186.4] has joined #shogun
+@wiking	lisitsyn: ping
+ lisitsyn	wiking: pong
+@wiking	lisitsyn: 1) what happend with kaggle IO?
+ lisitsyn	wiking: not ready yet
+ lisitsyn	but I added downloaders
+ lisitsyn	wiking: will work on that soon
+@wiking	2) https://scan.coverity.com
+@wiking	first login with github
+ lisitsyn	hmm
+@wiking	https://scan.coverity.com/projects/1763?tab=Overview
+@wiking	do u see there something like request more access?
+ lisitsyn	wiking: no
+ lisitsyn	just not authorized
+@wiking	shit
+@wiking	ok i guess pathen it's because it hasn't been fully configured...
+ lisitsyn	wiking: did you add shogun already?
+@wiking	yeah i'm working on that
+@wiking	but configuring with our crazy travis config
+@wiking	is not the easiest task
+@wiking	lisitsyn: but check out in the meanwhile the whole coverity stuff
+@wiking	looks like a tool that we would benefit a lot from
+ lisitsyn	wiking: yeah
+@wiking	but then again we should see the result first...
+ lisitsyn	true
+ lisitsyn	I have no idea yet
+@wiking	i'll try to first do then the analysis locally
+@wiking	doesn't have to be done via travis necessarily
+@wiking	maybe we could even integrate a new buildbot task
+@wiking	that runs every week once on the develop branch
+@wiking	as otherwise we would need to maintain a new branch
+@wiking	lisitsyn: what do you reckon? i feel like maybe actually integrating this to buildbot as a weekly once thing would be better than to maintain a new branch
+@wiking	lisitsyn: https://scan.coverity.com/faq#frequency
+ lisitsyn	wiking: yeah sounds better for me too
+ lisitsyn	well all the thing is now like an overkill
+@wiking	what do you mean?
+ lisitsyn	I mean we don't really need to do static analysis for each build and so on
+@wiking	yeah we can change that as well
+@wiking	lisitsyn: to a twice a week thing
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has joined #shogun
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- PirosB3 [~pirosb3@host238-17-dynamic.245-95-r.retail.telecomitalia.it] has quit [Quit: PirosB3]
+-!- lambday [67157d51@gateway/web/freenode/ip.103.21.125.81] has quit [Ping timeout: 240 seconds]
+-!- khalednasr [~k.nasr92@41.69.186.4] has quit [Quit: Leaving]
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+@wiking	lisitsyn: https://scan.coverity.com/projects/1763
+@wiking	lisitsyn: do u see the request button now?
+ lisitsyn	You are not authorized to access this page.
+ lisitsyn	wiking: ^
+@wiking	damn wtf
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: abinashpanda :develop * 6b8f833 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/6b8f833e5253c1c7be340fae5464575c8d020639
+ shogun-notifier-	shogun: CUAIFile class added to parse and write UAI file format
+ shogun-notifier-	shogun: tklein23 :develop * 0ade087 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/0ade087af368e4d14772b8db4fd1248e1a3956c6
+ shogun-notifier-	shogun: Merge pull request #2019 from abinashpanda/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Created CUAIFile class (Issue #1913) to save and load file in UAI file format.
+-!- thoralf [~thoralf@91-65-136-198-dynip.superkabel.de] has joined #shogun
+ thoralf	Good morning.
+ lisitsyn	thoralf: yeah that's a nice winter day :D
+ thoralf	lisitsyn: Still cold in russia? ;)
+ lisitsyn	thoralf: nah I mean if it is morning it could be a winter too ;)
+ thoralf	I know.  I just needed an appropriate answer to you. :)
+ thoralf	It worked. :)
+ lisitsyn	thoralf: apart from that it is around 0C
+ thoralf	Really?
+ thoralf	We had 20 degree.
+ thoralf	16 degree according to the forecast.
+ thoralf	8 degree tonight.
+ lisitsyn	thoralf: it is on its way from -30 to +30
+ lisitsyn	gradually
+ lisitsyn	half way done
+ thoralf	That's really bad.
+ thoralf	Come to Berlin. ;)
+ lisitsyn	thoralf: why bad? it is pretty cool actually
+ thoralf	It's between 10-20 most of the time.
+ lisitsyn	sometimes it is cold
+ lisitsyn	sometimes it is hot :D
+ lisitsyn	what sucks is that roads are ruined every spring
+ thoralf	We can choose between cold and warm rain. ;)
+ lisitsyn	thoralf: and you speak like I don't want to come to berlin ;)
+ lisitsyn	can't see the opportunity ;)
+ thoralf	lol
+ thoralf	Did you see this one? ;) https://github.com/shogun-toolbox/shogun/issues/2133
+ thoralf	lisitsyn: Every time I touch shogun this happens.
+ lisitsyn	thoralf: actually sparse vector is assumed to be sorted
+ thoralf	lisitsyn: Well, if it's assumed to be sorted, why computing dot product this way?
+ thoralf	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/lib/SGSparseVector.cpp#L355
+ thoralf	You can do it in O(n), but this one is in O(n^2).
+ lisitsyn	unreadable :D
+--- Log closed Mon Apr 14 00:00:04 2014

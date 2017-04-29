@@ -1,0 +1,205 @@
+--- Log opened Fri Mar 23 00:00:19 2012
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- PhilTillet [~Philippe@tillet-p42154.maisel.int-evry.fr] has quit [Read error: Operation timed out]
+-!- l0nr4n [~l0nr4n@unaffiliated/l0nr4n] has quit [Quit: This computer (or maybe me) has gone to sleep]
+-!- mayanks43 [~Marcus@115.248.130.148] has joined #shogun
+-!- mayanks431 [~Marcus@116.203.83.193] has joined #shogun
+-!- mayanks43 [~Marcus@115.248.130.148] has quit [Ping timeout: 240 seconds]
+-!- mayanks431 is now known as mayanks43
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- romi_ [~mizobe@187.57.0.171] has joined #shogun
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has quit [Ping timeout: 276 seconds]
+-!- vikram360 [~vikram360@117.192.188.225] has quit [Ping timeout: 272 seconds]
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has joined #shogun
+-!- mayanks43 [~Marcus@116.203.83.193] has quit [Read error: Connection reset by peer]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ CIA-64	shogun: Soeren Sonnenburg master * r252a844 / (4 files in 3 dirs):
+ CIA-64	shogun: remove blas/lapack functions from Math headers
+ CIA-64	shogun: in particula drop dgemm / dgemv which can be directly used from atlas
+ CIA-64	shogun: anyways. - http://git.io/NpKy3g
+ sonne|work	shogun-buildbot: now buildbot lets see if you will be happy again
+ n4nd0	:)
+ sonne|work	n4nd0: of course he (or she) is not
+ sonne|work	different problem
+ n4nd0	sonne|work: haha
+-!- vikram360 [~vikram360@117.192.163.224] has joined #shogun
+ gsomix	hi
+ sonne|work	moin gsomix
+* gsomix is now looking at "wikipedia/Moin" :)
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 252 seconds]
+-!- wiking_ is now known as wiking
+-!- PhilTillet [~Philippe@tillet-p42154.maisel.int-evry.fr] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackburn	sonne|work: what's up with lapack test?
+ sonne|work	blackburn: atlas was always disabled on buildbot - now that it is enabled it triggers bugs
+ blackburn	sonne|work: clapack.h missing h\mm
+ blackburn	sonne|work: https://github.com/shogun-toolbox/shogun/commit/1336edf6a03ae51575f04d6630f87f5b415f2e87 why did you do that?
+ blackburn	I mean it was working before
+ sonne|work	no it was not working before
+ sonne|work	to autodetect atlas
+ blackburn	sonne|work: on my ubuntu it was detecting atlas pretty well
+ sonne|work	on my machine running debian unstable not / nor on n4nd0's machine
+ blackburn	anyway something goes wrong with HAVE_* things I guess
+ sonne|work	no
+ blackburn	what is wrong then?
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 244 seconds]
+ sonne|work	problem is that INCLUDES need to be used in examples
+ blackburn	ah right
+ sonne|work	so what we have in .config needs to be propagated to be used in make check-examples
+ n4nd0	sonne|work: I don't know if this may help but yesterday when I configure with includes=/usr/include/atlas I got octave to work good
+ n4nd0	sonne|work: but this morning I discovered that the examples in libshogun failed
+ n4nd0	clapack.h not found IIRC
+ sonne|work	n4nd0: yeah - that is what we are working on...
+ n4nd0	I had to configure without the flag and compile again
+ blackburn	sonne|work: btw as for tests, you probably have seen I've fixed serialization related errors
+ blackburn	sonne|work: and yes svmocas test should be 'resaved'
+ sonne|work	no - when?
+ blackburn	sonne|work: well in the beginning of this week or so
+ blackburn	I wrote parameter map stuff
+ blackburn	sonne|work: https://github.com/shogun-toolbox/shogun/commit/eec65f511fd1f33edfe4f58c195d8443a45a03a8 that is
+ gsomix	sonne|work, I responded to comments on github
+ CIA-64	shogun: Soeren Sonnenburg master * r26aff14 / src/Makefile.template : propagate INCLUDES to libshogun examples - http://git.io/ZLGYkA
+ sonne|work	blackburn: nice - but I think we need to increase parameter version in NEWS too
+ sonne|work	i.e. paramter 0 -> parameter 1
+ blackburn	sonne|work: exactly
+ blackburn	sonne|work: and default version as well
+ blackburn	if it wasn't changed before
+ CIA-64	shogun: Soeren Sonnenburg master * r956b5e4 / src/NEWS : increment parameter format version 0 -> 1 - http://git.io/SMlZ1g
+ sonne|work	it used to be 0
+ blackburn	nevertheless I don't like this soo hard back compatibility stuff but I was surprised how well-designed it is
+ blackburn	sonne|work: could you please emphasize in how to apply guide we don't need test commits/comments/requests
+ blackburn	2 cases already I don't know how to tell them we don't need it
+ sonne|work	blackburn: should this be 1 one at the end SGParamInfo("kernel_backup", CT_SCALAR, ST_NONE, PT_SGOBJECT, 0) ?
+ sonne|work	I mean doesn't kernel_backup exist only in version 1?
+ blackburn	sonne|work: yeah my mistake probably
+ blackburn	sonne|work: custom kernel as well
+ blackburn	data_locked is already 0
+ sonne|work	could you please fix it?
+ blackburn	sonne|work: I can't sorry, I have no access to my notebook right now
+ sonne|work	ok done
+ CIA-64	shogun: Soeren Sonnenburg master * r3f877e2 / src/shogun/machine/KernelMachine.cpp : custom_kernel / kernel_backup appeared only in version 1 - http://git.io/jpXaVw
+ blackburn	sonne|work: and probably my port 22 is blocked here :D
+ blackburn	my? git I mean
+ blackburn	sonne|work: ok thanks
+ sonne|work	hmmhh still failing
+ blackburn	sonne|work: what fails?
+ sonne|work	http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/576/steps/test_1/logs/stdio
+ sonne|work	not sure if this is already the version   with the Makefile.template patch
+ sonne|work	yeah it is
+ blackburn	sonne|work: where is clapack.h on your machine?
+ CIA-64	shogun: Soeren Sonnenburg master * r0445a57 / examples/undocumented/libshogun/check.sh : let check.sh propagate INCLUDES too - http://git.io/Ru9fSQ
+ sonne|work	now it should work...
+* sonne|work crosses fingers
+ blackburn	hah
+ blackburn	sonne|work: does rest code like converters etc work?
+ blackburn	with new changes I mean
+ blackburn	is it only related to examples?
+ sonne|work	blackburn: atlas was always off on machines where clapack.h was not in /usr/include/
+ sonne|work	so it can only affect libshogun based stuff
+ sonne|work	gsomix: I just had a look - nice work. so can this be applied as is?
+ sonne|work	gsomix: or do we have to deal with http://www.mail-archive.com/numpy-discussion@scipy.org/msg29403.html somehow?
+ shogun-buildbot	build #578 of cmdline_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/578
+ sonne|work	yay! :-)
+ blackburn	success
+ shogun-buildbot	build #556 of r_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/r_static/builds/556
+ blackburn	sonne|work: new crazy idea: we should encourage some ML teaching course to use shogun!
+ shogun-buildbot	build #557 of octave_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/557
+ sonne|work	blackburn: not a crazy idea - but you know I am not a professor so it is tough...
+ sonne|work	so in case you become one (or heiko) -> do it :)
+ blackburn	sonne|work: I actually can organize something not really official
+ blackburn	but that sucks
+ blackburn	I mean we could contact some professor
+ blackburn	sonne|work: in the crazy case I would like to become a lecturer it would require at least 6 (sic!) years more
+ shogun-buildbot	build #545 of python_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/545
+ n4nd0	blackburn: sonne|work I think I could be able to talk about it with a professor here at KTH
+ blackburn	n4nd0: nice! I am personally ready to support something like that
+ blackburn	i.e. with code or so
+ n4nd0	blackburn: here they have a couple of courses in the ml master where students use simple examples in matlab to see different learning algorithms work
+ n4nd0	blackburn: I think that the teacher would probably agree if we suggest the idea and give the examples of the stuff they want of course
+ n4nd0	blackburn: I think it's an awesome idea btw
+ blackburn	n4nd0: just retrieve a list of topics or so
+ blackburn	and we can develop some pretty examples
+ n4nd0	this is the first course, take a look under lab assignments
+ n4nd0	http://www.csc.kth.se/utbildning/kth/kurser/DD2431/ml11/
+ n4nd0	and here you can see the topics of the other course http://www.csc.kth.se/utbildning/kth/kurser/DD2427/bik12/Schedule.php
+ blackburn	n4nd0: aha will take a look
+ gsomix	sonne|work, as is. if i figured out correctly.
+-!- harshit_ [~harshit@182.68.130.255] has joined #shogun
+-!- harshit_ [~harshit@182.68.130.255] has quit [Ping timeout: 264 seconds]
+ shogun-buildbot	build #384 of python_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_modular/builds/384  blamelist: sonne@debian.org
+ blackburn	sonne|work: huh! that's strange ^
+ sonne|work	leaving CSGObject::migrate
+ sonne|work	leaving CSGObject::migrate
+ sonne|work	*** glibc detected *** python: corrupted double-linked list: 0x0000000000cb23d0 ***
+ sonne|work	seems like we have a problem in one of the data structures migrations use...
+ blackburn	yeah but it is ok on my pc
+ sonne|work	uhh and
+ sonne|work	../data/regression/KRR_1_15_Gaussian_1en05.mERROR
+ sonne|work	KRR is disabled/unavailable!
+ blackburn	sonne|work: that's because you renamed it
+ sonne|work	ahh yes
+-!- vikram360 [~vikram360@117.192.163.224] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.163.224] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 252 seconds]
+ gsomix	sonne|work, I sent one more commit
+ gsomix	and now I'm going to the theater. :)
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- harshit_ [~harshit@182.68.130.255] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- l0nr4n [~l0nr4n@hugogascon.ml.tu-berlin.de] has joined #shogun
+-!- l0nr4n [~l0nr4n@hugogascon.ml.tu-berlin.de] has quit [Changing host]
+-!- l0nr4n [~l0nr4n@unaffiliated/l0nr4n] has joined #shogun
+-!- harshit_ [~harshit@182.68.130.255] has quit [Ping timeout: 276 seconds]
+-!- l0nr4n [~l0nr4n@unaffiliated/l0nr4n] has quit [Remote host closed the connection]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- harshit_ [~harshit@182.68.130.255] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+-!- blackburn [~qdrgsm@83.234.54.68] has joined #shogun
+-!- gsomix [~gsomix@188.168.2.59] has quit [Ping timeout: 252 seconds]
+-!- menonnik [~chatzilla@59.178.179.83] has joined #shogun
+-!- menonnik [~chatzilla@59.178.179.83] has quit [Client Quit]
+-!- blackburn_ [d5578bfc@gateway/web/freenode/ip.213.87.139.252] has joined #shogun
+-!- PhilTillet [~Philippe@tillet-p42154.maisel.int-evry.fr] has quit [Ping timeout: 260 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Operation timed out]
+-!- gsomix [~gsomix@188.168.128.174] has joined #shogun
+ gsomix	I'm back
+-!- vikram360 [~vikram360@117.192.163.224] has quit [Ping timeout: 252 seconds]
+ harshit_	hi everyone , shogun is giving me an exception when i try to use my own class derived from clinearmachine
+ harshit_	exception is :
+ harshit_	[ERROR] assertion w_dim==features->get_dim_feature_space() failed in file machine/LinearMachine.cpp line 54
+ harshit_	terminate called after throwing an instance of 'shogun::ShogunException'Aborted
+ harshit_	Does any one have any idea why this error is coming
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has quit [Remote host closed the connection]
+-!- muddo [~muddo@gateway/tor-sasl/muddo] has joined #shogun
+-!- harshit_ [~harshit@182.68.130.255] has quit [Ping timeout: 260 seconds]
+-!- romi_ [~mizobe@187.57.0.171] has quit [Ping timeout: 246 seconds]
+-!- vikram360 [~vikram360@117.192.163.224] has joined #shogun
+-!- harshit_ [~harshit@182.68.130.255] has joined #shogun
+-!- romi_ [~mizobe@187.101.141.174] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- blackburn_ [d5578bfc@gateway/web/freenode/ip.213.87.139.252] has quit [Quit: Page closed]
+-!- harshit_ [~harshit@182.68.130.255] has quit [Ping timeout: 246 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- harshit_ [~harshit@182.68.130.255] has joined #shogun
+@sonney2k	harshit_, the dimensionality of your w vector doesn't match the dim of you examples
+@sonney2k	so you call apply and it cannot do anything
+-!- harshit_ [~harshit@182.68.130.255] has quit [Remote host closed the connection]
+@sonney2k	blackburn, btw it is only python_modular that is failing...
+@sonney2k	all the rest is ok now?!
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+@sonney2k	blackburn, hmmhh many tests work now - but I still have these warnings about data_locked not being there
+@sonney2k	so I guess something is not working correctly yet...
+@sonney2k	yeah and the multiclass issue is still there too
+ wiking	blackburn: i have some code
+ wiking	i'll commit it but now i'm off to rest a bit
+ wiking	when u have time and when it's in would be great to have some feedback
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+-!- gsomix [~gsomix@188.168.128.174] has quit [Read error: Operation timed out]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+--- Log closed Sat Mar 24 00:00:19 2012

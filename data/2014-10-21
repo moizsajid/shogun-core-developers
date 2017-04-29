@@ -1,0 +1,221 @@
+--- Log opened Tue Oct 21 00:00:33 2014
+-!- Phawx [~Phawx@91.102.9.98] has quit [Ping timeout: 245 seconds]
+-!- HeikoS [~heiko@nat-165-26.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- Phawx [~Phawx@91.102.9.98] has joined #shogun
+-!- Phawx [~Phawx@91.102.9.98] has quit [Remote host closed the connection]
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has quit [Remote host closed the connection]
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has joined #shogun
+-!- PirosB3 [~pirosb3@195.101.111.125] has joined #shogun
+-!- HeikoS [~heiko@2.216.173.249] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- Netsplit *.net <-> *.split quits: @lisitsyn
+-!- Netsplit over, joins: lisitsyn
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+-!- PirosB3 [~pirosb3@195.101.111.125] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@195.101.111.125] has joined #shogun
+-!- HeikoS [~heiko@2.216.173.249] has quit [Quit: Leaving.]
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+@lisitsyn	lambday: hey
+ lambday	lisitsyn: hola
+@lisitsyn	lambday: how are you doing?
+ lambday	lisitsyn: how do you do, sir?
+ lambday	lisitsyn: haha.. good.. reading submodular functions is killing me
+@lisitsyn	lambday: hahah sir!
+-!- arne-cl [~arne@f052135204.adsl.alicedsl.de] has joined #shogun
+ lambday	(trying to add a British touch)
+@lisitsyn	lambday: before gsoc I receive like a billion of DEAR SIR
+@lisitsyn	:D
+@lisitsyn	no offense but guess who writes this way :)
+ lambday	lisitsyn: haha that's common.. I too got a few from anonymous people regarding asking tips for cracking the IIT entrance exam for masters :|
+@lisitsyn	lambday: did you manage to solve your issue with virtual stuff?
+ lambday	lisitsyn: thanks to you.. I did - here it is
+ lambday	lisitsyn: https://github.com/lambday/flash/blob/develop/src/flash/statistics/internals/DataManager.h#L118
+@lisitsyn	std::shared_ptr<shogun::CFeatures>(feats)
+@lisitsyn	uhmm don't do that ;)
+@lisitsyn	make_shared
+ lambday	lisitsyn: ah that's just to save time
+ lambday	ohh
+ lambday	alrighty
+@lisitsyn	ahh no
+@lisitsyn	this would be ok as well
+ lambday	but this doesn't leak
+@lisitsyn	yeah yeah my bad
+ lambday	lisitsyn: why don't we start using shared_ptr in shogun as well whenever we can?
+@lisitsyn	lambday: I think we should
+@lisitsyn	lambday: we actually should convert to d-ptrs
+ lambday	lisitsyn: and do we need a wrapper for the containers as well?
+@lisitsyn	sgvector?
+@lisitsyn	or what?
+@besser82	lisitsyn, lambday: I'm currently accumulating stuff to cleanup ^^
+@lisitsyn	ahh dynamicarray etc?
+ lambday	nah normal std::vector std::pair std::map
+@lisitsyn	lambday: swig is slow with std
+@lisitsyn	that's just the only issue
+@besser82	lisitsyn, sgvector is custom impl. written in C  \o/
+@lisitsyn	besser82: hah well there were some reasons I guess
+ lambday	besser82: also our CDynamicObjectArray is pretty heavyweight...
+ lambday	otherwise it solves the same problems
+@besser82	lisitsyn, yes --->  No invented here  XD
+@lisitsyn	I am like into training some models here now
+@lisitsyn	and actually for me what matters is command line :D
+@besser82	lisitsyn, lambday: one thing is kick out all that legacy C*****-shiatz...
+@lisitsyn	so I start to think we should have cool command line for shogun
+@besser82	that was just for those ugly $binding_static
+@besser82	lisitsyn, real gangstaz sip on yacc  ^^
+@lisitsyn	besser82: heh
+@lisitsyn	I mean VW is just an ugly thing with command line
+@lisitsyn	but you can integrate it anywhere
+@besser82	the whole cli-thingie is pretty ugly...
+ lambday	I think that's a great idea..
+@lisitsyn	yeah cli is ugly
+@lisitsyn	but writing huge programs for data processing is hard as well
+@lisitsyn	I mean you need to grep something sort it blabla and then feed to your classifier
+@lisitsyn	it is just a waste of time to write a program for that
+ lambday	lisitsyn: how good is our cmdline_static?
+@besser82	lisitsyn, that's what python_modular is for  ;)
+@lisitsyn	nah not really
+@lisitsyn	just one CLI utility
+@lisitsyn	and your python data processing code is a mess :D
+ arne-cl	hi! could someone help me compile/install shogun with python_modular bindings?
+@besser82	lisitsyn, Y?
+@lisitsyn	arne-cl: yeah sure what's the problem?
+@besser82	lisitsyn, import sh
+ arne-cl	i tried foo@bar:/tmp/shogun-3.2.0/build# cmake -DCMAKE_INSTALL_PREFIX="/opt/shogun-install" -DPythonModular=ON .. which ran fine, but...
+ lambday	arne-cl: hey
+@lisitsyn	besser82: yeah but still ugly
+@besser82	arne-cl, which distro?
+ arne-cl	... after make and make install, i cant import modshogun in python
+ lambday	arne-cl: set PYTHONPATH
+ arne-cl	linux mint 16
+@lisitsyn	yeah
+@lisitsyn	you have some strange prefix for shogun
+@lisitsyn	you'd have to let python know of it
+@besser82	arne-cl, export PYTHONPATH=/opt/shogun-install/usr/lib/pythonX.X/
+@besser82	arne-cl, replace X.X with real python version ^^
+ lambday	lisitsyn: did you happen to give any thoughts on the plugin arch?
+ lambday	how should we go about that... etc?
+@besser82	lambday, I'd propose void**  XD
+ lambday	besser82: hahaha I C
+@lisitsyn	lambday: well still think
+@lisitsyn	we should have a few interfaces
+@lisitsyn	lke base interfaces we have
+@lisitsyn	others go away
+ arne-cl	besser82: i tried export PYTHONPATH=/opt/shogun-install/lib/python2.7/ but i still get an import error in python
+@lisitsyn	you do some require - it loads .so (.dylib, .dll)
+ lambday	so... the way I was thinking is to make the shogun code partitioned into wrappers and internals.. so in that case, the wrappers are the interfaces that you're talking about
+@lisitsyn	yeah
+@besser82	arne-cl, you missed that **/usr/**  :D
+ lambday	fits pretty well then..
+ lambday	arne-cl: do a quick find :)
+ arne-cl	besser82: but in /opt/shogun-install, there are only these dirs: include, lib and share
+@lisitsyn	lambday: it is not clear for me how parameters should look like
+@lisitsyn	kernel.set("width", 3.0)?
+ lambday	lisitsyn: in many cases I think we can make the internals header only... so highly optimized templated code can be written there..
+ lambday	and wrappers are just clients using that internal library
+@lisitsyn	yeah whenever it makes sense we can optimize
+@besser82	arne-cl, then I'm out of advice, sry...
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has quit [Read error: Connection reset by peer]
+ lambday	lisitsyn: you did something for that in aer, no?
+@lisitsyn	lambday: yeah kind of
+ arne-cl	besser82: thanks anyway, i'll retry without a custom install dir
+ lambday	lisitsyn: is there any off-the-shelf parameter framework that we can use?
+@lisitsyn	lambday: uhmm I don't know
+@lisitsyn	lambday: that's just about the interface
+@lisitsyn	storing parameters is simple and stupid
+@lisitsyn	you do some map or anything like that and that's it
+ lambday	lisitsyn: so what's the issue?
+@lisitsyn	lambday: the interface
+ lambday	kernel.set("width", 3.0) is fine
+ lambday	pretty python-like :D
+@lisitsyn	lambday: the signature of such method is
+@lisitsyn	set(const char*, T)
+@lisitsyn	so we just generate all the possible things
+-!- Floatingman [~Floatingm@c-68-52-34-232.hsd1.tn.comcast.net] has joined #shogun
+@lisitsyn	I don't know if that's cool
+ lambday	yeah
+@lisitsyn	no compile time checks at all
+ lambday	ummmm
+ lambday	yeah that's an issue :/
+@lisitsyn	lambday: we can support both tags
+ lambday	lisitsyn: so you don't want to do anything specific for each class?
+@lisitsyn	and strings
+@lisitsyn	that's easy
+@lisitsyn	yeah no specific methods if we want plugins
+@lisitsyn	okay that's actually possible
+@lisitsyn	but would be ugly
+@lisitsyn	call('precompute_shit_together')
+@lisitsyn	lambday: ^ like that
+@lisitsyn	in python we can add things dynamically
+@lisitsyn	not in java
+ lambday	you gotta have something for the classes to specify
+ lambday	make register_params mandatory for each class..
+@lisitsyn	lambday: I think we can avoid any register params
+@lisitsyn	lambday: you just don't specify field exactly
+@lisitsyn	you only specify their names and type
+ lambday	I mean yes that should do
+ lambday	and you store as Any or void**
+ lambday	and cast it back
+@lisitsyn	yeah Any and void** is the same :D
+@lisitsyn	lambday: you can do smart things if you know all the fields of a class
+ lambday	so if the cast function is available then can't we static assert it with the templated set(...) function
+ lambday	:-/
+@lisitsyn	1) you reserve exactly this amount of memory
+@lisitsyn	2) you re-order them to be aligned
+@lisitsyn	and 3) you can add some spaces to avoid threading issues
+@lisitsyn	lambday: ^ 3) is the funny thing actually
+@lisitsyn	I am talking about false sharing
+ lambday	lisitsyn: what's that?
+@lisitsyn	lambday: say you have
+@lisitsyn	struct { int a; int b; }
+@lisitsyn	and you access it from different threads
+@lisitsyn	your CPU will block both a and b just because they are in same cache line
+@lisitsyn	struct { int a; char space[1024]; int b; } would be much faster :D
+ lambday	really
+@lisitsyn	lambday: so the thing is that ideally you'd just
+@lisitsyn	put some lines like that
+@lisitsyn	addParameter<int>("width");
+@lisitsyn	addParameter<std::string>("name");
+@lisitsyn	it reserves sizeof(int) + sizeof(std::string) + sizeof(alignment junk) bytes
+ lambday	what if some single threaded program tries to use it then? locality is lost...
+@lisitsyn	lambday: yeah
+ lambday	or it may be possible to use different layouts for single threaded or multithreaded if we know that too in advance
+@lisitsyn	lambday: I don't think we should bother about that
+@lisitsyn	lambday: the thing is that we can do that
+@lisitsyn	in one place
+@lisitsyn	if we have plain old C++ classes you know
+@lisitsyn	we have to do all the stuff manually
+ lambday	lisitsyn: how vital would be this alignment in some, say, data-oriented job?
+ lambday	data hungry
+@lisitsyn	not really an issue I think
+@lisitsyn	lambday: we just let compiler know of constness of get
+@lisitsyn	and it optimizes redundant calls
+@lisitsyn	you don't really use parameters that often I think
+ lambday	lisitsyn: hmm... this is cool stuff man
+@lisitsyn	lambday: ahh yeah another thing about storing everything in one piece of memory
+@lisitsyn	lambday: we can (de)serialize with one strcpy
+@lisitsyn	(if it is one arch)
+ lambday	strcpy or std::copy?
+@lisitsyn	lambday: what's the difference :D
+ lambday	lol.. null :D
+@lisitsyn	lambday: pointers would be updated though
+ lambday	lisitsyn: yep..
+ lambday	lisitsyn: could we write some poc within aer for this stuff?
+@lisitsyn	lambday: yeah I'll try to find some time for that
+ lambday	lisitsyn: if you think I can help code-wise for some places let me know..
+@lisitsyn	lambday: would assigning some issues work?
+ lambday	lisitsyn: I guess so..
+@lisitsyn	lambday: cool then I'll try
+ lambday	lisitsyn: awesome.. looking forward to this stuff.. very psyched
+@lisitsyn	:D
+ lambday	lisitsyn: reading all these mathematics is giving me headache :(
+ lambday	could use some break..
+@lisitsyn	lambday: oh why? maths is kind of cool
+ lambday	lisitsyn: it is... but I feel like way too much new information is being hashed inside my brain within a very short period of time.. and I'm telling you I don't feel much good :D
+ lambday	lisitsyn: working on feature selection btw which is cool stuff :D
+-!- arne-cl [~arne@f052135204.adsl.alicedsl.de] has left #shogun []
+ lambday	lisitsyn: going to grab a beer... see you soon :)
+@lisitsyn	see ya
+-!- PirosB3 [~pirosb3@195.101.111.125] has quit [Quit: PirosB3]
+@wiking	ping
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Ping timeout: 246 seconds]
+--- Log closed Wed Oct 22 00:00:35 2014

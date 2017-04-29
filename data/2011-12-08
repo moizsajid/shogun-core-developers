@@ -1,0 +1,111 @@
+--- Log opened Thu Dec 08 00:00:19 2011
+-!- blackburn [~blackburn@188.168.2.160] has quit [Quit: Leaving.]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- Ram108 [~amma@14.99.41.10] has joined #shogun
+ Ram108	hi
+ Ram108	i am new to shogun and i would like to contribute something.....
+ Ram108	could someone guide me as to where to start...... i have tried google-ing up a lot of key words but could not get much idea out of it
+ Ram108	thank you....
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- Ram108 [~amma@14.99.41.10] has quit [Ping timeout: 252 seconds]
+-!- kocki [8d2c1705@gateway/web/freenode/ip.141.44.23.5] has joined #shogun
+ kocki	hello
+ kocki	i have a question
+ kocki	may i link to shogun from my application without releasing it under the gpl?
+ sonne|work	well you can use any gpl compatible license for your code
+ sonne|work	kocki: ^
+ sonne|work	but you have to opensource your code  under a compat license if you want to distribute the conglomerate product
+ kocki	ok, thank you
+ kocki	i'm afraid, that won't be possible
+ kocki	then, i'll have to use libsvm or some other library
+ sonne|work	kocki: look at scikits learn or torch or browse mloss.org
+ sonne|work	maybe you'll find sth
+ kocki	thank you very much! i'll do that
+ kocki	scikit learn is for python, but i need something for c++
+-!- blackburn [~blackburn@188.168.14.102] has joined #shogun
+ sonne|work	kocki: dlib ml?
+ sonne|work	anyways no idea really what is best for you
+ kocki	i'm looking at dlib at the moment. looks promising
+ blackburn	sonne|work: btw I don't really understand why we are GPL ;)
+ sonne|work	hehe
+ blackburn	sonne|work: testing now
+ blackburn	Ram108: if you would read logs you should contact me with blackburn91@gmail.com
+ 15SAAI18M	shogun: Sergey Lisitsyn master * r52f7c5a / data : Update data - http://git.io/dB580Q
+ blackburn	sonne|work: did you already turned off trac?
+ sonne|work	not intentionally
+ sonne|work	is it off?
+ sonne|work	looks like
+ sonne|work	hmhh
+ sonne|work	well then one more reason to migrate :D
+ sonne|work	I have to check why it is not running but cannot do that from here
+ blackburn	sonne|work: I guess your kids did
+ blackburn	sonne|work: I hardly remember all the issues ;)
+ sonne|work	well then make a new plan for 1.2 - right?
+ sonne|work	like swig 2.0.4 as hard requirement and stuff
+ shogun-buildbot	build #388 of cmdline_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/388
+ blackburn	sonney2k: I'm not sure it is an issue
+ shogun-buildbot	build #363 of python_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/python_static/builds/363
+ blackburn	sonne|work: http://dl.dropbox.com/u/10139213/shogun/words.png did I show it to you?
+ blackburn	LLE with 'diff' Custom kernel defined on words
+ blackburn	Kernel LLE in fact
+ 15SAAI18M	shogun: Sergey Lisitsyn master * rf77788a / applications/dimreduction/words_embedding.py : Updated words embedding application - http://git.io/cTpkLw
+ kocki	i just want to thank you and tell you that i will try dlib. bye
+ sonne|work	kocki: ok - np
+ sonne|work	blackburn: which kernel is this?
+ sonne|work	CommWordStringKernel with sorted preproc?
+ blackburn	sonne|work: custom
+ blackburn	for i in range(N):
+ blackburn	for j in range(i,N):
+ blackburn	s = difflib.SequenceMatcher(None,words[i],words[j])
+ blackburn	:)
+ blackburn	dist_matrix[i,j] = s.ratio()
+ blackburn	should be kernel_matrix ;)
+ sonne|work	I would suggest to just use CommWordStringKernel for that ... no idea what sequence matcher does though
+ sonne|work	the Comm* kernel will count e.g. 2 mers
+ blackburn	sonne|work: I'll try
+-!- kocki [8d2c1705@gateway/web/freenode/ip.141.44.23.5] has quit [Quit: Page closed]
+ blackburn	sonne|work: how to use it? :)
+ blackburn	got it
+ blackburn	but results are worse or I set wrong params
+ sonne|work	I need to see the code
+ blackburn	cf = StringCharFeatures(words, RAWBYTE)
+ blackburn	wf = StringWordFeatures(RAWBYTE)
+ blackburn	wf.obtain_from_char(cf,0,1,2,False)
+ blackburn	return CommWordStringKernel(wf,wf)
+ blackburn	sonne|work: words are ['publishing','below',...]
+ blackburn	you said something about sorted preprocs?
+ sonne|work	blackburn: yes look in the example kernel_commwo*
+ sonne|work	otherwise result will be crap
+ blackburn	yeah it is now
+ blackburn	sonne|work: what is order,start and gap?
+ sonne|work	order is ngram length (use 2)
+ sonne|work	start is usually order-1
+ sonne|work	and gab is not used
+ sonne|work	so IIRC 0
+ blackburn	sonne|work: hmm pretty interesting results too
+ sonne|work	you could use CommUlongStringKernel instead
+ sonne|work	and the up to order 4
+ blackburn	sonne|work: got something like that http://dl.dropbox.com/u/10139213/shogun/words.png
+ sonne|work	works well right?
+ blackburn	sonne|work: sure
+ sonne|work	was that order 4?
+ sonne|work	or 2?
+ blackburn	sonne|work: 2, 4 wasn't working at all
+ sonne|work	4 is too tough I guess
+ sonne|work	there are rarely 3-mer matches
+ sonne|work	we should have hashed string features too
+ sonne|work	but currently these only exist for DNA
+-!- blackburn [~blackburn@188.168.14.102] has left #shogun []
+-!- blackburn [~blackburn@188.168.14.102] has joined #shogun
+ blackburn	sonney2k: turn on trac please ;)
+-!- song [9810375e@gateway/web/freenode/ip.152.16.55.94] has joined #shogun
+ song	Hi  I was trying to use R-shogun interface with the example script: kernel_oligo_string_modular.R. I got the following error when excuting line 16:  > dump <- feats_train$set_features(feats_train, fm_train_dna) Error in feats_train$set_features(feats_train, fm_train_dna) :   could not find function "f"  Could anyone help me to interpret this error message?
+-!- song is now known as Guest32426
+ Guest32426	Hi  I was trying to use R-shogun interface with the example script: kernel_oligo_string_modular.R. I got the following error when excuting line 16:  > dump <- feats_train$set_features(feats_train, fm_train_dna) Error in feats_train$set_features(feats_train, fm_train_dna) :   could not find function "f"  Could anyone help me to interpret this error message?
+ Guest32426	i cannot send question to the shogun maillist so I post it here.
+-!- Guest32426 [9810375e@gateway/web/freenode/ip.152.16.55.94] has quit [Client Quit]
+--- Log closed Fri Dec 09 00:00:19 2011

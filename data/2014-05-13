@@ -1,0 +1,201 @@
+--- Log opened Tue May 13 00:00:46 2014
+-!- lisitsyn [~qdrgsm@80.252.20.67] has left #shogun []
+-!- [1]Saurabh7 [~Saurabh7@115.248.45.78] has joined #shogun
+-!- Saurabh7 [~Saurabh7@115.248.45.78] has quit [Ping timeout: 265 seconds]
+-!- [1]Saurabh7 is now known as Saurabh7
+-!- [1]Saurabh7 [~Saurabh7@115.248.45.78] has joined #shogun
+-!- Saurabh7 [~Saurabh7@115.248.45.78] has quit [Ping timeout: 276 seconds]
+-!- [1]Saurabh7 is now known as Saurabh7
+-!- DarkRoom [~darkroom@14.139.82.6] has joined #shogun
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has joined #shogun
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Client Quit]
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has quit [Quit: PirosB3]
+-!- Saurabh7 [~Saurabh7@115.248.45.78] has quit [Ping timeout: 240 seconds]
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- kislay [~Abhijeet@103.240.205.246] has quit [Ping timeout: 250 seconds]
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has quit [Remote host closed the connection]
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has joined #shogun
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	Good morning people
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has joined #shogun
+@iglesiasg	parijat, Hey parijat, I'm having a look at your PR atm
+ parijat	iglesiasg: hi.. i see that you are reviewing my PR.. if you have any questions, I am available here in irc..
+@iglesiasg	parijat, great, thanks
+ parijat	iglesiasg: yup I saw!
+@iglesiasg	parijat, for the moment all of them are more or less minor comments
+@iglesiasg	parijat, but please have a look at the comment on line 152 of C45ClassifierTree
+ parijat	iglesiasg: yup, I saw a few of them.. I will address them
+@iglesiasg	parijat, maybe I misunderstood something of what's going on there
+ parijat	iglesiasg: alright,, let me see.
+@iglesiasg	parijat, not exactly on that line, pretty close
+ parijat	iglesiasg: I think you are right there! if the last set of same labels has higher weight, its gooing to ignore that.
+@iglesiasg	parijat, all right
+ parijat	iglesiasg: I will fix this
+@iglesiasg	parijat, I think you can correct if by pulling out the else if and making it an independent if within the for loop
+ parijat	iglesiasg: yes exactly!
+@iglesiasg	parijat, I compiled and tested your code locally btw
+@iglesiasg	parijat, 0 leaks in valgrind :)
+ parijat	iglesiasg: me too, I checked valgrind before sending in! ;)
+ parijat	iglesiasg: btw, did you get any word about acceptance of your paper?
+@iglesiasg	parijat, yes, yesterday night
+@iglesiasg	parijat, they accepted it \o/
+@iglesiasg	parijat, but I have to address some comments from reviewers
+ parijat	iglesiasg: yo! calls for celebrations.
+@iglesiasg	parijat, hehe yeah!
+ parijat	iglesiasg: very nice! so you would be travelling somewhere to present the paper?
+@iglesiasg	parijat, haha yeah
+@iglesiasg	to Spain....
+@iglesiasg	hahaha
+@iglesiasg	funny thing
+@iglesiasg	at least it is not to my city, although another city I've already been in. Salamanca
+@iglesiasg	parijat, this if the conference: http://fusion2014.org/
+ parijat	iglesiasg: haha! good good..
+@iglesiasg	I'd prefer to visit a new place
+ parijat	iglesiasg: oh! let me see..
+ parijat	iglesiasg: ya, Im sure you will get many opportunities to visit new places, this is just the beginning..
+ parijat	iglesiasg: you are right about data getting modified... I should probably restore the data matrix
+-!- kislay [~Abhijeet@103.240.206.190] has joined #shogun
+@iglesiasg	parijat, ok, I should start going soon
+@iglesiasg	parijat, I have left to look into entropy, informational_gain... and apply_multiclass_from_...
+@iglesiasg	parijat, but I guess these are pretty much the same as in ID3, right?
+ parijat	iglesiasg: ya almost! very few changes
+@iglesiasg	parijat, I should be able to read them during the day anyway
+@iglesiasg	parijat, nice job! :)
+ parijat	iglesiasg: thanks! there are a few things that are yet to be done like missing values..
+ parijat	iglesiasg: should I do these in this PR itself? or is it better to wait for this getting merged?
+@iglesiasg	parijat, better wait, this PR is already large
+@iglesiasg	parijat, remind me what these missing values are, please
+ parijat	iglesiasg: i meant feature for handling missing values in C4.5
+ parijat	iglesiasg: i have to add this. plus tree pruning
+ parijat	iglesiasg: but this PR is complete in itself without these. So it wont be a problem if we merge this 1st and then go ahead adding the remaining things
+@iglesiasg	parijat, I meant what the idea was behind handling missing values
+@iglesiasg	parijat, I have bad memory :)
+ parijat	iglesiasg: ok! the idea is that..
+ parijat	iglesiasg: if we choose a data vector with unknown chosen attribute, we split the entire weight of the vector into fractions correponding to the possibility of the vector being moved to each of the child nodes
+ parijat	iglesiasg: so basically we move the vector into all the children nodes of the current node, but the weight gets divided accordingly
+ parijat	iglesiasg: did I make sense?
+@iglesiasg	parijat, yep
+ parijat	iglesiasg: sometimes what I say can be difficult to understand!! :)
+@iglesiasg	parijat, if the attribute is unknown, how are the weights computed in each of the children?
+@iglesiasg	parijat, the same for all of them?
+@iglesiasg	I mean these possibilities you mentioned above
+ parijat	iglesiasg: no, based on the ratio in which vectors with know attributes move into various children
+@iglesiasg	parijat, ok
+@iglesiasg	thanks
+ parijat	iglesiasg: not a problem! :)
+@iglesiasg	parijat, this is in some way semi-supervised learning, isn't it?
+ parijat	iglesiasg: ya, in a way.. but not  entirely though I think.. its just extended to handle missing values
+ parijat	iglesiasg: I too have to go now.. let me address your comments and update the PR
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has quit [Quit: Page closed]
+@iglesiasg	catch you later
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has joined #shogun
+-!- kislay [~Abhijeet@103.240.206.190] has quit [Ping timeout: 240 seconds]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- kislay [~Abhijeet@103.240.205.72] has joined #shogun
+-!- kislay [~Abhijeet@103.240.205.72] has quit [Ping timeout: 258 seconds]
+-!- thoralf [~thoralf@91-66-177-150-dynip.superkabel.de] has joined #shogun
+ thoralf	Hellau.
+ lisitsyn	thoralf: today I am talking about 1+2+3+... = -1/12
+ lisitsyn	what do you think?
+ thoralf	lisitsyn: True if "... = -73/12"
+ lisitsyn	thoralf: nah not really ;)
+ thoralf	of course!
+ thoralf	lisitsyn: Tell me - what is it about?
+ lisitsyn	thoralf: http://en.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF
+ thoralf	Crazy
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-glhceqzfxnrglcic] has joined #shogun
+-!- kislay [~Abhijeet@103.240.205.135] has joined #shogun
+-!- kislay [~Abhijeet@103.240.205.135] has quit [Ping timeout: 252 seconds]
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- kislay [~Abhijeet@103.240.206.95] has joined #shogun
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has quit [Quit: PirosB3]
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has joined #shogun
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has quit [Ping timeout: 240 seconds]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+ kislay	hey pickle27 :)
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- pickle27f [~pickle27@216.191.231.218] has joined #shogun
+ kislay	hey pickle27 :)
+ kislay	pickle27f, looks like some network problems you are suffering with!
+ pickle27f	kislay, agh yeah this is my work computer
+ pickle27f	macs are the worst at losing wifi and being weird about it
+ kislay	pickle27f, haha :D
+ kislay	pickle27f, I have been reading quite a lot about factory pattern!
+ kislay	pickle27f, but there seems too unorganized content present!
+ pickle27f	thats great - yeah don't over do it, you can probably start implementing the shogun opencv converter factories now
+ kislay	oh. yeah . will love to!
+ pickle27f	also can you take a look at the PR - we need to put OpenCV under a flag
+ kislay	yes.
+ kislay	I was about to look into it
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has joined #shogun
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has quit [Quit: Page closed]
+-!- HeikoS [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 240 seconds]
+-!- HeikoS [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ kislay	pickle27f, I couldn't understand the reason we need a flag. you mentioned there that if someone wants OpenCV integration and they don't have OPenCV installed, we need not give them warning. But why?
+ pickle27f	we want OpenCV integration to be something the user specifies when configuring shogun
+ pickle27f	the same way the user specifies if they want python
+ pickle27f	we don't simply build python support if we can
+ pickle27f	we only do it if asked
+ pickle27f	we want the same for OpenCV
+ pickle27f	so it needs to be behind a flag
+ pickle27f	does that make sense?
+ kislay	pickle27f, yup.
+ pickle27f	that way the default build does not change at all and if they want OpenCV we'll try and add it
+ pickle27f	if they want opencv but don't have it installed we'll say something about it
+ kislay	oh! yeah
+ kislay	okay. got it.
+-!- HeikoS [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+ pickle27f	guys why are my emails to shogun-team always filtered? can I be whitelisted on there
+ pickle27f	sonney2k_, ^
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+-!- thoralf [~thoralf@91-66-177-150-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+-!- pickle27f [~pickle27@216.191.231.218] has joined #shogun
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has quit [Ping timeout: 255 seconds]
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Quit: Leaving]
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has quit [Quit: Leaving.]
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-glhceqzfxnrglcic] has quit [Quit: Connection closed for inactivity]
+-!- utsavjain [~utsav@113.193.139.79] has joined #shogun
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has quit [Quit: PirosB3]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has joined #shogun
+-!- pickle27f [~pickle27@216.191.231.218] has joined #shogun
+-!- utsavjain [~utsav@113.193.139.79] has left #shogun []
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+-!- pickle27f [~pickle27@216.191.231.218] has joined #shogun
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@iglesiasg	sup guys
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+-!- kislay [~Abhijeet@103.240.206.95] has quit [Ping timeout: 252 seconds]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+ lisitsyn	hey iglesiasg HeikoS
+ lisitsyn	cool news :)
+@iglesiasg	lisitsyn, yandex?
+ lisitsyn	no i mean europython thing fonally
+ lisitsyn	finally
+@iglesiasg	aaah ok
+ lisitsyn	argh i am like hot now :d
+ lisitsyn	around 38c you know
+@iglesiasg	ups
+@iglesiasg	lisitsyn, you are probably the warmest part of Russia now
+ lisitsyn	haha
+ lisitsyn	no its hot outside now
+ lisitsyn	so maybe there is a place
+--- Log closed Wed May 14 00:00:26 2014

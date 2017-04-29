@@ -1,0 +1,222 @@
+--- Log opened Sun May 29 00:00:41 2011
+@sonney2k	more involved than I thought...
+ CIA-32	shogun: Soeren Sonnenburg master * r52ce59f / (82 files in 9 dirs): rename preproc -> preprocessor - http://bit.ly/kgUDUq
+@sonney2k	now for the CClassifier rename...
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Quit: Leaving]
+-!- blackburn [~qdrgsm@188.168.3.22] has joined #shogun
+@sonney2k	blackburn, around?
+@sonney2k	I've done the preproc PreProc etc transition
+@sonney2k	does it that look good to you or do you have any other ideas for improvement?
+@sonney2k	I am doing the machine transition now
+@sonney2k	Current plan is to create a directory machine and then  move the KernelMachine DistanceMachine in there
+@sonney2k	in addition Classifier and rename it to Machine
+@sonney2k	and also LinearClassifier - and name it LinearMachine
+ sploving	sonney2k, I debug one day for lua MatrixTest.lua example and now it works. I pushed it. when you have time please take a look at it. l8r
+@sonney2k	sploving, nice
+@sonney2k	sploving, not sure why but this thing cannot be applied
+@sonney2k	I think you need to rebase your patch against git master
+ CIA-32	shogun: Soeren Sonnenburg master * r54150e8 / (65 files in 10 dirs):
+ CIA-32	shogun: Transistion: rename CClassifier to CMachine
+ CIA-32	shogun: correspondingly rename CLinearClassifier -> CLinearMachine
+ CIA-32	shogun: and move them to the machine/ subdirectory - http://bit.ly/kKpVM6
+@sonney2k	blackburn, ok we have Machines now :D
+@sonney2k	sploving, btw thanks for the status email to the mailinglist!
+ sploving	sonney2k, you are welcome. git fetch && git merge upstream/master. fatal: Entry 'src/configure' would be overwritten by merge. Cannot merge
+-!- Tanmoy [56ce19a2@gateway/web/freenode/ip.86.206.25.162] has joined #shogun
+-!- Tanmoy [56ce19a2@gateway/web/freenode/ip.86.206.25.162] has quit [Client Quit]
+ blackburn	sonney2k: now yes
+ blackburn	reading..
+ blackburn	sonney2k: I have only one idea about preproc - to structurize it some another way, i.e. now dim reduction processor are all inherited from SimplePreproc<float64_t> - looks strange
+ blackburn	I'd like to study more about MDS for genomic data sets :) will try a bit later
+@bettyboo	blackburn, smart!
+ blackburn	bettyboo: just like you
+@bettyboo	blackburn: well then send another request: btw I also noted that you don't have newlines after and before loops ... that is also sth I would like to have for readability
+ sploving	blackburn, /root/shogun/src/libshogun/classifier/DistanceMachine.cpp:32: multiple definition of `shogun::CDistanceMachine::~CDistanceMachine()'
+ blackburn	yees?
+ sploving	what does that mean? I  reset my repo to the trunk, but when compile it shows the following error
+ blackburn	sploving: will try it now too
+ sploving	sonney2k, I reset it to the uptream, change my files need commit and pushed it!
+ blackburn	compiling..
+ sploving	blackburn, what is going?
+ blackburn	sploving: compiling :)
+ sploving	blackburn,so slow? how many cors of you machine?
+ blackburn	it is 2 core T4300 processor in my notebook
+ sploving	you could use make -j4
+ blackburn	what it is?
+ blackburn	hehe
+ blackburn	jobs, see now
+ blackburn	sploving: done, everything is ok
+ blackburn	no error you mentioned before
+ sploving	you mean libshogun and python?
+ sploving	I compile lua
+ blackburn	ah
+ sploving	I will have a try again
+ blackburn	anyway I think there is no difference
+ blackburn	because the error is in libshogun
+ blackburn	damn it is fast!
+ blackburn	thank you for -j4 advice
+-!- sploving [~root@124.16.139.196] has quit [Ping timeout: 240 seconds]
+@sonney2k	blackburn, so looks ok for you ?
+ blackburn	sonney2k: preproc?
+@sonney2k	blackburn, preproc and machine
+ blackburn	sonney2k: yeah it is ok
+@sonney2k	hmmhh sploving above didn't do make distclean or git clean -dfx before
+@sonney2k	blackburn, I am not sure if the machine directory shouldn't have the regression etc stuff as subdirs
+@sonney2k	blackburn, should machine's classify function be renamed to apply ?
+@sonney2k	or do you have a better name?
+ blackburn	sonney2k: train - apply, right?
+@sonney2k	blackburn, good for me
+@sonney2k	train we have
+ blackburn	sonney2k: for me too
+@sonney2k	but classify needs a rename to apply() then
+@sonney2k	that has to be done manually though
+ blackburn	it makes sense for clustering and regression issues
+@sonney2k	ok
+@sonney2k	currently we have
+@sonney2k	CMachine
+@sonney2k	CLinearMachine
+@sonney2k	CDistanceMachine
+@sonney2k	CKernelMachine
+ blackburn	about CDistanceMachine
+ blackburn	it have nice thread based distance calculation routines
+ blackburn	why we have not ones in distance?
+@sonney2k	blackburn, IIRC distance has those already
+ blackburn	sonney2k: for example get_distance_matrix do it without threads
+@sonney2k	blackburn, but I would say you only comment on the structure of shogun and do the remaining things afterwards
+@sonney2k	blackburn, i think it does with threads
+@sonney2k	I mean you have exams which are more important for now
+ blackburn	no problem with exams, will study it this evening :)
+@sonney2k	ok
+ blackburn	sonney2k: classifier, clustering might be subdirs of machine
+@sonney2k	if distance matrix is not yet pthreaded - submit patches sure
+@sonney2k	blackburn, yeah - thought so too
+@sonney2k	regression too
+ blackburn	sonney2k: I am not very familiar with threads used here, will be think about just after finishing some important steps in my dimreduction
+ blackburn	some of algos should be parallelized for sure
+@sonney2k	blackburn, yeah
+@sonney2k	very welcome...
+ blackburn	and I would implement kd-tree or balltree
+ blackburn	seems working with instance-learning (or neighborhood-based, etc) algos is my fate :D
+@sonney2k	blackburn, there is a lightning fast kdtree implementation available already
+ blackburn	because I started shogun developing with kNN and my project uses it too
+@sonney2k	by john langford
+@sonney2k	so we could borrow his code :)
+ blackburn	aha
+ blackburn	well it simplifies work :)
+@sonney2k	but structure first
+ blackburn	just adapt it to shogun
+@sonney2k	so what do you think should I move the machine derived things into machine ?
+ blackburn	yeah, of course
+@sonney2k	and should I make subdirs there or not
+@sonney2k	probably or?
+ blackburn	subdirs sounds nice
+@sonney2k	I mean regression -> machine/regression
+ blackburn	btw, may be some more namespaces should be nice too
+@sonney2k	blackburn, but how do we reflect that change in e.g. python_modular?
+ blackburn	what do you mean?
+ blackburn	ah
+@sonney2k	currently it is from shogun.Classifier import *
+ blackburn	shogun.Machine.Classifier or shogun.Classifier?
+@sonney2k	we don't want shogun.Machine.Classifier I think
+ blackburn	yeah sounds cumbersome
+@sonney2k	so I am not sure if we should actually move things already
+@sonney2k	shogun isn't that big yet...
+ blackburn	is it possible to make shogun.Classifier just a shorthand name for libshogun/machine/classifier?
+@sonney2k	if we were numpy then it makes sense
+@sonney2k	blackburn, sure but it is not consistent then
+@sonney2k	I would prefer the same structure in C++ as in *_modular
+@sonney2k	otherwise it will be confusing
+ blackburn	sounds reasonable
+ blackburn	okay so let it be the way it is now
+@sonney2k	I would then add a shogun.Machine for the modular interfaces
+ CIA-32	shogun: Baozeng Ding master * r6688b5c / (4 files in 2 dirs): use lua_objlen to count table size, improve error handing, and add lua vector/matrix test - http://bit.ly/klNC7w
+ blackburn	the only issue - looks confusing then classes in some 'package' are inherited from the other one
+ blackburn	but no other way now
+ blackburn	sonney2k: btw 'make -j4' rocks, it makes shogun compile fast!
+@sonney2k	blackburn, I use that all the time of course
+@sonney2k	(I have it set in MAKEFLAGS='-j4')
+@sonney2k	so I don't have to specify it
+ blackburn	where I can set it?
+@sonney2k	bashrc]
+ blackburn	ah. i see
+@sonney2k	i have my son now on my left arm...
+@sonney2k	slight handicap
+ blackburn	sonney2k: btw PreProc was wrong indeed
+ blackburn	looks like wrong camel-case
+ blackburn	cause word is Preprocessor not pre processor and so on
+ blackburn	so I like it more :)
+@sonney2k	me too
+@sonney2k	more readable
+ blackburn	just adapted LLE for new naming
+@sonney2k	and we avoid unneeded shortcuts anyway
+@sonney2k	LLE should also have a proper name :)
+ blackburn	anyway it is not in trunk so I have much time to think about how to name it
+ blackburn	but LocallyLinearEmbedding is bad too
+@sonney2k	it says more than LLE I think
+ blackburn	sonney2k: I have a very simple idea about codestyle
+ blackburn	just modify it http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml
+@sonney2k	which link exactly?
+ blackburn	I just mean if we will have an 'official' codestyle
+ blackburn	new developers should not make some not-shogun-style code
+ blackburn	it could simplify your work
+@sonney2k	we have that though not as erfect
+@sonney2k	p
+@sonney2k	cookie time
+@sonney2k	l8r
+ blackburn	well then I will have some game theory time :D
+-!- blackburn [~qdrgsm@188.168.3.22] has left #shogun []
+-!- blackburn [~qdrgsm@188.168.3.22] has joined #shogun
+ serialhex	OOH!!!! I WANNA POKE SOMEONE IN THE EYE!!!!
+ serialhex	sonney2k: so i keep getting this error when i compile shogun, i have the configure string i'm using & the last little bit of the output.  if you have any ideas of things you want me to look at let me know, i've got a few things i'm doing and will get back to you asap!
+@sonney2k	serialhex, look in the mirror ;-)
+ serialhex	in the mirror??
+@sonney2k	which error?
+ serialhex	DUHH!!!
+@sonney2k	^^eye poking :D
+ serialhex	one sec :P
+ serialhex	https://gist.github.com/9b28bde8718703fe1b66
+@sonney2k	but only the left eye please ;-)
+ serialhex	why?  left eye wonky or somethin??  can you see better out of your right eye?
+@sonney2k	serialhex, do a git clean -dfx
+ serialhex	kk
+ serialhex	anything else before i try the make?
+* serialhex is configurin & makin!
+ serialhex	i've got some ppl coming over in a minute sonney2k so i've got to handle that & i'll let you know how things go, all right?
+ serialhex	(and besides, the compiling takes FOR FREAKING EVAR!!!)
+@sonney2k	serialhex, heh
+@sonney2k	deal with them - let them choose the weapons ;-)
+ serialhex	they're here!  i'll bbl!!
+@bettyboo	8)
+ serialhex	EXACTLY!!!
+ blackburn	damn stochastic game with shity bellman equations :E
+@sonney2k	blackburn, what do you think should I *add* a apply() and apply_to_example() function to all the classifiers and make that one call the classify() / classify_example() one that already exists in classifiers or should I rename the classify() etc functions in classifier's?
+ blackburn	sonney2k: to _add_ sounds easily :)
+@sonney2k	blackburn, I did the other thing but now I am not convinced that this was the right deision
+@sonney2k	diaper time...
+ blackburn	you renamed it?
+ blackburn	not bad too
+@sonney2k	blackburn, I don't know... it will break all scripts..
+ blackburn	yeah a little revolution
+@sonney2k	CMachine / CClassifier rename is not intrusive for the interface side
+@sonney2k	so I don't like it
+ blackburn	well time for some sleep
+ blackburn	three days - three exams to go :D
+ blackburn	sonney2k: see you
+@sonney2k	I tend to revert the changes ...
+ blackburn	which changes have you done?
+@sonney2k	and only add the apply function
+@sonney2k	blackburn, all the replacement classify -> apply
+ blackburn	ah
+@sonney2k	classify_example -> apply_example
+ blackburn	apply_to_example looks better
+@sonney2k	but for classifiers I think we should keep these functions
+@sonney2k	blackburn, yeah sure but that is not the problem
+ blackburn	sonney2k: btw what about no apply_to*? apply(features) & apply(vector)?
+@sonney2k	and apply(idx) ?
+ blackburn	yeap
+ blackburn	some kind of polymorphism :)
+@bettyboo	8)
+ blackburn	well, time to bed :) now really
+ blackburn	see you
+-!- blackburn [~qdrgsm@188.168.3.22] has quit [Quit: Leaving.]
+--- Log closed Mon May 30 00:00:44 2011

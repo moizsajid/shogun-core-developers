@@ -1,0 +1,235 @@
+--- Log opened Tue Feb 12 00:00:45 2013
+-!- cavalier- [~cavalier-@70.118.110.73] has quit [Ping timeout: 260 seconds]
+-!- cavalier- [~cavalier-@70.118.110.73] has joined #shogun
+-!- blackburn [~blackburn@188.168.14.94] has quit [Ping timeout: 244 seconds]
+-!- FSCV [~FSCV@204.45.110.163] has quit [Quit: Leaving]
+-!- blackburn [~blackburn@188.168.3.25] has joined #shogun
+-!- FSCV [~FSCV@189.139.150.187] has joined #shogun
+-!- FSCV [~FSCV@189.139.150.187] has quit [Ping timeout: 240 seconds]
+-!- FSCV [~FSCV@173.254.212.46] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	good news gsoc announcement
+ n4nd0	sonney2k, sonne|work, blackburn : so I read it is important to have a release before gsoc, how can I help with that?
+ blackburn	n4nd0: hey
+ n4nd0	good morning :)
+ blackburn	n4nd0: well we need to close all known bugs
+ n4nd0	blackburn: in github issues?
+ blackburn	n4nd0: yes and in general
+-!- blackburn [~blackburn@188.168.3.25] has quit [Quit: Leaving.]
+-!- FSCV [~FSCV@173.254.212.46] has quit [Quit: Leaving]
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+ n4nd0	blackburn: is tests/integration something still in use or deprecated?
+ blackburn	n4nd0: we still can use it
+ blackburn	but it could fail a lot I expect
+ n4nd0	blackburn: ok
+ blackburn	n4nd0: could you please run make check-valgrind and paste the result somewhere?
+ blackburn	in libshogun
+ n4nd0	blackburn: ok, but I need a bit of time, I was trying to make all the examples in libshogun
+ n4nd0	but it seems that my Eigen is not detected by configure
+ n4nd0	so converter examples are not properly built
+ blackburn	hmm true
+ blackburn	it is not properly handled I am afraid
+ n4nd0	blackburn: in configure?
+ blackburn	n4nd0: I mean examples are not guarded
+ blackburn	n4nd0: but why it doesn't detect your eigen? any ideas?
+ n4nd0	blackburn: my Eigen is in /usr/local/include
+ n4nd0	and it seems that the configure script doesn't look in there
+ n4nd0	I have used the flag --incdir=/usr/loccal/include/eigen3
+ n4nd0	but I am afraid the incdir variable is not used by check eigen3 in configure
+ blackburn	it uses pkg-config as I can see
+ n4nd0	I don't have that program installed here :D
+ n4nd0	blackburn: the thing I am wondering is
+ n4nd0	I can just re-install Eigen and I guess it should be fine
+ n4nd0	but maybe configure should find it if it is in /usr/local/include
+ n4nd0	nvm, pkg-config is installed
+ blackburn	n4nd0: yes it should but it currently uses *only* pkg-config
+ n4nd0	yep
+ n4nd0	that's probably fine
+ n4nd0	it's a local problem of mine, I need to make my pkg-config detect eigen3
+ n4nd0	Eigen3 support .. yes :)
+ blackburn	nice
+ blackburn	n4nd0: so finally works?
+ n4nd0	yes
+ n4nd0	making check-valgrind on the way
+ blackburn	thanks!
+ blackburn	I have to go, be back in a few hours
+ n4nd0	ok
+ n4nd0	i will paste the results and take a look
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 245 seconds]
+-!- sumit_ [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+-!- n4nd0 [~nando@n158-p227.kthopen.kth.se] has joined #shogun
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ n4nd0	blackburn: valgrind results
+ n4nd0	http://pastebin.com/TYjzrCzJ
+ n4nd0	everything looks fine except from libary_serialization
+ n4nd0	I am guessing that we are OK with suppressed errors
+-!- wiking_ is now known as wiking
+-!- wiking [~wiking@info2k1.hu] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+ n4nd0	blackburn: hello hello
+ blackburn	hey
+ n4nd0	the results of make valgrind-check
+ n4nd0	http://pastebin.com/TYjzrCzJ
+ blackburn	n4nd0: thanks
+ blackburn	whoops
+ n4nd0	suppressed errors are fine I guess?
+ blackburn	yes
+ blackburn	nice to know my code is a little b0rken
+ n4nd0	oh fuck
+ n4nd0	converter_kernellocallylinearembedding
+ n4nd0	and some others
+ blackburn	hah my bad
+ n4nd0	do you know why can it be?
+ blackburn	no - I'd have to investigate
+ blackburn	n4nd0: or you can if you want :)
+ blackburn	actually it didn't produce so many errors before - quite strange for me
+ n4nd0	blackburn: maybe something is wrong in my system
+ n4nd0	when I run check.sh I get error everywhere
+ blackburn	no as it should work on any system :)
+ n4nd0	that cannot be good
+ blackburn	yes check.sh doesn't work in libshogun examples
+ n4nd0	why not?
+ blackburn	n4nd0: could you try to run converter_kernellocallylinearembedding?
+ blackburn	and valgrind it too
+ n4nd0	blackburn: yep
+ n4nd0	what is wrong with check.sh then?
+ blackburn	n4nd0: I don't know - I use make check-examples
+ n4nd0	blackburn: http://dl.dropbox.com/u/11020840/shogun/valgrind.log
+ n4nd0	kernellocallylinearembedding
+ blackburn	thanks
+ n4nd0	blackburn: I can investigate a bit now
+ n4nd0	if you are not already on it?
+ blackburn	n4nd0: no I am now under windows at job :(
+ blackburn	n4nd0: looks surprising to me
+ n4nd0	blackburn: I am not sure if I ever valgrind-ed tapkee
+ n4nd0	did you?
+ blackburn	n4nd0: that matrix is not properly initialized strange
+ blackburn	yes I did
+ blackburn	there were no errors :)
+ blackburn	well the fact is LLE works ok but KLLE works bad
+ blackburn	as they are the same in tapkee I find that quite strange
+ blackburn	n4nd0: I expect I forgot to initialize something or so
+ n4nd0	blackburn: do you happen to know if resize in Eigen initializes the matrix or vector elements?
+ n4nd0	from the doc it seems to me that it doesn't
+ blackburn	n4nd0: no I don't know
+ n4nd0	blackburn: take a look
+ n4nd0	http://eigen.tuxfamily.org/dox/SimplicialCholesky_8h_source.html
+ n4nd0	valgrind complains about line 819, so d must be unintiliazed
+ n4nd0	and I think this is caused because m_diag is not initialized
+ n4nd0	it is resized in 764
+ n4nd0	but the values are not set
+ n4nd0	and they are used in 803 in an intermediate computation of d
+ blackburn	n4nd0: scary!
+ n4nd0	yeah...
+ n4nd0	but I think it is not due to that probably
+ n4nd0	it must be another thing
+ n4nd0	blackburn: a think that confuses me
+ n4nd0	DefaultSparseSolver in tapkee might be SimplicialCholesky or SimplicialLDLT
+ n4nd0	SimplicialCholesky is used at the moment
+ n4nd0	but in the method where valgrind complains, DoLDLT is set to true
+ n4nd0	it seems a bit contradictory, doesn't it?
+ blackburn	yeah
+ n4nd0	maybe that method should be called with DoLDLT=false?
+ n4nd0	just guessing no real idea :D
+ blackburn	I don't know actually
+-!- sumit_ [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Ping timeout: 245 seconds]
+ blackburn	that all sounds strange
+ blackburn	again, LLE and KLLE should both fail
+ blackburn	or not
+ blackburn	anyway I'll take a look tonight
+ n4nd0	that's true
+ n4nd0	I am going to check if I discover why it fails in one but not the other
+ blackburn	makes sense, thanks
+ n4nd0	blackburn: look at this, it confuses me but maybe it tells you something :)
+ n4nd0	to simply to std::cout << matrix << std::endl
+ n4nd0	of the matrix we are giving to the solver
+ n4nd0	rises the conditional jump error in klle and not in lle
+ n4nd0	it must be something related to how this matrix is created
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Ping timeout: 240 seconds]
+-!- shogun-buildbot_ [~shogun-bu@7nn.de] has joined #shogun
+ blackburn	yes
+ blackburn	n4nd0: https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/converter/LocallyLinearEmbedding.cpp#L87
+ blackburn	absent in https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/converter/KernelLocallyLinearEmbedding.cpp#L65
+ n4nd0	blackburn: you are a professional :)
+ n4nd0	let me try it
+ blackburn	n4nd0: probably that's the reason - this should fire some warning though
+ blackburn	n4nd0: added the issue to not forget about setting that
+ n4nd0	blackburn: that solved valgrind's complains indeed
+ blackburn	I expect others are caused by something similar..
+ n4nd0	probably
+ n4nd0	blackburn: about the warning thing
+ n4nd0	you mean that we should enable that in tapkee right?
+ n4nd0	if some parameters are not set, say it
+ blackburn	yes sure n4nd0
+ n4nd0	I apply the change if so
+-!- n4nd0 [~nando@n158-p227.kthopen.kth.se] has quit [Ping timeout: 256 seconds]
+-!- Hausas [~admin@185.6.154.4] has joined #shogun
+-!- Hausas [~admin@185.6.154.4] has quit [Changing host]
+-!- Hausas [~admin@unaffiliated/hausas] has joined #shogun
+-!- Hausas [~admin@unaffiliated/hausas] has left #shogun []
+-!- n4nd0 [~nando@n158-p227.kthopen.kth.se] has joined #shogun
+ wiking	mmm
+ wiking	blackburn: one gsoc idea: recommendation system
+ blackburn	wiking: mentor?
+ wiking	blackburn: happy to be
+ wiking	moreover i can get one person i think
+ wiking	from a company that is working on recommendation systems
+ wiking	i'll have a chat with him today
+ wiking	i can ask him what he would have in his mind
+ wiking	for sure he would be ok to comentor with me a project like that
+ wiking	(co-mentor as he is rather busy)
+-!- FSCV [~FSCV@204.45.110.163] has joined #shogun
+-!- Guest84830 [73fe7104@gateway/web/freenode/ip.115.254.113.4] has joined #shogun
+ Guest84830	Hi everyone, I am Parthasarathy G, a computer science under-grad student from IIT Madras, I am interested in contributing for Shogun, can anyone please guide me regarding this?
+ n4nd0	Guest84830: hey
+ n4nd0	the roadmap normally starts forking the repo, fetching a local copy and building it
+ n4nd0	then you could work on something you are interested in or we could suggest you some kind of contribution
+ Guest84830	Is there an existing git repo i could pull from?
+ n4nd0	Guest84830: yeah sure
+ n4nd0	the repository is in github
+ n4nd0	https://github.com/shogun-toolbox/shogun
+ Guest84830	I am currently cloning the repo, thanks for the link.
+ n4nd0	you are welcome
+ Guest84830	n4nd0: I have finished building the code, but not exactly found where the binaries are
+ n4nd0	Guest84830: libshogun.so should be in src/shogun
+ n4nd0	it is a good idea to make install too so you can use it from any part on your system
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ Guest84830	ah yes, i have finished that.
+ n4nd0	I will be back in afew minutes
+-!- Guest84830 [73fe7104@gateway/web/freenode/ip.115.254.113.4] has quit [Ping timeout: 245 seconds]
+ n4nd0	re
+-!- blackburn [~blackburn@83.234.54.3] has joined #shogun
+-!- FSCV_ [~FSCV@173.254.212.46] has joined #shogun
+-!- FSCV [~FSCV@204.45.110.163] has quit [Ping timeout: 252 seconds]
+-!- n4nd0 [~nando@n158-p227.kthopen.kth.se] has quit [Quit: leaving]
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+-!- naruto [73fe7104@gateway/web/freenode/ip.115.254.113.4] has joined #shogun
+-!- naruto is now known as Guest61045
+-!- sumit [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Quit: Page closed]
+ Guest61045	Hi sonney2k , I was working on building from source some time ago, i have finished the building part, but what about launching the gui?
+-!- blackburn [~blackburn@83.234.54.3] has quit [Quit: Leaving.]
+-!- Guest61045 [73fe7104@gateway/web/freenode/ip.115.254.113.4] has quit [Quit: Page closed]
+-!- SCV__ [~FSCV@173.254.212.46] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: FSCV_
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Hello all.  Hope things are going well
+ KMcQuisten	I have a quick question that I hope I can get answered
+ wiking	shoot
+ KMcQuisten	I use LibSVR quite a bit, and have generally used the epsilon-SVR flavor.  The parameter optimization framework only allows one to optimize nu, the maximum fraction of data points that are support vectors.  I know that there's a relationship between nu and the tube epsilon.
+ KMcQuisten	I've done the optimization on nu, but when I try to apply those parameters manually, changin nu doesn't seem to be changing the results.
+ KMcQuisten	Are the default values for tube_epsilon stepping on my manual setting of nu before training?
+ KMcQuisten	And if so how do I fix it?
+ KMcQuisten	How does LibSVR determine if it's doing eps-SVR or nu-SVR?
+ wiking	mmm
+ wiking	<pass>
+ wiking	i don't know who would be an expert in libsvr here
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Ping timeout: 245 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Ping timeout: 245 seconds]
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Well damn.
+ KMcQuisten	Well, does anyone know why nu is available for optimization in LibSVR, but the tube epsilon isn't?  It would certainly be very handy to be able to use the built-in model selection fromework to find the best tube epsilon
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+--- Log closed Wed Feb 13 00:00:45 2013

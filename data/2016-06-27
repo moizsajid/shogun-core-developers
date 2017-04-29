@@ -1,0 +1,302 @@
+--- Log opened Mon Jun 27 00:00:57 2016
+-!- arianepaola [~ariane@unaffiliated/arianepaola] has quit [Read error: Connection reset by peer]
+-!- arianepaola [~ariane@unaffiliated/arianepaola] has joined #shogun
+ shogun-buildbot	build #29 of memleak - valgrind is complete: Failure [failed memory check generate html]  Build details are at http://buildbot.shogun-toolbox.org/builders/memleak%20-%20valgrind/builds/29  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, OXPHOS <engelzora@gmail.com>
+ shogun-buildbot	build #1030 of nightly_none is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_none/builds/1030  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, OXPHOS <engelzora@gmail.com>
+ shogun-buildbot	build #1160 of nightly_default is complete: Failure [failed test test_1 notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1160  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, OXPHOS <engelzora@gmail.com>
+ arianepaola	ping wiking
+@wiking	pon
+@wiking	g
+ BZDMG	bazdmeg morning
+@wiking	morning :)
+ arianepaola	hi
+-!- sanuj [~sanuj@117.203.23.79] has joined #shogun
+ sanuj	BZDMG, there?
+ sanuj	I solved the bug
+ sanuj	very silly bug
+ arianepaola	ping wiking
+ arianepaola	wiking https://gist.github.com/arianepaola/d9ea1c39d632128942554bbc3e862de6
+ BZDMG	sanuj:
+ BZDMG	so what's the bug
+ sanuj	one word
+ sanuj	https://github.com/shogun-toolbox/shogun/pull/3221/commits/380f576e3615aea29b56f0afb721efe5485510ae#diff-9c3599c0d2090e493be261b079e9b63eR37
+ sanuj	should be void set(...)
+ sanuj	i actually did all the changes step by step on a fresh branch to spot this
+ sanuj	hehe
+-!- OXPHOS [c68f0c0c@gateway/web/freenode/ip.198.143.12.12] has joined #shogun
+-!- arianepaola [~ariane@unaffiliated/arianepaola] has quit [Read error: Connection reset by peer]
+-!- HeikoS [~heiko@LFbn-1-4373-242.w92-170.abo.wanadoo.fr] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	HeikoS: yo
+@wiking	OXPHOS: china!
+@HeikoS	jojo
+ OXPHOS	wiking: hello!
+@wiking	BAZDMEG
+@wiking	BAAAAAAAAAAAAAAAZDMEG
+@wiking	OXPHOS sanuj Saurabh7__
+@wiking	where is the weekly email? :)
+@wiking	OXPHOS sanuj Saurabh7__ PING PING PING PING PING
+@wiking	please let's try to have this in your calendars
+@wiking	so i dont have to do this every week
+@wiking	thnx
+ OXPHOS	wiking: working on it. trying to locate the revised schedule i wrote yesterday..
+@wiking	okok
+@wiking	it's 5:28pm
+@wiking	:P
+@wiking	i know where u r
+@wiking	:D
+@HeikoS	in fact, as I said in the last email, pls also send a 1-2 sentence short status every day you work on shogun
+ sanuj	okay, sending
+ sanuj	i was thinking of reporting what i had done today
+ sanuj	since the day is not over, i didn't send
+@HeikoS	the daily thing can me minor, totally fine
+@HeikoS	just for us to keep track
+ sanuj	sending to HeikoS BZDMG wiking and lambday
+@wiking	no
+@wiking	mailing list
+ sanuj	shogun list
+ sanuj	okay
+@wiking	is a perfect place
+@wiking	:)
+@HeikoS	sanuj: so what sup with da bug?
+ sanuj	HeikoS, solved it
+ sanuj	was silly
+@HeikoS	sanuj: great!!
+@HeikoS	sanuj: what was it?
+ sanuj	HeikoS, i actually did all the changes step by step on a fresh branch to spot this as you had suggested ;)
+ sanuj	HeikoS, https://github.com/shogun-toolbox/shogun/pull/3221/commits/380f576e3615aea29b56f0afb721efe5485510ae#diff-9c3599c0d2090e493be261b079e9b63eR37
+ sanuj	should have been void set(...)
+ sanuj	forgot to do this ^
+ OXPHOS	wiking: haha you caught me
+@wiking	:>
+@HeikoS	sanuj: this is the private method to add a nonexisting tag?
+@HeikoS	sanuj: can you rename this to something better then _set?
+ sanuj	no this is in Self struct in SGObject.cpp
+ sanuj	HeikoS, i have renamed _set to add() to set a parameter for first time from init_param()
+@HeikoS	sanuj: cool
+@HeikoS	so then, you can re-add the things you had developed
+@HeikoS	or did you already?
+@HeikoS	sanuj: and then we can finally merge this pr
+ sanuj	HeikoS, i'm just adding some unit-tests
+ sanuj	on MockObject
+@HeikoS	sanuj: great, pls ping me once done
+ sanuj	okay
+@HeikoS	I am online for 2 more hours or so
+ sanuj	HeikoS, that's good
+@HeikoS	OXPHOS: so how are things going?
+ sanuj	back in UK?
+ sanuj	no it seems
+ sanuj	HeikoS_web,
+@HeikoS	sanuj: no thats my workstation in the office
+@HeikoS	I am still hiding
+ sanuj	yeah....that's how in inferred that you are not in london :P
+ OXPHOS	HeikoS: good! revising based on your comments
+@HeikoS	OXPHOS: ok, as said, I am here for a while now
+@HeikoS	so we can discuss also, if needed
+@HeikoS	wiking: when do you finally tell us how to get rid of the templating macros?
+ OXPHOS	HeikoS: cool! I have a question -
+ OXPHOS	template<class T>   void SGVector<T>::copy_data(const SGReferencedData &orig)   { gpu_vector=std::shared_ptr<GPUMemoryBase<T>>(((SGVector*)(&orig))->gpu_vector);
+@HeikoS	shoot
+ OXPHOS	you said: this crashes if I pass SGMatrix, no? If so, this was a bug. Could need a fix there
+@HeikoS	yeah since you static cast
+@HeikoS	and if I passed something else than SGVector what happens?
+@HeikoS	OXPHOS: ever saw this: http://stackoverflow.com/questions/27504280/metaprogramming-with-stdis-same
+ OXPHOS	like some other derived of SGRef?
+@HeikoS	OXPHOS: yes, like SGMatrix
+@HeikoS	no type error
+@HeikoS	but static cast will fail
+ OXPHOS	HeikoS: yeah i see. But not sure how to avoid that..?
+@HeikoS	OXPHOS: can you give me the link again?
+ OXPHOS	HeikoS: is_same also requires a list of all types right? why is it different from the template<T> stuff?
+ OXPHOS	HeikoS: https://github.com/shogun-toolbox/shogun/pull/3310/files#diff-9b962870c247ccd3f897b1ceacae8567
+@HeikoS	OXPHOS: not sure, just was looking at it, never really checked it before
+@HeikoS	OXPHOS: so copy_data is not a method of SGReferencedData, right? Just of SGVector?
+ OXPHOS	HeikoS: it's pure virtual in SGRef
+@HeikoS	OXPHOS: I see
+@HeikoS	ok then
+ OXPHOS	But if we also have a gpu_data in SGMatrix maybe it is okay..?
+@HeikoS	I kind of dont wanna put a dynamic cast
+@HeikoS	so just leave it for now
+@HeikoS	Ill ask BZDMG
+ OXPHOS	sure HKS!
+ BZDMG	what?
+@HeikoS	BZDMG: copy_data method
+@HeikoS	purely virtual in SGReferencedData
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+@HeikoS	implemented in SGVector
+@HeikoS	BZDMG: doesnt check type
+@HeikoS	but static casts to SGVector
+@lambday	erm.. what are we talking about?
+@HeikoS	lambday: minor stuff
+@HeikoS	lambday: whats needed to merge OXPHOS PR?
+@lambday	HeikoS: let me check
+@lambday	well the build is broken.
+@lambday	secondly, this still is for develop branch
+ OXPHOS	Do I suppose to split them into .h and .cpp?
+@lambday	OXPHOS: why didn't you just refactor things in the linalg_refactor branch? there you've already added the global instance
+@lambday	OXPHOS: why do we need to keep adding the same thing in multiple branches? :)
+ BZDMG	HeikoS: show me the code I don't get it :)
+ OXPHOS	lambday: dunno..because some stuff are already merged?
+ OXPHOS	lambday: I can pull it against that branch for this update
+@lambday	OXPHOS: merged to the feature branch.. doesn't mean we can't change things later :)
+ OXPHOS	lambday: haha sure. also why it always fails some tests?
+@lambday	OXPHOS: you'll have to check that
+@lambday	OXPHOS: but please make the PR against feature/linalg_refactor branch..
+@lambday	where you already added those stuffs.. just refactor it
+ OXPHOS	lambday: sure
+ OXPHOS	BZDMG: i think you're @-ed on Github for that line of codes
+@lambday	OXPHOS: also, I don't think you have turned off *all* the SGVector operations when data is on gpu.. we have to make sure that they throw error message instead of just crashing
+ Saurabh7__	Hi
+ Saurabh7__	HeikoS: yo
+ OXPHOS	lambday: not all..there're some static ones
+@lambday	OXPHOS: but in case you did that already, just ignore my comments :D
+ OXPHOS	lambday: those static methods..I think they should be moved out finally..and they takes T* not SGVectors actually so I think they're harmless for now
+@HeikoS	Saurabh7__: jojo
+@lambday	OXPHOS: what are those methods?
+ OXPHOS	lambday: sum..add..norm..
+@lambday	OXPHOS: yeah they should be moved out! put to linalg
+@lambday	OXPHOS: but let's not do it all in just one patch
+ Saurabh7__	HeikoS: I think I have updated most comments in the PR,
+@HeikoS	Saurabh7__: you feel it is merge ready?
+@HeikoS	will check soon
+ OXPHOS	lambday: sure
+@lambday	OXPHOS: it's easier to miss things - we gotta do it in some later patch
+ Saurabh7__	HeikoS: yes
+@lambday	BZDMG: who are your vowels?
+ Saurabh7__	mm lemme check memleak
+@lambday	ate*
+@HeikoS	lambday: jo
+@HeikoS	lambday: can you give me a little tip here
+@lambday	HeikoS: sure.. what is it about?
+@HeikoS	lambday:  see pm
+@HeikoS	lambday: can you see?
+@lambday	yes
+@HeikoS	Saurabh7__: got some timings on which changes helped?
+ Saurabh7__	HeikoS: yes will have to put them in
+@HeikoS	Saurabh7__: https://github.com/shogun-toolbox/shogun/pull/3293/files#diff-8faba8d51b4c212ec2cf40d103697caaR571
+@HeikoS	what about this?
+ Saurabh7__	HeikoS: ah yes, a column is chosen there to go through
+ Saurabh7__	HeikoS: so do we need num_subset of columns
+ Saurabh7__	* we need
+ Saurabh7__	HeikoS: so you recommend sorting the first num_subset elements ?
+@HeikoS	everything that determines the order in which you access memory
+@HeikoS	should be sorted
+@HeikoS	Saurabh7__: all my comments were minor
+@HeikoS	Ill give me OK to merge
+ Saurabh7__	HeikoS: ok thanks, will get those values out and do memcheck here
+@HeikoS	Saurabh7__: cool
+@HeikoS	Saurabh7__: once thats done, then we do get rid of the float64_t?
+ Saurabh7__	HeikoS: yes could be
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun-data: Saurabh7 :master * e27433b / testsuite/meta/ (2 files): https://github.com/shogun-toolbox/shogun-data/commit/e27433b4349c3c2821c80e90deb4bc0a387e0be9
+ shogun-notifier-	shogun-data: update rf data
+ shogun-notifier-	shogun-data: Heiko Strathmann :master * b9b2d90 / testsuite/meta/ (2 files): https://github.com/shogun-toolbox/shogun-data/commit/b9b2d9058c22dae86a4181db7271dfa02485af7d
+ shogun-notifier-	shogun-data: Merge pull request #111 from Saurabh7/rfnewdata
+ shogun-notifier-	shogun-data:
+ shogun-notifier-	shogun-data: update rf data
+ Saurabh7__	right now its expected everything is already numerals
+-!- sanuj [~sanuj@117.203.23.79] has quit [Ping timeout: 244 seconds]
+@HeikoS	OXPHOS: jo
+@HeikoS	could you clean up the doc?
+@HeikoS	lots of deprecated stuff in there
+@HeikoS	OXPHOS: maybe just create a new doc with the revised timeline
+@HeikoS	not sure where to look
+ OXPHOS	HeikoS: which one?
+@HeikoS	the doc you sent in the mail to list
+ OXPHOS	HeikoS: oh i see. so I'll remove the outdated ones
+@HeikoS	OXPHOS, Saurabh7__, gotta leave soon
+@HeikoS	might be back later
+@HeikoS	but anything you want to discuss?
+ OXPHOS	HeikoS: not yet. thx!
+@HeikoS	cool see you later then
+-!- sanuj [~sanuj@117.203.23.79] has joined #shogun
+ Saurabh7__	HeikoS: ok
+ Saurabh7__	HeikoS: next I will try multithreaded thing and removing float64_t ?
+@HeikoS	Saurabh7__: start with float64
+@HeikoS	there might be some mini issues we need to solve with this
+@HeikoS	or multithread
+@HeikoS	you can choose :)
+-!- HeikoS [~heiko@LFbn-1-4373-242.w92-170.abo.wanadoo.fr] has quit [Quit: Leaving.]
+ sanuj	BZDMG, there?
+ BZDMG	sanuj: a bit
+ sanuj	BZDMG, need to discuss one thing
+ BZDMG	yeap
+ sanuj	BZDMG, now params are set in init_params() for each class
+ sanuj	they are declared but not initialized with a value
+ sanuj	BZDMG, if someone does get() then it will result in garbage value
+ sanuj	without setting a value to it
+ sanuj	BZDMG, ?
+ BZDMG	sanuj: get should fail
+ BZDMG	if there is no such thing
+ BZDMG	no garbage
+ sanuj	BZDMG, currently we have this
+ sanuj	    void init_params()
+ sanuj	    {
+ sanuj	        m_vector = SGVector<float64_t>();
+ sanuj	        add("vector", m_vector);
+ sanuj	        add("int", m_int);
+ sanuj	        add("float", m_float);
+ sanuj	    }
+ sanuj	    SGVector<float64_t> m_vector;
+ sanuj	    int32_t m_int;
+ sanuj	    float64_t m_float;
+ sanuj	BZDMG, how to make get() fail?
+ sanuj	BZDMG, and we need to consider member variables with default values also....
+ BZDMG	BZDMG: get = if has(..) return else fail
+ BZDMG	sanuj: ^
+ BZDMG	not really get the problem
+ sanuj	BZDMG, there are two functions now in SGObject.h
+ sanuj	set() and add()
+ BZDMG	yes
+ sanuj	add is protected and set is public
+ sanuj	add("vector", m_vector); will do => map[basetag] = any
+ sanuj	but m_vector is empty
+ sanuj	same is the case for m_int, m_float
+ sanuj	so m_int and m_float have random values since they are not initialized
+ sanuj	BZDMG, has() will also return true since they exist in the map
+ sanuj	BZDMG, got it?
+ BZDMG	sanuj: probably yes
+ BZDMG	but it is not garbage
+ BZDMG	its default
+ BZDMG	I think we should explicitly provide what value to put
+ sanuj	BZDMG, most members dont have default value
+ sanuj	okay
+ BZDMG	they all have
+ BZDMG	it is either zero or something like that
+ sanuj	BZDMG, no worries then
+-!- sanuj [~sanuj@117.203.23.79] has quit [Ping timeout: 276 seconds]
+-!- sanuj [~sanuj@117.203.23.79] has joined #shogun
+ sanuj	BZDMG, one more question
+-!- OXPHOS [c68f0c0c@gateway/web/freenode/ip.198.143.12.12] has quit [Quit: Page closed]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- sanuj [~sanuj@117.203.23.79] has quit [Ping timeout: 272 seconds]
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has joined #shogun
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has quit [Quit: Page closed]
+-!- sanuj [~sanuj@117.203.23.79] has joined #shogun
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has joined #shogun
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has quit [Quit: sonne|osx]
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has joined #shogun
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has quit [Client Quit]
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has quit [Ping timeout: 250 seconds]
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has joined #shogun
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has quit [Client Quit]
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has joined #shogun
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has quit [Quit: sonne|osx]
+-!- sanuj [~sanuj@117.203.23.79] has quit [Remote host closed the connection]
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has joined #shogun
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has joined #shogun
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has joined #shogun
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has joined #shogun
+-!- HeikoS [~heiko@82.113.183.181] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- sonne|osx [~sonne@x4e37463a.dyn.telefonica.de] has quit [Client Quit]
+-!- HeikoS [~heiko@82.113.183.181] has quit [Quit: Leaving.]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Heiko Strathmann :feature/kernel_exp_family * b027178 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/b02717855307fb01ff52fa2041721e2014bfaf10

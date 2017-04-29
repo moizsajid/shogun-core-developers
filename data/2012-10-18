@@ -1,0 +1,297 @@
+--- Log opened Thu Oct 18 00:00:05 2012
+--- Day changed Thu Oct 18 2012
+ blackburn	how much?
+ wiking	i still want to see what mosek does though
+ wiking	one loss function for my case: 34.59
+ wiking	the published one best case is 35.6
+ blackburn	what's the difference between your method and previous?
+ wiking	well the underlying so-solver
+ blackburn	hmm so just a solver issue?
+ wiking	yep
+ blackburn	are you using BMRM?
+ wiking	p-bmrm
+ blackburn	proximal point?
+ wiking	p3bmrm for that matter
+ wiking	not ppbmrm
+ blackburn	aham
+ wiking	but the p3bmrm
+ wiking	with multiple cps
+ blackburn	well you should publish it then :D
+ wiking	hehehe
+ wiking	i need to get the other benchmarking data set
+ wiking	but it not only gives me better results
+ wiking	but much less training time is needed as well
+ wiking	:P
+ wiking	it's like 2/3
+ wiking	so pretty good
+ blackburn	here comes a title "Efficient latent structured support vector machines training via multiple cutting plane models"
+ blackburn	:D
+ wiking	::DDD
+ wiking	lolface
+ blackburn	lets write an abstract :D
+ blackburn	Nowadays latent models of visual concept recognition are widespread and efficient. However blablabla
+ blackburn	:D
+ wiking	nyihahahaha
+ wiking	btw freak is already included in opencv 2.4.2
+ wiking	afaik we have a timer function in shogun right? ?:)
+ blackburn	wiking: CTime right
+ blackburn	wiking: yes freak is in for a while already
+ blackburn	wiking: I tried it as a dense descriptor
+ blackburn	works ok but in the end I started to believe it is just wrong
+-!- blackburn [~blackburn@83.234.54.218] has quit [Quit: Leaving.]
+ shogun-buildbot	build #119 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/119
+ shogun-buildbot	build #136 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/136
+-!- in3xes [~in3xes@122.174.96.165] has joined #shogun
+-!- in3xes [~in3xes@122.174.96.165] has quit [Remote host closed the connection]
+ wiking	sonne|work: online?
+ sonne|work	y
+ wiking	sonne|work: can u give me an access to a buildslave where there is clang?
+ sonne|work	 that machine is doing all mailinglist, webhosting, buildslave
+ sonne|work	so no
+ wiking	i will not vandalize it
+ sonne|work	but I should have a bit of time once on the mentor summit to do these changes
+ wiking	just want to fix the static analyzer
+ wiking	it should be a 2liner :)
+ wiking	or is there sense to add another buildslave?
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ wiking	since i have a spare ubuntu server running around
+ wiking	so there we could have static analyzer
+ blackburn	wiking da servers master
+ wiking	sonne|work: maybe that sounds better? and then that would be the static analyzer bot?
+ sonne|work	wiking: we don't have an ubuntu buildslave yet
+ sonne|work	so it would make sense
+ wiking	sonne|work: oh ok
+ sonne|work	and yes give me the 2 liner :)
+ wiking	sonne|work: i'll do the thingy
+ wiking	w8
+ wiking	dont go away!
+ sonne|work	wiking: I don't have access to the bot from work but can maybe do it form the airport tomorrow
+ wiking	sonne|work: buildslave create-slave shogun-buildbot www.shogun-toolbox.org shogun-ubuntu1 <passwd>
+ wiking	that sounds good for you?
+ sonne|work	probably good - w/o access to the bots I have no clue (brain == empty)
+ wiking	sonne|work: okok i've tried to follow what's in the freebsd bot config
+ wiking	i've sent you in /msg the details, or should i send it via email?
+ sonne|work	ha
+ sonne|work	yes
+ wiking	i'll run now a test with static analyzer on that host on shogun
+ wiking	blackburn: here?
+ wiking	blackburn: what packages should i have on ubuntu for a decent shougn build?
+ sonne|work	wiking: apt-get build-dep shogun
+ sonne|work	and also the newer ones
+ wiking	mmm something is weird with atlas/lapack
+ wiking	installed libatlas-dev
+ wiking	but doesn't recongise it
+ blackburn	wiking: libatlas3gf-base
+ sonne|work	wiking, well you need arpack, nlopt, superlu, snappy etc too
+ wiking	Checking for Atlas support ... no
+ sonne|work	wiking: do you want to just build libshogun or the whole thing with octave, java, lua etc...
+ wiking	libshogun at first
+ sonne|work	k
+ blackburn	wiking: install libatlas* :D
+ wiking	ok i've done with it
+ blackburn	everything that has atlas word :)
+ wiking	now it's doing the static-analyzer
+ wiking	which package is NLOPT?
+ wiking	i couldn't find anything with apt-cache search nlopt
+ blackburn	wiking: bingo, it is nonexistent
+ blackburn	:D
+ wiking	:>
+ wiking	i see
+ wiking	ok then
+ wiking	u install it by hand?
+ wiking	brb
+ blackburn	yes
+ sonne|work	wiking: there is one in debian unstable - so probably newer ubuntus will have it
+ wiking	blackburn: yesterday i've tried to do a SGSparseVector -> Eigen::SparseVector mapping but it seems it's more complicated than i thought... i.e. it would take an awful lot of copy elements... and i think this way we'd loose the performance gain of eigen
+ wiking	sonne|work: noup :( i have 12.04.1
+ wiking	i.e. latest stable ubuntu and doesn't have it :(
+ blackburn	12.10 is out :)
+ wiking	oh woah
+ blackburn	wiking: well yeah it is a problem
+ sonne|work	wiking: then grab the .deb from debian
+ wiking	blackburn: 12.10 release date today :DDD
+ wiking	blackburn: 0day you are
+ wiking	:)
+ wiking	has n4nd0 been around lately?
+ wiking	finally i've managed to progress with his mosek solver as well
+ blackburn	wiking: no, he is rather in gmail than in irc
+ wiking	blackburn: yeah i see him on g+
+ wiking	i've found the bug in his code
+ wiking	but it's rather strange
+ wiking	i think there's something around CList
+ wiking	:(
+ wiking	with referencing...
+ wiking	yey it worked: http://categorizer.tmit.bme.hu/~wiking/shogun-sa/
+ blackburn	static thing rocks heh
+ wiking	no mem-leak  8X
+ wiking	almost cannot believe :D
+ wiking	ok here's a little PR for mosek :)
+ wiking	merge plz https://github.com/shogun-toolbox/shogun/pull/795
+ sonne|work	wiking: write him an email
+ sonne|work	wiking: whats wrong with CList?
+ sonne|work	did he use the thread safe functions or the non-safe ones?
+ wiking	sonne|work: already discussed with him.... he's studying for an exam he has tomorrow
+ wiking	so we'll talk after
+ sonne|work	k
+ wiking	sonne|work: https://github.com/vigsterkr/shogun/blob/b146efb45b7410c370de277f4d1aa02d66f7707a/src/shogun/structure/PrimalMosekSOSVM.cpp#L130
+ wiking	starting from there
+ wiking	till line 177
+ wiking	as i see it
+ wiking	i'd expect that result has m_refcount =1
+ wiking	on line 1777
+ wiking	*177
+ wiking	but that's not the case
+ sonne|work	the non thread safe ones
+ wiking	?
+ wiking	how can i have non-safe one?
+ sonne|work	wiking: it doesn't matter here - there are no threads
+ wiking	yeah :)
+ wiking	but anyhow
+ sonne|work	wiking: shouldn' thte refcount be 2?
+ wiking	an insert_element should ++ the refcount
+ wiking	expecially that the list is delete_element=true
+ sonne|work	yes
+ sonne|work	but he also uses argmax to get it
+ sonne|work	so it might be 1 already there
+ sonne|work	wiking: what is the actual count?
+ wiking	not that https://github.com/vigsterkr/shogun/blob/b146efb45b7410c370de277f4d1aa02d66f7707a/src/shogun/structure/PrimalMosekSOSVM.cpp#L125 doesn't add a ref
+ sonne|work	so it has 0 there?
+ wiking	yes
+ wiking	ok then i'm stupid :D
+ wiking	becuase the insert -> 1
+ wiking	and l177 -> 0
+ shogun-buildbot	build #449 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/449  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ wiking	wasn'tme
+-!- adoniscik [~emre@c-67-180-103-118.hsd1.ca.comcast.net] has quit [Ping timeout: 240 seconds]
+ sonne|work	blackburn: you?
+ sonne|work	or clue?
+ blackburn	sonne|work: heiko
+ blackburn	or me
+ blackburn	:D
+ blackburn	rather heiko
+ shogun-buildbot	build #558 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/558  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ sonne|work	wiking: could you please ask heiko then? otherwise you will be drowning in emails
+ blackburn	heh I bet wiking already set up his spam filter :D just as I did
+ blackburn	well joking gmail puts all these mails to the special folder I never read
+ blackburn	but it is not called 'spam'
+ shogun-buildbot	build #559 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/559  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #450 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/450
+ wiking	:D
+ wiking	i think i've solved the mosek thing... but it performs really bad :S
+ wiking	so maybe i didn't
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 246 seconds]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+-!- adoniscik [~emre@c-50-131-104-102.hsd1.ca.comcast.net] has joined #shogun
+-!- blackburn [~blackburn@31.28.57.136] has joined #shogun
+ wiking	blackburn: lol man
+ wiking	blackburn: have u heard about this stuff:
+ wiking	http://about.travis-ci.org/
+ wiking	and btw: best one of the best PRs https://github.com/matplotlib/matplotlib/pull/1329
+ wiking	:DDD
+ wiking	note the bottom of the PR description:  Good to merge -- The Travis build passed (Details)
+ blackburn	hehe
+ wiking	here's a nice blog post about it
+ wiking	http://jakevdp.github.com/blog/2012/10/07/xkcd-style-plots-in-matplotlib/
+ wiking	but back to the travis thing
+ wiking	i'll try it now on my own repo
+ wiking	of shogun to set it up
+ blackburn	I do not understand CI :D
+ wiking	but this PR testing sounds good
+ wiking	well this travis shit is basically another type of buildbot
+ wiking	but it's well integrated with github
+ wiking	so you have things like
+ wiking	once you have a PR
+ wiking	it'll automatically try to build it
+ wiking	and test it for that matter
+ blackburn	ahh
+ wiking	looks nice
+ blackburn	okay I see
+ wiking	but i want to test this PR for mpl :D
+ wiking	looks hilarious
+ wiking	blackburn: https://travis-ci.org/#!/vigsterkr/shogun/jobs/2843350
+ wiking	hehehe
+ blackburn	heh
+ wiking	niiice
+ wiking	even the dependencies are installing
+ wiking	:))))
+ wiking	but i think i'll have to add more packages there as that's for an old shogun
+ wiking	woah this one even takes mo
+ wiking	mono
+ wiking	:d
+ wiking	oooh noooo
+ wiking	i forgot a cd src
+ wiking	:D
+ wiking	2nd try: https://travis-ci.org/#!/vigsterkr/shogun/jobs/2843516
+ blackburn	http://researchinprogress.tumblr.com/ wiking it is totally awesome :D
+ wiking	woohooo
+ wiking	building!
+ wiking	blackburn: ahahahha
+ blackburn	omg
+ blackburn	:D
+ wiking	i want this for SHOGUN!
+ wiking	it's basically an extra buildbot
+ wiking	integrated in github
+ wiking	:)
+ wiking	heheh python_modular is building
+ wiking	yey
+ blackburn	wiking: where is it run and why it is free? :)
+ wiking	ok clang droped dead
+ wiking	blackburn: dunno :D
+ wiking	blackburn: let's be happy that it's still free
+ wiking	This test series was run on a worker box sponsored by Engine Yard
+ wiking	ok wtf is this:
+ wiking	In file included from modshogun_wrap.cxx:9527:
+ wiking	2853/usr/lib/gcc/i686-linux-gnu/4.6/../../../../include/c++/4.6/cstring:101:3: error:
+ wiking	2854      declaration conflicts with target of using declaration already in scope
+ wiking	2855  memchr(void* __s, int __c, size_t __n)
+ wiking	2856  ^
+ wiking	2857/usr/include/string.h:95:14: note: target of using declaration
+ wiking	2858extern void *memchr (__const void *__s, int __c, size_t __n)
+ wiking	2859             ^https://travis-ci.org/#!/vigsterkr/shogun/jobs/2843516/L2852
+ wiking	ok
+ wiking	https://travis-ci.org/#!/vigsterkr/shogun/jobs/2843516/L2852
+ wiking	this
+ wiking	:>
+ blackburn	uhuh
+ wiking	that's with clang
+ wiking	gcc 4.6 is still running
+ wiking	that seems to be working till now
+ wiking	1943Executing your script (./configure && make && make test) took longer than 25 minutes and was terminated.
+ wiking	:)
+ blackburn	huh
+ blackburn	we are pretty big to compile in 25 mins
+ wiking	i'm gonna tweak around a bit (some says that make -j 4 helps to speed up compilation, even though there's only one core in the VM)
+ wiking	but the other option is to only use certain interfaces in travis
+ wiking	status.github.com :Partial service outage
+ wiking	:S
+ blackburn	oops
+ wiking	battlestation doooown
+ wiking	Major service outage
+ wiking	somebody brokez z internet
+ wiking	We are experiencing issues due to a DDOS attack, working hard to restore service...
+ wiking	:DDD
+ wiking	lol
+ wiking	and doubleROTFL for not using ipython till now
+ blackburn	is it cool?
+ wiking	yeah i like it
+ wiking	at least it has completion when i start hitting the <tab>
+ wiking	heheh
+ wiking	wtf
+ wiking	sf is hyper slow as well for me
+ blackburn	youtube is down :)
+ wiking	worksforme
+ wiking	woah motherfucker
+ wiking	i've just realised that stupid macports
+ wiking	is keeping the distfiles if i do a port clean
+ wiking	my distfiles dir is currently 6 gigs
+ wiking	what a waste...
+ blackburn	why not overwritten?
+ wiking	no i mean it keeps the tar.gz for all the installed ports
+ blackburn	I see
+ blackburn	okay I'm out of power
+ blackburn	see you
+ wiking	laterz
+-!- blackburn [~blackburn@31.28.57.136] has quit [Quit: Leaving.]
+--- Log closed Fri Oct 19 00:00:17 2012

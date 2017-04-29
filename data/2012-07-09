@@ -1,0 +1,392 @@
+--- Log opened Mon Jul 09 00:00:17 2012
+ CIA-18	shogun: Sergey Lisitsyn openmp * r4e109e3 / (2 files): Made CDistance use openmp - http://git.io/l24RNA
+ CIA-18	shogun: Sergey Lisitsyn openmp * r2b811d5 / (2 files): Made CombinedKernel use openmp - http://git.io/DnBP-g
+ CIA-18	shogun: Sergey Lisitsyn openmp * r15203a3 / src/shogun/lib/external/shogun_libsvm.cpp : Made LibSVM use openmp - http://git.io/pZMErA
+ CIA-18	shogun: Sergey Lisitsyn openmp * r6cc5b15 / (2 files): Made DistanceMachine use openmp - http://git.io/_EN9_g
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@81.28.187.0] has quit [Quit: Leaving.]
+ shogun-buildbot	build #18 of nightly_default is complete: Failure [failed updatedoc]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/18
+-!- av3ngr [av3ngr@nat/redhat/x-xlpzesjskamqquhz] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-xlpzesjskamqquhz] has left #shogun []
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 244 seconds]
+-!- uricamic [~uricamic@2001:718:2:1634:54ea:8a06:2501:ed7b] has joined #shogun
+-!- gsomix [~gsomix@178.45.92.193] has joined #shogun
+ gsomix	good morning
+ gsomix	sonney2k, got your mail. working on this problem now
+-!- blackburn [~blackburn@81.28.187.0] has joined #shogun
+ CIA-18	shogun: Sergey Lisitsyn master * r47a4297 / src/shogun/mathematics/lapack.cpp : Made lapack use mallocs instead of SG_MALLOCs - http://git.io/VZFXZA
+-!- blackburn [~blackburn@81.28.187.0] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	gsomix, can you reproduce the problem? And do you think it is our fault?
+ gsomix	sonney2k, problems with trace mallocs are related to multithread. blackburn fixed already. but there is problem with CMap.
+ gsomix	and I think this is my fault.
+-!- pluskid [~pluskid@li411-226.members.linode.com] has joined #shogun
+-!- pluskid [~pluskid@li411-226.members.linode.com] has quit [Ping timeout: 264 seconds]
+-!- pluskid [~pluskid@111.120.6.180] has joined #shogun
+-!- gsomix [~gsomix@178.45.92.193] has quit [Read error: Connection reset by peer]
+ shogun-buildbot	build #19 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/19
+-!- gsomix [~gsomix@88.200.242.178] has joined #shogun
+ wiking	boaaah
+ gsomix	sonney2k, around? it seems, that CMap works not properly with multithreaded insert/delete.
+ gsomix	see you later guys
+-!- gsomix [~gsomix@88.200.242.178] has quit [Ping timeout: 246 seconds]
+-!- gsomix [~gsomix@88.200.242.178] has joined #shogun
+ wiking	n4nd0: ping
+ n4nd0	wiking: pang
+ wiking	n4nd0: pong ;)
+ wiking	ok so question: svm^struct is going to be in ?
+ n4nd0	in like in shogun?
+ wiking	yes
+ n4nd0	not exactly that implementation
+ n4nd0	what I am doing is a similar project though
+ wiking	since currently u have mosek but i was wondering if u are planning to include svm^struct as well
+ n4nd0	no, I am not planning that
+ n4nd0	but we are planning to do something alternative that does not require mosek
+ wiking	ah good that's good enough
+ n4nd0	nice
+-!- pluskid [~pluskid@111.120.6.180] has quit [Quit: Leaving]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 244 seconds]
+-!- nietpiet [92322838@gateway/web/freenode/ip.146.50.40.56] has joined #shogun
+-!- emrecelikten [~emre@213.153.218.163] has joined #shogun
+-!- heiko [~heiko@host86-181-154-192.range86-181.btcentralplus.com] has joined #shogun
+-!- gsomix [~gsomix@88.200.242.178] has quit [Ping timeout: 246 seconds]
+-!- gsomix [~gsomix@88.200.242.178] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:54ea:8a06:2501:ed7b] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@81.28.187.0] has joined #shogun
+ blackburn	sonney2k: sg_malloc is not thread-safe
+ gsomix	and also my CMap
+ heiko	gsomix, do you have any idea about this trace-mallocs weirdness?
+ blackburn	heiko: thread-unsafetyy
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- cwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has quit [Ping timeout: 245 seconds]
+ heiko	blackburn, really? that is it?
+ blackburn	heiko: well we use cmap to store allocated blocks
+ blackburn	and insert is not thread safe
+ heiko	mmh
+ heiko	but that should be easy to fix
+ heiko	just lock whil inserting
+ blackburn	sure
+ heiko	blackburn, around?
+ blackburn	yeah
+ heiko	computing covariance matrices...
+ heiko	cblas_dgemm ??
+ blackburn	sure
+ heiko	I saw that in your code
+ blackburn	what is the problem?
+ heiko	what method is that?
+ blackburn	dot product of matrices
+ heiko	ah alright
+ blackburn	well to be honest it is not covariance
+ blackburn	but once we center it
+ blackburn	or center features before
+ blackburn	it is
+ heiko	which way is best to compute cov(h) where h is a vector?
+ heiko	like the matlab equivalent
+ heiko	that way youre doing there?
+ blackburn	dger I guess
+ heiko	which is?
+ heiko	I am not used to all these libraries :)
+ blackburn	heiko: well what is cov(h)?
+ blackburn	x'*x resulting with matrix?
+ blackburn	if so cblas_dger does the job
+ heiko	empirical covariance matrix where the entries contains the covariance of pairs of the random variables in the input matrix
+ heiko	which would be E[hh^T] - E[h]E[h]^T
+ heiko	and expectations are estimated by sample mean
+ blackburn	heiko: I'd suggest to cblas_dger and center_matrix after
+ heiko	ok alright
+ heiko	I will add a routine to CStatistics
+ heiko	this blas stuff is horrible to read ;)
+ blackburn	no if you are android
+ heiko	what?
+ blackburn	I am
+ blackburn	:D
+ heiko	lol :D
+ heiko	an evil robot, that what you are!
+ heiko	what does dger do?
+ blackburn	heiko: just product of vectors
+ heiko	inner or outer?
+ heiko	result is matrix or vecor?
+ blackburn	hehe
+ blackburn	good shot
+ blackburn	matrix
+ heiko	ok so I can do the hh^T thing with it
+ blackburn	but matrix / scalar is the choice
+ heiko	nice
+ blackburn	heiko: yes but do not forget to zero resulting matrix before
+ heiko	oh man
+ heiko	complicated
+ heiko	will add that
+ blackburn	cblas_dger(n_dims,n_dims,1.0,x,1,x,1,cov_matrix,n_dims)
+ blackburn	heiko: ^
+ blackburn	cov_matrix += xx' that is
+ blackburn	or may be
+ blackburn	cov_matrix += 1.0*xx'
+ heiko	mmh ok
+ heiko	Ill dig into it
+ blackburn	heiko: if you are confused with ld* - it is just increment of dimensions
+ blackburn	so 1 for vectors and #num_of_rows for matrix
+ heiko	argh
+ heiko	anoyying
+ blackburn	why?
+ heiko	because I still have no idea what to call ;) and I hate try and error code development
+ blackburn	heiko: what is wrong with dger?
+ heiko	its fine, I just hat these technical things, but Ill stop complaining now
+ blackburn	heiko: just ask me :)
+ heiko	well, if you know what to do, could you add a method static SGMatrix<T> cov(SGMatrix<T> observations) to CStatistics? :)
+ blackburn	heiko: sure
+ blackburn	heiko: observations is column-wise feature vectors?
+ heiko	it would be great if there was a bool flag for transposing
+ heiko	yes
+ blackburn	heiko: transposing what? observations?
+ heiko	yes I mean if my data is the wrong way round it would be nice if I wouldnt have to transpose it before
+ heiko	but its not that important
+ blackburn	hahha
+ blackburn	I just found
+ blackburn	pseudo-formulas
+ blackburn	in statistics
+ blackburn	nicee
+ heiko	what?
+ heiko	Ah I see :)
+ blackburn	loooool
+ blackburn	integral looks very lovely
+ heiko	hehe I might translate these into latex
+ heiko	taken from ALGLIB :)
+ blackburn	ok ETA 20 minutes
+ heiko	many thanks :)
+ heiko	blackburn, they look horrible in doxygen documentation ;) I will definately change that
+-!- nietpiet [92322838@gateway/web/freenode/ip.146.50.40.56] has quit [Quit: Page closed]
+ blackburn	heiko: can you test it afterwards?
+ heiko	I will :)
+ blackburn	hmm heiko it looks like in LLE I call kernel matrix as covariance matrix
+ heiko	ah thats even better, I can copy it
+ heiko	which lines?
+ heiko	blackburn, is it the one in 498?
+ blackburn	heiko: shogun/converter/LocallyLinearEmbedding.cpp:309
+ heiko	thats dgemm
+ blackburn	heiko: yes
+ blackburn	X'X
+ blackburn	heiko: linear kernel matrix that is
+@sonney2k	blackburn, well then we have to make it so
+ blackburn	sonney2k: anyway lapacks mallocs are out of scope for tracing
+@sonney2k	going back to just malloc will not solve the problem
+ blackburn	sonney2k: no but it shouldn't be tracked
+@sonney2k	blackburn, but there is no error check in there so that won't do it
+@sonney2k	blackburn, so what is not thread safe about them - the tracing stuff only right?
+ gsomix	well time to work
+ gsomix	good evening
+ CIA-18	shogun: Soeren Sonnenburg master * rda0a349 / src/shogun/mathematics/lapack.cpp : Revert "Made lapack use mallocs instead of SG_MALLOCs" - http://git.io/Anljog
+@sonney2k	gsomix, hi there - regarding thread safety of CMap - I guess all you would need to do is change the add / remove functions right?
+@sonney2k	gsomix, if not other option would be to have a general acquire_lock() / release_lock() in CMap that one always has to call before doing sth with CMap
+ heiko	blackburn, finally got it :)
+@sonney2k	wiking, don't miss your progress report this week!
+ blackburn	heiko: sorry was away for a while
+ blackburn	will commit soon
+ heiko	blackburn
+ heiko	I just found that I already did this
+ heiko	SGMatrix has matrix multiply
+ blackburn	:D
+-!- alexlovesdata [c25fae98@gateway/web/freenode/ip.194.95.174.152] has joined #shogun
+ heiko	using cblas_dgemm
+ blackburn	heiko: okay should I do that then?
+ heiko	sorry  :(
+ blackburn	no problem :D
+ heiko	just need to center matrix before then its fine
+ blackburn	heiko: after you mean?
+ heiko	no before
+ heiko	and its not centering as center() method
+ heiko	but only remove mean of each column
+ blackburn	yeah exactly what I mean
+ blackburn	heiko: it is the same
+ heiko	are you sure?
+ blackburn	pretty much
+ heiko	oh yeah
+ heiko	just seeing it
+ blackburn	but it is more efficient
+ heiko	man, i should sleep more :)
+ blackburn	and more
+ blackburn	it does not modify matrix
+ blackburn	feature one I mean
+ heiko	not modify?
+ heiko	center() you mean()
+ heiko	ehm
+ heiko	how to not modify matrix?
+ heiko	ah
+ heiko	actually
+ heiko	one could do this with the +beta*A thing at the end of dgem
+ blackburn	heiko: well you don't have to subtract mean and to modify feature matrix
+ blackburn	only covariance is to be modified
+ heiko	afterwards?
+ blackburn	yeah I think so
+ blackburn	let me check
+ heiko	are you sure?
+ heiko	no I think it has to be done before
+ blackburn	heiko: before what?
+ heiko	before computing product
+ heiko	I mean one has to center feature matrix
+ blackburn	heiko: argh sorry
+ blackburn	center works only with kernel matrix it seems
+ heiko	yeah there its fine
+ blackburn	heiko: just checked, yeah
+ blackburn	sad it doesn't work with covariance
+@sonney2k	gsomix, why do you think that is slow?
+ gsomix	sonney2k, I had to do it at morning... :)
+@sonney2k	gsomix, I mean basically none of the shogun stuff is thread safe
+@sonney2k	we make things thread safe when we need it and I am not so sure about CMap here
+ blackburn	sonney2k: why to make it explicit
+@sonney2k	blackburn, you mean the locking/ unlocking?
+ blackburn	yes
+@sonney2k	if it significantly slows down the 'normal' use case then we should make it explicit
+ gsomix	sonney2k, aww, just got your mail
+ blackburn	sonney2k: slows down significantly?? how
+ blackburn	lock is not that slow
+@sonney2k	blackburn, did you measure?
+ blackburn	sonney2k: did you?
+ blackburn	I didn't
+@sonney2k	no
+@sonney2k	blackburn, but basically no data structure or anything in shogun is thread safe
+ blackburn	sonney2k: right
+ blackburn	but it should be actually I think :)
+@sonney2k	while I don't mind adding thread safety for relevant cases we should do it only when really necessary
+@sonney2k	blackburn, just think of someone calling train() of an SVM twice (in two threads...)
+@sonney2k	lots of stuff will just kaboom
+@sonney2k	gsomix, can you quickly measure say how long it takes to add say 100000 items via add() to CMap?
+@sonney2k	gsomix, w/ and w/o locks?
+ blackburn	sonney2k: evaluations are open now :)
+@sonney2k	blackburn, is this good or bad?
+@sonney2k	blackburn, btw
+ blackburn	sonney2k: gsoc one I mean
+@sonney2k	grep pthread shogun/ -r -l --include='*.cpp' | grep -v conv | wc -l
+@sonney2k	21
+@sonney2k	not so many ...
+ blackburn	I know
+ blackburn	sonney2k: and 4 done already
+@sonney2k	yeah problem is that this is not a trivial task and it is easy to make mistakes
+ blackburn	sonney2k: it is not that bad actually
+ blackburn	I just paste helper thing into the place where pthread code was
+ alexlovesdata	@sonney2k: I will take a deep look into Viktors Code tomorrow
+ n4nd0	sonney2k: around?
+@sonney2k	blackburn, well look at shogun/features/DotFeatures.cpp
+@sonney2k	actually that is not so difficult in this one
+@sonney2k	blackburn, shogun/features/HashedWDFeaturesTransposed.cpp CHashedWDFeaturesTransposed::dense_dot_range_helper
+@sonney2k	n4nd0, no :P
+ n4nd0	sonney2k: I have planned some holidays for the next week, so I'll be some days off work; is there a big problem with it?
+ n4nd0	sonney2k: I am certain it won't destroy the project's schedule
+@sonney2k	n4nd0, np - just continue quickly when you are back
+ n4nd0	sonney2k: yeah, I have also reserved more time for this week
+ n4nd0	thank you
+ n4nd0	is there any way we get to know if our mentor has already sent the midterm evaluation?
+@sonney2k	n4nd0, no
+-!- emrecelikten [~emre@213.153.218.163] has quit [Quit: Leaving.]
+ gsomix	sonney2k, sorry. I'm back.
+ gsomix	>> quickly measure | is it actually needed?
+ gsomix	>> acquire_lock() / release_lock() | for lock/unlock? or for lock_init/lock_destroy?
+@sonney2k	gsomix, what I had in mind is measuring CMap w/o locking
+@sonney2k	(only add() function)
+@sonney2k	and then w/ locking
+ gsomix	ok
+@sonney2k	(from the patch you just sent)
+@sonney2k	we can assume spinlocks so it should be pretty fast
+@sonney2k	but lets see
+ blackburn	sonney2k: I am pretty sure locking of free lock is fast - no matter spinlock it is or mutex
+@sonney2k	blackburn, my bet is that it is 10-100 times more expensive than x[i]=y
+ blackburn	sonney2k: my bet it is as fast :D
+@sonney2k	gsomix, be the judge :D
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 248 seconds]
+@sonney2k	n4nd0, nico just sent me an email that he did the evals
+ blackburn	sonney2k: well why do you think so?
+@sonney2k	gut feeling :D
+@sonney2k	why do you think it is fast?
+ n4nd0	sonney2k: yeah, thank you :)
+ blackburn	do you think any waits are here?
+ blackburn	it should be just atomic some bool=true
+ blackburn	well I don't know how to do that atomic though
+-!- alexlovesdata [c25fae98@gateway/web/freenode/ip.194.95.174.152] has quit [Quit: Page closed]
+@sonney2k	n4nd0, btw before you leave just sent some early weekly report then - thanks
+@sonney2k	blackburn, with spinlocks i think it really is just accessing some integer
+@sonney2k	with the pthread stuff it is sth more complex
+@sonney2k	but lets see
+@sonney2k	gsomix, any news?
+ blackburn	with pthread stuff?
+ blackburn	isn't spinlock pthread stuff?
+ gsomix	sonney2k, measuring
+@sonney2k	gsomix, btw I cannot access melange and fill out your evaluation...
+ gsomix	sonney2k, hmm, I'm not sure that I did it correctly. but... http://pastebin.com/WxCL76LK code and http://pastebin.com/eurxustX results
+-!- ckwidmer [8ca3fe9d@gateway/web/freenode/ip.140.163.254.157] has joined #shogun
+ blackburn	sonney2k: statistically insignificant
+ blackburn	:D
+ gsomix	oh, I had to make seven measurements... as said in the training manual for physics labs. :)
+ blackburn	lol
+ gsomix	I'm slowpoke... it seems that sonney2k gone to sleep
+@sonney2k	gsomix, can you please measure only the add part with CTime and one more thing - are you using some on-demand cpu frequency scheduling?
+@sonney2k	gsomix, turn that to a fixes freq in that case
+@sonney2k	and for how to use CTime:  CTime t;  t.cur_time_diff(true);
+@sonney2k	that's it
+ gsomix	>> turn that to a fixes freq in that case | I don't know how. :(
+@sonney2k	gsomix, cpufreq-set -r  -g performance
+ blackburn	heiko: ping
+ gsomix	sonney2k, blackburn http://pastebin.com/uyjZzj6P
+ gsomix	hm
+ blackburn	sonney2k: HAHA
+ gsomix	hm, weekly report
+@sonney2k	gsomix, what is this print out? please use cur_time_diff() ...
+ blackburn	sonney2k: you looooost
+@sonney2k	blackburn, c'mon the pthreaded stuff looks even faster than the other?
+ blackburn	sonney2k: INSIGNIFICANT :D
+ gsomix	sonney2k, okay. .____.
+@sonney2k	gsomix, I think you used the clock_t based function...
+ gsomix	I used CTime with cur_runtime_diff
+@sonney2k	blackburn, yes it seems to be fast enough though
+ gsomix	that "get time difference between start and NOW"
+@sonney2k	gsomix, runtime_diff is not cur_time_diff
+@sonney2k	I guess we need to modify the function names
+@sonney2k	one is measuring cpu time
+ blackburn	yeah cur_time_diff
+@sonney2k	the other wall clock time (in higher resolution)
+ blackburn	is *impossible* to remember
+@sonney2k	blackburn, suggestions for a better name?
+ gsomix	oh, ok
+@sonney2k	blackburn, gsomix it is like time <cmd>
+@sonney2k	real0m0.003s
+@sonney2k	user0m0.000s
+@sonney2k	sys0m0.000s
+ gsomix	ok
+@sonney2k	real == wall clock time
+ blackburn	sonney2k: I do not have any actually
+@sonney2k	user == run_time in CTime
+ blackburn	my methods have bad names too :D
+@sonney2k	I am no longer sure that the runtime based functions are ok...
+@sonney2k	blackburn, well for a start - how about get_wall_clock_time() ?
+@sonney2k	and get_consumed_cpu_time() ?
+ blackburn	better
+@sonney2k	instead of
+@sonney2k	get_curtime()
+@sonney2k	and get_runtime()
+@sonney2k	but I don't know how to name the functions measuring the difference between the saved start time and 'now'
+ blackburn	get_elapsed_clock_time
+@sonney2k	get_elapsed_wall_clock_time()
+@sonney2k	get_elapsed_cpu_time()
+@sonney2k	I like that
+ heiko	blackburn what was it?
+ heiko	sorry was having diner :)
+ blackburn	heiko: no problem not actual I think
+ blackburn	I just didn't manage to find one xval function
+ blackburn	but now did
+ heiko	ok :)
+ CIA-18	shogun: Heiko Strathmann master * r371587b / (9 files in 5 dirs): Merge pull request #634 from karlnapf/master (+8 more commits...) - http://git.io/XCtHgg
+ heiko	blackburn, I just added the covariance :)
+ heiko	will log off now, good night
+ blackburn	cool
+-!- heiko [~heiko@host86-181-154-192.range86-181.btcentralplus.com] has left #shogun []
+ gsomix	blackburn, sonney2k http://pastebin.com/ri5Q6a5n
+ gsomix	.____.
+@sonney2k	gsomix, what is the code?
+ blackburn	sonney2k: does pycon fits to present shogun?
+ gsomix	sonney2k, http://pastebin.com/fmGYTZfs
+ gsomix	tired
+ gsomix	need to sleep
+ gsomix	good night guys
+-!- gsomix [~gsomix@88.200.242.178] has quit [Ping timeout: 244 seconds]
+--- Log closed Tue Jul 10 00:00:17 2012

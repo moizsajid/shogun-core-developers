@@ -1,0 +1,139 @@
+--- Log opened Sat Aug 24 00:00:28 2013
+-!- travis-ci [~travis-ci@ec2-50-19-189-171.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/10551431
+-!- travis-ci [~travis-ci@ec2-50-19-189-171.compute-1.amazonaws.com] has left #shogun []
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- sonne|osx_ [~sonne@f053037041.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f053046196.adsl.alicedsl.de] has quit [Ping timeout: 245 seconds]
+-!- sonne|osx_ is now known as sonne|osx
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has left #shogun []
+-!- gsomix_ [~gsomix@109.169.254.249] has joined #shogun
+-!- gsomix [~gsomix@95.67.172.244] has quit [Ping timeout: 264 seconds]
+-!- dkyang [7ae07e1e@gateway/web/freenode/ip.122.224.126.30] has joined #shogun
+-!- lisitsyn [~lisitsyn@109-226-90-47.clients.tlt.100megabit.ru] has left #shogun []
+@wiking	sonney2k: here?
+@wiking	sonne|osx: ping :)
+-!- lisitsyn [~lisitsyn@109-226-90-47.clients.tlt.100megabit.ru] has joined #shogun
+-!- van51 [~van51@ppp-94-66-12-14.home.otenet.gr] has joined #shogun
+@wiking	lisitsyn: yo
+@sonney2k	wiking, wassup?
+-!- HeikoS [~androirc@90.204.242.124] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	Test
+-!- van51 [~van51@ppp-94-66-12-14.home.otenet.gr] has quit [Quit: Leaving.]
+@wiking	sonney2k: yeah i wanted to ask something
+@wiking	but i forgot
+-!- iglesiasg [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+ iglesiasg	hello hello
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@sonney2k	wiking, must have been important :D
+@wiking	sonney2k: oh yeah i remember
+@wiking	sonney2k: should we use DynArray<> as part of the public api or rather CDynamicArray?
+@wiking	and what's the best way to have a DynArray< DynArray<> >
+-!- iglesiasg_ [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+-!- iglesiasg [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Ping timeout: 250 seconds]
+-!- iglesiasg_ is now known as iglesiasg
+-!- van51 [~van51@ppp-94-66-12-14.home.otenet.gr] has joined #shogun
+-!- dkyang [7ae07e1e@gateway/web/freenode/ip.122.224.126.30] has quit [Quit: Page closed]
+-!- iglesiasg [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Ping timeout: 250 seconds]
+-!- van51 [~van51@ppp-94-66-12-14.home.otenet.gr] has quit [Quit: Leaving.]
+@wiking	anybody around
+@wiking	?
+ lisitsyn	wiking: yes
+@wiking	lisitsyn: ok so here's the problem
+@wiking	i have a set of sparse-like vector (that's now basically a DynArray)
+@wiking	it's for storing indices
+@wiking	i have like N of them
+@wiking	i'd like to store them in an array or list
+@wiking	and then i have to convert it to SGVector<> for being able to do add_subset()
+ lisitsyn	crazy :)
+@wiking	how should i store the array of DynArrays/
+@wiking	?
+ lisitsyn	and you need to serialize it, right?
+@wiking	i've tried CDynamicArray<DynArray<index_t> >
+@wiking	but that doesn't work
+@wiking	yeah it'd be great to serialize
+-!- van51 [~van51@ppp-94-66-12-14.home.otenet.gr] has joined #shogun
+ lisitsyn	why doesn't it work?
+@wiking	btw dunno, parameters->add_vector() is complaining
+@wiking	in CDynamicArray...
+ lisitsyn	ahhh
+@wiking	anyhow
+ lisitsyn	yes I guess add_vector  works only with simple types
+@wiking	yeps
+@wiking	mmm
+@wiking	so yeah i have no clue
+@wiking	of course std::vector<std:vector<index_t> > would work...
+@wiking	:P
+@wiking	ah and the problem is that i dont know the sizeof of DynArray...
+ lisitsyn	that's basically what ya need :)
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+@wiking	i mean prior creating it
+@wiking	hence i cannot use SGVector
+@wiking	:P
+ lisitsyn	I see no workaround for this right now
+@wiking	basically i'm trying to implement this: http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm#ooberr
+@wiking	for that i have to get the indicies for the elements that are out of bag for each bag...
+@wiking	lisitsyn: btw bool* array1; bool* array2; bool* array2 |= array1; would work? :)
+@wiking	noup it seems not :)
+-!- lambday [67157f36@gateway/web/freenode/ip.103.21.127.54] has joined #shogun
+ lisitsyn	wiking: what's it?
+@wiking	nada
+@wiking	i'll have to use some STL it seems
+ lisitsyn	wiking: yeah we've got to find a way to employ stl w/o pain
+-!- van51 [~van51@ppp-94-66-12-14.home.otenet.gr] has quit [Quit: Leaving.]
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has left #shogun []
+@sonney2k	wiking, never use DynArray but rather DynamicArray/DynamicObjectArray when you want to serialize
+@wiking	sonney2k: yeah i've figured because of sgobject...
+@wiking	news on the new server? :)
+@wiking	btw: any of u who has linux plz update integration data
+-!- lambday [67157f36@gateway/web/freenode/ip.103.21.127.54] has quit [Ping timeout: 250 seconds]
+@sonney2k	wiking, yeah it is ordered
+@wiking	\o/
+-!- gsomix_ [~gsomix@109.169.254.249] has quit [Quit: Leaving]
+@wiking	sonney2k: and how can i store an SGVector in an array?
+@wiking	any kind of array
+@wiking	or list
+@wiking	as currently i dont see that happening in shogun
+@sonney2k	wiking, well store it in a DynamicArray and good
+@sonney2k	wiking, any clues why I am getting this?
+@sonney2k	 git push github master
+@sonney2k	To git@github.com:shogun-toolbox/shogun-data.git
+@sonney2k	 ! [rejected]        master -> master (non-fast-forward)
+@sonney2k	error: failed to push some refs to 'git@github.com:shogun-toolbox/shogun-data.git'
+@sonney2k	ohh I got got got it
+@sonney2k	I wasn't on a branch
+ lisitsyn	typical for shogun-data
+ lisitsyn	;)
+@sonney2k	lisitsyn, :P
+ lisitsyn	sonney2k: it happened to me like 10 times or so
+ lisitsyn	no idea why
+ lisitsyn	I don't remember what's the case it tracks off the branch
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun-data: Soeren Sonnenburg :master * b1dee0e / testsuite/tests/ (2 files): https://github.com/shogun-toolbox/shogun-data/commit/b1dee0e05df512b4d9011414d1b14374521afdbf
+ shogun-notifier-	shogun-data: update prunevarsubmean data
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * df6c6c6 / data: https://github.com/shogun-toolbox/shogun/commit/df6c6c62bd86ba10e9a2e968881e5d5c59beb6ba
+ shogun-notifier-	shogun: require new data version
+@sonney2k	lisitsyn, maybe it looses track of the branch when one does git submodule udpate or even git pull in shogun/ ?
+ lisitsyn	git submodule update I think yes
+@sonney2k	lisitsyn, well checkout master
+@sonney2k	lisitsyn, and tehn git pull in the shogun dir
+@sonney2k	lets see if it changes things
+ lisitsyn	sonney2k: do you have any insight whether something based on SO svm is applicable to frame-rate object detection?
+@sonney2k	lisitsyn, well I guess you would have to prefilter quite a bit and you could only use rather simple models
+ lisitsyn	sonney2k: it seems it is time for me to apply shogun for something commercial
+ lisitsyn	essentially it is just object detection so lets see how it goes
+@sonney2k	just do it :)
+ lisitsyn	sonney2k: I have to find a solution in next 15 days :D
+@sonney2k	lisitsyn, errm tough opencv?
+ lisitsyn	sonney2k: what?
+ lisitsyn	that's a task for opencv true
+ lisitsyn	but may be I can learn some svm or so
+-!- travis-ci [~travis-ci@ec2-50-17-145-124.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/10577408
+-!- travis-ci [~travis-ci@ec2-50-17-145-124.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #38 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/38  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #1510 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1510  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+ shogun-buildbot	build #1300 of cyg1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1300  blamelist: Soeren Sonnenburg <sonne@debian.org>
+--- Log closed Sun Aug 25 00:00:30 2013

@@ -1,0 +1,202 @@
+--- Log opened Mon Aug 06 00:00:17 2012
+@sonney2k	for linear svms yes for kernel svms dot() won't change
+@sonney2k	ohh it does - you also need to use bit shifts
+ blackburn	but it is probably the same
+ blackburn	it would make sense if I had no memory but it fits
+@sonney2k	depends - less mem req. may mean better cache usage
+@sonney2k	and you will have much less mem accesses too
+ blackburn	sonney2k: unfortunately it stopped on 90% :(
+-!- n4nd0 [~nando@198.Red-2-137-33.dynamicIP.rima-tde.net] has joined #shogun
+ n4nd0	hi blackburn
+ blackburn	hey
+ n4nd0	let me ask you
+ n4nd0	my compile log looks pretty ugly
+ n4nd0	full of warnings related to Eigen
+ n4nd0	something local I guess
+ n4nd0	lot of things like this one, give me a sec
+ blackburn	we all have it :)
+ n4nd0	http://pastebin.com/QjzNk4XY
+ n4nd0	aham
+ n4nd0	doesn't it look pretty bad?
+ blackburn	no not really
+ n4nd0	mmm ok
+ blackburn	I wanted to fix ithat but forgot
+ n4nd0	at least pretty long
+ n4nd0	I got a bit concerned because I run some examples but didn't get anything on screen
+ blackburn	the key is to make it -isystem instead of -I
+ n4nd0	something fishy with SG_PRINT I guess
+ n4nd0	I thought it could be related
+ blackburn	no should not
+ n4nd0	can you please tell me if your SG_PRINT works fine even with those warnings around?
+ blackburn	yes, it works
+ n4nd0	ok, thank you
+ blackburn	n4nd0: you could get warnings off for now
+ blackburn	just open .config
+ blackburn	find -I of eigen
+ blackburn	and make it -isystem instead
+ n4nd0	ok, I will do that after my current compilation
+ n4nd0	thanks!
+ blackburn	I can't stop looking at that cat
+ blackburn	http://cs301712.userapi.com/v301712029/5979/A_hDGJZepqk.jpg
+@sonney2k	blackburn, it has your eyes :D
+ n4nd0	good night guys
+-!- n4nd0 [~nando@198.Red-2-137-33.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+-!- gsomix [~gsomix@109.169.130.0] has quit [Ping timeout: 272 seconds]
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+ shogun-buildbot_	build #51 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/51
+-!- puffin444 [62e3926e@gateway/web/freenode/ip.98.227.146.110] has quit [Quit: Page closed]
+-!- gsomix [~gsomix@109.169.255.212] has joined #shogun
+-!- gsomix [~gsomix@109.169.255.212] has quit [Quit: Ex-Chat]
+-!- pluskid [~pluskid@108.171.196.83] has joined #shogun
+-!- K0stIa [~kostia@2001:718:2:1634:4a5b:39ff:fe99:cc49] has joined #shogun
+-!- K0stIa [~kostia@2001:718:2:1634:4a5b:39ff:fe99:cc49] has left #shogun []
+-!- uricamic [~uricamic@2001:718:2:1634:c92:f823:ac7e:c99f] has joined #shogun
+-!- blackburn [~blackburn@109.226.80.43] has joined #shogun
+-!- pluskid [~pluskid@108.171.196.83] has quit [Ping timeout: 246 seconds]
+-!- pluskid [~pluskid@111.120.59.211] has joined #shogun
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+-!- K0stIa [~kostia@2001:718:2:1634:4a5b:39ff:fe99:cc49] has joined #shogun
+-!- K0stIa [~kostia@2001:718:2:1634:4a5b:39ff:fe99:cc49] has left #shogun []
+-!- Netsplit *.net <-> *.split quits: pluskid
+-!- uricamic [~uricamic@2001:718:2:1634:c92:f823:ac7e:c99f] has quit [Quit: Leaving.]
+-!- Netsplit over, joins: pluskid
+-!- pluskid [~pluskid@111.120.59.211] has quit [Ping timeout: 240 seconds]
+-!- pluskid [~pluskid@108.171.196.83] has joined #shogun
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+-!- heiko [~heiko@dhcp-189-122.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- pluskid [~pluskid@108.171.196.83] has quit [Quit: Leaving]
+ heiko	wiking, around?
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+-!- KMcQuisten_ [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten_	silly webchat
+ KMcQuisten_	why do you torment me so?
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~blackburn@109.226.80.43] has joined #shogun
+-!- n4nd0 [~n4nd0@198.Red-2-137-33.dynamicIP.rima-tde.net] has joined #shogun
+ KMcQuisten_	Hey there blackburn
+ blackburn	KMcQuisten_: hey I just saw your mail
+ KMcQuisten_	Righto
+ blackburn	no, gsomix was a little away
+ KMcQuisten_	*grumble*
+ KMcQuisten_	Allrighty.
+ blackburn	KMcQuisten_: actually all method calls increase reference count with director
+ blackburn	so even some debug stuff makes it increase with no limits :D
+ KMcQuisten_	Zoinks
+ KMcQuisten_	That's a bit of a problem, isn't it?
+ KMcQuisten_	:)
+ blackburn	KMcQuisten_: yes and in your example something makes features to be deleted :)
+ KMcQuisten_	Very odd.
+ blackburn	kind of shootin' leg
+ KMcQuisten_	Yeah I hope gsomix can figure it out soon.  I have a whole host of custom kernels that I want to use the directorkernel framework for.
+ blackburn	KMcQuisten_: okay I reached him so we will try to figure it out
+ KMcQuisten_	Awesome.  Thanks so much, guys.
+ blackburn	KMcQuisten_: try to call __disown__() on each created director kernel
+ blackburn	before using
+ blackburn	I have to reconfigure shogun meanwhile
+ KMcQuisten_	WHen should I call it?
+ KMcQuisten_	Before I pass it to the machine with set_kernel()?  OR after?
+ blackburn	KMcQuisten_: after creation
+ blackburn	when you construct combined kernel I think
+ KMcQuisten_	Is it a method call from the kernel object, or CombinedKernel.__disown__(directorkernel)?
+ KMcQuisten_	or is disown a global function
+ blackburn	KMcQuisten_: kernel object
+ blackburn	x.__disown__()
+ KMcQuisten_	Alrighty
+-!- heiko [~heiko@dhcp-189-122.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+ blackburn	uh finally compiled with directors
+ blackburn	it goes pretty slow we need to speed up it somehow :D
+ KMcQuisten_	Ok, that fixed that segfault.  Now, what about other situations where I'm creating, using and destroying a bunch of director kernels, but not in a combinedkernel?  Do I needto call disown on any director kernel that gets passed to a regular shogun object?
+ blackburn	yeah example works here too
+ blackburn	KMcQuisten_: yeah each time you create anything director - disown it
+ KMcQuisten_	Disown it after i pass it to another object, yes?  If I disown it right away won't it be deleted?
+ blackburn	KMcQuisten_: well yeah, disown it before use in any shogun object
+ blackburn	I am unsure if that can be done automaticall
+ blackburn	y
+ KMcQuisten_	I can do an isinstance check in my code for that
+ blackburn	I will check whether that can be done automatically
+ KMcQuisten_	Ok
+-!- heiko [~heiko@dhcp-189-122.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- heiko [~heiko@dhcp-189-122.internal.eduroam.ucl.ac.uk] has quit [Client Quit]
+-!- heiko [~heiko@dhcp-189-122.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- n4nd0 [~n4nd0@198.Red-2-137-33.dynamicIP.rima-tde.net] has quit [Quit: Ex-Chat]
+-!- KMcQuisten_ [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+-!- heiko [~heiko@dhcp-189-122.internal.eduroam.ucl.ac.uk] has left #shogun []
+@sonney2k	blackburn, hmmhh would be better to discus the stuff KMcQuisten runs into on the mailinglist than in privat
+@sonney2k	e
+ blackburn	sonney2k: yeah
+ blackburn	sonney2k: did you know about that issue btw?
+@sonney2k	blackburn, I don't even know now and no one else except you does :D
+@sonney2k	blackburn, do we have a function in evaluation to get the confusion matrix?
+ blackburn	sonney2k: yes, multiclassaccuracy has one
+@sonney2k	blackburn, because https://github.com/shogun-toolbox/shogun/pull/679/files#L16R66
+@sonney2k	I guess that one shoudl use it then?
+ blackburn	hah
+ blackburn	yes pluskid came with his own solution again
+@sonney2k	ok told him
+@sonney2k	blackburn, do you know if n4nd0 fixes up matrix features to be more general / whether he introduces SGMatrixList as new data type to not have yet another type*, int, int issue later?
+@sonney2k	blackburn, ahh and do you know where gsomix is hiding :D
+ blackburn	no idea
+ blackburn	about first
+ blackburn	gsomix is available in jabber
+@sonney2k	it is pretty bad that we always get *huge* PRs :(
+@sonney2k	blackburn, I don't know about you but really carefully doing code review for these big monsters is a pain so I only do it superficially...
+ blackburn	sonney2k: yeah it can be hard sometimes
+@sonney2k	pluskids PR has ~1700 lines n4nd0s 2600...
+@sonney2k	blackburn, ohh I see your eyes in github
+* sonney2k files hypnotized
+ blackburn	sonney2k: :D
+ blackburn	sonney2k: isn't that cat awesome?
+@sonney2k	blackburn, yes
+@sonney2k	blackburn, did you receive the github love email
+ blackburn	sonney2k: yeah
+ blackburn	reading
+-!- n4nd0 [~nando@92.Red-2-137-9.dynamicIP.rima-tde.net] has joined #shogun
+ wiking	bijuuuu
+ blackburn	wiking: what's that about?:)
+ wiking	dunno
+ wiking	the mars thingy has landed todaybtw :)
+ blackburn	wiking: yeah pretty funny for me to compare that with inquisition taking place in russia
+-!- gsomix [~gsomix@80.234.52.32] has joined #shogun
+ gsomix	good evening
+ blackburn	wiking: btw I was playing around with freaks and they are pretty interesting
+ blackburn	wiking: I'd like to use opencv to compute features now
+ wiking	blackburn: eheheh told you
+ blackburn	rewriting such things is way too slow
+ blackburn	sure
+ wiking	opencv is good enough for that
+ wiking	nothing else though :)
+ blackburn	it is ugly actually but nothing better
+ wiking	indeed
+ blackburn	wiking: so are we going to use BoW?
+ wiking	well since i have the code for it
+ wiking	we could
+ blackburn	wiking: I tried freak on road signs with one keypoint at center of image
+ wiking	how was it?
+ blackburn	not the best descriptor for sure but ~90% of accuracy can be reached
+ blackburn	actually it would be better for a few keypoints I think
+ blackburn	wiking: what I do not understand is alex's comment
+ blackburn	I mean authors state it works..
+ blackburn	one reason to try freak is that it is terrible fast
+ wiking	hehhehe
+ wiking	well can't we do some dense freak ?
+ wiking	or at least yeah we should do several keypoints for bow
+ blackburn	wiking: what is dense here?
+ wiking	well good question
+ blackburn	wiking: you mean some grid of keypoints?
+ blackburn	why to do that? in these pics I thought we need a few keypoints
+ blackburn	wiking: what is your bow code based on?
+ wiking	blackburn: that's fully java+hadoop+mahout code
+ blackburn	wiking: how do you compute keypoints/descriptors?
+ wiking	blackburn: that's coming from the opencv code in my case
+ blackburn	wiking: do you think we can optimize it for binary descriptors?
+ wiking	well
+ wiking	afaik we could
+ wiking	but we should just run  test asap
+ blackburn	wiking: what's actual deadline btw?
+-!- n4nd0 [~nando@92.Red-2-137-9.dynamicIP.rima-tde.net] has quit [Ping timeout: 252 seconds]
+ CIA-18	shogun: Sergey Lisitsyn master * rfb93440 / (19 files in 2 dirs): Crossvalidation support for SLEP based multitask - https://github.com/shogun-toolbox/shogun/commit/fb93440c21ad5d7a42b6f2f178afc123166270cb
+ shogun-buildbot_	build #161 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/161  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ blackburn	oh
+ blackburn	okay
+--- Log closed Tue Aug 07 00:00:17 2012

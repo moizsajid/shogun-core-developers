@@ -1,0 +1,184 @@
+--- Log opened Sat Jun 04 00:00:54 2011
+-!- blackburn [~qdrgsm@188.122.237.128] has joined #shogun
+-!- blackburn [~qdrgsm@188.122.237.128] has quit [Remote host closed the connection]
+ CIA-18	shogun: Sergey Lisitsyn master * r6e1583e / (266 files in 30 dirs): Merged upstream - http://bit.ly/ipWn9O
+ CIA-18	shogun: Sergey Lisitsyn master * r88443c9 / (5 files in 3 dirs): Adapted CClassicMDS to new structure - http://bit.ly/j7U83R
+ CIA-18	shogun: Sergey Lisitsyn master * raba45d0 / (3 files): Cleaned and fixed CClassicMDS - http://bit.ly/mAfLto
+ serialhex	sonney2k, are you on?
+ serialhex	hmm, ok, well when you get on there are 2 things:
+ serialhex	1) Kernel needs to be renamed, as it's a top-level module in ruby (everything decends from object, and object mixes in kernel, so every object will add those methods & stuff to it when you require kernel)
+ serialhex	it could be something as simple as Kernels, seeing as theres more than one...
+ serialhex	2) how does one make the *.so files that are generated be lowercase, as rubyists expect to "require 'classifier'"  not "require 'Classifier'"  and with Classifier.so being capitalized the first wont find it
+ serialhex	i noticed this can be done while looking at the java_modular stuff, i just dont know where it is (or if that's the default of how it outputs)
+-!- blackburn [~qdrgsm@188.122.237.128] has joined #shogun
+ blackburn	hehe just noticed mds has been accepted as is
+ serialhex	cool cool
+ serialhex	you doin alright blackburn?
+ blackburn	serialhex: yeap, all day long was doing lecture notes for exam on parallel computations
+ serialhex	cool, sounds like fun :P
+ blackburn	I fckng hate teacher of that shit
+ blackburn	and how are you today?
+ serialhex	doing well, writing up some tests for the ruby modular stuff
+ serialhex	basically making sure the libs load up properly & stuff
+ blackburn	I have just read logs
+ blackburn	you said there are kernel conflict :)
+ blackburn	it is really strange they called some base object - kernel
+ serialhex	yeah, it's not really an object, it's all the basic methods that are used throughout most of the objects
+ serialhex	though object Object has it's own methods too :D
+ blackburn	I see
+ blackburn	anyway strange naming
+ blackburn	why not Base or sth like that
+ serialhex	(yes, it is fun to talk about the object Object and how class Class's superclass is module or sth... :P )
+ serialhex	idk, but that's what it is...
+ serialhex	if we can rename it kernels then we're good, but i dunno if he'll want to name it that or sth else
+ blackburn	hmm it is raining all day long
+ serialhex	nice!  i wish it would rain here
+ serialhex	SWEET!!! my test failed :D
+ blackburn	may be it is possible to rename it in typemap?
+ blackburn	serialhex: hmm if question starts with maybe is it ok to say 'it is' and not 'is it'?
+ blackburn	voices in my head says it is ok but idk
+ blackburn	:D
+ serialhex	yeah, you're right
+ serialhex	on both counts :D
+ serialhex	i'm also hoping to find a way to rename all the files from "Foo.so" to "foo.so"
+ blackburn	Foo.i should contain sth related to
+ serialhex	hmm... i'll look there in a min...
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Remote host closed the connection]
+@sonney2k	blackburn, hmmhh your patch is suspicous ...
+ blackburn	sonney2k: why?
+@sonney2k	looks like you didn't do a git pull --rebase
+ blackburn	I didn't
+@sonney2k	so this means git took what you did as the master and applied everything I and others did on top of your stuff
+ blackburn	sonney2k: where is the difference?
+ blackburn	sonney2k: but the diff is only for 4 files
+@sonney2k	blackburn, one is using what I do as a master and apply your patch on top
+ blackburn	ah so everything is ok now?
+@sonney2k	and one is to use what you did and apply all the many patches on top
+@sonney2k	and you should do the first by using git pull --rebase
+ blackburn	sorry, I haven't knew it
+@sonney2k	yeah too late now
+@sonney2k	next time
+ blackburn	sonney2k: ah it makes my branch 'branched' from the current master, right?
+@sonney2k	yes
+@sonney2k	you should rebase
+@sonney2k	either you do git checkout master
+@sonney2k	then git pull
+@sonney2k	and then git checkout <nameofyourbranch>
+@sonney2k	git rebase master
+ blackburn	sonney2k: so if I want to keep my branch actual I should not git merge upstream/master but git rebase?
+@sonney2k	yes of course !
+ blackburn	damn
+ blackburn	i'm useless hehe
+@bettyboo	:*)
+@sonney2k	I mean we could still undo the last change
+@sonney2k	I just do some git reset --hard
+@sonney2k	and then git push --force
+@sonney2k	but no idea if someone else already git pull'd
+@sonney2k	then it would go kaboom
+* blackburn is crying :)
+-!- serialhex [~serialhex@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+ serialhex	wow, it's been a LOOONG time since i've used windows... and i dont miss it!
+ blackburn	sonney2k: but git pull is pulling only my local master
+ blackburn	how to apply upstream master?
+ serialhex	git pull upstream master
+ serialhex	(if you've made an upstream)
+ blackburn	oh damn
+ serialhex	???
+ blackburn	actually I was doing merging with upstream all the time
+ blackburn	I just didn't know there is a human way to do it
+ serialhex	HA!!!  thats wonky!!! :P
+@bettyboo	*g*
+ serialhex	wow windows is being slow!!!
+ blackburn	sonney2k: well so what you will do?
+ blackburn	serialhex: I'm a stupid monkey - I have pulled a request with all changes being before :D
+ blackburn	because I had been doing merging all the time
+@sonney2k	I suspect otherers will or have already made the same mistake and I just didn't notice because I cannot recognize this from the diff
+@sonney2k	serialhex, I have no idea what we should do about kernel
+@sonney2k	I mean adding an exception just for ruby will be confusing on the long run
+@sonney2k	so we should have a consistent name
+ serialhex	true... and breaking backwards compatibility is probably bad...
+@sonney2k	the problem is that I was just about to de-pluralize things
+@sonney2k	like distributions
+ serialhex	ok
+@sonney2k	-> distribution
+* blackburn just found out that git have 'stash' cmd
+@sonney2k	we are currently massively breaking things
+ serialhex	HAHA!!! lol
+@sonney2k	I mean recall the CClassifier -> CMachine change
+@sonney2k	preproc -> preprocessors
+@sonney2k	etc etc
+ serialhex	true
+ blackburn	next version of shogun will be surprising a lot
+@sonney2k	after this GSoC we hopefully have sth stabalized
+@sonney2k	stabelized
+ blackburn	just imagine some guy using shogun from his ubuntu repo
+ blackburn	and one day it is all changed :D
+@bettyboo	smart
+ serialhex	ZOMG WINDOWS IS SOOOO FSCKING SLOWWWWWWWW!!!!!!!
+ serialhex	blackburn, theres a free uber-git book @ http://progit.org/
+ blackburn	ehh
+ blackburn	okay
+ blackburn	serialhex: do you know how to completely replace my master to upstream master?
+ blackburn	with*
+ serialhex	wow, you sound like i told you that if you had sex with an ugly woman i'd give you $100
+ serialhex	umm... hd on
+ blackburn	no, ehh is about my issues with my master branch
+ blackburn	I have commited something I should not
+ serialhex	well you could do a git reset --hard HEAD^ if it was your last commit
+ blackburn	oh
+ blackburn	it is ok now
+ blackburn	I pushed --force it
+ serialhex	you fixed it?
+ blackburn	yeap
+ serialhex	ahh... yeah that'll fix your github.com stuffz
+ serialhex	FFS!!! i'm like 3 days late for the sale!!! dammit!
+ serialhex	and i *REALLY* hate this font!!
+ blackburn	for some reason I want to reinstall my ubuntu hehe
+ blackburn	well why not
+ blackburn	it was a mistake to update it
+ serialhex	update what??
+ blackburn	10.10 -> 11.04
+ serialhex	oh, yeah, that's the reason why i moved to archlinux
+ blackburn	arch? how it is?
+ serialhex	i *LOVE* gentoo, but i dont have the time to install it
+ blackburn	I was thinking about debian
+ blackburn	i'm a paranoid sometimes and now when X.org falls down sometimes I'm even a bigger paranoid
+ blackburn	well I think now I'll install ubuntu 11.04 and will remove unity :)
+ serialhex	heh, yeah unity sucks afaik
+ blackburn	when I had updated ubuntu I deleted unity in 1 min :D
+* blackburn is saving cracked wolfram mathematica license
+ serialhex	you think you might be able to get me in on the mathematica action?? :D
+ blackburn	don't understand
+ serialhex	cracked mathematica license + e-mail to me = a new toy!!
+ blackburn	ah
+ blackburn	I don't know if it will be working for you (there is a hardware key afaik)
+ serialhex	yeah, i've never used mathematica... i heard it's pretty spiffy
+ serialhex	ooh, thats not cool!
+ blackburn	I can send you a crack anyway if you want :D
+ blackburn	I just don't care if it bad
+ serialhex	ok
+ serialhex	OOH!!! i need a new computer!!!
+ serialhex	i'll bbl!
+-!- serialhex [~serialhex@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit []
+-!- blackburn [~qdrgsm@188.122.237.128] has quit [Quit: Leaving.]
+@sonney2k	hmmhh
+ CIA-18	shogun: Soeren Sonnenburg master * r07b707b / (4 files in 3 dirs):
+ CIA-18	shogun: Potentially work around the java_modular compile error.
+ CIA-18	shogun: This commit *may* again cause issues with labels not being known in classifiers or
+ CIA-18	shogun: kernels respectively in preprocs. - http://bit.ly/jsVLVK
+-!- blackburn [~blackburn@188.122.237.128] has joined #shogun
+ blackburn	sonney2k: do you use debian on your laptop?
+@sonney2k	blackburn, I am a debian developer...
+@sonney2k	of course
+@sonney2k	but I might have different focus
+@sonney2k	I don't need the newest stuff just a stable system
+@sonney2k	and I don't want to upgrade too often
+@sonney2k	I just don't have time for this
+@sonney2k	and ubuntu is just too unstable for me
+ blackburn	sonney2k: is it very stable?
+@sonney2k	and really has a lot of buggy software - since it uses random snapshot of debian packages for the release
+ blackburn	may be I will change it to debian some day too :)
+@sonney2k	blackburn, depends of course but I use it on 3 servers / all machines at work and on my notebooks.
+ blackburn	I don't like unity and all these stuff
+@sonney2k	no issues so far
+--- Log closed Sun Jun 05 00:00:00 2011

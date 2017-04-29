@@ -1,0 +1,1221 @@
+--- Log opened Tue Aug 20 00:00:23 2013
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has left #shogun []
+@sonney2k	dumm die dumm
+@wiking	wazza
+@sonney2k	wiking, I think we should rent some core i7 based system from gsoc money for arbitrary tortures
+@sonney2k	as in it could host the demo and do the buildbot
+@wiking	sonney2k: hetzner.de
+@wiking	;)
+@sonney2k	and we could all have logins there
+@wiking	indeed
+@wiking	ok big commit is coming up
+@sonney2k	wiking, or https://www.ovh.de/dedicated_server/isgenug.xml the 24G / i7 ~35 EUR/month
+@wiking	oooh
+@wiking	this seems to be even better
+@wiking	although
+@wiking	50 eur/month for 32 gigs ram ;P
+@wiking	which could really be useful when we have like 3-4 buildbots in qemu/kvm
+@wiking	http://www.hetzner.de/hosting/produkte_rootserver/ex40
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :develop * d43dd66 / / (22 files): https://github.com/shogun-toolbox/shogun/commit/d43dd6649255b38cc6b655b7670c59829ab0ac01
+ shogun-notifier-	shogun: Add BaggingMachine
+ shogun-notifier-	shogun: Add basic label combination rule implementations for ensemble learning
+ shogun-notifier-	shogun: Add MockMachine, MockFeature, MockLabels
+@wiking	there weee goooo ;) baggingmachine ;)
+@wiking	and ensemble learning
+@wiking	sonney2k: i think we should clone an osx nightly
+-!- iglesiasg [~iglesias@89-77-4-38.dynamic.chello.pl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@wiking	sonney2k: because it's really not needed to create packages after each and every commit
+@iglesiasg	hi guys
+* wiking wonders if this is going to compile on travis 
+@wiking	ooooh i forgot to upgrade modshogun.i :(
+@wiking	sonney2k: when do we start with the D-classing?
+@wiking	iglesiasg: yo
+@sonney2k	wiking, well just do it
+@iglesiasg	wiking, I just saw you pushed new stuff, nice!
+@wiking	sonney2k: ah ok
+@wiking	sonney2k: i guess it's going to be some scripty shit :)
+@wiking	iglesiasg: heheh yeah it's the first attempt
+@sonney2k	no hand work
+@wiking	iglesiasg: haven't tested it at all... :P and i really want to see if i enable openmp how it will crash to pieces :D
+@sonney2k	we really have to think hard per class what we want to expose and what not
+@iglesiasg	wiking, hehe I see
+@wiking	HeikoS: can u plz check on BaggingMachine why i clone_equal fails on it with segfault (you need to remove it from the ignores list in clone_unittest.cc.py script to get the error)
+@wiking	iglesiasg: should work with a simple thread
+@wiking	iglesiasg: i should add an ipython notebook for it :)
+@wiking	sonney2k: speaking of which... can u fire up that ipython notebook generator script?
+@iglesiasg	hushell, hey! I see that there a few comments in the PR you have not addressed yet, is it still work in progress? Just wondering since you told me to check if it was good to merge :)
+@iglesiasg	wiking, I will get definitely into ipython notebook this week
+@wiking	iglesiasg: yeah that's a cool stuff ;)
+@wiking	iglesiasg: make sure you have 1.0 though...
+@iglesiasg	wiking, ipython 1.0 at least? why is it so?
+@wiking	iglesiasg: well that's really the stuff... i mean 0.13 is cool as well but our ipython generator will be 1.0
+@wiking	so to avoid surprises :P
+@iglesiasg	wiking, it makes sense
+@iglesiasg	I guess it is easy to get 1.0 in ubuntu in any case
+@sonney2k	wiking, well can you help getting the static interfaces back to work?
+@wiking	sonney2k: yeah i'll do it
+@wiking	sonney2k: there's a FindMatlab.cmake by default in 2.8 cmake
+@wiking	so at least we dont have to care about that too much
+@sonney2k	wiking, and btw have you seen HeikoS' last commit? We should drop that file and increase the required CMake version number
+@sonney2k	lisitsyn, btw have you updated INSTALL already? I mean at least a bit?
+@wiking	sonney2k: ooh noooo... i told him to solve it w/o that function
+@sonney2k	wiking, this file is at least in .9 but not in .4 (as heiko said)
+@wiking	sonney2k: i'll change the superLu detection
+@wiking	sonney2k: hence we wont need this macro
+@sonney2k	wiking, well it doesn't really matter - we can require a newer cmake version
+@wiking	of course apt-get is now failing on traviw... yeee \o/
+@sonney2k	after all this is a big switch...
+@wiking	sonney2k: should we support an EnsembleMachine?
+@wiking	sonney2k: which receives a DynObjArray of machines + weights
+@wiking	and basically does the learning...
+@wiking	sonney2k: oh and i see that you started to switch the python scripts to simply just import everything from modshogun
+@wiking	sonney2k: imo it's a good idea... are going to make this default?
+@wiking	*are we
+@wiking	just that whether i should create an Ensemble/__init__.py or not at all...
+@wiking	as we are really dropping that
+ gsomix_	wiking, hey. I'll fix problems with csv and parses. it seems it's related to locales and reals representations in files.
+ gsomix_	and thanks for report
+@wiking	gsomix_: heehhe locale
+@wiking	wtf
+@wiking	jesus... great that you've managed to find out the underlying bug
+@sonney2k	wiking, the only worrying thing about the hetzner server is the fixed traffic limit. with ovh you have 'only' 100MB/s but guaranteed
+@sonney2k	wiking, yes lets only ever use modshogun
+@sonney2k	gsomix_, yes sure that is why we always set to C locale in ascii file
+@wiking	sonney2k: mmm i have like 20TB with hetzner... and i never managed to get over it
+@wiking	sonney2k: and even then you r only shaped to 10mbit
+@sonney2k	wiking, well we are talking buildslave right?
+@sonney2k	wiking, but permanently then
+@wiking	yep
+@wiking	sonney2k: no just for the month... or?
+@sonney2k	wiking, no
+@sonney2k	http://wiki.hetzner.de/index.php/Traffic
+@sonney2k	ahh german
+@wiking	aaah
+@sonney2k	it says permanent if you have no good excuse for this one time thing
+@sonney2k	http://wiki.hetzner.de/index.php/Traffic/en
+@sonney2k	english
+@wiking	We will permanently restrict the connection speed if more than 20 TB/month are used (the basis for calculation is for outgoing traffic only. Incoming and internal traffic is not calculated).
+@wiking	would we have a lot of outgoing?
+@sonney2k	true
+@sonney2k	would just be incoming
+@wiking	as buildslave is really just d/l-ing
+@sonney2k	then yes
+@wiking	sonney2k: we just need some good virtualisation... kvm is good enough? because i had really troubles with qemu :S
+@wiking	or we should just go with Xen?
+@sonney2k	wiking, we don't even need virtualization
+@sonney2k	wiking, chroot would be good enough
+@wiking	sonney2k: how do we do the different os/distro thingy?
+@wiking	sonney2k: chroot a fedora within an ubuntu...?
+@sonney2k	wiking, just install the os's in a couple of chroot's
+@wiking	ah ok
+@sonney2k	wiking, why not?
+@wiking	if that's good enough
+-!- shogun-notifier- [~irker@7nn.de] has quit [Ping timeout: 256 seconds]
+@wiking	sonney2k: i guess we just gonna run into trouble with funky os
+@wiking	like netbsd or openbsd
+@wiking	;P
+@sonney2k	well if we needed security on this scratch machine then not ...
+@wiking	or?
+@sonney2k	true
+@wiking	but that we can Xen
+@sonney2k	but hey we have a working setup
+@sonney2k	so I would only move over debian
+@wiking	sonney2k: fedora, centos and an ubuntu slave would be great in that
+@wiking	and maybe a funky bsd ;P
+ gsomix_	wiking, arch linux? :]
+@sonney2k	wiking, well ubuntu/redhat + centos/debian derivatives are 90% of the linux distributions
+@sonney2k	I would assume bsd people can compile their own code :)
+@wiking	sonney2k: heheh yeah true... but it'd be great to see at least that the stable centos,fedora, ubuntu comiples/runs fine ;)
+@sonney2k	wiking, ok I am too lousy with cmake
+@sonney2k	wiking, when I do
+@sonney2k	rm -rf build; mkdir build; cd build; cmake -DPythonModular=ON -DCMAKE_PREFIX_PATH=/usr/local/stow/shogun-2.2.0 ..
+@sonney2k	cmake overwrites shogun/Makefile
+@wiking	sonney2k: that's rather interesting :S
+@sonney2k	wiking, try your own!
+@sonney2k	urgs
+@sonney2k	now it is doing this already with cmake ..
+@wiking	you mean the <shogun root>/Makefile ?
+ shogun-buildbot	build #1559 of deb3 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1559  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@sonney2k	wiking, yes
+@wiking	woah
+@wiking	i wonder
+ shogun-buildbot	build #1441 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1441  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1472 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1472  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@sonney2k	wiking, can one build with python3 and python2 installed now?
+* sonney2k tries
+-!- iglesiasg [~iglesias@89-77-4-38.dynamic.chello.pl] has quit [Quit: Ex-Chat]
+@sonney2k	man what slows down shogun compile time *THAT MUCH*
+@sonney2k	it is ridiculously slow now
+@wiking	sonney2k: did u set -DCMAKE_BUILD_TYPE=Debug
+@wiking	?
+@wiking	otherwise you are building release
+@wiking	and that's optimizing shogun's mother as well...
+ gsomix_	sonney2k, why dense labels are float64_t?
+@sonney2k	gsomix_, well common type for regression,classification etc
+@sonney2k	wiking, yeah but still we have massively slowed down
+ gsomix_	sonney2k, so labels not only represents discrete classes, right?
+@sonney2k	gsomix_, indeed real valued numbers!
+@sonney2k	gsomix_, btw maybe it is a good idea to also be more tolerant when reading in integer's - I mean use the float parsers and then convert to ints
+@sonney2k	gsomix_, otherwise things like 1e+000 cannot be parsed
+ gsomix_	sonney2k, makes sense
+ shogun-buildbot	build #8 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/8  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@sonney2k	even building the examples is slooow
+@sonney2k	95%
+@wiking	sonney2k: yeash because there  forgot to remove the optimization flags when building in release mode
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * cc383c2 / examples/undocumented/libshogun/parameter_iterate_float64.cpp: https://github.com/shogun-toolbox/shogun/commit/cc383c27fc7614e659c7d9754712bb5e33b3fa7d
+ shogun-notifier-	shogun: make n a local variable to fix name clash
+@sonney2k	wiking, no but that is ok. should be optimized
+@wiking	sonney2k: really?
+@sonney2k	wiking, I am just wondering why it is slow - basically the examples use very little headers and just link against shogun
+@sonney2k	done
+@sonney2k	ohh no
+@sonney2k	I did commit in the meantime
+@sonney2k	now examples are linked again
+@sonney2k	done
+ gsomix_	3:30 AM, chickens started screaming in my window
+@wiking	hehehehe
+ gsomix_	I'd say roosters, not chicks. but chicks are better of course.
+@sonney2k	gsomix_, time to get your well deserved eggs
+* sonney2k finally has modshogun compiled and working for python
+@wiking	\o/
+@sonney2k	python ~/ipynb_run_save.py svm_binary_classification.ipynb
+@sonney2k	running svm_binary_classification.ipynb
+@sonney2k	testing:
+@sonney2k	8 code cells from notebook Untitled0
+@sonney2k	wrote svm_binary_classification_run_saved.ipynb
+@sonney2k	yes works
+@sonney2k	alright then night!
+ gsomix_	wake me up if I fell asleep
+ shogun-buildbot	build #1442 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1442  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@wiking	\o/
+ shogun-buildbot	build #1473 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1473  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #9 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/9  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #1263 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1263  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has quit [Ping timeout: 256 seconds]
+ shogun-buildbot	build #1560 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1560
+ shogun-buildbot	build #1264 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1264  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- hushell [~hushell@c-98-232-178-161.hsd1.or.comcast.net] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ gsomix_	good morning?
+@sonney2k	gsomix_, good morning!
+@sonney2k	gsomix_, did you have your eggs for breakfast?
+ gsomix_	sonney2k, I haven't had breakfast yet.
+@sonney2k	gsomix_, I did!
+ gsomix_	but yes, little chicken coop gives us tasty eggs. little farm, huh.
+ gsomix_	sonney2k, cool. :)
+@sonney2k	wiking, I guess you are still asleep - anyways nightly_default should compile for all interfaces we support :)
+@sonney2k	wiking, it also has to install to appropriate paths since the doc generator runs things like sg('help') to generate the doc on-the-fly
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Client Quit]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has quit [Quit: Leaving.]
+-!- gsomix_ [~gsomix@178.45.77.251] has quit [Ping timeout: 264 seconds]
+-!- gsomix_ [~gsomix@178.45.44.239] has joined #shogun
+ shogun-buildbot	build #1265 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1265
+@wiking	sonney2k:  okey i'm on it
+@wiking	HeikoS: ping
+-!- gsomix_ is now known as gsomix
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- gsomix [~gsomix@178.45.44.239] has quit [Ping timeout: 245 seconds]
+ lisitsyn	sonney2k: yes I updated INSTALL a bit
+-!- gsomix [~gsomix@178.45.44.239] has joined #shogun
+@sonney2k	wiking, http://nbviewer.ipython.org/url/shogun-toolbox.org/static/notebook/svm_binary_classification.ipynb
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	wiking, we have another issue on cygwin - the tests are looking for cygshogun-14.dll
+@sonney2k	shouldn't it be just libshogun*.dll ?
+ thoralf	Could merge my PR https://github.com/shogun-toolbox/shogun/pull/1444?
+ thoralf	somebody
+-!- van51 [~van51@ppp-2-87-0-126.home.otenet.gr] has joined #shogun
+ van51	hello
+@HeikoS	thoralf: there you go
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Thoralf Klein :develop * dc1ed1f / src/shogun/io/BinaryFile.cpp: https://github.com/shogun-toolbox/shogun/commit/dc1ed1f3081c0d7b726e9988987ff875deef6a5d
+ shogun-notifier-	shogun: Fixed that BinaryFile::get_sparse_matrix() did not set num_feat properly.
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 0f20584 / src/shogun/io/BinaryFile.cpp: https://github.com/shogun-toolbox/shogun/commit/0f20584bcc268837f21a770b1376eafb64d8aaec
+ shogun-notifier-	shogun: Merge pull request #1444 from tklein23/num_features_in_binaryfile
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed that BinaryFile::get_sparse_matrix() did not set num_feat properly
+ thoralf	HeikoS: Thanks.  I'll rebase the other PR and tell you when travis goes green.
+@HeikoS	thoralf: cool, thanks a lot!
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+@sonney2k	HeikoS, http://nbviewer.ipython.org/url/shogun-toolbox.org/static/notebook/mmd_two_sample_testing.ipynb
+@HeikoS	sonney2k: autogenerated?
+@sonney2k	yes
+@HeikoS	sonney2k: sweet!
+@sonney2k	http://shogun-toolbox.org/buildbot/builders/nightly_default/builds/498
+@sonney2k	notebooks updated
+@HeikoS	so now we only need to structure them a bit and have a website with a list
+@sonney2k	and fix the issues
+@sonney2k	8 cells failed to complete
+@sonney2k	...
+@HeikoS	sonney2k: will do
+@HeikoS	sonney2k: is there a list of notebooks somewhere?
+@HeikoS	http://nbviewer.ipython.org/url/shogun-toolbox.org/static/notebook doesnt work
+@HeikoS	ah sorry
+@sonney2k	ohh it is just a path thing
+@HeikoS	thats the viewer
+@HeikoS	but is there a way to see all notebooks?
+@HeikoS	we also should have small abstracts for them and then generate a website with abstract and link
+@sonney2k	HeikoS, well we have to think of one
+@HeikoS	I will do this in a while
+@HeikoS	its cool that the notebooks are still generated when cells fail
+@sonney2k	maybe we could automatically parse the notebooks folder and then display links
+@sonney2k	some image snapshots would be cool
+@HeikoS	sonney2k: yeah but I would like to have something nicer
+@sonney2k	HeikoS, well then they are semi-broken though
+@HeikoS	abstract
+@HeikoS	generated as the documented examples
+ shogun-buildbot	build #1443 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1443  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1474 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1474  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@wiking	HeikoS: yo
+@HeikoS	wiking: yo!
+@wiking	HeikoS: ideas about clone ?
+@HeikoS	wiking: sorry I am not up to date, whats happening?
+@wiking	HeikoS: yesterday i've commited BaggingMachine and a bunch of other stuff
+@wiking	HeikoS: and i had to remove the BaggingMachine from the clone_unittest.cc.py, i.e. add it to the ignores as for some reason the clone method segfaulted
+@HeikoS	wiking: I see
+@HeikoS	wiking: would be good to have these more modular tests
+@HeikoS	wiking: first generate empty instance
+@HeikoS	then get name
+@HeikoS	then clone it self
+@HeikoS	then clone and equals
+@HeikoS	but I can have a look ...
+ shogun-buildbot	build #10 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/10  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	wiking: compiling
+@wiking	HeikoS: don't forget to remove the BaggingMachine from the .py script
+@HeikoS	wiking: I will create a small program to test
+@HeikoS	easier
+ lisitsyn	I shoulda get up to that pace you are pulling shogun to, wiking
+@wiking	HeikoS: i'll add soon a small dummy example
+@wiking	lisitsyn: :D
+@HeikoS	wiking: no need, just give me the classname (BaggingMachine)
+@HeikoS	so done from your part, I wll check later today
+@wiking	lisitsyn: well u know, u were up and running in jan->july
+@wiking	so it's all cool
+@wiking	HeikoS: CBaggingMachine ;)
+ lisitsyn	wiking: I am bothered with the begging machine
+ lisitsyn	:D
+@wiking	heheh that is still shit :)
+ lisitsyn	what bothers me is that we will have a looot classes
+@wiking	lisitsyn: indeed
+ lisitsyn	like niggarule yourmotherrule
+@HeikoS	drop half of them!
+ lisitsyn	whatever
+@wiking	lisitsyn: becoming like java API :)
+ lisitsyn	yes and it is bad for swig
+@wiking	lisitsyn: D-class ;P
+@HeikoS	half of the classes are not workin anyway , just stealing compile time
+@HeikoS	mark stable classes that are tested/documented
+ lisitsyn	what I could suggest
+@HeikoS	and use this to produce a stable branch
+ lisitsyn	is to hide these classes somehow
+ lisitsyn	like
+ lisitsyn	CombinationRule <- some enum or whatever -> CombinationRuleImpl -> various implementations
+ lisitsyn	this is not that OOP but it could be better swig wise I think
+@wiking	CombinationRuleFactory :D
+@wiking	lisitsyn: http://zchydem.enume.net/2010/01/19/qt-howto-private-classes-and-d-pointers/
+@wiking	lisitsyn: it's like interface in java :P
+ lisitsyn	wiking: forward declare and use a pointer?
+@wiking	yep
+ lisitsyn	yes that's a good way for sue
+ lisitsyn	sure*
+ lisitsyn	the only thing is that we need to change implementation in interfaces
+ lisitsyn	something that links X and these impls
+ lisitsyn	HeikoS: I wanted to ask you whether you made some plans on our SF trip
+@HeikoS	lisitsyn: not yet
+@wiking	lisitsyn: but aaaanyyyhoooooow
+ lisitsyn	HeikoS: I am thinking of arriving at least a day before to walk around
+@wiking	lisitsyn: ideas for having views on CFeatures? :) that is actually thread safe :P
+@HeikoS	lisitsyn: yeah totally
+ lisitsyn	but I don't think it makes sense to re-book hotel
+ lisitsyn	wiking: what kind of views?
+@wiking	lisitsyn: it's like add_subset(index_Vector)
+@wiking	but with add_subset the problem is that if i run it with 5 threads
+@wiking	it's going to be either a mess
+@wiking	or if i add mutex around it then it's not going to be parallel at all
+ lisitsyn	HeikoS: my visa appointment is on 6th sept. but I think it should be ok
+ lisitsyn	wiking: oops :D
+@wiking	lisitsyn: https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/machine/BaggingMachine.cpp#L101
+@wiking	lisitsyn: see there...
+@wiking	lisitsyn: if i enable there OpenMP... w/o a condition it's not going to work
+@wiking	if i add a condition there its basically not parallel...
+ lisitsyn	HeikoS: so we can stay somewhere near or so (but I'll arrive just for a day before I think)
+@HeikoS	lisitsyn: cool
+@HeikoS	yeah I will check some airbnb place
+@wiking	HeikoS: yeah go with that...
+@HeikoS	that is cheap and nice and we dont have to go to a hotel
+@wiking	HeikoS: that was the cheapest option for me back in april
+ lisitsyn	wiking: yeaah I see what's the problem
+@wiking	and in SF it's like airbnb heaven :P
+@wiking	lisitsyn: so that's why i say that i need views on features/labels
+ lisitsyn	wiking: yeah I understand now
+@wiking	lisitsyn: afaik this would be needed anyways if we start supporting multi-core
+ lisitsyn	wiking: yes true
+ shogun-buildbot	build #1266 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1266
+ shogun-notifier-	shogun: van51 :develop * cd3608c / / (3 files): https://github.com/shogun-toolbox/shogun/commit/cd3608c1bf7cae5da710735fb02518dae4d2652c
+ shogun-notifier-	shogun: Fixed LBPPyrDotFeature
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 29b45bb / / (3 files): https://github.com/shogun-toolbox/shogun/commit/29b45bb04ddf8efbab3e758cf436b3d9548301b9
+ shogun-notifier-	shogun: Merge pull request #1445 from van51/feature/lbppyr
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed LBPPyrDotFeatures
+ shogun-buildbot	build #1562 of deb3 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1562  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ shogun-buildbot	build #1444 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1444  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ shogun-buildbot	build #1475 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1475  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ shogun-buildbot	build #1836 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1836  blamelist: van51 <vangelis_51@hotmail.com>
+@wiking	damn
+@wiking	why ensure valid is just doing SG_ERROR instead of returning a bool?
+ shogun-buildbot	build #11 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/11  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+@wiking	any objections to change the behaviour of CLabels::ensure_valid from void to bool?
+ shogun-buildbot	build #1267 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1267  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ thoralf	HeikoS: Now it's time for my segfault PR: https://github.com/shogun-toolbox/shogun/pull/1444
+ lisitsyn	thoralf: added new segfault?
+ lisitsyn	;)
+ thoralf	lisitsyn: Yes, as usual!
+ lisitsyn	ah fixed :(
+ thoralf	lisitsyn: Nice idea, though. ;)
+ lisitsyn	thoralf: yes, "Added new segfaulting code to X"
+ lisitsyn	"Removed necessary check for NULL"
+ thoralf	lisitsyn: But we have some constraints: Should not be detected by unit-tests or examples.
+ lisitsyn	yes!
+ lisitsyn	"currently unit-tests don't detect the error"
+* thoralf is thinking of random access to arrays of unknown length. :)
+ lisitsyn	thoralf: random reference counter
+ lisitsyn	russian roulette
+ lisitsyn	sometimes it is 0 and you die
+ thoralf	lisitsyn: initialization to 1+some_constant*rand()/number_of_threads()
+ thoralf	I think its the main difference between C/C++ and Java: "Trust the programmer." vs. "Don't even think about trusting him.  Keep him tied."
+-!- van51 [~van51@ppp-2-87-0-126.home.otenet.gr] has quit [Quit: Leaving.]
+ lisitsyn	thoralf: why?
+ thoralf	lisitsyn: I didn't get your question.
+ lisitsyn	thoralf: why do you think that's the difference ;)
+ shogun-buildbot	build #1837 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1837
+ shogun-buildbot	build #1445 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1445  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ lisitsyn	I admit I don't get it
+ shogun-buildbot	build #1476 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1476  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ thoralf	lisitsyn: In C/C++ it's much harder to write sane code than in Java.  So you have to trust the skills of your programmer more.
+ thoralf	lisitsyn: In Java you're hiding things that are too complicated/error-prone for most programmers.
+ thoralf	(Which is good.)
+* wiking created a bagging machine the make worse results than a simple machine \o/
+ thoralf	wiking: Cool :)
+ lisitsyn	wiking: begging machine
+ lisitsyn	please give me some skills I can't recognize it
+ lisitsyn	pleasse man give me some knowledge
+@wiking	:D
+ lisitsyn	come on don't be that greedy
+@wiking	i hate fucking SGMatrix
+ thoralf	lisitsyn: One point should be enough :)
+ thoralf	lisitsyn: Now try to generalize.
+ lisitsyn	I need a point
+ lisitsyn	point is that I need
+ lisitsyn	if I share with you my story would share a point with me?
+ thoralf	lisitsyn: Sharing a point in 2D: I keep x, you're getting y?
+ lisitsyn	hah or semi-supervised begging
+ lisitsyn	just give me some point no matter what label it is of
+ shogun-notifier-	shogun: Thoralf Klein :develop * 4fae70c / src/shogun/features/ (2 files): https://github.com/shogun-toolbox/shogun/commit/4fae70ce6a0e4be06ec43a9eaf622d746f6d698f
+ shogun-notifier-	shogun: Fixing segfault.  Off-by-one when setting number of dimensions in StreamingSparseFeatures.
+ shogun-notifier-	shogun: Thoralf Klein :develop * 3ac91b7 / src/shogun/features/streaming/StreamingSparseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/3ac91b712d688828d6ef2795a345846c2dd52ff8
+ shogun-notifier-	shogun: Simple refactoring: Reuse get_dimension() from SparseVector to reduce code duplication.
+ shogun-notifier-	shogun: Thoralf Klein :develop * bc4bfa0 / src/shogun/features/streaming/StreamingSparseFeatures.cpp: https://github.com/shogun-toolbox/shogun/commit/bc4bfa0c983b7208124bdd375978d5beedd57e6e
+ shogun-notifier-	shogun: Simple refactoring: Reuse dense_dot()/sparse_dot() from SparseVector to reduce code duplication.
+ shogun-notifier-	shogun: Thoralf Klein :develop * 0288090 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/0288090a80c5ad122b654e05e1f22a08bae94a12
+ shogun-notifier-	shogun: * Fixed broken unit test (number of non-zero-entries != number of dimensions).
+ shogun-notifier-	shogun: * Reformatting and fixing of debug output.
+ shogun-notifier-	shogun: Thoralf Klein :develop * 21e82a8 / src/shogun/features/ (2 files): https://github.com/shogun-toolbox/shogun/commit/21e82a83da8c8f43d7d3cab62074f2736061681a
+ shogun-notifier-	shogun: Thanks to HeikoS: Disabling reference counting for temporary sparse vectors.
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 92abec1 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/92abec12d3aad4abe350f0abdc77a07c23db5f5a
+ shogun-notifier-	shogun: Merge pull request #1443 from tklein23/fix_streaming_sparse
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixing segfault. Off-by-one when setting number of dimensions in StreamingSparseFeatures.
+ shogun-buildbot	build #12 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/12  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- gsomix [~gsomix@178.45.44.239] has quit [Ping timeout: 260 seconds]
+ shogun-buildbot	build #1268 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1268  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ shogun-buildbot	build #1563 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1563
+ shogun-notifier-	shogun: Viktor Gal :develop * e1ed907 / src/interfaces/modular/modshogun.i: https://github.com/shogun-toolbox/shogun/commit/e1ed907f998f43cd93e4249210645b29c451871c
+ shogun-notifier-	shogun: Add Ensemble.i and Ensemble_includes.i to modshogun.i
+ shogun-notifier-	shogun: Viktor Gal :develop * b4cdd86 / / (2 files): https://github.com/shogun-toolbox/shogun/commit/b4cdd86afc138d29533f1f86e290de778ec465d2
+ shogun-notifier-	shogun: Fix CBaggingMachine::apply_get_outputs
+ shogun-notifier-	shogun: Add subset for the labels as well in CBaggingMachine::train_machine
+-!- gsomix [~gsomix@178.45.90.93] has joined #shogun
+@wiking	gsomix: how r the chickens? :)
+@wiking	sonney2k: ping
+ gsomix	wiking, fine, lol.
+ shogun-buildbot	build #1446 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1446  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Thoralf Klein <thoralf.klein@zib.de>
+ shogun-buildbot	build #1477 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1477  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+-!- twthewizard [~chatzilla@141.0.149.74] has joined #shogun
+ shogun-buildbot	build #1838 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1838  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+@wiking	twthewizard: yo :)
+ shogun-buildbot	build #1447 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1447  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1478 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1478  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Thoralf Klein <thoralf.klein@zib.de>, Viktor Gal <viktor.gal@maeth.com>
+ twthewizard	yo wiking
+ twthewizard	:)
+-!- gsomix [~gsomix@178.45.90.93] has quit [Ping timeout: 264 seconds]
+-!- twthewizard [~chatzilla@141.0.149.74] has left #shogun []
+ shogun-buildbot	build #13 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/13  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Thoralf Klein <thoralf.klein@zib.de>
+@wiking	ooh man that person who created the ruby .debs for the stable debian should be hanged
+@wiking	:)
+@HeikoS	wiking: you should not be so extreme ...
+ shogun-buildbot	build #1269 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1269  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@wiking	man it's impossible that they are putting packages of ruby to some random locations
+@wiking	god bless digitalocean :)
+@HeikoS	wiking: ok now to the clone bug
+@HeikoS	wiking can be ask for a certain cmake version
+@HeikoS	wiking: the error I had yesterday came from an old one
+@wiking	HeikoS: yes
+@HeikoS	see commit
+@HeikoS	wiking: but sonney2k didnt like adding the file
+@wiking	HeikoS: you fixed it an awkward way
+@wiking	i'll fix it ...
+@HeikoS	wiking: ok, remove the file
+@HeikoS	wiking: I will install cmake locally instead
+ shogun-buildbot	build #14 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/14  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@HeikoS	wiking: how to make cmake print all options, like debug etc
+@wiking	HeikoS: google
+@wiking	i'm not cmake manual sorry man
+ lisitsyn	HeikoS: ccmake
+@wiking	it's just that i'm getting cmake FAQs all the time here at the irc
+@HeikoS	wiking: hehe, sorry ;)
+ lisitsyn	use that
+ lisitsyn	HeikoS: ask me next time to lower the wiking's load ;)
+@HeikoS	lisitsyn: ccmake is too complicated
+@HeikoS	I just want a list
+@HeikoS	with these D.... flags
+@HeikoS	since I cannot remember them
+ lisitsyn	HeikoS: ?? what's complicated in ccmake?
+ lisitsyn	that's exactly what it does aint it?
+@HeikoS	too much information I dont want
+ lisitsyn	that's -D flags
+ shogun-notifier-	shogun: Viktor Gal :develop * cdbca67 / cmake/FindRubyNArray.cmake: https://github.com/shogun-toolbox/shogun/commit/cdbca671451cfdaa89b24096c412b8e0238afce9
+ shogun-notifier-	shogun: Fix RubyNArray find path issue #1438
+ shogun-notifier-	shogun: Add archdir among the search paths, as on debian squeeze that's where
+ shogun-notifier-	shogun: narray files reside
+ lisitsyn	HeikoS: you may use cmake -i but it is the same
+@HeikoS	lisitsyn: ah in fact, it helped :)
+@HeikoS	thanks
+ lisitsyn	HeikoS: did you confuse ccmake with something else? :)
+@HeikoS	lisitsyn: confusion is a good word for most of my actions ;)
+ lisitsyn	I just realized it sounds like a wrong word
+ lisitsyn	:D
+ lisitsyn	anyway HeikoS you got what I mean right?
+@HeikoS	dont know :)
+@HeikoS	but currently compiling
+ lisitsyn	HeikoS: s/confuse/mix up/ or whatever
+ lisitsyn	HeikoS: so ccmake is ok?
+@HeikoS	yes it worked
+@HeikoS	lisitsyn:
+@HeikoS	/home/heiko/Desktop/shogun/shogun/src/shogun/lib/RefCount.h: In constructor 'shogun::RefCount::RefCount(int32_t)':
+@HeikoS	/home/heiko/Desktop/shogun/shogun/src/shogun/lib/RefCount.h:23:46: error: no matching function for call to 'std::atomic<int>::atomic(int32_t&)'
+@HeikoS	/usr/include/c++/4.7/bits/atomic_base.h:329:7: error: 'constexpr' does not name a type
+@HeikoS	and many more
+@wiking	HeikoS: mmm c++11 :)
+ lisitsyn	yeah looks like C++11
+@HeikoS	this is my custom eclipse project for debugging single programs
+@HeikoS	worked before :/
+@wiking	well i guess your eclipse compiler is not defining -std=c++11
+@wiking	while cmake realised that your compiler supports it
+@HeikoS	I see
+@HeikoS	wiking: what do you use to compile /test single programs?
+@wiking	HeikoS: i would highly suggest to use cmake generated eclipse project
+@HeikoS	such as examples?
+@wiking	HeikoS: make :)
+@HeikoS	let me try
+@wiking	and then gdb
+@HeikoS	does eclipse even create cmake projects?
+@wiking	HeikoS: dude
+@wiking	HeikoS: cmake -h
+@wiking	on the end of that you'll see a list of generators
+ lisitsyn	HeikoS: cmake creates eclipse projects
+@HeikoS	wiking: dude, well I never used it
+ lisitsyn	HeikoS: use -G "Eclipse blablabal"
+@wiking	and i suppose that you are going to have something like
+@wiking	Eclipse CDT4 - Unix Makefiles
+@wiking	in that list
+ lisitsyn	yes
+@wiking	if so
+ lisitsyn	this one
+@HeikoS	so far I used the wizzard in eclipse
+ lisitsyn	:D
+@wiking	then just run
+@wiking	cmake -G "Eclipse CDT4 - Unix Makefiles" <all the other cmake flags u use> ..
+@wiking	(in the build directory of course
+@wiking	and you'll have a nice and shiny eclipse project
+@wiking	you problem of course is going to be that the src files are not grouped together
+@wiking	like on the filessystem
+@wiking	this could be fixed in cmake
+@wiking	but seems nobody is so interested in this
+@wiking	(anyhow now you'll have the src files in one big list)
+ lisitsyn	wiking: I thought it is solved
+ lisitsyn	ain't you found some flag or what
+@wiking	lisitsyn: i dont seen anywhere a source_group in src/shogun/CMakeLists.txt :P
+@wiking	lisitsyn: one needs to define the groups...
+ lisitsyn	ahh
+@wiking	lisitsyn: it's a bunch of cmake regexp lines
+@wiking	nothing serious..
+@wiking	i mean to create the right source_groups
+@wiking	ok so about the static fucking interfaces
+@wiking	is it like
+@wiking	compile the files in the static interface dir
+@wiking	and link it together with libshogun.so?
+ lisitsyn	wiking: looks like
+@wiking	i'm just asking since i have no clue at all
+@wiking	and i'm too lazy to check in the repo the Makefile.template file
+@HeikoS	wiking:
+@HeikoS	svn: E155004: Working copy '/home/heiko/Desktop/shogun/shogun/third_party/GoogleMock' locked.
+@HeikoS	svn: E155004: '/home/heiko/Desktop/shogun/shogun/third_party/GoogleMock' is already locked.
+@HeikoS	svn: run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
+@wiking	HeikoS: hahahahaha
+@wiking	HeikoS: they are using the same fs?
+@HeikoS	wiking: I am currently just trying to compile on my machine
+@HeikoS	and to run a program to debug the clone stuff
+@wiking	HeikoS: ok then you left it in a bad state
+@wiking	HeikoS: rm -rf third_party/GoogleMock
+@HeikoS	i did a make clean
+@wiking	and it'll check it out again
+@wiking	no it's not about that
+@HeikoS	ok
+@HeikoS	so again about the eclipse thing
+@wiking	yes?
+@HeikoS	what I had before was I imported shogun as a makefile project, all fine
+@HeikoS	and then I had a seperate project for my testing stuff
+@wiking	yeah well now u can use cmake generated
+@wiking	eclipse
+@HeikoS	wiking: ok I did
+@wiking	all shiny and stuff :)
+@HeikoS	I though have all this crap in the folder structury
+@wiking	where?
+@HeikoS	cxx11* ...
+@wiking	one can get rid of it
+@wiking	cmake just needs some love for that one ;)
+@HeikoS	ok
+@HeikoS	but importing the build folder is the way to go I guess
+@wiking	mmm i wouldn't do that
+@wiking	if i were you
+ shogun-buildbot	build #1270 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1270  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Thoralf Klein <thoralf.klein@zib.de>, Viktor Gal <viktor.gal@maeth.com>
+@HeikoS	how then?
+@HeikoS	import src folder? (I did that before=
+@wiking	HeikoS: use the cmake generated eclipse proj
+@wiking	lisitsyn: u know what puzzles me: https://travis-ci.org/shogun-toolbox/shogun/jobs/10376781#L418
+@wiking	lisitsyn: while having a dummy project with almost the same cmake detectors: https://travis-ci.org/vigsterkr/subgrep/jobs/10233626#L2672
+@wiking	lisitsyn: i cannot get around it
+@wiking	HeikoS: that -G stuff i've written you should actually generate you an eclipse project that you can just open with eclipse
+@wiking	as far as i know
+@HeikoS	wiking: this google mock issue apears whenever I cances a build btw
+@wiking	HeikoS: heh... amaaazing
+@wiking	HeikoS: cmake/eclipse bug
+@wiking	or even svn :)
+@wiking	dunno why the lock is not removed...
+@HeikoS	uh
+@HeikoS	eclipse crash
+@HeikoS	aaah
+@wiking	:D
+@HeikoS	man 30 min since I tried to compile this example
+@wiking	why no just do command line?
+@HeikoS	wiking: because I dont like it
+@HeikoS	for that
+@wiking	ok then start fixing cmake
+@HeikoS	wiking: btw this project file, I cannot find it
+@HeikoS	it should be put in build
+@wiking	ok look
+@wiking	i this this now
+@wiking	This is not supported well by Eclipse.  It is strongly recommended to use a build directory which is a sibling of the source directory.
+@wiking	hence
+@wiking	i did this
+@wiking	in /home/wiking/
+@wiking	i have /home/wiking/shogun and /home/wiking/shogun_build_eclipse
+@wiking	cd /home/wiking/shogun_build_eclipse
+@wiking	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_PREFIX_PATH=/opt/local -DENABLE_TESTING=ON -DENABLE_CCACHE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=ON ../shogun/
+@wiking	i've got
+@wiking	.project and .cproject in /home/wiking/shogun_build_eclipse
+@wiking	as well as a big mfucking Makefile ;)
+@wiking	and now i guess i should somehow import/open this in eclipse
+@HeikoS	wiking: ah I see thanks, will try that
+@wiking	i aint got no eclipse on my machine
+@HeikoS	wiking: does this create another build of the same source I guess?
+@HeikoS	wiking: this having another build of the shogun source is weird
+@HeikoS	then I have to recompile two things on editing
+ thoralf	HeikoS: Were you able to "open" the created project or did you create one with existing code?
+@HeikoS	yep
+@HeikoS	opened worked
+@HeikoS	I am thinking of ditching eclipse actually
+ thoralf	Me too. :(
+ thoralf	HeikoS: Didn't find an enable open button. ;)
+@HeikoS	worked very nicely with configure but this cmake stuff seems to be annoying with it
+ lisitsyn	we should convert to IDE developing team
+@HeikoS	thoralf: its import existing project
+@HeikoS	lisitsyn: maybe you have advice for me
+ lisitsyn	HeikoS: what's up?
+@HeikoS	I just want something that works without too much hassle and hacking
+@HeikoS	all I need to do is to edit shogun and compile, brwoser classes etc
+@HeikoS	and another project where I can write shogun programs and link them against the shogun compiled version
+ lisitsyn	HeikoS: is it general question or you mean eclipse?
+@HeikoS	my point is that I dont like spending my time on this
+@HeikoS	so something that works easily
+@HeikoS	or something that you guys know how to use
+ lisitsyn	I am in search of ideal IDE too hah
+ lisitsyn	well
+@HeikoS	because I dont know anything about this, I just make things work somehow and then I immediately forget how I did that
+ thoralf	HeikoS: Does not work - always gives "invalid project description"
+ lisitsyn	HeikoS: what problems do you have with eclipse?
+@HeikoS	so currently, I would really like to compile shogun but it doesnt work
+ lisitsyn	HeikoS: http://www.lighttable.com/ we need this for C++ :)
+ thoralf	lisitsyn: Woah.
+ shogun-buildbot	build #1448 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1448  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ lisitsyn	I feel really bad when I think about C++ IDEs
+ lisitsyn	something's gotta change
+ thoralf	lisitsyn: Yeah.  Even PHP is better. :(
+ thoralf	better supported
+ lisitsyn	HeikoS: I am going to try cmaking in my virtual machine now
+ lisitsyn	thoralf: I have some thoughts on that but I am afraid I won't be able to create an IDE :D
+ thoralf	lisitsyn: First of all its a GUI.  Scientists are not good in building GUIs. ;)
+ shogun-buildbot	build #1479 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1479  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ thoralf	wiking: Is there a way of giving travis more cpus/machines to speed up things?
+-!- HeikoS [~heiko@nat-167-65.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@nat-167-65.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ shogun-buildbot	build #15 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/15  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@HeikoS	lisitsyn: uninstall?
+ lisitsyn	HeikoS: what?
+@HeikoS	shogun-
+@HeikoS	finallyyy!!
+@HeikoS	I ran my program again ;)
+ lisitsyn	HeikoS: I am struggling with cmake now
+ lisitsyn	and eclipse
+ lisitsyn	;D
+-!- foulwall [~user@2001:da8:215:c252:7846:786c:36da:abfc] has joined #shogun
+@HeikoS	wiking: new instance of bagging machine returns NULL
+@HeikoS	wiking: would be good if we had incremental tests for that generated for all classes
+@HeikoS	that new empty instance is not NULL
+@HeikoS	second that clone works
+@HeikoS	third that clone and equals returns true
+@wiking	HeikoS: ive just sent u a nice cmake + eclipse tutorial
+@HeikoS	wiking: I have seen it nice!
+@HeikoS	wiking: what do you use for hacking shogun?
+@wiking	thoralf: travis is for free...
+@HeikoS	wiking: new_sgserializable("CBaggingMachine", PT_NOT_GENERIC); returns NULL
+ thoralf	wiking: No way of adding own machines to the pool?
+@wiking	thoralf: you can subscribe, i.e. pay and then i guess you get better service... but then again this is really a question for google, right? i'm not a travis employee
+@wiking	thoralf: /j #travis
+@wiking	thoralf: there's some quite knowledgeable people there
+@wiking	about travis
+@wiking	i bet that even travis employees hang around there
+ thoralf	wiking: Hey man, I was about to offer a resources.
+ thoralf	Don't rtfm me all the time.
+@wiking	thoralf: /j #travis
+@wiking	thoralf: but these type of questions there's no way of me knowing anything about
+@wiking	thoralf: i just know that travis has a subscription service
+@wiking	thoralf: and that the build time is soft limited to 20 mins
+@wiking	so really 'rtfm' :)
+@wiking	and join #travis
+@wiking	HeikoS: mmmm
+@HeikoS	wiking: ah sorry no C
+@HeikoS	we should have the tests anyway
+@wiking	HeikoS: well i edit in ST3 and compile/debug in normal console
+@HeikoS	wiking: the error is caused since you have the bags member on stack and register it differently
+@HeikoS	SG_ADD((CSGObject**)&m_bags, "bags", "Bags array", MS_NOT_AVAILABLE);
+@HeikoS	you cannot do this with things on the stack
+@HeikoS	Ill replace it to be on heap that should fix things
+ thoralf	wiking: You seemed involved in travis-stuff, so the chances of getting a quick answer are better than reading the internet+more.
+ thoralf	wiking: And "don't know" is an acceptable answer. ;)
+ lisitsyn	these guys talk about bags and members
+@HeikoS	wiking: #define SG_UNREF(x) { if (x) { if ((x)->unref()==0) (x)=NULL; } }
+@HeikoS	so it sets things to NULL
+@wiking	HeikoS: ah cool i've remembered about if(x) but not the x=null
+ shogun-buildbot	build #1271 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1271  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@HeikoS	wiking: any reason you store the number of bags?
+@HeikoS	one can get them from the array #define SG_UNREF(x) { if (x) { if ((x)->unref()==0) (x)=NULL; } }
+@HeikoS	m_bags
+@HeikoS	sorry
+@wiking	HeikoS: for classifying
+@HeikoS	ok
+@HeikoS	issue fixed :)
+@HeikoS	that was good, clone test detected a nasty problem thats hard to find in other context
+@wiking	HeikoS: btw wanted to ask: what's the issue with TreeMachine
+@wiking	why cannot it support clone?
+@HeikoS	some generic stuff that avoids it
+@HeikoS	there are three classes where it cannot work
+@HeikoS	or I mean where the automated tests cannot work
+@wiking	HeikoS: as i'd like to have .clone for the treemachine obviously :P
+@wiking	so i was just wondering if u could tell me why currently it's not 'working' and then i could maybe fix it somehow
+@wiking	thoralf: Travis CI GmbH Prinzessinnenstr. 20 10969 Berlin, Germany
+@wiking	;)
+ thoralf	wiking: I know. ;)
+ thoralf	Thanks. ;)
+@HeikoS	wiking: I forgot actually,
+@HeikoS	is it blacklisted in the jinja stuff?
+@wiking	yeps
+@wiking	it's in ignores
+@HeikoS	ok then the sg_new serialisable causes problems
+@wiking	btw we should start maybe considering to use mktemp or such in unittests :)
+@wiking	thoralf: the deal with our slow builds is that we have much too much build jobs at once... the default upper limit is 5 concurent jobs, and as soon as u start using more you'll have your build times at least doubled
+@wiking	or at least this is what i've gathered from travis blogs
+ thoralf	wiking: I could just go there and ask why.  It's 15 minutes by foot. ;)
+@wiking	thoralf: do that ! :)
+@wiking	thoralf: maybe we'll get prio :)
+ thoralf	lol
+@wiking	thoralf: but i'm sure if u wanna donate build server
+@wiking	they will not refuse
+ thoralf	wiking: It's more like donating VMs within our infrastructure.
+@wiking	thoralf: yeah ... they have their own build VM images and that's all u need actually imho
+ thoralf	wiking: But it seems not to be distributed
+@wiking	thoralf: yeah i couldn't download it either
+@wiking	but
+@wiking	you can build it yourself
+@wiking	the whole vm buildscript stuff is available somewhere within their github repos
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has joined #shogun
+ pickle27	HeikoS: around?
+-!- van51 [~van51@ppp-2-87-0-126.home.otenet.gr] has joined #shogun
+@HeikoS	pickle27: hi!
+ pickle27	HeikoS: any idea about why my clone fails? I just found that the object name was wrong could that be it?
+ pickle27	also did unit tests get moved in a recent pr? I can't find them even though Im pretty sure I am building them
+@HeikoS	pickle27: there are various reasons: get_name, uninitialised parameters, wrongly registered parameter are the most recent ones
+@HeikoS	pickle27: for that, you will have to ask wiking :)
+ pickle27	HeikoS: okay because get_name was wrong until now
+@HeikoS	I am still messing with cmake, so dont know
+ pickle27	HeikoS: is travis up?
+@HeikoS	pickle27: dont know, I just sent a PR, but did not trigger yet
+ pickle27	HeikoS: okay it hasn't triggered for mine yet either, Im trying to build the tests locally to see if I fixed it
+@HeikoS	ok
+@HeikoS	pickle, otherwise run this program with valgrind, helps a lot:
+@wiking	HeikoS: pickle27 http://status.travis-ci.com/
+ pickle27	well
+@HeikoS	pickle27: https://gist.github.com/karlnapf/6282793
+ pickle27	HeikoS: thanks I'll try that if this doesn't work
+@HeikoS	pickle27: obviously with your classname
+ pickle27	wiking: did anything change with unit tests and cmake?
+ pickle27	they used to be built in /tests under my build dir but now they aren't
+@wiking	pickle27: indeed :)
+ pickle27	Im also building with python modular
+@wiking	pickle27: in you cmake build dir just type ctest --output-on-failure
+@wiking	pickle27: but dont forget to give -DENABLE_TESTING=ON for the cmake
+ pickle27	okay, Im am building right now I;ll try that when its done
+ shogun-notifier-	shogun: Heiko Strathmann :develop * a194c7d / src/shogun/machine/BaggingMachine.cpp,src/shogun/machine/BaggingMachine.h: https://github.com/shogun-toolbox/shogun/commit/a194c7d26e2835c7b3b74b4ae5d95837ebd70040
+ shogun-notifier-	shogun: fixed clone error via putting CDynamicObjectArray on heap rather than stack, which caused memory errors in parameter registration
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 28eecbb / src/shogun/machine/BaggingMachine.cpp: https://github.com/shogun-toolbox/shogun/commit/28eecbb219592814325fb7cae8762b36ba45fb73
+ shogun-notifier-	shogun: removed unset generic, not needed
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 0937bcc / src/shogun/machine/BaggingMachine.cpp,src/shogun/machine/BaggingMachine.h: https://github.com/shogun-toolbox/shogun/commit/0937bcc695f8a23ee01eca07855feba6e9bfb0dc
+ shogun-notifier-	shogun: Merge pull request #1446 from karlnapf/develop
+@HeikoS	wiking: fixed your clone
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix clone for BaggingMachine
+@HeikoS	wiking: ^
+@wiking	HeikoS: \o/
+@HeikoS	wiking: now I got 100 free more stupid questions :)
+@HeikoS	wiking: never put CSGObjects on the stack btw
+@HeikoS	ah I am dreaming of a shogun hacking guide
+@wiking	:D
+@wiking	HeikoS: btw what's with this: https://github.com/shogun-toolbox/shogun/issues/1348
+@wiking	and i need this as well: https://github.com/shogun-toolbox/shogun/issues/1355
+@wiking	HeikoS: any update on that one?
+@HeikoS	wiking: the obtain from generic is done, someone just has to do the automated generation, but I have put up examples for that already
+@HeikoS	wiking: the multiple subsets, ah well
+@HeikoS	I am for views
+@HeikoS	as "name", "rows", "cols"
+ shogun-buildbot	build #1449 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1449  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	or for features just "indices"
+@HeikoS	wiking: I can do that
+@wiking	https://gist.github.com/karlnapf/6176277
+@wiking	u want diz?
+@HeikoS	wiking: yes, that should be easy to generate for all classes rigtht?
+@wiking	and want it to be autogenerated? :)
+@wiking	like with jinja2?
+@HeikoS	yes
+@wiking	ok the only question here will be
+@HeikoS	and then put to
+@HeikoS	#include <shogun/base/obtain_from_generic.h>
+@wiking	i mean 'concern'
+@wiking	that we'll require jinja2 just to build libshogun
+@wiking	;)
+@wiking	i mean we already have python as a requirement
+@HeikoS	it can be optional
+@wiking	HeikoS: you mean a -DAutomagicObtainFromGeneric=ON
+@HeikoS	but that might be annoying
+@wiking	?: )
+@HeikoS	yes
+@wiking	well
+@wiking	then we'll have to have like
+@HeikoS	but then we have to use more +ifdefs
+@wiking	millions of #ifdef ...
+@wiking	yeps
+@HeikoS	I am not against dependencies
+@HeikoS	can we cmake the jinja?
+ shogun-buildbot	build #1480 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1480  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@wiking	HeikoS: we could :)
+@HeikoS	then it would be fine right?
+@wiking	HeikoS: i've just put there the big question.... just put there what u think
+@wiking	and then let's decide about this fast
+@HeikoS	ok voted
+@HeikoS	wiking: and views will come some time this or next month
+@HeikoS	I first need to run shogun on a cluster
+@wiking	HeikoS: btw i would do feature_object.add_subset(int32_t fold_id, SGVector<index_t> subset)
+@wiking	i mean
+@wiking	feature_object.add_subset(SGVector<index_t> subset, int32_t fold_id=0)
+@HeikoS	fold_id?
+@wiking	coming from https://github.com/shogun-toolbox/shogun/issues/1355
+@HeikoS	yeah the add_subset will just get an identifier with it, preferably a string
+@wiking	or you totally changed your mind about that?
+@HeikoS	for code readability
+@HeikoS	and the current calls will be mapped to "default" or whatever
+@HeikoS	then its not touching existing code
+@HeikoS	add_subset(const char* identifier, SGVector subset)
+@wiking	the only reason i'm suggesting to switch the func args is that we dont have to rewrite code where subset is being used
+@HeikoS	wiking: yes, agreed
+@HeikoS	or no
+@wiking	and just give a default value if it's not set
+@HeikoS	actually, we can just have an inline wrapper
+@HeikoS	doesnt really matter
+@HeikoS	and then we need a serialisable map class
+@HeikoS	which we dont have I think
+@wiking	add_subset(SGVector subset, const char* identifier="defaultshit")
+@HeikoS	wiking, yes
+@wiking	HeikoS: what ya miss for the clustering btw
+@HeikoS	wiking: its all basic stuff
+@wiking	i mean having a cluster where arch/os is different is pretty scary though
+@HeikoS	I need a script that locally installs shogun including python bindings
+@wiking	that's really not how a cluster should look like ;)
+@HeikoS	wiking: yes for now, its ok to assume common arch
+@HeikoS	but later, no
+ shogun-buildbot	build #16 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/16  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@HeikoS	I am currently just writing a bash to install everything
+@HeikoS	In file included from /usr/include/hdf5.h:24:0,
+@HeikoS	                 from /nfs/data3/ucabhst/environments/barlow/shogun/src/shogun/io/HDF5File.cpp:17:
+@HeikoS	/usr/include/H5public.h:57:20: fatal error: mpi.h: No such file or directory
+@HeikoS	compilation terminated.
+@HeikoS	[ 21%] Building CXX object src/shogun/CMakeFiles/shogun.dir/io/SerializableJsonReader00.cpp.o
+@HeikoS	compile error on cluster
+@HeikoS	wiking: ^ my fault?
+@wiking	HeikoS: checking
+@wiking	mpi? :)
+@wiking	where did mpi came from :)))
+@HeikoS	/usr/include/H5public.h:57:20:
+@wiking	mmm so it's hdf5 right?
+@HeikoS	yes
+@HeikoS	include <mpi.h>
+@wiking	wtf :)
+@HeikoS	is it possible to deactivate HD5 file stuff?
+@wiking	HeikoS: hehehe
+@wiking	always have something that is not yet ready
+@wiking	:)
+@HeikoS	mmh
+@HeikoS	just need to compile
+@wiking	but i really wonder how's that possible that you have hdf5 with parallel installed
+@wiking	and no mpi.h
+@wiking	this is scary
+@HeikoS	not my machine
+@wiking	yeah i supposed
+@HeikoS	this is other peoples machines
+@wiking	'other peoples sucks' :D
+@HeikoS	the problem is that I cannot change the configs everywhere
+@wiking	yeah i supposed
+@HeikoS	btw is cmake easy to install locally?
+@HeikoS	because this one is so old that shogun only cmakes with my addition yesterday
+@wiking	HeikoS: yeap
+@HeikoS	wiking: btw will you remove that and require cmake >2.8.5
+@wiking	HeikoS: you dont even need to install it
+@wiking	HeikoS: wget (latest cmake tar.gz) && untar && cd && ./configure && make
+@HeikoS	ok cool
+@wiking	and you'llhave a ./bin/cmake exec
+ pickle27	wiking: I got No tests were found when running ctests
+@wiking	that u can use .... no need to install it at all
+@wiking	pickle27: have u read the otehr line? :)
+@wiking	pickle27: -DENABLE_TESTING=ON with cmake
+ pickle27	yeah I built with -DENABLE_TESTING=ON
+ pickle27	wait
+@wiking	and u reran make
+@wiking	?
+ pickle27	how do you separate cmake args
+@wiking	space
+ pickle27	ahh
+@wiking	as any other command line args
+ pickle27	I used a comma?
+@wiking	pickle27: dunno why
+-!- iglesiasg [~iglesias@89-77-4-38.dynamic.chello.pl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+@wiking	HeikoS: no it's no need fo rthat
+@wiking	HeikoS: u just made me now a little bit more worx
+ pickle27	wiking: okay now it is building tests
+@wiking	pickle27: gr8
+@HeikoS	wiking: what?
+@wiking	HeikoS: well u would have needed to find a more simple FindSuperLU.cmake file
+@wiking	instead u backported something
+@wiking	...
+@wiking	and now i have to git rm
+@HeikoS	wiking: I know sorry
+@wiking	anyhow googling
+@wiking	anyways what the fuck are we using superlu for?
+@HeikoS	no idea
+@wiking	lisitsyn: do we need superlu still?
+@wiking	HeikoS: it's in tapkee apartently
+@wiking	lisitsyn: i remember u writing something about superlu is not needed by tapkee anymore...
+@HeikoS	wiking: well
+@HeikoS	haha :)
+@wiking	HeikoS: no really.... lisitsyn wrote i think yesterday that he doesnt need superlu anymore
+@wiking	let's see if so
+@wiking	because if really not then i'm just throwing out the whole stuff
+@HeikoS	yep good
+@HeikoS	wiking: btw I have a basic question about bash scripts
+@HeikoS	is it ok to cd around?
+@HeikoS	or is there a command to run something in a certain dir?
+@wiking	n
+@wiking	o
+@wiking	u can move whereever u want to
+@wiking	just make sure that the directory actually exits :P
+@HeikoS	sure :)
+@wiking	other than that u do whatever
+@wiking	HeikoS: i mean u can even do cd / && rm -rf .
+@wiking	;)
+@HeikoS	wiking: cool let me try
+@wiking	heheheh
+@HeikoS	**************
+@wiking	HeikoS: root removed :S
+@wiking	?
+@wiking	no ping from HeikoS :D
+@HeikoS	hehe :)
+ thoralf	HeikoS: "sudo rm -rf ." is cool
+ thoralf	Just removes the current directory.
+ thoralf	:D
+@HeikoS	no root rights here
+@HeikoS	what does cmake's configure do?
+ thoralf	HeikoS: Just joking.  It recursively deletes everything :)
+@HeikoS	running tests of socket stuff???
+@HeikoS	tests failing
+@wiking	HeikoS: lol
+@wiking	:D
+@wiking	i have no idea man
+@HeikoS	configure takes longer than compile
+@HeikoS	wiking: my current solution for cluster is to locally install everything to $HOME/$HOSTNAME
+@wiking	HeikoS: sounds reasonable... as u said that there's a high variance among your cluster nodes arch/os wise
+ shogun-buildbot	build #1450 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1450  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #1272 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1272  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ thoralf	Hmm.  All these OSX builds are stuck in travis.
+ thoralf	Queued, but not started since 6 hours.
+ shogun-buildbot	build #1481 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1481  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@wiking	thoralf: osx bots are down i guess
+@wiking	HeikoS: have u tested CIndependentComputationEngine?
+@HeikoS	wiking: nope, but lamday should have
+@HeikoS	he is using it
+@HeikoS	why?
+@HeikoS	only serial is impleented yet though
+@HeikoS	for clusters we will use clone, but not sure for multicore
+@HeikoS	since shared memory would be cool for that
+ shogun-buildbot	build #17 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/17  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@wiking	HeikoS: clone?
+@HeikoS	wiking: yes serialisation clones
+@wiking	HeikoS: ah ok but what is going to be the backend? :)
+@wiking	i mean it needs to be interfaced somehow
+@HeikoS	yes, but thats all yet in the stars
+@wiking	yeye i'm just thinking about it now loudly
+@wiking	that we could of course serialise the cloned object into fs
+@wiking	but we could as well use/support somekind of a cluster backend
+@wiking	that actually does this via sockets
+@wiking	i mean the passing around of serialised objects
+@HeikoS	wiking: sorry again, any way to tell shogun which python to use?
+@wiking	HeikoS: -DCMAKE_PREFIX_PATH is actually a good bet
+@wiking	if u have your python somewhere funky
+@HeikoS	PYTHON_PACKAGES_PATH
+@wiking	say i have one python in /usr/
+@wiking	but then i have another python under /opt/local
+@wiking	i do cmake -DCMAKE_PREFIX_PATH=/opt/local
+@wiking	so that it first searches there the stuff
+@HeikoS	wiking: I see, thanks
+@wiking	because we could actually start supporting Apache AVRO
+@wiking	vote 7 down vote accepted
+@wiking	So when Hadoop was being written by Doug Cutting he decided that the standard Java method of serializing Java object using Java Object Serialization (Java Serialization) didn't meet his requirements for Hadoop. Namely, these requirements were:
+@wiking	    Serialize the data into a compact binary format.
+@wiking	    Be fast, both in performance and how quickly it allowed data to be transfered.
+@wiking	    Interoperable so that other languages plug into Hadoop more easily.
+@wiking	As he described Java Serialization:
+@wiking	    It looked big and hairy and I though we needed something lean and mean
+@HeikoS	wiking: maybe
+@wiking	and it's pretty cool because
+@wiking	it has like all the interfaces
+@wiking	that we support
+@HeikoS	but we should be very careful about not starting too much
+@wiking	HeikoS: no i mean it's just an api
+@wiking	HeikoS: i mean interfacing
+@HeikoS	wiking: this python trick did not work :(
+@wiking	HeikoS: and avro is cool in sense that the serialised objects are selfcontained. i.e. the schema of the object is in the serialised file
+@wiking	and it's defined by JSON
+@wiking	that we already support
+@wiking	;P
+@HeikoS	that sounds sweet
+@HeikoS	what does python need?
+@HeikoS	I just have a pip install of python and some libs
+@HeikoS	but no libpython.so
+@HeikoS	-- Found PythonLibs: /usr/lib/libpython2.7.so (found version "2.7.2+")
+@HeikoS	this one is not around in my installation
+@wiking	HeikoS: it's system lib
+@wiking	u need that
+@HeikoS	I see
+@wiking	w/o that u cannot have pythonmodular
+@wiking	HeikoS: i mean if u want to have that installed locally
+@HeikoS	ok but does it have to match my interpreter version?
+@wiking	HeikoS: then you have to install the the whole python from src yourself
+@HeikoS	argh really?
+@wiking	HeikoS: yes otherwise it will get messy
+@HeikoS	so can I combine this stuff?
+@HeikoS	I just need my local ipython in fact
+@wiking	HeikoS: ipython is just on top of python
+@HeikoS	so then I will rather use system python
+@HeikoS	ok
+@HeikoS	ocol
+@wiking	ok brb
+@wiking	i'll check on this avro shit laterz
+@HeikoS	wiking: the mpi thing still blocks my compilation, what to do?
+@HeikoS	I can install packages for now though
+@HeikoS	but libopenmpi-dev is already there
+ shogun-buildbot	build #1273 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1273  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ pickle27	iglesiasg:
+ pickle27	i fixed clone in jedidiag
+@iglesiasg	pickle27, hey, wassup
+@iglesiasg	pickle27, cool! what was it?
+ pickle27	obj name was wrong lol
+@iglesiasg	oh! subtle bug :)
+@iglesiasg	pickle27, all right, so we let travis take care of it and then I will merge
+ pickle27	iglesiasg: travis hasnt started on it, its been 2 hours
+@iglesiasg	pickle27, mmm annoying
+@HeikoS	just run tests locally :)
+ pickle27	all green :)
+@HeikoS	so the clone was resolved? :)
+ pickle27	yup
+@HeikoS	cool!
+@iglesiasg	let's do it then!
+@HeikoS	wiking: we should really have these tests ^
+@HeikoS	get_name
+ shogun-notifier-	shogun: Kevin :develop * 113fe62 / / (11 files): https://github.com/shogun-toolbox/shogun/commit/113fe622525aecc6618731932ce5bdbfaf5bd497
+ shogun-notifier-	shogun: added JediSep ICA algorithm
+ shogun-notifier-	shogun: Kevin :develop * f334832 / src/shogun/ (6 files): https://github.com/shogun-toolbox/shogun/commit/f334832298fffb352e203c655607c9be7ac31952
+ shogun-notifier-	shogun: JediSep cleanup
+ shogun-notifier-	shogun: Kevin :develop * b5ade41 / src/shogun/converter/ica/JediSep.h: https://github.com/shogun-toolbox/shogun/commit/b5ade41b3628f1e84b1ac56d8b772a30d12750a8
+ shogun-notifier-	shogun: fixed JediSep object name
+ shogun-notifier-	shogun: Kevin :develop * 25f81d5 / src/shogun/mathematics/ajd/JediDiag.h: https://github.com/shogun-toolbox/shogun/commit/25f81d5123b53a1b37ebdfbdc760f97a1a9c0e08
+ shogun-notifier-	shogun: fixed JediDiag obj name
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 1e7f32a / / (14 files): https://github.com/shogun-toolbox/shogun/commit/1e7f32af83790413a6902170d451c7629b70a96f
+ shogun-notifier-	shogun: Merge pull request #1433 from pickle27/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: added JediSep ICA algorithm
+ pickle27	hopefully travis starts on this pr
+ shogun-buildbot	build #1451 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1451  blamelist: Kevin <kevinhughes27@gmail.com>
+ shogun-buildbot	build #1452 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1452  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Kevin <kevinhughes27@gmail.com>
+ shogun-buildbot	build #1482 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1482  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Kevin <kevinhughes27@gmail.com>
+ shogun-buildbot	build #18 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/18  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Kevin <kevinhughes27@gmail.com>
+-!- lambday [67157c37@gateway/web/freenode/ip.103.21.124.55] has joined #shogun
+-!- hushell [~hushell@c-98-232-178-161.hsd1.or.comcast.net] has quit [Ping timeout: 256 seconds]
+-!- lisitsyn1 [~lisitsyn@fb2-lo1.global63.net] has joined #shogun
+ lisitsyn1	wazzaaa
+ shogun-buildbot	build #1844 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/1844  blamelist: Kevin <kevinhughes27@gmail.com>
+ shogun-buildbot	build #1274 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1274  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>, Kevin <kevinhughes27@gmail.com>
+-!- HeikoS [~heiko@nat-167-65.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+@wiking	lisitsyn1: superlu?
+@wiking	heokok i'm on it
+@wiking	lisitsyn1: do u still need it?
+-!- iglesiasg [~iglesias@89-77-4-38.dynamic.chello.pl] has quit [Quit: Ex-Chat]
+-!- travis-ci [~travis-ci@ec2-54-224-242-169.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/10406306
+-!- travis-ci [~travis-ci@ec2-54-224-242-169.compute-1.amazonaws.com] has left #shogun []
+@wiking	oh yeah
+@wiking	travis is starting to wake up
+ lisitsyn1	wiking: no
+@wiking	lisitsyn1: can i throw then out the whole SuperLU detection?
+ lisitsyn1	wiking: yes
+@wiking	great thnx
+ shogun-notifier-	shogun: Viktor Gal :develop * e97ed82 / / (4 files): https://github.com/shogun-toolbox/shogun/commit/e97ed82d515bec9adb6b6fa3e327b7f924c6d494
+ shogun-notifier-	shogun: Remove SuperLU detection as it not used anymore
+ shogun-buildbot	build #1453 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1453  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- van511 [~van51@ppp-94-66-27-251.home.otenet.gr] has joined #shogun
+ shogun-buildbot	build #1483 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1483  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- van51 [~van51@ppp-2-87-0-126.home.otenet.gr] has quit [Ping timeout: 264 seconds]
+-!- hushell [~hushell@8-92.ptpg.oregonstate.edu] has joined #shogun
+ shogun-buildbot	build #19 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/19  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- van511 [~van51@ppp-94-66-27-251.home.otenet.gr] has quit [Quit: Leaving.]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 276 seconds]
+ shogun-buildbot	build #1275 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1275  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- gsomix [~gsomix@95.67.149.216] has joined #shogun
+ lambday	wiking: there?
+ lambday	wiking: I need to use an external library for graph coloring.. need shogun to configure with it
+@wiking	lambday: yes
+@wiking	lambday: ok give me details
+@wiking	what's the lib u need
+-!- lambday_ [67157d37@gateway/web/freenode/ip.103.21.125.55] has joined #shogun
+ lambday_	err got ddc
+@wiking	now worries just gimme the lib name
+ lambday_	wiking: its ColPack graph coloring library...
+@wiking	lol
+ lambday_	:-/
+@wiking	lthis is the one:
+@wiking	http://www.cscapes.org/coloringpage/
+@wiking	?
+ lambday_	wiking: yep
+@wiking	mmm ok
+ shogun-buildbot	build #1569 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1569
+@wiking	this is going to be rather intersting
+ lambday_	http://cscapes.cs.purdue.edu/download/ColPack/ColPack-1.0.9.tar.gz
+ lambday_	wiking: why so?
+-!- lambday [67157c37@gateway/web/freenode/ip.103.21.124.55] has quit [Ping timeout: 250 seconds]
+@wiking	well this seems to be a library that's really not wide spread
+ lambday_	wiking: ummm yeah
+@wiking	lambday_: do u know what version u would need at least?
+ lambday_	umm not sure... I am using 1.0.9
+@wiking	hehe ok
+ lambday_	wiking: if this is not there in debian repo, should we use something else?
+@wiking	lambday_: no not necessary
+@wiking	i mean it's ust that this feature is going to be used by very few peopl
+@wiking	u know that
+@wiking	 ;)
+@wiking	as it's highly improbable that someone is going to have this library installed
+ lambday_	wiking: yeah.. only those people with a huge sparse matrix to compute log-det of :(
+@wiking	unless he really wants the feature u r creating with it
+ lambday_	wiking: yeah... that's true
+@wiking	lambday_: but no worries i can add the detection for it
+ lambday_	wiking: thanks man! :)
+@wiking	lambday_: what does it install actually?
+ lambday_	headers and lib
+ lambday_	libColPack.so
+ lambday_	in /usr/local/lib/
+ lambday_	and /usr/local/include/ColPack/ [default]
+@wiking	what's the header? ColPack.h?
+ lambday_	wiking: ColPackHeaders.h
+@wiking	okok i see
+ lambday_	I just gotta include this one and rest all are included
+ lambday_	err I will get dc
+-!- lambday_ [67157d37@gateway/web/freenode/ip.103.21.125.55] has quit [Ping timeout: 250 seconds]
+ shogun-notifier-	shogun: Viktor Gal :develop * 137d664 / CMakeLists.txt,cmake/FindColPack.cmake: https://github.com/shogun-toolbox/shogun/commit/137d664fb40032ffd0f916afed886a08fbebe290
+ shogun-notifier-	shogun: Add FindColPack script for graph coloring
+ shogun-notifier-	shogun: dedicated to lambday
+@wiking	sorry for the double commit :S
+ shogun-notifier-	shogun: Viktor Gal :develop * 5640485 / src/shogun/lib/config.h.in: https://github.com/shogun-toolbox/shogun/commit/5640485109184fb2dc81b570d7c73af480f68144
+ shogun-notifier-	shogun: add HAVE_COLPACK to the config.h
+ shogun-buildbot	build #1454 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1454  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1484 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1484  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #20 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/20  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- zxtx [~zv@rrcs-74-62-200-195.west.biz.rr.com] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-23-20-152-199.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/10413060
+-!- travis-ci [~travis-ci@ec2-23-20-152-199.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #1276 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1276  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1455 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1455  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1485 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1485  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #21 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/21  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@wiking	shogun-buildbot: force rebuild --branch develop 'bsd1 - libshogun'
+ shogun-buildbot	try 'force build [--branch=BRANCH] [--revision=REVISION] [--props=PROP1=VAL1,PROP2=VAL2...]  <WHICH> <REASON>'
+@wiking	shogun-buildbot: force rebuild --branch=develop 'bsd1 - libshogun'
+ shogun-buildbot	try 'force build [--branch=BRANCH] [--revision=REVISION] [--props=PROP1=VAL1,PROP2=VAL2...]  <WHICH> <REASON>'
+@wiking	shogun-buildbot: force build --branch=develop 'bsd1 - libshogun'
+ shogun-buildbot	build forced [ETA 8m25s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #1486 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1486
+ shogun-notifier-	shogun: Viktor Gal :develop * 6c21825 / tests/unit/base/clone_unittest.cc.py: https://github.com/shogun-toolbox/shogun/commit/6c218252a4f0e03b5243cb6b5692a0c9327ed161
+ shogun-notifier-	shogun: Remove BaggingMachine from ignores in clone_unittes.cc.py
+-!- pickle27 [~kevin@d67-193-243-174.home3.cgocable.net] has quit [Quit: Leaving.]
+ shogun-buildbot	build #953 of rpm1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/rpm1%20-%20libshogun/builds/953  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1456 of deb2 - static_interfaces is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/1456  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1487 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/1487  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #22 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/osx1%20-%20libshogun/builds/22  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1277 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/1277  blamelist: Viktor Gal <viktor.gal@maeth.com>
+--- Log closed Wed Aug 21 00:00:24 2013

@@ -1,0 +1,158 @@
+--- Log opened Thu Jun 09 00:00:11 2011
+@sonney2k	did you run make install?
+ serialhex	anyway, the answer i keep getting is 0, i would think that the classifier would do a better job, even with random inputs, but every time i run the ruby example the answer is 0
+ serialhex	and yes, i did, the error i get is...
+ serialhex	the python error:
+ serialhex	ImportError: No module named shogun.Features
+ serialhex	i'll gist my ruby code in a sec so you can tell me where i may be off
+@sonney2k	serialhex, worrying
+@sonney2k	I suspect you installed the python files into some place that python doesn't know / find
+@sonney2k	so you would need to fiddle with the PYTHONPATH environment variable
+ serialhex	ok, i'll look into that in a bit
+ serialhex	the ruby code is here: https://gist.github.com/1015544
+@sonney2k	anyway gist the ruby code@
+ serialhex	there is a LOT of methods i had to make in order to make it work, i'll probably stick them in a module or something so i dont have to keep doing that over & over
+@sonney2k	serialhex, wow
+ serialhex	if you have any Q's about anything let me know
+@sonney2k	lots of code is helper stuff
+ serialhex	yeah i know :P
+@sonney2k	I think you should introduce some util.rb or so
+@sonney2k	otherwise it becomes hard to read... or do you know of any ruby module that could make the example code shorter?
+ serialhex	will do, but since i was just writing this one i figured i'd include it there for now
+@sonney2k	I am asking because that is the code that will be in the tutorial in the shogun docs
+ serialhex	erm... not really at the moment.  there are a few things i have planned to clean it up, but i want to make sure it's working right before i make it perdy
+@sonney2k	it looks great...
+ serialhex	though the output is always 0... which is what has me worried that something is wrong
+ serialhex	hd on, switching to tablet
+@sonney2k	serialhex, you say out is always 0 ?
+ serialhex	yes
+@sonney2k	could you try with more examples please
+@sonney2k	say num = 100
+ serialhex	ok
+ serialhex	i just tried woth 1000 and still 0
+-!- serialhex01 [~androirc@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+@sonney2k	if you do out = svm.apply.get_labels in line 129 will this out also be just 0 ?
+ serialhex	it's a bunch of floats
+@sonney2k	some at -1 / +1 (or close to?)
+ serialhex01	hmm,  some kind of near
+@sonney2k	like?
+ serialhex	with @num = 10 i get: [0.4680212008907656, 0.10552998375268269, -0.5108234747841581, -0.03223529191720908, -0.04684119144986374, 1.1074998515237082, 0.741678376385645, 0.9422832217759, 0.9387448468671497, 0.40136515063517464, -0.33593238370448436, 0.7812235280836723, 0.24727375268561924, 1.0973898926638292, 0.17753467690222277, 0.7639046416040717, 0.29813303799435864, 1.0396246815544672, 0.5358912110843104, 1.
+ serialhex	019790835318551]
+@sonney2k	not exactly what I would expect
+@sonney2k	so could you print kernel.get_kernel_matrix in line 122?
+@sonney2k	with num=2 or 3 or so
+@sonney2k	serialhex, just for clarification what this example does:
+@sonney2k	it generates to gaussian distributed 'blobs' that are shifted with dist to the left bottom / right top
+@sonney2k	so if you do num=5 then 5 points in each gaussian
+@sonney2k	and respectively 5 negatively and 5 positvely labelled points
+@sonney2k	then trains an svm with gaussian kernel
+ serialhex	i kind of figured it did something like that
+@sonney2k	since you use a rather large kernel width (2.xx) the decision boundary will be close to linear
+@sonney2k	could you print the kernel above?
+@sonney2k	and please also trainlab / testlab
+ serialhex	when i try to print kernel.get_kernel_matrix it says i need 3 args...
+ serialhex	prob gonna be booted for this... :P
+ serialhex	pry(main)> trainlab
+ serialhex	=> [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+ serialhex	pry(main)> testlab
+ serialhex	=> [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+@sonney2k	serialhex, I guess I didn't add support for get_kernel_matrix out typemap yet
+ serialhex	maybe not :(
+@sonney2k	what you could do though is call kernel.kernel(0,0) and kernel(0,1)
+ serialhex	pry(main)> kernel.kernel(0,0)
+ serialhex	=> 0.41299384873307404
+ serialhex	pry(main)> kernel.kernel(0,1)
+ serialhex	=> 0.7068562426983315
+ serialhex	(btw, pry is an awesome tool! i love it!!!)
+@sonney2k	hmmhh kernel(i,i) should return 1.0
+@sonney2k	so sth is weird
+@sonney2k	but your example is with 90% prob correct
+ serialhex01	are you asking?
+@sonney2k	no
+@sonney2k	fact
+ serialhex	oh, ok
+@sonney2k	push your example
+ serialhex	will do
+@sonney2k	I will need to debug / valgrind...
+ serialhex	pushed... and removed the test i pushed before
+ serialhex	and made a pull req
+ serialhex	i need to go to the office, i'll ttyl and hopefully we'll be able to figure this out soon sonney2k
+@sonney2k	serialhex, thanks a lot!
+@sonney2k	and good forking / kniving ;-)
+ serialhex	np :D
+-!- serialhex01 [~androirc@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Quit: AndroIRC]
+ CIA-18	shogun: Justin Patera master * r42ea1d3 / (2 files): removed simple ruby test - http://bit.ly/jXXHrP
+ CIA-18	shogun: Soeren Sonnenburg master * rdfd6804 / examples/undocumented/ruby_modular/classifier_libsvm_minimal_modular.rb : Merge branch 'master' of git://github.com/serialhex/shogun - http://bit.ly/j4HCuW
+ CIA-18	shogun: Justin Patera master * r5fbcb40 / examples/undocumented/ruby_modular/classifier_libsvm_minimal_modular.rb : added ruby_modular libSVM example... needs to be clean & probably fixed... - http://bit.ly/jgqKRv
+ CIA-18	shogun: Soeren Sonnenburg master * r0a9ffa2 / src/.generate_link_dependencies.py : Add the *_doxygen.i files to the modular modules build-deps - http://bit.ly/jlBCOW
+ serialhex	BUAHAHAHAHAHAHA!!!! I HAVE FIXED IT!!!!!!!
+ serialhex	(i think)
+ serialhex	you're probably dead asleep right now sonney2k, but i've worked on the ruby example a bit, now it's giving me vals ~0.5 (random chance) which i don't know if it should do better than that (i'm assuming little better than chance, but probably not much) but it's better than 0!!!
+ serialhex	i'm going to pull out all the extra nonsense that's in the classifier file & then push (though there are already a few small changes i did before this) and you should be getting that tonight/tomorrow
+ serialhex	ok, you're not getting the spiffy cleaned-up version today, but you are getting the version that works today... it's sleep time yo!  nite all, and morning everyone else!!!
+-!- alesis-novik [~alesis@188.74.87.84] has quit [Remote host closed the connection]
+-!- in3xes_ [~in3xes@59.163.196.121] has joined #shogun
+-!- in3xes [~in3xes@210.212.58.111] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ is now known as in3xes
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@59.163.196.121] has quit [Ping timeout: 240 seconds]
+-!- in3xes_ is now known as in3xes
+-!- in3xes_ [~in3xes@210.212.58.111] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- in3xes_ is now known as in3xes
+-!- in3xes_ [~in3xes@59.163.196.121] has joined #shogun
+-!- in3xes_ [~in3xes@59.163.196.121] has quit [Read error: Connection reset by peer]
+-!- in3xes [~in3xes@210.212.58.111] has quit [Ping timeout: 276 seconds]
+-!- blackburn [~blackburn@188.168.4.183] has joined #shogun
+ serialhex	hey blackburn, want to see something funny?
+ blackburn	serialhex: hey
+ blackburn	exactly
+@bettyboo	yo
+ serialhex	heres the example that sonney2k wanted me to translate to ruby: https://github.com/serialhex/shogun/blob/master/examples/undocumented/python_modular/classifier_libsvm_minimal_modular.py
+ serialhex	and here is the (working) ruby translation: https://github.com/serialhex/shogun/blob/master/examples/undocumented/ruby_modular/classifier_libsvm_minimal_modular.rb
+ serialhex	do you think i did enough bootstrapping??
+ blackburn	hehe
+ blackburn	where is no numerical framework like numpy?
+ serialhex	i'm gonna pull all of that stuff in the beginning out & stick it in another file i can just require to make it nicer... but i gtg and take care of some stuff right now
+ serialhex	there is, but we just havn't implemented it yet
+ blackburn	I see
+ serialhex	i need to read the source in order to figure out WTF to do with it
+ serialhex	anyway, i need to take a shower & get going, i'll ttyl!  have a nice day!!
+ blackburn	have a nice day too
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes1 [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes1 [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- in3xes1 [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+-!- in3xes1 [~in3xes@180.149.49.227] has quit [Ping timeout: 276 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ is now known as in3xes
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 255 seconds]
+-!- in3xes1 [~in3xes@180.149.49.227] has joined #shogun
+-!- cwidmer [~quassel@connect.tuebingen.mpg.de] has quit [Remote host closed the connection]
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 258 seconds]
+ blackburn	sonney2k: if we was using ARPACK (http://www.caam.rice.edu/software/ARPACK/) my algos would be faster - is it possible to include it to shogun?
+ blackburn	for example in LLE NxN eigenproblem is solved
+ blackburn	and after we pick just 2,3 or so of all N eigenvectors
+ blackburn	not efficient, lanzcos algorithm could do it faster
+-!- in3xes1 is now known as in3xes
+@sonney2k	blackburn, sure why not - but make it optional(!)
+@sonney2k	i.e. it must work with lapack only too
+@sonney2k	blackburn, anyway you should better prepare for your exam right now! much more important than GSoC!
+-!- f-x [~user@117.192.218.39] has joined #shogun
+@sonney2k	serialhex, hmmhh 50% only means random chance
+ serialhex	yeah sonney2k... i dont know what the deal is, but i's better than 0
+@sonney2k	so out == 0 is the problem
+ serialhex	out == 0???
+ serialhex	you mean for this line: testerr = mean out.sign.eql_items? testlab
+ serialhex	i should probably make it clearer like so: testerr = mean( out.sign.eql_items? testlab )
+ blackburn	sonney2k: ah, I see. so I could use lapack if arpack is not available, right?
+ blackburn	ah exam right :D
+@bettyboo	haha
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 244 seconds]
+--- Log closed Fri Jun 10 00:00:14 2011

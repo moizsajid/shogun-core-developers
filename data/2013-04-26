@@ -1,0 +1,247 @@
+--- Log opened Fri Apr 26 00:00:29 2013
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- Netsplit *.net <-> *.split quits: @HeikoS
+-!- Netsplit over, joins: @HeikoS
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: Lost terminal]
+-!- lisitsyn [~blackburn@188.168.13.211] has quit [Ping timeout: 245 seconds]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Quit: Page closed]
+-!- makokal [~bokal@pD9EF09DC.dip0.t-ipconnect.de] has quit [Quit: makokal]
+-!- sijin [~smuxi@144.214.222.109] has joined #shogun
+-!- van51 [~van51@athedsl-397303.home.otenet.gr] has left #shogun ["PING 1366939949"]
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has quit [Remote host closed the connection]
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has joined #shogun
+-!- Yanglittle [deb20af0@gateway/web/freenode/ip.222.178.10.240] has joined #shogun
+ Yanglittle	hey, does any examples output the testdat's posterior probability in python_modular?
+-!- gsomix [~Miranda@188.168.13.211] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+-!- van51 [~van51@athedsl-397303.home.otenet.gr] has joined #shogun
+-!- van51 [~van51@athedsl-397303.home.otenet.gr] has quit [Quit: Leaving.]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- lisitsyn [~blackburn@46.20.65.122] has joined #shogun
+-!- van51 [~van51@athedsl-397303.home.otenet.gr] has joined #shogun
+-!- makokal [~bokal@pD9EF09DC.dip0.t-ipconnect.de] has joined #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+ foulwall	Hi sonney2k
+ foulwall	I saw the idea "mloss.org and mldata.org integration" is also available. I think I can do some work on that after I finish the demos.
+ sonne|work	foulwall: I think demos is more work than you expect :)
+ sonne|work	But sure we could also allow uploads of *small* data sets for the demo
+-!- lisitsyn [~blackburn@46.20.65.122] has quit [Quit: Leaving.]
+ foulwall	sonne|work: Maybe after the GSoC I'll help that.
+ foulwall	sonne|work: yeah, some demos will need bigger data set
+ sonne|work	foulwall: cheng and me would be happy if you do...
+ foulwall	sonne|work: I love shogun, so just at you service, meanwhile I can get myself trained in developing them.
+-!- foulwall [~foulwall@li379-21.members.linode.com] has left #shogun []
+-!- erlenda [~erlenda@fw-oslo.intelcom.no] has joined #shogun
+ Yanglittle	hey, LibSVM can  map the distance-from-margin into probalilities, does shogun do ?
+-!- makokal [~bokal@pD9EF09DC.dip0.t-ipconnect.de] has quit [Quit: makokal]
+-!- van51 [~van51@athedsl-397303.home.otenet.gr] has left #shogun ["PING 1366963177"]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+@HeikoS	Yanglittle, hi, yes we can do this
+@HeikoS	check scores_to_probabilities of BinaryLabels
+@HeikoS	there is also an example in libshogun
+@wiking	HeikoS: what bug?
+@wiking	#948
+@wiking	?
+@iglesiasg	wiking, HeikoS : hey guys, one thing that I don't quite understand regarding the randomness issue with the tests
+@iglesiasg	wiking: it fails across platforms/archs because we are relying too much on the seed right?
+@wiking	not about seed
+@wiking	it's about RNG
+@iglesiasg	wiking: then?
+@wiking	it's not the same accross platforms
+@iglesiasg	wiking: ok but say
+@wiking	hence seeded RNG won't be the same either
+@iglesiasg	if it is because we are relying on the seed I understand
+@iglesiasg	otherwise, I don't
+@iglesiasg	because if we are generating numbers from say an interval [0,1]
+@HeikoS	wiking: ?
+@iglesiasg	why does it make a difference how are they generated as long as they are in that interval?
+@wiking	iglesiasg: because they are not the same exact number? :)
+@HeikoS	iglesiasg: we save results to files, then compare against them
+@HeikoS	to any random stuff will kill us
+@iglesiasg	wiking: then, we are relying too much on the seed
+@HeikoS	iglesiasg: some methods are random
+@wiking	iglesiasg: with seed(x) in the code u suppose that the random will be always the same
+@iglesiasg	wiking: i.e. we are generating "random numbers" that are not random actually
+@HeikoS	no way around that
+@iglesiasg	wiking: ok, I understand
+@HeikoS	data doesnt have to be, but other things have to be
+@wiking	which is true until u r using the same system
+@HeikoS	wiking: what was with the bug?
+@wiking	HeikoS: nada realised
+@iglesiasg	wiking: then it doesn't make sense to me to face problems for that
+@HeikoS	what if we have our own random machine in shogun?
+@HeikoS	would that solve it?
+@iglesiasg	it is just that the tests don't work on random data
+@HeikoS	what about python?
+@HeikoS	iglesiasg: its not only that data
+@wiking	HeikoS: python uses system rng afaik
+@iglesiasg	HeikoS: yeah, it is also internally like in CV you said
+@iglesiasg	right?
+@HeikoS	wiking: so even python is not reproducible?
+@wiking	HeikoS: and anyhow now we are failing exactly with python_modular ;P
+@HeikoS	iglesiasg: exactly
+@HeikoS	wiking: so we need a random machine in shogun that can produce everything
+@HeikoS	as far as i know we mainly use normal and uniform samples from python
+@HeikoS	we have both in shogun
+@HeikoS	just need to use them instead of the numpy methods then
+@HeikoS	or we change our approach
+@lisitsyn	HeikoS: wiking: sonne|work: iglesiasg: please check mail
+@HeikoS	that is, only use fixed data
+@HeikoS	dont test random methods but whether results make sense
+@HeikoS	I did that a while ago but its also problematic
+@HeikoS	like x-val results
+@HeikoS	you can define an interval of what you expect
+@HeikoS	but no guarantee
+@iglesiasg	lisitsyn: it is looking good :)
+@HeikoS	lisitsyn: dito
+@lisitsyn	HeikoS: is it bad or good?
+@lisitsyn	:D
+@iglesiasg	HeikoS: rather than using our random machine
+@iglesiasg	HeikoS: I would enable the possibility of setting randomly generated values as the deafult option, but in tests we set that from outsite
+@iglesiasg	outside*
+@iglesiasg	that would be for the parts that use random numbers internally, e.g. CV
+@lisitsyn	wiking: I like your font
+ sonne|work	HeikoS, wiking, iglesiasg - we need a portable random number generator
+@wiking	lisitsyn: which? :))))
+@wiking	lisitsyn: i think i've fixed it
+ sonne|work	eigen3?
+@lisitsyn	wiking: in the issue you just created
+@lisitsyn	wiking: I just read a mail and whoa!
+@iglesiasg	sonne|work: I think the solution can be a bigger problem than the original one :)
+@wiking	lisitsyn: hahahah yeah
+@lisitsyn	sonne|work: eigen3 doesn't have great random
+@wiking	lisitsyn: github took it's work seriously with highlighting :))
+@wiking	sonne|work: afaik openssl/ssh will have one ;)
+@lisitsyn	sonne|work: C++11 has portable random stuff
+@lisitsyn	:D
+@wiking	sonne|work: and those ones are for sure portable
+@wiking	sonne|work: it's now matter of teste
+@wiking	*taste
+@wiking	to depend shogun on openssl
+@wiking	or just cut out the rng from openssl
+@lisitsyn	are we going to use C++11 btw?
+@lisitsyn	:D
+@wiking	i'd rather go with simple dependency, as nowadays a system w/o openssl is pretty weird... unless it's not connected to the network :P
+@HeikoS	true ssl is easy to depend on
+@HeikoS	how about c++11?
+@HeikoS	what would that do to us?
+@lisitsyn	HeikoS: I am not sure it is really portable but I just ask if we are going to use new standard
+@HeikoS	lisitsyn: different question, lets solve the other one first :)
+@HeikoS	if it *is* portable, we could do it
+@HeikoS	but what would it do to us?
+@HeikoS	whats needed to use it?
+@lisitsyn	HeikoS: --std=c++0x IIRC
+@lisitsyn	HeikoS: starting from gcc 4.6 or 4.7
+@HeikoS	lisitsyn: have you tried what happens then?
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- makokal [~bokal@eduroam-pool3-225.wlan.uni-bremen.de] has joined #shogun
+@lisitsyn	HeikoS: happens like?
+@lisitsyn	HeikoS: once you use newer standard you can use new headers
+@lisitsyn	like shared_ptr or these rng things
+@lisitsyn	HeikoS: ah and std collections use move semantics
+@HeikoS	lisitsyn: I mean, does it compile?
+@wiking	HeikoS: it does
+@lisitsyn	HeikoS: yes of course, back compatibility is a must
+@HeikoS	then why not use it?
+@wiking	at least with clang yes
+@lisitsyn	HeikoS: it can get into troubles though
+@lisitsyn	HeikoS: as I know shared libraries are not compatible
+@HeikoS	lisitsyn: I see
+@wiking	lisitsyn: do you know an easy way to generate a skeleton of a polygon?
+@lisitsyn	wiking: generate?
+@lisitsyn	wiking: http://upload.wikimedia.org/wikipedia/commons/a/ab/StraightSkeletonDefinition.png like that?
+@wiking	lisitsyn: yeah similar but my polygon is a simple 2D one
+@lisitsyn	I don't know the algorithm
+@wiking	yeah i'm trying to find one as well atm...
+-!- gsomix [~Miranda@r206-10.smr.ru] has joined #shogun
+ gsomix	hello
+ gsomix	sonne|work: sonney2k: there?
+-!- saket [0e8b5206@gateway/web/freenode/ip.14.139.82.6] has joined #shogun
+@wiking	lisitsyn: anybody is working on RandomizedPCa and fast k-Means?
+@lisitsyn	wiking: no, probably no
+@lisitsyn	wiking: I wanted to but swamped
+@wiking	ok
+@wiking	i took random forest
+@lisitsyn	wiking: want to participate in gsoc? ;)
+@lisitsyn	:D
+@wiking	lisitsyn: heheh can i ?
+@wiking	:)
+@lisitsyn	wiking: are you eligible at all?
+@wiking	lisitsyn: i've realised that yes :)
+@lisitsyn	hah
+-!- saket [0e8b5206@gateway/web/freenode/ip.14.139.82.6] has quit [Ping timeout: 245 seconds]
+@wiking	btw: for CRF we could use http://www.chokkan.org/software/crfsuite/
+@wiking	it's bsd license
+* wiking just looking through the development issues on github
+@wiking	btw isn't #943 fixed?
+@wiking	json serialization ?
+-!- iglesiasg [~nando@n177-p222.kthopen.kth.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- gsomix [~Miranda@r206-10.smr.ru] has quit [Read error: Connection reset by peer]
+@wiking	btw opencv has RNG as well http://docs.opencv.org/modules/core/doc/operations_on_arrays.html?highlight=rng#rng
+-!- gsomix [~Miranda@r206-10.smr.ru] has joined #shogun
+@iglesiasg	interesting
+-!- pranjaldaga [~pranjalda@115.248.50.23] has joined #shogun
+-!- gsomix [~Miranda@r206-10.smr.ru] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+-!- gsomix [~Miranda@r206-10.smr.ru] has joined #shogun
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has quit [Ping timeout: 264 seconds]
+-!- pranjaldaga [~pranjalda@115.248.50.23] has quit [Ping timeout: 260 seconds]
+-!- iglesiasg [~nando@n177-p222.kthopen.kth.se] has quit [Quit: leaving]
+-!- iglesiasg [~nando@n177-p222.kthopen.kth.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- kabujinuo [ca288b6b@gateway/web/freenode/ip.202.40.139.107] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- erlenda [~erlenda@fw-oslo.intelcom.no] has quit [Quit: Leaving]
+-!- iglesiasg [~nando@n177-p222.kthopen.kth.se] has quit [Quit: leaving]
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has quit [Quit: Leaving.]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- kaushalb09 [~kaushalb0@cpe-74-77-131-130.buffalo.res.rr.com] has joined #shogun
+-!- kaushalb09 [~kaushalb0@cpe-74-77-131-130.buffalo.res.rr.com] has quit [Client Quit]
+-!- gsomix [~Miranda@r206-10.smr.ru] has quit [Quit: Miranda IM! Smaller, Faster, Easier. http://miranda-im.org]
+-!- makokal [~bokal@eduroam-pool3-225.wlan.uni-bremen.de] has quit [Quit: makokal]
+-!- pranjaldaga [~pranjalda@115.248.50.23] has joined #shogun
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- kabujinuo [ca288b6b@gateway/web/freenode/ip.202.40.139.107] has quit [Quit: Page closed]
+-!- lisitsyn [~blackburn@46.20.65.63] has joined #shogun
+-!- Yanglittle [deb20af0@gateway/web/freenode/ip.222.178.10.240] has quit [Ping timeout: 245 seconds]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- gsomix [~Miranda@46.20.65.63] has joined #shogun
+-!- lisitsyn [~blackburn@46.20.65.63] has quit [Quit: Leaving.]
+-!- makokal [~bokal@212.201.44.246] has joined #shogun
+-!- mikhailBelous [~towelenee@109.205.249.161] has joined #shogun
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- sids_aquarius [~sidi_@li400-124.members.linode.com] has joined #shogun
+-!- makokal [~bokal@212.201.44.246] has quit [Quit: makokal]
+-!- van51 [~van51@athedsl-397303.home.otenet.gr] has joined #shogun
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: Lost terminal]
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- pranjaldaga [~pranjalda@115.248.50.23] has quit [Ping timeout: 260 seconds]
+-!- pranjaldaga [~pranjalda@115.248.50.23] has joined #shogun
+-!- naywhaya1e is now known as naywhayare
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Quit: Page closed]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has joined #shogun
+-!- van51 [~van51@athedsl-397303.home.otenet.gr] has left #shogun ["QUIT :Leaving."]
+ gsomix	sonney2k: are you there?
+-!- lisitsyn [~blackburn@109-226-120-160.clients.tlt.100megabit.ru] has joined #shogun
+-!- mode/#shogun [+o lisitsyn] by ChanServ
+-!- pranjaldaga [~pranjalda@115.248.50.23] has quit [Ping timeout: 258 seconds]
+-!- gsomix [~Miranda@46.20.65.63] has quit [Read error: Connection reset by peer]
+-!- vgorbati [d4029f22@gateway/web/freenode/ip.212.2.159.34] has quit [Ping timeout: 245 seconds]
+-!- gsomix [~Miranda@46.20.65.63] has joined #shogun
+-!- poojits [75d35d4a@gateway/web/freenode/ip.117.211.93.74] has joined #shogun
+ poojits	I am interested in "Interface and develop the general quadratic solver library libqp" project for GSOC, but there is no preliminary task for this in the issue list on github. Should I get in touch with mentor Vojtech Franc directly?
+@lisitsyn	poojits: yes
+ poojits	xfrancv@cmp.felk.cvut.cz is his university email address. Is this okay?
+@lisitsyn	poojits: yes totally
+ poojits	thanks alot.
+-!- gsomix [~Miranda@46.20.65.63] has quit [Read error: Connection reset by peer]
+-!- gsomix [~Miranda@46.20.65.63] has joined #shogun
+-!- HeikoS [~heiko@nat-160-69.internal.eduroam.ucl.ac.uk] has left #shogun []
+-!- iglesiasg [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- mikhailBelous [~towelenee@109.205.249.161] has quit [Ping timeout: 264 seconds]
+--- Log closed Sat Apr 27 00:00:29 2013

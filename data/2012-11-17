@@ -1,0 +1,501 @@
+--- Log opened Sat Nov 17 00:00:17 2012
+-!- zxtx [~zv@216.3.101.62] has joined #shogun
+-!- zxtx [~zv@216.3.101.62] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~blackburn@109.226.125.245] has quit [Quit: Leaving.]
+ shogun-buildbot	build #145 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/145
+ shogun-buildbot	build #151 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/151
+ shogun-buildbot	build #174 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/174
+-!- ptizoom [~christian@85.210.94.175] has joined #shogun
+-!- zxtx [~zv@ool-45750cfe.dyn.optonline.net] has joined #shogun
+-!- blackburn [~blackburn@109.226.125.245] has joined #shogun
+ blackburn	*okayface*
+-!- blackburn [~blackburn@109.226.125.245] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@109.226.125.245] has joined #shogun
+ blackburn	sonney2k: I see you are a fan of russian driving?
+-!- blackburn [~blackburn@109.226.125.245] has quit [Client Quit]
+-!- blackburn [~blackburn@109.226.125.245] has joined #shogun
+-!- blackburn [~blackburn@109.226.125.245] has quit [Client Quit]
+-!- blackburn [~blackburn@109.226.125.245] has joined #shogun
+-!- blackburn [~blackburn@109.226.125.245] has quit [Client Quit]
+-!- blackburn [~blackburn@109.226.125.245] has joined #shogun
+-!- blackburn [~blackburn@109.226.125.245] has quit [Remote host closed the connection]
+ wiking	\\\oooooooooooooooooo//////////////
+ wiking	NCBM is wooooooooooooooooorking
+ wiking	at least the convex part of it!
+-!- blackburn [~blackburn@109.226.125.245] has joined #shogun
+ wiking	blackburn: maaan
+ wiking	good news
+ wiking	ncbm started to work!
+ blackburn	yes?
+ blackburn	cool
+ wiking	mmm
+ wiking	mmm
+ wiking	maybe even lbfgs
+ wiking	can compute only the linesearch? :)
+ wiking	it seems not
+ blackburn	you mean pass a function to let it do linesearch only?
+ wiking	yes
+ blackburn	no idea
+ wiking	as it has the line search algo implemented i need
+ blackburn	copy paste
+ blackburn	:D
+ wiking	hahahah
+ wiking	yeah maybe
+ wiking	or as shogun has it
+ wiking	i should be able to call it as extern
+ wiking	lbfgs can solve min f(x)?
+ blackburn	that's what it purposed to, no?
+ wiking	dunno
+ wiking	i'm wondering what it can solve
+ blackburn	any nonlinear problem I think
+ blackburn	with continuous gradient at least
+ wiking	mmm
+ wiking	i could give it  go i guess ;)
+ wiking	lol it's one big c file
+ wiking	mmm i think i should be able to call it
+ wiking	mmm this'll be an interesting one
+ wiking	eheeem
+ wiking	i do better with less iterations
+ wiking	:>
+ wiking	115 vs 44 iterations
+ wiking	but there's 2 times more cutting planes
+ wiking	well something for someting
+ blackburn	heh
+ blackburn	sonney2k: I think you should take a look at the Processing language
+ wiking	someone should fix the inline malloc ;)
+ blackburn	haha
+ blackburn	who cares
+@sonney2k	wiking, I think we should (inside of) SG_INPLACE_MALLOC use new[]() and SG_INPLACE_FREE then to free it
+ blackburn	free new[] is a good idea ;)
+@sonney2k	blackburn, what do you want to say?
+ blackburn	just joking
+ blackburn	I mean we have to be careful to delete[] it
+ blackburn	not to delete or free
+@sonney2k	blackburn, sure
+@sonney2k	it sucks big times that the only reason for the existence of new[] is that new[]() stuff
+@sonney2k	which is so cumbersome in syntax that it really feels broken by design :/
+@sonney2k	anyways SG_MALLOC has helped us a lot to avoid copying matrices
+ blackburn	why? I don't feel new[] is inconsistent
+@sonney2k	new()
+@sonney2k	new[]
+@sonney2k	new[]() ?
+@sonney2k	malloc
+@sonney2k	delete
+@sonney2k	delete[]
+@sonney2k	free?
+ blackburn	what is new[]()?
+@sonney2k	realloc?
+@sonney2k	blackburn, that is what we need to call the default constructor
+ blackburn	ahh
+@sonney2k	your placement constructor / inplace new
+ blackburn	new FuckerClass[30]();
+ blackburn	like that?
+ blackburn	well still - isn't really inconsistent
+@sonney2k	new SGVector<int>[40]();
+ blackburn	I mean it is quite minimal
+@sonney2k	what?
+@sonney2k	you cannot mix any of the stuff above
+@sonney2k	so you break all api's to C
+ blackburn	well
+@sonney2k	and we interface to lots of C libraries
+ blackburn	interfacing is not a problem
+ blackburn	pointers are valid still
+ blackburn	and libraries do not free our resources
+@sonney2k	so we basically need to stay at malloc & friends
+@sonney2k	yeah but it is not just calling it is owning a ptr allocated by e.g. numpy
+@sonney2k	and vise versa
+ blackburn	we let libs own our memory only in sgvector case I think
+ blackburn	sgmatrix/sgvector
+@sonney2k	exactly
+ blackburn	so for collections of vectors or anything like that
+ blackburn	we can use new[]
+@sonney2k	but new[] is not enough
+@sonney2k	new[]()
+ blackburn	what's the problem with new[]() and new[]?
+@sonney2k	it is a big difference
+@sonney2k	one will be as bad as malloc()
+@sonney2k	(requiring the placement constructor call)
+@sonney2k	and the issue I have with this is that I would have liked to just use one macro for all SG_MALLOC
+@sonney2k	so now we again have to be cautious which malloc macro we use
+ blackburn	it is possible with templates :D
+@sonney2k	how so?
+ blackburn	we specialize template for stypes like float64-t
+ blackburn	to not call in-place
+@sonney2k	but we cannot do it for everything
+@sonney2k	I mean think of people using some structure
+ blackburn	it is actually compiles to inplace say float
+ blackburn	(I think so)
+ blackburn	I mean new float[64]() works
+@sonney2k	maybe the other way around would work
+@sonney2k	we specialize templates only for SGVector & friends
+ blackburn	yeah it would work too
+@sonney2k	to call new[]()
+@sonney2k	and delete[]
+@sonney2k	so to do this we would need to make the sg_malloc function templated
+@sonney2k	and then overload the implementation for SGVector
+ blackburn	yes, if we specialize it it would work smoothly
+@sonney2k	but will this compile - I mean when we define a  templated function that uses malloc by default?
+ blackburn	why not?
+@sonney2k	well conflict in function definition? no?
+ blackburn	no, it is not overloading
+@sonney2k	I mean if we specialize one type - don't we have to specialize all types?
+ blackburn	it is specialization
+ blackburn	no
+ blackburn	just put it to header
+@sonney2k	sure about that?
+ blackburn	absolutely, that's how generic C++ works
+@sonney2k	we ignore lib/memory* in interfaces anyways
+@sonney2k	so then that will solve all our problems
+@sonney2k	and we can get rid of this sh* extra macro
+ blackburn	template<typename T> sg_malloc(...) { default impl }
+ blackburn	template<> sg_malloc<SGVector> sg_malloc(...) { inplace }
+@sonney2k	and we can acturally even return a T*
+ blackburn	ah return type
+ blackburn	so
+ blackburn	template<> sg_malloc<SGVector> SGVector* sg_malloc(...) { inplace }
+ blackburn	template<typename T> T* sg_malloc(...) { default impl }
+ blackburn	then we use
+@sonney2k	blackburn, but what about SGVector?
+ blackburn	sg_malloc<SGVector>()
+@sonney2k	I mean it is templated again
+ blackburn	ahh
+ blackburn	hehe
+@sonney2k	so we would need to do this for all types right?
+ blackburn	no
+@sonney2k	sg_malloc<SGVector<int> > etc
+ blackburn	we can use
+ blackburn	template<template ..
+@sonney2k	ohh I need the exact syntax
+ blackburn	hah I just don't know how would it work with basic types
+@sonney2k	template<class T, class U> T* sg_malloc(...) { default impl }
+ blackburn	uh oh
+ blackburn	sounds like a problem :D
+@sonney2k	why?
+ blackburn	we can't specialize templated templates
+ blackburn	we'd need to specialize it for all possible types
+ blackburn	if that's ok - it still would work
+@sonney2k	luckily sgvector etc use only a couple of fixed numeric types
+@sonney2k	so yes it would work
+ blackburn	sonney2k: I use partial specialization in tapkee instead of virtual methods
+ blackburn	I have enum parameter 'method' which I specialize with concrete implementation
+@sonney2k	yeah there is always >1 way and there are pros/cons
+@sonney2k	so we need to do this for malloc, calloc, realloc
+ blackburn	do we use realloc?
+@sonney2k	at least we should throw an exception if someone does
+@sonney2k	for a user it seems it is all malloc handles so he might be tempted to use realloc
+@sonney2k	another reason I hate new[]
+@sonney2k	now realloc available
+@sonney2k	no
+ blackburn	I don't know real use-cases of realloc
+@sonney2k	a dynamically growing array?
+ blackburn	it should be hidden
+@sonney2k	something like std:;vector but fast
+ blackburn	haha std vector is fast
+@sonney2k	resize it then
+@sonney2k	it cannot use realloc
+@sonney2k	it needs to *copy*
+ blackburn	why are you so sure about that?
+@sonney2k	because there is no realloc op in C++
+ blackburn	what makes it so impossible to use it in implementation of vector?
+@sonney2k	and what is worse: if you have a 1G matrix and want to resize it to a 2G matrix
+@sonney2k	you not only have to copy 1G
+@sonney2k	but you also need 3G of mem
+@sonney2k	temporarily but still
+@sonney2k	new[] delete[] lala
+ blackburn	you make me have to find it in sources
+ blackburn	right
+ blackburn	sonney2k: okay actually 1G -> 2G resize is something wrong
+ blackburn	I mean you just shouldn't use such data structure
+ blackburn	you can't *guarantee* realloc will manage to free 1G next to your 1G available
+ blackburn	I'd say it is very unlikely realloc will keep it at its place
+@sonney2k	blackburn, why?
+@sonney2k	memory is for a long time not contiguous (in real world)
+ blackburn	sonney2k: yes it is very non-contiguous
+@sonney2k	some weird mapping the kerlneld will do
+@sonney2k	anyway lets first template sg_malloc and friends and then specialize
+ wiking	lalalalalaaaaaaaaaaaaaaaaaaaa
+@sonney2k	wiking, singing in the rain?
+@sonney2k	too bad that we didn't get in doc camp btw but looks like you were right
+ wiking	and by the way this is lol: http://www.flickr.com/photos/whitehouse/8191317327/in/photostream
+ wiking	sonney2k: hehehe that's alright
+ wiking	in a parallel universe we got in and we wrote a book
+ wiking	;)
+@sonney2k	I hope these templates won't create dependency hell again
+ blackburn	http://www.roflcat.com/images/cats/I_Should_Buy_A_Boat.jpg
+-!- sonney2k [~shogun@7nn.de] has left #shogun ["Ex-Chat"]
+ blackburn	C++ programmers go right to dependency hell after passing away
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+@sonney2k	blackburn, hum I cannot have the real sg_malloc in the .cpp file any longer right?
+ blackburn	no if you want it to be generic you can't
+@sonney2k	only if I wanted to allow a certain fixed amount of types
+ blackburn	that's not generic just some code generation
+@sonney2k	maybe I should keep the original sg_malloc in there and then just define a templated one that calls the sg_malloc by default
+ blackburn	yeah why not
+ blackburn	but template goes to .h
+ wiking	mmm
+ wiking	one question
+@sonney2k	only one?
+ blackburn	the answer is yes
+@sonney2k	no 43
+ blackburn	always say yes
+ blackburn	42&
+ blackburn	?
+ wiking	shouldn't we have like line searching methods under optimizers?
+ wiking	i mean now that i'm putting one in for my method as a static function
+@sonney2k	makes sense
+ wiking	maybe in a future
+ blackburn	I consider line search as a part of optimizers
+ wiking	somebody else will need it as well
+ wiking	blackburn: well yeah i'm writing this optimizer
+ wiking	but now i need line searching
+ blackburn	well they are pretty tied to each other
+ wiking	but i wonder if maybe somebody else will need it
+ wiking	if ever of course..
+ wiking	btw i have some more code cleanups for the bmrm methods
+ blackburn	problem is that line-search schemes are usually use a few parameters from the outside
+ wiking	yes indeed
+ blackburn	and it is hard to provide interface so flexible it fits everywhere
+ wiking	yeah that's true
+ wiking	but yeah you need somekind of a function evaluator to be able to pass
+ wiking	and initial vector with the gradient
+ wiking	that's kind of like what you need to be able to pass in general
+@sonney2k	blackburn, ok doing it like this:
+@sonney2k	#define SG_MALLOC(type, len) sg_generic_malloc<type>(size_t(len), __FILE__, __LINE__)
+ wiking	ok then i take it as a yes
+ wiking	and we'll see how it goes...
+@sonney2k	void* sg_malloc(size_t size, const char* file, int line);
+@sonney2k	template <class T>
+@sonney2k	T* sg_generic_malloc(size_t len, const char* file, int line)
+@sonney2k	{
+@sonney2k	    return (T*) sg_malloc(sizeof(T)*len, file, line);
+@sonney2k	}
+@sonney2k	etc
+ blackburn	yeah
+@sonney2k	CALLOC, REALLOC, FREE
+@sonney2k	all the same way
+ blackburn	yeah we can do that generic too if you want
+ blackburn	:D
+@sonney2k	blackburn, we do
+ blackburn	I mean CALLOC/REALLOC/FREE
+@sonney2k	btw we could simplify the SG_MALLOC * macro
+@sonney2k	ahh now
+@sonney2k	no
+ blackburn	??
+@sonney2k	forget it
+ blackburn	oops
+ blackburn	:D
+ blackburn	I love templates
+ blackburn	but actually lets rather copypaste
+@sonney2k	I don't. They increase compile time and issues
+@sonney2k	copy paste where?
+ blackburn	calloc/realloc/free
+ blackburn	they are powerful
+ blackburn	sonney2k: have you seen thing I wrote to wiking yesterday?
+ blackburn	 58 ????diffusion_matrix.array().cwiseQuotient((p*p.transpose()).array().pow(timesteps));
+ blackburn	sonney2k: ^ diffusion_matrix is a matrix, p is a vector, timesteps is an integer
+ blackburn	*NO* temporaries
+ wiking	mmm
+@sonney2k	that certainly is cool
+ blackburn	it is not only shorter but faster
+ wiking	i start to be very annoyed by fucking c/c++
+ wiking	takes too much time to get something tested
+ blackburn	write in processing!
+ blackburn	:0
+ blackburn	:)
+ wiking	hahaha
+ wiking	that shit i hate
+@sonney2k	wiking, or python :)
+ wiking	:>
+ wiking	yeah python
+ wiking	but some things i can have as lib function in c
+ wiking	there's no python eqv
+ wiking	and no bindings either
+ blackburn	write in java
+ wiking	java my ass
+ wiking	:>>>
+ blackburn	AbstractCollectionItemGeneratorParser
+ wiking	:D
+ wiking	indeed
+ wiking	AbstractCollectionItemGeneratorParserFactory
+ wiking	;)
+ wiking	never forget the factory
+ wiking	:D
+ blackburn	ConcurrentBlockingMulticollectionGenericQueue
+ wiking	java certainly feels like factory toolkit
+ wiking	you stand in the factory assembly line
+ blackburn	AbstractSingletonDispatchingMultipleFactoryBlockingCollectionGenericToolkitDependencyInjectionScheme
+ wiking	and code
+ wiking	like a monkey
+@sonney2k	java has its benefits
+@sonney2k	if only it were fast
+ blackburn	sonney2k: it is fast
+@sonney2k	sure
+@sonney2k	and no latencies
+@sonney2k	and no memory overhead
+ blackburn	function calls in java are as fast as in C++
+ blackburn	virtual I mean
+ blackburn	sonney2k: what is slow in java? :)
+ wiking	sonney2k: it's fucking fast
+ wiking	sonney2k: have u seen the comparison of languages/performance by google?
+ wiking	it's nicely shows that java is fast
+ wiking	but i hate the fucking GC
+ wiking	:D
+ wiking	i mean the one thing about java
+@sonney2k	wiking, you mean like 3x slower?
+ wiking	nono
+ blackburn	3x??
+ wiking	check it out
+ blackburn	come on
+ blackburn	it is not 1999 outside
+@sonney2k	then it would be 1000 times slower
+ blackburn	aha
+ blackburn	and std::vector is non-contiguous
+ blackburn	:D
+ wiking	:>>>>>>>
+ wiking	that's why you can always use
+ blackburn	sonney2k: if you have latencies you really should check you use caching properly
+ wiking	&std::vector<..>[0]
+ wiking	as a continous memory array
+ wiking	;)
+@sonney2k	haha in that paper
+@sonney2k	java has a 3.7 times higher memory footprint
+ blackburn	that's ok if you don't multiply matrices
+ blackburn	I'd 90% of software doesn't
+@sonney2k	and it is 5.8 times slower
+ wiking	gc
+ wiking	of course
+ wiking	and jvm
+ blackburn	5.8 slower on what?
+@sonney2k	https://days2011.scala-lang.org/sites/days2011/files/ws3-1-Hundt.pdf
+@sonney2k	c++
+@sonney2k	wiking, and that even minimal arrays[] are like std::vector
+@sonney2k	anyways I didn't say it has its benefits
+ blackburn	well no frameworks, no EE
+ blackburn	for C++
+@sonney2k	but for high speed stuff were even factor 2 counts it is unbearable
+@sonney2k	blackburn, yeah sure
+ blackburn	sonney2k: scala is even slower but ask mikio why he uses it :)
+@sonney2k	well it is convenient
+@sonney2k	like java
+@sonney2k	lots of third party libs
+@sonney2k	nice ides
+ blackburn	life is too short to write in C++
+ blackburn	:D
+@sonney2k	yeah that is why I use python :)
+ blackburn	I spent two years doing inplace malloc
+ blackburn	:D
+@sonney2k	blackburn, only because you didn't impl. proper templated sg_mallocs :(
+@sonney2k	we should be more lazy
+@sonney2k	but lazy at the right places
+ blackburn	we have such atmosphere I didn't ever thing about it
+ blackburn	think*
+@sonney2k	huh?
+ blackburn	well we are old-school C and I had no chance to really understand templates
+@sonney2k	all the templated stuff in shogun is there for a reason
+@sonney2k	to avoid code duplication
+ blackburn	after tapkee I do understand much more
+ wiking	doh motherfuckers
+ wiking	i can haz libqp
+ wiking	;)
+@sonney2k	blackburn, you talk about pluskid's templated labels or what?
+@sonney2k	we didn't really have anyone attempting to use templates for anything
+ blackburn	sonney2k: yeah so I had no chance :)
+@sonney2k	pluskids label draft didn't work - we needed to expose labels to the outside
+ blackburn	I am not talking about this concrete example
+@sonney2k	so %template and %rename would have been needed big times
+@sonney2k	and for everything else we can use it but only if we just use it *internally*
+ blackburn	oops I was wrong about no alloc
+ blackburn	:D
+@sonney2k	no temporaries you mean?
+ blackburn	yeahh
+ blackburn	but in other not-such-complex cases it works
+-shogungit:#shogun- [shogun] sonney2k pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/c9a8772920c0...dad0687edf4c
+-shogungit:#shogun- shogun/master 7d54bf9 Soeren Sonnenburg: next realease will be shogun 2.1.0
+-shogungit:#shogun- shogun/master dad0687 Soeren Sonnenburg: add templated sg_malloc functions
+@sonney2k	blackburn, could you please have a look at my sg_malloc stuff?
+ blackburn	righto
+ blackburn	looks good
+ blackburn	time to specialize!
+ blackburn	:D
+@sonney2k	blackburn, do you remember for what parts of the code you called the placement news?
+@sonney2k	I mean this will cause crashes
+ shogun-buildbot	build #647 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/647  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ blackburn	sonney2k: all things that use sgvector arrays
+ blackburn	I reverted sgstring things though
+@sonney2k	so we do one test for sgvector for now
+@sonney2k	blackburn, why that?
+@sonney2k	was sth still not working?
+ blackburn	I spend 2-3 days trying to fix serialization
+@sonney2k	oh yes - that simply is not implemented
+ blackburn	no success so get back to working
+@sonney2k	while this automagic refcounting stuff in sgvector is nice
+@sonney2k	it really causes pain in serialzation
+ shogun-buildbot	build #648 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/648
+@sonney2k	code there assumed to be able to write to some ptr
+ blackburn	yeah
+@sonney2k	but now that would really need a rewrite to work for any sg* datatype explicitly
+@sonney2k	anyways
+ blackburn	maybe when I get drunk celebrating new year
+ blackburn	I will attempt to fix everything
+ blackburn	:D
+@sonney2k	or when heiko gets his new job
+ blackburn	what's up with his job now?
+@sonney2k	(the better choice ;)
+ blackburn	I see him pretty rare here
+@sonney2k	template<> SGVector<uint8_t>* sg_generic_malloc(size_t len)
+@sonney2k	{
+@sonney2k	    return new SGVector<uint8_t>[len]();
+@sonney2k	}
+@sonney2k	like this right?
+ blackburn	 template<> SGVector<uint8_t>* sg_generic_malloc<SGVector<uint8_t>>(size_t len)
+ blackburn	 template<> SGVector<uint8_t>* sg_generic_malloc<SGVector<uint8_t> >(size_t len)
+@sonney2k	but with > >
+@sonney2k	(note the space)
+@sonney2k	k
+@sonney2k	blackburn, do we need that for SGMatrix too?
+ blackburn	no idea
+ blackburn	arrays of matrices.. humm
+@sonney2k	btw - I think we could even drop SGString and use SGVector there
+@sonney2k	but hey not a big thing
+ blackburn	what do you mean?
+@sonney2k	string == vector
+ blackburn	oh
+ blackburn	well
+ blackburn	it would require quite huge amount of time
+@sonney2k	blackburn, I am back to dependency hell
+@sonney2k	lib/memory.h now needs to include SGVector
+@sonney2k	.h
+ blackburn	hehe
+@sonney2k	which itself uses memory
+ blackburn	extern templates are not possible hah
+ blackburn	only in C++11
+-!- travis-ci [~travis-ci@ec2-23-20-88-236.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/3244580
+-!- travis-ci [~travis-ci@ec2-23-20-88-236.compute-1.amazonaws.com] has left #shogun []
+@sonney2k	blackburn, can I do the template specialization only in the .cpp file?
+@sonney2k	but then I still need SGVector in header right?
+ blackburn	I don't think you can
+@sonney2k	ahh no
+@sonney2k	should work
+@sonney2k	seems like it compiles
+ blackburn	with in .cpp specialization?
+@sonney2k	yeah
+@sonney2k	Q of course is if it works
+-!- ptizoom [~christian@85.210.94.175] has quit [Quit: Ex-Chat]
+-!- ptizoom [~christian@85.210.94.175] has joined #shogun
+@sonney2k	blackburn, please check again
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/3d23faabc887b3bc2082b8f17144a70ef3a3346b
+-shogungit:#shogun- shogun/master 3d23faa Soeren Sonnenburg: add specialization for SGVector and malloc/calloc/realloc/free
+@sonney2k	in principle the inplace allocations could go now
+@sonney2k	aswell as the ~ stuff
+@sonney2k	that should *significantly* simplify our code
+ blackburn	yeah
+@sonney2k	blackburn, so please test and be brave to remove the placement (de)constructors if it works
+ blackburn	will test
+ blackburn	not promise to remove it next days though :)
+@sonney2k	well test it at least
+@sonney2k	and tell us :)
+-!- ptizoom [~christian@85.210.94.175] has quit [Ping timeout: 252 seconds]
+-!- ptizoom [~christian@79-71-89-182.dynamic.dsl.as9105.com] has joined #shogun
+--- Log closed Sun Nov 18 00:00:17 2012

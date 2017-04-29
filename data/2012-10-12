@@ -1,0 +1,54 @@
+--- Log opened Fri Oct 12 00:00:17 2012
+ wiking	lol primal objective: -1000000000000000019884624838656.000000
+ wiking	:>
+ wiking	mosek mosek
+ shogun-buildbot	build #130 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/130
+-!- adoniscik [~emre@c-67-180-103-118.hsd1.ca.comcast.net] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Ping timeout: 246 seconds]
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- adoniscik [~emre@c-67-180-103-118.hsd1.ca.comcast.net] has quit [Ping timeout: 240 seconds]
+-!- Netsplit *.net <-> *.split quits: romi_, sonne|work
+-!- Netsplit over, joins: sonne|work, romi_
+-!- blackburn [~blackburn@188.168.4.211] has joined #shogun
+ blackburn	wiking: you've minimized it quite a lot already!
+-!- too [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ too	hi there
+ sonne|work	hi there too :D
+ too	blackburn: hi there, is that you who wrote the CAlphabet::translate_from_single_order" function ?
+ too	sonne|work: looking for some explanation about CAlphabet::translate_from_single_order
+ sonne|work	nope me
+ sonne|work	and gunnar IIRC
+ too	bitwise operations make me crazy :p
+ sonne|work	too efficient :DF
+ too	indeed
+ sonne|work	yeah. idea is basically to squeeze e.g. 2 characters into one byte etc
+ sonne|work	so for DNA you need just 2 bits for A,C,G,T
+ sonne|work	so you can have 4 characters encoded in 1 byte
+ too	I see. And max value seems to be 2^8 then alphabet of size > 256 seems not possible right now, right ?
+ sonne|work	yes it is for byte alphabets max
+ sonne|work	if you have bigger alphabets you shouldn't use StringByteFeatures but StringWordFeatures etc anyways
+ sonne|work	and then not do this kind of encoding but use the hashing trick
+ too	the hashing trick ?
+ sonne|work	yeah, compute a hash of your n-characters
+ sonne|work	and store just that
+ sonne|work	it is good enough for any real world app and very fast
+ too	is there any example of this proc with shogun ?
+ sonne|work	too: use murmurhash2
+ sonne|work	in lib/Hash
+ too	just to be sure: StringWordFeatures = CStringFeatures<uint64_t> and StringByteFeatures = CStringFeatures<char> ?
+ too	tanks for advice
+ sonne|work	not uint64_t but uint16_t
+ sonne|work	but you can use whatever is appropriate for your alphabet
+ too	allright, then in practice I can make shogun common string kernels work with stringfeatures from bigger alphabet (?)
+ sonne|work	difficulty depends on kernel you need though
+ too	spectrum kernel for example
+ sonne|work	I would suggest to implement DotFeatures for your feature type - that is the fastest possible way and you can use all linear SVMs (that then train using the spectrum kernel)
+ sonne|work	there are a couple of examples for that already Hashed* features
+ too	thanks
+-!- too [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- sonne|work [~sonnenbu@194.78.35.195] has quit [Quit: Leaving.]
+-!- adoniscik [~emre@c-67-180-103-118.hsd1.ca.comcast.net] has joined #shogun
+-!- heiko [~heiko@host86-177-112-51.range86-177.btcentralplus.com] has joined #shogun
+-!- romi_ [~mizobe@187.57.2.253] has quit [Remote host closed the connection]
+-!- heiko [~heiko@host86-177-112-51.range86-177.btcentralplus.com] has left #shogun []
+--- Log closed Sat Oct 13 00:00:17 2012

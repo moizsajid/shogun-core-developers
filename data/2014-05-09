@@ -1,0 +1,594 @@
+--- Log opened Fri May 09 00:00:40 2014
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Client Quit]
+-!- khalednasr [~k.nasr92@41.69.183.238] has quit [Quit: Leaving]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has quit [Quit: PirosB3]
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has quit [Quit: Leaving.]
+-!- pickle27 [~pickle27@192.0.136.118] has joined #shogun
+ shogun-buildbot	build #1 of nightly_fedora is complete: Failure [failed git]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_fedora/builds/1  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>, khalednasr <k.nasr92@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-cillcushvctzxqji] has quit [Quit: Connection closed for inactivity]
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+-!- pickle27 [~pickle27@192.0.136.118] has quit [Quit: Leaving]
+-!- thoralf [~thoralf@91-66-177-150-dynip.superkabel.de] has joined #shogun
+ thoralf	Hey GUIs
+ thoralf	(and CLIs)
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-hccjlqffpfaqjoji] has joined #shogun
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ lambday	HeikoS: hey!
+ lambday	HeikoS: check this out! https://github.com/lambday/shogun-linalg/blob/master/src/test.cpp#L31
+ lambday	HeikoS: it can take SGVector, eigen3 vectors viennacl vectors
+ lambday	all we gotta do is to call linalg::dot(a,b)
+ lambday	:d
+ lambday	and just reran the benckmark - mean 0.000004770994186, var 0.000000000000533
+ lambday	crazy fast!
+ lambday	1,000,000 sized vectors, mean over 1000 iterations
+-!- thoralf [~thoralf@91-66-177-150-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+@HeikoS	lambday: benchmark comparing against what?
+ lambday	HeikoS: the runtime alternative implementation that I had
+@HeikoS	what were the results there again?
+ lambday	the one I just pasted is for the new design we have
+@HeikoS	lambday: sorry for being confused, just read about kernels ;)
+ lambday	haha :D
+@HeikoS	how much is the difference?
+ lambday	HeikoS: pretty huge actually!
+@HeikoS	two orders of magnitude?
+ lambday	HeikoS: could you please try to run on your machine?
+@HeikoS	that seems weird, doesnt it?
+ lambday	more than that!
+ lambday	kind of...
+-!- thoralf [~thoralf@91-66-177-150-dynip.superkabel.de] has joined #shogun
+ lambday	HeikoS: could you please run this? https://github.com/lambday/shogun-linalg
+ lambday	(I pushed some changes recently - so please pull)
+@HeikoS	lambday: just started
+* lambday nailbiting
+@HeikoS	btw the compile command in the readme doesnt work, I have to put -l shogun to the end
+@HeikoS	heiko@heiko-ThinkPad-T440s:~/git/shogun-linalg$ ./test
+@HeikoS	mean 0.000005961656570, var 0.000000000005047
+@HeikoS	mean 0.000011920928955, var 0.000000000000000
+@HeikoS	is that the right compile command?
+@HeikoS	g++ -O3 -std=c++0x -I./src/ -I/usr/include/eigen3 -lshogun -o test src/test.cpp -l shogun
+ lambday	there will be 3 results
+ lambday	yes
+@HeikoS	lambday:  ah yeah, sorry
+@HeikoS	heiko@heiko-ThinkPad-T440s:~/git/shogun-linalg$ ./test
+@HeikoS	mean 0.000005961656570, var 0.000000000005047
+@HeikoS	mean 0.000011920928955, var 0.000000000000000
+@HeikoS	mean 0.000005771160126, var 0.000000000003758
+@HeikoS	so whats what there?
+ lambday	yeah!! see! same result
+ lambday	the first one is globally set backend (eigen3)
+ lambday	for dot
+ lambday	2nd one is for globally set backend (eigen3) for sum
+ lambday	3rd one is explicitly set backend eigen3 for dot
+@HeikoS	I see
+@HeikoS	cool
+ lambday	and now run this one (the earlier implementation that we had)
+ lambday	(runtime one)
+@HeikoS	I remember like only two zeros for the runtime one?
+@HeikoS	ok
+@HeikoS	what to add?
+ lambday	that's not in this code :D
+ lambday	just a sec
+@HeikoS	ah I see
+ lambday	HeikoS: https://gist.github.com/lambday/5d936749a1aa26e50beb
+ lambday	dot_factory_benckmark.cpp
+ lambday	compile it with g++ -std=c++0x -I/usr/include/eigen3 -lshogun dot_factory_benchmark.cpp
+@HeikoS	lambday: compiling ...
+ lambday	there would be a warning but ignore that :D
+ lambday	gonna take a while!
+@HeikoS	yeah saw it
+ lambday	how much?
+@HeikoS	running :)
+@HeikoS	seems to run on two cpu?
+ lambday	(sorry about the mistake in readme.. changing)
+@HeikoS	lambday: no worries
+ lambday	two?
+@HeikoS	50% of 4 cpu
+@HeikoS	maybe its another process
+@HeikoS	though doesnt look like
+ lambday	phew!
+@HeikoS	lambday: how log does it run?
+ lambday	err... 3-4 mins
+@HeikoS	aaah
+ lambday	(so you can imagine that the other one is indeed better)
+@HeikoS	I compile shogun in the back
+ lambday	:D
+@HeikoS	that takes lots of cpu
+@HeikoS	restarting
+ lambday	ohhh
+@HeikoS	haha
+@HeikoS	0.06 was the mean :)
+ lambday	0.06
+@HeikoS	lambday: but these new hashwell cpus are really bad when multiple things are running
+@HeikoS	my old thinkpad was way faster
+ lambday	430?
+@HeikoS	t440s
+ lambday	I am using 430
+@HeikoS	yeah
+@HeikoS	that has the old core 2 ones
+@HeikoS	the 440s is way slower
+@HeikoS	(though runs for 7 hrs :) )
+ lambday	with wifi on??
+ lambday	:-o
+@HeikoS	yes
+ lambday	whoa!
+@HeikoS	not with cpu intense stuff of course and not full screen brightness, but to work its fine
+@HeikoS	lambday: what do you got for the runtime example?
+@HeikoS	lambday: man
+@HeikoS	heiko@heiko-ThinkPad-T440s:~/git/shogun-linalg$ ./a.out
+@HeikoS	mean 0.063714141607285, var 0.000017001427689
+ lambday	ugly as shit!
+ lambday	:D
+@HeikoS	comparing to
+@HeikoS	mean 0.000005961656570, var 0.000000000005047
+@HeikoS	is that the same operation on the same or comparable data?
+ lambday	I wonder what the hell is going on there!!
+ lambday	just check the main function for a bit!
+@HeikoS	yeah did, looks the same right?
+ lambday	exactly same unless I missed some obvious thing
+ lambday	yeah!!!!
+ lambday	:-/
+@HeikoS	lambday: man!
+@HeikoS	so the only difference here are these v calls
+ lambday	should be!
+@HeikoS	lambday: that 10000
+@HeikoS	factor
+@HeikoS	*crazy*
+ lambday	I thought with modern arch it doesn't matter much
+ lambday	ohhh sorry sorry
+ lambday	you didn't compile the last one with -O3
+@HeikoS	ah
+ lambday	ah crap!
+* lambday nailbiting again!
+@HeikoS	lambday: phew
+@HeikoS	thats actually good
+@HeikoS	otherwise I would have been confused
+ lambday	now we'll see the actual difference
+@HeikoS	lambday:  ok
+@HeikoS	heiko@heiko-ThinkPad-T440s:~/git/shogun-linalg$ ./a.out
+@HeikoS	mean 0.001409775972366, var 0.000000014521595
+@HeikoS	so thats about 10 times faster
+ lambday	10 times??
+ lambday	no
+@HeikoS	but the difference is still 1000 right?
+ lambday	ohh yeah
+@HeikoS	to the compile time version
+@HeikoS	mmmh
+ lambday	yeah
+@HeikoS	lambday: I am still suspicious
+@HeikoS	I mean how can that be?
+ lambday	HeikoS: umm when I ran it earlier it was something around v
+@HeikoS	this means that one v-call costs as much as 1000 dot product operations
+ lambday	mean 0.000607864618301, var 0.000000004135587
+@HeikoS	so whats the difference on your system?
+@HeikoS	I mean anything from factor 10 makes sense to take the compile time pain (which is not that much) for
+-!- lambday_ [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+ lambday_	HeikoS: sorry got dc
+ lambday_	HeikoS: on my machine its still 500x
+ lambday_	how come this new code is ultra fast?
+@HeikoS	lambday_ weird
+ lambday_	I mean, as long as I was using dot<float, SGVector<float>>(a, b)
+ lambday_	it was like 10 times faster
+@HeikoS	what did you change?
+ lambday_	but just now I added this dot(a,b)
+ lambday_	wait let me show
+ lambday_	its kinda creepy
+ lambday_	HeikoS: https://github.com/lambday/shogun-linalg/blob/master/src/linalg/modules/redux.h#L18
+ lambday_	so it infers about t
+ lambday_	T
+ lambday_	and works with SGVector and Eigen3 vector both
+ lambday_	so say I have VectorXd a, b;
+ lambday_	I can use linalg::dot(a,b)
+ lambday_	(although I haven't pushed that code to the repo but locally tested)
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Ping timeout: 240 seconds]
+ lambday_	it inters about T in the runtime
+ lambday_	oops
+ lambday_	compile time!!
+-!- lambday_ is now known as lambday
+ lambday	infers*
+@HeikoS	lambday_ ehm what? could you repeat, I got confused :)
+ lambday	HeikoS: so I mean
+ lambday	linalg::dot(..) can work both with SGVectors as params and even Eigen3 vectors as params
+ lambday	so in shogun we'll be all over just be using linalg::dot
+ lambday	even with direct eigen3 vectors it would work
+ lambday	and so with viennacl vectors
+ lambday	so I don't need to know about how those backend dot calls look like - I'll just be using linalg::dot
+ lambday	talked with lisitsyn on this yesterday for a while
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-hccjlqffpfaqjoji] has quit [Quit: Connection closed for inactivity]
+@HeikoS	lambday: okay!
+@HeikoS	lambday: thats amazing in fact
+@HeikoS	very clean
+ lambday	HeikoS: yeah - so basically we drop the template arg requirement while calling these methods
+@HeikoS	lambday: so given the discussions with the others, what about pushing this into Shogun now? :)
+ lambday	yeah and super easy to use
+@HeikoS	lambday: does the compile time blow up this way?
+ lambday	HeikoS: I think I can - although wiking didn't seem very convinced
+ lambday	I personally find no issues with this - except a bit tricky code but super simple API
+ lambday	HeikoS: it will - but not exponentially
+@HeikoS	lambday: well the tricky code is inside shogun
+ lambday	yeah
+@HeikoS	lambday: ok
+ lambday	so I'll start sending patches then?
+@HeikoS	lambday: with wiking, did you discuss with him?
+ lambday	HeikoS: no I tagged him on a few posts but may be he's busy
+@HeikoS	lambday: we should totally listen to his concerns, but I am not completely sure currently what they are
+@HeikoS	lambday: did you talk about this?
+ lambday	HeikoS: as far as I understood - he was worried about compiled versions of shogun - say shogun-linalg-eigen3, shogun-linalg-viennacl
+ lambday	but we have that for eigen3 already
+ lambday	and those who wants to play the code should run cmake on their own
+@HeikoS	lambday: ah yes
+ lambday	not download from repo
+@HeikoS	lambday: so this is really an issue
+@HeikoS	shogun-binary
+ lambday	debian/rhel repo I mean
+@HeikoS	which backend do we choose?
+ lambday	so can't we just port eigen3 version for packaging like we do
+@HeikoS	lambday: yeah currently we also have that
+@HeikoS	lambday: so in fact if we just say global backend is eigen3, nothing changes
+ lambday	yeah
+@HeikoS	lambday: though the combinations are quite a few
+ lambday	HeikoS: with added flexibility - if you take the pain to build yourself :D
+@HeikoS	lambday: but we dont want to do that, have mybrid shogun binaries
+@HeikoS	lambday: what about builds?
+@HeikoS	lambday: we need to make sure that all work
+@HeikoS	lambday: so travis would go for shogun::eigen
+@HeikoS	and the buildbot could maybe do a GPU version
+@HeikoS	lambday: but the gpu stuff is not there yet
+ lambday	yeah buildbot should check all
+@HeikoS	lambday: buildbot has no GPU ;)
+ lambday	haha but opencl code works with cpu as well
+ lambday	so it can check whether it builds right
+@HeikoS	lambday: so the way I see this is that we make eigen3 the default and that replaces all existing binaries
+@HeikoS	and then we can add one more if we have say vienna cl
+@HeikoS	lambday: ah I see
+@HeikoS	wiking: ^
+ lambday	HeikoS: yeah that sounds good
+@HeikoS	so I think it doesnt blow up things too much
+@HeikoS	lambday, wiking we have more possibilities, but these did not even exist yet, so no need to put all of them in binaries,
+@HeikoS	and the main use case is easy, maybe one more
+@HeikoS	lambday: so I would say, go for the patches - yorkerlin will be thankful too
+ lambday	HeikoS: may be a feature branch
+ lambday	or develop?
+@HeikoS	lambday: and feel free to open an issue on github where you ask people to replace c++-loop dot products (or even eigen ones) with the new calls (entrance task). and put a (growing) list of supported operations
+@HeikoS	lambday: feature branch
+@HeikoS	lambday: for now
+ lambday	HeikoS: okay
+@HeikoS	lambday: then change a few things to use that ( I will help)
+ lambday	HeikoS: alright :)
+@HeikoS	lambday: and once say dot, sum, cholesky, SVD, eig is in, we can merge it
+@HeikoS	(with one used example each, passing unit tests, etc)
+ lambday	HeikoS: yeah that sounds better
+ lambday	HeikoS: so I mean how to I send PRs to other branches in upstream?
+ lambday	HeikoS: or I have to directly have to push to some upstream?
+ lambday	git push upstream feature_linalg
+@HeikoS	lambday: ehm
+@HeikoS	lambday: I think you should just push to your fork
+@HeikoS	a new branch in your fork
+ lambday	HeikoS: yeah alright
+ lambday	HeikoS: actually that's better
+ lambday	HeikoS: we can discuss there also
+@HeikoS	then you can send PRs against the same branch in upstream
+ lambday	okay!
+ lambday	alright
+@HeikoS	so same model, just that you dont touch/send PRs against develop but say linalg
+ lambday	alright
+@HeikoS	lambday: cool man!
+@HeikoS	lambday: just reading your type inference stuff
+ lambday	HeikoS: had to make it this way for eigen3.. takes a hell lot of template args :D
+ lambday	HeikoS: and viennacl also takes two
+ lambday	I gotta adjust it a bit for viennacl
+ lambday	brb with a cup of tea
+ lambday	back
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Ping timeout: 240 seconds]
+-!- HeikoS [~heiko@0541877d.skybroadband.com] has quit [Ping timeout: 240 seconds]
+ shogun-buildbot	build #117 of osx2 - python is complete: Failure [failed examples and unit tests]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20python/builds/117  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>, khalednasr <k.nasr92@gmail.com>
+-!- sonne|osx [~sonne@89.204.139.51] has joined #shogun
+-!- sonne|osx [~sonne@89.204.139.51] has quit [Quit: sonne|osx]
+-!- pickle27f [~pickle27@216.191.231.218] has joined #shogun
+-!- HeikoS [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@pat-191-250.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- yorkerlin [c0008056@gateway/web/freenode/ip.192.0.128.86] has joined #shogun
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has joined #shogun
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has quit [Client Quit]
+@wiking	thoralf: ping
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has quit [Client Quit]
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- Steve___ [32cbf032@gateway/web/freenode/ip.50.203.240.50] has joined #shogun
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+ Steve___	Can anyone help with an issue I'm having in Cygwin with shogun cmake?
+-!- HeikoS [~heiko@nat-8-102.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has quit [Quit: PirosB3]
+-!- Steve___ [32cbf032@gateway/web/freenode/ip.50.203.240.50] has quit [Quit: Page closed]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has joined #shogun
+-!- pickle27f [~pickle27@216.191.231.218] has joined #shogun
+-!- yorkerlin [c0008056@gateway/web/freenode/ip.192.0.128.86] has quit [Quit: Page closed]
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has joined #shogun
+-!- lisitsyn [~qdrgsm@188-122-242-81.clients.tlt.100megabit.ru] has joined #shogun
+ lisitsyn	lambday: hey
+ lisitsyn	I have seen this crazy thing :)
+ lambday	lisitsyn: hey!
+ lambday	lisitsyn: I was wishing that you would
+ lambday	lisitsyn: please check the 2nd one
+ lisitsyn	this is going complicated but it works and we are cool then
+ lisitsyn	let me check again
+ lambday	lisitsyn: please check the simplified one
+ lambday	lisitsyn: which just assumes that the first template arg is actually the scalar type
+ lambday	lisitsyn: currently I pushed this simplified one to my shogun-linalg repo and it works fine
+ lisitsyn	lambday: why int...?
+ lambday	lisitsyn: well I changed it later... for Eigen3 its int.. for ViennaCL its unsigned int...
+-!- thoralf [~thoralf@91-66-177-150-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+ lisitsyn	hmm can we forget about these variadic useless-for-us-things?
+ lisitsyn	I mean can we avoid declaring it int
+ lambday	so please check this https://github.com/lambday/shogun-linalg/blob/master/src/linalg/modules/redux.h
+ lisitsyn	ahh
+ lambday	lisitsyn: oh that too did
+ lambday	wait
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+ lambday	lisitsyn: https://github.com/lambday/shogun-linalg/blob/master/src/linalg/impl/redux.h#L31
+ lambday	but specialization has to be done
+ lisitsyn	hmm
+ lambday	(don't mind the `sum` method - I have updated only the dot
+ lisitsyn	okay let me think what can be improved
+ lambday	lisitsyn: yes please
+ lambday	the outcome is already sexy as fuck!! https://gist.github.com/lambday/5ef302d76b334517647e#file-test_vector2-cpp-L53 :D
+ lisitsyn	lambday: the thing is currently we'd have to put a shitload of code to do some say 'norm' operation
+ lisitsyn	yeah this is much better indeed
+ lambday	works seamlessly with eigen3 vectors as well
+ lambday	lisitsyn: well, just a bit copy paste
+ lambday	in impl we're going to add backend specific stuffs
+ lambday	and in module we're adding these wrappers
+ lisitsyn	lambday: Info thing is most confusing for me
+ lisitsyn	wish it was hidden somehow
+ lambday	lisitsyn: is there any way?
+ lisitsyn	lambday: I don't know yet
+ lambday	ummm
+ lambday	lisitsyn: you mean you wanna get rid of this totally - some soln which works for whichever extra info the backend vector class have?
+ lisitsyn	yeah
+ lisitsyn	just forget about all the 2nd and 3rd and whatever parameters
+ lisitsyn	can we do that?
+ lambday	lisitsyn: you can - you're the magician :D
+ lambday	but seriously I don't know how!
+ lambday	typedefs?
+ lisitsyn	lambday: no idea yet :) let me clone and play with your thing
+ lambday	lisitsyn: yes
+ lisitsyn	lambday: write makefiles ;)
+ lambday	lisitsyn: hah yeah :D
+ lisitsyn	default:
+ lisitsyn	  g++ -O3 -std=c++0x -I./src/ -I/usr/include/eigen3 -D<OPTIONS> -o test src/test.cpp -lshogun
+ lisitsyn	lambday: use this ;)
+ lambday	:D
+ lambday	OPTION should be changed
+ lambday	I was thinking of writing a cmakefile.txt but then thought its just a prototype :D
+ lisitsyn	haha
+ lisitsyn	lambday: did you know
+ lisitsyn	sometimes you can use
+ lisitsyn	T.......
+ lisitsyn	:D
+ lisitsyn	I didn't know about that
+ lambday	what the
+ lambday	what does it even mean?
+ lisitsyn	this is VERY variadic
+ lisitsyn	:D
+ lambday	man!
+ lambday	c++ is going crazy!
+ lisitsyn	lambday: I guess this is like variadic function arguments with variadic template parameters
+ lisitsyn	but it's gonna be quite advanced stuff
+ lambday	ah
+ lambday	phew!
+ lisitsyn	lambday: okay so I get the problem
+ lambday	lisitsyn: what is it
+ lisitsyn	tricky thing
+ lisitsyn	I mean int vs typename
+ lambday	lisitsyn: how to resolve this?
+ lisitsyn	lambday: never had this so don't know
+ lambday	lisitsyn: I tried for a few hours then gave up
+ lisitsyn	lambday: damn this is another edge where different semantics meet
+ lisitsyn	like template value parameter
+ lisitsyn	and template type parameter
+ lisitsyn	:D
+ lambday	yep!
+ lambday	I found no better soln than template <class Info,template <class,Info...> class Vector,class T,enum Backend,Info... I>
+ lambday	then specialize
+ lisitsyn	lambday: what about thing that obtains scalar from SGVector/Vector?
+ lambday	lisitsyn: that can always be done
+ lambday	lisitsyn: I did that
+ lisitsyn	won't it simplify things?
+ lambday	lisitsyn: but looked scary
+ lisitsyn	hmm do you have some gist of that?
+ lambday	oh no that too I have int...
+ lambday	lisitsyn: https://gist.github.com/lambday/9dbda55fa7af5d1a34cf
+ lisitsyn	lambday: I don't remember how C++ acts if you pass a templated type to non-templated typename
+ lisitsyn	is this a problem?
+ lambday	lisitsyn: as in passing SGVector<T> as some class Vector
+ lisitsyn	template <typename T> ..
+ lambday	lisitsyn: can be done
+ lisitsyn	but you call it with
+ lisitsyn	<SGVector<T>>
+ lisitsyn	does it work?
+ lambday	yep it does
+ lambday	let me check
+ lisitsyn	then we won't have these ints?
+ lambday	lisitsyn: yeah here https://github.com/lambday/shogun-linalg/blob/master/src/linalg/impl/redux.h#L37
+ lambday	umm
+ lisitsyn	lambday: I can't compile this last gist
+ lisitsyn	can you?
+ lambday	lisitsyn: yeah because I compiled it with changed SGVector :P
+ lambday	with the value_type in there
+ lisitsyn	ahh
+ lisitsyn	got it
+ lisitsyn	okay let me try to simplify that
+ lisitsyn	ohhhh
+ lisitsyn	ohhh
+ lisitsyn	now I see
+ lisitsyn	:D
+ lisitsyn	lambday: I stopped at specializing
+ lisitsyn	how to specialize without T :D
+ lambday	lisitsyn: trying locally too :D
+ lambday	lisitsyn: I don't think we can :D
+ lambday	nah man!
+ lambday	no hope!
+ lisitsyn	lambday: yeah I can't see any way
+ lambday	phew!
+ lambday	I could totally use a full bottle of rum right now
+ lisitsyn	lambday: once we need to put SGVector here
+ lisitsyn	we need its type again
+ lambday	lisitsyn: yeah!
+ lambday	was just going to change that then realized
+ lisitsyn	however
+ lisitsyn	ok let me try
+ lisitsyn	last chance
+-!- pickle27f [~pickle27@216.191.231.218] has joined #shogun
+ lambday	go for it!
+ lisitsyn	lambday: we are deffs walking on the edge of C++ :D
+ lambday	lisitsyn: :D
+ lisitsyn	last time I was on it I had a lot of compiler internal errors
+ lisitsyn	:D
+ lambday	lisitsyn: tell me about it - took hours to get this one compiling!
+ lisitsyn	lambday: I think I have an idea
+ lambday	tell me
+ lambday	!!
+ lisitsyn	lambday: but we need something else not type_traits
+ lambday	lisitsyn: what?
+ lisitsyn	lambday: something that can choose anything-of-X-or-Y
+ lisitsyn	like T::X or T::Y
+ lisitsyn	either defined of them
+ lisitsyn	see what I mean?
+ lambday	not exactly
+ lisitsyn	in eigen3 we have scalar
+ lisitsyn	and here we have value_type
+ lisitsyn	so we need a thing
+ lisitsyn	that can get either T::Scalar
+ lisitsyn	or T::value_type
+ lambday	if it was just two the IF<..> thing would have worked
+ lisitsyn	well maybe there is a way
+ lambday	lisitsyn: but even with that IF thing, how do you specialize?
+ lambday	recursive IF ...
+ lisitsyn	lambday: not clear for me yet
+ lisitsyn	lambday: I have 3 errors :D
+ lisitsyn	type/value mismatch
+ lambday	what did you change?
+ lisitsyn	a bunch of things
+ lambday	ah is there any online codepad sort of thing where we can share live code like google doc?
+ lisitsyn	basically I am trying to postpone real reference to SGVector<T> to the very last moment
+ lisitsyn	hmm yeah there is a bunch of them
+ lisitsyn	let me try some thing and we will see
+ lisitsyn	lambday: I give up :D
+* lambday cries
+ lisitsyn	lambday: it took me some variadic templates again
+ lisitsyn	no simplification
+ lambday	but if we can minimize the number of places its going to be used
+ lambday	lisitsyn: then that's better
+ lambday	lisitsyn: could you please show me your current code?
+ lisitsyn	lambday: it doesn't work still but yeah sure
+ lisitsyn	https://gist.github.com/lisitsyn/7ad1882f6be8e0ff4108
+ lisitsyn	the idea was to postpone declaration of Vector as template
+ lisitsyn	but not sure it works
+ lisitsyn	it seems it doesn't
+ lisitsyn	due to these additional template parameters
+-!- khalednasr [~k.nasr92@41.69.144.155] has joined #shogun
+ lambday	lisitsyn: yeah! impossible to specialize the type_traits now
+ lisitsyn	lambday: ok our last resort to simplify it is macro
+ lambday	aw, man!
+ lisitsyn	lambday: otherwise if someone put int instead of unsigned int
+ lisitsyn	or something like that by mistake
+-!- lisitsyn [~qdrgsm@188-122-242-81.clients.tlt.100megabit.ru] has quit [Ping timeout: 276 seconds]
+-!- parijat [671b082a@gateway/web/freenode/ip.103.27.8.42] has quit [Ping timeout: 240 seconds]
+-!- lisitsyn [~qdrgsm@5-28-31-38.clients.tlt.100megabit.ru] has joined #shogun
+ lambday	lisitsyn: I give up!
+ lambday	lisitsyn: can't be done!
+ lisitsyn	lambday: yeah same thing here
+ lambday	lisitsyn: ah
+ lambday	lisitsyn: so what about this macro thing?
+ lisitsyn	lambday: well you could try to reduce the verbosity of these arguments of death
+ lisitsyn	< ... > int whatever
+ lisitsyn	:D
+ lambday	that's tough too :D
+ lambday	one macro per method?
+ lambday	nooooo
+ lambday	lisitsyn: http://games.usvsth3m.com/2048/boobs-edition-21/ :P
+ lisitsyn	lambday: hah
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Ping timeout: 240 seconds]
+-!- abinash_panda [012616d8@gateway/web/freenode/ip.1.38.22.216] has joined #shogun
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+-!- thoralf [~thoralf@91-65-137-23-dynip.superkabel.de] has joined #shogun
+ abinash_panda	thoralf: Hi !
+ thoralf	Hey! ;)
+ thoralf	I'm just writing a reply.
+ thoralf	abinash_panda: Is it possible that the document you sent me is empty?
+ abinash_panda	thoralf: Ok
+ abinash_panda	thoralf: Yeah. I would be completing the document now. Just writing the document.
+ thoralf	abinash_panda: What's your local time right now?
+ abinash_panda	thoralf: Its 1:20 AM
+ thoralf	And what are your working hours?
+ thoralf	i.e. the hours you're planning to be awake and working on shogun ;)
+ abinash_panda	thoralf: I am fine with working from anytime between 6 AM upto 11 PM.
+ thoralf	6am - 11pm is 2:30am - 7:30pm here.
+ thoralf	My working hours are 10am-8pm; so it's 1:30pm-11:30pm your time.
+ thoralf	You're having lunch when I wake up. ;)
+ abinash_panda	thoralf: Yeah, I would be having a lunch when you wake up :)
+ thoralf	https://www.wolframalpha.com/input/?i=berlin+varanasi
+ thoralf	Bookmark it, so you know how late it's here.
+ abinash_panda	thoralf: I have bookmarked it.
+ abinash_panda	thoralf: You could see the temperature difference. Its really hot over here
+ thoralf	lol
+ thoralf	32?, that's pretty much.
+ abinash_panda	One of my friend did his summer internship at Berlin. He used to tell about the temperature over there. I envy you ;)
+-!- pickle27f [~pickle27@216.191.231.218] has quit [Ping timeout: 240 seconds]
+-!- pickle27_ [~pickle27@216.191.231.218] has joined #shogun
+ thoralf	abinash_panda: I know it's already late, it's okay if you answer my mail tomorrow.
+ thoralf	abinash_panda: Tomorrow we should talk about how we proceed, okay?
+ abinash_panda	thoralf: Yeah. Fine :)
+ abinash_panda	thoralf: I would try my best to be available during night :). I would be completing the schedule early in the morning.
+ thoralf	abinash_panda: I joining between 10am and 1pm.
+ abinash_panda	thoralf: Ok :)
+ thoralf	Good night!
+ abinash_panda	Good night
+-!- abinash_panda [012616d8@gateway/web/freenode/ip.1.38.22.216] has quit []
+-!- thoralf [~thoralf@91-65-137-23-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+-!- pickle27_ [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+-!- pickle27_ [~pickle27@216.191.231.218] has joined #shogun
+-!- pickle27_ [~pickle27@216.191.231.218] has quit [Quit: This computer has gone to sleep]
+-!- PirosB3 [~pirosb3@cpc4-newt31-2-0-cust631.newt.cable.virginm.net] has quit [Quit: PirosB3]
+ lisitsyn	khalednasr: hey
+ khalednasr	lisitsyn, hey
+ lisitsyn	khalednasr: good you asked :)
+ lisitsyn	I think Theo seems to be busy
+ khalednasr	yeah
+ lisitsyn	khalednasr: ok maybe we should just wait a bit
+ lisitsyn	khalednasr: if it is not critical we could postpone until he gets time
+ khalednasr	lisitsyn, yeah sure
+ lisitsyn	this is important as he is the domain expert here
+ lisitsyn	I can only say things about engineering :D
+ khalednasr	I'll start working on the class diagram meanwhile
+-!- lisitsyn1 [~qdrgsm@5-28-31-38.clients.tlt.100megabit.ru] has joined #shogun
+ lisitsyn1	khalednasr: back :D
+ lisitsyn1	khalednasr: ok what about monday as theo said?
+ khalednasr	lisitsyn1, I'm free Monday night
+ lisitsyn1	khalednasr: yeah works-for-me as well
+-!- lisitsyn [~qdrgsm@5-28-31-38.clients.tlt.100megabit.ru] has quit [Ping timeout: 276 seconds]
+-!- besser82 [quassel@fedora/besser82] has quit [Read error: Connection reset by peer]
+-!- chakri [srichakrad@gateway/shell/bnc4free/x-jsuuiymjsakguetl] has quit [Remote host closed the connection]
+-!- besser82 [quassel@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- khalednasr [~k.nasr92@41.69.144.155] has quit [Quit: Leaving]
+--- Log closed Sat May 10 00:00:42 2014

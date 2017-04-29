@@ -1,0 +1,185 @@
+--- Log opened Fri Feb 03 00:00:19 2012
+-!- n4nd0 [~n4nd0@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- dfrx [~f-x@inet-hqmc02-o.oracle.com] has joined #shogun
+-!- dfrx [~f-x@inet-hqmc02-o.oracle.com] has quit [Remote host closed the connection]
+-!- dfrx [~f-x@inet-hqmc02-o.oracle.com] has joined #shogun
+-!- in3xes [~in3xes@59.163.196.121] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes1 [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@59.163.196.121] has quit [Ping timeout: 248 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 252 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes1 [~in3xes@180.149.49.227] has quit [Ping timeout: 260 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 252 seconds]
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- policecar [~policecar@g225186186.adsl.alicedsl.de] has joined #shogun
+-!- dfrx [~f-x@inet-hqmc02-o.oracle.com] has quit [Remote host closed the connection]
+ policecar	hey hey
+ policecar	i'm trying to do model selection w/ cross-validation, LibSVMMultiClass and a Gaussian kernel in python. i've tried to follow your examples closely for starters but i always get a "parameter with name C does not exist" error.
+ policecar	i was wondering if i'm not instantiating the classifier correctly. how would i do that if i have a range of values rather than a single value per parameter?
+ blackburn	hey
+ policecar	hey
+ blackburn	too bad there is no heiko here
+ policecar	is he the guy to ask? ; )
+ blackburn	sure, he is an author of the CV stuff
+ policecar	d'you think he'll come by sometime?
+ blackburn	well let me try to help you
+ policecar	ok, kewl
+ policecar	should i paste code?
+ blackburn	yeah would be start point for us
+ policecar	the basic structure is the following
+ policecar	root = ModelSelectionParameters()
+ policecar	C = ModelSelectionParameters( "C" );
+ policecar	root.append_child( C )
+ policecar	C.build_values( 1, 11, R_EXP )
+ policecar	gauss_kernel = GaussianKernel()
+ policecar	kernel = ModelSelectionParameters( 'kernel', gauss_kernel )
+ policecar	root.append_child( kernel )
+ policecar	width = ModelSelectionParameters( 'width' )
+ policecar	width.build_values( 1, 2, R_EXP )
+ policecar	kernel.append_child( width )
+ policecar	classifier = LibSVMMultiClass()
+ policecar	feats = RealFeatures( features )
+ policecar	labels = Labels( labels )
+ policecar	splitting_strategy = StratifiedCrossValidationSplitting( labels, 10 )
+ policecar	evaluation_criterium = ContingencyTableEvaluation( ACCURACY )
+ policecar	hm, not the best place maybe, i'm being throttled due to flooding
+ blackburn	hoho
+ blackburn	:)
+ policecar	wrt classifier, i also tried adding the following lines, to no avail
+ policecar	classifier.set_C( 0.0, 1.0 )
+ policecar	classifier.set_kernel( gauss_kernel )
+ blackburn	there is set_C1 and set_C2
+ blackburn	but why set_kernel fails - no idea
+ policecar	i dunno if it fails, i just still get the same error msg that parameter named C doesn't exist
+ blackburn	ah
+ policecar	one could also try walking the reverse way... the error is thrown by Parameter.cpp if !own
+ policecar	and try to figure when and why that is the case
+ blackburn	I feel shame for having difficulties with toolbox where I am a developer
+ blackburn	:D
+ policecar	oh no
+ blackburn	hmm
+ policecar	but it's a complex collection
+ blackburn	policecar: are you subscribed to the mailing list?
+ policecar	no
+ policecar	i searched for the problem online, and got results from the mailing list i think but i'm not a subscriber
+ policecar	so far i communicated here and on github
+ blackburn	policecar: that would be nice if you subscribe and ask your question on the mailing list
+ blackburn	then others would find how to solve the problem later
+ policecar	alright
+ policecar	will do
+ blackburn	thanks
+ blackburn	I think Heiko will answer rather rapidly
+ blackburn	unfortunately have to go now
+ blackburn	see you later
+-!- puneetgoyal [~puneetgoy@115.240.80.18] has joined #shogun
+ policecar	k
+ policecar	cu
+ policecar	thx
+-!- blackburn [~qdrgsm@109.226.79.14] has quit [Quit: Leaving.]
+-!- puneetgoyal [~puneetgoy@115.240.80.18] has quit [Ping timeout: 248 seconds]
+-!- in3xes1 [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes_ [~in3xes@180.149.49.227] has quit [Ping timeout: 260 seconds]
+-!- in3xes1 [~in3xes@180.149.49.227] has quit [Ping timeout: 248 seconds]
+-!- policecar [~policecar@g225186186.adsl.alicedsl.de] has left #shogun []
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 255 seconds]
+-!- derp [811fd351@gateway/web/freenode/ip.129.31.211.81] has joined #shogun
+-!- derp [811fd351@gateway/web/freenode/ip.129.31.211.81] has quit [Client Quit]
+-!- Ram108 [~amma@219.64.147.192] has joined #shogun
+-!- eric [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric	hi
+-!- eric is now known as Guest54284
+ Guest54284	would like information for linking shogun library with cmake
+ Guest54284	anyone did this before ?
+ sonne|work	Guest54284: never tried but it is just -lshogun if you want to link against it
+ Guest54284	I am working on a C++ project for computer vision
+ Guest54284	using many C++ libraries
+ Guest54284	what advice could you tell me using shogun ofr calssification
+ Guest54284	my application is realtime
+ Guest54284	Should I use directly shogunlib (c++)
+ Guest54284	or better use modular interface ?
+-!- in3xes [~in3xes@210.212.58.111] has joined #shogun
+ sonne|work	most certainly libshogun from C++ is what you want
+ sonne|work	Guest54284: for prototyping you could try a modular interface (like python_modular)
+ sonne|work	it is very easy then to switch to C++ later (same syntax)
+ Guest54284	ok thanks a lot
+ Guest54284	great work btw
+ Ram108	sonney2k: hi i need some help regarding how to make a code shogun like
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+ Guest54284	hi again, got lots of undefined "clapack" when compiling some shogun example
+ Guest54284	however I compile and install shogun without any error
+-!- Guest54284 [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+-!- blackburn [~qdrgsm@109.226.79.14] has joined #shogun
+-!- eric [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ eric	hi there
+-!- eric is now known as Guest7912
+ blackburn	hi
+ Guest7912	question about shogun compilation
+ blackburn	shoot
+ Guest7912	I didn't manage to compile with numpy support
+ Guest7912	numpy + matplotlib installed
+-!- Ram108 [~amma@219.64.147.192] has quit [Quit: Ex-Chat]
+ blackburn	was it detected while configure?
+ Guest7912	but ./configure send NO python numpy support
+ blackburn	what is os you use?
+ Guest7912	ubuntu 64b
+ blackburn	then sudo apt-get install python-dev
+ Guest7912	done
+ blackburn	that's the required thing
+ Guest7912	I know
+ Guest7912	have reinstall completely
+ blackburn	so, is it 'NO' still?
+ Guest7912	yes that's why I'm here :p
+ Guest7912	crazy thing
+ blackburn	hmm
+ Guest7912	what difference give ./configure --target=amd64 ?
+ blackburn	well I've never used it..
+ blackburn	why do you want to specify target?
+ Guest7912	coz simple ./configure give host architecture i386 ..
+ blackburn	hmm
+ Guest7912	I just download the lastest git version
+ Guest7912	and same errors ..
+ Guest7912	should I write the output of ./configure here ?
+ blackburn	not here but please paste it somewhere
+ blackburn	strange that i386 was detected, shouldn't be, we will try to fix
+ Guest7912	lastest git code give me the right architecture x86_64
+ blackburn	ah then use latest :)
+ Guest7912	but still no python support detected
+ Guest7912	I just tried with another lib and no numpy support detected again ...
+ blackburn	wait a min
+ Guest7912	then smthg wrong with MY config
+ blackburn	could you please
+ blackburn	run python
+ blackburn	and enter
+ blackburn	import numpy
+ Guest7912	ImportError: /usr/lib/liblapack.so.3gf: undefined symbol: ATL_chemv
+ blackburn	hah ok
+ Guest7912	lapack-dev installed btw
+ Guest7912	so is libatlas-dev
+ blackburn	hmm something went wrong with numpy+atlas/lapack
+ blackburn	could you please remove libatlas
+ Guest7912	should I remove atlas ?
+ Guest7912	okok
+ blackburn	and try to import numpy once again
+ Guest7912	AttributeError: 'module' object has no attribute 'core'
+ blackburn	what is your ubuntu version btw?
+ Guest7912	ImportError: /usr/lib/liblapack.so.3gf: undefined symbol: ATL_chemv again
+ Guest7912	11.10
+ blackburn	did you install anything related by hand?
+ Guest7912	ffmpeg ?
+ blackburn	damn that's crazy
+ blackburn	so you told me you reinstalled things already
+ blackburn	right?
+ Guest7912	yep
+ Guest7912	I have to go dude sorry, (a girl) pb is still here, so I comin back soon!
+ Guest7912	thx anyway
+ blackburn	well now you know that is the problem
+-!- Guest7912 [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+-!- blackburn [~qdrgsm@109.226.79.14] has quit [Quit: Leaving.]
+ CIA-11	shogun: Soeren Sonnenburg master * r1778466 / (18 files in 5 dirs):
+ CIA-11	shogun: Merge pull request #366 from karlnapf/master
+ CIA-11	shogun: added print_modsel_params method (+7 more commits...) - http://git.io/4uiTEg
+-!- in3xes_ [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@210.212.58.111] has quit [Ping timeout: 252 seconds]
+--- Log closed Sat Feb 04 00:00:19 2012

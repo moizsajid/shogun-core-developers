@@ -1,0 +1,228 @@
+--- Log opened Fri Aug 31 00:00:17 2012
+-!- gsomix [~gsomix@178.45.74.12] has quit [Ping timeout: 245 seconds]
+-!- Netsplit *.net <-> *.split quits: blackburn, yoh_, audy, shogun-buildbot, @sonney2k, zxtx, sr___, naywhayare, wiking, CIA-52
+-!- Netsplit over, joins: blackburn, zxtx, audy, sr___, shogun-buildbot, @sonney2k, yoh_, CIA-52, naywhayare, wiking
+-!- gsomix [~gsomix@178.45.72.194] has joined #shogun
+ blackburn	okay
+@sonney2k	blackburn, so
+@sonney2k	the 1,1 hack is also suboptimal
+ blackburn	sonney2k: yes because it is needed for each field
+@sonney2k	blackburn, yeah
+@sonney2k	and btw the problem exists for sgvector too!
+ blackburn	I do not understand why not to make it (true)
+@sonney2k	and other referenced data
+ blackburn	by default
+ blackburn	what do we lose there?
+@sonney2k	we might just get some crashers
+ blackburn	why?
+@sonney2k	but if we do it we should do it for all SGReferencedData
+ blackburn	what should crash?
+@sonney2k	blackburn, it could be that we relied on this
+@sonney2k	e.g.
+@sonney2k	data pointer is set later
+@sonney2k	but that is not intended to be freed later
+ blackburn	it sounds like a hack
+ blackburn	do we really use it somewhere?
+@sonney2k	no idea
+@sonney2k	we can try
+ blackburn	I do not use it anywhre
+@sonney2k	but the real patch would just be to remove the 'false'
+@sonney2k	i.e.
+@sonney2k	SGMatrix() : SGReferencedData()
+@sonney2k	etc
+ blackburn	sonney2k: other option is to make serialization take care of ref counts
+ blackburn	it is kind of pain yet
+@sonney2k	yeah but that we should do later
+@sonney2k	when we do the CMap trick before serializing objects
+@sonney2k	for now - we can give it a try
+ blackburn	yes but no time for that now
+ blackburn	argh then we still can release
+ blackburn	:D
+@sonney2k	maybe it is more consistent anyways to have refcounting=true always
+ blackburn	yes it sounds more consistent for me
+@sonney2k	let me just do it...
+ blackburn	feel free, I can patch shogun only through github web now :)
+@sonney2k	blackburn, is there an online vim on github :D
+@sonney2k	blackburn, btw we don't have SGNDArray converted to referenced yet...
+ blackburn	not the terrible issue
+@sonney2k	and string / stringlist
+ CIA-52	shogun: Soeren Sonnenburg master * rbb0907c / (6 files in 2 dirs): enable reference counting by default (even in default constructors) for SG Datatypes - http://git.io/NRjBOg
+@sonney2k	blackburn, gsomix I finally managed to get the infrastructure going for the new website
+@sonney2k	I put it here for now http://shogun.7nn.de/
+@sonney2k	(to not kill the old one)
+ gsomix	sonney2k, cool
+ shogun-buildbot	build #390 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/390  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@sonney2k	blackburn, ^ see - some stuff seems to rely on that behavior
+@sonney2k	anyway I guess we should rather fix the new crashes than doing it the old way...
+@sonney2k	gsomix, can you help fixing these?
+ gsomix	sonney2k, hm, what's wrong?
+ blackburn	sonney2k: yes, lets rather fix these crashers
+ blackburn	gsomix: yeah we'd appreciate if you localize it ;)
+ gsomix	ok
+ CIA-52	shogun: Soeren Sonnenburg master * rfc5a120 / src/shogun/features/streaming/StreamingDenseFeatures.cpp : disable refcounting for 'current' vector in streaming features - http://git.io/DWJkNw
+ blackburn	sonney2k: parsebuffer should be fixed still
+@sonney2k	blackburn, ?
+@sonney2k	uhh!
+@sonney2k	CKNN::~CKNN()
+@sonney2k	{
+@sonney2k	    SG_FREE(m_train_labels.vector);
+@sonney2k	}
+@sonney2k	wtf?!
+ blackburn	hahahah
+ blackburn	yes
+ blackburn	WAT
+ blackburn	lol
+@sonney2k	blackburn, any idea why we even copy the train labels?
+@sonney2k	ahh we need it to classify later
+ blackburn	sonney2k: to subtract min label
+ blackburn	pretty idiot thing actually
+ shogun-buildbot	build #492 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/492  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ CIA-52	shogun: Soeren Sonnenburg master * r2535f44 / src/shogun/multiclass/KNN.cpp : remove free() in destructor (causing a double free) - http://git.io/ybQ7Lg
+@sonney2k	blackburn, what did you mean 'parsebuffer should be fixed still?'
+ blackburn	sonney2k: it handles vectors in pretty crappy way
+@sonney2k	blackburn, I really think you should file all the findings we just had as github issues
+@sonney2k	otherwise this is just forgotten
+ blackburn	sonney2k: I asked gsomix to fix that :)
+ blackburn	what else is to do?
+@sonney2k	blackburn, sparse stuff still fails - but I don't get it. do you have an idea?
+@sonney2k	==12560== Invalid read of size 8
+@sonney2k	==12560==    at 0xEA6ECB2: shogun::CSparseFeatures<double>::free_sparse_feature_matrix() (SparseFeatures.cpp:95)
+@sonney2k	==12560==    by 0xEA6F598: shogun::CSparseFeatures<double>::free_sparse_features() (SparseFeatures.cpp:104)
+@sonney2k	==12560==    by 0xEA6F5E3: shogun::CSparseFeatures<double>::~CSparseFeatures() (SparseFeatures.cpp:90)
+@sonney2k	==12560==    by 0xEA6F628: shogun::CSparseFeatures<double>::~CSparseFeatures() (SparseFeatures.cpp:91)
+@sonney2k	==12560==    by 0xE3AF4BC: shogun::CSGObject::unref() (SGObject.cpp:178)
+@sonney2k	==12560==    by 0xD5982B2: _wrap_delete_SparseRealFeatures (modshogun_wrap.cxx:326578)
+@sonney2k	==12560==    by 0xD845AA3: _wrap_delete_SparseRealFeatures_closure (modshogun_wrap.cxx:607465)
+@sonney2k	==12560==    by 0x47C781: frame_dealloc.14762 (in /usr/bin/python2.7)
+@sonney2k	==12560==    by 0x4B7C81: PyEval_EvalCodeEx (in /usr/bin/python2.7)
+@sonney2k	==12560==    by 0x4C77DB: function_call.15201.3848 (in /usr/bin/python2.7)
+@sonney2k	==12560==    by 0x4B1CD0: PyEval_EvalFrameEx (in /usr/bin/python2.7)
+@sonney2k	==12560==    by 0x4B7C67: PyEval_EvalCodeEx (in /usr/bin/python2.7)
+@sonney2k	==12560==  Address 0xb0bf3c0 is 0 bytes inside a block of size 96 free'd
+@sonney2k	==12560==    at 0x4C27D4E: free (vg_replace_malloc.c:427)
+@sonney2k	==12560==    by 0xD952BE0: shogun::SGSparseMatrix<double>::free_data() (SGSparseMatrix.h:103)
+@sonney2k	==12560==    by 0xD8D2184: shogun::SGReferencedData::unref() (SGReferencedData.h:157)
+@sonney2k	==12560==    by 0xD8FDB6A: shogun::SGSparseMatrix<double>::~SGSparseMatrix() (SGSparseMatrix.h:64)
+@sonney2k	==12560==    by 0xD5992BE: _wrap_SparseRealFeatures_get_sparse_feature_matrix (modshogun_wrap.cxx:326920)
+@sonney2k	==12560==    by 0x4B01FC: PyEval_EvalFrameEx (in /usr/bin/python2.7)
+@sonney2k	==12560==    by 0x4B7C67: PyEval_EvalCodeEx (in /usr/bin/python2.7)
+@sonney2k	==12560==    by 0x4C77DB: function_call.15201.3848 (in /usr/bin/python2.7)
+@sonney2k	==12560==    by 0x4B1CD0: PyEval_EvalFrameEx (in /usr/bin/python2.7)
+@sonney2k	==12560==    by 0x4B7C67: PyEval_EvalCodeEx (in /usr/bin/python2.7)
+@sonney2k	==12560==    by 0x55F2E2: run_mod.42411.3586 (in /usr/bin/python2.7)
+@sonney2k	==12560==    by 0x4555E4: PyRun_FileExFlags (in /
+ blackburn	huh
+ blackburn	sonney2k: yes
+@sonney2k	blackburn, ?
+@sonney2k	care to share?
+ blackburn	https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/features/SparseFeatures.cpp:373
+ blackburn	we need to inc ref counter initially
+ blackburn	it should be 2 on creation
+@sonney2k	    SGSparseMatrix<ST> sm=SGSparseMatrix<ST>(NULL, 0, 0, false);
+@sonney2k	so that is the fix right?
+ blackburn	actually yes
+ blackburn	could be the fix as well
+@sonney2k	blackburn, the other would require that we use SGSparseMatrix for SparseFeatures (to be put on todo)
+ blackburn	yes, but refcounter = 2 initially would work as well
+ blackburn	however it is a crappy solution :)
+ CIA-52	shogun: Soeren Sonnenburg master * r958ce8f / src/shogun/features/SparseFeatures.cpp : disable refcounting for sparse matrix - http://git.io/tn9YpQ
+@sonney2k	that should do it
+* sonney2k is hunting some food
+ blackburn	yeah
+ blackburn	I need to hunt for some tea
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 248 seconds]
+ shogun-buildbot	build #493 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/493  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+ shogun-buildbot	build #391 of deb2 - static_interfaces is complete: Failure [failed test cmdline_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/391  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #494 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/494
+@sonney2k	shogun-buildbot, I told you!
+ shogun-buildbot	What you say!
+ shogun-buildbot	build #392 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/392
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has joined #shogun
+-!- satanach [~satanach@137.Red-83-39-123.dynamicIP.rima-tde.net] has joined #shogun
+-!- satanach [~satanach@137.Red-83-39-123.dynamicIP.rima-tde.net] has left #shogun []
+@sonney2k	n4nd0, if you have some time - could you try to get all valgrind errors down to 0 in examples/libshogun ?
+ CIA-52	shogun: Soeren Sonnenburg master * r9e92392 / (3 files in 3 dirs): fix a couple of memory leaks in so example (mostly unnecessary SG_REF's - http://git.io/6kEr9A
+-!- Netsplit *.net <-> *.split quits: zxtx
+ blackburn	sonney2k: we have to wait for puffin's patch still
+-!- Netsplit over, joins: zxtx
+-!- CIA-52 [cia@198.71.88.9] has quit [Ping timeout: 244 seconds]
+-!- CIA-30 [cia@cia.vc] has joined #shogun
+ blackburn	sonney2k: we can't have eigen in h, right?
+ blackburn	*.h
+-!- Alberto [96a13b06@gateway/web/freenode/ip.150.161.59.6] has joined #shogun
+-!- Alberto [96a13b06@gateway/web/freenode/ip.150.161.59.6] has quit [Client Quit]
+-!- Alberto [96a13b06@gateway/web/freenode/ip.150.161.59.6] has joined #shogun
+-!- CIA-30 [cia@cia.vc] has quit [Ping timeout: 244 seconds]
+-!- CIA-27 [cia@cia.vc] has joined #shogun
+-!- CIA-27 [cia@cia.vc] has quit [Ping timeout: 244 seconds]
+-!- CIA-30 [cia@cia.vc] has joined #shogun
+-!- n4nd0 [53b32c87@gateway/web/freenode/ip.83.179.44.135] has quit [Quit: Page closed]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	naywhayare: hey! how is it going with the KNN thing?
+-!- Alberto [96a13b06@gateway/web/freenode/ip.150.161.59.6] has quit [Ping timeout: 245 seconds]
+-!- koen-shogun [~ksande@195.114.233.130] has joined #shogun
+-!- koen-shogun [~ksande@195.114.233.130] has left #shogun []
+ n4nd0	hi blackburn
+ blackburn	hey
+ n4nd0	have you heard about something called categorical prediction?
+ n4nd0	I'm reading a book about large margin methods for ASR and they present this
+ n4nd0	at first, I thought that it was going to be structured prediction
+ n4nd0	but I am reading the chapter were categorical prediction is introduced and I don't understand a sh**
+ n4nd0	:D
+ n4nd0	anybody there?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- hoijui [~hoijui@141.23.65.251] has joined #shogun
+-!- hoijui [~hoijui@141.23.65.251] has quit [Quit: Leaving]
+@sonney2k	blackburn, yes - no eigen in .h
+@sonney2k	blackburn, but usually that is not a problem (you can move any function code to -> .cpp)
+@sonney2k	blackburn, btw same thing holds for pthreads etc
+@sonney2k	blackburn, can you fix the memory leaks in the libshogun examples? there are quite many...
+@sonney2k	wiking, any thoughts on getting proper gtest/gmock detection?
+-!- blackburn1 [~blackburn@188.168.5.103] has joined #shogun
+@sonney2k	blackburn1 seen this:
+@sonney2k	<sonney2k> blackburn, yes - no eigen in .h
+@sonney2k	<sonney2k> blackburn, but usually that is not a problem (you can move any function code to -> .cpp)
+@sonney2k	<sonney2k> blackburn, btw same thing holds for pthreads etc
+@sonney2k	<sonney2k> blackburn, can you fix the memory leaks in the libshogun examples? there are quite many...
+ blackburn1	sonney2k: yeah thanks
+ blackburn1	sonney2k: about eigen - it is the issue with puffin's code  so it blocks us to release just now
+ blackburn1	he is working on  that
+ blackburn1	sonney2k: I will a little later
+ blackburn1	(fix)
+-!- CIA-30 [cia@cia.vc] has quit [Ping timeout: 244 seconds]
+-!- blackburn1 [~blackburn@188.168.5.103] has quit [Ping timeout: 252 seconds]
+-!- CIA-30 [cia@cia.vc] has joined #shogun
+-!- CIA-30 [cia@cia.vc] has quit [Ping timeout: 252 seconds]
+-!- CIA-33 [cia@cia.vc] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- blackburn666 [d55786d5@gateway/web/freenode/ip.213.87.134.213] has joined #shogun
+ n4nd0	blackburn666: 666? feeling diabolic? :P
+ blackburn666	n4nd0: exactly
+ n4nd0	blackburn666: let me ask you
+ n4nd0	I think something has gotten broken kind of badly in my computer
+ n4nd0	whenever I want to execute an example of libshogun I get
+ n4nd0	Segmentation fault (core dumped)
+ n4nd0	have you seen that before?
+ blackburn666	hmm not really
+ blackburn666	just any example fails?
+ n4nd0	I think that basically all
+ n4nd0	I just tried with basic_minimal
+ n4nd0	I am gooing to configure and compile from zero
+ blackburn666	I'd suggest to reinstall from the blank
+ n4nd0	do you mean ./configure, make clean, make and make install?
+ n4nd0	or something else?
+ blackburn666	yeah or even git clean -dfx if you have nothing unstaged for commit
+-!- CIA-33 [cia@cia.vc] has quit [Ping timeout: 244 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- CIA-27 [cia@cia.vc] has joined #shogun
+@sonney2k	blackburn, if you see n4nd0 tell him I need bern4rds help now...
+@sonney2k	blackburn666, ^
+-!- gsomix is now known as blackburnsqrt-1
+-!- blackburnsqrt-1 is now known as blackburnsqrt[-1
+ blackburnsqrt[-1	aww :(
+-!- blackburnsqrt[-1 is now known as blackburnsqrt-1
+-!- blackburnsqrt-1 is now known as gsomix
+-!- blackburn666 [d55786d5@gateway/web/freenode/ip.213.87.134.213] has quit [K-Lined]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [K-Lined]
+--- Log closed Sat Sep 01 00:00:17 2012

@@ -1,0 +1,64 @@
+--- Log opened Mon Nov 26 00:00:15 2012
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: Lost terminal]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ shogun-buildbot	build #185 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/185
+-!- ptizoom [~christian@79-71-89-182.dynamic.dsl.as9105.com] has quit [Quit: Ex-Chat]
+-!- ptizoom [~christian@79-71-89-182.dynamic.dsl.as9105.com] has joined #shogun
+-!- zxtx [~zv@ool-45750cfe.dyn.optonline.net] has joined #shogun
+@sonney2k	wiking, look at this mess http://shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/674/steps/compile%20libshogun/logs/warnings%20%2818%29
+@sonney2k	wiking, please fix these warnings
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/ec1f0883fbfa6855bdf1720c5a15fc0cc7a65447
+-shogungit:#shogun- shogun/master ec1f088 Soeren Sonnenburg: Misc cleanups...
+ shogun-buildbot	build #564 of deb2 - static_interfaces is complete: Failure [failed test octave_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/564  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+ shogun-buildbot	build #565 of deb2 - static_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/565
+ shogun-buildbot	build #186 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/186
+-shogungit:#shogun- [shogun] vigsterkr opened pull request #837: Fix warnings in libbmrm and libncbm (master...so-dev)  https://github.com/shogun-toolbox/shogun/pull/837
+-shogungit:#shogun- [shogun] vigsterkr opened pull request #838: Fix macro check in SGVector (master...master)  https://github.com/shogun-toolbox/shogun/pull/838
+-shogungit:#shogun- [shogun] sonney2k pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/ec1f0883fbfa...3dd2ab3d3843
+-shogungit:#shogun- shogun/master c87fcdd Viktor Gal: Fix warnings in libbmrm and libncbm
+-shogungit:#shogun- shogun/master 3dd2ab3 Soeren Sonnenburg: Merge pull request #837 from vigsterkr/so-dev...
+-!- gsomix [~gsomix@188.168.2.95] has joined #shogun
+ gsomix	hi
+@sonney2k	gsomix, hey there?
+@sonney2k	got time to party?
+@sonney2k	wiking, could you please try to compile on osx with HAVE_ATLAS set in .config to see if this would already work?
+ wiking	sonney2k: that will not work
+ wiking	sonney2k: i've tried... there are several function calls that are missing from the accelerator framework
+ wiking	that's why i've added that or macro in sgvector
+@sonney2k	wiking, ok then
+-shogungit:#shogun- [shogun] sonney2k pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/3dd2ab3d3843...329a232fc58e
+-shogungit:#shogun- shogun/master a084140 Viktor Gal: Fix macro check in SGVector...
+-shogungit:#shogun- shogun/master 329a232 Soeren Sonnenburg: Merge pull request #838 from vigsterkr/master...
+ gsomix	sonney2k, yep.
+ gsomix	sonney2k, I'm slowpoke... there is python3 support in matplotlib.
+-!- zxtx [~zv@ool-45750cfe.dyn.optonline.net] has quit [Ping timeout: 264 seconds]
+-!- blackburn [~blackburn@188.168.2.95] has joined #shogun
+ wiking	sonney2k: here?
+@sonney2k	wiking, ?
+ wiking	sonney2k: copy ctor of sgvector
+ wiking	i mean the problem is that what if i really want to make a copy of a vector?
+@sonney2k	wiking, clone()
+@sonney2k	we should really try to never copy by default
+@sonney2k	and create some clone() method if we want a clone
+@sonney2k	(that holds for all shogun objects)
+@sonney2k	wiking, ok?
+ wiking	sonney2k: okey
+ wiking	ok then i'll change a bit the memcpy part
+ wiking	i wonder if cblas_dcopy is faster than an optimizied memcpy
+ wiking	:>
+ blackburn	shouldn't be
+@sonney2k	wiking, did you ever benchmark memcpy? I highly question that this is faster than a simple for loop
+@sonney2k	for example I did a comparison with a 'highly optimized' sse based assembly version and gcc's default result with march=native was exactly as good
+-!- zxtx [~zv@ool-45750cfe.dyn.optonline.net] has joined #shogun
+-!- naywhaya1e [~ryan@spoon.lugatgt.org] has joined #shogun
+ blackburn	sonney2k: gcc's default version?
+ blackburn	they call sse stuff if possible I think
+-!- Netsplit *.net <-> *.split quits: naywhayare
+@sonney2k	blackburn, yeah but memcopy is likely to be compiled/optimized for some generic linux box
+@sonney2k	so a lib function is likely slower than a march=native tuned for loop - but hey I didn't try but I would be surprised if this is not the case
+@sonney2k	for example atlas in ubuntu is damn slow
+@sonney2k	compiling atlas locally gives you an order of magnitude speedup
+-!- naywhaya1e is now known as naywhayare
+--- Log closed Tue Nov 27 00:00:15 2012

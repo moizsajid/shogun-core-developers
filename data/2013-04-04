@@ -1,0 +1,885 @@
+--- Log opened Thu Apr 04 00:00:19 2013
+-!- heiko [~heiko@027fc813.bb.sky.com] has quit [Quit: Leaving.]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot_	build #343 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/343
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * 385bd08 / / (6 files): https://github.com/shogun-toolbox/shogun/commit/385bd08015902ab080f0e0f4eea36db4a850b9af
+ shogun-notifier-	shogun: really fail on buildbot when new tests fail
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: - require new data version with updated test-data
+ shogun-notifier-	shogun: - seed randomized examples for reproducible results
+ shogun-notifier-	shogun: - let tester display list of failed examples
+@sonney2k	blackburn, that should do it...
+ shogun-buildbot_	build #995 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/995  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- blackburn [~blackburn@83.234.54.216] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@n186-p150.kthopen.kth.se] has joined #shogun
+-!- lambday [b613104f@gateway/web/freenode/ip.182.19.16.79] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 260 seconds]
+-!- wiking [~wiking@info2k1.hu] has joined #shogun
+-!- n4nd0 [~nando@n186-p150.kthopen.kth.se] has quit [Quit: leaving]
+-!- n4nd0 [~test@n150-p177.kthopen.kth.se] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- heiko [~heiko@nat-170-240.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+ blackburn	sonne|work: libsvr?
+ blackburn	hah we never know what will fail
+ heiko	blackburn: thats my fault
+ heiko	what is failing?
+ heiko	blackburn:  ah I fucked up the data again :(
+ blackburn	heiko: hah alright
+ heiko	blackburn: where do I have to commit data again? which dir?
+ blackburn	heiko: shogun/data
+ blackburn	heiko: ah btw I need your comments on
+ blackburn	https://github.com/shogun-toolbox/shogun/issues/959
+ blackburn	heiko: ah and one more thing
+ blackburn	heiko: what do you think about the following syntax
+ blackburn	heiko: svm.parameter("width").set(5.0);
+ blackburn	OR
+ blackburn	svm.parameter(Width).set(5.0);
+ blackburn	the latter with enum could be easily implemented as I see
+ heiko	blackburn: for what?
+ heiko	in order to avoid getter/setter stuff?
+ blackburn	heiko: yes
+ heiko	very cool idea
+ heiko	much easier
+ heiko	better to implement etc
+ blackburn	heiko: but not only for that
+ heiko	I think we should use strings
+ heiko	since do not have to mess with enums,
+ heiko	thats always annoying in python
+ blackburn	heiko: yes I like strings but enum is easier to implement
+ heiko	blackburn: what means easier? for who?
+ blackburn	heiko: for us and users
+ heiko	lets do the thing thats easier for users
+ blackburn	parameter(DoubleParameterEnum) would return the thing
+ heiko	but why?
+ blackburn	that can be set only with double
+ blackburn	that's not that easy with string
+ heiko	blackburn: my fear is that one forgets to define those enums
+ blackburn	yeah I like strings too
+ blackburn	you know it is an anti-pattern
+ blackburn	but still
+ heiko	blackburn: as for the model selection syntax, we really have to think about all possible cases
+ heiko	this was a horrible pain to implement 2 years ago, since so many possible combinations
+ heiko	so whatever we use, lets keep all combinations in mind
+ blackburn	heiko: so you do hate getters too?
+ heiko	in the c++ examples, I covered most of the possible parameter trees
+ heiko	blackburn: yes totally
+ blackburn	brother
+ blackburn	:D
+ heiko	why do we have the parameter framework?
+ heiko	haha :D
+ blackburn	heiko: my idea is to store all parameters in map
+ heiko	blackburn, so your example in the issue are fine
+ heiko	but problems is sub-parameters
+ blackburn	heiko: like?
+ heiko	like sonney2k 's exam?ple
+ blackburn	no that's not a problem
+ blackburn	let me show how would I do that
+ heiko	blackburn: I like this syntax more
+ heiko	since it is more clear what hjappens
+ heiko	ok
+ blackburn	svm.parameter("C").as(ValuesSet).from([2,4])
+ blackburn	powerkernel.parameter("distance").as(ValuesSet).from([minkowski])
+ blackburn	etc
+ blackburn	heiko: which syntax do you like more?
+ sonne|work	heiko: failing libsvr makes sense - please commit to data and then do git add data and commit from the main repo and while you are at it please also regenerate for kernel_local_alignment_string_modular.py - I've changed that too
+ heiko	sonne|work: already did, I will add the kernel stuff
+ lambday	heiko, blackburn : hi :) morning
+ sonne|work	heiko: but did you git push to data
+ sonne|work	?
+ blackburn	lambday: hey
+ sonne|work	heiko: *and* to the src repo?
+ lambday	heiko, blackburn : I made some changes in that commit..
+ blackburn	heiko: yeah you probably forgot to update link in shogun
+ heiko	lambday: morning!
+ blackburn	git add data
+ lambday	now it uses amd for both older and newer eigen
+ blackburn	shogun/data I mean
+ blackburn	lambday: nice
+ heiko	blackburn, what is the procedure to update data commits? sorry for being stupid but I thought I have to push to data and thats it?
+ heiko	lambday: very good!
+ blackburn	heiko: no, go to shogun main repo now
+ lambday	heiko: tried various methods since last night... seems like extending simplicialcholesky to use some of its protected members was the easiest among all
+ heiko	lambday: did you write a test for both cases?
+ blackburn	and update data dir too
+ sonne|work	heiko: do you want the git lecture?
+ blackburn	heiko: data dir in *main* repo points to some 'revision'
+ blackburn	you updated the data but now you need to update that pointer in shogun *main* repo
+ sonne|work	heiko: git can also keep submodules in sync with the main shogun repo
+ heiko	blackburn: I see
+ lambday	heiko: ummm... only one test case is there... if shogun is configured with older eigen it will use older method, otherwise newer method... I tested with both and it gives same result
+ sonne|work	heiko: that is you need to commit the revision number of data thing by doing git commit data
+ sonne|work	from the main shogun repo
+ sonne|work	and then push
+ heiko	lambday: ok good then, I will merge soon!
+ heiko	sonne|work: let me try
+ sonne|work	heiko: now when you do git pull it will also update data to the required state
+ sonne|work	that helps to keep test data *AND* src code in sync
+ lambday	heiko: :) I'll start looking into the Sampling large sparse Gaussians issue then...
+ heiko	sonne|work:  so when I use the generator to generate a new test, git tells me no changes :(
+ heiko	from both data and shogun
+ sonne|work	heiko: for which .py files?
+ sonne|work	and in data you are on main branch?
+ sonne|work	master I mean
+ heiko	yes master
+ heiko	python generator.py ../../../examples/undocumented/python_modular/kernel_local_alignment_string_modular.py
+ sonne|work	heiko: no just do
+ sonne|work	generator.py kernel_local_alignment_string_modular.py
+ heiko	was that changed recently? ... might just be my bad memory
+ sonne|work	no was always like this
+ heiko	sonne|work: still git status doesnt contain the new files
+ sonne|work	heiko: and you are in the data/ folder?
+ heiko	the data repo or the data folder of the tests=?
+ sonne|work	shogun/data
+ heiko	yes
+ heiko	heiko@heiko-ThinkPad-T420:~/Desktop/shogun/data$ git status
+ heiko	# On branch master
+ heiko	nothing to commit (working directory clean)
+ sonne|work	and on master branch?
+ sonne|work	ok the please remove the file
+ heiko	the new data file?
+ sonne|work	data/tests/kernel_local_alignment_string_modular*
+ sonne|work	and see if git sees that there is a change
+ heiko	I am totally confused, I changed all these tests a while ago and had no problems with it
+ sonne|work	so is there one now?
+ sonne|work	if you remove that file?
+ heiko	yes that is detected
+ heiko	I create the new ones ...
+ heiko	git status still tells me deleted
+ heiko	the genereator does not create the file ...
+ heiko	let me check how I call it
+ sonne|work	python generator.py kernel_local_alignment_string_modular.py
+ sonne|work	but you need *latest* shogun compiled and python modular installed
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: lambday :master * 7ba436e / / (3 files): https://github.com/shogun-toolbox/shogun/commit/7ba436ec19ed7de4e95efe9fa0b70f30b18b576d
+ shogun-notifier-	shogun: added log-det method for sparse matrices in CStatistics
+ shogun-notifier-	shogun: Heiko Strathmann :master * dba5cb7 / / (3 files): https://github.com/shogun-toolbox/shogun/commit/dba5cb777caa18e0e0e9d3fe3ab85c8a714d2f3e
+ shogun-notifier-	shogun: Merge pull request #961 from lambday/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Added log-determinant method for sparse matrices in CStatistics class
+ heiko	sonne|work: that might be the reason, of course!
+ heiko	sonne|work: ok I have pushed to the data repo, will now commit the data version and push
+ heiko	lets see if it works
+ shogun-buildbot_	build #996 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/996  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-notifier-	shogun: Heiko Strathmann :master * d4f8bf8 / data: https://github.com/shogun-toolbox/shogun/commit/d4f8bf854b4e7527a268f83c6fa6177d538ed899
+ shogun-notifier-	shogun: new tests for libsvr and local alignment kernel
+ shogun-notifier-	shogun: Heiko Strathmann :master * 7987f7c / data: https://github.com/shogun-toolbox/shogun/commit/7987f7c8feb783d27f2b077871a33db4bee45f6a
+ shogun-notifier-	shogun: Merge pull request #964 from karlnapf/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: new data version
+ heiko	sonne|work, blackburn, that should be it right?
+ heiko	lambday: I merged your code, nice work!
+ lambday	heiko: thanks man.. :)
+ heiko	lambday: yes, sampling the large Gaussians is very similar, you have to permute the matrix, use the cholesky to sample, and then permute back
+ heiko	you might want to look into the Gaussian class
+ heiko	since it already can sample
+ heiko	but maybe we want another approach
+ heiko	dont know yet, feel free to suggest
+ lambday	heiko: as of now, CGaussian doesn't use SGSparseMatrix I guess.. let me check
+ lambday	hmm
+ heiko	lambday: exactly
+ heiko	sonne|work: so the integration tests now make the buildbot fail, nice!
+ heiko	sonne|work: what about adding python_modular to the travis at some point? at least one simple version
+ blackburn	heiko: yes should be right
+ heiko	and I also would like to see the warnings as errors for the travis (at least for libshogun and python)
+ heiko	but thats quite restrictive :D
+ heiko	anyway, have to do some work now ...
+ lambday	heiko: by the way, we'll be needing that SGSparseMatrix to eigen's SparseMatrix again... what about we add this method somewhere? blackburn asked to talk to sonney2k regarding this..
+ heiko	lambday: ah yes, I remember
+ heiko	it would be good to have tools for this, but yes, swig could cause trouble
+ heiko	I dont know what might happen, ask sonney2k aka sonne|work
+ lambday	heiko: hmmm...
+ heiko	lambday: what do you think about the CGaussian class?
+ lambday	heiko: I just had a look...
+ heiko	lambday: I think its the wrong place
+ heiko	these CDistribution classes have a different purpose
+ lambday	heiko: for this, we need to add a sample method (like the one that's already there), right? the one that uses cblas
+ lambday	heiko: what's the wrong?
+ heiko	so maybe, we just add sample_gaussian to CStatistics?
+ lambday	heiko: oh!
+ heiko	so what about a method to sample a multivariate Gaussian in CStatistics?
+ heiko	both for sparse and dense matrices
+ heiko	you give mean and covariance matrix and a number n
+ heiko	you get n samples from that Gaussian
+ heiko	you could start again with dense to get a feeling for the method
+ heiko	and then extend to sparse (permutation stuff again)
+ lambday	heiko: that sounds good...
+ heiko	for the sparse, you have to compute the chol of the permuted matrix, and have to permute the samples backwards
+ heiko	in the unit test, you can sample a few thousand points and then compute the empirical covariance matrix (we have that in shogun)
+ heiko	and then compare
+ lambday	okay..
+ lambday	heiko: let me see... will be shooting you with more stupid questions soon :D
+ heiko	lambday: there are no stupid questions :D
+ heiko	lambday: btw you could also replace the covariance method we have with an eigen3 call
+ heiko	that would be useful
+ lambday	covariance method in?
+ lambday	CStatistics?
+ shogun-buildbot_	build #703 of cyg1 - libshogun is complete: Failure [failed configure]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/703  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+ lambday	oh no!
+ heiko	lambday: thats cyg, dont worry
+ lambday	heiko: phew!
+ heiko	http://www.shogun-toolbox.org/buildbot/tgrid
+ lambday	hmm
+ heiko	lambday: http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/997/steps/compile%20python_modular/logs/warnings%20%287%29
+ heiko	could you rename the variables so that swig doesnt do this col_ row_ underscore thing?
+ heiko	and also please tell doxygen to ignore them
+ heiko	this way, we get rid of warnings
+ heiko	or maybe docunment them
+ lambday	heiko: you mean rename col_ to col etc?
+ heiko	lambday: swig renames col to col_ since col is reserved
+ heiko	lambday: that is a bit annoying, but can be avoided via different names
+ heiko	for example for SGVector, we use
+ heiko	vlen for the length
+ heiko	len is reserved
+ lambday	ohkay..
+ heiko	just be creative
+ heiko	and also tell doxygen to ignore or write comments with /** */
+ lambday	heiko: and how do I tell doxygen to ignore the "not documented" part
+ heiko	#ifndef DOXYGEN_SHOULD_SKIP_THIS
+ heiko	blackburn: right? ^
+ lambday	okay
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ heiko	lambday:  search the shogun code for this DOXYGEN_SOULD_SKIP_THIS to see how it works
+ heiko	wow snowstorm
+ heiko	london whether is really nice these days
+ lambday	heiko: snowstrom ... I've never seen one :(
+ heiko	lambday: not missing too much, its grey and cold ;)
+ heiko	my heating wasnt working for two days early this week
+ heiko	which  means about 5 degrees inside the flat
+ lambday	heiko: :D hard to imagine sitting here at 30 degree C
+ lambday	heiko: oh shit! :D
+ heiko	haha :) I remember sweating a lot when I was in mumbai
+ lambday	heiko: you were in mumbai? when?
+ heiko	lambday: yes about 2 years ago, I stayed a few days in colaba before traveling southwards
+ heiko	went on a backpack holiday in south-west india for about 4 weeks
+ heiko	quite different place to here ;)
+ lambday	heiko: aah.. :D
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+ lambday	and I'm dying to do so same in europe
+ heiko	blackburn: #ifndef DOXYGEN_SHOULD_SKIP_THIS is the way to avoid doxygen warnings right?
+ blackburn	heiko: yes
+ heiko	lambday: go ahead :)
+ lambday	okay I'm checking it then
+ heiko	lambday: probably easiest way is through academia I guess - many Indian guys here at UCL for example
+ heiko	lambday: I gotta do some work, will be back later today
+ lambday	heiko: hmm... alright
+ lambday	ciao man :)
+ blackburn	lambday: discussing ways to leave india? :)
+ lambday	blackburn: more of a trip :P
+-!- n4nd0 [~test@n150-p177.kthopen.kth.se] has quit [Ping timeout: 252 seconds]
+ lambday	could use some break from studies and do some other stuffs :D
+ lambday	may be next year
+ blackburn	lambday: what year of your studies it is?
+ lambday	blackburn: doing pre-final year in masters
+ blackburn	the same here hah
+ lambday	blackburn: ahan... planning for phd?
+ shogun-buildbot_	build #997 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/997
+ blackburn	lambday: I don't know - I am heavily involved into kind of industry
+ blackburn	and the only way to consider is phd in eu/usa not here
+ lambday	blackburn: same here.. will think of phd if I get a chance abroad.. where are you from basically?
+ blackburn	lambday: russia
+ lambday	blackburn: ah, vodka :D
+ blackburn	lambday: yes of course
+ lambday	:D
+ lambday	I started with it.. 8 years back.. never stopped :D
+ blackburn	lambday: oh we use it instead of milk
+ lambday	blackburn: lol man! :D
+ shogun-buildbot_	build #998 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/998  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has left #shogun ["Leaving"]
+-!- n4nd0 [~test@n150-p177.kthopen.kth.se] has joined #shogun
+-!- n4nd0 [~test@n150-p177.kthopen.kth.se] has quit [Client Quit]
+-!- n4nd0 [~nando@n186-p150.kthopen.kth.se] has joined #shogun
+ sonne|work	heiko: did you git push?
+ heiko	sonne|work yes, check github, both tests still fail :(
+ sonne|work	heiko: but github didn't build that yet AFAIK
+ heiko	ill force a rebuild
+ sonne|work	heiko: https://github.com/shogun-toolbox/shogun/commit/dba5cb777caa18e0e0e9d3fe3ab85c8a714d2f3e
+ sonne|work	that is the last commit
+ heiko	https://github.com/shogun-toolbox/shogun/commits/master
+ heiko	shows the data commit
+ heiko	and in data there is also the new file
+ heiko	The following tests failed! kernel_local_alignment_string_modular.py setting 1/2 kernel_local_alignment_string_modular.py setting 2/2 regression_libsvr_modular.py setting 1/2 regression_libsvr_modular.py setting 2/2
+ heiko	build 999 :)
+ blackburn	http://jobs.ebaycareers.com/silicon-valley/student-and-new-grad/jobid3365811-intern-software-engineer-ebay-jobs
+ blackburn	haha ebay wants something like coffin for liblinear
+ heiko	blackburn: thats awesome!
+ heiko	we will use that in shogun :)
+ blackburn	heiko: someone should consider applying for that job
+ blackburn	it looks like a week of work
+ blackburn	(if one messed with shogun)
+ heiko	maybe :)
+ sonne|work	blackburn, heiko well shogun can already do that all :D
+ heiko	I dont have time
+ heiko	sonne|work haha :D
+ heiko	we should tell them and ask for money
+ blackburn	sonne|work: yeah that looks stupid to make *research* on that
+ blackburn	nothing to research here
+ blackburn	I am quite surprised that ebay doesn't know that?
+ blackburn	how do they train classifiers?
+ sonne|work	I guess some SGD
+ n4nd0	blackburn: sometimes I think that everything has already been discovered
+ n4nd0	we just have to actually find which person has already done what we aim for :D
+ blackburn	n4nd0: yeah that's true
+ shogun-buildbot_	build #999 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/999  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+ sonne|work	heiko: could you please run tester.py locally with regression_libsvr_modular.py  and kernel_local_alignment_string_modular.py ?
+ sonne|work	^stuff still seems to fail on the bb
+ heiko	sonne|work, works locally
+ sonne|work	excellent!
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- kakashi_ [~kakashi_@nltk/kakashi] has quit [Ping timeout: 245 seconds]
+ lambday	heiko: let me know if I got this right - first I generate n random samples X, using CMath::randn_double(), then I compute the lower cholesky factor, L of the covariance matrix C, then I use it to compute Y = L * X, and then add mean to each of these to get the actual n samples..
+ heiko	lambday: yes
+ heiko	thats how it works
+ heiko	you will have to add the mean afterwards
+ heiko	lambday: oh wait
+ heiko	in fact, you have to create vectors from N(0,I) - so each element with randn
+ heiko	and then n of those vectors
+ heiko	what you can do is just to create a DxN matrix and fill all the elements with randn
+ heiko	and be careful about transposes since they sometimes mess up things, you should check for all this in the unit tests, but thats the way in pronciple
+ lambday	heiko: yes... hmm
+ heiko	sonne|work, so works locally, got it commited, but fails on bb??
+ lambday	heiko: btw I fixed the doxygen warnings.. renamed the variables as well..
+ lambday	why is build failing?
+ heiko	lambday: nice, would you send a PR just with that?
+ heiko	lambday: my fault, dont worry
+ lambday	heiko: hmm.. okay I am sending a PR
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: lambday :master * 1873193 / src/shogun/mathematics/Statistics.h: https://github.com/shogun-toolbox/shogun/commit/1873193a5b005c04b0feec5705836af7a556cb76
+ shogun-notifier-	shogun: fixed doxygen warnings in CStatistics
+ shogun-notifier-	shogun: Heiko Strathmann :master * 4c78dc8 / src/shogun/mathematics/Statistics.h: https://github.com/shogun-toolbox/shogun/commit/4c78dc81fc58a81592975015b4d1b6024013408a
+ shogun-notifier-	shogun: Merge pull request #965 from lambday/master
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fixed doxygen warnings in CStatistics, renamed a few variables
+-!- n4nd0 [~nando@n186-p150.kthopen.kth.se] has quit [Quit: leaving]
+ lambday	heiko: one more thing... say, we empirically calculate the covariance matrix of the samples, how do we compare it with the original one in the unit test?
+ heiko	make sure the norm of the difference is small
+ heiko	"sufficiently small"
+ heiko	same for the mean
+ lambday	ohkay... got it
+ lambday	hmmm
+-!- lambday_ [0e8b614f@gateway/web/freenode/ip.14.139.97.79] has joined #shogun
+-!- lambday [b613104f@gateway/web/freenode/ip.182.19.16.79] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot_	build #704 of cyg1 - libshogun is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cyg1%20-%20libshogun/builds/704
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has quit [Ping timeout: 260 seconds]
+@sonney2k	heiko, let me check if the stuff fails here too...
+ heiko	sonney2k: ok
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+@sonney2k	heiko, local alignment kernel works fine here
+ heiko	and libsvr?
+ heiko	sonney2k: I changed that too
+@sonney2k	exception - what did you do?
+@sonney2k	can't we have two libsvr examples instead of one?
+@sonney2k	I mean one for epsilon / C and one for C & nu?
+@sonney2k	heiko, ^
+ heiko	ah sorry
+ heiko	sonney2k: I changed the example to do both
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has joined #shogun
+ heiko	sonney2k: dont get this, but its safe to overwrite -- I added  unit tests which ensure that libsvr does the correct thing for epsilon and nu (compared against libsvm output)
+ heiko	so just create a new test file
+ heiko	dont know why mine doesnt work
+@sonney2k	heiko, no I meant it might be worthwhile to have each method in a separate file but IDK
+ heiko	sonney2k: why?
+ heiko	its just one line difference
+ heiko	and the unit tests should tell us which one of those fail
+ heiko	but we can also change it
+@sonney2k	heiko, looks like you didn't update the svr data
+@sonney2k	at least the output is once len == 100 and once 120
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+ heiko	sonney2k: https://github.com/shogun-toolbox/shogun-data/commit/3e9b26391c67e6d4291b3a5138d7a403778624c7
+ heiko	but I dont know, I always struggle with this
+ heiko	could you add a new one? was working before and I only changed example a bit
+@sonney2k	heiko, but did you git add data *afterwards*
+ heiko	yes
+ heiko	apparently not, but I thought I did
+@sonney2k	no you didn't
+ heiko	I committed this yesterday
+ heiko	and updated the data today
+@sonney2k	let me update the data ptr
+ heiko	cool thanks!
+@sonney2k	heiko, btw both works here just fine
+ shogun-buildbot_	build #1000 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1000
+ shogun-buildbot_	build #1001 of deb3 - modular_interfaces is complete: Failure [failed test ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1001  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- kakashi_ [~kakashi_@nltk/kakashi] has joined #shogun
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Quit: Page closed]
+-!- tp199911 [~thomas@109.129.173.247] has joined #shogun
+-!- tp199911 is now known as ZeThomad
+-!- ZeThomad is now known as ZeThomas
+ ZeThomas	hey sonney2k, blackburn
+ ZeThomas	I get weird stuff in my code
+ ZeThomas	it just almost immediately exits with code 139, no errors
+ ZeThomas	here's my code: http://pastebin.com/567TrTnx
+ ZeThomas	I had the same thing when I did a similar thing with a CustomKernel, but that got solved by no longer subclassing CustomKernel, as sonney2k pointed out
+ ZeThomas	But DirectorKernels are made for being subclassed, no? Or is there another way?
+ blackburn	ZeThomas: hey
+ blackburn	let me take a look
+ blackburn	ZeThomas: sorry have to go - will take a look tonight
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ ZeThomas	weird... I have implemented the exact same functionality in 2 different kernel setups, and yet the svm gives me different results...
+ ZeThomas	an F1-score on average of 3% more when using the CustomKernel that does the exact same thing as a LinearKernel with big feature vectors
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 256 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ shogun-buildbot_	build #1002 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1002
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- shogun-toolbox [~shogun@7nn.de] has quit [Ping timeout: 256 seconds]
+--- Log closed Thu Apr 04 19:01:21 2013
+--- Log opened Thu Apr 04 19:01:29 2013
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 12 nicks [1 ops, 0 halfops, 0 voices, 11 normal]
+-!- Irssi: Join to #shogun was synced in 6 secs
+-!- lambday_ [0e8b614f@gateway/web/freenode/ip.14.139.97.79] has quit [Ping timeout: 245 seconds]
+@sonney2k	ZeThomas, try to use a lower svm epsilon
+@sonney2k	say 1e-5
+@sonney2k	ZeThomas, a custom kernel internally uses just floating point precision while a standard kernel uses double
+@sonney2k	that could alreayd explain it
+ ZeThomas	sonney2k, but that implies that the less precise svm gives more precise predictions?
+@sonney2k	ZeThomas, sure why not
+ ZeThomas	how would you explain that?
+@sonney2k	ZeThomas, SVM just optimizes to eps precision
+@sonney2k	so choice of eps / C / and floating point precison all matter
+ ZeThomas	oh, so by lowering the eps in the LinearKernel, my results will be better aligned?
+ ZeThomas	or in the CustomKernel?
+@sonney2k	heiko, looks like you did commit data after all - we have one green happy bb!
+@sonney2k	ZeThomas, both
+ heiko	sonney2k: yes build 1002 worked :)
+@sonney2k	results should get more similar
+ heiko	sonney2k:  do you know what this weird warning in python modular means?
+@sonney2k	heiko, yes
+@sonney2k	some scipy module loading a .mat file
+@sonney2k	and it looks like it is not specifying some option
+ heiko	ok
+@sonney2k	which is supposed to be changed in future versions
+@sonney2k	let me fix it
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 245 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :master * d10e022 / examples/undocumented/python_modular/ (3 files): https://github.com/shogun-toolbox/shogun/commit/d10e022a23a26b51e73a217c5014f3cf8d879ee6
+ shogun-notifier-	shogun: fix a the loadmat warning
+@sonney2k	heiko, do you have git-flow available as a package?
+@sonney2k	I mean could you please install it
+@sonney2k	?
+@sonney2k	heiko, now that we have everything 'green' we should switch to the new dev model
+@sonney2k	so it would be good taht you have this thing around too
+-!- ZeThomas [~thomas@109.129.173.247] has quit [Ping timeout: 258 seconds]
+ heiko	sonney2k: gitflow?
+@sonney2k	heiko, you are on ubuntu right?
+ heiko	installed
+@sonney2k	heiko, http://labs.grupow.com/blog/2011/07/05/getting-started-with-git-flow
+@sonney2k	it is this scheme http://nvie.com/posts/a-successful-git-branching-model/
+ heiko	ah nice I see
+@sonney2k	for each feature we work on feature branches
+@sonney2k	*directly*(
+@sonney2k	and then merge stuff down to the development branch
+ heiko	yes thats good
+@sonney2k	git flow helps us doing that all easily
+ heiko	nice
+ heiko	I will check it out ...
+@sonney2k	heiko, jsut type git flow help
+ heiko	sonney2k: I will check it out later, currently busy with something, maybe lets do the switch on the weekend or next week?
+@sonney2k	heiko, ASAP I would say
+@sonney2k	when wiking/blackburn are around
+ heiko	sonney2k: agreed
+ heiko	lets just wait until everyone is around and then do it spontaneously
+@sonney2k	master will become less polluted
+ heiko	I will be around on the weekend
+ heiko	sonney2k: yes, that will be very useful
+ heiko	I am also keen on activating python on travis, will also help a lot
+@sonney2k	heiko, well most important is to have our buildbot infrasturcture
+ heiko	sonney2k: I am keen on this since it prevents us from being lazy
+@sonney2k	travis is not that helpful IMHO
+ heiko	so warnings/errors dont add up
+@sonney2k	it is doing lots of false stuff
+ heiko	you only merge if it succeeds
+ heiko	since we sometimes ignore new warnings in merges
+ heiko	same for new errors
+ heiko	but agree buildbot more useful
+ heiko	but travis is also very useful for gsoc
+ heiko	when you dont write code on your own
+@sonney2k	heiko, well I am pretty happy with the infrastructure now
+ heiko	sonney, yes its getting better and better :)
+@sonney2k	heiko, we had all these integration tests last year too but we didn't turn them on
+@sonney2k	in the buildbot
+@sonney2k	so that is why so much broke
+@sonney2k	now that we have everything in place it should be harder(tm) to break stuff
+@sonney2k	in addition, lots of shogun's internals are more developed now so we won't have huge changes like we had the gsoc's back
+ heiko	sonney2k, yes, agreed. I really like the approach of making things that work waterproof
+ heiko	so whenever something breaks, we will notice
+ heiko	I guess next step is to improve documentation :)
+@sonney2k	heiko, for git flow watch this http://buildamodule.com/video/change-management-and-version-control-deploying-releases-features-and-fixes-with-git-how-to-use-a-scalable-git-branching-model-called-gitflow
+@sonney2k	heiko, and then this how to do it with git flow http://labs.grupow.com/blog/2011/07/05/getting-started-with-git-flow
+@sonney2k	it is really easy...
+@sonney2k	heiko, so I think we can switch right away
+-!- blackburn [~blackburn@109.226.90.103] has joined #shogun
+@sonney2k	blackburn, we are greeeen!
+ blackburn	sonney2k: heh nice
+@sonney2k	blackburn, lets switch to git flow !
+@sonney2k	blackburn, do you already have git-flow installed?
+ blackburn	sonney2k: no
+@sonney2k	blackburn, then please apt-get install it
+ blackburn	sonney2k: I didn't know about that tool (ashamed)
+@sonney2k	blackburn, read here <sonney2k> heiko, for git flow watch this http://buildamodule.com/video/change-management-and-version-control-deploying-releases-features-and-fixes-with-git-how-to-use-a-scalable-git-branching-model-called-gitflow
+@sonney2k	<sonney2k> heiko, and then this how to do it with git flow http://labs.grupow.com/blog/2011/07/05/getting-started-with-git-flow
+ blackburn	sonney2k: alrigh
+ heiko	guys, sorry I cannot stay much longer today
+@sonney2k	heiko, no worries we will keep you updated
+ blackburn	heiko: you won't forgiven
+ blackburn	be*
+@sonney2k	blackburn, what I don't know is whether everyone has to run git flow init
+ blackburn	sonney2k: what does it do exactly?
+@sonney2k	blackburn, it sets up the git flow layout
+ blackburn	*exactly* which commands?
+@sonney2k	with feature branches, development branch main (aka master) branch etc
+@sonney2k	git flow init -d
+ blackburn	checking sources
+@sonney2k	blackburn, I would very much love to go with the defaults
+ blackburn	sonney2k: I think it is enough to do init only once
+ blackburn	according to what I see in sources of gitflow
+@sonney2k	blackburn, you mean either of us can do it?
+ blackburn	sonney2k: yes probably - it creates branches
+@sonney2k	blackburn, do you have local branches except master on your clone?
+ blackburn	no
+ blackburn	sonney2k: can we drop some branches btw?
+@sonney2k	blackburn, I mean on the shogun toolbox clone
+ blackburn	sonney2k: yes I got you - I don't have any local branches
+@sonney2k	not shogun clone under your github account
+@sonney2k	OK
+@sonney2k	blackburn, then please do git flow init -d in that
+ blackburn	sonney2k: I am concerned with some stuff here
+@sonney2k	shoot
+ blackburn	sonney2k: there is such thing as feature publish
+ blackburn	I think we are not going to use remotes right?
+ blackburn	except main remore
+@sonney2k	blackburn, maybe not but if git flow creates remote branches for features why not
+@sonney2k	it doesn't hurt
+ blackburn	sonney2k: okay let me clean my repo and init
+ blackburn	sonney2k: ahh I was bored in bus and came with another api thing
+ blackburn	sonney2k: data.features(1,20).disable()
+@sonney2k	blackburn, actually if I understand git correctly I could delete a local branch
+@sonney2k	while keeping the remote branch
+ blackburn	sonney2k: yes
+ blackburn	why not
+@sonney2k	because I have this stupid shogun_2.1.0 branch here
+@sonney2k	but I dont' need it
+ blackburn	but it will appear on git pull
+ blackburn	again
+@sonney2k	I only needed it to push to our 3 remotes
+@sonney2k	blackburn, no only when I explicitly pull it or?
+* sonney2k tries
+ blackburn	sonney2k: if you do just 'git pull'
+ blackburn	not specifying any branch
+ blackburn	it will fetch it for you again I think
+@sonney2k	git branch -d shogun_2.1
+@sonney2k	error: The branch 'shogun_2.1' is not fully merged.
+@sonney2k	If you are sure you want to delete it, run 'git branch -D shogun_2.1'.
+@sonney2k	ugh
+ blackburn	I did git flow init -d
+@sonney2k	blackburn, did that go through?
+@sonney2k	what branches do you have now?
+@sonney2k	git branch
+ blackburn	Production and integration branches should differ.
+@sonney2k	haha
+ blackburn	I think defaults are not ok for us
+ blackburn	okay where do we develop *next release*?
+ blackburn	sonney2k: unstable?
+@sonney2k	master
+@sonney2k	or develop?
+@sonney2k	I am confused by the wording
+ blackburn	sonney2k: lets get back to the scheme
+ blackburn	sonney2k: http://habrastorage.org/storage/4bf7e68c/49e29c35/3a01bd6b/782a1be3.png
+@sonney2k	develop then
+ blackburn	sonney2k: if my understanding is correct - master is to store tags of releases
+ blackburn	develop in what we do for next release
+ blackburn	uhm I am confused
+@sonney2k	yeah I agree
+@sonney2k	develop == for next release
+ blackburn	sonney2k: it didn't create anything
+ blackburn	how does it work?
+@sonney2k	blackburn, did it run through?
+ blackburn	yes
+@sonney2k	I mean did you answer all the questions?
+ blackburn	sonney2k: I told it to use 'dev'
+@sonney2k	5 or so
+@sonney2k	and then
+@sonney2k	?
+ blackburn	I kept feature/release/etc by default
+ blackburn	does it store some config for that?
+@sonney2k	maybe it is a local thing after all?
+@sonney2k	looks like it
+@sonney2k	git config -l
+@sonney2k	it should list gitflow
+@sonney2k	then let me run git flow init too
+ blackburn	ohh yes
+ blackburn	I see
+@sonney2k	blackburn, so we use dev right?
+@sonney2k	not devel?
+ blackburn	sonney2k: it requires existent branch
+@sonney2k	blackburn, I am asking because we have some dev branch crurently
+ blackburn	sonney2k: lets kill dev
+ blackburn	and create it once again
+@sonney2k	and it is urgs
+@sonney2k	OK
+@sonney2k	please kill it then
+@sonney2k	so we will have master/dev/feature/hotfix/release right?
+ blackburn	sonney2k: lets call it develop
+@sonney2k	yes
+@sonney2k	lets do it
+ blackburn	to not confuse with an old one
+ blackburn	sonney2k: oh I start to realize the power of that thing
+ blackburn	sonney2k: merging of hotfixes to releases sounds powerful
+@sonney2k	blackburn, please prefix tags with shogun_
+ blackburn	sonney2k: ok
+ blackburn	sonney2k: can't we use only one git remote?
+ blackburn	sonney2k: may be some cron script that pushes it to sg and google
+ blackburn	I am afraid of breaking something if they go out of sync
+ blackburn	sonney2k: pull
+@sonney2k	blackburn, probably - if you have time - please experiment with sth
+@sonney2k	blackburn, so do I have to run git flow too?
+ blackburn	sonney2k: yes
+@sonney2k	or shall I just git pull -a now?
+ blackburn	sonney2k: git pull to fetch new develop branch
+ blackburn	and git flow init -f to select it for now
+ blackburn	sonney2k:
+ blackburn	gitflow.branch.master=master
+ blackburn	gitflow.branch.develop=develop
+ blackburn	gitflow.prefix.feature=feature/
+ blackburn	gitflow.prefix.release=release/
+ blackburn	gitflow.prefix.hotfix=hotfix/
+ blackburn	gitflow.prefix.support=support/
+ blackburn	gitflow.prefix.versiontag=shogun_
+ blackburn	sonney2k: ^ that's how my git flwo conf looks like
+-!- heiko [~heiko@nat-170-240.internal.eduroam.ucl.ac.uk] has left #shogun []
+@sonney2k	blackburn, so now we can just do git flow feature foo
+@sonney2k	work on this finish this
+@sonney2k	and done?
+@sonney2k	I am not sure how the push/pull stuff works
+@sonney2k	and how do we work with students from now on?
+@sonney2k	they all send PR's to dev right?
+ blackburn	sonney2k: yes
+ blackburn	sonney2k: from feature/something
+@sonney2k	and they work on their own feature branches right?
+@sonney2k	ok
+ blackburn	I am not sure about pushing
+@sonney2k	ohh I like it
+@sonney2k	when we want to do a release
+@sonney2k	we can just start a release branch
+ blackburn	yes
+@sonney2k	and then do all the fixing in there
+@sonney2k	while we can still go wild in dev
+ blackburn	sonney2k: I am going to check the pushing thing
+@sonney2k	blackburn, I think you just do git push on the branch you are on to the branch you want to push
+@sonney2k	to
+ blackburn	sonney2k: okay when you git flow feature start
+ blackburn	it creates a branch
+@sonney2k	so it changed FETCH_HEAD to develop here
+ blackburn	you commit some things
+@sonney2k	yeah but that is local right?
+ blackburn	yes sure
+@sonney2k	so only when you wnat to work with sb on this
+@sonney2k	you push it
+ blackburn	git flow feature finish *merges and deletes*
+@sonney2k	to create a new remote branch
+@sonney2k	yes
+@sonney2k	so you have a single clean commit
+ blackburn	sonney2k: only one commit?
+ blackburn	does it stack it?
+@sonney2k	blackburn, I am only guessing
+ blackburn	checking
+ blackburn	sonney2k: no
+ blackburn	it puts all commits
+ blackburn	and merge commit too
+ blackburn	it is possible to stack them too I think
+ blackburn	with some patching may be
+@sonney2k	blackburn, the good thing is that you can do as many git reset <id> as you want
+@sonney2k	so you /can/ cleanup your local feature branch
+@sonney2k	to not have crappy / build breaking etc stuff in there
+ blackburn	sonney2k: I'd like to have kinda selective rights for branches
+@sonney2k	yeah no one can push to master...
+@sonney2k	except you or os
+@sonney2k	so
+ blackburn	sonney2k: then we would allow commits for everyone (in feature branches)
+@sonney2k	blackburn, well then our repo would be spammed
+ blackburn	sonney2k: no, for students + us I mean
+@sonney2k	yes sure
+@sonney2k	blackburn, actually we don't need that for students - they can work on their own fork
+@sonney2k	and from there do the PRs
+@sonney2k	issue with git flow is that this doesn't go very well with github
+@sonney2k	so PR's are some kind of alternate concept
+@sonney2k	and other remote forks
+@sonney2k	blackburn, please announce on the mailinglist that we changed the dev model
+@sonney2k	and add the steps
+@sonney2k	maybe we need to add some page on our website where we document the steps
+@sonney2k	(or at least our README.developer)
+ blackburn	sonney2k: ok
+@sonney2k	blackburn, what is left to do for that is - what do we do with the buildbot?
+@sonney2k	should it form now on work on develop?
+ blackburn	sonney2k: yes as master is to be updated only a few times per year may be :)
+@sonney2k	and actually master will just be some state we had in develop / the release branch
+ blackburn	yes
+@sonney2k	the only issue I see is that we would want to have a buildbot for release branches
+ blackburn	sonney2k: why?
+@sonney2k	blackburn, tomorrow gsoc will be announced right?
+ blackburn	sonney2k: oh I am afraid 7
+ blackburn	April 8: 19:00 UTCList of accepted mentoring organizations published on the Google Summer of Code 2013 site.
+@sonney2k	blackburn, because one directly commits to the release branch trying to stabilize things
+@sonney2k	puh
+@sonney2k	so we still have time
+ blackburn	monday
+ blackburn	sonney2k: for what?
+@sonney2k	blackburn, recall our todo?
+@sonney2k	1) get build to work
+@sonney2k	2) new dev model
+@sonney2k	3) update website
+ blackburn	sonney2k: oh this year gsoc is so sloooow
+@sonney2k	4) announce workshop
+@sonney2k	->then get accepted (please!!)
+ blackburn	interim is 8-22 May
+ blackburn	crazy!
+@sonney2k	blackburn, how was it last year
+ blackburn	ohh month back or even more
+@sonney2k	I totally forgot...
+ blackburn	sonney2k: it started officially in early may
+@sonney2k	yeah I remember it was quite some rush
+ blackburn	sonney2k: this time it starts with summer and ends in september
+@sonney2k	I think they are trying to accomodate for how we study in europe
+ blackburn	yes probably
+@sonney2k	vacations here are july-september
+ blackburn	in usa as well?
+@sonney2k	no idea
+@sonney2k	blackburn, btw https://dl.dropbox.com/u/31480471/website-cbase.png
+@sonney2k	n4nd0 suggested to put the c-base workshop stuff on the long thing
+@sonney2k	and the gsoc announcement in the middle?
+@sonney2k	thoughts?
+ blackburn	sonney2k: oh I totally dislike everything sorry :)
+ blackburn	we should do something with it
+@sonney2k	what?
+@sonney2k	100% parse error
+ blackburn	sonney2k: haha I don't like whole design of the page
+@sonney2k	haha
+ blackburn	sonney2k: soo I don't have any ideas
+ blackburn	what this cbase thing is doing here?
+ blackburn	sonney2k: I am mostly depressed about that box
+ blackburn	it looks like 2002 or 2003 idk
+ blackburn	3d box
+@sonney2k	blackburn, which box?
+ blackburn	left to shogun thing
+ blackburn	with 'new' label
+ blackburn	sonney2k: do you feel ok about it?
+@sonney2k	blackburn, sure I like it
+@sonney2k	the c-base logo - we want to announce the workshop
+ blackburn	oh I don't know may be it is something wrong with me :)
+@sonney2k	so some kind of logo should be there
+@sonney2k	some graphics - text is too boring...
+ blackburn	sonney2k: http://twitter.github.com/bootstrap/examples/carousel.html
+@sonney2k	blackburn, so you like this style?
+ blackburn	sonney2k: which?
+@sonney2k	this bootstrap link above
+ blackburn	oh yes it is awesome
+ blackburn	bootstrap stuff looks very cool (for me)
+@sonney2k	it is wasting even more space than our theme though
+ blackburn	sonney2k: are you tired with my crazy api things? I have some more to show you
+@sonney2k	blackburn, in any case switching themes is just a matter of someone changing the css
+@sonney2k	that's all
+ blackburn	sonney2k: no with bootstrap classes should be quite different
+@sonney2k	blackburn, sure I am :D
+ blackburn	sonney2k:
+@sonney2k	blackburn, why?
+ blackburn	svm.train().now()
+ blackburn	svm.train().meanwhile()
+ blackburn	svm.train().later()
+@sonney2k	blackburn, for remote scheduling?
+ blackburn	sonney2k: yes
+ blackburn	sonney2k: like/dislike?
+ blackburn	:)
+@sonney2k	like
+@sonney2k	but not sure
+ blackburn	sonney2k: about?
+@sonney2k	where now() etc should be
+@sonney2k	I mean svm.train() will already train no?
+ blackburn	sonney2k: svm.now().train()?
+ blackburn	I am thinking about how to handle defaults here
+ blackburn	by default it should be blocking (now())
+@sonney2k	blackburn, and you want to have parameters for this time stuff
+ blackburn	sonney2k: what do you mean?
+@sonney2k	e.g. memory limit
+@sonney2k	number of requested CPUs
+@sonney2k	when to run
+@sonney2k	use MPI
+@sonney2k	whatever
+ blackburn	sonney2k: I am afraid I am overusing chains of method
+ blackburn	s*
+@sonney2k	builderpattern without build lover
+ blackburn	hah
+ blackburn	sonney2k: it is probably d3.js that made me think about it
+@sonney2k	blackburn, but d3 is more crazy
+@sonney2k	kind of perceptron training in one line with data.enter().do_some_update()
+ blackburn	sonney2k: yes but may be it appears to be better
+@sonney2k	it certainly is more compact
+@sonney2k	but also extremely hard to digest / read
+ blackburn	sonney2k: tradeoff as always
+ blackburn	sonney2k: recalling that model selection stuff
+ blackburn	that builder-like thing is intended to fail during the run-time
+ blackburn	and may be more error-prone
+ blackburn	but much more readable and digestable
+ blackburn	(0,1,0.1,R_EXP)
+@sonney2k	blackburn, why should at fail at run-time?
+ blackburn	sonney2k: I am afraid there would be some things like overloaded methods
+ blackburn	when you say use .from(10) on double parameter
+ blackburn	I am even sure there would be some things that are compiling well but fail on runtime
+@sonney2k	ahh you are talking C++
+ blackburn	sonney2k: ah btw when do you think we can get to C++11?
+ blackburn	sonney2k: have you learnt some C++11 btw?
+@sonney2k	blackburn, you want to totally drift away from C-style programming right?
+ blackburn	sonney2k: depends what you mean by C-style
+@sonney2k	what we had
+@sonney2k	blackburn, regarding your api - in python modular that would not be an issue
+@sonney2k	it is just an exception at a different level
+ blackburn	sonney2k: I am thinking about that C-style question
+ blackburn	sonney2k: I don't have the general answer - but there are a few things I'd like to get rid of
+ blackburn	like we all hate getters and setters and etc
+ blackburn	sonney2k: I hope you do hate get/set too?
+@sonney2k	blackburn, I am pretty pragmatic
+@sonney2k	they do the job
+ blackburn	sonney2k: they are disappearing in modern languages
+ blackburn	like scala and etc
+@sonney2k	blackburn, replaced by what builder patterns?
+ blackburn	sonney2k: no, why?
+@sonney2k	blackburn, no how do you set a variable then
+@sonney2k	in scala
+ blackburn	sonney2k: obj.field = something
+@sonney2k	blackburn, public variables?
+@sonney2k	or what is the difference?
+ blackburn	sonney2k: no this calls the getter
+ blackburn	err
+ blackburn	setter
+ blackburn	autogenerated
+@sonney2k	wait so you still have a setter and getter?
+ blackburn	sonney2k: not in your code
+@sonney2k	what setter/getter is then called?
+ blackburn	sonney2k: autogenerated code
+ blackburn	sonney2k: which you can overload if you really need some custom getter/setter
+@sonney2k	ok
+ blackburn	sonney2k: if we were using only python
+ blackburn	svm.parameter("C") = 3.0
+ blackburn	would be possible
+ blackburn	or rather
+ blackburn	svm["C"]
+ blackburn	but we are tied to other langs
+@sonney2k	well svm.C would work if we don't want getters/setters at all
+ blackburn	sonney2k: not in java/etc
+ blackburn	haha I am still managing to produce at least one commit per day for 29 days
+ blackburn	sonney2k: ah btw what about cmake
+ blackburn	sonney2k: are we going to go for cmake some day?
+@sonney2k	as I said lot of work but I don't mind if someone does the job
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+@sonney2k	blackburn, please send the announcement
+ blackburn	yes yes
+@sonney2k	would be bad if someone kills master with a patch now
+ blackburn	ohh yes
+ blackburn	well heiko reads mail usually
+@sonney2k	nite
+ blackburn	alright
+ blackburn	will send a mail in a few minutes
+--- Log closed Fri Apr 05 00:00:21 2013

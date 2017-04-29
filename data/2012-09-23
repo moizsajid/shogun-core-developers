@@ -1,0 +1,187 @@
+--- Log opened Sun Sep 23 00:00:17 2012
+ CIA-31	shogun: Sergey Lisitsyn master * r9a174ee / (2 files in 2 dirs): Fixed compressed string features crasher and a few more potential memory errors - http://git.io/H2c2nA
+-!- blackburn1 [~blackburn@31.28.33.88] has quit [Quit: Leaving.]
+ shogun-buildbot_	build #542 of deb3 - modular_interfaces is complete: Failure [failed test ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/542  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- ptizoom_ [55d2543d@gateway/web/freenode/ip.85.210.84.61] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot_	build #109 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/109
+-!- ptizoom [55d2543d@gateway/web/freenode/ip.85.210.84.61] has quit [Ping timeout: 245 seconds]
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has joined #shogun
+-!- blackburn [~blackburn@31.28.33.88] has joined #shogun
+ wiking	blackburn: yo
+ blackburn	wiking: hey! how are you?
+ wiking	blackburn: sorry i haven't seen your message on time the other day
+ blackburn	ah we are all busy nevermind :)
+ wiking	yeah i'm recovering now from my wedding :)
+ wiking	but now i'm more or less back
+ blackburn	oh so we are congratulating you?
+ blackburn	:)
+ wiking	have u seen michal around lately?
+ wiking	yeye :)))
+ blackburn	no he rather disappear
+ wiking	:(
+ blackburn	is it your first time? :)
+ wiking	hehehe first and last i hope
+ wiking	i have some problems with the dualsolver
+ wiking	maybe i should email him :S
+ blackburn	bmrm?
+ wiking	yeps
+ blackburn	what's wrong?
+ wiking	well
+ wiking	the whole thing starts with w = 0
+ wiking	and basically when i give it a problem to solve
+ wiking	it doesn't converge to anywhere :(
+ wiking	w is zero
+ wiking	and after 2 iteration the whole thing stops
+ blackburn	did you tune lambda?
+ wiking	haven't touched yet that
+ wiking	but then again
+ wiking	it's weird
+ blackburn	oh that's the reason then
+ wiking	mmm let me try
+ wiking	do u have a good lambda?
+ blackburn	no idea, just try some small/large
+ blackburn	the reason you get w=0 is that you overregularize that
+ blackburn	so the algorithm prefers w=0 rather than avoid any errors on train set
+ wiking	lemme check what was the lambda
+ wiking	ok so lambda =  0.100000 is not good
+ wiking	i'll try now with 10
+ blackburn	lambda is 1/C for svms
+ blackburn	IIRC
+ wiking	yeps
+ blackburn	no idea if #count counts here as well
+ wiking	ok so neither 0.001 nor 10.0 does anything
+ blackburn	try some extreme values like 1e-10 and 10e10
+ wiking	i think i still have some other problem
+ wiking	basically w keeps being 0
+ blackburn	what is the model?
+ wiking	ok lemme copy-paste the risk function
+ wiking	\lambda||\mathbf{w}||^2 + \sum_{i=1}^n \left( \max_{(\hat{y},\hat{h}) \in YxH} \left[ \mathbf{w}  \cdot \Psi(x_i, \hat{y}, \hat{h})+\Delta(y_i, \hat{y}, \hat{h}) \right ] \right )  - \sum_{i=1}^n \mathbf{w} \cdot \Psi(x_i, y_i, h^*_i)
+ wiking	put it here for easy reading
+ wiking	http://www.codecogs.com/latex/eqneditor.php
+ blackburn	so latent thing again :)
+ wiking	basically the last term is = 0 because of w=0
+ wiking	and the 2nd term is -245
+ wiking	and that's it
+ wiking	it doesn't move anywhere
+ blackburn	can you paste  the thing BMRM output?
+ wiking	[DEBUG] risk: -245.000000 0.000000 0: tim=0.545, Fp=-245.000000, Fd=-inf, R=-245.000000
+ wiking	[DEBUG] risk: -245.000000 0.000000 1: tim=0.550, Fp=-245.000000, Fd=-0.000000, (Fp-Fd)=-245.000000, (Fp-Fd)/Fp=1.000000, R=-245.000000, nCP=1, nzA=0, QPexitflag=1
+ blackburn	I find that confusing to have exactly 245.0
+ wiking	it's because of \Delta(y_i, \hat{y}, \hat{h})
+ wiking	buuuut
+ wiking	i think i'm stupid :))))
+ wiking	yes
+ blackburn	ah it is hamming-like?
+ blackburn	I see
+ wiking	yeah
+ wiking	but
+ wiking	i did
+ wiking	w*psi - delta
+ wiking	instead of
+ wiking	w*psi + delta
+ wiking	in the 2nd term
+ blackburn	heh
+ wiking	dunno why
+ blackburn	try brand new thing then :)
+ wiking	trying with 0.01 lambda
+ wiking	hahahah much better
+ wiking	it's already at the 42th iteration
+ wiking	55
+ wiking	and counting
+ blackburn	lets hope it converge
+ wiking	well now fp went down to 8
+ wiking	from 245.000000
+ wiking	;)
+ blackburn	wiking: so something promising now?
+ wiking	iteration 450 ;)
+ blackburn	ehh what's dual gap?
+ wiking	 489: tim=1.278, Fp=2.828893, Fd=2.449111, (Fp-Fd)=0.379781, (Fp-Fd)/Fp=0.134251, R=0.379781, nCP=223, nzA=214, QPexitflag=1
+ blackburn	uh
+ blackburn	tight
+ wiking	ok maybe i should change lambda
+ blackburn	wiking: I expect either problem is hard to solve or you've got hard to solve parameters
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has quit [Quit: Leaving]
+ wiking	wtf
+ wiking	this shit took about 7gigs of ram
+ blackburn	wow
+ wiking	yeah i think i should valgrind the shit out of it ;)
+ CIA-31	shogun: Sergey Lisitsyn master * re0a93ad / (3 files in 2 dirs): A few more stringfeatures improvements - http://git.io/bHbEEA
+ wiking	yey i was leaking
+ wiking	and am still but not that much at least
+ blackburn	wiking: what is leaking?
+ blackburn	your code?
+ wiking	yeah
+ wiking	mmm when should this converge...ever? :)
+ blackburn	should converge in 200-300 iters in a normal way
+ blackburn	as I believe I mean
+ blackburn	well
+ blackburn	that's all a bit strange
+ wiking	yeah i'm at iter 900
+ wiking	trying with different lambda
+ wiking	blackburn: something for reading: http://www.computer.org/portal/web/csdl/doi/10.1109/TPAMI.2012.197 :)
+ blackburn	pdf unavailable heh
+ wiking	mmm
+ blackburn	I guess you've got some university access for that?
+ wiking	haven't tried
+ wiking	i've just read the abstract ;)
+ wiking	i'll check it
+ blackburn	wiking: I'm now attacking stereo matchin' problem
+ wiking	hiih
+ blackburn	surprisingly that's kind of hard to be real-time thing
+ wiking	yep
+ blackburn	but I have to make it realtime
+ wiking	oh bmrm why u no converge!
+ blackburn	bmrm can haz converge I am sure :)
+ wiking	yeah i think i need something like this
+ wiking	but with bmrm
+ wiking	http://images.memegenerator.net/instances/500x/9090678.jpg
+ wiking	:D
+ blackburn	so risk is decreasing and decreasing?
+ blackburn	heh
+ blackburn	and decreasing once again
+ wiking	yeah indeed it does
+ wiking	0.168798
+ wiking	this is the risk atm :D
+ blackburn	how much it decreases iteration by iteration?
+ wiking	0.01
+ blackburn	hmm
+ wiking	it's basically moving around 0.15-0.17
+ wiking	for the last 10 iterations
+ blackburn	may be you could try wider tolerance?
+ blackburn	just to check it converges to something consistent
+ wiking	how? which parameter?
+ wiking	as now i'm using everything default
+ wiking	except lambda
+ blackburn	lemme check
+ wiking	lambda is 0.01
+ blackburn	wiking: is your class built on top of dual lib qp bm so svm?
+ wiking	sortof
+ blackburn	set_TolRel
+ blackburn	1e-3 by default
+ wiking	so i guess 0.1 would be nicer than :)
+ blackburn	try that
+ wiking	ok doin'
+ wiking	ok risk is still going down with 1.0
+ wiking	mmm
+ wiking	still nada
+ wiking	i have like 122 cutting planes
+ wiking	the risk is moving between 1.3-1.4
+ shogun-buildbot_	build #543 of deb3 - modular_interfaces is complete: Failure [failed test ruby_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/543  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ wiking	oh woah
+ wiking	after iter  896: tim=1.641, Fp=2.754775, Fd=2.489348, (Fp-Fd)=0.265427, (Fp-Fd)/Fp=0.096352, R=0.265427, nCP=272, nzA=265, QPexitflag=1
+ wiking	it converge
+ wiking	d
+ blackburn	wiking: anything consistent or?
+ shogun-buildbot_	build #110 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/110
+-!- blackburn [~blackburn@31.28.33.88] has quit [Quit: Leaving.]
+-!- heiko [~heiko@host86-180-121-44.range86-180.btcentralplus.com] has joined #shogun
+ heiko	sonney2k, around?
+-!- geenoc [9c389a0c@gateway/web/freenode/ip.156.56.154.12] has joined #shogun
+-!- geenoc [9c389a0c@gateway/web/freenode/ip.156.56.154.12] has quit [Client Quit]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- heiko [~heiko@host86-180-121-44.range86-180.btcentralplus.com] has left #shogun []
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 248 seconds]
+ CIA-31	shogun: Sergey Lisitsyn master * r2250ce5 / src/interfaces/ruby_modular/swig_typemaps.i : Fixed ruby string typemaps - http://git.io/T1gxxQ
+ shogun-buildbot_	build #544 of deb3 - modular_interfaces is complete: Failure [failed test lua_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/544  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- blackburn [~blackburn@188.168.2.50] has joined #shogun
+--- Log closed Mon Sep 24 00:00:17 2012

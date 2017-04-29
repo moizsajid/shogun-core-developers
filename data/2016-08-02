@@ -1,0 +1,273 @@
+--- Log opened Tue Aug 02 00:00:48 2016
+@wiking	lisitsyn, what do you mean? bool operator==(const T& x, const T& y) is the declaration of the equals
+@wiking	or?
+@wiking	i mean it sounds stupid though :)
+@wiking	ah you mean virtual bool equals(CSGObject* other, float64_t accuracy=0.0, bool tolerant=false);
+@wiking	?
+@wiking	but then it should be fine :)
+@wiking	ah but
+@wiking	bool T::operator ==(const T2 &b) const;
+@wiking	:)
+@wiking	mmmm
+@wiking	that's a fun one
+@wiking	:>
+@wiking	btw lisitsyn blame Heiko for that design decision: https://github.com/dhruv13J/shogun/commit/ff244613212122d54b3de609c7c4d95a45dd026e#diff-1689b0bd3ceb28355cc3c05ed7ffe4f0
+@wiking	rcurtin, sorry yesterday i've passed out
+ rcurtin	no worries, I am about to pass out myself
+ rcurtin	so maybe tomorrow :)
+@wiking	:)))
+@wiking	hahah ok
+@wiking	just msg
+@wiking	the problem is that i think we are in a 13 hours
+@wiking	time diff
+@wiking	you are east coast?
+ rcurtin	yeah, east coast
+ rcurtin	13 hours... where are you?
+@wiking	singapore
+ rcurtin	ah, okay
+ rcurtin	well I will be awake tomorrow morning around 1300 UTC, so maybe you will still be awake then :)
+@wiking	:)
+@wiking	just ping me
+ rcurtin	sure
+ rcurtin	'night :)
+@wiking	gnite
+-!- sanuj [~sanuj@61.0.30.105] has joined #shogun
+ sanuj	wiking, there?
+@wiking	sanuj, yes
+ sanuj	wiking, so over here https://github.com/shogun-toolbox/shogun/pull/3357/files/b79c74445e90a3930003d5a4e35385ca31ecfa42..f768dbc9fa02e71ff155de5051ece64faa868208#diff-af3b638bc2a3e6c650974192a53c7291R962
+ sanuj	i need to check FIND_PACKAGE(JINJA2)
+ sanuj	and then set ENABLE_TESTING or COMPILE_MODULAR_INTERFACE
+ sanuj	?
+@wiking	man
+@wiking	i mean i dont understand
+@wiking	check cmakelists.txt
+ sanuj	not sure what your second comment means
+@wiking	https://github.com/sanuj/shogun/blob/f768dbc9fa02e71ff155de5051ece64faa868208/CMakeLists.txt#L89
+@wiking	why not check here the jinja2
+@wiking	?
+@wiking	i dont understand why do you need to create yet another branch
+@wiking	that checks the same fucking thing
+ sanuj	wiking, jinja2 is also required in ENABLE_TESTING
+@wiking	and
+@wiking	you leave it there
+@wiking	and check it
+@wiking	i dont get what's the problem
+@wiking	come on
+@wiking	let's be a bit more like a developer
+@wiking	instead of a random code generator
+@wiking	anyhow
+@wiking	just move the find pacakge there
+@wiking	and you should be set
+ sanuj	wiking, in that case i'll have to put 2 checks for JINJA2
+@wiking	no just one
+@wiking	you put one to the modular
+@wiking	right?
+@wiking	the other is already there
+ sanuj	if no modular interfaces are enabled then it won't be checked
+@wiking	or?
+ sanuj	but we need to check for unit-tests also
+@wiking	i'm sorry?
+@wiking	https://github.com/sanuj/shogun/blob/f768dbc9fa02e71ff155de5051ece64faa868208/CMakeLists.txt#L960
+@wiking	this check is for
+@wiking	modular
+@wiking	the one for the unit test
+@wiking	is *already* there
+ sanuj	yeah
+@wiking	so?
+ sanuj	i meant there will be 2 checks for jinja2 in the resultant code
+ sanuj	if that's fine, then i'll do it
+@wiking	and ?
+@wiking	i mean in cmake taht check is actually cached
+@wiking	if you do 2 times the same if in a codebase
+@wiking	that wont work?
+@wiking	or what? i mean i dont undestand here the concern
+ sanuj	i was worrying about the redundancy of 2 checks for the same thing
+ sanuj	i guess that's not a problem
+ sanuj	so i'll do what you are suggesting
+ sanuj	wiking, can you please rebase feature/tags with develop?
+@wiking	sure
+@wiking	gimem a sec
+ sanuj	wiking, actually no need
+ sanuj	lisitsyn pushed his commit on feature/tags
+ sanuj	i just checked
+@wiking	k
+-!- sanuj [~sanuj@61.0.30.105] has quit [Ping timeout: 252 seconds]
+-!- sanuj [~sanuj@61.0.30.105] has joined #shogun
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- sanuj [~sanuj@61.0.30.105] has quit [Ping timeout: 265 seconds]
+-!- sanuj [~sanuj@61.0.30.105] has joined #shogun
+ sanuj	lisitsyn, yo
+ sanuj	there is a problem
+@wiking	what is the problem sanuj ?
+ sanuj	rebasing for that PR
+ lisitsyn	oh I am a bit stucked with SG_ADD
+ lisitsyn	I've implemented something working
+ lisitsyn	but it has some nasty bug
+ sanuj	lisitsyn, the problem is that sets() replaces Any object
+ sanuj	or does operator=
+ sanuj	ohkay
+ sanuj	lisitsyn, do we need a static method in Any that updates() the value
+ sanuj	will be good for updating value of member variables
+ lisitsyn	what for?
+ lisitsyn	ah
+ lisitsyn	yeah maybe
+ sanuj	lisitsyn, so sets() implementation should be changed i think
+ sanuj	since the current version won't work for member variables
+ sanuj	lisitsyn, we should just update the value of already existing Any object in the map
+ sanuj	what do you think?
+ lisitsyn	sanuj: what do you mean by won't work?
+ lisitsyn	what bug do you have?
+ sanuj	lisitsyn, i don't have any bug
+ sanuj	haven't tested it
+ sanuj	but i mean
+ sanuj	https://github.com/shogun-toolbox/shogun/blob/develop/src/shogun/base/SGObject.h#L333
+ lisitsyn	ah you mean we can't use this external pointer thing there/
+ lisitsyn	because it is going to be replaced?
+ sanuj	erase_type() makes a new Any object
+ sanuj	yeah
+ lisitsyn	oh well that's exactly what I am fighting with now
+ lisitsyn	the last thing before SG_ADD works
+ sanuj	lisitsyn, i think with this implementation the map object of Any will start pointing to new memory
+ sanuj	instead of the m_member's memory
+ sanuj	after it has been updated with sets()
+ lisitsyn	you're right
+ lisitsyn	lets try to fix it
+ lisitsyn	:)
+ sanuj	yeah
+ sanuj	wanted to discuss with you the possible solutions
+ sanuj	one way is to have an static update() in Any and use that
+ lisitsyn	not sure have to think about it
+ sanuj	okay
+ sanuj	lisitsyn, sets() is only used after register_param(). So there is always an Any object in map when sets() is used to modify it. Whatever we do, it's best to change value of same memory instead of making a new Any object and changing the memory. Unnecessary creation and deletion of Any objects.
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Viktor Gal :feature/javascript * fad3659 / README.md,src/interfaces/javascript_modular/CMakeLists.txt,index.js,package.json: https://github.com/shogun-toolbox/shogun/commit/fad3659a65c70ca281a38462a327176965c4f048
+ shogun-notifier-	shogun: Add node and npm build
+ shogun-notifier-	shogun: Viktor Gal :feature/javascript * 84cb0e4 / src/shogun/neuralnets/DeepBeliefNetwork.h: https://github.com/shogun-toolbox/shogun/commit/84cb0e4d78e8fed3677513ff7c2fdf7d189ac828
+ shogun-notifier-	shogun: fix include path for SGMatrixList in DeepBeliefNetwork
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@wiking	HeikoS, buya
+@HeikoS	wiking: jo!
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has quit [Quit: Leaving.]
+-!- travis-ci [~travis-ci@ec2-54-163-63-103.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/149124483
+-!- travis-ci [~travis-ci@ec2-54-163-63-103.compute-1.amazonaws.com] has left #shogun []
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- sanuj [~sanuj@61.0.30.105] has quit [Ping timeout: 252 seconds]
+-!- sanuj [~sanuj@61.0.30.105] has joined #shogun
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has quit [Quit: Leaving.]
+-!- sanuj [~sanuj@61.0.30.105] has quit [Ping timeout: 265 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- sanuj [~sanuj@59.91.132.116] has joined #shogun
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has quit [Quit: Leaving.]
+-!- sanuj [~sanuj@59.91.132.116] has quit [Ping timeout: 240 seconds]
+ rcurtin	wiking: I'm here now, but only for a few minutes... I overslept and have to leave soon... oops
+@wiking	rcurtin, the trick is
+@wiking	i have no idea what i wanted to ask
+@wiking	:D
+@wiking	i'll try to think about it
+ rcurtin	ok :)
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has quit [Quit: Leaving.]
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- OXPHOS [4441a916@gateway/web/freenode/ip.68.65.169.22] has joined #shogun
+@wiking	OXPHOS, back to usa?
+ OXPHOS	wiking: hey yep
+@HeikoS	OXPHOS: jojo
+@HeikoS	Saurabh7: hi!
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: OXPHOS :feature/linalg_refactor * 3e9ceac / / (7 files): https://github.com/shogun-toolbox/shogun/commit/3e9ceace0ecd572956060ff612b2de0aaf7124bf
+ shogun-notifier-	shogun: linalg-sum_no_diag
+ shogun-notifier-	shogun: Heiko Strathmann :feature/linalg_refactor * 3e3e8e0 / / (7 files): https://github.com/shogun-toolbox/shogun/commit/3e3e8e052b2c7a8c2c00a8caf7fb30601906e293
+ shogun-notifier-	shogun: Merge pull request #3400 from OXPHOS/linalg_sum
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: LinalgRefactor - no_diag sum
+-!- leagoetz [~leagoetz@nat-206-249.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- leagoetz [~leagoetz@nat-206-249.internal.eduroam.ucl.ac.uk] has quit [Client Quit]
+-!- sanuj [~sanuj@59.91.130.234] has joined #shogun
+ sanuj	HeikoS, yo
+ sanuj	the plan is to not replace TParamter
+@HeikoS	sanuj:
+ sanuj	just add tags parameter also
+@HeikoS	I see
+@HeikoS	yeah thats ok
+@HeikoS	sanuj: btw
+ sanuj	to add a layer of new API
+@HeikoS	remember our meeting?
+ sanuj	yeah
+@HeikoS	the last shogun gsoc meeting
+@HeikoS	there were some dates
+@HeikoS	so you guys should wrap up soon
+@HeikoS	to spend the rest of  the time writing docs and peer review
+ sanuj	HeikoS, yes, see my timeline
+@HeikoS	try to stop coding very soon
+@HeikoS	cool
+@HeikoS	just wanted to remind :)
+@HeikoS	I will leave for a trip soon
+@HeikoS	and not be back before end of GSoC
+@HeikoS	wiking: will merge things and handle the admin
+@HeikoS	I will check back in September what was the result :)
+@HeikoS	but yeah, as said in the meeting, the docs are really really important for us
+ sanuj	HeikoS, where are you going?
+ sanuj	https://docs.google.com/document/d/1ZVV9KsHxpoj2G3HYYp-8MNjDpHVL0RGvj5hD0r03lgg/edit?usp=sharing
+ sanuj	HeikoS, i'll write good docs
+ sanuj	don't worry :D
+@HeikoS	good! :)
+@HeikoS	I think you got the hang of it by now!
+@HeikoS	Looking fowrad to read things when back
+ sanuj	HeikoS, cool
+@HeikoS	Saurabh7: same for your stuff!
+ sanuj	when are you leaving?
+@HeikoS	now
+ sanuj	oh
+ sanuj	HeikoS, enjoy your trip!!!
+ sanuj	:D
+@HeikoS	thanks a lot! :)
+ sanuj	HeikoS, can you give me ideas about this: https://github.com/shogun-toolbox/shogun/pull/3390
+@HeikoS	sanuj: https://travis-ci.org/shogun-toolbox/shogun/jobs/147142817#L2744
+@HeikoS	you can run the listing by hand
+@HeikoS	ctest -R "testname"
+@HeikoS	ah it doesnt even compile
+@HeikoS	well look at the java code listing and see whats wrong
+ sanuj	HeikoS, i need some ideas about enum
+ sanuj	how to structure the tests?
+@HeikoS	I they work in the existing meta examples dont they?
+ sanuj	HeikoS, yes they work
+@HeikoS	it is ok like this
+@HeikoS	do something that makes sense
+@HeikoS	it should be both illustrating the meta language, and also serve as systematic testing of the constructs
+ sanuj	HeikoS, okay
+@HeikoS	try to ask esben sorig
+@HeikoS	he know what to do there
+@HeikoS	and he might help a bit
+@HeikoS	wiking or lisitsyn need to merge for now
+ sanuj	HeikoS, sure sure
+@HeikoS	sanuj: ok man, take care
+@HeikoS	bye!
+ sanuj	HeikoS, nice working with you too! :D
+ sanuj	have fun
+@HeikoS	sanuj: thanks! :) and see you soon !
+ sanuj	yep :D
+ sanuj	(on irc :P)
+-!- HeikoS [~heiko@host-92-0-178-129.as43234.net] has quit [Remote host closed the connection]
+-!- OXPHOS [4441a916@gateway/web/freenode/ip.68.65.169.22] has quit [Ping timeout: 250 seconds]
+-!- OXPHOS [4441a916@gateway/web/freenode/ip.68.65.169.22] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-163-72-166.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/149218049
+-!- travis-ci [~travis-ci@ec2-54-163-72-166.compute-1.amazonaws.com] has left #shogun []
+ Saurabh7	hm looks like heiko was "back"
+ Saurabh7	:D
+-!- sanuj [~sanuj@59.91.130.234] has quit [Remote host closed the connection]
+-!- lambday [6a3311c4@gateway/web/freenode/ip.106.51.17.196] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- OXPHOS [4441a916@gateway/web/freenode/ip.68.65.169.22] has quit [Ping timeout: 250 seconds]
+--- Log closed Wed Aug 03 00:00:49 2016

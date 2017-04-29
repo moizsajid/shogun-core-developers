@@ -1,0 +1,444 @@
+--- Log opened Sat Jun 14 00:00:32 2014
+-!- zxtx_ [~zv@host109-147-162-17.range109-147.btcentralplus.com] has joined #shogun
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- zxtx_ [~zv@host109-147-162-17.range109-147.btcentralplus.com] has quit [Ping timeout: 240 seconds]
+-!- thoralf [~thoralf@91-65-141-142-dynip.superkabel.de] has joined #shogun
+ thoralf	Hey.
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Ping timeout: 252 seconds]
+-!- thoralf [~thoralf@91-65-141-142-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+ shogun-buildbot	build #27 of nightly_fedora is complete: Failure [failed git]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_fedora/builds/27  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>, Parijat Mazumdar <mazumdarparijat@gmail.com>
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-qrkukgbnezblckhi] has quit [Quit: Connection closed for inactivity]
+ shogun-buildbot	build #826 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/826  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>, Parijat Mazumdar <mazumdarparijat@gmail.com>
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- iglesiasg [~iglesiasg@524AE0A7.cm-4-3d.dynamic.ziggo.nl] has quit [Quit: Leaving]
+-!- kislay [~Abhijeet@103.240.205.45] has joined #shogun
+-!- abinash_panda [~abinash@117.200.235.73] has joined #shogun
+-!- thoralf [~thoralf@91-65-141-142-dynip.superkabel.de] has joined #shogun
+ thoralf	Heyhey.
+ thoralf	abinash_panda: Hey.
+-!- thoralf [~thoralf@91-65-141-142-dynip.superkabel.de] has quit [Ping timeout: 252 seconds]
+-!- thoralf [~thoralf@91-65-141-142-dynip.superkabel.de] has joined #shogun
+-!- thoralf [~thoralf@91-65-141-142-dynip.superkabel.de] has quit [Ping timeout: 240 seconds]
+-!- abinash_panda [~abinash@117.200.235.73] has quit [Ping timeout: 240 seconds]
+-!- abinash_panda [~abinash@223.179.142.166] has joined #shogun
+-!- zxtx_ [~zv@31.55.63.253] has joined #shogun
+-!- soumyaC [uid15286@gateway/web/irccloud.com/x-qmsfqbyijxobnixe] has joined #shogun
+-!- zxtx_ [~zv@31.55.63.253] has quit [Ping timeout: 245 seconds]
+-!- khalednasr [~k.nasr92@41.69.194.156] has joined #shogun
+-!- abinash_1anda [~abinash@110.227.152.138] has joined #shogun
+-!- abinash_panda [~abinash@223.179.142.166] has quit [Ping timeout: 244 seconds]
+-!- kislay [~Abhijeet@103.240.205.45] has quit [Ping timeout: 240 seconds]
+-!- abinash_1anda is now known as abinash_panda
+-!- thoralf [~thoralf@91-65-141-142-dynip.superkabel.de] has joined #shogun
+ abinash_panda	hey thoralf !
+ thoralf	Hey abinash_panda
+ abinash_panda	I have some doubts regarding the hashing of sparse vector.
+ abinash_panda	I went through the paper  K. Weinberger, et.al. Feature Hashing for Large Scale Multitask Learning
+ abinash_panda	and have some confusion regarding the hashing
+ abinash_panda	I had sent you a mail regarding it ;)
+ thoralf	I know - but I don't understand what's the difference between both formulas.
+ thoralf	Ah, I see.
+ thoralf	No, the formula is correct.
+ thoralf	You want wo sum over all indices, which are hashed to the same value.
+ abinash_panda	thoralf: Okay. Thats what I am saying that we should sum over all the x[j] j:h(j) == i
+ abinash_panda	instead of x[i] j:h(j) == i
+ thoralf	\xi(j) x_j
+ abinash_panda	or \xi(i) x_j ??
+ thoralf	I see your point.  It's a typo in the paper.
+ thoralf	We have two hashing functions over (j).
+ thoralf	One is hashing the feature indices, the other is "toggling" the prefix of the summed value.
+ abinash_panda	Okay. I got it.
+ thoralf	alex.smola.org/papers/2009/Weinbergeretal09.pdf
+ thoralf	They fixed it in this paper.
+ abinash_panda	So, with this I had modified my hash_vector() method and the results are
+ abinash_panda	[0.0 sec] created random sparse vector: 262144 features, 268435456 dimensions, [min;max;len]=[440;268435454;261995]
+ thoralf	But I found out that your version is slower.
+ abinash_panda	[10.7 sec] tklein23 implementation -- 24.0
+ abinash_panda	[3.2 sec] abinash implementation -- 79.8
+ thoralf	You need to create "sparse" hashed vectors.
+ thoralf	uint32_t hash_dim  = 1 << 18
+ thoralf	int32_t num_features = 1 << 12
+ thoralf	Both parameters were switched, thus creating *dense* vectors.
+ thoralf	Your implementation always creates a *dense* vector as intermediate vector.
+ thoralf	It has to be allocated, zero()ed, assigned and then iterated over.
+ thoralf	And if the hash space is big enough, this can be expensive.
+-!- lisitsyn [~qdrgsm@85.114.187.192] has joined #shogun
+ lisitsyn	khalednasr: hey
+ abinash_panda	Yeah, I have seen it.
+ thoralf	Master!
+ khalednasr	lisitsyn, hey
+ lisitsyn	khalednasr: gonna glance over your pr just now
+ lisitsyn	thoralf: hah
+ khalednasr	lisitsyn, thanks! take your time
+ abinash_panda	thoralf: One minor modification required in your code:
+ abinash_panda	[0.0 sec] created random sparse vector: 262144 features, 268435456 dimensions, [min;max;len]=[440;268435454;261995]
+ abinash_panda	[10.7 sec] tklein23 implementation -- 24.0
+ abinash_panda	dst.features[j].entry += (mm3 % 2 == 1 ? -1.0 : 1.0) * src.features[j].entry;
+ abinash_panda	thoralf: dst.features[j].entry += (mm3 % 2 == 1 ? -1.0 : 1.0) * src.features[j].entry;
+ lisitsyn	yikes! 268435456 dimensions ;)
+ thoralf	lisitsyn: :D
+ thoralf	abinash_panda: I don't see the improvement.
+ thoralf	+=
+ thoralf	Damn!
+ thoralf	Yes
+ lisitsyn	khalednasr: as usual no comments :D
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: khalednasr :develop * d254dbb / / (5 files): https://github.com/shogun-toolbox/shogun/commit/d254dbb51a1f8440bff334e769766a3fd6648753
+ shogun-notifier-	shogun: Implemented Restricted Boltzmann Machines
+ shogun-notifier-	shogun: khalednasr :develop * 12ce633 / NEWS: https://github.com/shogun-toolbox/shogun/commit/12ce633d01841d3da9a5742f5c6808589870daf5
+ shogun-notifier-	shogun: updated NEWS file to include changes to the NeuralNets module
+ shogun-notifier-	shogun: Sergey Lisitsyn :develop * 2490b57 / / (6 files): https://github.com/shogun-toolbox/shogun/commit/2490b576b8079aee59ef3074357d3b30ba9daebc
+ shogun-notifier-	shogun: Merge pull request #2304 from khalednasr/rbms
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Implemented Restricted Boltzmann Machines
+ thoralf	abinash_panda: No!
+ thoralf	:D
+ thoralf	abinash_panda: I'm only collecting the values.
+ lisitsyn	it is boring you write that good code :P
+ thoralf	abinash_panda: The summing happens magically when sort_features()
+ khalednasr	lisitsyn, haha :D
+ thoralf	abinash_panda: If a sparse vector has duplicate entries, they will be summed after sorting.
+ abinash_panda	thoralf: Okay. I was not knowing it. Cool feature ;)
+ abinash_panda	thoralf: Okay. So, I am going with your implementation of hash_vector() :)
+ thoralf	lol
+ thoralf	abinash_panda: Well, we have to take care that sparse vectors indices are sorted and not duplicate.
+ thoralf	abinash_panda: Otherwise strange[tm] things will happen.
+ abinash_panda	Yeah...BTW I liked the *strange[tm]* comment :D
+ thoralf	:D
+ abinash_panda	thoralf: One more thing, if we are going to deal only with SGSparseVector, so should I put a check on features being CSparseFeatures ?
+ thoralf	abinash_panda: Good question.
+ thoralf	abinash_panda: Yes, please check it.
+ abinash_panda	Yeah...then we should also go for CHashedSparseMultilabelModel to avoid confusion ;)
+* thoralf hates these long names.
+ thoralf	:D
+ shogun-buildbot	build #2373 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2373  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, khalednasr <k.nasr92@gmail.com>
+ abinash_panda	thoralf: Fine. Then I am going with CHashedMultilabelModel :D
+ thoralf	Other thing is that we add alternate implemation for hash_vector() and put a SGNOTIMPLEMENTED inside.
+ thoralf	abinash_panda: Haha, cool.
+ thoralf	You know how to make people happy ;)
+ abinash_panda	thoralf: Yeah ;)
+ abinash_panda	thoralf: another implementation for hash_vector()??
+ abinash_panda	thoralf: is this for dense vectors??
+ thoralf	abinash_panda: Not yes, just a bold idea.
+ thoralf	sth like hash_vector(SGVector) and hash_vector(SGSparseVector).
+ thoralf	But don't care about this yet.  I don't see a sense in using *dense* vectors with this approach.
+ thoralf	This will eat up your memory, your family and your whole life.
+ abinash_panda	thoralf: lol :D
+ thoralf	abinash_panda: Have you tried the benchmark with hash_dim  = 1 << 18 and num_features = 1 << 12 ?
+ abinash_panda	Yeah, I had tried. Found that your implementation is faster ;)
+ thoralf	Okay.
+ thoralf	Difference will grow with increaing hash_dim.
+ thoralf	1 << 20 is devastating
+ abinash_panda	Oh. No, I have not tried yet.
+ abinash_panda	thoralf: Another doubt regarding get_joint_feature_vector() method?
+ thoralf	abinash_panda: Do you have doubts or are you asking me?
+ abinash_panda	As you have mentioned in the comment that it should be a sparse vector right?
+ thoralf	abinash_panda: Yes.
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+ thoralf	abinash_panda: My local code already uses sparse vectors for this, but it's hard to isolate...
+ abinash_panda	thoralf: But the CStructuredModel class requires that the output of this should be SGVector instead.
+ thoralf	abinash_panda: I know.  Let me check something.
+ abinash_panda	thoralf: Furthermore, solvers like PrimalMosekSOSVM and StochasticSOSVM also require ret->psi_pred and ret->psi_truth
+ thoralf	abinash_panda: In my refactoring I completely removed psi_pred and psi_truth from result set.
+ abinash_panda	Okay.
+ thoralf	Instead I put get_joint_feature_vector calls directly in the machines.
+ abinash_panda	thoralf: Yeah...we can do that
+ thoralf	abinash_panda: We should.
+ thoralf	Otherwise we'll get into trouble with our approach.
+ thoralf	Can you make it a separate PR and send it before the current one?
+ abinash_panda	Yeah..sure.
+ thoralf	iirc this is only small refactoring - but I don't remember if I had to fix unit tests as well.
+ abinash_panda	Once you were talking of some good git tutorial. Could you please send me the link?
+ abinash_panda	I had messed up with my local repo
+ thoralf	abinash_panda: Mail sent.
+ thoralf	abinash_panda: It's a paid one, so please don't spread it too far.
+ abinash_panda	thoralf: Okay. I would take care of that.
+ abinash_panda	Thanks :)
+ abinash_panda	thoralf: So, tomorrow I would sending the PR refactoring the solvers :)
+ thoralf	The machines, right?
+ thoralf	Not the solvers
+ thoralf	I grepped for psi_truth/psi_pred and found a few machines.
+ abinash_panda	Yeah..the machines.
+ thoralf	So first refactoring is simply removing psi_pred/truth from ResultSet and calling psi() inside the machines.
+ abinash_panda	Yeah...it would be a simple task. I would do it.
+ abinash_panda	and then we can discuss on the get_joint_feature_vector()
+ thoralf	Yes.
+ abinash_panda	we can overload get_joint_feature_vector() method for returning SGSparseVector..right?
+ thoralf	abinash_panda: Not sure if we can have same signature but different return values.
+ thoralf	lisitsyn: Master?
+ lisitsyn	thoralf: ahh stop it :D
+ thoralf	:D
+ thoralf	lisitsyn: X function(Y) can't have a Z function() implementation, right?
+ thoralf	X function(Y)
+ lisitsyn	thoralf: it has some intrinsic irony and I feel I don't deserve being msc :D
+ thoralf	Z function(Y)
+ lisitsyn	ehhm
+ lisitsyn	ah covariant types?
+ lisitsyn	or?
+ thoralf	Don't know what covariant types are. :D
+ lisitsyn	ok in java you can
+ lisitsyn	Z extends X
+ lisitsyn	then
+ thoralf	No
+ lisitsyn	totally different types?
+ thoralf	Z extends A and X extends A
+ thoralf	A = SGObject ;)
+ thoralf	so totally different
+* thoralf cannot imaging how dispatching to the right function should work. ;)
+ lisitsyn	how can it dispatch what function to call? ;)
+ lisitsyn	well
+ thoralf	imagine
+ thoralf	Haha, thanks.
+ thoralf	abinash_panda: Let's say we can't - but let's discuss that tmrw
+ lisitsyn	in C++ you can
+ thoralf	lisitsyn: Really?
+ abinash_panda	thoralf: Fine :)
+ lisitsyn	yeah with default argument
+ lisitsyn	it looks like
+ lisitsyn	X function(Y, somedefault thing)
+ lisitsyn	Z function(Y, some default thing)
+ lisitsyn	the trick is you need to FAIL one default thing
+ lisitsyn	so it has no other choice
+ thoralf	And how do I fail?
+ lisitsyn	hmm accessing some member of class
+ lisitsyn	I mean if you ask for
+ lisitsyn	A::T
+ lisitsyn	and there is no T
+ lisitsyn	in A
+ lisitsyn	it fails
+ lisitsyn	http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/SFINAE
+ lisitsyn	ok this describes better
+ thoralf	Ah!  function templates
+ thoralf	Of course.
+ thoralf	Not overloading, but templates.
+ lisitsyn	thoralf: yeah sure
+ thoralf	lisitsyn: In shogun we're using everything. ;)
+ lisitsyn	thoralf: but in normal languages there is no such crazy thing as overloaded return type functions
+ thoralf	lisitsyn: Are you calling C++ crazy? ;)
+ lisitsyn	thoralf: absolutely
+ thoralf	Agree :)
+ thoralf	C++ is kind of a job guarantee. :)
+ lisitsyn	thoralf: though java sucks
+ lisitsyn	:D
+ thoralf	(Java is no job guarantee itself; you need to add JavaEE or Hadoop to make it unpredictable ;))
+ lisitsyn	thoralf: on the other hand java is too verbose and is no better
+ lisitsyn	hmm here I had a lot opportunities with java
+ lisitsyn	but no opportunities with C++ at all
+ thoralf	opportunities?
+ thoralf	Talking seriously or ironic?
+ lisitsyn	well
+ lisitsyn	no, I am quite serious
+ thoralf	opportunities always sounds like "issues" ;)
+ lisitsyn	when I wanted to change my job
+ lisitsyn	I had no C++ thing around
+@wiking	lisitsyn: so yeah i'm moving to .sg
+ thoralf	Yeah, but Java itself is easy to learn.  That's why all the companies are using Java, because developers are easier to find.
+ lisitsyn	wiking: sg!
+ thoralf	C++ is hard to learn, so less people learn it :)
+ lisitsyn	thoralf: yeah monkey can code java
+ lisitsyn	:D
+ thoralf	wiking: Cool.
+ thoralf	wiking: Don't do anything wrong - they may put you in chains and whip you. ;)
+ lisitsyn	wiking: how do you feel about it? ;)
+@wiking	thoralf: hhahhahah
+@wiking	lisitsyn: well a bit ambivalent
+@wiking	but it's ok i always wanted to live in asia
+@wiking	so we'll see
+ lisitsyn	shogunees move around the world
+ lisitsyn	:D
+ lisitsyn	yaa!
+ thoralf	wiking: Wish you good luck.
+@wiking	but yeah after the move
+ lisitsyn	wiking: when do you move?
+@wiking	i'll be back in working on shogun
+@wiking	lisitsyn: hehehehe i thought it's going to be 1st of august
+ thoralf	wiking:)
+ lisitsyn	wiking: cool we are moving at the same time hah
+@wiking	but now my wife checked an email and suddenly it seems we have to go on the 9th of july
+@wiking	:)))
+ lisitsyn	ah
+@wiking	so suddenly it's like getting tickets
+ pickle27	wiking: where are you moving to?
+@wiking	pickle27: singapore
+ pickle27	ahh cool
+ pickle27	I know some guys who have worked there
+ pickle27	they really like it
+@wiking	ok i need job
+@wiking	:)
+@wiking	so anybody knows anything in singapore
+@wiking	plz let me know
+@wiking	as currently i dont get to work in singapore (visa problems)
+@wiking	so i need an employer who would apply for me for a working visa :P
+ pickle27	I still think you guys should all come work for shopify :p
+-!- travis-ci [~travis-ci@ec2-50-16-123-177.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Sergey Lisitsyn's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/27582468
+-!- travis-ci [~travis-ci@ec2-50-16-123-177.compute-1.amazonaws.com] has left #shogun []
+ lisitsyn	pickle27: give me visa I am all yours haha
+@wiking	so yeah
+@wiking	i'm for sale at the moment
+@wiking	as i had to quit my current job
+@wiking	because of the move
+@wiking	pickle27: shopify? work from remote? :)
+ lisitsyn	pickle27: you probably don't even imagine what's the canadian visa PITA  :D
+ pickle27	we only have remote of operations at the moment
+ pickle27	all devs are in canada
+ pickle27	lisitsyn: I'll ask for you!
+@wiking	anyhooooow thoralf if u know something at researchgate let me know :)
+ lisitsyn	pickle27: haha no need yet
+@wiking	i'm really jobless atm
+@wiking	:)))
+ lisitsyn	pickle27: I am moving to yandex this august
+ thoralf	pickle27: Canada is great. :)
+ lisitsyn	gonna try it first
+@wiking	other than that i code for food :P
+ thoralf	pickle27: I had to cancel my canada vacation this week ;(
+ thoralf	pickle27: Shopify is looking for ML engineers?
+ pickle27	oh no! thoralf where were you visiting in canada?
+ thoralf	pickle27: I like Canada so much and I booked a flight to Boston for last week, then going to Toronto and Montreal this week, New England next week.
+ thoralf	So the plan.
+ thoralf	But I had to cancel a day before because my gf had a bicycle accident.
+ lisitsyn	oh is it ok?
+ thoralf	She's okay-ish now.
+ pickle27	that sucks hope she's alright
+ thoralf	Yeah, but this happened the day before the flight, so the doctors said not to fly.
+ thoralf	But I love canada. :D
+ lisitsyn	this sucks
+ thoralf	pickle27: Where are you living?
+ pickle27	we're hiring all kinds of engineers btw we are growing too fast
+ pickle27	Im in Ottawa now
+ pickle27	as in we can't hire people fast enough!
+ thoralf	pickle27: Okay, probably we're traveling to Canada this autumn.  Same tour.  Indian summer.  We'll let you know... you can even join, as we probably will rent a car and travel around. :D
+ thoralf	Boston -> Amherst -> Toronto -> ... -> Montreal -> Boston
+ pickle27	yeah totally let me know! it would be fun to meet some of you guys in rl
+ thoralf	Will you come to Berlin for the workshop?
+ thoralf	Just to let you know... I can host some of you guys here.
+ pickle27	I was thinking about it but I haven't planned anything so probably not
+ lisitsyn	thoralf: ha! this would be cool
+ thoralf	So no hotel needed, if this may change your decision.
+ lisitsyn	but I am still unavailable
+ thoralf	Only have a sparse sofa, but enough floor space for a lot of nerds. :D
+ lisitsyn	gonna rush through moscow in search of a flat exactly these days
+ lisitsyn	thoralf: tell me sth about winter berlin
+ lisitsyn	it is cool during winter?
+ lisitsyn	is it* :D
+ lisitsyn	cool not temperature wise but any other kind of coolness
+ thoralf	lisitsyn: I'm living here... so you shouldn't ask me.
+ thoralf	I don't know all this tourist stuff.
+ lisitsyn	thoralf: hah
+ thoralf	Waking up, going to work, going back.
+ thoralf	Spending my holiday in != Berlin ;)
+ lisitsyn	thoralf: are there any sales before xmas or whatever?
+ thoralf	lisitsyn: Of course, everywhere.
+ lisitsyn	this is deffs not I am interesting in but you know I have gf
+ lisitsyn	:D
+ thoralf	lisitsyn: Before christmas there are some traditional markets.
+ thoralf	In Berlin, Leipzig, N?rnberg...
+ thoralf	hot spiced wine
+ thoralf	:D
+ lisitsyn	we call it some german word
+ thoralf	or wine punch - however this is called.
+ thoralf	Gl?hwein
+ lisitsyn	glintwine?
+ lisitsyn	:D
+ lisitsyn	thoralf: okay I see :)
+ lisitsyn	thoralf: this is something funny
+ lisitsyn	you see you're living in kind of center of something
+ lisitsyn	at least more things are going on there
+ lisitsyn	someone is living in NYC and feel the same - wake up / work / sleep
+ thoralf	lisitsyn: I'm living next to Tegel Airport and Main station.
+ lisitsyn	what's main station?
+ thoralf	Hauptbahnhof.
+ thoralf	Train.
+ lisitsyn	ahh
+ lisitsyn	cool place
+ thoralf	Yeah.
+ lisitsyn	the only place we managed to buy things in
+ thoralf	Cool place for good transport experience when hosting guests. :D
+ lisitsyn	because I was stupid enough to not think people could ever not work during sundays
+ thoralf	lol
+ thoralf	pickle27, lisitsyn: I'll host all of you guys. :)
+ lisitsyn	why? :D
+ pickle27	I really do want to visit Berlin!
+ lisitsyn	pickle27: ask me about tourist things haha ;)
+ thoralf	lisitsyn: You don't have to. :D
+ lisitsyn	thoralf: wait wait I feel cheated :D
+ lisitsyn	how come you live near tegel
+ lisitsyn	and hauptbahnhof
+ lisitsyn	at the same time
+ lisitsyn	aren't they far away?
+ thoralf	lisitsyn: maps.google.com -> berlin beusselstr
+ lisitsyn	thoralf: tegel is terribly far away! :D
+ thoralf	Or compute directions: Hauptbahnhof -> Beusselstr -> Tegel
+ thoralf	lisitsyn: It's 5-10 minutes by Bus.
+ thoralf	5 by car
+ lisitsyn	thoralf: alright ;)
+ thoralf	And the bus between Hauptbahnhof and Tegel stops (almost) in front of my house. :D
+ lisitsyn	thoralf: this moabit thing seemed to be quiet area
+ lisitsyn	is it true?
+ thoralf	lisitsyn: It's getting popular because of last cheap flats near city center.
+ thoralf	lisitsyn: We have lot of students here, but (not yet) many caf?s and bars.
+ thoralf	But I think they're developing.
+ thoralf	But it's more living area for working people, but already nice enough for hipster coming here on the weekends.
+ lisitsyn	thoralf: ah btw I have opposite offer - I could host you in moscow from august ;)
+ lisitsyn	and well any of you ;)
+ lisitsyn	thoralf: you haven't been there right?
+ thoralf	lisitsyn: Honestly I'm a concerned about Russia.  About war with Ukraine.
+ thoralf	lisitsyn: Never.
+ thoralf	Never been there.
+ lisitsyn	how concerned?
+ thoralf	I don't know.  First of all, reputation of Russia is not quite good over here.
+ lisitsyn	heh well
+ thoralf	Regaring police and foreign affairs.
+ thoralf	Regarding
+ lisitsyn	thoralf: it is actually like not something to worry about :D
+ lisitsyn	I mean the best solution is to don't bother with that stuff at all
+ thoralf	lisitsyn: Well, I guess it doesn't affect tourists at all.
+ thoralf	lisitsyn: Btw., before xmas the whole city is illuminated. ;)
+ thoralf	(Not what you think :D)
+ lisitsyn	thoralf: haha
+ lisitsyn	thoralf: I wish this ukraine madness stopped but nobody wants to stop it
+ lisitsyn	thoralf: EU and the US put some sanctions but they are really insignificant
+ lisitsyn	so this is a big game
+ thoralf	lisitsyn: Everybody wants to stop it, but some people see big opportunities there...
+ lisitsyn	thoralf: well not everybody but all but people who control
+ lisitsyn	:D
+ lisitsyn	it's getting funny because our presidents does whatever he wants and EU has no real power to push him back
+ lisitsyn	president*
+ lisitsyn	no real power or no real will
+ lisitsyn	I am quite sure $-wise it is quite easy to put some costs on russia but it is not the case for some reason
+ thoralf	lisitsyn: Everybody here is surprised as well why we can't do anything about it.
+ thoralf	lisitsyn: Maybe they thing about "markets" - Russia simply is a big market and Germany lives of exports.
+ thoralf	And everybody else is concerned about gas?
+ thoralf	Only guessing.
+ lisitsyn	well gas is the thing, yeah
+ lisitsyn	it should be like 20% of gas import in the EU
+ lisitsyn	that comes from russia
+ lisitsyn	thoralf: the most important thing is that russian elite is heavily attached to the EU
+ lisitsyn	they live there, their children live there
+ lisitsyn	so this is pure fake
+ thoralf	They have estates in Berlin, while local elite hast estates in Moscow :D
+ thoralf	Just conspiracy, no proof.
+ lisitsyn	thoralf: and it is good
+ lisitsyn	:D
+ lisitsyn	I mean as long as they are deeply tied to europe we will not have any kind of war :D
+ lisitsyn	but if putin's daughters are out of netherlands we can treat it as a bad sign hah
+ thoralf	Good point.
+ thoralf	We should visualize relatives of russian politicians on a map.
+ thoralf	We := Western secret services
+-!- lisitsyn [~qdrgsm@85.114.187.192] has quit [Read error: Connection reset by peer]
+-!- lisitsyn [~qdrgsm@85.114.187.192] has joined #shogun
+ lisitsyn	thoralf: that's easy
+ lisitsyn	you just draw star-like topology
+ lisitsyn	connect moscow with every european city
+ lisitsyn	there is nothing outside of moscow in russia so it would look cool
+ thoralf	lisitsyn: Btw., have you seen memcheck on buildbot is error free now? :D
+ lisitsyn	thoralf: no clue!
+* thoralf pushed this since march.
+ lisitsyn	thoralf: oh sounds like I should congartulate you ;)
+ thoralf	lol
+ thoralf	You sound like Sheldon.
+ lisitsyn	thoralf: oh no I don't like that thing :D
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Quit: Leaving]
+--- Log closed Sun Jun 15 00:00:33 2014

@@ -1,0 +1,480 @@
+--- Log opened Tue Jul 26 00:00:38 2016
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- GandalfTheWizard [~Emma@112.10.170.216] has joined #shogun
+-!- OXPHOS [c0a906af@gateway/web/freenode/ip.192.169.6.175] has joined #shogun
+-!- GandalfTheWizard [~Emma@112.10.170.216] has quit [Ping timeout: 240 seconds]
+@wiking	OXPHOS: if you are touching CHAIDTree
+@wiking	do you mind to fix a bug there?
+ OXPHOS	wiking: I can try
+@wiking	OXPHOS: lemme dig it out
+@wiking	OXPHOS: one is rather simple: http://buildbot.shogun-toolbox.org/static_analysis/2016-07-13-010034-30511-1/report-e95725.html#EndPath
+ OXPHOS	wiking: not sure how to read it..what is the problem there?
+@wiking	see the 5 steps
+@wiking	it basically describe you a situation
+@wiking	where you gonna have a null pointer exception
+@wiking	when you do CDynamicObjectArray* children=node->get_children();
+@wiking	coz
+@wiking	node_t* node=current
+@wiking	but there's never a check whether current != NUL
+@wiking	L
+@wiking	got it?
+ OXPHOS	so there could be situation when current=NULL
+ OXPHOS	just we need a check there
+ OXPHOS	wiking^
+@wiking	yeah i mean the easiest is that you add an assertation
+@wiking	in the beginning of the function call of CLabels* CCHAIDTree::apply_from_current_node(SGMatrix<float64_t> fmat, node_t* current)
+@wiking	that current != NULL
+@wiking	it's a simple input value check for the function
+ OXPHOS	wiking: kk i see
+ OXPHOS	wiking: and for the sgvector serialization - any comments on the refcount? https://github.com/shogun-toolbox/shogun/pull/3226
+@wiking	yeah i'm gonna look into that now
+@wiking	ok so another thing is
+@wiking	can you login here: https://scan.coverity.com
+@wiking	with your github accoutn?
+ OXPHOS	wiking: "You are not associated with any projects"
+ OXPHOS	In order to start using Scan you need to be associated with at least one project.
+@wiking	ah
+@wiking	can you tell me what is your email address associated with your github account?
+ OXPHOS	engelzora@gmail.com
+ OXPHOS	I can do "add me to the project"
+@wiking	send you an invite
+ OXPHOS	wiking: thx. I logged in.
+@wiking	ok can u see now the shogun project?
+@wiking	you should be able to view the defects
+@wiking	i wonder if you can open this link: https://scan8.coverity.com/reports.htm#v11736/p10202/fileInstanceId=12508917&defectInstanceId=4294867&mergedDefectId=135945
+@wiking	but once you can go to the defects you should try to look at the 135945 CID
+@wiking	that's the CHAID related resource leak
+@wiking	the thing is that it's rather complicated :)
+@wiking	OXPHOS: so ok for sgvect
+@wiking	so the thing is that we serialize the sgvec as part of a model right?
+ OXPHOS	yep
+@wiking	say i have a LinearMachine that has a weight vector
+@wiking	SGVector<float64_t>
+@wiking	w
+@wiking	so you need to serialize the refcount structure
+@wiking	because in this case there would be refcount = 1
+@wiking	but thin kabout a more complicated model
+ OXPHOS	like?
+ OXPHOS	btw I saw the leaks
+@wiking	what do yo umean lik?
+@wiking	*like
+ OXPHOS	oh I was waiting for your example about the "more complicated model"
+ OXPHOS	wiking^
+@wiking	well more complicated can be
+@wiking	that you have some Label vector
+@wiking	and say those are referenced my the machines in the bagging machine
+@wiking	bagging machine like RF
+@wiking	so that label vector would have like
+@wiking	refcount = as many trees there are in RF
+ OXPHOS	yeah..
+@wiking	so yeah you have to set serialize the ref count
+@wiking	at least the count
+ OXPHOS	okay. yeah i was thinking i have to
+@wiking	like i twas in the old serialization case right?
+ OXPHOS	right
+ OXPHOS	lemme see how to do this inheritance serialization
+@wiking	mmm i mean you dont need to serialize the SGRef object itself
+@wiking	but yeah
+@wiking	that's one way
+ OXPHOS	wiking: I just need the m_refcount, i.e. RefCount class right? but m_refcount is private in SGRef. so I guess I have to go through SGRef
+@wiking	OXPHOS: i mean the best is if you actually serialize the inherited things automatically
+@wiking	if possible
+@wiking	because that way if later there's a change in SGReferencedData then we dont need to modify anything in the serialization code
+@wiking	and you need to go through SGReferencedData
+@wiking	"class SGVector : public SGReferencedData"
+@wiking	OXPHOS: http://uscilab.github.io/cereal/polymorphism.html
+@wiking	^ that's your howto
+@wiking	mmm
+@wiking	wait maybe not enough
+@wiking	but yeah you can define releation like
+@wiking	CEREAL_REGISTER_POLYMORPHIC_RELATION(SGVector, SGReferencedData)
+@wiking	CEREAL_REGISTER_POLYMORPHIC_RELATION(SGMatrix, SGReferencedData)
+@wiking	RefCount is just a member of SGReferencedData
+@wiking	but yeah i guess that'd need a serialization method as well :)
+@wiking	btw
+ OXPHOS	saw it . thanks!
+@wiking	OXPHOS: http://uscilab.github.io/cereal/inheritance.html
+@wiking	but yeah
+@wiking	i have a question
+@wiking	so the template<Archive> save/load_cereal(Archive& a) methods are currently implemented in cpp
+@wiking	right?
+ OXPHOS	yes
+ OXPHOS	for sgobject
+ OXPHOS	it's in sgvector.h
+@wiking	OXPHOS: yep yep i mean sgobject
+@wiking	would it be hard to move it to sgobject.h?
+@wiking	because the problem is that even if you expose now the templated version of the save/load thingy
+@wiking	the user will have to recompile shogun
+@wiking	if she wants to serialize it into a new Archive format
+@wiking	right?
+ OXPHOS	I think all existed/specified formats will be compiled in the begining?
+@wiking	ok so let me put it this way
+ OXPHOS	the only solution i can see is to move the SGObejct::self from .cpp to .h. Not sure how bazdback like this
+@wiking	there are now 3 formats
+@wiking	right?
+ OXPHOS	yes
+@wiking	so what if i have a new Archive format
+@wiking	a custom one
+@wiking	because i'm a user like that
+@wiking	and i wanna use that for serializing shogun
+@wiking	objects
+ OXPHOS	Yeah the codes has to be modified and everything will be re-compiled because it's SGObejct
+@wiking	in that case the only option is that actually i make that part of shogun
+@wiking	(the new format)
+@wiking	and then i need to recompile
+@wiking	ok so but if the templated load/save would be implemented in header
+@wiking	this coudl be avoided right?
+ OXPHOS	I think so
+ OXPHOS	yeah right
+@wiking	ok so
+@wiking	the question is
+@wiking	what is preventing us to be able to do this switch?
+ OXPHOS	I need to iterate through the map, which is defined in .cpp
+ OXPHOS	it's in a pimpl
+ OXPHOS	wiking^
+@wiking	ParametersMap?
+ OXPHOS	wiking^ yes..it's self::map[basetag, any]
+@wiking	ok i suppose we dont want to expose the self in .h because of map/unordered_map
+@wiking	but lemme ask about this bazdback
+@wiking	:)
+ OXPHOS	kk
+@wiking	so lets not merge that until we can resolve that either way
+@wiking	:p
+@wiking	i guess 12 hours more max
+-!- sanuj [~sanuj@117.204.242.64] has joined #shogun
+-!- sanuj [~sanuj@117.204.242.64] has quit [Ping timeout: 260 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Wu Lin :develop * f49f873 / cmake/FindMetaExamples.cmake: https://github.com/shogun-toolbox/shogun/commit/f49f8731ef0c0256b79b104ea916f37138ea2d37
+ shogun-notifier-	shogun: fix a bug in cmake
+ shogun-notifier-	shogun: Wu Lin :develop * f3485af / cmake/FindMetaExamples.cmake: https://github.com/shogun-toolbox/shogun/commit/f3485af3f9bbce846d0c6f1cd013b09c25e53d24
+ shogun-notifier-	shogun: Merge pull request #3394 from yorkerlin/bugfix
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fix a bug in cmake
+ shogun-buildbot	build #1309 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1309  blamelist: Wu Lin <yorkerlin@users.noreply.github.com>, Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #2951 of bsd1 - libshogun is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2951  blamelist: Wu Lin <yorkerlin@users.noreply.github.com>, Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #88 of xenial - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/xenial%20-%20libshogun/builds/88  blamelist: Wu Lin <yorkerlin@users.noreply.github.com>, Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #38 of FC23 - libshogun - aarch64 is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC23%20-%20libshogun%20-%20aarch64/builds/38  blamelist: Wu Lin <yorkerlin@users.noreply.github.com>, Wu Lin <yorker.lin@gmail.com>
+-!- sanuj [~sanuj@117.204.242.64] has joined #shogun
+-!- OXPHOS [c0a906af@gateway/web/freenode/ip.192.169.6.175] has quit [Ping timeout: 250 seconds]
+@wiking	bazdback: ping ping pingoooo ping
+@wiking	:)
+ sanuj	i need you too bazdback
+ shogun-notifier-	shogun: Viktor Gal :develop * 6249e61 / cmake/FindCtags.cmake: https://github.com/shogun-toolbox/shogun/commit/6249e61b211c667f7ca02bc29f802644bc7cfa12
+@wiking	sanuj: what do you nneed?
+ shogun-notifier-	shogun: Prefer Exuberant Ctags over GNU
+ shogun-notifier-	shogun: this fixes the problem of FreeBSD's ctags
+@wiking	i might be able to help
+ sanuj	wiking, he suggested me to use sfinae to solve the plugin bug
+@wiking	ah
+ sanuj	i have read about sfinae and understand it a bit
+@wiking	 yeah and wher ehave you got stuck with it?
+ sanuj	but not sure how to solve that bug using sfinae
+@wiking	i mean sfinae is all about not erroring when there's an unsupported type
+ sanuj	wiking, https://travis-ci.org/shogun-toolbox/shogun/jobs/147180067#L1394
+@wiking	just simply silently NOP
+ shogun-buildbot	build #1310 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1310  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@wiking	sanuj: btw do you know of a good substitution for std::hash in none-c++11 case?
+@wiking	you mean this
+@wiking	/opt/shogun/src/shogun/lib/any.h:149:34: error: no match for 'operator==' (operand types are 'std::function<shogun::Some<shogun::MockBaseClass>()>' and 'std::function<shogun::Some<shogun::MockBaseClass>()>')
+@wiking	?
+ sanuj	yeah
+ sanuj	but i'm not comparing std::function anywhere explicitly
+@wiking	what do you compare then?
+@wiking	i know that you do a
+@wiking	ASSERT_EQ()
+@wiking	right?
+ sanuj	EXPECT_EQ
+@wiking	or that
+@wiking	yeah
+ sanuj	wiking, but the compiler error is not from there
+@wiking	btw
+@wiking	in any.h
+@wiking	#include <string.h>
+ sanuj	wiking, it happens while compiling this https://github.com/shogun-toolbox/shogun/pull/3370/files#diff-7e05729c8a117ab30510a77a08865f33R1
+@wiking	shouldn't that be <cstring>
+@wiking	to be correct?
+ sanuj	wiking, actually yes, i'll fix that
+@wiking	k
+ sanuj	wiking, but how to go about debugging this
+ sanuj	how to use sfinae
+ sanuj	is it for debugging or preventing the bug from happening?
+@wiking	latter
+@wiking	i mean you wanna be able to compile this code
+@wiking	            return typed_storage == typed_other_storage;
+@wiking	here typed_storage = std::function<shogun::Some<shogun::MockBaseClass>()>
+@wiking	right?
+ sanuj	yeah
+ sanuj	wiking, so i need to use sfinae in any.h so that it compiles
+ shogun-buildbot	build #89 of xenial - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/xenial%20-%20libshogun/builds/89  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@wiking	so can you just provide an empty implementation for that?
+@wiking	i mean the specialized case of any template
+ shogun-buildbot	build #2952 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2952  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ sanuj	wiking, okay, i see
+ sanuj	wiking, so a specialized implementations for std::function?
+@wiking	i mean i guess anything that is std::function<?>
+ sanuj	oh yeah
+ sanuj	cool, i'll try patching any
+ shogun-buildbot	build #39 of FC23 - libshogun - aarch64 is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC23%20-%20libshogun%20-%20aarch64/builds/39  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- sanuj [~sanuj@117.204.242.64] has quit [Ping timeout: 258 seconds]
+ shogun-notifier-	shogun: Viktor Gal :develop * 515b334 / src/shogun/regression/LeastAngleRegression.h: https://github.com/shogun-toolbox/shogun/commit/515b3349560275e959aa459d8c5fd1d36d9a1f78
+ shogun-notifier-	shogun: Remove dependency for lapack in LARS
+-!- sanuj [~sanuj@117.204.242.64] has joined #shogun
+ shogun-buildbot	build #1311 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1311  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #90 of xenial - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/xenial%20-%20libshogun/builds/90  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #2953 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2953  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-notifier-	shogun: Viktor Gal :develop * 14355ea / tests/unit/ (2 files): https://github.com/shogun-toolbox/shogun/commit/14355ea1b0baffe6b1eb8356000033bf5fa81445
+ shogun-notifier-	shogun: Include <numeric> when using std::iota
+ shogun-buildbot	build #1312 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1312  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #40 of FC23 - libshogun - aarch64 is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC23%20-%20libshogun%20-%20aarch64/builds/40  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- OXPHOS [c0a906af@gateway/web/freenode/ip.192.169.6.175] has joined #shogun
+ shogun-buildbot	build #2954 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2954  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #91 of xenial - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/xenial%20-%20libshogun/builds/91  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ OXPHOS	Hey wiking, I was trying to #include <cereal/types/base_class.hpp>, but got the error halfway: http://pastebin.com/BYXbQVBN any idea why?
+@wiking	just a sec checking
+-!- OXPHOS_ [c0a906af@gateway/web/freenode/ip.192.169.6.175] has joined #shogun
+-!- OXPHOS [c0a906af@gateway/web/freenode/ip.192.169.6.175] has quit [Ping timeout: 250 seconds]
+@wiking	shogun-buildbot: force build --branch=develop 'bsd1 - libshogun'
+ shogun-buildbot	build #2955 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #2955 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2955
+ shogun-buildbot	build #41 of FC23 - libshogun - aarch64 is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC23%20-%20libshogun%20-%20aarch64/builds/41  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has joined #shogun
+-!- mode/#shogun [+o lambday] by ChanServ
+ shogun-notifier-	shogun: Viktor Gal :develop * 9273672 / cmake/FindMetaExamples.cmake: https://github.com/shogun-toolbox/shogun/commit/9273672ad3afa6d4ead25fbdadf2660b6cc8aeb8
+ shogun-notifier-	shogun: Remove GMM meta example if LAPACK is not available
+@wiking	OXPHOS_: mmm
+@wiking	OXPHOS_: all you did is just to include the cereal/types/base_class
+@wiking	.hpp:33:
+@wiking	?
+ OXPHOS_	wiking: YES
+ shogun-buildbot	build #1313 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1313  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@wiking	:) upset? :)
+@wiking	or why the capitals? :>
+ OXPHOS_	confused.. :P
+@wiking	u r asian
+@wiking	when u write with capitals
+@wiking	people are super angry
+@wiking	:)
+@wiking	ok so what's your cereal version?
+ bazdback	BAZDMAAAGGGZZ
+@wiking	bazdback: y0
+@wiking	OXPHOS_: ok so just to make sure
+@wiking	if you take that example from http://uscilab.github.io/cereal/inheritance.html
+@wiking	and do
+ OXPHOS_	wiking: sorry..i was angry about the error. should be 1.2.0 but I need to confirm
+@wiking	clang++ -I/usr/local/include -std=c++11 -c test_cereal.cpp
+@wiking	what happens?
+@wiking	bazdback: morning
+ OXPHOS_	wiking: no error
+ OXPHOS_	wiking: compiled
+@wiking	OXPHOS_: super :)
+ shogun-buildbot	build #92 of xenial - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/xenial%20-%20libshogun/builds/92  blamelist: Viktor Gal <viktor.gal@maeth.com>
+@wiking	OXPHOS_: btw include it before #include <shogun/lib/config.h>
+@wiking	i mean the base clase
+@wiking	*"class
+ shogun-buildbot	build #2956 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2956  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ OXPHOS_	lemme try
+ OXPHOS_	wiking: not helping
+ OXPHOS_	wiking: SVMLightOneClass.cpp is not the first .cpp includes base_class.hpp. I don't  know why the previous ones were fine
+ bazdback	wiking: hey
+-!- bazdback is now known as lisitsyn
+@wiking	ho
+-!- travis-ci [~travis-ci@ec2-54-91-68-140.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/147423516
+-!- travis-ci [~travis-ci@ec2-54-91-68-140.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #42 of FC23 - libshogun - aarch64 is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC23%20-%20libshogun%20-%20aarch64/builds/42  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- HeikoS [~heiko@smb-amrs-02.hotspot.hub-one.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- HeikoS [~heiko@smb-amrs-02.hotspot.hub-one.net] has quit [Client Quit]
+ OXPHOS_	wiking: hey any updates? : )
+@wiking	on my end?
+@wiking	i dont have th ecode :)))
+@wiking	OXPHOS_: i'm trying to fix some opaque shit in the mkl
+ sanuj	wiking, you work on computer vision right?
+@wiking	sanuj: used to
+@wiking	not lately
+@wiking	lately i'm a fucking devops idiot
+@wiking	:D
+ sanuj	haha
+ sanuj	wiking, what's your phd on?
+ OXPHOS_	wiking: ohhhh any hints on how to debug? It literally requires nothing but #include <base_class.hpp> to cause the error
+ sanuj	lisitsyn, there?
+@wiking	sanuj: medical image processing
+@wiking	OXPHOS_: what you can do
+@wiking	is do a clang++ -E
+@wiking	that'll basically generate the whole file
+ sanuj	wiking, i got an intern at this lab camp.lcsr.jhu.edu/intern/
+@wiking	jhu is cool
+ sanuj	they do robotics and vision in medicine
+@wiking	OXPHOS_: so with that (g++ or clang++) doesn't matter
+@wiking	-E will just generate the file, i.e. resolve all the macros
+ OXPHOS_	wiking: thanks! lemme try
+ OXPHOS_	sanuj: congrats!
+ sanuj	OXPHOS_, thanks :D
+ sanuj	wiking, you know any online sources from where i can learn about vision stuff related to augmented reality?
+@wiking	mmm
+@wiking	scholar.google.com
+@wiking	:)
+ sanuj	:D
+@wiking	you think i'm joking :)
+ sanuj	nope :)
+@wiking	lisitsyn: bazdmeg here?
+ lisitsyn	wiking: yeap
+ sanuj	lisitsyn, in any.h, i did this
+ sanuj	        bool equals(void** storage, void** other_storage) const
+ sanuj	        {
+ sanuj	            if(util::EqualExists<T>::value) {
+ sanuj	                T typed_storage = *(reinterpret_cast<T*>(*storage));
+ sanuj	                T typed_other_storage = *(reinterpret_cast<T*>(*other_storage));
+ sanuj	                return typed_storage == typed_other_storage;
+ sanuj	            }
+ sanuj	            return true;
+ sanuj	        }
+ sanuj	where EqualExists checks if operator== is present
+ lisitsyn	does it work?
+ sanuj	no
+ lisitsyn	I'd guess so
+ lisitsyn	:D
+ sanuj	yeah
+ sanuj	gives same compiler error
+@wiking	lisitsyn: so question
+ lisitsyn	quite obvious
+ sanuj	lisitsyn, what exactly were you suggesting yesterday
+ lisitsyn	wiking: what q?
+ lisitsyn	sanuj: sfinae!
+ lisitsyn	bool equals(void** storage, void** other_storage) const
+ lisitsyn	this should be different when it comes to T
+ lisitsyn	that doesn't support
+ lisitsyn	==
+ sanuj	lisitsyn, so i just make another "equals" implementation which just returns true ?
+ sanuj	yeah
+ lisitsyn	sanuj: oh this is quite dangerous
+ lisitsyn	I'd prefer keeping it unimplemented
+ sanuj	lisitsyn, you don't want to  implement operator== for any?
+ lisitsyn	sanuj: you'd need two declarations of operator==
+ sanuj	or do i just declare a specialization of equals for std::function and not implement it?
+ lisitsyn	sanuj: yeah rather that
+ sanuj	but is this sfinae?
+ lisitsyn	bool equals(void** storage, void** other_storage, bool supports_equal=util::EqualExists<T>::value) const
+ lisitsyn	I'd suggest something like that
+ sanuj	lisitsyn, how will i use the supports_equal value in the function equals?
+ lisitsyn	sanuj: you don't use it
+ lisitsyn	you just put default value there
+ lisitsyn	so compiler chooses the right implementation
+ sanuj	okay, let me try that
+ sanuj	lisitsyn, is this function specialization based on its argument "supports_equal" rather than its template argument T?
+ lisitsyn	yeap
+ lisitsyn	or you can go with some other approach
+ lisitsyn	not sure which is best here
+ sanuj	lisitsyn, i think it's good to check for the existence for operator==
+ sanuj	lisitsyn, but if we leave it undefined for the cases when operator== doesn't exist then how will it decide whether it's equal or not?
+@wiking	lisitsyn: so in order to be able to put the template implementation of the serialization function of SGObject into the header (that way no need to recompile the whole library if one comes up with a new Archive type
+@wiking	this requires self, i.e. the parameterMap to be defined in the header right?
+@wiking	:)
+@wiking	lisitsyn: ^
+@wiking	lisitsyn: pingooooo
+ sanuj	wiking, is it possible to do function specialization based on its argument "supports_equal" rather than its template argument T?
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ lisitsyn	wiking: sry
+-!- sanuj [~sanuj@117.204.242.64] has quit [Ping timeout: 264 seconds]
+@wiking	lisitsyn: i stole your ::Self idea for MKL
+@wiking	care to look at it?
+@wiking	:D
+@wiking	lisitsyn: but yeah what do u say on the above
+-!- OXPHOS_ [c0a906af@gateway/web/freenode/ip.192.169.6.175] has quit [Ping timeout: 250 seconds]
+@wiking	Saurabh7: ping
+ lisitsyn	wiking: sry!
+ lisitsyn	:D
+ lisitsyn	interrupted all the time
+@wiking	lisitsyn: okok so read those when u can and react
+@wiking	(and comment on my pr)
+@wiking	:D
+@wiking	https://github.com/shogun-toolbox/shogun/pull/3396
+@wiking	i dont remember when was my last time
+@wiking	that i sent a pr
+ lisitsyn	wiking: SELF!
+ lisitsyn	all the way
+ lisitsyn	wiking: well this looks good
+-!- sanuj [~sanuj@117.204.242.64] has joined #shogun
+ lisitsyn	exactly what this is for
+@wiking	ok cool
+@wiking	i'll wait for travis
+@wiking	but then i'll merge
+@wiking	lisitsyn: but yeah any ideas about template<Archive>...?
+ lisitsyn	wiking: yeah just read it but sorry don't really get the problem
+ lisitsyn	is there some code?
+@wiking	ok so
+@wiking	lemme find the pr
+@wiking	ok look here
+@wiking	https://github.com/shogun-toolbox/shogun/pull/3375/files#diff-9c3599c0d2090e493be261b079e9b63eR523
+@wiking	see the template<class Archive> void CSGObject::cereal_save(Archive& ar) const; is implemented in .cpp
+@wiking	so now this is a shit
+@wiking	if somebody comes with a new Archive format
+@wiking	not the 3 default ones
+@wiking	cereal::BinaryOutputArchive, cereal::JSONOutputArchive, cereal::XMLOutputArchive
+@wiking	because if you specify a new serialization format
+@wiking	then you have to recompile shogun
+@wiking	while if the templated save/load would be implemented in SGObject.h
+@wiking	see what i mean?
+ lisitsyn	uh
+ lisitsyn	so we want to support just any possible Archive?
+ lisitsyn	I didn't know we do want it, now I get it
+ lisitsyn	wiking: do we really want to support arbitrary Archives?
+@wiking	i mean why not? :)
+@wiking	i mean i dont care into what format the user wants to serialize
+@wiking	if he want to serialize directly into memcached or redis
+@wiking	i dont care
+@wiking	if he implements the Archive interface he can do it
+ lisitsyn	ok I get it
+ lisitsyn	wiking: ok we need to bridge the gap between templated archive
+ lisitsyn	and hidden .cpp things
+ lisitsyn	wiking: argh
+ lisitsyn	this is tough
+ lisitsyn	wiking: I am not really a fan of what kind of rape happened to 'any'
+ lisitsyn	:D
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: OXPHOS :feature/cereal * b002f1e / src/shogun/base/SGObject.h,src/shogun/lib/any.h: https://github.com/shogun-toolbox/shogun/commit/b002f1ecffde34f87eff4657e391c289321927ee
+ shogun-notifier-	shogun: update indentations and whitespace
+ shogun-notifier-	shogun: Sergey Lisitsyn :feature/cereal * f95a0d7 / src/shogun/base/SGObject.h,src/shogun/lib/any.h: https://github.com/shogun-toolbox/shogun/commit/f95a0d73a2160d18ef0a8a6bed307972eda984a2
+ shogun-notifier-	shogun: Merge pull request #3393 from OXPHOS/cereal_style
+ shogun-notifier-	shogun:
+-!- sanuj [~sanuj@117.204.242.64] has quit [Ping timeout: 240 seconds]
+ shogun-notifier-	shogun: update indentations and whitespace in SGObject and Any
+@wiking	:>>>>
+-!- OXPHOS [c0a906af@gateway/web/freenode/ip.192.169.6.175] has joined #shogun
+ lisitsyn	wiking: there must be prettier way to do that :D
+@wiking	lisitsyn: mmmm
+ shogun-notifier-	shogun: Viktor Gal :develop * efd291f / src/shogun/classifier/mkl/MKL.cpp,src/shogun/classifier/mkl/MKL.h: https://github.com/shogun-toolbox/shogun/commit/efd291f4ac41ac4324dafd336694527ad6831004
+ shogun-notifier-	shogun: Hide GPLK or CPLEX parameters
+ shogun-notifier-	shogun: this way one will not require to supply the compiler flags
+ shogun-notifier-	shogun: for GLPK or CPLEX when using MKL.
+ shogun-notifier-	shogun: Viktor Gal :develop * 9ef9147 / src/shogun/classifier/mkl/MKL.cpp,src/shogun/classifier/mkl/MKL.h: https://github.com/shogun-toolbox/shogun/commit/9ef91473de6cb005bcdd0e824bd1f5b9547f66bb
+ shogun-notifier-	shogun: Merge pull request #3396 from vigsterkr/MKLparams
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Hide GPLK or CPLEX parameters
+ shogun-buildbot	build #1314 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1314  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ shogun-buildbot	build #1315 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/1315  blamelist: Viktor Gal <vigsterkr@gmail.com>
+ shogun-buildbot	build #2957 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2957  blamelist: Viktor Gal <vigsterkr@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+-!- sanuj [~sanuj@117.204.242.64] has joined #shogun
+ shogun-buildbot	build #43 of FC23 - libshogun - aarch64 is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC23%20-%20libshogun%20-%20aarch64/builds/43  blamelist: Viktor Gal <vigsterkr@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Quit: buildmaster reconfigured: bot disconnecting]
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+ shogun-buildbot	build #93 of xenial - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/xenial%20-%20libshogun/builds/93  blamelist: Viktor Gal <vigsterkr@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+-!- travis-ci [~travis-ci@ec2-54-158-129-129.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Viktor Gal's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: https://travis-ci.org/shogun-toolbox/shogun/builds/147486486
+-!- travis-ci [~travis-ci@ec2-54-158-129-129.compute-1.amazonaws.com] has left #shogun []
+-!- OXPHOS [c0a906af@gateway/web/freenode/ip.192.169.6.175] has quit [Quit: Page closed]
+ c4goldsw	ping wiking
+ sanuj	lisitsyn, there?
+-!- lambday [8028b10a@gateway/web/freenode/ip.128.40.177.10] has quit [Quit: Page closed]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has joined #shogun
+ CaBa	is there an implementation of any kind of weighted training in shogun? i.e. if i want to add a sort of confidence to a binary label?
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ c4goldsw	Hey CaBa, try asking sanuj or Saurabh7
+-!- sanuj [~sanuj@117.204.242.64] has quit [Ping timeout: 258 seconds]
+-!- sanuj [~sanuj@59.97.245.21] has joined #shogun
+-!- c4goldsw [5da420e6@gateway/web/cgi-irc/kiwiirc.com/ip.93.164.32.230] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- sanuj [~sanuj@59.97.245.21] has quit [Remote host closed the connection]
+--- Log closed Wed Jul 27 00:00:39 2016

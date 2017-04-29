@@ -1,0 +1,581 @@
+--- Log opened Fri Apr 27 00:00:19 2012
+-!- n4nd0 [~nando@188.Red-2-137-0.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+-!- av3ngr [av3ngr@nat/redhat/x-fdgjejyzjtxwmlhd] has joined #shogun
+-!- vikram360 [~vikram360@117.192.187.42] has quit [Ping timeout: 260 seconds]
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.172.17] has joined #shogun
+-!- gsomix [~gsomix@188.168.5.45] has quit [Read error: Operation timed out]
+ CIA-64	shogun: Soeren Sonnenburg master * r4574712 / (3 files in 2 dirs):
+ CIA-64	shogun: don't do SG_FREE on varray.begin
+ CIA-64	shogun: This is now handled in the destructor of v_array and additional free's
+ CIA-64	shogun: only cause double free bugs. - http://git.io/r81grA
+ shogun-buildbot	build #739 of cmdline_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/cmdline_static/builds/739
+-!- vikram360 [~vikram360@117.192.172.17] has quit [Ping timeout: 250 seconds]
+-!- magicfly [c07c1afb@gateway/web/freenode/ip.192.124.26.251] has quit [Quit: Page closed]
+-!- av3ngr [av3ngr@nat/redhat/x-fdgjejyzjtxwmlhd] has quit [Remote host closed the connection]
+-!- av3ngr [~av3ngr@60-241-222-244.static.tpgi.com.au] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- av3ngr [~av3ngr@60-241-222-244.static.tpgi.com.au] has quit [Quit: That's all folks!]
+ sonne|work	wiking: looks like we are the lone rangers today...
+ wiking	hehehe people went on holidays or what? :)
+ sonne|work	looks like
+ sonne|work	I would have wanted to talk to pluskid again about these new sgvector developments but hey
+ wiking	what's the final decision on that?
+ sonne|work	there is no final decision
+ sonne|work	I start to agree with blackburn, i.e., have a very simple rudimentary SGVector that is only used to pass around ptrs (not for long term usage)
+ sonne|work	and some other class that has more overhead, like GC
+ sonne|work	maybe derive one from the other
+ sonne|work	and the SGIVector (I == interface)
+ wiking	mmm
+ wiking	so basically you are ending up with the shared_pointer concept
+ sonne|work	is then only stuff to be used from the outside for long term
+ sonne|work	no
+ wiking	i mean if you are doing interfacing of SGVector
+ wiking	and such
+ wiking	you'll have the same thing going on
+ sonne|work	what I mean is we have just double* and int for sgvector
+ sonne|work	no more
+ sonne|work	no overhead
+ wiking	yep
+ wiking	so no reference counter there i guess
+ sonne|work	we use this whenever possible
+ sonne|work	but for internal class storage of (bigger) sgvectors we use sth like SGIVector
+ sonne|work	that can be shared and passed around
+ sonne|work	with reference counts and stuff
+ wiking	yeah
+ wiking	well that is exactly what i meant about SGIVector will mimic the shared_ptr concept of boost
+ sonne|work	yes true
+ sonne|work	more or less :)
+ wiking	hehe ok
+ wiking	sounds reasonable
+ wiking	for
+ wiking	me
+ wiking	:)
+ wiking	damn too many enters
+ wiking	(doing a ubuntu lts upgrade in the background)
+ sonne|work	this needs to be discussed with pluskid, blackburn and n4nd0 ...
+ sonne|work	no idea whether they all attempted to upgrade ubuntu yesterday
+ sonne|work	and now are gone :P
+ wiking	hahahahah yeah
+ wiking	maybe they've all done that and now trying to fix it... i'm just doing it on a server so worst case it's going to crash :P
+ wiking	if that works out
+ wiking	then i should the same with all my cluster nodes ;P that'll be fun for sure :)
+ wiking	btw do u know any industrial application of shogun?
+ sonne|work	rumor has it that it is used
+ wiking	oh cool
+ wiking	i wonder what environment
+ sonne|work	no idea
+ wiking	i'd be interested testing shogun's performance on some embedded device
+ wiking	whether it's feasable
+ wiking	at least small parts of it
+ sonne|work	heh, we ran it on gunnars iphone a while ago :D
+ wiking	how was it? draining battery? :)
+ sonne|work	just for fun
+ wiking	i might be able to try on a raspberry pi when i finally receive it :)
+ sonne|work	no applications...
+ sonne|work	certainly all the linear methods are fast enough for embedded
+ wiking	yes
+ wiking	that's what i've thought
+ wiking	maybe we should create a build file for andro and iOS :)
+ wiking	just for the fun of it
+ wiking	it could even be
+ wiking	that it only contains only the 'classification' parts
+ wiking	that it can load up the model
+ wiking	and then just classify it
+ wiking	in case of classifiers... since learning u can do in a cloud as well :)
+ wiking	and then just download the learned model
+ sonne|work	I would say just libshogun
+ sonne|work	and the static cmdline interface
+ wiking	damn the shipping date is still 15th of august for my raspberry pi
+ wiking	anyhow once i have it i'll give it a go and do some benchmarking ;)
+ wiking	should be fun
+ sonne|work	toys are supposed to be fun :D
+ wiking	heheh my wife just won an award :)
+ sonne|work	good idea to spend it on toys ;-)
+ sonne|work	which one?
+ sonne|work	btw
+ wiking	ah it's a local artist award from our hometown
+ wiking	i think there's no money with it only 'fame' :)
+ sonne|work	heh, that reminds me we still need a cool logo :)
+ wiking	ahahhahaha
+ sonne|work	wiking: btw are you still in touch with alex?
+ sonne|work	wiking: ahh and do you remember what I wanted to discuss with vojtech? I totally forgot to talk to him
+ sonne|work	ahh
+ sonne|work	food
+ wiking	sonne|work: yeah i'm in touch with him, I'm just finishing now a big chunk of the latent svm code, so when it's committed i'll have another big discussion with him about how to go further... and whether or not he is satisfied with the outcome
+ wiking	sonne|work: mmm vojtech? YES i know! about adding stuff to libqp
+ wiking	like pr_loqo
+ wiking	sonne|work: so yeah get hold of him and talk about that (pr_loqo and i think it was tron? to libqp)
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has joined #shogun
+ wiking	PhilTillet: hey! r u still planning to do the patches for opencl in shogun?
+ PhilTillet	hello wiking :p
+ wiking	PhilTillet: or it should be picked up by somebody else
+ PhilTillet	absolutely, i've spent the last 4 days reading litterature about svm
+ wiking	?
+ wiking	you wanna opencl svm
+ PhilTillet	yes
+ wiking	i must say that you'll have problems with that
+ wiking	a lot of people tried various ways to extend svm parallel
+ PhilTillet	why? there has been a lot of paper succeeding!
+ wiking	and there are some ways of course
+ wiking	but neither is a silver bullet
+ PhilTillet	i've already done a prototype on classification (not learning) , and the improvement was something like seven-fold or eight-fold :p
+ wiking	yeah learning is a hard part
+ PhilTillet	but I have some paper who parallelized smo with success
+ wiking	yeah smo
+ PhilTillet	improving performances by 20x :p
+ wiking	you have one from google as well
+ wiking	psvm
+ wiking	it's using mpi
+ PhilTillet	well mpi and opencl are completely different :p
+ wiking	yeah i know
+ PhilTillet	cuSVM would be more of an example ^^
+ PhilTillet	anyway, I need to go to eat :p
+ PhilTillet	cya
+ wiking	:(
+ wiking	shit since i just wanted to say
+ wiking	something
+ wiking	but let me know when u r back
+ PhilTillet	wiking, i'm back
+ PhilTillet	:p
+ wiking	ok
+ wiking	just a sec i've fucked up something on my server
+ wiking	:)))
+ PhilTillet	good job! :D
+ wiking	hahah fixed
+ PhilTillet	:p
+ wiking	i wonder if this works now
+ wiking	brb
+ wiking	oh no i cannot test it yet
+ wiking	so anyhow have u taken a look at libqp?
+ wiking	if that could be opencl-ized
+ PhilTillet	hmmm not at all :p
+-!- karlnapf [~heiko@host86-182-161-144.range86-182.btcentralplus.com] has joined #shogun
+ wiking	that'd be great though
+ PhilTillet	actually i'm not very familiar yet with constrained optimization (that's why i need to read a bit of litterature :D)
+* wiking is just testing mosh
+ PhilTillet	I just know that SMO has been successfully cuda-ized :p
+ wiking	The implemented solver (libqp_splx.c) is a generalization of the method proposed in [1, 2]. It is based on the Sequential Minimal Optimization (SMO) algorithm with an improved working set selection strategy.
+ PhilTillet	well then I guess yess :p
+ PhilTillet	does Shogun relies on libqp for training?
+ wiking	well more and more things will
+ wiking	but like svmocas is one example
+ PhilTillet	hmmm
+ wiking	and most probably 2 gsoc project this year
+ wiking	is going to use libqp
+ PhilTillet	i see :p
+ wiking	even 3
+ wiking	;)
+ PhilTillet	then I should more focus on a generic implementation of libqp that could be re-used for svm?
+ wiking	well check this
+ wiking	src/shogun/lib/external/libqp_splx.cpp
+ wiking	     410 src/shogun/lib/external/libqp_splx.cpp
+ wiking	410 lines
+ wiking	so it's not that big
+ PhilTillet	well indeed it's not that big :p
+ sonne|work	PhilTillet: that is not the bottleneck
+ sonne|work	the bottleneck is the thing I gave you :)
+ PhilTillet	what do you mean? :p
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+ wiking_	woah this mosh works great :)
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 252 seconds]
+-!- wiking_ is now known as wiking
+ PhilTillet	sonne|work : I have thought about a cleaner way to implement OpenCL without #ifdef everywhere :p making the functions not #ifdef'ed in the .h, and make another .cpp to implement them, and if USE_OPENCL is not defined, just return an error message like "No OpenCL support"
+ sonne|work	PhilTillet: this \sum_i alpha_i K(x,x_i) is the operation that kills time
+ sonne|work	all the rest is almost insignificant
+ PhilTillet	training is insignifiant? :o
+ sonne|work	this operation is what takes most of the time in training
+-!- karlnapf [~heiko@host86-182-161-144.range86-182.btcentralplus.com] has quit [Quit: Leaving.]
+ PhilTillet	oh, yes
+ PhilTillet	well I'll keep on reading more and try to come up with an implementation :p
+ PhilTillet	but a lot of guys have succeeded so i'm sure that it's possible :p
+-!- Priyans [~Priyans@115.248.130.148] has joined #shogun
+ PhilTillet	It will just take some time :D
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Connection reset by peer]
+-!- wiking_ is now known as wiking
+-!- PhilTillet [~Philippe@vir78-1-82-232-38-145.fbx.proxad.net] has quit [Remote host closed the connection]
+--- Log closed Fri Apr 27 14:18:08 2012
+--- Log opened Fri Apr 27 14:28:58 2012
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 9 nicks [1 ops, 0 halfops, 0 voices, 8 normal]
+-!- Irssi: Join to #shogun was synced in 6 secs
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@vpna052.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpna052.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- blackburn1 [~qdrgsm@188.168.2.179] has joined #shogun
+-!- Priyans [~Priyans@115.248.130.148] has quit [Quit: Leaving]
+-!- blackburn1 [~qdrgsm@188.168.2.179] has quit [Ping timeout: 260 seconds]
+-!- henri [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has joined #shogun
+ henri	hi there
+ henri	I have a problem of memory desallocation
+ henri	I use opencv for computer vision apps, and I initialize shogun matrix from cv::Mat object like this :
+ henri	cv::Mat cvmat(100,100,CV_32FC1,cv::Scalar(0.0));
+ henri	SGMatrix<float> sgmatrix((float*)cvmat.data, cvmat.rows, cvmat.cols);
+ henri	problem is when for example I do SG_UNREF(svm), then I got *** glibc detected *** /home/(...): double free or corruption (out): 0x0000000000a2f1c0 ***
+ sonne|work	henri: where do you put this matrix?
+ sonne|work	into SimpleFeatures<float> ?
+ henri	yes
+ sonne|work	henri: argh yes that explains it
+ henri	this could be written like that : CSimpleFeatures<float>* features =new CSimpleFeatures<float>((float*)samples.data,samples.rows,samples.cols);
+ sonne|work	we currently assume to 'own' the memory
+ henri	samples is cv::Mat struture
+ sonne|work	so when the simple feature object is destroyed it will SG_FREE the matrix
+ sonne|work	and I guess opencv does the same
+ henri	indeed
+ sonne|work	wiking, blackburn -> that is why we need the new sgvector stuff ...
+ sonne|work	henri: we have some plans to avoid copying but that hasn't been done yet
+ sonne|work	henri: so for now you will have to feed a copy of the opencv matrix into shogun
+ sonne|work	gsomix: are you around?
+ wiking	heheheh :)
+ henri	I don't understand why I get this error from shogun because opencv free the matrix after shogun
+ henri	I tried to add ref to the matrix but same error
+ henri	sonne|work: Wekk ok, should I go this way ? :: SGMatrix<float> sgmatrix = new SGMatrix<float>((float*)cvmat.data, cvmat.rows, cvmat.cols);
+ wiking	mm
+ henri	+ *
+ wiking	henri: u should copy the cvmat.data
+ henri	wiking: ok tx
+ wiking	otherwise you'll end up freeing twice the float array
+ wiking	henri: can we ask u what's your application?
+ henri	sure, I try to recognize video events
+ wiking	ah cool
+ wiking	which svm are u using in shogun?
+ henri	for now I used linear kernel on bow features
+ henri	but its just a beginning
+ wiking	and how is it working out for you?
+ wiking	ah ok
+ wiking	if u use BOW and linear kernel
+ wiking	i might suggest to test HomogeneousKernelMap preprocessor on your features
+ wiking	you'll have better classification results
+ henri	what is it ?
+ henri	My main goal is to keep time information which are lost in BOW features
+ wiking	it's based on this paper: http://www.robots.ox.ac.uk/~vgg/publications/html/vedaldi10-abstract.html
+ henri	I am gonna use strings kernels or kind of fisher kernel to do that
+ wiking	it basically allows you to have similar accuracy when u use histogram intersection kernel or jensen-shannon kernel on your histogram features but using linear svm
+ wiking	it's pretty cool
+ henri	problem is that strings kernel in shogun handle only a short alphabet
+ henri	I will provide advancement information if you want to
+ wiking	yeah sure
+ wiking	since i use shogun for image processing as well
+ henri	Are you one of the shogun developpers ,
+ henri	?
+ wiking	well i'm doing now gsoc for shogun
+ wiking	but for example this homogeneous kernel mapping trick has been ported by me to shogun
+ henri	on what part ?
+ wiking	as i needed linear svm but with the similar accuracy as if i'd use jensenshannon kernel
+ wiking	i'm implementing the latent svm module for shogun
+ wiking	henri: u use this as your research for uni?
+ henri	yes
+ henri	And I would help shogun with pleasure
+ henri	If I can
+ wiking	cool! anyhow if u have a data set where u wanna apply latent svm let me know since i'm just trying to build several scenarios where it could be applied. i.e. if u not only want to label an even in the video but you wanna give e.g. a bounding box for where that event happened that could be done via latent svm
+ henri	I can try, what data base have you already processed ? Thans for the article I am reading it !
+ henri	=)
+ wiking	well currently i'm testing with mammal identification in an image
+ henri	wiking: allright, I have to go now, I will be back next week.
+ wiking	alright!
+ wiking	cya
+ henri	wiking: the name is not henri but I will try to make you remember me, even with a different name ^^ cya
+ wiking	hehehe ok :)
+-!- henri [2e1fd566@gateway/web/freenode/ip.46.31.213.102] has quit [Quit: Page closed]
+ gsomix	sonney2k, sonne|work hey
+ gsomix	sonney2k, sonne|work just write me. I'm ready to go. :)
+ sonne|work	gsomix: do you see blackburn today?
+ sonne|work	I am thinking simplifying SGVector to only be double* and int
+ sonne|work	not refcount or anything
+ sonne|work	and then have a derived SGIVector (I == interface)
+ sonne|work	which we use only for returning things to the outside which keeps proper refernce counts and everything
+ sonne|work	so we have zero overhead when using SGVector
+ sonne|work	and can afford quite some for SGIVector
+ gsomix	sonne|work, I saw him at the uni, but he escaped.
+ sonne|work	gsomix: while wiking likes this I would prefer to discuss this with blackburn, n4nd0, pluskid
+ sonne|work	but that would be the plan
+ wiking	mailing list?
+ sonne|work	gsomix: maybe you can start to create some draft implementation
+ wiking	it might be more efficient to discuss it there
+ sonne|work	true
+ sonne|work	gsomix: e.g. create an SGIVector which has refcounts in the same way like SGObject but with some boolean that it refcounts for this thing are not needed)
+ wiking	oh fucking hell
+ sonne|work	and simplify the sgvector class
+ sonne|work	wiking: ?!
+ wiking	may 8 ... kdd deadline! :(
+ wiking	another day of paperworks for me it seems:D
+ sonne|work	work wiking work!
+ wiking	well it's just gonna be copy paste first
+ wiking	and then add some extra graphs
+ wiking	as i'm sure my last submission is going to be refused :D
+ wiking	but i'll get the notification tomorrow ;)
+ gsomix	sonne|work, we plan to use SGIVector as pointer, right?
+-!- blackburn1 [~qdrgsm@188.168.13.62] has joined #shogun
+ blackburn1	sonne|work: sonney2k bounce
+ blackburn1	sonney2k: I'd like to mimic or use valarray in the lightweight SGVector
+ sonne|work	gsomix: no
+ sonne|work	gsomix: the same way as before
+ sonne|work	blackburn1: new day new idea:
+ blackburn1	sonne|work: no old idea
+ blackburn1	wiking suggested it before
+ wiking	yes
+ wiking	i've already given u an implementation yesterday
+ sonne|work	blackburn1: I am talking about the 'new' sgvector plan I have today
+ wiking	ahhaha
+ blackburn1	ahh
+ wiking	:>
+ wiking	evolving day-by-day
+ sonne|work	blackburn1: lets have a SGVector and SGIVector
+ blackburn1	lol
+ sonne|work	(one for interface and one w/o)
+ sonne|work	blackburn1: like you suggested
+ blackburn1	sonne|work: we can use it by same interface I think
+ sonne|work	so we even remove the do_free flag from SGVector
+ blackburn1	or do you prefer explicit?
+ sonne|work	and we only use this to exchange vectors/matrices that *never* have to be freed
+ sonne|work	otherwise we use the SGIStuff
+ blackburn1	yes it is the idea I came with *proudly*
+ blackburn1	:D
+ sonne|work	zero overhead
+ sonne|work	blackburn1: this is not put in stone yet
+ blackburn1	sonne|work: yes and my suggestion is to mimic or use valarray
+-!- emrecelikten [~Anubis@92.44.165.109] has joined #shogun
+ sonne|work	so migration plan could be to rename all SGVector -> SGIVector
+ sonne|work	then introduce SGVector with minimal functionality
+ blackburn1	afaik it avoids memory alignment and SSE/SSE2/someothershit optimized
+ sonne|work	and derive SGIVector from that
+ sonne|work	then add the SGObject stuff we had before
+ sonne|work	refcounting
+ blackburn1	works for me
+ sonne|work	and a I_don't_use_refcounting flag
+ wiking	and the day has come to use crossval of shogun ;)
+ sonne|work	then we gradually have to check each and every occurrence of SGIVector and use SGVector if it does just sth like compute matrix
+ sonne|work	kernel matrix
+ sonne|work	and getting elements to vector
+ blackburn1	wiking: lasst xmas I used to xval
+ wiking	how did it feel? :)
+ blackburn1	but the very next day it gave segfault me away
+ blackburn1	(I am singing)
+ wiking	hah :)
+ blackburn1	this sounds like a gay song though
+ blackburn1	I should double-check if it is allright
+ wiking	i have a new data set and no train/test split so gotta try
+ sonne|work	if we recognize there is no single use for SGVector any longer then we rename SGIVector back and end of discussion
+ blackburn1	wiking: yes and teach me how to use it
+ wiking	heheheh :)
+ blackburn1	sonne|work: sounds like a good plan actually
+ sonne|work	blackburn1: OK?
+ blackburn1	sonne|work: painful but makes sense probably
+ blackburn1	however why not to hide realization stuff?
+ blackburn1	SGVector can be an interface
+ sonne|work	and?
+ blackburn1	sonne|work: do we really need to know whether it is do_free vector or not?
+ blackburn1	in code
+ sonne|work	no
+ sonne|work	but I am not sure what you want to tell me
+ blackburn1	sonne|work: http://yuml.me/diagram/scruffy;/class///%20Cool%20Class%20Diagram,%20%5BSGVector%5D-%5BSGInternalVector%5D,%20%5BSGVector%5D-%5BSGInterfaceVector%5D.png
+ blackburn1	but rather not http://yuml.me/diagram/scruffy;/class///%20Cool%20Class%20Diagram,%20%5BSGVector%5D-%5BSGInterfaceVector%5D.png
+ sonne|work	blackburn1: why that?
+ sonne|work	all the functions like add / subset etc are in SGVector
+ sonne|work	so Internal would be the same as SGVector
+ blackburn1	sonne|work: hmm I think it would be more extensible
+ blackburn1	who knows may be we will come with LazyVector :D
+ sonne|work	blackburn1: recall that we cannot have a single virtual function
+ sonne|work	(in SGVector)
+ blackburn1	why?
+ sonne|work	huge overhead
+ sonne|work	vtable needs to be stored...
+ blackburn1	sonne|work: but how would you like to handle interface vector?
+ sonne|work	IVec will have virtual functions and overhead crap
+ blackburn1	sonne|work: hmm but will be independent from vec?
+ sonne|work	no
+ blackburn1	sonne|work: what will they share then?
+ sonne|work	all functions
+ blackburn1	okay got you
+ blackburn1	sonne|work: I know you do some java - you should understand why I want some inheritance there ;)
+ blackburn1	recall how rich Collection is
+ blackburn1	IndirectList is a great example how good is to have general interface
+ sonne|work	blackburn1: I know
+ sonne|work	but this is all about saving every single bit possible :)
+ blackburn1	yeah
+ sonne|work	otherwise we could just use java
+ sonne|work	and no problems like we have now but only with GC :D
+ blackburn1	sonne|work: yeah it would be much easier to handle design and GC in java
+* sonne|work is happy to not have to use java at times
+ sonne|work	I am fighting with overoverover head here
+ blackburn1	sonne|work: really? I used to work on soft that would be infeasible in C++ so I don't really know the overhead
+ sonne|work	a double[]  is huge compared to what we have with sgvector
+ blackburn1	it should be not much slower
+ sonne|work	objects have a huge overhead
+ sonne|work	*HUGE*
+ blackburn1	1.5x?
+ sonne|work	not speed
+ blackburn1	overhead in memory means?
+ sonne|work	yes
+ sonne|work	it is all only about that
+ sonne|work	speed wise java is mostly ok
+ sonne|work	(nowadays)
+ sonne|work	and if you don't have time critical stuff
+ sonne|work	(GC ...)
+ blackburn1	sonne|work: I have no idea, how big is double[] for N elements?
+ sonne|work	for N=1 is what is relevant here
+ sonne|work	it has some name, refernce count, whatnot
+ sonne|work	there is no sizeof() in java for a reason :P
+ blackburn1	sonne|work: there is a way still - I thought you measured ;)
+ blackburn1	8 bytes for the type pointer.4 bytes for the array length.8 bytes for each element in the array (these are pointers to the actual objects).
+ blackburn1	via stackoverflow
+ blackburn1	sonne|work: not that bad
+ sonne|work	no way
+ sonne|work	there is more
+ sonne|work	otherwise GC could not work
+ sonne|work	gtg
+ sonne|work	cu
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+ blackburn1	oh the thing I forgot is to eat something
+ blackburn1	that shouldn't happen
+ blackburn1	wiking: I didn't know you are married
+ blackburn1	;)
+ wiking	ok
+ wiking	i've ran a benchmarking between
+ wiking	valarray and float vector dot product
+ wiking	ok it's biased i'm redoing it
+-!- PhilTillet [~Philippe@2001:660:3203:402:9c89:60e6:842d:5044] has joined #shogun
+ blackburn1	wiking: would be interesting to see results
+ blackburn1	sonney2k: we discussed a little
+ blackburn1	sonney2k: I think we need leading dimension stuff like in blas
+ blackburn1	with it we can support to slice rows and cols of matrices
+ blackburn1	i.e. vector containing elements one by one
+ blackburn1	and with skip of 10
+-!- karlnapf [~heiko@host86-182-161-144.range86-182.btcentralplus.com] has joined #shogun
+ wiking	lol
+ wiking	i've been invited for being a chair of a session on a conference
+ blackburn1	wiking: congrats ;)
+ emrecelikten	Like this? http://26.media.tumblr.com/tumblr_ls3g7yjipZ1qegu8do1_500.png :P
+ wiking	now let's get back to that benchmarking... i was cooking till now
+ wiking	blackburn1: hehehe and yes i'm married... i'm old man :P
+ wiking	emrecelikten: :DDD
+ wiking	exactly
+ emrecelikten	:D
+ wiking	is there an easy way to flush cache? :)
+ PhilTillet	wiking, god.my_computer.cache.flush() ; :p
+ wiking	:))
+ PhilTillet	#include <god>
+ PhilTillet	XD
+ PhilTillet	that would be so convenient
+ wiking	cacheflush
+ wiking	on linux apparently
+ blackburn1	sonney2k: we stuckeed
+ blackburn1	why do we need SGIVector?
+ blackburn1	it always has been copied and there is no need to handle references
+-!- gsomix [~gsomix@188.168.5.102] has quit [Ping timeout: 252 seconds]
+-!- PhilTillet [~Philippe@2001:660:3203:402:9c89:60e6:842d:5044] has quit [Ping timeout: 245 seconds]
+-!- PhilTillet [~Philippe@157.159.47.30] has joined #shogun
+-!- gsomix [~gsomix@83.234.54.138] has joined #shogun
+ wiking	mmm right where was is? :)
+ wiking	*i
+ wiking	:>
+-!- karlnapf [~heiko@host86-182-161-144.range86-182.btcentralplus.com] has quit [Ping timeout: 276 seconds]
+-!- gsomix [~gsomix@83.234.54.138] has quit [Ping timeout: 265 seconds]
+@sonney2k	blackburn1, to be able to share vectors / matrices
+ blackburn1	sonney2k: hmmm what is the case?
+@sonney2k	blackburn1, e.g. returning the label vector multiple times
+ blackburn1	oh
+@sonney2k	or the SGMatrix of simplefeatures
+ blackburn1	finally I understand
+@sonney2k	etc
+ blackburn1	sonney2k: but what to do in case like
+ blackburn1	kernel method
+ blackburn1	where we get vector
+@sonney2k	currently we can return it once but have to assume that the object still exists when using it
+@sonney2k	blackburn1, in kernel method we usually get a column vector from some sgmatrix
+@sonney2k	so it is just a ptr into sgmatrix and no interface
+@sonney2k	everything stored as member variable should probably be sgivector
+ blackburn1	sonney2k: btw do you like idea of that loop increment?
+@sonney2k	such that it can be returned
+@sonney2k	loop increment?
+ blackburn1	sonney2k: recall blas ddot
+@sonney2k	you mean slicing?
+ blackburn1	ddot(N,x,1,y,1) typically right?
+ blackburn1	but if we need column row
+ blackburn1	we currently copy
+@sonney2k	so slicing
+ blackburn1	when we can use these 'skips'
+ blackburn1	slicing sounds inconvenient but you get me
+ blackburn1	it costs one more integer though
+@sonney2k	the a[:,i] thing in python numpy
+@sonney2k	not good for core sgvector then
+ blackburn1	if memory is like 1 2 3 4 5 6 7 8 9
+ blackburn1	column is array+i
+ blackburn1	and row is array+3i
+@sonney2k	I got you but still
+@sonney2k	no overhead in sgvector
+@sonney2k	I am certainly ok having some fat sgivector supporting that
+@sonney2k	btw, there are still some problems
+ blackburn1	sonney2k: that would enable us to use column rows efficiently
+@sonney2k	simplefeatures don't have to be in memory
+@sonney2k	and they have preprocessors
+@sonney2k	so get_feature_vector()
+@sonney2k	could potentially return a processed copy that needs to be freed
+ blackburn1	yes who handles it?
+@sonney2k	we used to have a free_feature_vector() function
+@sonney2k	that is to be called
+ blackburn1	yes
+ blackburn1	what is our plan then?
+@sonney2k	it would have been better to have that done via some SG_UNREF(vector)
+@sonney2k	but then we would need SGIVector here
+@sonney2k	so we would have quite a bit of overhead if the matrix is in memory and there are no preprocessors
+ blackburn1	sonney2k: we would need SGIVector everywhere
+@sonney2k	why that?
+ blackburn1	what is the case w/o SGI?
+@sonney2k	I can imagine that we have two functions returning once the sgvector
+@sonney2k	and once sgivector
+@sonney2k	depending on what you intend to do
+* sonney2k runs out of battery
+ blackburn1	sonney2k: okay lets continue tomorrow or so
+@sonney2k	3 minutes left
+ blackburn1	do you have some indication of that?
+@sonney2k	blackburn1, you mean we don't need some efficient sgvector?
+@sonney2k	only sgivector stuff?
+-!- gsomix [~gsomix@188.168.13.227] has joined #shogun
+ blackburn1	sonney2k: I don't know the case we can use it
+ blackburn1	at some point we need some interfacing and badaboom
+@sonney2k	blackburn1, well for example one could use it for simple features
+@sonney2k	and jsut to access labels
+@sonney2k	etc
+ blackburn1	yes but only a few cases and it looks like we can have overhead there
+ blackburn1	I am only afraid of get_feature_vector and similar methods overhead
+@sonney2k	I don't know - if you want to compute kernel matrix it can become costly
+@sonney2k	if you just have 2d vectors
+@sonney2k	but have to increment refcount, and set some other variables
+ blackburn1	sonney2k: yes but how can we use it here?
+@sonney2k	just return SGVector
+ blackburn1	but who will handle memory things?
+ blackburn1	it looks like currently it is in a working state
+ blackburn1	free_feature_vector
+@sonney2k	and require a call to simplefeatures->free_feature_vector
+@sonney2k	(which is usually a nop)
+ blackburn1	hmm yes I agree here
+ blackburn1	but the separation could be hard
+@sonney2k	of course it would be nicer if the free* stuff would be done by the vector itself
+ blackburn1	I mean we need get_feature_vector for interface
+@sonney2k	blackburn1, well one always has to copy sgvectors in interface
+@sonney2k	since one cannot rely on it
+@sonney2k	have to leave train
+@sonney2k	cu
+ blackburn1	ah train
+ blackburn1	okay see you
+ blackburn1	I am probably heading to bed
+-!- PhilTillet [~Philippe@157.159.47.30] has quit [Ping timeout: 265 seconds]
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 260 seconds]
+-!- wiking_ is now known as wiking
+-!- blackburn1 [~qdrgsm@188.168.13.62] has quit [Quit: Leaving.]
+@sonney2k	Re
+@sonney2k	hmmhh
+ gsomix	good night guys
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+--- Log closed Sat Apr 28 00:00:17 2012

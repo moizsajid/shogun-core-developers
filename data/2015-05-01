@@ -1,0 +1,124 @@
+--- Log opened Fri May 01 00:00:06 2015
+@wiking	shogun-buildbot: force build --branch=develop 'deb3 - modular_interfaces'
+ shogun-buildbot	build forced [ETA 44m40s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #2641 of deb3 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2641
+-!- HeikoS [~heiko@p5797287E.dip0.t-ipconnect.de] has quit [Ping timeout: 245 seconds]
+@wiking	shogun-buildbot: force build --branch=develop 'deb3 - modular_interfaces'
+ shogun-buildbot	build forced [ETA 44m40s]
+ shogun-buildbot	I'll give a shout when the build finishes
+ shogun-buildbot	build #2642 of deb3 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2642
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-134-235.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- besser82|phresh [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has joined #shogun
+-!- besser82|phresh [~besser82@2003:a:372:5500:f2de:f1ff:fe89:42d4] has quit [Changing host]
+-!- besser82|phresh [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82|phresh] by ChanServ
+-!- besser82|phresh [~besser82@fedora/besser82] has quit [Remote host closed the connection]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+@wiking	besser82: yo
+@besser82	wiking, here =)
+@wiking	ok so about the packaging
+@wiking	we have 2 packaging done for libshogun itself
+@wiking	and one for python
+@wiking	but bascially we need to fix a bit cmake
+@wiking	so that we can actually build for example python-modular w/o building the actual c library
+@wiking	once that is done we can roll out all the other packages finally
+@wiking	any ideas for that?
+@wiking	i have some time now
+@wiking	so if u can just give me directions how to do that
+@wiking	i'm happy to spend now some hours on that
+@wiking	once that's done we can start adding daily builds
+@wiking	to the bot :)
+@besser82	i see...  doing that inside cmake isn't that trivial...
+@wiking	yeah that's why it isn't done yet :)
+@besser82	hehe...
+@besser82	first we need to get rid of all those preprocessor defines on the command-line...
+@besser82	and have them properly setup in a config.h && swig_config.i
+@wiking	i started to create ShogunConfig.cmake.in and ShogunConfigVersion.cmake.in
+@besser82	that's the next step
+@wiking	ahh that i would put later :)))
+@wiking	i mean the defines
+@besser82	i can do the defines thing...
+@besser82	have plenty of time today =)
+@wiking	see the COMPFLAGS_CPP and LINKFLAGS in
+@wiking	config.h atm
+@wiking	that we could use
+@wiking	but even ShogunConfig.cmake.in could contain those info or?
+@besser82	that's even more complicated
+@besser82	if we'd generate all that vars into ShogunConfig
+@besser82	.cmake
+@wiking	ah
+@wiking	so you would just put every compiler flag into config.h?
+@wiking	or not have any compiler flag
+@wiking	have everything in config.h
+@besser82	yes
+@wiking	ok
+@wiking	then actually ccache would start working properly ;)
+@wiking	:P
+@besser82	everything but swigflags and $ENV(CXXFLAGS)
+@besser82	right  :P
+@wiking	well that's almost there
+@besser82	because it doesn't need to eval all the cli defines
+@wiking	i mean we almost have everything redudant in config.h
+@wiking	and -D
+@besser82	that's fine...
+@wiking	so we could just start get rid of DEFINES variable
+@besser82	then I'll start doing the same for swig_config.i
+@wiking	and somehow just port the compiler flags for swig
+@besser82	yes
+@wiking	ok
+@wiking	so feature branch?
+@wiking	and let's push things there?
+@besser82	would be good...  I'll setup one, just a minute
+@wiking	ok
+@wiking	lemme know when i can pull
+@wiking	then i should work on removing the c++ compiler flags?
+@wiking	i mean from the libshogun and examples project?
+@wiking	and unit tests...
+@besser82	`feature/config.h`-branch is in sg-repo
+@wiking	btw we are now having serious problem with csharp modular :)
+@wiking	ok got it!
+@besser82	we should coordinate work a bit, so we don't have "spaghetti" mergings, but ffwd history
+@besser82	which problem with csharp?
+@wiking	yep
+@besser82	for me it works on fc22 && swig3
+@wiking	well i think we'll need to fix some typemap things int he csharp
+@wiking	what's your mono version?
+@besser82	Mono JIT compiler version 2.10.8 (tarball Sat Jun  7 14:11:04 UTC 2014)
+@besser82	Copyright (C) 2002-2011 Novell, Inc, Xamarin, Inc and Contributors. www.mono-project.com
+@besser82	TLS:           __thread
+@besser82	SIGSEGV:       altstack
+@besser82	Notifications: epoll
+@besser82	Architecture:  amd64
+@besser82	Disabled:      none
+@besser82	Misc:          debugger softdebug
+@besser82	LLVM:          supported, not enabled.
+@besser82	GC:            Included Boehm (with typed GC and Parallel Mark)
+@besser82	wiking, ^
+@wiking	ah ok
+@wiking	2.x
+@wiking	thats why
+@wiking	http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/2642/steps/csharp%20modular/logs/stdio
+@wiking	> 3.x is getting into troubles
+@besser82	to get anything newer to work, we'd need to rewrite the csharp thing to swig3
+@besser82	then we can cover all mono >= 2.X without trouble
+@besser82	next thing is: we should stop generating any crap inside cmake_src_dir, but use cmake_bin_dir
+@besser82	My long-term plan is: getting cmake refactored basically from scratch
+@besser82	we so many kludges in there  :(
+@besser82	have
+@wiking	yeap
+@wiking	but yeah lets do one at a time
+@wiking	as we will never get from 1 to 2
+@besser82	that's right
+-!- travis-ci [~travis-ci@ec2-54-196-42-248.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	it's Bj?rn Esser's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/60811748
+-!- travis-ci [~travis-ci@ec2-54-196-42-248.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #1005 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/1005  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>, Bj?rn Esser <bjoern.esser@gmail.com>
+@besser82	wiking, what's your status?
+@besser82	wiking, anything I can do?
+@besser82	wiking, like ripping out the cli defines
+-!- abinashm [uid66179@gateway/web/irccloud.com/x-fzdkorchplaibrbf] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 265 seconds]
+--- Log closed Sat May 02 00:00:07 2015

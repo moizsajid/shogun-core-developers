@@ -1,0 +1,167 @@
+--- Log opened Thu Sep 15 00:00:32 2011
+-!- sonney2k [~shogun@7nn.de] has quit [Ping timeout: 276 seconds]
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+ [1]warpy	sonne|work, did you see my msg ?
+ sonne|work	yes just saw it
+ sonne|work	we don't have free manpower for that currently
+ sonne|work	we will be getting windows / osx build bots
+ sonne|work	so when these are there I will at some point make sure shogun compiles on osx/windows
+ [1]warpy	any estimation on that, time frame wise ?
+-!- serialhex_ [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has joined #shogun
+-!- serialhex [~quassel@99-101-148-183.lightspeed.wepbfl.sbcglobal.net] has quit [Ping timeout: 258 seconds]
+-!- aelray [d472ce8a@gateway/web/freenode/ip.212.114.206.138] has joined #shogun
+ aelray	hi
+ aelray	somebody here?
+ sonne|work	yes
+ sonne|work	though busy and at work
+ sonne|work	just shoot
+ [1]warpy	sonne|work, no work plan / time frame yet ?
+ [1]warpy	also is anynone else working on the c# examples beside us ?
+ aelray	i have a basic question on ML and am not shure if it is solveable with shogun
+ aelray	my problem is i have to detect polygonal regions with only 90 degree corners in greyscale images
+ aelray	values inside this regions have usually higher amplitude than outside, the outside can be considered somehow black, except for noise
+ aelray	i need to extract the exact corner positions, can a SVM do this?
+ sonne|work	aelray: you could extract some context around the corners, like +/- 10 pixels or so and then using that 10x10 image try to detect if there is a corner in the middle
+ sonne|work	and then slide that thing around
+ aelray	ok, and this is realizable with sn SVM?
+-!- [1]warpy [~warpy@bzq-79-181-14-161.red.bezeqint.net] has quit [Quit:  Try HydraIRC -> http://www.hydrairc.com <-]
+ sonne|work	aelray: you have to extract these windows manually - but then classifying e.g. with gaussian kernel could already give you reasonable results
+ aelray	ok, so i have to extract a lot of small like 10x10 pictures from my datasets with and without corners? how much do i need ca.?
+ sonne|work	the more the better / I guess limited only by computation time / storage :)
+ sonne|work	thousands
+ aelray	sounds like fun
+ aelray	is this working even when the corner is not visible to human eyes but one knows, because of geometry, that there must be one?
+ sonne|work	trial and error...
+ aelray	ok, thanks so far
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- aelray [d472ce8a@gateway/web/freenode/ip.212.114.206.138] has quit [Ping timeout: 252 seconds]
+-!- blackburn [~blackburn@188.168.2.36] has joined #shogun
+-!- cwidmer [~quassel@connect.tuebingen.mpg.de] has joined #shogun
+-!- cwidmer [~quassel@connect.tuebingen.mpg.de] has quit [Remote host closed the connection]
+ blackburn	shit missed chris again
+-!- mode/#shogun [+o sonney2k] by ChanServ
+@sonney2k	Anyone here, blackburn?
+ blackburn	sonney2k: here
+ blackburn	hellloooo
+-!- alesis-novik [~alesis@cpat001.wlan.net.ed.ac.uk] has joined #shogun
+@sonney2k	blackburn, still there?
+ blackburn	sonney2k: yeap
+@sonney2k	blackburn, do you remember how big the modshogun_wrap.cxx is for python_modular?
+ blackburn	sonney2k: it is 16.7 mb on my git
+@sonney2k	blackburn, I meant number of lines
+ blackburn	ah
+ blackburn	sonney2k: 508k
+@sonney2k	exact number?
+ blackburn	sonney2k: 508888
+@sonney2k	$ wc -l interfaces/python_modular/modshogun_wrap.cxx
+@sonney2k	516531 interfaces/python_modular/modshogun_wrap.cxx
+@sonney2k	?!
+ blackburn	blackburn@blackburn-laptop:~/shogun/shogun/src$ wc -l interfaces/python_modular/modshogun_wrap.cxx
+ blackburn	508889 interfaces/python_modular/modshogun_wrap.cxx
+@sonney2k	blackburn, how did yo configure?
+@sonney2k	./configure --prefix=/usr/local/stow/shogun-1.0.0 --disable-optimization --enable-debug ?
+@sonney2k	or sth
+ blackburn	sonney2k: I don't remember
+ blackburn	shall I reconfig it?
+@sonney2k	yes please
+ blackburn	compiling
+@sonney2k	blackburn, you don't have to compile it to the end
+@sonney2k	just when the *.cxx file is there is sufficient
+@sonney2k	blackburn, so how big is the *.cxx?
+ blackburn	blackburn@blackburn-laptop:~/shogun/shogun/src$ wc -l interfaces/python_modular/modshogun_wrap.cxx
+ blackburn	508889 interfaces/python_modular/modshogun_wrap.cxx
+ blackburn	sonney2k: the same
+@sonney2k	hmmmhh let me treat the remaining classes in features/* and then git push
+@sonney2k	blackburn, then please check again
+@sonney2k	I removed a lot of code from the headers
+ blackburn	hmm I forgot to commit some changes
+@sonney2k	so it cannot possibly grow but what shall I say...
+@sonney2k	blackburn, today I tried your GNB
+ blackburn	sonney2k: and how it was? :)
+@sonney2k	for two-class I would love to have floating point values
+@sonney2k	not 0 and + 1
+ blackburn	pretty hard to get comprehensible map from probabilities to resulting labels
+@sonney2k	?
+ blackburn	btw
+@sonney2k	just  prob(x|theta_+) - prob(x|theta_-)
+ blackburn	for twoclass it is better to use logistic regression
+ blackburn	it is almost equal but faster
+@sonney2k	where theta+/- are the model params
+ blackburn	sonney2k: I'm going to sleep now, am I needed now?
+ blackburn	with .cxx issues
+@sonney2k	if you can wait for a few more minutes
+@sonney2k	I would be very interested in knowing whether the situation improved
+ blackburn	yeah sure
+ CIA-3	shogun: Soeren Sonnenburg master * r9c69c84 / src/shogun/preprocessor/Preprocessor.h : fix comment type to get it integrated in doxygen - http://git.io/N-RhJw
+ CIA-3	shogun: Soeren Sonnenburg master * r5fee0e6 / src/README.developer : mention that one should avoid inline functions - http://git.io/yLgAfw
+ CIA-3	shogun: Soeren Sonnenburg master * r8b4ce6c / (33 files):
+ CIA-3	shogun: remove most inline functions in features
+ CIA-3	shogun: - exceptions are some single line functions
+ CIA-3	shogun: - templated classes - http://git.io/vCcP0w
+@sonney2k	blackburn, please compile again
+@sonney2k	with the update ^
+ blackburn	sonney2k: yeah but first will commit some changes I did before
+@sonney2k	heh
+@sonney2k	blackburn, I think the rule should be one of us two doing one (small) git push every day
+ blackburn	eh?
+@sonney2k	the last week the project looked pretty dead
+ blackburn	ah
+ blackburn	yeah
+@sonney2k	so 1 commit / day improving minor things is helpful
+ blackburn	okay got it
+ blackburn	I won't commit, I didn't manage to finish it yet
+@sonney2k	blackburn, then create a local branch and configure compile again
+@sonney2k	I would be interested if what I did changed anything
+ blackburn	sonney2k: I just stashed it
+@sonney2k	blackburn, I think I will do the header changes removing all unnecessary includes / putting things into .cpp files and thus libshogun.so
+@sonney2k	so that's my task for the next weeks
+ blackburn	I see
+@sonney2k	and bug fixes here and there as usual
+@sonney2k	(btw I am still messing with the debian package - tough...)
+@sonney2k	blackburn, does it compile?
+@sonney2k	the new stuff?
+ blackburn	sonney2k: yeah was troubles with some .cpp I forgot to remove
+@sonney2k	I mean is the *.cxx already generated?
+@sonney2k	ok
+ blackburn	generating
+ blackburn	sonney2k: my tasks are still get preprocessor faster, etc
+@sonney2k	GNB
+@sonney2k	:D
+ blackburn	I guess you can fix/improve gnb if you will need that :)
+@sonney2k	btw the nice graphical gnb example you had could be in shogun examples
+ blackburn	I'm in rush with potential paper
+ blackburn	so focused on algorithm things
+ blackburn	in fact I was reading about superlu on my job for 2 hours :D
+ blackburn	sonney2k:
+ blackburn	blackburn@blackburn-laptop:~/shogun/shogun/src$ wc -l interfaces/python_modular/modshogun_wrap.cxx
+ blackburn	508785 interfaces/python_modular/modshogun_wrap.cxx
+ blackburn	sonney2k: but looks faster
+@sonney2k	so 100lines less
+@sonney2k	ok
+@sonney2k	there is more now in libshogun.so
+@sonney2k	the headers are just mere definitions
+ blackburn	I see
+@sonney2k	this will help removing includes too btw
+@sonney2k	and so speed up compilation hopefully...
+ blackburn	okay see you tomorrow
+@sonney2k	and will solve the problems with lapack being required or so
+@sonney2k	yeah
+@sonney2k	have a good sleep
+ blackburn	thanks
+@sonney2k	thanks for the report!
+ blackburn	you too
+ blackburn	report about?
+-!- blackburn [~blackburn@188.168.2.36] has quit [Quit: Leaving.]
+ CIA-3	shogun: Soeren Sonnenburg master * rc834d2b / (4 files): remove remaining inline functions in features/ - http://git.io/tYKBiw
+ CIA-3	shogun: Soeren Sonnenburg master * r4f9566f / src/interfaces/python_modular/swig_typemaps.i : start to simplify typemaps - extracting all code into functions - http://git.io/cHdaLg
+ CIA-3	shogun: Soeren Sonnenburg master * ra49b0f6 / (19 files in 3 dirs): remove unnecessary includes from .h files - http://git.io/xh2KxQ
+ CIA-3	shogun: Soeren Sonnenburg master * r4a8d99d / (2 files): (log message trimmed)
+ CIA-3	shogun: Put implementations of templated functions into .cpp files
+ CIA-3	shogun: This is possible when strictly following
+ CIA-3	shogun: http://www.parashift.com/c++-faq-lite/templates.html#faq-35.15
+ CIA-3	shogun: i.e. we must know beforehand which types we want to support and specify
+ CIA-3	shogun: them like
+ CIA-3	shogun: template class Foo<int32_t>;
+--- Log closed Fri Sep 16 00:00:37 2011

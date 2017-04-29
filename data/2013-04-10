@@ -1,0 +1,1098 @@
+--- Log opened Wed Apr 10 00:00:26 2013
+ blackburn	so is DRPK going to have a party?
+ harpreet	Hi, I was interested in the 'Develop interactive machine learning demos' for GSoc.
+ harpreet	Any advice on what sort of work I should do before I apply?
+ blackburn	harpreet: this was answered quite a few times on the mailing list - consider starting to contribute with small patches
+ harpreet	Since the project is almost entirely concerned with Python, Django, JS, should I submit patches for the core C++ code or something else?
+ medeeiip	yesterday I asked about development of a CMakelist. So working under windows is possible.... I did wrote the whole cmake list but the problem is compiler is complaining about a lot of things.... like e.g pthread...
+ medeeiip	can pthread be made optional?
+ medeeiip	the compiler is complaining about dirent.h too (as that is not available on windows)
+ medeeiip	is there any more additional dependencies too ( one was with sys/types.h but I made that inclusion optional using #ifdef _WIN32 .....#else...code)
+ blackburn	harpreet: no that's not that required to have C++ patches - any examples using python would work too
+ blackburn	medeeiip: yes pthread is optional
+ blackburn	medeeiip: that would be very helpful to fix these includes
+ medeeiip	can you tell me where and how dirent.h is used ( I mean I can see where, actually how?)
+ medeeiip	i mean not specifically
+ medeeiip	but to give me an idea
+ blackburn	medeeiip: it is used to find files IIRC
+ medeeiip	so if i need to replace that dependency I need to do the same thing on windows in a alternative way....
+ blackburn	yes probably
+ medeeiip	is there any available list about what feature is optional and what is required?
+ blackburn	feature of?
+ medeeiip	i mean optional components like (pthread as you said).... specifically what library is required and what is optional?
+ blackburn	ahh no I don't think we have a list
+ blackburn	basically it should compile always
+ medeeiip	it is directly complaining about pthread.....
+ blackburn	medeeiip: all pthreads code should be guarded with preprocessor
+ blackburn	so that's a bug
+ medeeiip	no no.... hold a sec .... as confg.h generation was not automated i created a config.h where I used #define HAVE_PTHREAD 1
+ medeeiip	let me check if it works without it.
+ medeeiip	an idiot i am....:D
+ blackburn	medeeiip: yeah HAVE_PTHREAD should not be set if you don't have it
+ medeeiip	what is lbfgsfloatval_t datatype?
+ medeeiip	in optimization_libfgs.cpp
+ blackburn	medeeiip: what kind of answer do you expect? ;)
+ medeeiip	from what library it is?
+ blackburn	lbfgs
+ medeeiip	'n that is?
+ medeeiip	BFGS method?
+ medeeiip	lib for that?
+ blackburn	limited memory broyden fletcher goldfarb shanno
+ blackburn	yes
+ blackburn	medeeiip: it is incldued to the sources
+ medeeiip	but lbfgsfloatval_t is not defined in lbfgs.h
+ blackburn	medeeiip: where is it used?
+ medeeiip	shogun\examples\undocumented\libshogun\optimization_lbfgs.cpp
+ medeeiip	example though.....
+ blackburn	hmm
+ blackburn	it might be it wasn't properly updated
+ blackburn	have to sleep now
+ medeeiip	it's night at ur country
+ medeeiip	???????
+ blackburn	medeeiip: yes deep night slowly becoming a morning
+ medeeiip	same in india...... but
+ medeeiip	u 'r from germany ?
+ medeeiip	isn't it?
+ blackburn	no, russia
+ blackburn	it is sonney2k who is from berlin
+ medeeiip	i see.....
+ medeeiip	btw good nite
+ medeeiip	i too need a sleep badly....... tomorrow i've college
+ blackburn	nite
+-!- medeeiip [~medeeiip@103.2.132.232] has quit [Quit: Leaving]
+-!- FSCV [~FSCV@187.210.54.166] has quit [Quit: Leaving]
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- phd [lvoronova1@77-120-201-195.sumy.volia.net] has quit [Ping timeout: 248 seconds]
+-!- foulwall_ [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Read error: Connection reset by peer]
+-!- gsomix [~Miranda@188.168.14.137] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~blackburn@188.168.14.137] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~blackburn@83.234.169.3] has joined #shogun
+-!- rishabh [~rishabh@202.78.172.162] has joined #shogun
+-!- abinash [75ef5e6e@gateway/web/freenode/ip.117.239.94.110] has joined #shogun
+-!- gzhd79 [~zeller@mnhm-4d011972.pool.mediaWays.net] has joined #shogun
+-!- gzhd79 [~zeller@mnhm-4d011972.pool.mediaWays.net] has quit [Client Quit]
+-!- foulwall_ [~foulwall@li379-21.members.linode.com] has quit [Ping timeout: 252 seconds]
+-!- harpreet [~ceo@202.3.77.220] has quit [Read error: Connection reset by peer]
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+@sonney2k	blackburn, muhaaaahaa you do boosting now :D
+ blackburn	sonney2k: yeah
+ blackburn	sonney2k: is the code crappy?
+@sonney2k	blackburn, no idea - but this reminds me of my multiboost endeavour
+@sonney2k	and I guess their code is massive - they have won a couple of competitions with that
+ blackburn	sonney2k: I do not know what to answer to last message
+ blackburn	:D
+@sonney2k	gtg brb
+-!- bogdanc [~bogdan@p16.eregie.pub.ro] has joined #shogun
+ sonne|work	blackburn: haha
+ blackburn	sonne|work: I am scared by your laugh
+ blackburn	:D
+ sonne|work	*MUUUUUAUAUAAAAAAHHHH*
+ blackburn	sonne|work: is adaboost-reg really that cool?
+ blackburn	I am quite surprised they got back to 2001 paper
+ sonne|work	blackburn: it certainly is a reasonable method
+ sonne|work	like any other method of course
+ blackburn	sonne|work: what I do not get - do they have C++ impl of their adaboost?
+ sonne|work	blackburn: "they"?
+ blackburn	sonne|work: or him - whatever :)
+ blackburn	sonne|work: he said 'they' are limited with time
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- abinash [75ef5e6e@gateway/web/freenode/ip.117.239.94.110] has quit [Ping timeout: 245 seconds]
+ sonne|work	blackburn: I don't know whom you mean
+ blackburn	sonne|work: roni
+ sonne|work	ahh so not the multiboost guys
+ sonne|work	well adaboost needs early stopping (or it will overfit)
+ sonne|work	or some kind of regularization
+ sonne|work	and of course it sucks to have too many baselearners in the end
+ sonne|work	(slow when using it)
+ n4nd0	adaboost doesn't overfit (or so said my professor always)
+ sonne|work	haha
+ sonne|work	then he has never used it
+ n4nd0	she*
+ blackburn	hmm how can it *not* overfit?
+ n4nd0	mm I am not completely sure what was her claim
+ n4nd0	let me check slides
+ blackburn	n4nd0: I just can't see any 'rule' that makes it not overfitting algorithm
+ blackburn	I mean how many weak classifiers do we need?
+ blackburn	50, 100?
+ sonne|work	n4nd0: gunnar back in the days wrote a paper about it improving the situation
+ n4nd0	blackburn: what do you want to use it for?
+ sonne|work	back in 1999 or so
+ blackburn	n4nd0: I was stupid enough last night to suggest to help with integrating some adaboost reg
+ n4nd0	blackburn: multiboost code to shogun?
+ blackburn	n4nd0: no, adaboost reg by gunnar
+ sonne|work	blackburn: I guess adaboost* is easy
+ sonne|work	but you need the framework for baselearners
+ sonne|work	so basically any shogun classifier could be baselearner
+ blackburn	sonne|work: what kind of framework?
+ sonne|work	blackburn: CBaseLearner ?
+ blackburn	sonne|work: you mean some ensemble classifier
+ n4nd0	sonne|work: if any shogun classifier could be a baselearner, why not CMachine?
+ blackburn	that outputs this weighted sum?
+ blackburn	that sounds easy - the only thing is how to learn these classifiers and their weights right?
+ sonne|work	n4nd0: yeah CMachine is what you will likely need to use though regression methods etc don't fit
+ n4nd0	aham true
+ sonne|work	blackburn: err no - you have a fixed parameter setting for base learners
+ sonne|work	blackburn: so you just call train(data)
+ sonne|work	and it is not so clear to me how to reweight data
+ blackburn	sonne|work: ah so we need weighting support here
+ n4nd0	found it in slides directly
+ n4nd0	Beauty of AdaBoost
+ n4nd0	among other things
+ n4nd0	Test Errot: Asmptotes - no over-fitting observed. It continues to decrease after training error vanishes.
+ blackburn	n4nd0: sounds like the best method
+ blackburn	n4nd0: that's crazy
+ n4nd0	Asymptotes*
+ blackburn	n4nd0: I am sure it will increase as weighted sum of a lot of floats gets not really stable with time
+ n4nd0	blackburn: IIRC the weights are normalized
+ n4nd0	not sure if that helps in what you are referring to
+ sonne|work	n4nd0: read the abstract of http://books.google.com/books?id=bMuzXPzlkG0C&pg=PA564&lpg=PA564&dq=gunnar+ratsch+adaboost*&source=bl&ots=MvrfwEEJIj&sig=G72a-SjKPxM6VIA0Xj_RdPtDYJc&hl=en&sa=X&ei=2QplUbe3KMm7hAePioBI&ved=0CC8Q6AEwAA
+ sonne|work	n4nd0: no overfitting if no noise
+ sonne|work	but w/ noise (which is always present)
+ sonne|work	you have it
+ sonne|work	that is gunnars '99 paper
+ sonne|work	adaboost reg
+ n4nd0	sonne|work: aham ok, I don't really know how to interpret the noise here
+ sonne|work	n4nd0: well any measured data is noise
+ n4nd0	the course I am talking about was really focused on using Adaboost for face detection
+ n4nd0	with this Haar features
+ sonne|work	yeah noisy
+ sonne|work	as hell
+ blackburn	modern method
+ blackburn	:D
+ sonne|work	svm is from 1997 :P
+ n4nd0	mmm I don't really understand then why it is said like that in the slides
+ blackburn	sonne|work: yeah that's why svm is 'outdated' comparing to deep learning things
+ sonne|work	and neural nets from decades ago :P
+ blackburn	sonne|work: svm is from 1970 actually
+ blackburn	:D
+ sonne|work	even more outdated then
+ sonne|work	deep learning is just hip again since people had SVMs (with guaranteed convergence) for long enough
+ sonne|work	blackburn: theory of SVM maybe but not the applications
+ blackburn	sonne|work: no it is pretty different
+ blackburn	sonne|work: learning features is important
+-!- gzhd79 [~zeller@embln.embl.de] has joined #shogun
+ sonne|work	blackburn: so?
+ blackburn	sonne|work: I can't see SVM learning anything on features so it is quite different I'd say
+ sonne|work	it is like what NN's have always done
+ sonne|work	but since NN's have local minima
+ sonne|work	they are extremely hard to control
+ blackburn	sonne|work: when working on images it gets important
+ sonne|work	the right features are important for any task
+ shogun-buildbot	build #355 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/355
+ n4nd0	blackburn: aren't there ways to use large margin SVM-like learning to choose features?
+ blackburn	sonne|work: yes but we should not engineer it
+ blackburn	n4nd0: just *choose*
+ n4nd0	on the meantime test break... :S
+ blackburn	n4nd0: deep learning is about constructing a few levels from low-level (pixels)
+ sonne|work	blackburn: yeah sure that is the dream - but there still is a long way to go
+ blackburn	sonne|work: yes but it is already making some steps to automagic features
+ sonne|work	blackburn: with NNs you choose certain architectures, ways of training etc that have a massive impact on what features it learns
+ blackburn	sonne|work: that's true
+ sonne|work	blackburn: well then use MKL with all kinds of kernels
+ sonne|work	it also learns some features
+ blackburn	sonne|work: but SVM do not consider it at all
+ sonne|work	but sucks badly
+ sonne|work	I don't agree
+ sonne|work	SVM learns important features in feature space
+ sonne|work	but you limit the features by choosing a kernel
+ n4nd0	sonne|work: why does the approach MKL with lot of kernels suck?
+ sonne|work	and yes you have a hard time to express these features
+ blackburn	sonne|work: feature selection is totally different from feature extraction
+ sonne|work	n4nd0: it usually gives worse performance than just adding kernels
+ blackburn	sonne|work: I tend to believe we should *extract* features not select
+ sonne|work	I don't
+ sonne|work	I think the more features - the better
+ blackburn	sonne|work: yes, but again back to images
+ blackburn	sonne|work: if we just select pixels
+ blackburn	it always sucks
+ blackburn	but if we have some high-level on it (like sift)
+ sonne|work	blackburn: sure
+ sonne|work	so they use convolutional NN's
+ sonne|work	others suck too
+ blackburn	sonne|work: yes convolution is a good base to transform pixels to something
+ blackburn	sonne|work: it is engineered to do convolution - that's bad
+ sonne|work	blackburn: believe - a ML method is as good as the person who trains it
+ sonne|work	there are soo many tricks involved in everything
+ sonne|work	there usually is no general rule
+ sonne|work	saying that methodA is better than methodB
+ sonne|work	some methods are a more natural choice for certain tasks of course but that's it
+ blackburn	sonne|work: I am speaking not about methods but the approach
+ shogun-buildbot	build #1009 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/1009  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ blackburn	learning some method on engineered features is (in general) worse
+ blackburn	than learning features and then method
+ sonne|work	blackburn: to the contrary
+ sonne|work	learning features & method together is usually worse
+ sonne|work	humans are usually much better in engineering features
+ blackburn	sonne|work: depends
+ blackburn	sonne|work: with images (it is the only field I know) it is not - sparse features, dictionary learning, convolution stuff - these are better
+ blackburn	sonne|work: e.g there is no heuristic in fitting HOG cell sizes
+ blackburn	it is just stupid model selection
+ sonne|work	blackburn: yes but if you then add prior knowledge and force the thing to focus on reasonable features
+ sonne|work	you will get even better results
+ blackburn	bah I am still at home should be at job
+ blackburn	:D
+ sonne|work	http://yann.lecun.com/exdb/mnist/
+ sonne|work	blackburn: and I am at work but hmm... ok working now
+ sonne|work	cu!
+ blackburn	sonne|work: you see
+ blackburn	everything from the top is about extracting
+ sonne|work	yes and lots of is about learning
+ sonne|work	and lots of is about extracting & learning
+ sonne|work	and limiting learning of features
+ blackburn	sonne|work: ensembling + feature extraction + learning
+ sonne|work	k-NN with 0.63!
+ sonne|work	beats halv of the NN
+ sonne|work	s
+ blackburn	sonne|work: very well engineered distance I guess
+ blackburn	shape context matching should be something that matches these curves in a smart way
+ sonne|work	actually even 0.52
+ sonne|work	better than any VM
+ sonne|work	committee of 35 conv. net, 1-20-P-40-P-150-10 [elastic distortions] width normalization 0.23
+ sonne|work	haha
+ blackburn	sonne|work: it must be pretty slow
+ sonne|work	and they do distortions etc
+ sonne|work	the usual invariance tricks
+ blackburn	sonne|work: yes most of top methods do it with distortions
+ sonne|work	rotation/shifting lala
+-!- blackburn [~blackburn@83.234.169.3] has quit [Quit: Leaving.]
+-!- medeeiip [~medeeiip@103.18.168.49] has joined #shogun
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+-!- gzhd79 [~zeller@embln.embl.de] has left #shogun []
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+ blackburn	sonne|work: did you like that new mentor?
+ sonne|work	blackburn: 25minutes!
+ blackburn	I had to reject him though
+ blackburn	sonne|work: what 25 minutes?
+ sonne|work	blackburn: yeah cool guy
+ sonne|work	it took you to get to work
+ blackburn	sonne|work: hah yes with no jams it is pretty fast
+ blackburn	sonne|work: 1.5 km actually
+ sonne|work	blackburn: we certainly need more mentors like him
+ blackburn	sonne|work: it takes more time to enter the building and get to that 13th floor
+ blackburn	than moving by bus
+ sonne|work	though it is a bit sad that he didn't speak japanese
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Ping timeout: 245 seconds]
+ blackburn	sonne|work: he has other cool skills
+ blackburn	sonne|work: he speaks machine code at least
+ sonne|work	brainfuck?
+ sonne|work	topcoder - within top 10?
+ sonne|work	we need HEROS
+ blackburn	sonne|work: I don't mind a fluent machine code speaker in team
+ sonne|work	true
+ sonne|work	kind of a matrix operator
+ sonne|work	we should equip ourselves with phone booths to exit the matrix
+ sonne|work	and some reasonable mobiles
+ blackburn	sonne|work: matrix operator is a must have
+ sonne|work	but only one that can cope with a few liters of vodka per day
+ blackburn	sonne|work: mind releasing 2.1.1 once I get finished with tapkee?
+ sonne|work	you have to ask our release manager
+ sonne|work	I think it has to be 2.2 btw
+ blackburn	sonne|work: ahhh yes
+ sonne|work	we changed some api's
+ blackburn	sonne|work: no 2.1.1
+ blackburn	wherE?
+-!- bogdanc [~bogdan@p16.eregie.pub.ro] has quit [Quit: Konversation terminated!]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- rishabh [~rishabh@202.78.172.162] has quit [Remote host closed the connection]
+-!- Yanglittle [deb20af1@gateway/web/freenode/ip.222.178.10.241] has joined #shogun
+ Yanglittle	Hi, I have a question, how should I do when I want to combine the pre-computed kernel ? I didn't find the examples in the shogun.
+ sonne|work	Yanglittle: just add the kernel like any other kernel
+ sonne|work	you just don't need any features...
+ Yanglittle	this is the usage of add_kernel: sg('add_kernel', weight, kernel-specific parameters)  the third parameter is replaced by pre-computed kernel matrix?
+ blackburn	sonne|work: your biggest mistake was to formulate that demos idea :D
+ sonne|work	ohh static interfaces
+ sonne|work	Yanglittle: please use a modular interface
+ blackburn	we have somewhat 5 6 7 may be 8?
+-!- n4nd0 [~test@n133-p134.kthopen.kth.se] has joined #shogun
+ sonne|work	blackburn: in worst case we create one project for interactive *on the web* and one for shogun's examples
+ sonne|work	blackburn: hmmhh this adaboost code must be magic...
+ blackburn	sonne|work: that would push some ML idea out..
+ sonne|work	I still don't know how you get weights for examples to work w/ shogun
+ sonne|work	but hey
+ blackburn	sonne|work: I LOVE MAGIC CODE
+ blackburn	:D
+ sonne|work	blackburn: why should it push out an ML idea?
+ blackburn	sonne|work: # slots?
+ sonne|work	well last year we gave one back
+ sonne|work	so...
+ blackburn	sonne|work: true
+ sonne|work	blackburn: look at http://codingplayground.blogspot.nl/2009/03/adaboost-improve-your-performance.html
+ sonne|work	he also has the orginal adaboost algorithm in there
+ blackburn	hahah funny code
+ sonne|work	I didn't know that http://en.wikipedia.org/wiki/Godel_prize
+ sonne|work	the adaboost authors got that prize
+ sonne|work	but for real boosting use http://www.multiboost.org/
+ blackburn	sonne|work: in two words - what is the problem with integrating multiboost?
+ sonne|work	blackburn: it is huuuge
+ blackburn	sonne|work: and one more important Q - why multiboost doesn't have adaboost reg
+ sonne|work	it has everytthing invented like we do but different ...
+ sonne|work	it has adaboost MH
+ blackburn	sonne|work: what is MH?
+ sonne|work	www.lsi.upc.edu/~lluism/cursos/docSoria00/add2.ps.gz
+ sonne|work	seems like for multilable
+ sonne|work	label
+ sonne|work	and w/ confidences
+ sonne|work	but no regularization!?
+ blackburn	I mean if adaboost reg is kind of cool - why didn't they implement it
+ blackburn	that seems to be strange at least
+ sonne|work	I guess early stopping is good enough
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Remote host closed the connection]
+-!- gsomix [~Miranda@83.234.169.3] has joined #shogun
+ gsomix	hi guys
+ n4nd0	hey gsomix!
+ medeeiip	hello everyone I's working to build the shogun on windows.... seems almost I've to  entirely rewrite math.h using _win32 preprocessor
+ medeeiip	but currently i'm stuck with this error:
+ medeeiip	use of undefined type 'shogun::shogun::CStringFeatures<ST>'
+ medeeiip	1>          with
+ medeeiip	1>          [
+ medeeiip	1>              ST=uint16_t
+ medeeiip	1>          ]
+ n4nd0	ups rewriting code... that must be touch
+ medeeiip	from src\shogun/distributions/HMM.h(582)
+ n4nd0	medeeiip: how are you trying to build it? using cygwin?
+ medeeiip	no native vs compiler......
+ n4nd0	mmm I am not entirely sure what you mean
+ blackburn	medeeiip: you probably didn't define a thing that enables that type
+ n4nd0	in any case I think that the easiest way to get shogun working in windows is with cygwin, algthough I have no experience
+ medeeiip	it's not about working.... I've enthu of porting shogun to windows...
+ n4nd0	ah ok I see
+ medeeiip	about that error:
+ medeeiip	there is a def :
+ medeeiip	CStringFeatures<uint16_t>* p_observations;
+ medeeiip	one more thing i did....
+ blackburn	medeeiip: -DUSE_UINT16 and so on
+ medeeiip	implmented mmanwin32
+-!- 18VAAX8BZ [~lvoronova@77-120-201-195.sumy.volia.net] has joined #shogun
+-!- phd [~lvoronova@77-120-201-195.sumy.volia.net] has joined #shogun
+-!- 18VAAX8BZ [~lvoronova@77-120-201-195.sumy.volia.net] has left #shogun []
+ medeeiip	blackburn: I didn't understand
+ medeeiip	what u just said
+ medeeiip	 -DUSE_UINT16 where?
+ blackburn	medeeiip: you should have USE_UINT16 define to have features for uint16_t enabled
+ medeeiip	actually i used a #ifdef _WIN32 and included stdint.h
+ medeeiip	where uint16_t is available
+ medeeiip	I also implemented mman-win32 from https://code.google.com/p/mman-win32/
+ medeeiip	so memory management shouldn't be a problem.....
+ blackburn	medeeiip: hmm wait it is not necessary to have that define
+ blackburn	it is relevant for interfaces but not for anything else it seems
+-!- heiko1 [~heiko@nat-183-237.internal.eduroam.ucl.ac.uk] has joined #shogun
+ blackburn	n4nd0: thanks for answering these messages
+ n4nd0	blackburn: :) it's nothing
+ medeeiip	blackburn: any hack for that.......
+-!- arp [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+ arp	hey.shogun does not work in ubuntu 64 bit rite?
+ n4nd0	arp: Hi, it does work.
+ n4nd0	what problem do you have?
+ arp	i was installing it via the ubutu software center,it jept on failing,saying that it failed to  download some packages
+ arp	or some packages could not be downloaded
+ n4nd0	Aham, I assumed you were installing from source, sorry.
+ n4nd0	I didn't actually know you can install it via de software center :)
+ n4nd0	arp: What package in particular did you try to install? I have just tried with libshogun11 and it worked fine here.
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has joined #shogun
+ Yanglittle	It can't find the module when I run "from shogun.Kernel import GaussianKernel" and I can't find them on my PC..
+ n4nd0	Yanglittle: I guess you built shogun for python_modular. Did you make install after building as well?
+-!- arp [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Quit: Page closed]
+ Yanglittle	three steps I all executed.
+ n4nd0	Yanglittle: is it possible that you have more than one python version in your system?
+ n4nd0	it could be that shogun was built against one of the versions and you are trying to run it using another
+-!- ZeThomas [~thomaspr@2a02:2c40:100:a000:a81c:41e5:277a:c326] has joined #shogun
+ Yanglittle	i installed two versions ago. now just version 2.7
+ Yanglittle	i will rebuild it
+ n4nd0	make sure the version of python detected by shogun is the same one you want to use
+ n4nd0	detected by shogun = detected by the configure script
+ Yanglittle	i will, thanks.
+ ZeThomas	hey I get an error while compiling shogun2.1
+ n4nd0	ZeThomas: and the error is?
+ ZeThomas	http://pastebin.com/GYeSxjGR
+ ZeThomas	lapack
+ ZeThomas	i just installed openblas (and removed atlas)
+ ZeThomas	and wanted to recompile
+ ZeThomas	numpy 1.7 has been recompiled successfully just now
+ n4nd0	mm then maybe it is imcopatible with openblas?
+ ZeThomas	I don't know, is it?
+ n4nd0	I didn't know about it, it might be
+ ZeThomas	bugger
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- arp [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+ n4nd0	ZeThomas: excuse me?
+ ZeThomas	n4nd0: I should watch my language, sorry
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- foulwall [~foulwall@2001:da8:215:6901:69a5:d6ae:aaf0:6ef1] has joined #shogun
+-!- blackburn [~lisitsin@mxs.kg.ru] has joined #shogun
+ blackburn	ha!
+-!- heiko1 [~heiko@nat-183-237.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- medeeiip [~medeeiip@103.18.168.49] has quit [Quit: Leaving]
+-!- abinashpanda [75ef5e6e@gateway/web/freenode/ip.117.239.94.110] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- abinashpanda [75ef5e6e@gateway/web/freenode/ip.117.239.94.110] has quit [Ping timeout: 245 seconds]
+-!- shrey [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ ZeThomas	blackburn: do you know if shogun supports openblas?
+ blackburn	ZeThomas: should be possible I think
+ ZeThomas	i compiled it, and successfully numpy with it
+ ZeThomas	but shogun gives me errors
+ ZeThomas	http://pastebin.com/GYeSxjGR
+ blackburn	ZeThomas: ehmmm 311 looks strange to me :)
+ blackburn	why 'I' is treated as complex
+ blackburn	ZeThomas: what is the compiler?
+ ZeThomas	gcc
+ ZeThomas	4.7
+ blackburn	ZeThomas: could you please try to put some char('I') or so?
+ blackburn	311 and 347 of src/shogun/mathematics/lapack.cpp
+ ZeThomas	so line 311 becomes: char I = char('I') ?
+ blackburn	yes
+ ZeThomas	ok
+ ZeThomas	done, I'm trying to recompile now
+* ZeThomas goes for coffee while shogun compiles
+ blackburn	ZeThomas: you may use make -j4 to use 4 cores
+ ZeThomas	oh, that's handy :)
+ sonne|work	and ccache!
+ blackburn	yes and ccache
+-!- n4nd0_ [~test@n133-p134.kthopen.kth.se] has joined #shogun
+-!- n4nd0 [~test@n133-p134.kthopen.kth.se] has quit [Quit: Reconnecting]
+ ZeThomas	so "make -j8 -ccache" ?
+ ZeThomas	blackburn: still the same error
+ blackburn	ZeThomas: no, ccache is a wrapper on top of compiler
+ blackburn	not a key
+ blackburn	ZeThomas: hmm let me think
+-!- n4nd0_ is now known as n4nd0
+ n4nd0	ZeThomas: no, ccache make -j8
+-!- n4nd0 [~test@n133-p134.kthopen.kth.se] has quit [Client Quit]
+-!- n4nd0_ [~test@n133-p134.kthopen.kth.se] has joined #shogun
+-!- n4nd0_ [~test@n133-p134.kthopen.kth.se] has quit [Client Quit]
+-!- n4nd0 [~test@n133-p134.kthopen.kth.se] has joined #shogun
+ ZeThomas	thanks n4nd0
+ blackburn	n4nd0: ?? would that work?
+ sonne|work	IIRC you need to install ccache and put a certain dir in $PATH
+ sonne|work	such that it calls ccache when gcc is called
+ blackburn	and replace CXX and CC with ccache g++
+ n4nd0	blackburn: do you normally use it as make --ccache?
+ n4nd0	blackburn: I always do ccache make blah blah
+ blackburn	n4nd0: so does that work with ccache make?
+ blackburn	bah..
+ n4nd0	hehe I hope so
+ blackburn	sonne|work: any idea why 'I' is treated as complex?
+ blackburn	ZeThomas: okay other guess
+ blackburn	'\I' maybe?
+ sonne|work	what is going on?
+ sonne|work	blackburn: my suggestion is to use char range = 'I';
+ sonne|work	then it should work
+ sonne|work	blackburn: I think it treats I as a complex nr
+-!- arp [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Ping timeout: 245 seconds]
+-!- sumit [73f91219@gateway/web/freenode/ip.115.249.18.25] has quit [Ping timeout: 245 seconds]
+ ZeThomas	yes that seems the case, so is this an OpenBLAS specific thing then?
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ ZeThomas	blackburn, sonne|work, this seems to have done the trick: I refactored every occurence of [varname] I to range
+ ZeThomas	however it gives errors for SGMatrix.cpp (http://pastebin.com/KV8Yzi9Y), I suspect of the same kind
+ sonne|work	    SGMatrix<int8_t> I(size, size);
+ sonne|work	yes
+ sonne|work	could you please call this identity there?
+ sonne|work	ZeThomas: and please send us a git pull request against the develop branch
+ ZeThomas	sonne|work: I'd be delighted, but you might want to talk me through it, I'm a git noob...
+ sonne|work	n4nd0: could you     please help ZeThomas?
+ n4nd0	back again
+ sonne|work	n4nd0: ^ please help him to set up git if you have time  - thanks!
+ n4nd0	sure
+ n4nd0	ZeThomas: so how is it going
+ n4nd0	although I have not tried yet myself git-flow, blackburn or someone else can tell us if we need some help about it though
+ ZeThomas	ok n4nd0, I git cloned git://github.com/shogun-toolbox/shogun.git
+ blackburn	yeah sure
+ ZeThomas	and made the changes
+ n4nd0	ZeThomas: ok then let's start again
+ blackburn	ZeThomas: I am afraid you would need to transfer your changs to your fork
+ blackburn	ZeThomas: is it ubuntu/debian you are running?
+ ZeThomas	blackburn: yes
+ n4nd0	because you fork the main repository and clone that one
+ blackburn	ZeThomas: please install git flow (sudo apt-get install git-flow)
+ n4nd0	blackburn: I guess however it can enough enough changing the remotes?
+ blackburn	n4nd0: ha good point
+ ZeThomas	blackburn: done
+ blackburn	alright
+ blackburn	now you have to 'git flow init'
+ ZeThomas	ok: Branch name for production releases: [master]
+ ZeThomas	?
+ n4nd0	ZeThomas: give me a second
+ n4nd0	this was already explained in the mailing list
+ blackburn	ZeThomas: yes that's default
+ n4nd0	I can send you a link
+ blackburn	ZeThomas: next release is develop
+ ZeThomas	n4nd0: please do
+ ZeThomas	sonne|work: it still fails to compile: http://pastebin.com/G25Fyx0g
+ n4nd0	ZeThomas: http://news.gmane.org/gmane.comp.ai.machine-learning.shogun
+ n4nd0	Crtl+f workflow
+ n4nd0	mail by Sergey on April 4th
+ sonne|work	ZeThomas: argh - please rename the varialbe I in line 106 to index
+ sonne|work	too
+-!- n4nd0 [~test@n133-p134.kthopen.kth.se] has quit [Ping timeout: 246 seconds]
+ ZeThomas	sonne|work: in which file?
+ ZeThomas	blackburn: ok git flow is set up
+ sonne|work	shogun/structure/libbmrm.h:106
+ sonne|work	I guess there too shogun/lib/external/libqp.h:61
+-!- votjak [~votjak@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- kpn [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+-!- n4nd0 [~test@n133-p134.kthopen.kth.se] has joined #shogun
+ n4nd0	got connection troubles
+ blackburn	ZeThomas: once it compiles do 'git flow support complex_literals'
+ blackburn	complex_literals is the name of branch to be created
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ ZeThomas	blackburn: Unknown subcommand: 'complex_literals'
+ ZeThomas	sonne|work: it compiles now, thanks. Is this an OpenBLAS specific thing?
+-!- kpn [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Ping timeout: 245 seconds]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ n4nd0	ZeThomas: my guess is that there is a global in OpenBlas called I
+ ZeThomas	n4nd0: oh, and in c++, global names take precedence over local ones? or in no case can you have doubles?
+ n4nd0	ZeThomas: with doubles you mean two variables with the same name?
+ ZeThomas	n4nd0: yes
+ ZeThomas	as you can do in python e.g.
+ n4nd0	I am not sure
+ n4nd0	ZeThomas: what could it be otherwise?
+ blackburn	ZeThomas: oops sorry
+ blackburn	ZeThomas: git flow support start complex_literals
+ ZeThomas	blackburn: Missing argument <base>
+ n4nd0	blackburn: why do you think this error with the I happened?
+ blackburn	n4nd0: no idea but your explanation looks valid
+ ZeThomas	blackburn: I add develop at the end?
+ blackburn	ZeThomas: hmm yeah try that
+ blackburn	ZeThomas: sorry we changed our model to git flow may be a week ago
+ blackburn	:)
+-!- medeeiip [~medeeiip@103.18.168.49] has joined #shogun
+ ZeThomas	ok: You are now on branch 'support/complex_literals'
+ blackburn	ZeThomas: okay so call 'git status' and check the files you made changes in
+ blackburn	'git add [filename]' each of them
+ ZeThomas	blackburn: ok, done
+ blackburn	ZeThomas: git commit -m 'your message here'
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ ZeThomas	blackburn, ok, what's next?
+ blackburn	ZeThomas: tricky part
+ blackburn	ZeThomas: git remote rename origin upstream
+ blackburn	ZeThomas: https://github.com/shogun-toolbox/shogun press the fork button
+ ZeThomas	blackburn: error: Could not rename config section 'remote.origin' to 'remote.upstream'
+ blackburn	ZeThomas: hmm okay
+ blackburn	ZeThomas: git remote add upstream https://github.com/shogun-toolbox/shogun.git
+-!- foulwall [~foulwall@2001:da8:215:6901:69a5:d6ae:aaf0:6ef1] has quit [Remote host closed the connection]
+ ZeThomas	blackburn: ok
+ blackburn	ZeThomas: done?
+ ZeThomas	yes
+ ZeThomas	so now?
+ blackburn	ZeThomas: git remote set-url [ssh url to your fork]
+ blackburn	argh
+ blackburn	ZeThomas: git remote set-url origin [ssh url to your fork]
+ blackburn	ZeThomas: you may get that link on the page of your fork
+ ZeThomas	blackburn: fatal: No such remote 'origin'
+ ZeThomas	git remote add origin https://github.com/shogun-toolbox/shogun.git ?
+ n4nd0	ZeThomas: origin should point to your fork, not to the main one
+ n4nd0	ZeThomas: it should be something like ...ZeThomas/shogun.git
+ n4nd0	where ZeThomas is your username in github
+ ZeThomas	oh, I'm so bad at git...
+ ZeThomas	so git remote add origin https://github.com/tp199911/shogun.git ?
+ n4nd0	it is hard at the beginning, I suggest you to check gitbook and some videocasts
+ n4nd0	ZeThomas: did you already fork in github?
+ ZeThomas	yes, that link is my fork
+ blackburn	ZeThomas: better use ssh url
+ blackburn	however https would work too
+ n4nd0	blackburn: faster with ssh?
+ blackburn	n4nd0: requires no authorization
+ ZeThomas	ok, so I do: git remote add origin git@github.com:tp199911/shogun.git ?
+ blackburn	ZeThomas: yes
+ n4nd0	blackburn: oh yeah, sure
+ ZeThomas	blackburn: ok, that's done
+ blackburn	ZeThomas: ok near to ready!
+ blackburn	ZeThomas: try to do git push origin
+ ZeThomas	Permission denied (publickey). fatal: The remote end hung up unexpectedly...
+ n4nd0	ZeThomas: you have to put your publich ssh key in github I think
+ blackburn	ZeThomas: just to check could you please git remote -v?
+ n4nd0	https://help.github.com/articles/generating-ssh-keys
+ blackburn	and paste the output
+ ZeThomas	http://pastebin.com/yQ7Mae73
+ blackburn	ZeThomas: alright
+ blackburn	ZeThomas: please follow the link n4nd0 put
+ blackburn	and set up a public key
+ ZeThomas	I'm on it
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ ZeThomas	blackburn: I get this after the push
+ ZeThomas	http://pastebin.com/w4cRiMri
+ blackburn	ZeThomas: alright
+ blackburn	no problem
+ blackburn	ZeThomas: git checkout master
+ blackburn	git pull --rebase origin master
+ blackburn	git checkout develop
+ blackburn	git pull --rebase origin develop
+ blackburn	git checkout support/complex_literals
+ blackburn	git rebase develop
+ blackburn	git push origin support/complex_literals
+ blackburn	something like this I think
+ ZeThomas	after git pull origin master I get: Aborting\n could not detach HEAD
+-!- gaurang [~quassel@triband-mum-59.182.146.169.mtnl.net.in] has joined #shogun
+ blackburn	ZeThomas: what is the branch you are on?
+ blackburn	git status
+ ZeThomas	on branch master
+ ZeThomas	the files I added have disappeared though :D
+ blackburn	ZeThomas: you commited them right?
+ ZeThomas	yes
+ ZeThomas	well, I guess
+ blackburn	so that's ok they are on a different branch
+-!- foulwall [~foulwall@2001:da8:215:6901:d1f1:befd:256d:419] has joined #shogun
+ blackburn	ZeThomas: I am confused with thar error
+ blackburn	that*
+ ZeThomas	blackburn: you and I both...
+ blackburn	ZeThomas: okay lets get back to that support/complex_literals branch
+ blackburn	git checkout complex_literals
+ blackburn	git flow support finish complex_literals
+-!- foulwall [~foulwall@2001:da8:215:6901:d1f1:befd:256d:419] has quit [Ping timeout: 245 seconds]
+ ZeThomas	Unknown subcommand: 'finish'
+ blackburn	ZeThomas: argghhhh
+ blackburn	my bad
+ blackburn	ZeThomas: git branch -m support/complex_literals feature/complex_literals
+-!- yefuneh [3edb8730@gateway/web/freenode/ip.62.219.135.48] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ yefuneh	Can someone point me to a **simple** example using shogun in lua?
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ blackburn	yefuneh: https://github.com/shogun-toolbox/shogun/blob/master/examples/undocumented/lua_modular/classifier_libsvm_minimal_modular.lua something like that
+ ZeThomas	blackburn: done
+ yefuneh	no, too complicated
+ blackburn	ZeThomas: git feature finish feature/complex_literals
+-!- gsomix [~Miranda@83.234.169.3] has quit [Read error: Connection reset by peer]
+ ZeThomas	blackburn: I suppose you mean git flow feature finish feature/complex_literals
+ ZeThomas	blackburn: No branch matches prefix 'feature/complex_literals'
+ yefuneh	blackburn when looking at svmlight for example, you just run svm_learn and svm_classify, is there something that just shows how to take a training file create a model and then run that model against the test data?
+ blackburn	ZeThomas: ohhhh
+ blackburn	ZeThomas: was it renamed?
+ blackburn	yefuneh: no probably there is no such example
+ n4nd0	yefuneh: https://github.com/shogun-toolbox/shogun/blob/master/examples/undocumented/lua_modular/classifier_averaged_perceptron_modular.lua
+ n4nd0	yefuneh: this looks simple enough
+-!- heiko1 [~heiko@nat-184-136.internal.eduroam.ucl.ac.uk] has joined #shogun
+ blackburn	n4nd0: could you please back me up with ZeThomas? have to get to work
+ n4nd0	blackburn: sure
+ n4nd0	blackburn: but not idea about git flow yet :)
+ blackburn	n4nd0: it is just about branches I think
+ yefuneh	n4nd0 - thanks. What is load_labels for? My test and training data are in a format like: -1 1:5 2:7 ... where -1 is the label
+ n4nd0	yefuneh: wild guess - load labels is to take the labels from a file and put them in a variable
+ yefuneh	n4nd0 thanks
+ n4nd0	yefuneh: if you labels are in that format you can either code your own functions to parse the data in a similar way to how it is done in the load.lua script
+ n4nd0	yefuneh: or you can create new data files following the convention of the files used in the example and re-use the load functions
+ ZeThomas	n4nd0, me to I have to get to work... can we do this some other time?
+ n4nd0	ZeThomas: sure
+ n4nd0	just come around some time
+ ZeThomas	ok, cheers
+ ZeThomas	cu, thanks for the help
+ yefuneh	n4nd0 - I'll have to look at the example files. Based on the examples it seems much more complicated then running svmlight/libsvm directly on the data
+-!- ZeThomas [~thomaspr@2a02:2c40:100:a000:a81c:41e5:277a:c326] has quit [Quit: Leaving]
+-!- phd [~lvoronova@77-120-201-195.sumy.volia.net] has quit [Ping timeout: 252 seconds]
+-!- frl [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+-!- phd [~lvoronova@77-120-201-195.sumy.volia.net] has joined #shogun
+-!- foulwall [~foulwall@li379-21.members.linode.com] has joined #shogun
+-!- yefuneh [3edb8730@gateway/web/freenode/ip.62.219.135.48] has quit [Quit: Page closed]
+-!- frl_ [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+-!- n4nd0 [~test@n133-p134.kthopen.kth.se] has quit [Ping timeout: 255 seconds]
+ frl_	in the issue "Kernel PCA test/check" . we have to implement th ekernel pca algorithm in python without using the shogun libraries rite?
+ frl_	m i correct?
+ frl_	?
+ frl_	?
+-!- frl [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Ping timeout: 245 seconds]
+ frl_	ne suggestions?
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ frl_	?
+ frl_	?
+ heiko1	frl_: see email
+-!- ppletscher [~ppletsche@84-75-165-165.dclient.hispeed.ch] has quit [Quit: ppletscher]
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- ppletscher [~ppletsche@84-75-165-165.dclient.hispeed.ch] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- medeeiip__ [~medeeiip@103.18.168.49] has joined #shogun
+-!- medeeiip [~medeeiip@103.18.168.49] has quit [Ping timeout: 245 seconds]
+-!- foulwall [~foulwall@li379-21.members.linode.com] has quit [Remote host closed the connection]
+-!- ppletscher [~ppletsche@84-75-165-165.dclient.hispeed.ch] has quit [Quit: ppletscher]
+@sonney2k	heiko1, https://docs.google.com/spreadsheet/ccc?key=0Aunb9cCVAP6NdDVBMzY1TjdPcmx4ei1EeUZNNGtKUHc&usp=sharing
+@sonney2k	blackburn, ^
+@sonney2k	I am just creating some python script to generate a page from that which we can put on the homepage
+ heiko1	sonney2k: ok
+ heiko1	I dont find that overly usefull though
+ heiko1	I think we should rather have a list of what we can do, which is a bit more detailed
+ heiko1	like "features"
+ heiko1	since this matrix oversimplifies somewhat
+ frl_	what does "integration test for kernel pca means?
+-!- frl_ [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Quit: Page closed]
+ blackburn	ha
+ blackburn	he left no chance to answer
+ heiko1	frl_: this saves the results of the example to a file once and then everytime the example is run it is compared against the old result. This way we can avoid that algorithms change wihtout us noticing
+-!- kipp [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+ heiko1	going for coffee ....
+@sonney2k	heiko1, blackburn - here it is https://dl.dropbox.com/u/31480471/matrix.png
+ kipp	what does integration test for kernal pca mean?does it means that the kernel matrix is valid?
+ kipp	m i correct?
+ blackburn	kipp: what is a valid kernel matrix?
+ blackburn	kipp: that was for your probably?
+ blackburn	(7:05:25 PM) heiko1: frl_: this saves the results of the example to a file once and then everytime the example is run it is compared against the old result. This way we can avoid that algorithms change wihtout us noticing
+ kipp	blackburn: kernel matrix should be postive definate
+ blackburn	kipp: yeah but it would be a test for kernel not pca, right? ;)
+ kipp	yes ,yes.sorry typed pca by mistake
+ blackburn	kipp: integration tests are usually checking if results are staying the same
+ blackburn	so it would be just project something and check if it is the same as it was before
+ kipp	so its like a accuracy checker
+ blackburn	kipp: some sort of
+ kipp	k,so its like checking ,if the data has become linearly separable or not
+ blackburn	kipp: no the data stays so the output should stay too
+ kipp	as in the output data  is same as the input data after kernel pca
+ blackburn	kipp: no as output data is the same after some code is changed
+ blackburn	naywhayare: how many SFINAE experts so far? ;)
+-!- kipp [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Ping timeout: 245 seconds]
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+-!- phd [~lvoronova@77-120-201-195.sumy.volia.net] has quit [Ping timeout: 264 seconds]
+-!- shrey [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Ping timeout: 245 seconds]
+-!- Yanglittle [deb20af1@gateway/web/freenode/ip.222.178.10.241] has quit [Quit: Page closed]
+-!- shrey [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+-!- blackburn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+-!- shrey [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has quit [Ping timeout: 245 seconds]
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Ping timeout: 245 seconds]
+-!- gaurang [~quassel@triband-mum-59.182.146.169.mtnl.net.in] has quit [Read error: Connection reset by peer]
+-!- phd [lvoronova1@77-120-201-195.sumy.volia.net] has joined #shogun
+ naywhayare	blackburn: no SFINAE experts but a large number of first-year undergraduates seem interested in the "9/10 difficulty" (as I listed it) project on improving the abstract tree traversals mlpack has...
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ naywhayare	and when I say "no, really, I promise, enjoy your summer, you can't learn this stuff in two weeks", they seem to end up even more interested
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- phd [lvoronova1@77-120-201-195.sumy.volia.net] has quit [Ping timeout: 260 seconds]
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- phd [~lvoronova@77-120-201-195.sumy.volia.net] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+ deerishi	i know Kernal PCA ,but I am still unclear about what do we need to do the kernalpca issue https://github.com/shogun-toolbox/shogun/issues/940
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ heiko1	deerishi: the point is to write a nice example to illustrate how the algorithm works
+ heiko1	some easy data, then you do your kernel PCA, and see how it changes the data
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ deerishi	heikol: thank you
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- shaumik [d2d43ae7@gateway/web/freenode/ip.210.212.58.231] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Ping timeout: 245 seconds]
+-!- shaumik [d2d43ae7@gateway/web/freenode/ip.210.212.58.231] has quit [Quit: Page closed]
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- blackburn [~blackburn@188.168.2.135] has joined #shogun
+ blackburn	heiko1:
+ blackburn	one thing on kpca
+ heiko1	blackburn:
+ blackburn	heiko1: tapkee supports kpca, may be it makes sense to change the code to use it
+ heiko1	blackburn: yes that might be good
+ heiko1	could you update the task?
+ blackburn	heiko1: yeah will do
+ heiko1	or maybe add another one for that
+ heiko1	since the example doesnt depend on the backend
+ blackburn	yes
+ blackburn	that's better
+ heiko1	cool
+ blackburn	naywhayare: I see
+ heiko1	blackburn: could we go into the git issue again? :)
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ blackburn	heiko1: what is the issue?
+ heiko1	still no idea how to commit ;)
+ heiko1	git flow
+ heiko1	remember?
+ blackburn	oh shh
+ blackburn	sure
+ blackburn	heiko1: could you please remind me the status we got into?
+ heiko1	git flow init
+ heiko1	Which branch should be used for bringing forth production releases?
+ heiko1	   - master
+ heiko1	Branch name for production releases: [master]
+ heiko1	I cannot select development
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ blackburn	heiko1: yes because it is not here
+ heiko1	exactly
+ blackburn	probably
+ blackburn	heiko1: is it your fork?
+ heiko1	yes
+ blackburn	heiko1: lets try
+ blackburn	git checkout -b develop upstream/develop
+ heiko1	fatal: git checkout: updating paths is incompatible with switching branches.
+ heiko1	Did you intend to checkout 'upstream/develop' which can not be resolved as commit?
+ blackburn	hmm
+ blackburn	git branch develop upstream/develop?
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ blackburn	heiko1: wait
+ blackburn	heiko1: lets do that
+ blackburn	git fetch upstream
+ blackburn	it should load all branches
+ heiko1	argh
+ heiko1	yes
+ heiko1	of course
+ blackburn	heiko1: but you'd still need to create your branch too
+ heiko1	remember  when you said git pull --rebase includes git fetch upstream?
+ blackburn	heiko1: yes
+ blackburn	pull is fetch + merge
+ blackburn	or fetch + rebase
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ heiko1	okay hzow to fetch the branch now?
+ blackburn	heiko1: does git branch -va
+ blackburn	show you remote branch
+ blackburn	of develop?
+ heiko1	yes
+ blackburn	heiko1: alright
+ blackburn	heiko1: just create develop
+ blackburn	ahh
+ blackburn	yes
+ blackburn	:D
+ blackburn	heiko1: I think you need to create a branch based on upstream/develop
+ heiko1	is there a difference between dev and develop?
+-!- kakashi_ [~kakashi_@nltk/kakashi] has quit [Ping timeout: 252 seconds]
+ blackburn	heiko1: dev should be deleted
+ heiko1	ok
+ blackburn	heiko1: it is deleted but git is distributed so it stayed in your copy
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ heiko1	blackburn: ok so now I created develop
+ blackburn	alright
+ blackburn	heiko1: git push origin develop
+ heiko1	how to update it?
+ blackburn	git rebase upstream/develop
+ heiko1	ok pushed
+-!- kakashi_ [~kakashi_@nltk/kakashi] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ heiko1	and now?
+ blackburn	heiko1: git flow init
+ heiko1	blackburn:  how to update the develop branch?
+ blackburn	heiko1: git gets easier once you get the basic idea that branches are homeomorphic endofunctors mapping submanifolds..
+ blackburn	:D
+ blackburn	heiko1: what do you mean by update?
+ heiko1	haha :)
+ heiko1	nevermind
+ heiko1	Which branch should be used for integration of the "next release"?
+ blackburn	next release is develop
+ heiko1	and production release?
+ heiko1	Ill check your mail
+ blackburn	heiko1: master
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ blackburn	heiko1: everything is default
+ heiko1	ok worked
+ blackburn	except versiontag
+ heiko1	so now I modify develop right?
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ blackburn	nope
+ blackburn	now you
+ blackburn	git flow feature start my_awesome_feature
+ blackburn	git commit ...
+ heiko1	ok
+ blackburn	git flow feature finish my_awesome_feature
+ heiko1	what does this? merge it into develop
+ heiko1	?
+ blackburn	heiko1: finish merges and deletes the branch
+ heiko1	I see
+ heiko1	and then I push develop?
+ blackburn	yes
+ heiko1	whats the command for that?
+ heiko1	just push?
+ blackburn	heiko1: but actually I have absolutely no idea how to handle that better
+ blackburn	heiko1: yes
+ blackburn	heiko1: I'd suggest you to finally commit in the main repository
+ heiko1	at which point?
+ blackburn	PRs are additional headache here
+ heiko1	what do you  mean by that?
+ heiko1	a I see
+ heiko1	no Ill do PR
+ heiko1	better for me
+ blackburn	heiko1: just merge it directly
+ heiko1	I tend to mess up repos
+ blackburn	why?
+ heiko1	fucked up mine about 100 times
+ blackburn	hmm
+ heiko1	so safer for me to work on the fork
+ heiko1	also we have a history
+ heiko1	think thats better
+ heiko1	and travis
+ heiko1	and I can see the diff in the PR view
+ blackburn	heiko1: yeah that has pros and conses
+ heiko1	I know, but Id rather stay on the safe side here
+ heiko1	thanks for the help!
+ blackburn	heiko1: but actually it would be better so consider moving some day ;)
+ blackburn	heiko1: the thing is that we do group commits this way
+ blackburn	so develop could look like a bunch of merges
+ heiko1	thats not bad right?
+ blackburn	ideally it looks like
+ blackburn	merge feature a
+ blackburn	merge feature b
+ blackburn	master is even more compressive
+ blackburn	it contains only tags
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ blackburn	heiko1: homeomorphic endofunctors! keep that in mind
+ heiko1	blackburn: yeah, whatever :D
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+ blackburn	heiko1: git flow stuff is just a script
+ blackburn	that creates branches and deletes it
+ heiko1	I know
+ blackburn	heiko1: just hides a few commands
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- votjak [~votjak@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Leaving]
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Ping timeout: 245 seconds]
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- bogdanc [~bogdan@p16.eregie.pub.ro] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- ppletscher [~ppletsche@84-75-165-165.dclient.hispeed.ch] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Read error: Connection reset by peer]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- deerishi [73f88294@gateway/web/freenode/ip.115.248.130.148] has quit [Ping timeout: 245 seconds]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- aegis1 [aegis1@123.237.52.165] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- gsomix [~Miranda@188.168.2.135] has joined #shogun
+ gsomix	hi
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ n4nd0	hey gsomix
+ n4nd0	what is your project search going?
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ n4nd0	how*
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ gsomix	n4nd0: in progress... any ideas? I think I can implement typemaps for model selection (ought to have done a long time ago >__<), but it's not enough.
+-!- ppletscher [~ppletsche@84-75-165-165.dclient.hispeed.ch] has quit [Quit: ppletscher]
+ gsomix	sonney2k: there? good evening
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 264 seconds]
+-!- aegis1 [aegis1@123.237.52.165] has quit [Ping timeout: 255 seconds]
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+@sonney2k	gsomix, hey there
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ gsomix	sonney2k: how are you? I want to continue the last conversation. what's wrong with R modular interface now?
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- phd [~lvoronova@77-120-201-195.sumy.volia.net] has quit [Ping timeout: 264 seconds]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+@sonney2k	gsomix, it is crashing
+@sonney2k	gsomix, IDK if you recall
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+@sonney2k	but whenever some object is transferred from C++ -> python
+@sonney2k	python needs to keep somehow track of the object and potentially destroy / deallocate it
+@sonney2k	this is done via reference counts
+@sonney2k	so we register 2 functions
+@sonney2k	called ref()
+@sonney2k	and unref()
+@sonney2k	that take care of this from python
+@sonney2k	for R modular these functions seem not to work
+@sonney2k	at least we just get crashes when these are enabled
+ gsomix	sonney2k: got it
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ gsomix	sonney2k: are there any else interfaces related issues? model selection, R, lua, static interfaces... hm?
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+@sonney2k	gsomix, yeah well blackburn had this nice model selection idea
+ gsomix	sonney2k: already know :)
+@sonney2k	gsomix, it is not a fulltime project though but just something to warm up LD
+@sonney2k	:)
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+@sonney2k	gsomix, otherwise interface wise we have some even harder problem - our wrapper code size is to big. we would need some way of splitting up the swig generated wrapper
+-!- heiko1 [~heiko@nat-184-136.internal.eduroam.ucl.ac.uk] has left #shogun []
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ gsomix	sonney2k: not clear. should this give a profit (less time to recompile or so)?
+ blackburn	gsomix: sonney2k: I will try to come up with idea on all these generic programming things tomorrow
+@sonney2k	gsomix, yes drastically reduced compile time
+@sonney2k	gsomix, and much less memory requirements
+ blackburn	https://github.com/shogun-toolbox/shogun/issues/969 we have standartizer!
+@sonney2k	instead of 3-4GB just few 100MB
+-!- n4nd0_ [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 276 seconds]
+-!- n4nd0_ is now known as n4nd0
+ blackburn	sonney2k: hmm he is going to standartize all libraries on github!
+@sonney2k	n4nd0, I managed to https://docs.google.com/spreadsheet/ccc?key=0Aunb9cCVAP6NdDVBMzY1TjdPcmx4ei1EeUZNNGtKUHc&hl=en#gid=0
+@sonney2k	convert this to html with some python script
+-!- jptech93 [~quassel@115.248.130.148] has quit [Remote host closed the connection]
+ n4nd0	sonney2k: I saw the matrix before, it looks good I think
+@sonney2k	https://dl.dropbox.com/u/31480471/matrix.png
+ gsomix	sonney2k: ok, thanks a lot. there is a lot to think about
+@sonney2k	n4nd0, so where do we put it
+ n4nd0	sonney2k: let met see
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+ n4nd0	sonney2k: somewhere inside about, what do you think?
+ n4nd0	isn't already something similar on the page? about > related projects
+ n4nd0	what about there?
+ n4nd0	maybe a subpage
+ n4nd0	sub-subpage
+ blackburn	sonney2k: I am surprised with that guy - he opens issues in various repos on that
+ blackburn	I just do not really get the motivation beneath
+@sonney2k	blackburn, yeah but it is cool
+@sonney2k	staying within standard (to the extent possible) will keep us out of trouble
+ blackburn	sonney2k: yeah and out of native compiling on window$
+@sonney2k	n4nd0, it is not just related projects though but also feature comparison
+ blackburn	:D
+@sonney2k	blackburn, why?
+ blackburn	sonney2k: VS heavily violates everything I know
+@sonney2k	ahh that
+ n4nd0	sonney2k: btw why does it appear shogun last updates 2010??
+@sonney2k	n4nd0, because that is when we updated the .csv
+@sonney2k	err google doc
+@sonney2k	blackburn, I don't like having a UUID in there though
+ blackburn	sonney2k: UUID is ok but ugly
+@sonney2k	then everything should be autogenerated
+@sonney2k	yeah because of ugliness
+ blackburn	sonney2k: I see no actual reason to do that
+ n4nd0	sonney2k: I would go for either about > information > feature comparison or about > related projects > feature comparison
+ blackburn	chances STL get a header named SG_CUSTOM_KERNEL_H_ are ehmm low
+ n4nd0	sonney2k: I think it would be nice though to have a link to it or sth where one can see part of the matrix png from the homepage
+@sonney2k	n4nd0, agreed
+@sonney2k	but it needs updating too
+ n4nd0	sonney2k: what needs updating?
+@sonney2k	n4nd0, that was pre shogun 1.0 IIRC
+@sonney2k	we have like 100'd more kernels
+@sonney2k	and so might have other projects
+@sonney2k	and other features of course
+ n4nd0	aaah ok I thought the google docs you have sent around today was up-to-date
+-!- shrey [ca4eaca2@gateway/web/freenode/ip.202.78.172.162] has joined #shogun
+@sonney2k	blackburn, well let him do the work no?
+ blackburn	sonney2k: he is not going to do that I think
+ blackburn	be back later
+-!- phd [~lvoronova@77-120-201-195.sumy.volia.net] has joined #shogun
+ gsomix	time to install linux
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 252 seconds]
+-!- gsomix [~Miranda@188.168.2.135] has quit [Read error: Connection reset by peer]
+-!- medeeiip [~medeeiip@103.18.168.49] has joined #shogun
+-!- jptech93 [~quassel@115.248.130.148] has quit [Ping timeout: 245 seconds]
+-!- medeeiip__ [~medeeiip@103.18.168.49] has quit [Ping timeout: 252 seconds]
+-!- bogdanc [~bogdan@p16.eregie.pub.ro] has quit [Quit: Konversation terminated!]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+-!- ahcorde [553324b1@gateway/web/freenode/ip.85.51.36.177] has joined #shogun
+ shrey	Hello everyone.
+ shrey	 I am new to machine learning.Can someone point me in the right direction so that i can start working on the binary classification problem?links to reading materials/demos would be helpful.
+-!- jptech93 [~quassel@115.248.130.148] has joined #shogun
+--- Log closed Thu Apr 11 00:00:27 2013

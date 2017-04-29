@@ -1,0 +1,228 @@
+--- Log opened Sun May 25 00:00:03 2014
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+-!- kislay [~Abhijeet@103.240.206.201] has quit [Quit: Leaving]
+-!- khalednasr [~k.nasr92@41.69.189.9] has quit [Ping timeout: 258 seconds]
+-!- kislay [~Abhijeet@103.240.206.201] has joined #shogun
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Ping timeout: 240 seconds]
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has quit [Ping timeout: 245 seconds]
+-!- sonne|work [~sonnenbu@sams-office-nat.tomtomgroup.com] has joined #shogun
+-!- kislay [~Abhijeet@103.240.206.201] has quit [Ping timeout: 265 seconds]
+-!- iglesiasg [~iglesiasg@c83-251-123-229.bredband.comhem.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- kislay [~Abhijeet@27.116.52.254] has joined #shogun
+-!- chakri [srichakrad@gateway/shell/bnc4free/x-gbvhltybbqawmhze] has quit [Remote host closed the connection]
+-!- besser82 [quassel@fedora/besser82] has quit [Remote host closed the connection]
+-!- dhruv13j [dhruv13j@gateway/shell/bnc4free/x-bettdhcubostejjo] has quit [Remote host closed the connection]
+-!- iglesiasg [~iglesiasg@c83-251-123-229.bredband.comhem.se] has quit [Quit: Leaving]
+-!- besser82 [quassel@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- burb_ [52c1941b@gateway/web/freenode/ip.82.193.148.27] has joined #shogun
+ burb_	hi everyone
+-!- jiaolong [553a565e@gateway/web/freenode/ip.85.58.86.94] has joined #shogun
+-!- chakri [srichakrad@gateway/shell/bnc4free/x-sjvxzrgrwmwttvhy] has joined #shogun
+-!- kislay [~Abhijeet@27.116.52.254] has quit [Quit: Leaving]
+-!- burb_ [52c1941b@gateway/web/freenode/ip.82.193.148.27] has quit [Quit: Page closed]
+-!- Saurabh7 [~Saurabh7@117.200.177.194] has joined #shogun
+-!- DarkRoom [~darkroom@14.139.82.6] has quit [Read error: Connection reset by peer]
+-!- kislay [~Abhijeet@27.116.52.254] has joined #shogun
+-!- DarkRoom [~darkroom@14.139.82.6] has joined #shogun
+ Saurabh7	hey kislay ,
+ kislay	hey Saurabh7
+ Saurabh7	kislay,  any idea how big shogun-data is?
+ Saurabh7	its taking forever to update here :)
+ kislay	385 MB...
+-!- khalednasr [~k.nasr92@41.69.198.3] has joined #shogun
+ kislay	last time I downloaded it, it was this much
+ Saurabh7	kislay, thanks
+ Saurabh7	have sh*t connection here
+ kislay	Saurabh7, where are you?
+ Saurabh7	ah, middle of nowhere right now :)
+ Saurabh7	native place
+ kislay	haha :D
+ kislay	where is it?
+ Saurabh7	west coast
+ Saurabh7	ratnagiri
+ kislay	maharashtra right
+ Saurabh7	yeah, oh , i meant east :P
+ kislay	Is beach near?
+ Saurabh7	yes very near, 2 km
+ kislay	awesome.
+ Saurabh7	:D
+-!- iglesiasg [~iglesiasg@w193-11-200-253.eduroam.sunet.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- khalednasr [~k.nasr92@41.69.198.3] has quit [Quit: Leaving]
+-!- khalednasr [~k.nasr92@41.69.198.3] has joined #shogun
+-!- jiaolong [553a565e@gateway/web/freenode/ip.85.58.86.94] has quit [Ping timeout: 240 seconds]
+ kislay	hey iglesiasg
+@iglesiasg	sup kislay
+ kislay	I am having a trouble. I have added OpenCV as a option in CmakeLists.txt.
+ kislay	now all my unit tests are working fine when I add a -HAVE_OPENCV=on flG
+ kislay	at the time of building
+ kislay	but my normal builds are failing.
+ kislay	iglesiasg,  So the point is...what to do to make those opencv unittests run only when the HAVE_OPENCV flag is enabled.
+@iglesiasg	kislay, I guess you wrote already an ifdef
+ kislay	yup
+ kislay	thats done...
+@iglesiasg	kislay, so for reason what's not working properly is the cmake part
+@iglesiasg	kislay, agree?
+ kislay	yes
+ kislay	I am somewhere messing with the includes!
+@iglesiasg	kislay, mm hold on -- the includes?
+@iglesiasg	kislay, have you checked if the HAVE_OPENCV flag gets the right value?
+ kislay	yes. I checked it. It gets 1.
+@iglesiasg	kislay, and when you don't use it, is it 0?
+ kislay	I didn't check this!!
+ kislay	ok. I see. hey one more thing...whats use of this '#include <shogun/lib/config.h>'
+ kislay	it's always at the top of all the headers I see...and it sets the value of HAVE_EIGEN3 and dependencies to 1
+@iglesiasg	kislay, yep
+@iglesiasg	kislay, optional libraries rather than dependencies, I think
+ kislay	But, if eigen3 is not in the machine, then HAVE_EIGEN3 should never be set
+ kislay	but if my theory is correct...
+ kislay	then we are setting it everytime
+@iglesiasg	kislay, that file should be refreshed after doing cmake
+@iglesiasg	I think
+ kislay	Nope. That file looks more hardcoded ...
+@iglesiasg	hmm
+ kislay	I edited that file and added HAVE_OPENCV =1
+ kislay	now I do a #include <shogun/lib/config.h>
+@iglesiasg	kislay, that file is in .gitignore
+ kislay	the #ifdef HAVE_OPENCV
+@iglesiasg	kislay, the fact that it is in .gitignore makes me believe even more that it should be generated with cmake
+@iglesiasg	kislay, but let me try it out
+ kislay	yeah, It should be system generated... doing a #include<shogun/lib/config.h> and then a #ifdef HAVE_OPENCV with the config.h file editable is foolishness. We are not achieving anything...
+ kislay	iglesiasg, wow
+ kislay	iglesiasg, i checked it.
+@iglesiasg	kislay, what is it?
+ kislay	it comments out those lines which have #define for optional lib not present!!!
+ kislay	iglesiasg, well...I don't know if I drew the right conclusion though..
+@iglesiasg	kislay, yes. I just tried something with doxygen
+ kislay	iglesiasg, so?
+@iglesiasg	kislay, if it is not installed, then /* #undef HAVE_DOXYGEN */ is written. Otherwise, #define HAVE_DOXYGEN 1 appears
+ kislay	haha
+ kislay	awesome
+@iglesiasg	kislay, this happens in the configure step of cmake (I do configure + generate in two steps using ccmake)
+@iglesiasg	kislay, not sure if you are being ironic :-P
+ kislay	Never knew things like these are hidden in the vaults of shogun :)
+@iglesiasg	kislay, so, I think that the question is
+@iglesiasg	kislay, what do you need / how do you want to do with OpenCV?
+ kislay	I need to convert the mat data structure which shogun uses to ours densefeatures
+@iglesiasg	kislay, if installed in the system then is used OR depending on a flag given
+@iglesiasg	kislay, the second seems more flexible to me at first sight
+-!- Saurabh7 [~Saurabh7@117.200.177.194] has quit [Quit: Leaving]
+ kislay	both..
+ kislay	the user need to have it
+ kislay	+ the user should make the flag ON
+@iglesiasg	kislay, ok. Have you seen something that is done like that already in our CMakeLists?
+ kislay	yeah. I have seen it very thoroughly
+ kislay	I got it merged even
+@iglesiasg	kislay, I didn't mean that...
+@iglesiasg	kislay, I meant if you have seen any other library that is handled like that already by our CMakeLists
+ kislay	I followed EIGEN3
+ kislay	very much like that
+@iglesiasg	kislay, then, as you may noted, EIGEN3 is not as you just said
+@iglesiasg	<kislay> the user need to have it
+@iglesiasg	<kislay> + the user should make the flag ON
+@iglesiasg	EIGEN3 is not handled like that
+@iglesiasg	If I am not wrong
+ kislay	yes, you are correct
+ kislay	we need to have it
+ kislay	no flags required
+ kislay	it automatically gets included..
+ kislay	right!!
+@iglesiasg	so.. we go back to the question before
+@iglesiasg	how do you want to do it
+ kislay	kevin wanted it be like we do with -DPythonModular=ON.
+ kislay	So, I would have liked it when we go for the flag
+@iglesiasg	kislay, all right. To make it makes more sense like that too
+@iglesiasg	kislay, I agree. Then you can probably draw inspiration from the Eigen part, but that is not exactly what you will want to do
+ kislay	yes yes
+@iglesiasg	kislay, I suggest you to check as well how we are doing it with CCACHE
+ kislay	ok
+@iglesiasg	kislay, I know that for that one we allow to do something like ENABLE_CCACHE=OFF
+ kislay	ah! I see.
+ kislay	I get it
+@iglesiasg	kislay, awesome ;-) Good luck with it!
+ kislay	Actually I followed the PythonModular lib to get the flag on/off. It's same as ccache..but the difference is just that Python interface is default OFF and CCache is On
+ kislay	it all makes sense :)
+@iglesiasg	g8
+ kislay	thanks. I will see it then
+ lisitsyn	iglesiasg: hey
+@iglesiasg	lisitsyn, hello hello
+ lisitsyn	iglesiasg: how is it going? :)
+@iglesiasg	lisitsyn, good, can't complain. What about you?
+ lisitsyn	iglesiasg: quite ok :)
+-!- kislay [~Abhijeet@27.116.52.254] has left #shogun ["Leaving"]
+@iglesiasg	lisitsyn, what are you up to this weekend?
+-!- kislay [~Abhijeet@27.116.52.254] has joined #shogun
+ lisitsyn	iglesiasg: polishing thesis :D
+@iglesiasg	exciting :P
+ lisitsyn	iglesiasg: for sure
+ lisitsyn	iglesiasg: e.g. I made a mistake in thesis' title :D
+ lisitsyn	forgot a word
+@iglesiasg	lisitsyn, haha let it be without it
+ lisitsyn	iglesiasg: it was already settled in some document so need to fix :D
+@iglesiasg	lisitsyn, how would it translate to English?
+ lisitsyn	iglesiasg: ehmm like 'research and development of inductive model transfer in pattern recognition'
+@iglesiasg	all right!
+@iglesiasg	it sounds fancy :)
+ lisitsyn	chicken chicken chicken chicken
+ lisitsyn	iglesiasg: I map data with LTSA and pray my domains are not apart anymore
+ lisitsyn	domain adaptation!
+ lisitsyn	:D
+ lisitsyn	chicken chicken chicken chicken chicken chicken chicken chicken
+ lisitsyn	http://www.youtube.com/watch?v=yL_-1d9OSdk
+@iglesiasg	haha pray
+ lisitsyn	iglesiasg: yes that's map&pray approach
+ lisitsyn	iglesiasg: similar to the 'construct deep neural network and pray' one
+ lisitsyn	though latter works :D
+-!- kislay [~Abhijeet@27.116.52.254] has quit [Ping timeout: 252 seconds]
+-!- iglesiasg [~iglesiasg@w193-11-200-253.eduroam.sunet.se] has quit [Ping timeout: 252 seconds]
+-!- iglesiasg [~iglesiasg@w193-11-200-253.eduroam.sunet.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- iglesiasg [~iglesiasg@w193-11-200-253.eduroam.sunet.se] has quit [Quit: Leaving]
+-!- kislay [~Abhijeet@103.240.206.14] has joined #shogun
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: lambday :feature/linalg * 86dface / src/shogun/kernel/CustomKernel.cpp,src/shogun/kernel/CustomKernel.h: https://github.com/shogun-toolbox/shogun/commit/86dface1a18e754fd2c1904cf178759cf413cec8
+ shogun-notifier-	shogun: updated custom kernel sum methods with linalg sum methods
+ shogun-notifier-	shogun: Soumyajit De :feature/linalg * e11dbea / src/shogun/kernel/CustomKernel.cpp,src/shogun/kernel/CustomKernel.h: https://github.com/shogun-toolbox/shogun/commit/e11dbeabfbf6078a3998fdf972f2d2af151e31f6
+ shogun-notifier-	shogun: Merge pull request #2241 from lambday/feature/linalg
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: updated custom kernel sum methods with linalg sum methods
+-!- Saurabh7 [~Saurabh7@117.200.177.194] has joined #shogun
+-!- DarkRoom [~darkroom@14.139.82.6] has quit [Remote host closed the connection]
+-!- kislay [~Abhijeet@103.240.206.14] has quit [Ping timeout: 240 seconds]
+-!- Saurabh7 [~Saurabh7@117.200.177.194] has quit [Quit: Leaving]
+-!- kislay [~Abhijeet@27.116.52.237] has joined #shogun
+-!- lambday [67157f4f@gateway/web/freenode/ip.103.21.127.79] has quit [Ping timeout: 240 seconds]
+-!- khalednasr [~k.nasr92@41.69.198.3] has quit [Quit: Leaving]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- khalednasr [~k.nasr92@41.69.198.3] has joined #shogun
+ khalednasr	lisitsyn, hey
+ lisitsyn	khalednasr: hey
+ khalednasr	lisitsyn, I've been playing around with viennacl a little bit
+ lisitsyn	cool
+ lisitsyn	what can you say about it?
+ khalednasr	turns out it doesn't support random number generation :(
+ lisitsyn	hmm
+ lisitsyn	well we can extend it in quite a few ways
+ lisitsyn	with custom kernels
+ khalednasr	yeah I guess
+ khalednasr	I know almost nothing about random number generators though
+ lisitsyn	khalednasr: doesn't opencl have anything on it?
+ lisitsyn	khalednasr: I was looking at your PR
+ khalednasr	It doesn't have any generators out of the box
+ lisitsyn	we need to summon heiko or wiking in the thread :D
+ lisitsyn	to make sure it follows the way other developers think is good
+ khalednasr	you mean the PR?
+ lisitsyn	yes
+ khalednasr	yeah sure
+ lisitsyn	I mean it is kind of specialized IO
+ khalednasr	lisitsyn, well, summon them! :D
+ lisitsyn	yeah
+-!- kislay [~Abhijeet@27.116.52.237] has quit [Quit: Leaving]
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- khalednasr [~k.nasr92@41.69.198.3] has quit [Read error: Connection reset by peer]
+-!- khalednasr [~k.nasr92@41.69.198.3] has joined #shogun
+-!- lisitsyn [~qdrgsm@80.252.20.67] has quit [Read error: Connection reset by peer]
+--- Log closed Mon May 26 00:00:04 2014

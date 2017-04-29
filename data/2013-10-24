@@ -1,0 +1,313 @@
+--- Log opened Thu Oct 24 00:00:54 2013
+-!- new_lido [~walid@41.218.173.204] has joined #shogun
+-!- zxtx [~zv@99-127-253-229.lightspeed.iplsin.sbcglobal.net] has joined #shogun
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has quit [Quit: Leaving]
+-!- van51 [~van51@athedsl-399544.home.otenet.gr] has joined #shogun
+-!- zxtx [~zv@99-127-253-229.lightspeed.iplsin.sbcglobal.net] has quit [Read error: Connection reset by peer]
+-!- zxtx [~zv@99-127-253-229.lightspeed.iplsin.sbcglobal.net] has joined #shogun
+-!- zxtx [~zv@99-127-253-229.lightspeed.iplsin.sbcglobal.net] has quit [Read error: Connection reset by peer]
+-!- van51 [~van51@athedsl-399544.home.otenet.gr] has quit [Quit: Leaving.]
+-!- new_lido [~walid@41.218.173.204] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot	build #588 of nightly_default is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/588
+-!- lisitsyn2 [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Ping timeout: 272 seconds]
+-!- lisitsyn2 [~lisitsin@mxs.kg.ru] has quit [Ping timeout: 265 seconds]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Ping timeout: 264 seconds]
+-!- lisitsyn2 [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- lisitsyn2 [~lisitsin@mxs.kg.ru] has quit [Ping timeout: 265 seconds]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Ping timeout: 248 seconds]
+-!- sonne|osx [~sonne@ip98-182-24-20.sb.sd.cox.net] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- besser82 [~besser82@fedora/besser82] has quit [Client Quit]
+@sonney2k	lisitsyn1, KMcQuistens issue is just the missing ldconfig in cmake
+@sonney2k	so expected behavior
+-!- besser82 [~besser82@77-20-92-33-dynip.superkabel.de] has joined #shogun
+-!- besser82 [~besser82@77-20-92-33-dynip.superkabel.de] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:c0ae:5404:f572:d9cb] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- new_lido [~walid@193.227.20.2] has joined #shogun
+-!- new_lido [~walid@193.227.20.2] has quit [Ping timeout: 252 seconds]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 264 seconds]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- new_lido [~walid@193.227.20.2] has joined #shogun
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ thoralf	Unit tests for python_modular: mathematics_linsolver_cg, mathematics_logdet, serialization_string_kernels_modular
+ thoralf	seem to be broken.
+ thoralf	No such file or directory: '../data/../logdet/west0479.mtx.gz'
+ thoralf	Any ideas where to get the file?
+@iglesiasg	thoralf, isn't the one there https://github.com/shogun-toolbox/shogun-data/tree/master/logdet?
+ thoralf	iglesiasg: No tree folder.
+@iglesiasg	thoralf, the path to it is wrong then?
+ thoralf	iglesiasg: submodule is up-to-date
+ thoralf	Oh, yes.  Without tree.
+ thoralf	../data/../logdet/ is wrong
+ thoralf	../data/logdet/ should be fine
+ thoralf	iglesiasg: https://github.com/shogun-toolbox/shogun/pull/1727
+ thoralf	Another error:File "./shogun/examples/undocumented/python_modular/serialization_string_kernels_modular.py", line 93, in load
+ thoralf	myobj = pickle.load(f)
+ thoralf	SystemError: [ERROR] In file ./shogun/src/shogun/io/SerializableHdf5Reader00.cpp line 28: assertion param failed in virtual bool shogun::SerializableHdf5Reader00::read_scalar_wrapped(const shogun::TSGDataType*, void*) file ./shogun/src/shogun/io/SerializableHdf5Reader00.cpp line 28
+@iglesiasg	thoralf, merged, thank you!
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Thoralf Klein :develop * 213b8a1 / examples/undocumented/python_modular/ (2 files): https://github.com/shogun-toolbox/shogun/commit/213b8a14155e87fd7f87690d736373f53d354c7d
+ shogun-notifier-	shogun: Fixing data path in python modular examples.
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 57ee552 / examples/undocumented/python_modular/ (2 files): https://github.com/shogun-toolbox/shogun/commit/57ee5524e4244e970651d4038419d05a734b0b6b
+ shogun-notifier-	shogun: Merge pull request #1727 from tklein23/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixing data path in python modular examples.
+ thoralf	Anyone is working on fixing serialization_string_kernels_modular.py?
+-!- new_lido [~walid@193.227.20.2] has quit [Ping timeout: 256 seconds]
+ thoralf	Seems that pickle.load() does not work on a file created by pickle.save()
+ thoralf	Am I the only one with this error?
+@iglesiasg	thoralf, is it in travis as well?
+@iglesiasg	IIRC there was something wrong with serialization and string
+-!- new_lido [~walid@105.200.133.136] has joined #shogun
+ thoralf	iglesiasg: Oh, yes.  Travis is broken since ages... but this error can be seen there, too.
+-!- sukalpo [65a700d9@gateway/web/freenode/ip.101.167.0.217] has joined #shogun
+ sukalpo	Could you please tell me how to run MKL SVM in Shogun in linux platform..?  Can I run it from the command line?   Can I have fivefold cross validation ...where do i specify the parameters of the base kernels...?  KIndly lt me know..... I need this very badly
+ thoralf	sukalpo: Did you take a look on the MKL examples?
+ thoralf	find examples/ |grep -i mkl
+-!- new_lido [~walid@105.200.133.136] has quit [Ping timeout: 245 seconds]
+ sukalpo	I don't understand how to run them......  I have used  SMO-MKL and I have customized it as per my need  without any trouble.....but this Shogun is really bugging me a lot :(     I get confused
+ shogun-buildbot	build #1977 of deb3 - modular_interfaces is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1977  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ thoralf	sukalpo: You can copy an example to a destination - then make sure to provide shogun headers and library to you compiler.
+ thoralf	destination of your choice.
+ thoralf	Since you don't try to customize shogun itself, try to use it as a library and start a project just linking t othe library.
+ thoralf	<sukalpo> Could  you please provide me a complete guide...say for example I have successfully installed shogun...and now I simply want to train my feature vector text file by calling MKL SVM / or I want to perform 5 fold cross validation...then what to do?
+ thoralf	sukalpo: I'm looking for an example to start with, give me a second.
+ sukalpo	ok
+ thoralf	Let take this one: shogun/examples/undocumented/python_modular/mkl_binclass_modular.py
+ thoralf	It shows how to use different kernels, how to include your own files.
+ thoralf	sukalpo: Please let's talk in the channel.
+-!- new_lido [~walid@193.227.20.2] has joined #shogun
+ thoralf	sukalpo: It should be no big deal to adapt the python code to a c++ example, since it's only a wrapper.
+ thoralf	sukalpo: As I told you, try to grep "MKL" inside the shogun source tree.
+ thoralf	sukalpo: ./examples/undocumented/libshogun/classifier_mklmulticlass.cpp
+ thoralf	sukalpo: ./examples/undocumented/libshogun/evaluation_cross_validation_multiclass_mkl.cpp
+ sukalpo	Ok....many thanks I will try to explore those stuffs now ......
+ thoralf	sukalpo: If it works out, we're happy about every contributed example. :)
+ sukalpo	Sorry  ..unable to locate "evaluation_cross_validation_multiclass_mkl.cpp"
+ thoralf	sukalpo: I just checked: https://github.com/shogun-toolbox/shogun/blob/develop/examples/undocumented/libshogun/evaluation_cross_validation_multiclass_mkl.cpp
+ thoralf	sukalpo: Please try again with a fresh checkout of the "develop" branch
+ sukalpo	so basically I need to compile  this file using a gcc compiler.....? is that all!! I mean to perform cross validation I just need to compile  "evaluation_cross_validation_multiclass_mkl.cpp"    using standard Gcc commands?
+ thoralf	Yes.
+ thoralf	But make sure to point you compiler to the library and header files.
+ sukalpo	may be am using old verison....2.0..hence the mismatch..
+ sukalpo	ok sure... I will keep ur point in mind
+ sukalpo	and inside the code  the two lines :  const char fname_feats[]="../data/fm_train_real.dat"; const char fname_labels[]="../data/label_train_multiclass.dat";    i need to change accordingly as per my feature fille and lable file ...right?
+ thoralf	Sth like: -I /shogun/src/ -L /path-to-shogun-lib/  -l shogun
+ thoralf	sukalpo: Just try.  And check the data files provided in data
+ sukalpo	ok will  do so
+ sukalpo	I will have to leave now...would you  mind if I email you later?
+ thoralf	sukalpo: Please keep asking in the channel.
+ sukalpo	ok sure.......Thanks for all your help
+-!- sukalpo [65a700d9@gateway/web/freenode/ip.101.167.0.217] has quit [Quit: Page closed]
+ shogun-buildbot	build #1978 of deb3 - modular_interfaces is complete: Failure [failed test python modular test ruby modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1978  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-notifier-	shogun-data: Thoralf Klein :master * 4c81ffb / README.md: https://github.com/shogun-toolbox/shogun-data/commit/4c81ffb365e153590e6c223a0b1610111dfee2e4
+ shogun-notifier-	shogun-data: Added basic README.md with instructions how to use/get shogun-data.
+ shogun-notifier-	shogun-data: Fernando Iglesias :master * a610e47 / README.md: https://github.com/shogun-toolbox/shogun-data/commit/a610e47c31517ea7c6e508367c6d4f91cc37d08f
+ shogun-notifier-	shogun-data: Merge pull request #27 from tklein23/master
+ shogun-notifier-	shogun-data:
+ shogun-notifier-	shogun-data: Added basic README.md with instructions how to use/get shogun-data.
+ shogun-notifier-	shogun-data: Fernando Iglesias :master * 14b569f / README.md: https://github.com/shogun-toolbox/shogun-data/commit/14b569ffa4c67793e2ab6c1357742e2b4fd6d5f3
+ shogun-notifier-	shogun-data: Update README.md
+-!- travis-ci [~travis-ci@ec2-204-236-220-70.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/12981842
+-!- travis-ci [~travis-ci@ec2-204-236-220-70.compute-1.amazonaws.com] has left #shogun []
+-!- zxtx [~zv@107.19.89.148] has joined #shogun
+@iglesiasg	hey thoralf
+@iglesiasg	thoralf, why are those two export required to run the python example?
+@iglesiasg	https://github.com/shogun-toolbox/shogun/pull/1728/files
+ thoralf	iglesiasg: They are needed if you're not installing shogun to system-wide locations.
+ thoralf	iglesiasg: (as I do)
+@iglesiasg	thoralf, all right. It makes total sense. Thank you!
+ shogun-notifier-	shogun: Thoralf Klein :develop * 4fd9a17 / INSTALL.md: https://github.com/shogun-toolbox/shogun/commit/4fd9a1719221573acba1f5c1e958eaac08d04cd6
+ shogun-notifier-	shogun: Fixed install instructions.  Added export instructions in case of custom install directory.
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 10cd8de / INSTALL.md: https://github.com/shogun-toolbox/shogun/commit/10cd8deecad77c2a7fa8690a640af23a4299fdc8
+ shogun-notifier-	shogun: Merge pull request #1728 from tklein23/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fixed install instructions.  Added export instructions in case of custom install directory
+ thoralf	And since I would recommend this, I added the instructions for a quick start :)
+ shogun-buildbot	build #2375 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2375  blamelist: Thoralf Klein <thoralf.klein@zib.de>
+ shogun-buildbot	build #2376 of deb1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2376  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+@sonney2k	Hey there!
+@sonney2k	thoralf, well the plan is that Heiko does the string kernel fix
+@sonney2k	thoralf, but I semi-killed heiko yesterday with some loooong march through the desert
+ thoralf	sonney2k: Hey.
+ thoralf	sonney2k: I just uncommented the example.
+ thoralf	No more good deeds today. ;)
+ thoralf	Fighting with python modular & ipython.
+@sonney2k	thoralf, btw the documentation can still be built with make doc in the shogun/doc directory
+ thoralf	sonney2k: Yes, but it's not part of the cmake process.
+ thoralf	sonney2k: So if you follow the instructions, you don't find any "documented" directories and might be confused.
+@sonney2k	thoralf, true but also not sure how it should be
+ thoralf	sonney2k: decisions like this are your part. ;)
+ thoralf	I just fixed it to make it a bit more plausible, however, I'm aware that this might be very short-term fixes.
+@wiking	mmm we can add it to cmake
+@wiking	it's not that hard
+@sonney2k	wiking, then please do it
+@wiking	i'm on these
+@wiking	but atm i'm working as well as i need income :P
+@wiking	unfortunately shogun is not paying yet :P
+ thoralf	wiking: The currency is fame ;)
+@sonney2k	wiking, I see - well only heiko can make a difference here
+@wiking	hehehe
+ shogun-notifier-	shogun-web: Soeren Sonnenburg :master * a9755f1 / static/thumbnails/ (10 files): https://github.com/shogun-toolbox/shogun-web/commit/a9755f11f08a7705d49531ad33d5d1897973f92c
+ shogun-notifier-	shogun-web: add demo thumbnails
+ thoralf	van51 states in his notebook: "The classes specifically are StreamingHashedDocDotFeatures, StreamingHashedDenseFeatures and StreamingHashedSparseFeatures. If one has mixed features, that are not just numerical or not just text, then he can use the CombinedDotFeatures class to combine objects of the aforementioned classes!"
+ thoralf	But the classes are not loadable in python.
+ thoralf	cannot import name StreamingHashedSparseFeatures
+@sonney2k	arrgh I somehow overwrote my nice svm notebook with the crappy one checked in :``-(
+ thoralf	Although the cpp classes exist.
+@iglesiasg	shit that's unfortunate
+@iglesiasg	sonney2k, have you checked if you had by chance any checkpoints you can revert to?
+@sonney2k	iglesiasg, checking
+ thoralf	Looking for *~ files as well? ;)
+@sonney2k	iglesiasg, checkpoint is still crappy but a lot better at least
+@iglesiasg	better than nothing indeed
+ thoralf	Unfortunately I cannot load the streaming/hashing classes mentioned in van's notebook.
+ thoralf	Any ideas why they're not wrapped into the python API?
+@iglesiasg	thoralf, mm that's funny
+@iglesiasg	thoralf, did you check if they have some sort of library dependency?
+ thoralf	Next question: Is it possible to use sparse features in python_modular?  I can't find them as well.
+ thoralf	iglesiasg: I'm using swig/python_modular as a blackbox.  How do I check what you suggested? ;)
+@iglesiasg	thoralf, checking if the streaming hashing classes have some sort of ifdef
+ thoralf	iglesiasg: Looks okay.  Nothing suspicious.
+@sonney2k	thoralf, yes you can use scipy.sparse
+@sonney2k	thoralf, use csc_matrix there
+ thoralf	sonney2k: Cool, thanks.
+@iglesiasg	thoralf, yeah, I don't see anything either
+@iglesiasg	thoralf, I can import here HashedDocDotFeatures
+@iglesiasg	thoralf, is that the one that fails for you?
+ thoralf	iglesiasg: van51 talks about StreamingHashedDocDotFeatures, StreamingHashedDenseFeatures and StreamingHashedSparseFeatures: http://shogun-toolbox.org/static/notebook/current/HashedDocDotFeatures.html
+ thoralf	iglesiasg: No such classes here.
+ thoralf	HashedDocDotFeatures works for me as well.
+@iglesiasg	thoralf, true, those ones are not here either
+@iglesiasg	thoralf, I think they are missing from the interfaces/modular SWIG files
+@iglesiasg	they should be in Features.i I think
+@iglesiasg	now I am not sure if he didn't put them there on purpose, or just forgot
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+@sonney2k	iglesiasg, just add them
+@iglesiasg	thoralf, would you mind to do that a moment?
+@iglesiasg	Right now I am in process of writing my thesis
+ thoralf	I'll try.
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Ping timeout: 248 seconds]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * e4e5136 / doc/ipython-notebooks/classification/SupportVectorMachines.ipynb: https://github.com/shogun-toolbox/shogun/commit/e4e5136c94c3e4bb94fc178176da296d1cc8e095
+ shogun-notifier-	shogun: add slightly polishes svm example
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 5a85232 / doc/ipython-notebooks/classification/SupportVectorMachines.ipynb: https://github.com/shogun-toolbox/shogun/commit/5a85232a21030ee1ceb1ad765e86f16b9d088cb4
+ shogun-notifier-	shogun: commit again w/o output
+ shogun-buildbot	build #2377 of deb1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2377
+@sonney2k	thoralf, done?
+-!- zxtx [~zv@107.19.89.148] has quit [Ping timeout: 251 seconds]
+ thoralf	sonney2k: No.  I switched to c++ for my example and will adapt it later - after I confirmed that it's useful and running. ;)
+ thoralf	sonney2k: Are you waiting for a commit or why are you asking?
+-!- HeikoS [~heiko@ip98-182-24-20.sb.sd.cox.net] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@sonney2k	thoralf, which classes are missing?
+@sonney2k	thoralf, it is trivial to add
+ thoralf	StreamingHashedDocDotFeatures, StreamingHashedDenseFeatures and StreamingHashedSparseFeatures - but they are all templated.
+ thoralf	and as far as I see, it will be a lot of boiler plate code.
+-!- travis-ci [~travis-ci@ec2-54-234-226-88.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/12987136
+-!- travis-ci [~travis-ci@ec2-54-234-226-88.compute-1.amazonaws.com] has left #shogun []
+@iglesiasg	see you later guys
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:c0ae:5404:f572:d9cb] has quit [Quit: Ex-Chat]
+-!- zxtx [~zv@129-79-241-133.dhcp-bl.indiana.edu] has joined #shogun
+ shogun-buildbot	build #1979 of deb3 - modular_interfaces is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1979  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- sonne|osx [~sonne@ip98-182-24-20.sb.sd.cox.net] has quit [Quit: sonne|osx]
+ shogun-buildbot	build #1980 of deb3 - modular_interfaces is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1980  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- travis-ci [~travis-ci@ec2-54-234-226-88.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/12991084
+-!- travis-ci [~travis-ci@ec2-54-234-226-88.compute-1.amazonaws.com] has left #shogun []
+-!- sonne|osx [~sonne@ip98-182-24-20.sb.sd.cox.net] has joined #shogun
+@wiking	anybody around with ubuntu on his desktop?
+ sonne|osx	wiking: our chroot on fatbot
+@wiking	mmm not good :(
+@wiking	ah actually yeah it could be ok
+@wiking	as we have 3.10 kernel
+@wiking	mmm this docker is amazing
+ besser82	wiking: Sure it is  :D  Because they involved RedHat  ;-P
+@wiking	it's funny though that currently the official binary install is only for deb ;)
+@wiking	:P
+ besser82	wiking: btw. nirik at last fixed that issue with openStack  ;)
+ besser82	wiking: could-aplliance is ready to go by tomorrow  :D
+@wiking	cool
+@wiking	btw what's the version of openstack u r running?
+ besser82	wiking: will check that with nirik ;)
+@wiking	ok
+@wiking	as Havana release includes docker by default => we can use the docker image of shogun
+-!- new_lido [~walid@193.227.20.2] has quit [Quit: Leaving]
+-!- travis-ci [~travis-ci@ec2-204-236-220-70.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/12991160
+-!- travis-ci [~travis-ci@ec2-204-236-220-70.compute-1.amazonaws.com] has left #shogun []
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has joined #shogun
+ KMcQuisten	Hey there.  I'm back.  Sorry I got pulled away before I could get help yesterday
+ sonne|osx	KMcQuisten: seen my answer?
+ KMcQuisten	Doin't think that i have
+ sonne|osx	run ldconfig manually
+ sonne|osx	or adjust LD_LIBRARY_PATH to point to the lib
+ besser82	wiking: <nirik> besser82: folsom currently.  :(
+ besser82	wiking: but nirik is planning to deploy havanna to two new metals and migrate the appliance to them  :D
+ KMcQuisten	Manually running ldconfig worked.  Will I have to do that after every reboot unless I adjust the LD_LIBRARY_PATH variable?
+-!- sonne|osx [~sonne@ip98-182-24-20.sb.sd.cox.net] has quit [Quit: sonne|osx]
+-!- KMcQuisten [d8338942@gateway/web/freenode/ip.216.51.137.66] has quit [Quit: Page closed]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 08f8a36 / NEWS: https://github.com/shogun-toolbox/shogun/commit/08f8a3650bdf73551f21cfb8615fb60ce9ac0b21
+ shogun-notifier-	shogun: Polished the NEWS file a bit to highligh GSoC projects
+ shogun-notifier-	shogun: Heiko Strathmann :develop * d9d8256 / src/shogun/clustering/GMM.cpp: https://github.com/shogun-toolbox/shogun/commit/d9d8256ff84f5f3efd26d5fe952e3649e5413210
+ shogun-notifier-	shogun: added comment
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 8b66911 / NEWS: https://github.com/shogun-toolbox/shogun/commit/8b66911f639d2017b7fe985fcc19392dae6dd5b4
+ shogun-notifier-	shogun: Correct names in GSoC 2013 list
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 65b4194 / src/shogun/base/Parameter.cpp: https://github.com/shogun-toolbox/shogun/commit/65b41948ec2a706115d5b4356046031579561878
+ shogun-notifier-	shogun: changed debug to info
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 89889f7 / src/shogun/features/Alphabet.cpp: https://github.com/shogun-toolbox/shogun/commit/89889f708eafd1251c8a8a6bd16f96d10d9eae1e
+ shogun-notifier-	shogun: added proper error message in case of NULL pointer parameter
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 622b662 / src/shogun/io/SerializableHdf5Reader00.cpp: https://github.com/shogun-toolbox/shogun/commit/622b66207f20c79a846e9fc88a572643e736aa1e
+ shogun-notifier-	shogun: removed assertion that broke things but did not help at all
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 72a3e5d / src/shogun/io/SerializableHdf5Reader00.cpp: https://github.com/shogun-toolbox/shogun/commit/72a3e5d351698de32068fec2fdb5d8d696b4e4e8
+ shogun-notifier-	shogun: moved assertion
+-!- HeikoS [~heiko@ip98-182-24-20.sb.sd.cox.net] has quit [Quit: Leaving.]
+-!- sonne|osx [~sonne@ip98-182-24-20.sb.sd.cox.net] has joined #shogun
+ sonne|osx	KMcQuisten no just once
+-!- sonne|osx [~sonne@ip98-182-24-20.sb.sd.cox.net] has quit [Quit: sonne|osx]
+ shogun-buildbot	build #1981 of deb3 - modular_interfaces is complete: Failure [failed test python modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1981  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- FSCV [~FSCV@118.163.183.204] has joined #shogun
+-!- iglesiasg [~iglesiasg@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+ shogun-buildbot	build #1982 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1982
+-!- FSCV [~FSCV@118.163.183.204] has quit [Quit: Leaving]
+ shogun-notifier-	shogun: Fernando Iglesias :develop * dd2dfa8 / NEWS: https://github.com/shogun-toolbox/shogun/commit/dd2dfa823ad83120ab4210495d7740ee2637da43
+ shogun-notifier-	shogun: Minor fix in NEWS
+-!- FSCV [~FSCV@50.7.50.60] has joined #shogun
+ shogun-buildbot	build #77 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/77  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #78 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/78  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- Koen__ [b91ab626@gateway/web/freenode/ip.185.26.182.38] has joined #shogun
+ shogun-buildbot	build #79 of clang34 - thread analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20thread%20analysis/builds/79  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- Koen__ [b91ab626@gateway/web/freenode/ip.185.26.182.38] has quit [Quit: Page closed]
+-!- AndChat49209 [~AndChat49@172.56.30.171] has joined #shogun
+-!- new_lido [~walid@41.218.178.18] has joined #shogun
+ AndChat49209	shogun-buildbot, force build --branch=develop nightly_default
+ shogun-buildbot	The build has been queued, I'll give a shout when it starts
+-!- travis-ci [~travis-ci@ec2-54-234-226-88.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/13000079
+-!- travis-ci [~travis-ci@ec2-54-234-226-88.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #589 forced
+ shogun-buildbot	I'll give a shout when the build finishes
+-!- AndChat49209 [~AndChat49@172.56.30.171] has quit [Ping timeout: 272 seconds]
+-!- AndChat49209 [~AndChat49@172.56.30.171] has joined #shogun
+-!- AndChat49209 [~AndChat49@172.56.30.171] has quit [Ping timeout: 252 seconds]
+ shogun-buildbot	build #98 of clang34 - static analysis is complete: Failure [failed analyse]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20static%20analysis/builds/98  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- besser82 [~besser82@fedora/besser82] has quit [Quit: freedom, friends, features, first ---> fedoraproject.org]
+ shogun-buildbot	build #244 of precise - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/244  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- travis-ci [~travis-ci@ec2-54-234-226-88.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/13003200
+-!- travis-ci [~travis-ci@ec2-54-234-226-88.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #589 of nightly_default is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/589
+-!- new_lido [~walid@41.218.178.18] has quit [Ping timeout: 240 seconds]
+-!- new_lido [~walid@41.218.173.31] has joined #shogun
+ shogun-buildbot	build #79 of clang34 - undefined behaviour analysis is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/clang34%20-%20undefined%20behaviour%20analysis/builds/79  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+--- Log closed Fri Oct 25 00:00:56 2013

@@ -1,0 +1,303 @@
+--- Log opened Wed Nov 21 00:00:17 2012
+ wiking	ok
+ wiking	so it seems i can rebase now
+ wiking	so what do i use instead of sg_realloc?
+@sonney2k	SG_REALLOC /SG_MALLOC / SG_CALLOC everything as usual
+ wiking	structure/CCSOSVM.cpp:294:7: error: use of undeclared identifier 'SG_REALLOC'
+ wiking	after rebase
+ wiking	structure/CCSOSVM.cpp:298:50: error: too few arguments provided to function-like macro invocation
+ blackburn	wiking: it was working before?
+ wiking	yes
+ wiking	it was
+ blackburn	baad
+ wiking	before rebase to the memory magix
+ blackburn	:D
+ wiking	so what the fuck
+ blackburn	can yuo show these 294 and 298?
+ wiking	https://github.com/shogun-toolbox/shogun/pull/823/files#L0R307
+ wiking	https://github.com/shogun-toolbox/shogun/pull/823/files#L0R311
+ blackburn	wiking: you should provide old size
+ wiking	LOLFACE?!
+ blackburn	type,pointer,old_len,len
+ wiking	comooone?!
+ wiking	why?
+ wiking	have any of you seen man realloc ? :D
+ wiking	i mean sorry but why would u need the oldsize?
+ blackburn	because there is not realloc for new/delete
+ blackburn	:D
+@sonney2k	wiking, that is new[
+@sonney2k	]
+@sonney2k	delete[]
+@sonney2k	and copy
+ wiking	well realloc shouldnt behave like that
+@sonney2k	and no way to figure out how much to copy underneath
+@sonney2k	wiking, there is no realloc for new[]
+ blackburn	it is not realloc in case of sgvectors
+ wiking	my 2 cents
+@sonney2k	so that is why we need that
+ wiking	fuck me in da face
+ wiking	i mean if we want memory managment
+ blackburn	see better solution?
+ wiking	why u just don't take the fucking memory pool from kernel.org
+ wiking	even better
+ blackburn	how does it solve your problem?
+ wiking	it was stupid of me to rebase
+ blackburn	you don't know old size?
+ wiking	well
+ blackburn	wiking: put 0 here if you don't know
+ wiking	yeah i have to maintain
+ blackburn	it is not referenced anyway
+ wiking	a new variable
+ wiking	that like fucking tracks
+ wiking	each fucking REALLOC's
+ wiking	state
+ wiking	fuckthishit
+ blackburn	can't say adding zero is so much issue
+ wiking	no but if i want to use it right
+ wiking	that's what i should do
+ blackburn	?
+ blackburn	it is used only if you realloc array of vectors
+ wiking	http://www.boost.org/doc/libs/1_47_0/libs/pool/doc/index.html
+ blackburn	wiking: so?
+ wiking	i have 1000+ line of patch here
+ wiking	and now trying to merge
+ blackburn	so you want to change everything to use pool with one more 1000+ line patch? :D
+ wiking	no i have some other patch
+ wiking	and now i've rebased
+ wiking	and now i'm broken
+ wiking	so i have to merge now
+ wiking	so that i can do anything
+ wiking	like continue working
+ wiking	libbm* shit has been minorly refactored
+ wiking	but i have a feeling that that code should be rewriten in c++
+ blackburn	which code?
+ wiking	libbm*
+ wiking	oh yeah
+ wiking	code is breaking
+ blackburn	well I agree it could be better to write in C++ everywhere
+ wiking	well there's so much code redundancy in that one
+ blackburn	but that's legacy - do you want to write and test it once again
+ wiking	well i've clean it up
+ wiking	as much as i can
+ blackburn	does it make use of vector operations?
+ wiking	got like /2 speedup
+ blackburn	because of eigen used?
+ wiking	so it's like 2* faster...
+ blackburn	for dot
+ wiking	well eigen and cblas
+ wiking	within each iteration it does at least 5 dots
+ blackburn	we should think about alignment actually
+ wiking	and another 3 of vec1_plus_alpha_vec2 stuff...
+ wiking	but then again
+ blackburn	feature vectors should be aligned
+ wiking	sgvector.h has to be refactored
+ wiking	i fucking hate to call static functions for a dot product
+ wiking	well alignement
+ wiking	is os/arch dependent
+ blackburn	no
+ wiking	so some cases u are lucky
+ wiking	that the mem is alloced
+ blackburn	in case of 3d vectors
+ blackburn	we are always unlucky
+ blackburn	I mean for eigen
+ blackburn	I don't care about cblas as it as old as sonney2k :D
+ wiking	:D
+ blackburn	I didn't suggest that guy eigen3
+ blackburn	to not speed up nuclear weapons development
+ blackburn	:D
+ blackburn	oh I should stop joking about that
+ blackburn	wiking: where have you seen that distCum?
+ wiking	ahahahah
+ wiking	of course a matlab code
+ wiking	academics ;)
+ blackburn	what does it mean?
+ blackburn	distance okay
+ blackburn	but what cum stands for in code?
+ wiking	cumulative distance
+ wiking	;)
+ blackburn	lol
+ blackburn	wiking: I received math_anal.zip once
+ wiking	dist-cum
+ wiking	:D
+ wiking	that's another great one
+ blackburn	that was task for sth like 'mathematical analysis'
+ wiking	calculs ;)
+ wiking	calculus
+ wiking	yeah
+ blackburn	calculus right
+ wiking	math anal
+ wiking	:>
+ blackburn	wiking: just today my neighbor gsomix showed me their teacher sent zad.zip
+ blackburn	must be 'zadanie' - task/problem
+ blackburn	but zad is effectively ass you know probably
+-!- zxtx [~zv@rrcs-24-213-167-69.nyc.biz.rr.com] has quit [Read error: Operation timed out]
+ wiking	:))))))
+ shogun-buildbot	build #149 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/149
+ shogun-buildbot	build #178 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/178
+ blackburn	wiking: http://metaoptimize.com/qa/questions/11465/should-cblas-triangular-matrices-be-full
+@sonney2k	wiking, did you stop crying?
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/0a5917168a713a2053ec5d72088cd001872a615d
+-shogungit:#shogun- shogun/master 0a59171 Soeren Sonnenburg: include lib/memory.h in common.h again since SGVector forward declaration works ok now
+ sonne|work	wiking: b'cause you only have to change one line which is SG_REALLOC for this stuff to work
+ sonne|work	shogun-buildbot: force rebuild nightly_all
+ shogun-buildbot	try 'force build [--branch=BRANCH] [--revision=REVISION] [--props=PROP1=VAL1,PROP2=VAL2...]  <WHICH> <REASON>'
+ sonne|work	shogun-buildbot: force build nightly_all
+ shogun-buildbot	build forced [ETA 28m17s]
+ shogun-buildbot	I'll give a shout when the build finishes
+-!- blackburn [~blackburn@37.61.180.47] has quit [Quit: Leaving.]
+ shogun-buildbot	build #150 of nightly_all is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/150
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+-!- zxtx [~zv@ip-64-134-65-129.public.wayport.net] has joined #shogun
+-!- zxtx [~zv@ip-64-134-65-129.public.wayport.net] has quit [Ping timeout: 248 seconds]
+-!- zxtx [~zv@ip-64-134-65-129.public.wayport.net] has joined #shogun
+-shogungit:#shogun- [shogun] vigsterkr opened pull request #831: Add template specialization for SGVector's arg_max and max (master...master)  https://github.com/shogun-toolbox/shogun/pull/831
+ wiking	a little bit of eyecandy first ;D
+-shogungit:#shogun- [shogun] sonney2k pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/0a5917168a71...ba1e9afb7ddc
+-shogungit:#shogun- shogun/master 1f02914 Viktor Gal: Add template specialization for SGVector's arg_max and max...
+-shogungit:#shogun- shogun/master ba1e9af Soeren Sonnenburg: Merge pull request #831 from vigsterkr/master...
+ sonne|work	wiking: heh
+ sonne|work	wiking: no idea how the discussion yesterday night went on
+ sonne|work	but what are your complaints exactly?
+ blackburn	sonne|work: he is just like me :D
+ sonne|work	blackburn: which means?
+ wiking	that realloc api
+ wiking	nonstandard
+ blackburn	sonne|work: marvin
+ sonne|work	I see
+ wiking	ah shit
+ sonne|work	wiking: yes I know. I couldn't come up with any standard solution. If you have an idea speak up
+ wiking	i forgot to change sparsematrix
+ sonne|work	wiking: fwiw I don't like it either but whenever we do realloc in shogun we know the old size so this is the least intrusive change
+ wiking	mmm
+ sonne|work	the only other option I see is to use new SGVector<int>[10]() and delete[] throughout the code
+ sonne|work	etc
+ blackburn	or restrict realloc for sgvectors
+ sonne|work	blackburn: yeah but then we cannot use DynArray for SGvector
+ blackburn	bad
+ sonne|work	blackburn: btw you said std::vector works for cases that need inplace constructors?
+ blackburn	sonne|work: I am curious would http://ustl.sourceforge.net/ work for you?
+ blackburn	sonne|work: vector calls constructors yes
+ blackburn	it has no chance to fail on that no matter what class it is
+ sonne|work	blackburn: any idea how it know when to call constructors?
+ blackburn	sonne|work: what do you mean 'when'?
+ sonne|work	I mean vector of double works too right?
+ sonne|work	well it needs to know that it can call the constructor
+ blackburn	yes why not
+ blackburn	are you sure new double[]() doesn't work?
+ blackburn	I think it does actually
+ sonne|work	I didn't try but then I wonder why plain new[] exists...
+ wiking	?
+ blackburn	sonne|work: take a look at stl code :)
+ wiking	blackburn: new double[] should work
+ blackburn	wiking: new double[30]();?
+ wiking	mmm
+ sonne|work	blackburn: well it compiles...
+ blackburn	hahaha youtube is banned in my country OKAY
+ wiking	blackburn: lol?
+ sonne|work	what?
+ sonne|work	what happened?
+ blackburn	youtube is illegal :D
+ blackburn	lol
+ wiking	blackburn: can u open it still?
+ blackburn	yes
+ wiking	so what?
+ blackburn	but won't be able soon I think
+ wiking	if they catch u watching it, then they'll come and fuck you up? :)
+ blackburn	they introduced a list of sites that are denied
+ wiking	ah yeah
+ wiking	the blacklist
+ blackburn	so just a few hours ago they put youtube there
+ wiking	i mean hey
+ blackburn	and now ISPs will deny it
+ wiking	you don't wanna watch that shit anyways
+ wiking	:)))
+ blackburn	haha right
+ wiking	maybe there's THAT kind of content there :P
+ blackburn	wiking: they tried to ban it before because of 'innocence of muslims'
+ blackburn	fucking muslims they are trouble makers all around the world
+ wiking	another fixfuck for shogun
+-shogungit:#shogun- [shogun] vigsterkr opened pull request #832: Fix SGSparseMatrix ctor to comply with SGMatrix ctor (master...master)  https://github.com/shogun-toolbox/shogun/pull/832
+ wiking	blackburn: what should new double[]() be?
+ blackburn	wiking: call ctor of double
+ sonne|work	wiking: double[]
+-shogungit:#shogun- [shogun] lisitsyn pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/ba1e9afb7ddc...810c9e5b7e6e
+-shogungit:#shogun- shogun/master c7f0a72 Viktor Gal: Fix SGSparseMatrix ctor to comply with SGMatrix ctor...
+-shogungit:#shogun- shogun/master 810c9e5 Sergey Lisitsyn: Merge pull request #832 from vigsterkr/master...
+ sonne|work	maybe it inits with 0's ?
+ blackburn	sonne|work: yes
+ sonne|work	wiking: did you convert all places that call SGSparseMatrix?
+ sonne|work	I mean otherwise stuff is transposed...
+ blackburn	sonne|work: wait but doesn't new Class[] call constructors?
+ sonne|work	blackburn: no
+ wiking	sonne|work: yeah i've tried to cover all of it as you can see in the patch
+ sonne|work	or?
+ sonne|work	wiking: k
+ blackburn	sonne|work: so you mean new Class[30] is unsafe later? I am unsure about that
+ sonne|work	http://stackoverflow.com/questions/620137/do-the-parentheses-after-the-type-name-make-a-difference-with-new
+ wiking	blackburn: new should call the default ctor
+ sonne|work	crazy crazy crazy
+ sonne|work	didn't know one can write new Class;
+ wiking	yes
+ blackburn	sonne|work: yes sure one can
+ blackburn	but I was unsure about new[]() and new[]
+ blackburn	so we just can use new[] and it will work nice
+ sonne|work	blackburn: yeah but it has a different meaning
+ blackburn	what's different?
+ sonne|work	look at the above link
+ wiking	sonne|work: well depends  ;)
+ wiking	i mean blackburn :)
+ wiking	it depends
+ blackburn	sonne|work: no, new[] would work in all our cases I think
+ wiking	i mean if u pass a class
+ sonne|work	blackburn: no I think it won't work like in the above link stuff will be uninited
+ wiking	then it should work as all classes have by default a ctor and even a copy ctor (as c++ automagically defines one) if you dont enforce it to be private
+ blackburn	sonne|work: things like int?
+ sonne|work	uninited
+ blackburn	sonne|work: okay actually new[size]() is ok for me
+ blackburn	it is rather universal
+ blackburn	always works no matter simple type or class is used
+ wiking	we always have default ctor for every class anyways for serialization
+ sonne|work	blackburn: yeah for 'higher' types that makes sense
+ blackburn	wiking: sonne|work it took 2 hr to recognize they are doing something wrong and youtube is not banned anymore :D
+ wiking	:>
+ wiking	that was fast actually
+ blackburn	great soviet firewall
+-!- zxtx [~zv@ip-64-134-65-129.public.wayport.net] has quit [Ping timeout: 248 seconds]
+-!- zxtx [~zv@ip-64-134-65-129.public.wayport.net] has joined #shogun
+-!- zxtx [~zv@ip-64-134-65-129.public.wayport.net] has quit [Ping timeout: 255 seconds]
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- zxtx [~zv@ip-64-134-65-129.public.wayport.net] has joined #shogun
+-!- zxtx [~zv@ip-64-134-65-129.public.wayport.net] has quit [Ping timeout: 246 seconds]
+-!- blackburn [~blackburn@83.234.169.54] has joined #shogun
+@sonney2k	muaahhh
+-shogungit:#shogun- [shogun] sonney2k pushed 2 new commits to master: https://github.com/shogun-toolbox/shogun/compare/810c9e5b7e6e...217af0036e06
+-shogungit:#shogun- shogun/master dfc7d7d Soeren Sonnenburg: move function definitions to .cpp file
+-shogungit:#shogun- shogun/master 217af00 Soeren Sonnenburg: define index_t in lib/common.h like all other datatypes
+@sonney2k	blackburn, now see what you have done - you could have suggested eigen3
+ blackburn	sonney2k: hahahaha
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Remote host closed the connection]
+--- Log opened Wed Nov 21 18:21:32 2012
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 5 nicks [0 ops, 0 halfops, 0 voices, 5 normal]
+-!- Irssi: Join to #shogun was synced in 6 secs
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+-!- shogun-buildbot [~shogun-bu@7nn.de] has quit [Remote host closed the connection]
+--- Log opened Wed Nov 21 18:28:27 2012
+-!- shogun-toolbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 5 nicks [0 ops, 0 halfops, 0 voices, 5 normal]
+-!- Irssi: Join to #shogun was synced in 7 secs
+-!- shogun-buildbot [~shogun-bu@7nn.de] has joined #shogun
+-!- sonney2k [~shogun@7nn.de] has joined #shogun
+-!- mode/#shogun [+o sonney2k] by ChanServ
+-!- zxtx [~zv@ool-44c1360a.dyn.optonline.net] has joined #shogun
+@sonney2k	wiking, around?
+@sonney2k	wiking, I wonder whether the sparse dot product now assumes sorted indices or not.
+-shogungit:#shogun- [shogun] sonney2k pushed 1 new commit to master: https://github.com/shogun-toolbox/shogun/commit/7528d0e12453396aa3d47ad08bdde6446c70af70
+-shogungit:#shogun- shogun/master 7528d0e Soeren Sonnenburg: put impl. of  sparse vector / matrix functions into .cpp
+ wiking	sonney2k: it does
+ wiking	even the comment says so
+ wiking	that we suppose that the indicies are ordered in non descending manner
+ shogun-buildbot	build #179 of nightly_default is complete: Failure [failed tutorial]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/179
+--- Log closed Thu Nov 22 00:00:15 2012

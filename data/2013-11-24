@@ -1,0 +1,113 @@
+--- Log opened Sun Nov 24 00:00:38 2013
+ shogun-buildbot_	build #305 of osx1 - libshogun is complete: Failure [failed git]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/305  blamelist: Viktor Gal <viktor.gal@maeth.com>
+-!- zxtx [~zv@ool-2f110054.dyn.optonline.net] has quit [Ping timeout: 246 seconds]
+-!- zxtx [~zv@ool-2f110054.dyn.optonline.net] has joined #shogun
+-!- thoralf [~thoralf@91-66-33-4-dynip.superkabel.de] has joined #shogun
+ thoralf	Hello everybody.
+-!- zxtx [~zv@ool-2f110054.dyn.optonline.net] has quit [Ping timeout: 252 seconds]
+-!- thoralf [~thoralf@91-66-33-4-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+-!- zxtx [~zv@ool-2f110054.dyn.optonline.net] has joined #shogun
+ shogun-buildbot_	build #627 of nightly_default is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/627
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- thoralf [~thoralf@91-66-33-4-dynip.superkabel.de] has joined #shogun
+ thoralf	Heyhey.
+@iglesiasg	thoralf, hello hello
+@iglesiasg	sonney2k, around?
+@iglesiasg	or someone with some Django experience around?
+@iglesiasg	ok, no problem. I found what I needed :)
+ thoralf	iglesiasg: Trying ony stackoverflow code snippet after another? ;)
+ thoralf	http://xkcd.com/1185/
+@iglesiasg	hehe not really, I found in the doc actually!
+ thoralf	(don't forget to check the mouse-over of the xkcd strip)
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 245 seconds]
+-!- zxtx [~zv@ool-2f110054.dyn.optonline.net] has quit [Ping timeout: 245 seconds]
+@sonney2k	thoralf, around?
+ thoralf	sonney2k: Yes.
+@sonney2k	thoralf, I am just wondering why you didn't make SGRefObject not a base class of CSGObject?
+@sonney2k	but really only the minimal thing in SGRefObject
+ thoralf	sonney2k: I first wanted some feedback before spending more time on this.
+ thoralf	CSGObject does a lot of things.  Which should be put into SGRefObject and which should stay?  How does this relate to SGReferencedData/ReferencedObject, etc.?
+@sonney2k	thoralf, just the refcounting no more should go into SGRefObject - as I said my biggest Q would be if we can use SGReferencedData (and just have one base class for referenced stuff)
+@sonney2k	but maybe not at this stage
+@sonney2k	thoralf, then maybe the CDynamicObjectArray should get another parent CDynamicRefObjectArray
+@sonney2k	which contains all the stuff but the serialization
+ thoralf	I knew I'm triggering lots of ideas. ;)
+ thoralf	But for now, making CSGObject subclass of SGRefObject would do?
+@sonney2k	thoralf, look the easy (and reasonable change) is SGReferencedObject <- CSGObject
+@sonney2k	so that should be done in one patch
+ thoralf	Yes, I just didn't know if you will approve the way I chose and how much of the functionality should be outsourced.
+ thoralf	It just happend a few times that I did something you rejected.
+@sonney2k	thoralf, the absolute minimum
+ thoralf	I'm on the way.
+@sonney2k	thoralf, you already did too much in one PR...
+ thoralf	For example?
+@sonney2k	thoralf, I am not sure how if you should use DynArray later - I mean it does not ref/unref there so it might be leaky
+ thoralf	Yes, but it was the easiest way of get it working, since DynamicObjectArray only accepts CSGObjects.
+@sonney2k	thoralf, it might make sense to have DynamicRefObjectArray for automagic ref/unref'ing
+ thoralf	I totally know that.  But I cannot spend more time on this issue -- the waste of memory has been reduced, so that my stuff runs.
+ thoralf	What I now do is just a favour for you guys. ;)
+ thoralf	sonney2k, I'm now having a problem with examples/undocumented/libshogun/library_gc_array.cpp: I'm getting a segfault in "return 0".
+ thoralf	The problem seems to be that the destructor is called *after* shogun_exit().
+ thoralf	Putting a scope around, ending before shogun_exit() solves the problem.
+ thoralf	Obviously we shouldn't call shogun_exit() if we're having automatic (shogun) variables in the same scope.
+* sonney2k is just doing this https://www.youtube.com/watch?v=mkZp851aOnE#t=201
+ thoralf	This video is currently unavailable.
+ thoralf	But the title tells a lot.
+@sonney2k	thoralf, the simple refactoring shouldn't break anything
+ thoralf	sonney2k: Yes, but the problem existed before.
+ thoralf	calling shogun_exit() in a scope, where variables exist, is problematic: In my case only changing SG_GCDEBUG to SG_SGCDEBUG triggered the problem.
+@sonney2k	thoralf, yes of course makes sense
+@sonney2k	everything has to be freed before that
+-!- zxtx [~zv@ool-2f110054.dyn.optonline.net] has joined #shogun
+ thoralf	sonney2k: The pull request has been updated.  I'm happy to announce: All refcount code from CSGObjects has been put into its new superclass SGRefObject.
+ thoralf	:D
+@sonney2k	thoralf, errm dont' see the PR!
+ thoralf	It's still this one: https://github.com/shogun-toolbox/shogun/pull/1770
+ thoralf	push --force
+ thoralf	I did not create a new class DynamicRefObjectArray, btw.
+@sonney2k	thoralf, ohh please3 a PR with just the SGRefObject no more
+ thoralf	What about the StructuredData stuff?
+@sonney2k	thoralf, not yet
+ thoralf	I don't understand.
+-!- thoralf [~thoralf@91-66-33-4-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+@wiking	morning
+@wiking	lisitsyn: ping
+-!- sonne|osx [~sonne@f053044029.adsl.alicedsl.de] has joined #shogun
+ sonne|osx	argh thorsten left
+ sonne|osx	hey wiking
+ lisitsyn	wiking: pong
+ lisitsyn	wiking: what kind of morning it is? :D
+ lisitsyn	are you in the us or what? ;)
+-!- thoralf [~thoralf@91-66-33-4-dynip.superkabel.de] has joined #shogun
+ thoralf	Hey.
+-!- sonne|osx [~sonne@f053044029.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- sonne|osx [~sonne@f053044029.adsl.alicedsl.de] has joined #shogun
+-!- lisitsyn [~lisitsyn@80.252.20.67] has quit [Ping timeout: 264 seconds]
+-!- lisitsyn [~lisitsyn@80.252.20.67] has joined #shogun
+ sonne|osx	thoralf: what I meant is that we should for now just do the SGRefObject refactoring in one PR not the other stuff you are doing
+ sonne|osx	thoralf: and really minimal please - no other functions like get_name etc - these should really all stay in SGObject
+ sonne|osx	(to the extent possible...)
+ thoralf	sonne|osx: No problem, I'll send another PR.  But remember how it started: You said we need this StructuredData refactoring.
+ thoralf	That's why I'm confused.
+ sonne|osx	thoralf: yeah but that was before you realized that you need refcounting
+ thoralf	sonne|osx: Btw. I found method stubs deep_copy() and a shallow_copy() in CSGObject.
+ thoralf	They are not used.
+ thoralf	Remove them?
+ sonne|osx	thoralf: not used at all? then remove them.
+ thoralf	The stubs are SG_NOTIMPLEMENTED, not nowhere overridden.
+ thoralf	https://github.com/shogun-toolbox/shogun/pull/1771
+ thoralf	SG_SGCDEBUG("unref() refcount %ld obj %s (%p) decreased\n", count, this->get_name(), this)
+ thoralf	sonne|osx:
+ thoralf	get_name() is required in SGRefObject ;)
+ sonne|osx	thoralf: that was only for debugging :/
+ sonne|osx	but hmmh don't see any better option
+ thoralf	No, I found shallow_copy() implemented in RelaxedTree.
+ thoralf	and GaussianKernel
+ sonne|osx	thoralf: but this can be in CSGObject
+-!- sonne|osx [~sonne@f053044029.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- thoralf [~thoralf@91-66-33-4-dynip.superkabel.de] has quit [Quit: Konversation terminated!]
+-!- thoralf [~thoralf@91-66-33-4-dynip.superkabel.de] has joined #shogun
+-!- pickle27 [~kevin@24-212-221-132.cable.teksavvy.com] has joined #shogun
+-!- pickle27 [~kevin@24-212-221-132.cable.teksavvy.com] has left #shogun []
+--- Log closed Mon Nov 25 00:00:39 2013

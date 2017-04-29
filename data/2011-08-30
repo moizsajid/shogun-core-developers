@@ -1,0 +1,238 @@
+--- Log opened Tue Aug 30 00:00:37 2011
+-!- blackburn1 [~blackburn@188.168.4.53] has quit [Ping timeout: 240 seconds]
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+-!- in3xes [~in3xes@180.149.49.227] has quit [Quit: Leaving]
+@sonney2k	serialhex, - you patch is not mergable
+@sonney2k	you have to rebase it
+-!- blackburn [~blackburn@188.168.3.121] has joined #shogun
+-!- heiko [~heiko@134.91.52.222] has joined #shogun
+@sonney2k	morning heiko - glad to see that your gf let you live and code ;-)
+ heiko	morning :)
+ heiko	yes, me too ;)
+ heiko	ok then, now for some hardcore coding action :)
+-!- blackburn [~blackburn@188.168.3.121] has quit [Ping timeout: 260 seconds]
+-!- blackburn [~blackburn@188.168.3.98] has joined #shogun
+@sonney2k	heiko, just ping me when there is anything
+ heiko	sonney2k, ok i will
+ heiko	now it the migrate method has to return by reference whether a new TParameter instance is returned, and also if its was was newly allocated
+ heiko	so all cases may be handleed
+@sonney2k	ok
+@sonney2k	seems like you really thought about it all then
+@sonney2k	I would have just made the strict assumption - no messing with inputs -
+@sonney2k	I think you will have to give me a short 'tutorial' once you are done
+-!- blackburn [~blackburn@188.168.3.98] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@188.168.4.202] has joined #shogun
+-!- blackburn [~blackburn@188.168.4.202] has quit [Ping timeout: 240 seconds]
+@sonney2k	heiko, what's up in the jungle?
+ heiko	sonney2k, its horrible
+ heiko	every time i touch something, new error araise
+ heiko	I can now serialize/deserialize SGVectors
+ heiko	but the normal vectors do not work
+@sonney2k	heiko, wait the normal serialization stuff no longer works?
+ heiko	The most frequent problem is the problem to build a TParameter isntance that can call load, from sratch, meaning that class variables are not attached
+ heiko	yes it does, but migration does not
+ heiko	normal serialization works all the time
+ heiko	because it is done separately
+ heiko	but migration of the old style vectors does not yet
+ heiko	its really really complicated, so many side-effects to think about
+@sonney2k	so for nomal vectors you need extra treatment right?
+@sonney2k	like copy doulbe* and len
+ heiko	currently i am getting mad because i just dont get it how to create a TParameter instance to load an old style vector
+ heiko	yes
+@sonney2k	and same with matrix/string/...
+ heiko	no even touched this yet
+ heiko	only doing vector/matrix
+@sonney2k	heiko, how about just *always* returning SGVector etc instead of normal vectors?
+@sonney2k	I mean when you have to do migrations then SGVector exists and is a more clean structure to store things
+@sonney2k	so then you don't need special extra treatment and the person doing migrations knows that he will only get scalars or SG* structures
+ heiko	I also thought of that some time ago but then I would have to modify things even in a deeper layer
+ heiko	which then causes even more horrible problems
+ heiko	I am getting invalid writes/reads all the time
+@sonney2k	hmmhhh, what problems do you have in more deep layers?
+ heiko	i would have to modify Tparameter::load for that (to store old style vectors in SGVector)
+ serialhex	sonney2k: ok, i'll doo that and re-post it
+@sonney2k	serialhex, thanks
+@sonney2k	heiko, sorry had to answer some questions here
+@sonney2k	heiko, that sounds a lot simpler to me
+@sonney2k	^ modifyingt Tparameter::load to optionally store old-style stuff in new-style vectors
+ heiko	sonney2k, i got to go now, sorry
+@sonney2k	heiko, so what shall we do?
+ heiko	i dont know
+ heiko	this is simply not easy
+ heiko	I dont know if it will be finished quick, I thought I could do it today
+ heiko	but the current problem blocks it
+ heiko	I pushed all code to my github account
+ heiko	perhaps you can take a look
+ heiko	here is my test program:
+ heiko	http://pastebin.com/Xzxf0bKv
+@sonney2k	ok then I guess we will have to make a release w/o this - I don't know whether you will have time to work on this later on such that we can do a proper conversion
+ heiko	and here the input file
+@sonney2k	later
+ heiko	http://pastebin.com/y4xRpy0x
+@sonney2k	any thoughts?
+ heiko	I will have tome to finish it, but the problem is that i move out of my flat on friday as I already told oyu
+ heiko	I will have some time tomorrow in the morning but I really need to start on the flat
+@sonney2k	heiko, I know - I am just asking if at all
+-!- f-x [75c0d906@gateway/web/freenode/ip.117.192.217.6] has joined #shogun
+@sonney2k	I mean I don't want to be an annoyance pushing you to do work you don't enjoy that much for too much longer
+@sonney2k	so I meant more like in the next weeks/months then
+ heiko	yes, I know
+@sonney2k	I certainly prefer to keep you in the time than to push you beyond what is fun... - so it is really up to you
+@sonney2k	heiko, but if you commit doing it - it would certainly be great - but I don't know 1-2 months from now on ETA I guess then?
+ heiko	yes something like that
+ heiko	next two months are full
+ heiko	but again, I think it will work soon, the conecept is there
+ heiko	the problems are of technical nature
+ heiko	lets do it like this:
+ heiko	i will try to finish it in the next days, i have some hours per day
+ heiko	and if it works, its great.
+@sonney2k	that sounds more like never then - the problem with this is that you really need to be so focussed - deep inside the code that it doing it as a side thing is close to impossible
+@sonney2k	ok
+@sonney2k	if not?
+ heiko	if not, either you have a look, or I will do it later
+ heiko	meaning starting again on it in one month
+@sonney2k	that is certainly fair
+@sonney2k	so we will try to do the tests w/o it and just create new regression tests with the new release
+@sonney2k	then make a release and we will see how people react
+ heiko	perhaps wait one more day before you start on it
+@sonney2k	well we wanted to release tomorrow right :)
+ heiko	ok then ..mmh
+@sonney2k	then blackburn starts studying again
+@sonney2k	I will have a new job ... so it is all difficult for us then for the next few weeks
+ heiko	its stupid: the migration basically works, scalars work, SGVectors do work, only the normal vectors do not
+@sonney2k	which is the only thing we need to migrate
+ heiko	But I will defenetly not finish it today
+@sonney2k	yeah I mean I could not foresee that it takes so long and that you were away most of last week
+@sonney2k	so it is like it is -
+ heiko	Me too, thought it would be done in a week or so, but now I am working on it for two weeks, and the serialization bugs also took a lot of time
+@sonney2k	heiko, I am very happy that you intend to finish it and stay around later
+@sonney2k	and you've done a great job anyways
+@sonney2k	so we should be more in a party than fail mood :)
+ heiko	thanks :) but a bit silly that this one does not work out
+ heiko	true :)
+ heiko	sonney2k, I got to go now, will be back tomorrow for some more talk and coding stuff
+ heiko	bye
+@sonney2k	we will have another release w/ that feature soon
+@sonney2k	so don't worry thanks and bye
+-!- heiko [~heiko@134.91.52.222] has quit [Ping timeout: 258 seconds]
+-!- blackburn [~blackburn@188.168.3.23] has joined #shogun
+ blackburn	sonney2k: any news?
+@sonney2k	blackburn, ys
+@sonney2k	yes
+@sonney2k	blackburn, we have to do w/o migrations for the release
+ blackburn	oh
+ blackburn	is heiko out of schedule?
+@sonney2k	blackburn, not out of schedule - it is much more difficult than we assumed
+@sonney2k	so we should try to check things manually now
+@sonney2k	that is use an old shogun version somewhere  - run the python modular examples
+@sonney2k	and then compare the output
+@sonney2k	with what we get when we run this on some new machine
+@sonney2k	err shogun
+ blackburn	hmm okay I see
+ blackburn	sonney2k: do you have time for that testing?
+@sonney2k	not now
+@sonney2k	could you start a few things
+@sonney2k	?
+ blackburn	yeah sure, that's why I'm asking
+@sonney2k	thanks so please start and document which examples you testes
+@sonney2k	did test
+@sonney2k	btw you could try to run tester.py
+@sonney2k	lets see how much works :)
+ blackburn	sonney2k: looks like nothing works :D
+@sonney2k	yay!
+@sonney2k	congrats
+ blackburn	compiling old shogun
+@sonney2k	blackburn, *arg* the old shogun example also doesn't work
+@sonney2k	err the ocr one I meant
+ CIA-3	shogun: Soeren Sonnenburg master * rdc68e4f / (2 files): fix two more 'problematic' ruby examples - http://git.io/K_UBow
+ CIA-3	shogun: Soeren Sonnenburg master * r6f9f139 / src/shogun/io/BinaryFile.cpp : improve error output in binary file - http://git.io/P4d2iQ
+ CIA-3	shogun: Soeren Sonnenburg master * r4ecaa34 / (2 files): remove obsolete multiboost - http://git.io/QatMIw
+ CIA-3	shogun: Soeren Sonnenburg master * r312e97b / src/shogun/machine/KernelMachine.h :
+ CIA-3	shogun: Fix a bug in kernel machine introduced in SGVector transition
+ CIA-3	shogun: m_alpha has its own length and should be set and used independently from
+ CIA-3	shogun: m_svs otherwise serialization fails - http://git.io/HdbVAg
+ CIA-3	shogun: Soeren Sonnenburg master * rf0b3121 / (applications/ocr/Ai.py applications/ocr/data/ocr.svm.gz): fix ocr example and data for new shogun - http://git.io/gaA-Bg
+@sonney2k	blackburn, yay! progress
+ CIA-3	shogun: Soeren Sonnenburg master * r5a85eb5 / (2 files): fix sailfish application - http://git.io/1UfSnQ
+ blackburn	sonney2k: sorry had to go
+ blackburn	so are all applications operational now?
+ CIA-3	shogun: Soeren Sonnenburg master * rfaf1d9c / applications/vw/Makefile : add makefile for vw - http://git.io/KpTA2Q
+@sonney2k	blackburn, looks like yes
+ blackburn	sonney2k: oh we got nice email with suggestion to implement some thing
+@sonney2k	what's missing now is check tests and make release script / debian package
+@sonney2k	blackburn, I would suggest you check the examples and I do the release scripts
+@sonney2k	blackburn, when ?
+@sonney2k	from whom
+ blackburn	sonney2k: take a look on the mailing list
+@sonney2k	ahh ok
+@sonney2k	yes
+ blackburn	sonney2k: will you answer?
+@sonney2k	nice - please reply that this is warmly welcome
+@sonney2k	can you do that?
+@sonney2k	just now
+ blackburn	sonney2k: yeah okay
+@sonney2k	gtg
+@sonney2k	l8r
+-!- in3xes [~in3xes@180.149.49.227] has joined #shogun
+ shogun-buildbot	build #171 of octave_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/octave_modular/builds/171
+ blackburn	I think there is no reason to check all distances/kernels
+ blackburn	will check some of them now
+@sonney2k	blackburn, I think you can even script this or?
+@sonney2k	*food*
+ blackburn	sonney2k: need your help to automate this :)
+ blackburn	sonney2k: surprise! gaussian kernel changed result
+ blackburn	distance too!
+ blackburn	even euclidian distance changed?!
+ blackburn	ah
+ blackburn	I guess I know
+ blackburn	sonney2k: our saved results are totally useless: we used wrong data reading
+-!- in3xes [~in3xes@180.149.49.227] has quit [Ping timeout: 240 seconds]
+ blackburn	okay distances and kernels should be ok
+ blackburn	we haven't changed any compute routines so I'm pretty sure all OK
+ blackburn	I had some doubts about parallel things but it is working smoothly
+@sonney2k	blackburn, btw let me check if I regenerate the tests if they work or not
+@sonney2k	kernel machines were broken before my last commit
+@sonney2k	blackburn, please try the predict example in applications/ocr
+@sonney2k	it's cool :)
+ blackburn	sonney2k: I tried it days before
+@sonney2k	you mean years?
+ blackburn	sth like 0.3 year before hah
+@sonney2k	argh
+@sonney2k	new crashers
+ blackburn	?
+@sonney2k	try python generator.py in python_modular testsuite
+ blackburn	uh
+ blackburn	sonney2k:
+ blackburn	==22401==  Access not within mapped region at address 0x0
+ blackburn	==22401==    at 0x9C14FF1: shogun::TParameter::save_ptype(shogun::CSerializableFile*, void const*, char const*) (Parameter.cpp:1987)
+ blackburn	==22401==    by 0x9C1545F: shogun::TParameter::save_stype(shogun::CSerializableFile*, void const*, char const*) (Parameter.cpp:2054)
+ blackburn	==22401==    by 0x9C15E1C: shogun::TParameter::save(shogun::CSerializableFile*, char const*) (Parameter.cpp:2193)
+@sonney2k	yeah and other issues...
+ blackburn	nice
+@sonney2k	yeah isn't it. it will never be boring
+@sonney2k	blackburn, there are other valgrind errors before even
+@sonney2k	well actually it starts in the first file
+@sonney2k	classifier_averaged_perceptron_modular.py
+ CIA-3	shogun: Soeren Sonnenburg master * rc52988d / (20 files in 3 dirs):
+ CIA-3	shogun: Merge pull request #320 from serialhex/master
+ CIA-3	shogun: Many more ruby examples (+6 more commits...) - http://git.io/DtZoig
+@sonney2k	argh
+@sonney2k	I am not really making progress on this bug
+ CIA-3	shogun: Soeren Sonnenburg master * r03ee3f8 / (doc/pages/ModularTutorial.mainpage src/README.developer): mention apply() instead of classify() in tutorial and README - http://git.io/mK5npw
+@sonney2k	blackburn, are you making progress?
+ shogun-buildbot	build #157 of ruby_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org:5347/builders/ruby_modular/builds/157  blamelist: sonne@debian.org, serialhex@gmail.com
+ blackburn	sonney2k: sorry got disturbed there in dormitory
+ blackburn	sonney2k: what's with ruby?
+ shogun-buildbot	build #160 of python_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org:5347/builders/python_modular/builds/160  blamelist: sonne@debian.org, serialhex@gmail.com
+ blackburn	sonney2k: ruby examples in python?!
+ blackburn	serialhex: hey you probably shouldn't have to commit python examples modifications ;)
+ CIA-3	shogun: Sergey Lisitsyn master * r9580eb8 / (3 files): Restore wrong modified python modular examples - http://git.io/zqUzKg
+-!- f-x [75c0d906@gateway/web/freenode/ip.117.192.217.6] has quit [Ping timeout: 252 seconds]
+ blackburn	sonney2k: got fixes for these crashes
+ shogun-buildbot	build #2 of nightly_default is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org:5347/builders/nightly_default/builds/2
+ shogun-buildbot	build #162 of python_modular is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org:5347/builders/python_modular/builds/162
+ CIA-3	shogun: Sergey Lisitsyn master * r21b24b3 / src/shogun/machine/DistanceMachine.cpp : Fixed segmentation fault error emerged with DistanceMachine serialization - http://git.io/0o1-XA
+ shogun-buildbot	build #163 of python_modular is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org:5347/builders/python_modular/builds/163  blamelist: sonne@debian.org
+ blackburn	shogun-buildbot: what the fuck are you compiling?
+ CIA-3	shogun: Sergey Lisitsyn master * raf951c1 / (2 files): Added modelselection examples' description - http://git.io/2_CLeQ
+--- Log closed Wed Aug 31 00:00:06 2011

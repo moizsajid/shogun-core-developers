@@ -1,0 +1,254 @@
+--- Log opened Tue Aug 19 00:00:05 2014
+--- Log closed Tue Aug 19 00:06:22 2014
+--- Log opened Tue Aug 19 00:06:33 2014
+-!- shogun-t1olbox [~shogun@7nn.de] has joined #shogun
+-!- Irssi: #shogun: Total of 18 nicks [5 ops, 0 halfops, 0 voices, 13 normal]
+-!- Irssi: Join to #shogun was synced in 9 secs
+-!- shogun-toolbox [~shogun@7nn.de] has quit [Ping timeout: 246 seconds]
+ hushell	thoralf: good to know c++flit ! Thanks :)
+@thoralf	:D
+@thoralf	Let's keep it a secret. ;)
+ hushell	thoralf: ;)
+ jiaolong	thoralf: Hi, I am back again. I have tried several times and found at least this function will cause trouble https://github.com/Jiaolong/shogun/blob/nd_array/src/shogun/lib/SGNDArray.h#L122
+ jiaolong	thoralf: Do you think the parameter 'index_t& max_at' could be the problem?
+@thoralf	jiaolong: Well, in the header you said "T max_element(index_t& max_at);", but you only specialized "float64_t SGNDArray<float64_t>::max_element(int32_t &max_at)"
+ jiaolong	thoralf: Or it can be lack of implement instances of other types, e.g., float32_t, int32_t, etc
+@thoralf	Same here: I guess you should specialize this as well.
+@thoralf	Try this: T SGNDArray<T>::max_element(int32_t &max_at) { T m = array[0]; ...
+ jiaolong	thoralf: OK, :)
+@thoralf	Maybe complex_... will fail, but check how SGVector solves this.
+@thoralf	complex_..t SGNDArray<T>::max_element(int32_t &max_at) { NOTIMPLEMENTED; }
+@thoralf	Btw: before "T m = array[0];" you should check "len_array > 0".
+ jiaolong	thoralf: Yes, you are right! The problem is because of the specilization. T SGNDArray<T>::max_element(int32_t &max_at) { T m = array[0]; ... WORKS!
+@thoralf	Cool!
+ jiaolong	thoralf: for int, float, the functions are acutally the same, should I implement max_element() twice?
+@thoralf	jiaolong: No.  You should just implement it for general T.
+ jiaolong	thoralf: But for other types, e.g., bool, it is not suitable
+@thoralf	Only make exceptions in cases where the function may differ from the straight-forward approach.
+@thoralf	Yes.
+ jiaolong	thoralf: OK, I see
+@thoralf	bool SGNDArray<bool>::max_element(...) { SGNOTIMPLEMENTED; return false; }
+@thoralf	Something like this to trick the compiler.
+ jiaolong	thoralf: But multiple such types, I have do the same multiple times?
+ jiaolong	thoralf: for instance 'char',
+@thoralf	Yes :(
+ jiaolong	thoralf: OK, :D
+@thoralf	Some people prefer to use macros for this, but I don't.
+@thoralf	template <>
+@thoralf	char SGVector<char>::twonorm(const char* x, int32_t len)
+@thoralf	{
+@thoralf	        SG_SNOTIMPLEMENTED
+@thoralf	        return '\0';
+@thoralf	}
+ jiaolong	thoralf: OK, I will also take a look at SGVector. Thank you so much!
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- thoralf [~thoralf@91-65-141-11-dynip.superkabel.de] has quit [Ping timeout: 250 seconds]
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Remote host closed the connection]
+ jiaolong	hushell: the problem has been solved. see https://github.com/shogun-toolbox/shogun/pull/2490
+ jiaolong	\quit
+-!- jiaolong [9e6d1f01@gateway/web/freenode/ip.158.109.31.1] has quit []
+ shogun-buildbot	build #2300 of deb2 - static_interfaces is complete: Failure [failed cmdline static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb2%20-%20static_interfaces/builds/2300  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, khalednasr <k.nasr92@gmail.com>
+ shogun-buildbot	build #477 of deb4 - python3 is complete: Failure [failed python static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/477  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, khalednasr <k.nasr92@gmail.com>
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 01ac2d0 / doc/ipython-notebooks/metric/LMNN.ipynb: https://github.com/shogun-toolbox/shogun/commit/01ac2d0b4dfb1a4130621a0fee4236fcfcbfe120
+ shogun-notifier-	shogun: Small changes in LMNN notebook to reduce running time.
+ shogun-notifier-	shogun: Fernando Iglesias :develop * 676868f / doc/ipython-notebooks/metric/LMNN.ipynb: https://github.com/shogun-toolbox/shogun/commit/676868fda75746eb0635dbfe716c35f1b9173366
+ shogun-notifier-	shogun: Merge pull request #2501 from iglesias/notebook/lmnn
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Small changes in LMNN notebook to reduce running time.
+-!- iglesiasg [524b8e0b@gateway/web/freenode/ip.82.75.142.11] has joined #shogun
+-!- iglesiasg [524b8e0b@gateway/web/freenode/ip.82.75.142.11] has quit [Client Quit]
+-!- travis-ci [~travis-ci@ec2-54-90-96-176.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/32916441
+-!- travis-ci [~travis-ci@ec2-54-90-96-176.compute-1.amazonaws.com] has left #shogun []
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 425f3da / src/shogun/machine/gp/InferenceMethod.h: https://github.com/shogun-toolbox/shogun/commit/425f3da95371545b1ab13f6e862de0905ed760a5
+ shogun-notifier-	shogun: Update InferenceMethod.h
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix wrong statement in documentation
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 02842ce / src/shogun/machine/gp/InferenceMethod.h: https://github.com/shogun-toolbox/shogun/commit/02842ce09065c68e29842a324ce9329a661a59e6
+ shogun-notifier-	shogun: Update InferenceMethod.h
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: another fix, overseen before
+-!- travis-ci [~travis-ci@ec2-54-89-155-211.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/32920749
+-!- travis-ci [~travis-ci@ec2-54-89-155-211.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #422 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/422  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, khalednasr <k.nasr92@gmail.com>
+-!- travis-ci [~travis-ci@ec2-54-89-155-211.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/32920939
+-!- travis-ci [~travis-ci@ec2-54-89-155-211.compute-1.amazonaws.com] has left #shogun []
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has joined #shogun
+-!- SerenityPhawx [~SerenityP@cpe-72-177-13-217.austin.res.rr.com] has joined #shogun
+-!- pickle27 [~pickle27@192-0-136-118.cpe.teksavvy.com] has quit [Remote host closed the connection]
+-!- SerenityPhawx [~SerenityP@cpe-72-177-13-217.austin.res.rr.com] has quit [Quit: Leaving]
+ shogun-buildbot	build #892 of nightly_default is complete: Failure [failed notebooks]  Build details are at http://buildbot.shogun-toolbox.org/builders/nightly_default/builds/892  blamelist: jiaolong <jiaolongxu@gmail.com>, Wu Lin <yorker.lin@gmail.com>, khalednasr <k.nasr92@gmail.com>, Heiko Strathmann <heiko.strathmann@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Fernando
+ shogun-buildbot	Iglesias <fernando.iglesiasg@gmail.com>, Abhijeet <abhijeetkislay@gmail.com>
+ shogun-buildbot	build #823 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/823  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #852 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/852  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot	build #49 of osx2 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20modular_interfaces/builds/49  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #50 of osx2 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20modular_interfaces/builds/50  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #2301 of deb2 - static_interfaces is complete: Failure [failed cmdline static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb2%20-%20static_interfaces/builds/2301  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #478 of deb4 - python3 is complete: Failure [failed python static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/478  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Fernando Iglesias :develop * b2a84da / src/shogun/features/Features.cpp,src/shogun/multiclass/KNN.cpp: https://github.com/shogun-toolbox/shogun/commit/b2a84dac3ad029a4093d36de1eb80fef4562c884
+ shogun-notifier-	shogun: Fix failure of KNN with cross-validation and memory leak on Features copy constructor.
+ shogun-notifier-	shogun: Fernando Iglesias :develop * e89843b / src/shogun/features/Features.cpp,src/shogun/multiclass/KNN.cpp: https://github.com/shogun-toolbox/shogun/commit/e89843b32a42b0fc9f5b28d292033c5f81acda86
+ shogun-notifier-	shogun: Merge pull request #2496 from iglesias/fix/knn_with_cv
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Fix failure of KNN with cross-validation and memory leak on Features copy constructor.
+-!- travis-ci [~travis-ci@ec2-54-89-155-211.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/32935912
+-!- travis-ci [~travis-ci@ec2-54-89-155-211.compute-1.amazonaws.com] has left #shogun []
+-!- van51 [~van51@ppp-94-66-15-225.home.otenet.gr] has joined #shogun
+ van51	yo!
+@wiking	 hey
+ shogun-buildbot	build #423 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/423  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- travis-ci [~travis-ci@ec2-54-90-246-144.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Fernando Iglesias's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/32935912
+-!- travis-ci [~travis-ci@ec2-54-90-246-144.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #824 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/824  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #550 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/550  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #853 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/853  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #551 of osx1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/551
+ shogun-buildbot	build #51 of osx2 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20modular_interfaces/builds/51  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #2302 of deb2 - static_interfaces is complete: Failure [failed cmdline static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb2%20-%20static_interfaces/builds/2302  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #479 of deb4 - python3 is complete: Failure [failed python static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/479  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- man-c [59d28792@gateway/web/freenode/ip.89.210.135.146] has joined #shogun
+ man-c	hallo
+-!- hushell [~hushell@c-98-232-237-144.hsd1.or.comcast.net] has quit [Ping timeout: 240 seconds]
+@wiking	hey
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ shogun-buildbot	build #424 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/424  blamelist: Fernando Iglesias <fernando.iglesiasg@gmail.com>
+-!- man-c [59d28792@gateway/web/freenode/ip.89.210.135.146] has quit [Ping timeout: 246 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Wu Lin :develop * 25a2f01 / doc/ (2 files): https://github.com/shogun-toolbox/shogun/commit/25a2f0128d95a23b8add0d4baa3aa893e621da73
+ shogun-notifier-	shogun: fixed the renaming issue
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 6e6268e / doc/ (2 files): https://github.com/shogun-toolbox/shogun/commit/6e6268eaa28fe733b9dd78d10ef672a40a26384b
+ shogun-notifier-	shogun: Merge pull request #2504 from yorkerlin/develop
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: fixed the renaming issue
+ shogun-buildbot	build #825 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/825  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #2511 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2511  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #826 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/826  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #2512 of bsd1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/2512
+-!- travis-ci [~travis-ci@ec2-54-166-228-166.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/32964653
+-!- travis-ci [~travis-ci@ec2-54-166-228-166.compute-1.amazonaws.com] has left #shogun []
+ shogun-buildbot	build #854 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/854  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #552 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/552  blamelist: Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #855 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/855  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- hushell [~hushell@c-98-232-237-144.hsd1.or.comcast.net] has joined #shogun
+ shogun-buildbot	build #553 of osx1 - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/553
+-!- man-c [59d28792@gateway/web/freenode/ip.89.210.135.146] has joined #shogun
+ shogun-buildbot	build #52 of osx2 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20modular_interfaces/builds/52  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #2303 of deb2 - static_interfaces is complete: Failure [failed cmdline static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb2%20-%20static_interfaces/builds/2303  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+ shogun-buildbot	build #480 of deb4 - python3 is complete: Failure [failed python static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/480  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Wu Lin <yorker.lin@gmail.com>
+-!- man-c [59d28792@gateway/web/freenode/ip.89.210.135.146] has quit [Ping timeout: 246 seconds]
+ matt|work	Heiko asked me to update the news with the r_modular fix I contributed, do I just edit the NEWS file directly and do a pull request?
+@lisitsyn	matt|work: yes
+-!- man-c [59d28792@gateway/web/freenode/ip.89.210.135.146] has joined #shogun
+-!- rajul [~rajul@180.151.18.31] has joined #shogun
+-!- rajul [~rajul@180.151.18.31] has quit [Ping timeout: 255 seconds]
+-!- rajul [~rajul@180.151.18.31] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: zxtx
+-!- rajul [~rajul@180.151.18.31] has quit [Ping timeout: 264 seconds]
+ shogun-notifier-	shogun: Matt Huska :develop * a718662 / NEWS,README.md,doc/pages/Interfaces.mainpage: https://github.com/shogun-toolbox/shogun/commit/a718662db91dda81305ed821ecaa5f840d5acbce
+ shogun-notifier-	shogun: Set R modular to stable in README.md. Update Interfaces doc and NEWS.
+ shogun-notifier-	shogun: Heiko Strathmann :develop * 4ba80b3 / NEWS,README.md,doc/pages/Interfaces.mainpage: https://github.com/shogun-toolbox/shogun/commit/4ba80b375ac8162244ccad35b5406a7273bc1f6c
+ shogun-notifier-	shogun: Merge pull request #2507 from matthuska/r-modular-news
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Set R modular to stable in README.md. Update Interfaces doc and NEWS.
+-!- Netsplit over, joins: zxtx
+-!- rajul [~rajul@180.151.18.31] has joined #shogun
+-!- van51 [~van51@ppp-94-66-15-225.home.otenet.gr] has quit [Ping timeout: 250 seconds]
+-!- van51 [~van51@94.66.15.225] has joined #shogun
+-!- in3xes [~in3xes@124.40.244.18] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-54-166-228-166.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/32979284
+-!- travis-ci [~travis-ci@ec2-54-166-228-166.compute-1.amazonaws.com] has left #shogun []
+-!- rajul [~rajul@180.151.18.31] has quit [Read error: Connection reset by peer]
+-!- rajul [~rajul@180.151.18.31] has joined #shogun
+-!- man-c [59d28792@gateway/web/freenode/ip.89.210.135.146] has quit [Quit: Page closed]
+-!- in3xes [~in3xes@124.40.244.18] has quit [Remote host closed the connection]
+-!- thoralf [~thoralf@ip25054fb1.dynamic.kabel-deutschland.de] has joined #shogun
+-!- mode/#shogun [+o thoralf] by ChanServ
+@thoralf	He.
+ shogun-buildbot	build #425 of debian wheezy - memcheck is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/425
+-!- thoralf [~thoralf@ip25054fb1.dynamic.kabel-deutschland.de] has quit [Quit: Konversation terminated!]
+-!- rajul [~rajul@180.151.18.31] has quit [Read error: Connection reset by peer]
+-!- man-c [59d28792@gateway/web/freenode/ip.89.210.135.146] has joined #shogun
+-!- rajul [~rajul@180.151.18.31] has joined #shogun
+-!- man-c [59d28792@gateway/web/freenode/ip.89.210.135.146] has quit [Ping timeout: 246 seconds]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- rajul [~rajul@180.151.18.31] has quit [Read error: Connection reset by peer]
+-!- rajul [~rajul@180.151.18.31] has joined #shogun
+-!- van51 [~van51@94.66.15.225] has quit [Read error: Connection reset by peer]
+-!- khalednasr [2945ab4e@gateway/web/cgi-irc/kiwiirc.com/ip.41.69.171.78] has joined #shogun
+@lisitsyn	khalednasr: hey wazzup
+ khalednasr	lisitsyn:hey :)
+@lisitsyn	khalednasr: I am curious what theo wants to talk about :)
+@lisitsyn	khalednasr: btw
+@lisitsyn	how far are we from gpu things?
+ khalednasr	lisitsyn:not far, maybe a week's work to gpu-ize the whole module
+@lisitsyn	really?
+@lisitsyn	khalednasr: will you by any chance have time for that?
+@lisitsyn	this is out of gsoc already but well
+ khalednasr	lisitsyn:yeah, most of the function that are needed are already there
+ khalednasr	lisitsyn:I'm gonna do it soon, I'm just busy right now with a few things
+@lisitsyn	khalednasr: I see
+@lisitsyn	khalednasr: if you have no time/will just let me know
+@lisitsyn	maybe I'll try to take care of that
+@lisitsyn	that's perfect ok as your work is rather done here
+ khalednasr	lisitsyn:cool :)
+@lisitsyn	khalednasr: I am like zero energy now :D hope theo will be there soon and it won't take much time
+ khalednasr	lisitsyn:I don't think it'll take long :)
+@lisitsyn	khalednasr: one guy at my job wants to try some nets
+@lisitsyn	I told him you are working on this thing but he asked whether it is gpu-based
+@lisitsyn	so actually everybody is interested in gpu things you know
+ khalednasr	lisitsyn:yeah they're really usefull for neural nets
+@lisitsyn	so I hope we will have gpu things ready in the next months
+@lisitsyn	we are not theano but that's ok
+ khalednasr	lisitsyn:yeah :)
+ khalednasr	lisitsyn:we should probably get #2421 and #2418 merged soon before we start gpu-izing
+ khalednasr	https://github.com/shogun-toolbox/shogun/pull/2421
+ khalednasr	https://github.com/shogun-toolbox/shogun/pull/2418
+ khalednasr	lisitsyn:the PRs are pushed against shogun-toolbox:feature/linalg, should I push them again for shogun-toolbox:develop?
+-!- rajul [~rajul@180.151.18.31] has quit [Read error: Connection reset by peer]
+@lisitsyn	khalednasr: I think thats' ok to push them against linalg
+@lisitsyn	what's the point?
+@lisitsyn	I probably miss this thing
+ khalednasr	lisitsyn:shouldn't they be on develop if we want to use them?
+@lisitsyn	well yeah
+@lisitsyn	but linalg is going to be merged at some point as well
+@lisitsyn	I hope :D
+ khalednasr	lisitsyn:it's already merged :)
+@lisitsyn	ahh damn
+@lisitsyn	:D
+@lisitsyn	now I got it
+@lisitsyn	yes then please rearrange them
+@lisitsyn	khalednasr: its a shame I missed that :D
+ khalednasr	lisitsyn:I should probably close them and push new ones?
+@lisitsyn	yeah
+@lisitsyn	the only sane way
+ shogun-buildbot	build #426 of debian wheezy - memcheck is complete: Failure [failed memory check]  Build details are at http://buildbot.shogun-toolbox.org/builders/debian%20wheezy%20-%20memcheck/builds/426  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+ shogun-buildbot	build #827 of precise - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/827  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Matt Huska <huska@molgen.mpg.de>
+@lisitsyn	khalednasr: probably I'll have to go to sleep soon
+@lisitsyn	I am visiting dentist early morning :D
+ khalednasr	lisitsyn:yeah, let's reschedule
+@lisitsyn	we've got to submit evaluation pretty soon
+ shogun-buildbot	build #856 of FCRH - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/FCRH%20-%20libshogun/builds/856  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Matt Huska <huska@molgen.mpg.de>
+-!- rajul [~rajul@180.151.18.31] has joined #shogun
+@lisitsyn	khalednasr: alright I am off :)
+@lisitsyn	khalednasr: I think that would be a good idea if you write a few words to update theo on the status
+ khalednasr	lisitsyn:alright, sorry you had to stay up  :)
+@lisitsyn	khalednasr: np :)
+ shogun-buildbot	build #53 of osx2 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20modular_interfaces/builds/53  blamelist: Matt Huska <huska@molgen.mpg.de>
+ shogun-buildbot	build #54 of osx2 - modular_interfaces is complete: Failure [failed csharp modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx2%20-%20modular_interfaces/builds/54  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- rajul [~rajul@180.151.18.31] has quit [Ping timeout: 246 seconds]
+-!- hushell [~hushell@c-98-232-237-144.hsd1.or.comcast.net] has quit [Ping timeout: 250 seconds]
+ shogun-buildbot	build #2304 of deb2 - static_interfaces is complete: Failure [failed cmdline static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb2%20-%20static_interfaces/builds/2304  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Matt Huska <huska@molgen.mpg.de>
+ shogun-buildbot	build #481 of deb4 - python3 is complete: Failure [failed python static]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb4%20-%20python3/builds/481  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, Matt Huska <huska@molgen.mpg.de>
+-!- khalednasr [2945ab4e@gateway/web/cgi-irc/kiwiirc.com/ip.41.69.171.78] has quit [Quit: http://www.kiwiirc.com/ - A hand crafted IRC client]
+-!- rajul [~rajul@180.151.18.31] has joined #shogun
+--- Log closed Wed Aug 20 00:00:06 2014

@@ -1,0 +1,825 @@
+--- Log opened Fri Apr 13 00:00:19 2012
+-!- av3ngr [av3ngr@nat/redhat/x-cvkzvkolelblsktc] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.186] has quit [Ping timeout: 252 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- vikram360 [~vikram360@117.192.160.228] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.180.120] has joined #shogun
+-!- vikram360 [~vikram360@117.192.180.120] has quit [Ping timeout: 252 seconds]
+-!- vikram360 [~vikram360@117.192.180.208] has joined #shogun
+-!- siddharth_ [~siddharth@14.139.82.6] has joined #shogun
+-!- siddharth_ [~siddharth@14.139.82.6] has left #shogun []
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 272 seconds]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-cvkzvkolelblsktc] has quit [Ping timeout: 240 seconds]
+-!- av3ngr [av3ngr@nat/redhat/x-xtwvnksjinqwtsqn] has joined #shogun
+ sonne|work	hi n4nd0 - a few warnings are on your account: http://www.shogun-toolbox.org/buildbot/builders/python_modular/builds/472/steps/compile/logs/warnings%20%2824%29
+ n4nd0	sonne|work: ok, I will take of them, thank you!
+-!- av3ngr [av3ngr@nat/redhat/x-xtwvnksjinqwtsqn] has quit [Quit: That's all folks!]
+ sonne|work	n4nd0: btw are you still happily covertree-ing?
+-!- xiangwang [~chatzilla@159.226.60.224] has joined #shogun
+ n4nd0	sonne|work: yeah
+ n4nd0	sonne|work: right now I am stuck with some university work, but I during my shogun time I am covertree-ing :)
+ n4nd0	sonne|work: why?
+ sonne|work	n4nd0: I got used to hearing break through's from you side :)
+ n4nd0	sonne|work: :D I am trying to control myself more now
+ sonne|work	too bad
+ sonne|work	:)
+ n4nd0	I discover yesterday though an interesting thing about JL covertree construction in my integration within shogun
+ n4nd0	sonne|work: I can show you now
+ n4nd0	sonne|work: the context is in CKNN:apply
+ n4nd0	sonne|work: here distance is set so distance(train_features, query)
+ n4nd0	sonne|work: but I need to build two cover trees before being able to do the queries
+ n4nd0	sonne|work: one with the train_features, and another with the queries
+ n4nd0	sonne|work: to build these trees I need distances, between those features
+ n4nd0	sonne|work: i.e to build the cover tree with train_features I need that distance is distance(train_features, train_features)
+ n4nd0	sonne|work: and to build the one for the queties: distance(queries, queries)
+ n4nd0	sonne|work: I have managed to do that using this trick http://snipt.org/uhRh3#expand
+ n4nd0	sonne|work: I think it is a bit ugly, but it does work!
+ sonne|work	yeah for that one would need what you have said
+ n4nd0	sonne|work: the problem is that it turns out that the calls to replace_[rhs|lhs] take more time than the creation of the cover trees
+ sonne|work	a way to compute distance for rhs,rhs stuff
+ sonne|work	what?
+ sonne|work	which distance?
+ n4nd0	sonne|work: what do you mean?
+ sonne|work	for which distance does it take more tiem?
+ sonne|work	time
+ n4nd0	I don't think it is really the distance
+ n4nd0	but the calls to replace_lhs and replace_rhs
+ n4nd0	in JL's code, both calls (for set_of_points and set_of_queries in the code) to batch_create
+ n4nd0	take less time than in my shogun code, using the replace methods in between
+ n4nd0	within my shogun code the portion of code I have pasted for you takes 0.2482(s)
+ n4nd0	while for JL's, the two calls to batch create take 0.053942(s)
+ n4nd0	oh wait
+ n4nd0	this may be caused as well for the upper_bound distance thing I told you about!
+ n4nd0	sonne|work: haha I think I did my first breakthrough of the day :D
+ sonne|work	I don't understand a thing
+ sonne|work	you mean upper_bound stuff is the reason why JL's thing is so fast
+ sonne|work	but you don't use it?
+ sonne|work	in shogun
+ n4nd0	I have not implemented it yet
+ sonne|work	and that is why it is so slow?
+ n4nd0	I think that the reason why I see that the construction of the trees is slow in shogun
+ n4nd0	maybe is because of the thing of the upper_bound distance
+ n4nd0	do you understand?
+ n4nd0	I am not that good at explaining sometimes :S
+ sonne|work	yes OK
+ sonne|work	but it is already faster right?
+ sonne|work	4 times I mean?
+ sonne|work	so you can speed it up quite a bit with this upper_bound stuff
+ n4nd0	exactly
+ n4nd0	right now it is already faster than the thing we had before
+ n4nd0	not as fast as standalone JL though
+ n4nd0	it might approach more standalanoe JL doing the upper_bound thing
+ sonne|work	nice!
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ sonne|work	n4nd0: now I wish you had time to try this out
+ n4nd0	sonne|work: the cover tree?
+ sonne|work	yes
+ sonne|work	the upper bound stuff w/i shogun
+ n4nd0	ah I will get some time to work on it today, I'm almost done with the test I wanted to do for my school project
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Quit: wiking]
+ sonne|work	great
+ sonne|work	let me know :)
+-!- blackburn [~qdrgsm@83.234.54.186] has joined #shogun
+ blackburn	n4nd0: hey there I heard some success with covertree?
+ n4nd0	blackburn: yeah, I managed to make it work from shogun
+ n4nd0	blackburn: is still work in progress though
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.186] has quit [Read error: Connection reset by peer]
+-!- pluskid [~chatzilla@111.120.58.220] has joined #shogun
+-!- blackburn [~qdrgsm@83.234.54.186] has joined #shogun
+ wiking	yo
+ sonne|work	wiking: yo
+ wiking	friday the 13th had it's course already on me :)
+ sonne|work	wiking - yeah you missed out 2 lines with warning fixes http://www.shogun-toolbox.org/buildbot/builders/python_modular/builds/472/steps/compile/logs/warnings%20%2824%29
+ sonne|work	or was it sth else ?\
+ wiking	hahaha sure something else... internet got broken, warm water in the house suddenly stopped working
+ wiking	2? i just see one preprocessor/PNorm.h:37:
+ wiking	pull request for fixing that error sent out
+ CIA-64	shogun: Viktor Gal master * r92348cf / src/shogun/preprocessor/PNorm.h : Fix for PNorm constructor doxygen comment - http://git.io/rp21jA
+ CIA-64	shogun: Soeren Sonnenburg master * r6c0a969 / src/shogun/preprocessor/PNorm.h :
+ CIA-64	shogun: Merge pull request #447 from vigsterkr/master
+ CIA-64	shogun: yet another fix for PNorm doxygen comment - http://git.io/BYlOsA
+ sonne|work	wiking: this one preprocessor/PNorm.cpp:120: warning: 'norm' may be used uninitialized in this function
+-!- pluskid_ [~chatzilla@li400-235.members.linode.com] has joined #shogun
+ sonne|work	actually more critical
+ wiking	mmm
+ wiking	hahahahah THE FIST line and i don't see it :)
+-!- pluskid [~chatzilla@111.120.58.220] has quit [Ping timeout: 260 seconds]
+-!- pluskid_ is now known as pluskid
+ wiking	s/FIST/FIRST/
+ wiking	actually that's a good question what it should be... afaik the best is to return 1.0 rather than 0.0
+ wiking	although that's not 'correct' but it won't hurt as much as if i would return 0.0 and then the caller right away uses the return value without checking to divide a number => divide by zero
+ wiking	agree?
+ sonne|work	wiking: huh?
+ sonne|work	you should init it with 0
+* sonne|work thinks wiking didn't have enough sleep
+ wiking	and if that gets returned...?
+ sonne|work	it doesn't
+ wiking	it might...
+ sonne|work	no
+ sonne|work	in all if () { } sections norm is computed
+ sonne|work	only in the first one it is incremented
+ sonne|work	that is why you need the init to 0
+ wiking	well it still can happen that 0 gets back
+ wiking	but that's the caller's problem then...
+ sonne|work	and an independent problem
+ wiking	ok
+ sonne|work	no matter what you set norm to
+ blackburn	THE FIST
+ wiking	:>>>
+ wiking	pull req sent
+ blackburn	hey guys have you heard how nice is DPRK's rocket?
+ wiking	?
+ pluskid	rocket ?
+ blackburn	http://news.yahoo.com/north-korean-missile-failed-launch-u-military-012804451.html totally broken lol
+ blackburn	wiking: should I merge your stuff? :)
+ wiking	blackburn: first one is already merged :)
+ wiking	but yeah would be great
+ wiking	ok
+ wiking	now it's time to go back and try to speed up gmm
+ wiking	:D
+-!- vikram360 [~vikram360@117.192.180.208] has quit [Ping timeout: 246 seconds]
+ CIA-64	shogun: Viktor Gal master * r7f6d2d2 / src/shogun/preprocessor/PNorm.cpp : PNorm: initialise the norm to 0.0 in the beginning - http://git.io/71I6pg
+ CIA-64	shogun: Sergey Lisitsyn master * r1f77383 / src/shogun/preprocessor/PNorm.cpp : Merge branch 'master' of git://github.com/vigsterkr/shogun - http://git.io/VqTbVw
+ wiking	yey
+ blackburn	wiking: I glanced over your twitter and I admit I do not understand anything
+ wiking	some of it is on hungarian :)
+ blackburn	yes I meant that ;)
+ blackburn	what is csinalok?
+ wiking	do
+ wiking	actually i'm doing
+ wiking	csinalni = to do
+ wiking	csinalok = i'm doing
+ wiking	or i do
+ n4nd0	use a lot twitter guys, I am making a project to rank users and stuff!
+ wiking	depends on the context
+ blackburn	n4nd0: same with your twitter btw
+ blackburn	wiking: there is no difference between I'm doing/to do in russian :D
+ n4nd0	blackburn: like in Swedish, no continuous forms!
+ blackburn	however you probably know that
+ blackburn	that is one of the reasons why we fail with speaking english properly sometimes
+ n4nd0	blackburn: do you have articles in Russian?
+ blackburn	bingo
+ n4nd0	blackburn: like "the house"
+ blackburn	no
+ n4nd0	the thing I have noticed the most in Russian speakers is that
+ blackburn	that's why I (and other russians) mix it up as well hah
+ blackburn	however I get used with it a little
+ blackburn	earlier it was worse
+ n4nd0	I don't think you do that one, at least I didn't notice
+ blackburn	no, I still do a lot of mistakes and crazy sentences
+ blackburn	but year ago it was really worse hah, right sonne|work?
+ blackburn	n4nd0: we also have cases (dative,genitive,etc) there
+ n4nd0	blackburn: that must be difficult
+ blackburn	not while you are native with it :D
+ blackburn	for example
+ blackburn	there is a fish
+ blackburn	and
+ blackburn	there is no fish
+ blackburn	would be
+ blackburn	ah bad example
+ blackburn	word with same cases :D
+ blackburn	I mean word is changing in different cases
+ n4nd0	like
+ n4nd0	the fish is red
+ n4nd0	I like fish
+ blackburn	???? ???????
+ blackburn	? ????? ????
+ blackburn	yes
+ n4nd0	when it is subject or DC
+ n4nd0	I actually know to say fish in Russian
+ blackburn	ryyba? ;)
+ n4nd0	yeah
+ n4nd0	haha
+ blackburn	n4nd0: aren't cases there in spanish?
+ wiking	blackburn:  ;) just saying ... usually indo-european language based people cannot grasp the idea of having only 3 tenses: past, present and future ;p
+ n4nd0	blackburn: no, no cases
+-!- uricamic [9320543b@gateway/web/freenode/ip.147.32.84.59] has joined #shogun
+ blackburn	wiking: isn't english indo-european? :)
+ blackburn	ah only
+ wiking	yes it is and it has about 8 tenses :)
+ blackburn	yes got you
+ blackburn	uricamic: can it be that you do not precompute kernel matrix in your gs krr?
+ blackburn	in case it is too large
+ blackburn	okay have to go guys
+ blackburn	wiking: how much tenses there are in hungarian then?
+ wiking	as said 3
+ wiking	:)
+ uricamic	blackburn: yes, I can change that
+ n4nd0	blackburn, wiking the tenses in Spanish are not normal ... too many
+ wiking	n4nd0: it's latin based language it's normal
+ wiking	;)
+ blackburn	ok see you
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- blackburn [~qdrgsm@83.234.54.186] has quit [Quit: Leaving.]
+-!- wiking [~wiking@vpnc224.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpnc224.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ n4nd0	too many anyway :)
+ pluskid	only 1 tense in Chinese ! :D
+ pluskid	I guess
+ n4nd0	:O
+ n4nd0	you don't have difference between past / present / future at least?
+ pluskid	we do not change form of a word
+ pluskid	but add more words to indicate the tense
+ pluskid	so there's no difference between "eat" and "eating"
+ pluskid	but the meaning depends on the context
+ n4nd0	not even eat and ate?
+ pluskid	there will be words in the context to indicate whether "eat" or "eating"
+ pluskid	but there are multiple tenses in Japanese
+ pluskid	though Chinese and Japanese looks very similar, they are quite different actually
+ pluskid	btw, shogun (the japanese word) is "jiang jun" in Chinese :p
+ pluskid	the same characters, different pronounciations
+ pluskid	and the same meaning
+ n4nd0	curious
+ sonne|work	uricamic: can you do any kind of benchmark for KRR?
+ sonne|work	uricamic: and one more thing - could you create a *separate* pull request for the GS-KRR?
+ uricamic	sonne|work: I plan to implement also the version which will not precompute the kernel matrix for large data. What kind of benchmark do you mean?
+ sonne|work	uricamic: just measure if GS is faster than the pinv based one
+ sonne|work	btw I would do it slightly differently
+ uricamic	sonne|work: I have tried to create another pull request, but it didn't work
+ sonne|work	gsomix, n4nd0, wiking, pluskid - please help uricamic with this :)
+ pluskid	uricamic: are you in the mailing list?
+ uricamic	is it possible that I can have only one opened pull request?
+ uricamic	pluskid: yes
+ pluskid	there was an email describing the work flow
+ sonne|work	uricamic: I would just add a new train function to KRR
+ shogun-buildbot	build #651 of octave_static is complete: Failure [failed test_1]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/651  blamelist: sonne@debian.org
+ sonne|work	and the epsilon parameter
+ wiking	!!!! sonne|work :>
+ sonne|work	not create a new class for that - I mean the rest is the same :)
+ pluskid	I think you have to create multiple branches to make multiple pull request
+ sonne|work	wiking: I promise I didn't do anything!
+ wiking	:))
+ wiking	why did it fail now? :)
+ sonne|work	something wrong with perceptron
+ uricamic	sonne|work: ok, that sounds reasonable, I will change it
+ sonne|work	a rhyme :)
+ sonne|work	uricamic: yeah then one can have a 'master' train function that selects some selected solver that one can specify as arg to constructor
+ sonne|work	wiking: I don't even see any error?!
+ uricamic	pluskid: what was the subject of that email ?
+ n4nd0	uricamic: yeah I agree with pluskid, you need multiple branches for multiple pull requests
+ pluskid	uricamic: git workflow
+ pluskid	uricamic: this link: http://article.gmane.org/gmane.comp.ai.machine-learning.shogun/2537
+ uricamic	pluskid: thanks
+ pluskid	u r wel~ ^_^
+* sonne|work is happy to see some interaction here :)
+-!- vikram360 [~vikram360@117.192.180.208] has joined #shogun
+ n4nd0	sonne|work: I got news
+* sonne|work listens up
+ sonne|work	n4nd0: what news?
+-!- gsomix [~gsomix@188.168.4.7] has quit [Ping timeout: 264 seconds]
+ n4nd0	sonne|work: so doing this upper bounded computation
+ n4nd0	the time improves, but just a little bit
+ n4nd0	before the construction time in shogun was like 5 times the one in standalone JL
+* pluskid is trying some IRC command
+ n4nd0	now it is sth between 4 and 5 times
+* n4nd0 likes this IRC command :)
+* pluskid thinks it cool, too
+ n4nd0	the thing is that the distance function used in standalone JL is pretty optimized
+ n4nd0	take a look
+ n4nd0	http://snipt.org/uhSe9
+ sonne|work	ahh ok
+ n4nd0	the loop is unrolled I think
+ n4nd0	the big issue is that it assumes that the dimension of the points is multiple of 8
+ sonne|work	and it is based on floats
+-!- pluskid [~chatzilla@li400-235.members.linode.com] has quit [Quit: ChatZilla 0.9.88.2 [Firefox 11.0/20120312181643]]
+ n4nd0	does that make a big difference too?
+ sonne|work	factor 2 at least
+ n4nd0	ok
+ n4nd0	so what do you think?
+ sonne|work	we don't want to switch to float
+ sonne|work	but all other speedups are welcome :)
+ n4nd0	so since that implementation assumes that the dimension of the features is multiple of 8
+ n4nd0	(if the points given are not, there is a function that pads them with zeroes)
+ n4nd0	how would you handle that in shogun?
+ xiangwang	hi, does shogun include the cutting-plane algorithms?
+ n4nd0	xiangwang: hey! we have OCAS :)
+ xiangwang	in which folder of classifier ? thanks
+ n4nd0	classifier/svm I guess
+ n4nd0	yeah I see it in classifier/svm/SVMOcas
+ n4nd0	sonne|work: do you think it pays off to reallocate CFeatures* lhs and rhs to make them multiple of 8?
+ n4nd0	could it be done in another way?
+ sonne|work	n4nd0: well one could use this algorithm for the multiple of 8 dims that fit and for the remainder the slow one
+ n4nd0	sonne|work: I like that solution
+ n4nd0	sonne|work: we document it, that is recommended to use covertree with multiples of 8 dimensions :)
+ sonne|work	no
+ sonne|work	I mean sth else
+ sonne|work	one can do fast processing as long as there are blocks of 8 dims to process
+ sonne|work	only for the remainder we use the slow method
+ sonne|work	that is fast too so no problem
+ n4nd0	aham
+ n4nd0	ok
+-!- elango_ [~elango@92-244-6-194.customers.ownit.se] has joined #shogun
+ n4nd0	also, this can only be done for SimpleFeatures, can't be?
+ sonne|work	yes
+ sonne|work	so I think this should be a function in dot/simplefeatures then
+ sonne|work	but hey covertree first then this speedup stuff :)
+ n4nd0	all right
+ n4nd0	avout the warnings before
+ n4nd0	ups aBout
+ sonne|work	yes?
+ n4nd0	they're related with the other covertree so when I do a pull request with the new one
+ n4nd0	that code disappears
+ sonne|work	ok
+ n4nd0	I mean, no need to fix them before right?
+ sonne|work	looking forward to it then
+ shogun-buildbot	build #652 of octave_static is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/octave_static/builds/652
+-!- vikram360 [~vikram360@117.192.180.208] has quit [Ping timeout: 276 seconds]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Read error: Operation timed out]
+-!- wiking_ is now known as wiking
+-!- vikram360 [~vikram360@117.192.180.208] has joined #shogun
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackburn	xiangwang: MulticlassOCAS and SVMOcas are cutting-plane based (libocas)
+-!- elango_ [~elango@92-244-6-194.customers.ownit.se] has left #shogun ["Leaving"]
+ blackburn	sonne|work: hey now I understand you a little more with 10 hrs of sleeping for last 3 days :D
+ blackburn	n4nd0: my suggestion is to add a flag/option for upper_bounded thing
+ n4nd0	blackburn: if SimpleFeatures are provided then do the special one?
+ blackburn	n4nd0: why features?
+ n4nd0	blackburn: I think this thing can only be done for SimpleFeatures
+ n4nd0	http://snipt.org/uhSe9
+ blackburn	n4nd0: I'd it depends on distance rather than features
+ n4nd0	but don't you think that the function I have posted can just be done if we have SimpleFeatures?
+ n4nd0	we can upper bound for all ok (as long as Euclidian is used this far)
+ n4nd0	but to do it with that unrolled loop and the multiples of 8
+ blackburn	I mean some distances could provide that
+ blackburn	and could not
+ blackburn	sonne|work: can all these fancy string kernels/distances be upper bounded?
+ blackburn	n4nd0: however you said it is not as fast as we expected with this upper bound?
+ n4nd0	sorry I was afk
+ n4nd0	blackburn: it is expected because it is not just the upper bound what makes JL faster but also the optimizations
+ blackburn	n4nd0: loop unrollment?
+ n4nd0	blackburn: probably
+ n4nd0	sonne|work pointed out that the floats also, we use double
+ blackburn	n4nd0: loop unrollment is dangerous thing to implement explicitly I think
+ blackburn	we can't be sure it would be faster everywhere
+ blackburn	and actually blas is unrolled so we should stick to blas I think
+ n4nd0	but there we cannot cut the computation if the upper bound is passed right?
+ blackburn	we can compute batches with blas
+ blackburn	n4nd0: DOUBLE PRECISION FUNCTION DNRM2(N,X,INCX)
+ blackburn	could you please try that?
+ blackburn	or SNRM2
+ blackburn	n4nd0: it is pretty interesting how did they implement that http://www.netlib.org/blas/dnrm2.f
+ n4nd0	blackburn: why don't you like just to implement that piece of code?
+ n4nd0	I mean the distance used in JL
+ blackburn	n4nd0: implement where?
+ n4nd0	to optimize the distance computation for cover tree
+ blackburn	check if it is faster than dnrm2 ;)
+ n4nd0	how can dnrm2 be faster?
+ n4nd0	don't you think this one is already very specific?
+ blackburn	in which means?
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+ n4nd0	it looks like they have optimized the distance computation so it goes very fast here
+ blackburn	I am still think we should stick to blas ;)
+ blackburn	it is optimized as well
+ n4nd0	ok
+ blackburn	n4nd0: for example dnrm2 is more stable
+ n4nd0	once I start to do this part of the optimization we can test it
+ blackburn	yes just test
+-!- xiangwang_ [~xiangwang@2001:cc0:2020:2013:f2de:f1ff:fe50:9012] has joined #shogun
+ sonne|work	n4nd0: I think blas would be even faster
+ n4nd0	we should try then
+-!- PhilTillet [~Philippe@157.159.42.154] has joined #shogun
+-!- xiangwang [~chatzilla@159.226.60.224] has quit [Ping timeout: 276 seconds]
+ n4nd0	see you later guys
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ blackburn	sonne|work: don't you think we should integrate cblas there?
+ blackburn	it is a common way I'd say
+-!- xiangwang [~chatzilla@159.226.60.224] has joined #shogun
+ sonne|work	blackburn: yes that is what I said
+ blackburn	no
+ blackburn	I mean to codebase
+ blackburn	sonne|work: many libs are integrating blas into their codebase
+ blackburn	however I see one great pitfall there - it would make packing .deb harder, right?
+ sonne|work	no
+ blackburn	bad way?
+ sonne|work	I don't want atlas/blas/gotoblas or anything in our codebase
+ blackburn	sonne|work: I am actually worried with arpack packaging - that's why I was thinking about it
+ blackburn	however better way would be to help with arpack package maintanence
+ sonne|work	yes
+-!- xiangwang [~chatzilla@159.226.60.224] has quit [Ping timeout: 265 seconds]
+ blackburn	sonne|work: how does it work? do maintaners have some public repo?
+ sonne|work	there is a pts page
+ sonne|work	for debian for each package
+ sonne|work	but you can also do apt-get source <nameofpkg>
+ sonne|work	then modify debian/ dir
+ blackburn	sonne|work: what if I want to fix something?
+-!- PhilTillet [~Philippe@157.159.42.154] has quit [Ping timeout: 245 seconds]
+ blackburn	one should send patches to maintainers?
+ sonne|work	create a patch ans submit a bugreport via reportbug <packagename>
+ blackburn	got it
+ blackburn	thanks
+-!- xiangwang [~chatzilla@159.226.60.224] has joined #shogun
+ blackburn	sonne|work: btw did you get used to gnome3?
+ sonne|work	yes
+ blackburn	I am becoming angrier with unity
+ blackburn	day-by-day
+-!- harshit_ [~harshit@182.68.181.141] has joined #shogun
+ harshit_	blackburn: hi !
+ blackburn	hi
+ harshit_	TSVM is almost complete, but there is some problem, should I create a pull request for TSVM ?
+ blackburn	yes
+-!- xiangwang [~chatzilla@159.226.60.224] has quit [Ping timeout: 246 seconds]
+ harshit_	also do you happen to have old svmlin library's example with you, their link is  broken in web
+ harshit_	I sent a mail to vikas(author ) but no reply till now
+ blackburn	no, I haven't
+ harshit_	I think soeren might have it, coz he is author of svmlin in shogun ? Please ask him when he comes online, I may not be able to catch him.
+ blackburn	sonne|work: ^
+ harshit_	oh he is online !!
+ blackburn	partially
+ blackburn	but I am afraid he just merged it
+ harshit_	what did he merge ??
+ blackburn	svmlin to shogun's codebase
+ harshit_	no no , I am not asking for its code, that is available. All I am asking for is its 'standard' examples,which are available in a separate archive which in not downloadable
+ harshit_	Want to test shogun's TSVM and svmlin TSM on that dataset before proceeding
+ blackburn	ah no idea
+ harshit_	no problem, btw how to issue *(some message) on IRC ?
+* blackburn this one?
+ blackburn	 / me
+ harshit_	yeah
+ blackburn	without spaces
+ harshit_	I cant see any thing
+ harshit_	coming
+-!- xiangwang [~chatzilla@159.226.60.224] has joined #shogun
+ harshit_	 / checking some new command
+ blackburn	"/me something"
+* harshit_ hello world
+ harshit_	got it
+ harshit_	lol
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 246 seconds]
+-!- wiking_ is now known as wiking
+-!- xiangwang [~chatzilla@159.226.60.224] has quit [Ping timeout: 260 seconds]
+-!- xiangwang [~chatzilla@159.226.60.224] has joined #shogun
+-!- pluskid [~pluskid@111.120.58.220] has joined #shogun
+-!- xiangwang [~chatzilla@159.226.60.224] has quit [Ping timeout: 265 seconds]
+-!- n4nd0 [~fjig@karmosin-03.csc.kth.se] has joined #shogun
+ pluskid	blackburn, have you looked at the LARS code?
+ blackburn	pluskid: yes
+ pluskid	any feedback?
+ blackburn	ok not really I think it should be merged
+ blackburn	I'll do that once I get to home
+ pluskid	cool, thanks
+ pluskid	any suggestions on what to work on next?
+ pluskid	small ones
+ blackburn	yes
+ blackburn	however not so small..
+ pluskid	hmm, let's see what's it
+ blackburn	pluskid: have you seen how did we organized multiclass machine?
+ pluskid	no, haven't investigated that yet
+ pluskid	any problems there?
+ blackburn	yes as new multiclass machines (CS liblinear and multiclass ocas) are in multiclass
+-!- xiangwang [~chatzilla@159.226.60.224] has joined #shogun
+ sonne|work	blackburn, pluskid: actually one could do the new subset stuff from heiko for oVo ?
+ sonne|work	OvO :D
+ blackburn	and are inherited from multiclass machine
+ blackburn	sonne|work: oVo looks nice ;)
+ blackburn	sonne|work: yes it is the task too
+ blackburn	sonne|work: my intention is to move larank and gmnp to multiclass
+ sonne|work	yeah but first finalize what n4nd0 started no?
+ blackburn	sonne|work: it is pretty unrelated
+ blackburn	while that stuff was generic and solvers do not make use of it
+ n4nd0	what is left from the part I did?
+ blackburn	I'll finish that on this weekend
+ blackburn	n4nd0: ovo subsetting
+ blackburn	pluskid: so the task could be
+ blackburn	to move larank to multiclass
+* pluskid is listening
+ blackburn	and adjust it accordingly
+ pluskid	ok
+ n4nd0	blackburn: didn't Heiko did that? I understood the thing that was left was to test if the results were now correct
+ blackburn	n4nd0: remember there is no add_subset for labels and kernels?
+ sonne|work	blackburn: but wouldn't he need it if he does other ECOC schemes?
+ sonne|work	ahh labels
+* pluskid waiting for you guys to arrive at a conclusion
+ sonne|work	yes true that needs to be done
+ sonne|work	too
+ blackburn	pluskid: currently larank is derived from multiclasssvm
+ pluskid	so we should make it derive from multiclass machine?
+ blackburn	exactly
+ blackburn	this can be done with rebasing multiclasssvm actually
+ pluskid	ok, I'll try that
+ pluskid	is multiclasssvm derived from multiclass machine?
+ blackburn	that could be painful so just let me know if you don't like do such refactoring
+ pluskid	yeah, I haven't read those code yet
+ blackburn	no, multiclasssvm should be inherited from kernelmulticlassmachine I think
+ blackburn	sonne|work: agree?
+ pluskid	I'll try to look at it and ask here if I have problems :)
+-!- xiangwang [~chatzilla@159.226.60.224] has quit [Ping timeout: 260 seconds]
+ pluskid	BTW: do we have publically available online doxygen doc
+ pluskid	for our dev code?
+ pluskid	latest code, automatically updated doc?
+ n4nd0	blackburn: I don't quite remember it that much but I think I already did the thing for kernels
+ sonne|work	blackburn: yes makes sense
+ n4nd0	blackburn: https://github.com/iglesias/shogun/commit/01eb524f812fff9cc9380d269351f2835bc24b62
+ sonne|work	pluskid: no
+ sonne|work	but you can just run make doc
+ pluskid	sonne|work, yes, but that makes my local repo dirty
+ pluskid	:p
+ pluskid	I mean git status shows some changed files in doc directory
+ pluskid	when I compile the doc
+ n4nd0	blackburn: I think that what is left to do is if it is correctly working after Heiko's job
+ pluskid	n4nd0, what you are talking about is that: what I intend to do is already done before?
+ n4nd0	pluskid: no no, no worries
+ n4nd0	pluskid: another thing
+ pluskid	ok :)
+ n4nd0	pluskid: another think that appeared in the conversation ;9
+ blackburn	pluskid: http://dl.dropbox.com/u/10139213/shogun/refactor.jpg
+ pluskid	got it
+* n4nd0 has weak fingers for parentheses today
+ pluskid	oops
+ pluskid	have to connect a VPN to see files in dropbox
+ blackburn	mad skillz painting loool
+ n4nd0	blackburn: haha that explanation ^ is just awesome
+ blackburn	damn did they block dropbox?
+ pluskid	have you guys heard about the Great Fire Wall in China?
+ blackburn	yes
+ n4nd0	yeah ...
+ pluskid	they block many valuable sites
+ pluskid	will be back in a while after a reconnection
+-!- pluskid [~pluskid@111.120.58.220] has quit [Quit: Leaving]
+ n4nd0	blackburn: have you checked the commit ^ ?
+-!- pluskid [~pluskid@173.254.214.60] has joined #shogun
+ blackburn	n4nd0: oh how did I miss that/
+ blackburn	wait
+ blackburn	is it merged?
+ n4nd0	blackburn: no
+ blackburn	what is you waiting for ;)
+ n4nd0	blackburn: I think we decided to wait after Heiko'
+ blackburn	ah
+ pluskid	what is the refactor figure mean?
+ pluskid	is this already done or waiting to be done?
+ blackburn	that should be done
+ blackburn	left (as is) => right (should be)
+ pluskid	so they all become disconnected?
+ blackburn	no my links were overlapped by package :D
+ blackburn	structure is obvious
+ blackburn	the only thing - multiclasssvm should inherit from multiclass
+ pluskid	cool figure btw :)
+ blackburn	I think we should make use of uml for such things - much easier to grasp
+-!- xiangwang_ [~xiangwang@2001:cc0:2020:2013:f2de:f1ff:fe50:9012] has quit [Remote host closed the connection]
+ blackburn	cu
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Remote host closed the connection]
+-!- wiking [~wiking@vpnc122.ugent.be] has joined #shogun
+-!- wiking [~wiking@vpnc122.ugent.be] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- xiangwang [~chatzilla@159.226.60.224] has joined #shogun
+-!- vikram360 [~vikram360@117.192.180.208] has quit [Ping timeout: 265 seconds]
+-!- harshit_ [~harshit@182.68.181.141] has quit [Quit: Leaving]
+-!- xiangwang [~chatzilla@159.226.60.224] has quit [Ping timeout: 260 seconds]
+-!- vikram360 [~vikram360@117.192.184.89] has joined #shogun
+ wiking	heheh it's great to do cuda calculations on your desktop machine... suddenly the whole gui became unresponsice :P
+-!- karlnapf [~heiko@dhcp-186-176.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- uricamic [9320543b@gateway/web/freenode/ip.147.32.84.59] has quit [Quit: Page closed]
+-!- xiangwang [~xiangwang@2001:cc0:2020:2013:f2de:f1ff:fe50:9012] has joined #shogun
+ sonne|work	karlnapf: hey - the man is back :D
+ karlnapf	sonne|work hi there :) yes busy week here
+ karlnapf	last coursework deadline today
+ karlnapf	family visiting ...
+ karlnapf	exam preparation
+ sonne|work	tough tough
+ karlnapf	how are things?
+ sonne|work	did you see that we got 9 slots?
+ sonne|work	of which we will give back 1 due to not enough mentors?
+ karlnapf	what? wow :)
+ karlnapf	no not yet
+ karlnapf	man
+ karlnapf	awsome this is
+ sonne|work	if 2/5th of them stay with us after GSoC we are in shogun heaven
+ karlnapf	yes
+ karlnapf	very cool
+ karlnapf	this will probably happen
+ karlnapf	how many proposals were there in the end?
+ sonne|work	48
+ sonne|work	from 38 students
+ sonne|work	still a lot
+ sonne|work	probably a dozen w/o patch though
+ sonne|work	(reject)
+ karlnapf	indeed, very nice congratulations for the 9 slots
+ karlnapf	whats next?
+ karlnapf	ranking probably
+ karlnapf	sonne|work, talk to you later got a meeting now. I will be around in the evening and on the weekend
+ sonne|work	cu
+ wiking	jeeeeey
+ wiking	finally we are on the same page with alex!
+ wiking	\o/
+-!- karlnapf [~heiko@dhcp-186-176.internal.eduroam.ucl.ac.uk] has quit [Ping timeout: 252 seconds]
+ wiking	now it's coding time \o/
+ wiking	and god damn cuda :)
+-!- karlnapf [~heiko@dhcp-186-176.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- pluskid [~pluskid@173.254.214.60] has quit [Quit: Leaving]
+ wiking	mmm was there a final decision whether shogun will depend on viennaCL ?
+-!- n4nd0 [~fjig@karmosin-03.csc.kth.se] has quit [Quit: leaving]
+ sonne|work	no not yet
+ sonne|work	optional in any case
+ wiking	i mean that the opencl solution will be actually based on viennacl?
+ wiking	anyhow i'll give my comments on the pull request as well
+ wiking	send
+ wiking	t
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has left #shogun []
+-!- gsomix [~gsomix@178.45.43.67] has joined #shogun
+ gsomix	home, sweet home
+ gsomix	hello
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 245 seconds]
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has joined #shogun
+-!- xiangwang [~xiangwang@2001:cc0:2020:2013:f2de:f1ff:fe50:9012] has quit [Remote host closed the connection]
+-!- gsomix [~gsomix@178.45.43.67] has quit [Ping timeout: 260 seconds]
+-!- gsomix [~gsomix@178.45.43.67] has joined #shogun
+-!- nickon [~noneedtok@dD5774105.access.telenet.be] has joined #shogun
+-!- nickon [~noneedtok@dD5774105.access.telenet.be] has quit [Quit: ( www.nnscript.com :: NoNameScript 4.22 :: www.esnation.com )]
+ gsomix	sonney2k, moin. how are you?
+-!- naywhayare [~ryan@spoon.lugatgt.org] has quit [Remote host closed the connection]
+-!- blackburn [~qdrgsm@109.226.90.219] has joined #shogun
+ wiking	blackburn: have u ever worked with DomainAdaptationSVM?
+ blackburn	nope
+ blackburn	planning to actually
+ blackburn	are you going to try whole shogun? :)
+ wiking	some stuff
+ wiking	i'd like to test something
+ wiking	i have a pretty well trained svm
+ wiking	but for some images i don't have some features
+ blackburn	at all?
+ wiking	yep
+ wiking	since some of the features are actually textual features
+ wiking	that are not dependent on the image itself
+ wiking	but where the image resided
+ wiking	and i have some random images about which i have no other info
+ wiking	so some features are basically missing
+ wiking	and i was wondering if i could still
+ wiking	classify those images
+ blackburn	damn you have hard task :D
+ wiking	this DomainAdaptationSVM
+ wiking	seems to be something
+ wiking	that is worth a shot
+ blackburn	is it a multiclass problem you have?
+ wiking	yes
+ blackburn	would need to design new DA SVM then :D
+ blackburn	how much time you have?
+ wiking	yeah just realized from the code
+ wiking	that actually it seems to be binary classifier
+ blackburn	so no need to multiclass?
+ wiking	i would
+ wiking	but src/shogun/classifier/svm/DomainAdaptationSVM.h is binary right?
+ wiking	mm yeah
+ wiking	since it's derived from SVMLight
+ wiking	damn i thought i could just use it out of box :)
+ blackburn	yes
+ wiking	:((
+ blackburn	wiking: while this DA SVM was implemented by chris I can ask him
+ blackburn	and we can come up with linear multiclass da svm
+ blackburn	da svm lol
+ wiking	:>
+ wiking	yeah would be great to extend it
+ wiking	mmm it has a kernelized version as well...
+ blackburn	wiking: yes while it is dual
+ blackburn	wiking: okay dinner time now and after I'll send chris a mail
+ wiking	cool
+ wiking	u can cc me as well
+ blackburn	sure
+-!- harshit_ [~harshit@182.68.181.141] has joined #shogun
+ blackburn	wiking: are you particularly interested in kernelized version?
+ wiking	well that'd be great
+ wiking	but i can do a hkm shit :)))
+-!- PhilTillet [~Philippe@npasserelle10.minet.net] has quit [Ping timeout: 260 seconds]
+ blackburn	wiking: http://fml.tuebingen.mpg.de/raetsch/lectures/talk-mtcompbio.pdf
+ blackburn	on last pages there are some DA techniques
+-!- PhilTillet [~Philippe@157.159.42.154] has joined #shogun
+-!- gsomix [~gsomix@178.45.43.67] has quit [Read error: Connection reset by peer]
+-!- puffin444 [230bf329@gateway/web/freenode/ip.35.11.243.41] has joined #shogun
+-!- gsomix [~gsomix@178.45.44.70] has joined #shogun
+ blackburn	wiking: sent
+-!- PhilTillet [~Philippe@157.159.42.154] has quit [Ping timeout: 260 seconds]
+-!- naywhayare [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ blackburn	wiking: time to take pencil! deriving CS with DA
+ blackburn	;)
+ wiking	?
+ wiking	cs =?
+ blackburn	crammer singer
+ blackburn	my favourite multiclass formulation with simple dual ;)
+ wiking	hahahah
+ wiking	tell me tell me
+ wiking	i make NOW :)
+ blackburn	wiking: make what? ;)
+ wiking	da with cs
+ blackburn	I'm going to implement it once I formulate it
+ blackburn	however that would be not so trivial
+-!- nickon [~noneedtok@dD5774105.access.telenet.be] has joined #shogun
+ blackburn	afaik liblinear solver do not support easy linear term setting
+ wiking	Log-likelihood: 860587008.000000
+ wiking	:D
+ wiking	gmm-ing my dataset :P
+ blackburn	log? oh that's nice
+ n4nd0	good night guys!
+ wiking	well this would have had taken like about a week to calculate
+ blackburn	n4nd0: nite
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+ wiking	w/o having a nvidia tesla
+ blackburn	wiking: is the dataset so big?
+ wiking	yep
+ wiking	5*10^6 vectors with each of 64 dimension
+ wiking	it was weird though
+ wiking	had to do a *10^3 for each vector
+ wiking	as otherwise gmm couldn't find any cluster centers
+ wiking	so i don't know if on the end this is going to work out :)
+ wiking	i'm still amazed by this tesla... now it's 116W is being used now when it's running on 100%
+ blackburn	wiking: why not kmeans?
+ wiking	blackburn: since i'm trying to generate some fisher vectors
+ wiking	and i'd be interested as well in the soft clustering of gmm
+ blackburn	wiking: I see
+ blackburn	I just recalled there is an algorithm called ??????
+ blackburn	:D
+-!- puffin444 [230bf329@gateway/web/freenode/ip.35.11.243.41] has quit [Quit: Page closed]
+ blackburn	wiking: idea of regularized DA svm is to
+ blackburn	optimize 1/2 ||w-w0||^2 + C \sum_i \xi_i with same s.t.
+ blackburn	w0 is SVM trained on source domain
+ wiking	ah
+ blackburn	and predictor is
+ blackburn	<w,x>+<w0,x>
+ blackburn	sounds reasonable but I need to think about it in MC mean
+-!- gsomix [~gsomix@178.45.44.70] has quit [Ping timeout: 276 seconds]
+-!- karlnapf [~heiko@dhcp-186-176.internal.eduroam.ucl.ac.uk] has left #shogun []
+@sonney2k	blackburn, wiking well you can just use all the w_0 you obtained from the original training and learn new w's
+ blackburn	sonney2k: how?
+@sonney2k	so it is basically the same thing like two-class - one just chooses the corresponding w_0
+@sonney2k	blackburn, I assume you do true MC
+ blackburn	CS
+@sonney2k	so you have one-vs-rest classification in the end
+ blackburn	sonney2k: the problem is:
+ blackburn	min 1/2 ||w-w0||^2 + C ..
+ blackburn	s.t. <w,x>-...
+ blackburn	not w-w0
+ blackburn	so it can't be 'virtual' w-w0
+-!- harshit_ [~harshit@182.68.181.141] has quit [Read error: Connection reset by peer]
+ blackburn	sonney2k: got me?
+-!- harshit_ [~harshit@182.68.181.141] has joined #shogun
+@sonney2k	not yet
+ blackburn	sonney2k: I mean dual task will change in that case
+@sonney2k	min 0.5||w||^2 +0.5 ||w-w0||^2 + ...
+ blackburn	sonney2k: and liblinear does not provide an easy way
+ blackburn	wow what is it?
+@sonney2k	same thing like you use
+ blackburn	but grad will change
+@sonney2k	by some constant
+@sonney2k	IIRC there is some gamma or whatever factor in front of the second term
+ blackburn	sonney2k: but still needs some patching there right?
+@sonney2k	so you can scale gamma and get
+ blackburn	sonney2k: have you seen I've got a competitor?
+@sonney2k	0.5 ||w||^2 + gamma w^T w_0 + ...
+@sonney2k	yes you need to do some patching
+@sonney2k	in the same way liblinear is patched now for binary svm
+@sonney2k	not just one :D
+ blackburn	sonney2k: but one is going to contribute ;)
+ blackburn	sonney2k: do you think following is reasonable then?
+ blackburn	0.5 \sum_m ||w_m||^2 + gamma \sum_m wm^T w_0m + C \sum_i \xi_i
+ blackburn	however I can hardly see what is the trade-off we want to achieve there
+ blackburn	sonney2k: what is the role of w^T w_0?
+ blackburn	ah stupid question it is w-w0
+@sonney2k	gtg
+@sonney2k	cu
+ blackburn	wiking: we should employ sonney2k more in future ;)
+ wiking	:>
+-!- nickon [~noneedtok@dD5774105.access.telenet.be] has quit [Quit: ( www.nnscript.com :: NoNameScript 4.22 :: www.esnation.com )]
+@sonney2k	re
+ wiking	re
+@sonney2k	blackburn, and the ||w0||^2 part is const so can be left out from objective
+ blackburn	sonney2k: yes that's clear
+ blackburn	sonney2k: what stays unclear is how that addition changes the solution?
+@sonney2k	depends on value of gamma :)
+ blackburn	I mean does the solution change if we +1 to gradient?
+ blackburn	hmm it seems so but strange
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has joined #shogun
+-!- wiking_ [~wiking@78-23-189-112.access.telenet.be] has quit [Changing host]
+-!- wiking_ [~wiking@huwico/staff/wiking] has joined #shogun
+ blackburn	sonney2k: how many multitask proposals then?
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Ping timeout: 248 seconds]
+-!- wiking_ is now known as wiking
+ wiking	have i missed something? :S
+ wiking	this was the last message i've seen: blackburn: hmm it seems so but strange
+ blackburn	wiking: no, the only thing is I asked how many multitask proposals we received
+ wiking	ah there was a gsoc idea about this?
+ blackburn	wiking: what is do you think I am applying for then? ;)
+ wiking	mm maybe i should have tried this project :)))
+ blackburn	wiking: will you stop changing areas some day? :D
+-!- harshit_ [~harshit@182.68.181.141] has quit [Read error: Connection reset by peer]
+ wiking	hahaha
+ wiking	no i just need this one
+ wiking	but
+ wiking	i can test with 1 class
+ wiking	to see how it would work
+-!- harshit_ [~harshit@182.68.181.141] has joined #shogun
+ wiking	that'll do out of box...
+ blackburn	wiking: it doesn't depend on your problem already - I got interested to implement that :D
+ wiking	:>>
+ wiking	there's code
+ wiking	:)
+--- Log closed Sat Apr 14 00:00:17 2012

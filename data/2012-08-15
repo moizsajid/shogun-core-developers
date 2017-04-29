@@ -1,0 +1,288 @@
+--- Log opened Wed Aug 15 00:00:17 2012
+ shogun-buildbot	build #355 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/355  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #284 of deb2 - static_interfaces is complete: Failure [failed test cmdline_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/284  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+@sonney2k	blackburn, yes
+ blackburn	sonney2k: I forgot what I wanted to say, so nevermind :D
+@sonney2k	hah
+@sonney2k	did you get the bb happy?
+ blackburn	no, not yet
+ blackburn	there are a DUALLIBQPBMRMSOMCSVM
+-!- cwidmer [45c9b18c@gateway/web/freenode/ip.69.201.177.140] has joined #shogun
+ blackburn	bug
+@sonney2k	wow now everything crashes
+ blackburn	sonney2k: it was hard but I managed to carry out all these crashes
+ blackburn	believe me it is hard to break everything :D
+@sonney2k	blackburn, from experience I think you are joking :D
+ blackburn	I will fix cmdline static
+ blackburn	python modular won't be fixed before our SO guys negotiate anything
+@sonney2k	grmpf
+-!- cwidmer [45c9b18c@gateway/web/freenode/ip.69.201.177.140] has quit [Quit: Page closed]
+ CIA-21	shogun: Sergey Lisitsyn master * rf7116ba / src/shogun/lib/malsar/malsar_clustered.cpp : Restored termination check in clustered MTL - http://git.io/VK8TsA
+ shogun-buildbot	build #356 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/356  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+ shogun-buildbot	build #285 of deb2 - static_interfaces is complete: Failure [failed test cmdline_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/285  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot	build #55 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/55
+ shogun-buildbot	build #64 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/64
+ shogun-buildbot	build #51 of nightly_all is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/51
+-!- gsomix_ [~gsomix@88.200.214.210] has joined #shogun
+-!- gsomix_ [~gsomix@88.200.214.210] has quit [Client Quit]
+-!- uricamic [~uricamic@2001:718:2:1634:88c4:9daf:4b80:763c] has joined #shogun
+-!- n4nd0 [~nando@98.Red-2-137-39.dynamicIP.rima-tde.net] has joined #shogun
+ uricamic	n4nd0: hi
+ n4nd0	hi uricamic
+ n4nd0	how are you doing?
+ uricamic	good, how are you?
+ n4nd0	I am fine too
+ n4nd0	enjoying my last days in Spain
+ uricamic	I installed mosek, but shogun configuration script haven't found it, is there something what shall I do to help it?
+ n4nd0	I am coming back to Sweden on Friday
+ uricamic	nice :)
+ n4nd0	yes
+ n4nd0	I didn't change anything in the configure script to detect mosek (soeren told me not to worry about it)
+ n4nd0	although Sergey added something
+ n4nd0	what I do is just to run ./configure
+ n4nd0	and later to add manually a couple of changes for mosek in the file .config
+ n4nd0	I can tell you about them if you want
+ uricamic	I see, I was confused because there is info in configuration output that MOSEK was not found
+ n4nd0	mmm ok
+ n4nd0	that must be probably what Sergey added
+ uricamic	I wanted to try your python example, because I have figured out, that my example crashes on exit
+ n4nd0	but I don't know whether it works
+ n4nd0	all right
+ n4nd0	then just do these modifications
+ uricamic	and I have tried to run valgrind on it and pointed out some lines in MulticlassSOLabels so I just wanted to compare with your example if it will aslo be the case
+ n4nd0	aham ok
+ n4nd0	I am sure that the HMSVM doesn't leak memory
+ n4nd0	but it might be that the Multiclass example does because now that I think of it I didn't check this with valgrind, have to do that soon!
+ n4nd0	uricamic: did you get the mail?
+ n4nd0	I have just forwarded you the same instructions I sent to Nico some time ago to build with MOSEK
+ uricamic	yes, thx. And if you run your python multiclass example does it exit normally?
+ uricamic	in my case everything works nicely, but on exit it crashes with segmentation fault.
+ uricamic	I can send you valgrind output on that
+ n4nd0	uricamic: we are talking about so_multiclass.py right?
+ uricamic	yep
+ uricamic	but I have run valgrind so far only on so_multiclass_BMRM.py
+ uricamic	since I have not yet managed to get so_multiclass.py working with MOSEK yet
+ n4nd0	but you are right
+ n4nd0	something explodes in that example
+ n4nd0	I get a *** glibc detected *** python: free(): invalid pointer: 0x09e33d38 ***
+ n4nd0	once I started with hm-svm I never tried compatibility with the multiclass thing with the new changes :(
+ n4nd0	sorry about that
+ n4nd0	let me see
+ uricamic	https://gist.github.com/c8e5335419f15ada9f89
+ n4nd0	mmm
+ n4nd0	let me try with the libshogun example
+ n4nd0	C++ traces are far more readable...
+ uricamic	it is ok, I was just trying to figure out what is wring, since I have never written anything in python :)
+ n4nd0	ok :)
+ n4nd0	the error appears in the C++ example too, which is good
+ uricamic	really?
+ uricamic	because for me my C++ example worked fine
+ n4nd0	my so_multiclass.cpp had a *** glibc detected *** ./so_multiclass: free(): invalid pointer: 0x09d25fc8 ***
+ uricamic	I see, I haven't checked the C++ example with valgrind yet, but at least it haven't produced any segfault on running
+ uricamic	n4nd0: btw what do you mean by C++ traces?
+ n4nd0	like the gist you sent me
+ n4nd0	valgrind detects lot of things with python programs
+ n4nd0	just because of the python language
+ n4nd0	(one can either use a suppresions file or re-compile python with some flags)
+ uricamic	I see
+ n4nd0	so those are normally hard to read
+ uricamic	ok
+ n4nd0	however, C++ ones are cleaner
+ uricamic	yep, sure
+ uricamic	And finally the last thing concerning the merging of risk function and structured models :)
+ n4nd0	sure, tell me
+ uricamic	I think there have just been some misunderstanding at the beginning of GSoC or we only forgot our original intentions
+ uricamic	I remember that at the beginning, we have been discussing the risk function and I have told you, that the risk function consists of argmax with loss and building psi vectors
+ n4nd0	ok
+ uricamic	but because we had to submit some code already, this divergence happened :)
+ n4nd0	all right
+ n4nd0	so then
+ uricamic	but then somehow, we forgot that we wanted to put it back together
+ n4nd0	is it possible to do a generic risk function in StructuredModel right?
+ n4nd0	there is no need to re-define in multiclass model, hm-svm, etc
+ n4nd0	because the parts that change are argmax, loss, and psi
+ n4nd0	or?
+ uricamic	it is, but I guess sometimes, the risk function can be written more efficiently, so there should still be possibility to redefine it
+ n4nd0	sure
+ n4nd0	virtual method :D
+ uricamic	yep :)
+ n4nd0	ok
+ n4nd0	let's do that then
+ uricamic	that was the intention of possibility to pass some user data to the risk function
+ n4nd0	mm I don't understand that
+ n4nd0	can you explain me more what do you mean with user data to the risk function?
+ uricamic	because you can e.g. precompute a lot of things because it is done in each iteration of BMRM again
+ n4nd0	I see
+ uricamic	sure for example in one of my applications of SO-SVM for facial landmark detection, the computation of risk is quite complex, I mean time demanding
+ n4nd0	ok
+ n4nd0	and what do you there then?
+ uricamic	but if u have a computer with a lot of memory, you can save a lot of computations by precomputing some matrix multiplications
+ uricamic	in this particular example I now can afford to precompute loss for all examples
+-!- n4nd0 [~nando@98.Red-2-137-39.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+-!- n4nd0 [~nando@98.Red-2-137-39.dynamicIP.rima-tde.net] has joined #shogun
+ uricamic	and also precompute all psi vectors in the last term of evaluation of risk
+ n4nd0	ok
+ n4nd0	uricamic: I have to go now
+ uricamic	moreover we have done lately some experiments with incompletely annotated examples, which also needs some other things to be passed to risk function
+ uricamic	n4nd0: ok, see ya
+ n4nd0	uricamic: I have not managed to detect what is wrong with the multiclass model, why that glibc appears
+ n4nd0	but I'll come back to this tonight
+ uricamic	ok
+ n4nd0	bye!
+-!- n4nd0 [~nando@98.Red-2-137-39.dynamicIP.rima-tde.net] has quit [Client Quit]
+-!- heiko [~heiko@host86-179-59-65.range86-179.btcentralplus.com] has joined #shogun
+ wiking	uricamic: mmm waht was now the consensus for the risk function? :)
+ wiking	pure virtual or virtual? :)
+-!- heiko1 [~heiko@host86-185-9-87.range86-185.btcentralplus.com] has joined #shogun
+ uricamic	wiking: I guess virtual
+-!- heiko [~heiko@host86-179-59-65.range86-179.btcentralplus.com] has quit [Ping timeout: 260 seconds]
+ wiking	okei
+ uricamic	wiking: and have you seen yesterday the message about change in risk function?
+ uricamic	that insted of void the retrun type should be flaot64_t ?
+ wiking	uricamic: ah yeah
+ wiking	i saw that
+ wiking	but what should be the value?
+ wiking	i mean it represents what?
+ uricamic	instead of passing argument R which is there just to store the result of the value of risk function it will return this value
+ wiking	ah ok
+ wiking	so R gets out from the function args
+ uricamic	i.e. R will pop out from the argument list and instead of it this value will be returned
+ wiking	okok
+ uricamic	yep, exactly
+ wiking	i'll do that change
+ wiking	first i'll do a change in latentlabels
+ wiking	and then i'll send in the new patch for the risk as well
+ uricamic	so it requires also to change 2 lines in each libbmrm.cpp, libppbm.cpp and libp3bm.cpp
+ uricamic	ok, thanks
+ wiking	yeps
+ wiking	no worries
+ uricamic	thank you very much, for this inconveniences
+ wiking	no no it's cool
+ wiking	on the end it'll help me as well
+ uricamic	in the end everything will be probably nicely merged together :)
+ wiking	hehehe yeah i'm hoping that i can do something similar with latent and structured model ;)
+ wiking	we'll see how that'll end up
+ wiking	btw libbmrm.cpp, libppbm.cpp and libp3bm.cpp are all solving the same minimization problem right?
+ wiking	just in a different way?
+ uricamic	yep
+ uricamic	well, more or less
+ wiking	okok
+ uricamic	in libppbm and libp3bm is added proximal term to the function that is optimized
+ uricamic	i.e. instead of just minimizing \lambda/2 || w ||^2 + R(w)
+ uricamic	we are minimizing \lambda/2 || w ||^2  + \alpha || w - w_t ||^2 + R(w)
+ uricamic	and the difference between libppbm and libp3bm is that libp3bm uses multiple cutting plane models
+ uricamic	but when number of cp models is set to 1, then those two are identical
+-!- uricamic [~uricamic@2001:718:2:1634:88c4:9daf:4b80:763c] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@109.226.80.43] has joined #shogun
+ wiking	blackburn: !
+ blackburn	wiking: !
+ wiking	blackburn: merge :)
+ blackburn	ok
+ blackburn	be back in 15 minutes
+ CIA-21	shogun: iglesias master * rccc31d9 / (8 files in 2 dirs): * doc fixes and less warnings - http://git.io/5nO2Ew
+ CIA-21	shogun: Sergey Lisitsyn master * r09b33ad / (8 files in 2 dirs): Merge pull request #716 from iglesias/so - http://git.io/PSwwhQ
+ CIA-21	shogun: Viktor Gal master * r5689042 / (11 files in 5 dirs): Redesign LatentLabels This way LatentLabels not only store actually the h_i (latent labels) but as well as in a general way store the actual y_i (labels). - http://git.io/kj8cGw
+ CIA-21	shogun: Sergey Lisitsyn master * reee036e / (11 files in 5 dirs): Merge pull request #718 from vigsterkr/latent - http://git.io/quttLA
+ blackburn	wiking: around?
+ shogun-buildbot	build #357 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/357  blamelist: iglesias <fernando.iglesiasg@gmail.com>
+ shogun-buildbot	build #286 of deb2 - static_interfaces is complete: Failure [failed test cmdline_static]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/286  blamelist: iglesias <fernando.iglesiasg@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ CIA-21	shogun: Sergey Lisitsyn master * r42f6150 / data : Updated data - http://git.io/N2m4gQ
+-!- naywhaya1e [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- zxtx [~zv@c-24-18-130-24.hsd1.wa.comcast.net] has quit [Ping timeout: 240 seconds]
+-!- Netsplit *.net <-> *.split quits: naywhayare
+-!- gsomix [~gsomix@178.45.80.114] has joined #shogun
+ gsomix	good evening
+-!- gsomix_ [~gsomix@109.169.131.21] has joined #shogun
+ shogun-buildbot	build #358 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/358  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- gsomix [~gsomix@178.45.80.114] has quit [Read error: Connection reset by peer]
+ shogun-buildbot	build #347 of deb1 - libshogun is complete: Failure [failed git]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb1%20-%20libshogun/builds/347  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>, Viktor Gal <viktor.gal@maeth.com>
+@sonney2k	gsomix_, hey there!
+@sonney2k	gsomix_, how is 0-copy?
+ gsomix_	sonney2k, there is one small problem. I need overload free_feature_matrix in swig. now I'm trying resolve. :)
+-!- gsomix_ is now known as gsomix
+@sonney2k	gsomix, hmmhh indeed IIRC blackburn also did nasty things when preprocessing freatures (freeing the feature matrix)
+@sonney2k	gsomix, is there a way in python to 'own' the numpy array?
+-!- heiko1 [~heiko@host86-185-9-87.range86-185.btcentralplus.com] has quit [Quit: Leaving.]
+ gsomix	sonney2k, own? what do you mean? I just get internal buffer from numpy array and keep it.
+@sonney2k	gsomix, so you Py_INCREF?
+@sonney2k	or how do you ensure that this buffer is still valid later?
+ gsomix	yep, automatically in PyObject_GetBuffer
+@sonney2k	ok
+ gsomix	and decref in ReleaseObject.
+ gsomix	only one problem - refcount in DenseFeatures.
+ gsomix	*ReleaseBuffer
+ gsomix	I need something like SGMatrix with refcount=2, because buffer is external
+ gsomix	and I need overload free_feature_matrix for proper behavior
+@sonney2k	gsomix, why do you need to overload free_feature_matrix?
+ gsomix	hm, waaaaaait...
+@sonney2k	isn't increasing the refcount in SGMatrix sufficient?
+@sonney2k	gsomix, ^
+ gsomix	nope. hm, but how can I increase refcount?
+ gsomix	I just create new SGMatrix with numpy array's buffer
+@sonney2k	gsomix, why not?
+ gsomix	sonney2k, hack? I just  don't need to free buffer in DenseFeatures (free_feature_matrix or destructor).
+ gsomix	maybe it's sufficient, but it's hack.
+@sonney2k	gsomix, the buffer is not freed
+@sonney2k	gsomix, just the refcount is decreased
+@sonney2k	gsomix, or do you want to call ReleaseBuffer?
+ gsomix	I need to call ReleaseBuffer.
+ gsomix	I figured out one solution.
+@sonney2k	gsomix, ?
+ gsomix	I can to keep one more copy of new SGMatrix in Py_buffer object, that I getting from numpy array.
+ gsomix	refcount++
+@sonney2k	gsomix, for refcounts it is easy - you just make the ref/unref functions public in SGReferencedData
+@sonney2k	that is even better :D
+ gsomix	sonney2k, public? are you sure? :)
+ gsomix	sonney2k, so what do you prefer?
+@sonney2k	but for ReleaseBuffer you would have to either modify dense features to store the py object (awful :( or register some kind of callback function
+@sonney2k	like void release_buffer() :D
+@sonney2k	gsomix, yours!
+ gsomix	ok
+@sonney2k	gsomix, ok with the callback idea? or do you have any other?
+ gsomix	at this moment - other, but I'm not sure. need to experiment.
+ gsomix	thanks! :)
+ gsomix	sonney2k, ah!
+ blackburn	sonney2k: he needs an LHC to check that
+ gsomix	after all I need to overload free_feature_matrix. I need to call ReleaseBuffer in this method
+ gsomix	blackburn, pffff. I have sent curiosity for checking some my shogun's ideas. :)
+ gsomix	*Curiosity
+@sonney2k	gsomix, so ok with the release_buffer callback idea?
+ gsomix	I don't know, why I need this callback func.
+ gsomix	because ReleaseBuffer don't free buffer's memory.
+ gsomix	it seems I'm a little misunderstood or confused.
+ gsomix	:)
+@sonney2k	gsomix, how do you call ReleaseBuffer?
+@sonney2k	or better where is it called?
+ gsomix	sonney2k, in destructor and free_feature_matrix.
+@sonney2k	gsomix, of DenseFeatures you mean?
+ gsomix	yep
+@sonney2k	but you can you make DenseFeatures to be aware of that - I mean it knows nothing about python or anything
+ gsomix	I can overload destructor and free_feature_matrix in swig
+@sonney2k	gsomix, how?
+ gsomix	mmm, builtin and little hack
+ gsomix	I have overload destructor already
+@sonney2k	gsomix, I think it is sufficient to overload free_feature_matrix
+@sonney2k	since that is called in destructor
+ gsomix	yep =____=
+ gsomix	hehe, I'm stupid
+@sonney2k	ok - then it is all good
+@sonney2k	gsomix, do it and PR it!
+ gsomix	aha
+-!- zxtx [~zv@c-67-170-78-150.hsd1.wa.comcast.net] has joined #shogun
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+-!- blackburn [~blackburn@109.226.80.43] has joined #shogun
+-!- blackburn1 [~blackburn@109.226.78.36] has joined #shogun
+-!- blackburn [~blackburn@109.226.80.43] has quit [Ping timeout: 245 seconds]
+-!- blackburn [~blackburn@62.106.106.114] has joined #shogun
+-!- blackburn1 [~blackburn@109.226.78.36] has quit [Ping timeout: 272 seconds]
+-!- blackburn [~blackburn@62.106.106.114] has quit [Quit: Leaving.]
+ gsomix	sonney2k, around?
+@sonney2k	gsomix, yes?
+ gsomix	sonney2k, what do you think about runtime hack? I can only to modify DenseFeatures method's table in init (runtime) section of module.
+ gsomix	is it awful?
+@sonney2k	gsomix, for free_feature_matrix you mean?
+ gsomix	yep
+@sonney2k	gsomix, I think it is already hacky anyways - so just do it :D
+ gsomix	sonney2k, btw, did you read Levi "Hackers: heroes of computer revolution"? :)
+--- Log closed Thu Aug 16 00:00:17 2012

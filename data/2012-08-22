@@ -1,0 +1,1835 @@
+--- Log opened Wed Aug 22 00:00:05 2012
+--- Day changed Wed Aug 22 2012
+ n4nd0	(I don't know how to write most today...)
+ blackburn	it appear in risk
+ n4nd0	well ok ... it looks like we are not going to agree today
+ n4nd0	my guess is that you need to explicitily look for what is the value of that max_y
+ blackburn	risk uses violating object
+ n4nd0	and not say that it is going to be given by argmax_y
+ blackburn	decision function does not
+ blackburn	in case of correct delta it should comply with max of the second term
+ n4nd0	I don't think so
+ n4nd0	I mean, I do not agree
+ blackburn	what can I say it works for HMM :)
+ n4nd0	a good model will give you for a training pair (xi,yi)
+ blackburn	will commit things pretty soon
+ n4nd0	an argmax_y for xi that is close to yi
+ n4nd0	then the delta will be close to zero
+ blackburn	why we want to make delta zero
+ blackburn	if we maximize it?
+ n4nd0	blackburn: commit so I can take it a look
+ blackburn	will do once I check examples
+ yooo	rolf this yml format makes me crayz .. "The node does not represent a user object"
+ blackburn	I hope I will manage to wake up tomorrow :D
+ blackburn	today I was late for an hour
+ yooo	hehe
+ n4nd0	hehe
+ yooo	your commits today make me fell that one hour late didnt prevent you working on shogun during the day ^^
+ blackburn	I am trying to find a balance between not being fired and shoguning
+ blackburn	n4nd0: how many iterations mosek does on that hm svm example?
+ n4nd0	blackburn: I am not sure right now, I think between 6-10, let me check
+ blackburn	bmrm does 14
+ blackburn	takes 0.63s here
+ n4nd0	it takes quite longer here
+ n4nd0	9 iterations
+ CIA-52	shogun: Sergey Lisitsyn master * r45840d7 / (12 files in 5 dirs): Refactored SO machine to not use its own features reference, fixed generic risk and bmrm result type - http://git.io/fj6dnQ
+ n4nd0	26 seconds
+ blackburn	here you go
+ n4nd0	wow that's a large lambda :)
+ n4nd0	how did you guess that value?
+ CIA-52	shogun: Sergey Lisitsyn master * rf253152 / (2 files in 2 dirs): Improved multiclass tree guided logistic regression - http://git.io/1RuW7Q
+ blackburn	no idea just entered big value
+ n4nd0	lol
+ blackburn	it is not the best value btw
+ blackburn	objective tends to be pretty big this way
+ blackburn	okay 5 millions is too big
+ blackburn	500 thousands tends to be overregularize too
+ blackburn	hmm 50000 works just like 5000
+ blackburn	0 is da best
+ blackburn	will not converge
+ blackburn	and furthermore will break you computer
+ blackburn	I changed one already
+ blackburn	n4nd0: with 0.01 accuracy is 0.9989
+ n4nd0	blackburn: nice
+ n4nd0	HM-SVM?
+ blackburn	with 1e-5 it is 0.9991
+ blackburn	yes
+ blackburn	can it be 100%?
+ n4nd0	maybe
+ blackburn	lets try 1e-37
+ blackburn	oh no
+ blackburn	noooo
+ blackburn	0.9998 and crazy numbers
+ blackburn	Fp=720255088080000357764535868940049436668877340672.000000,
+ n4nd0	what?
+ blackburn	that is primal objective LOL
+ n4nd0	O_O
+ n4nd0	that looks pretty weird
+ n4nd0	maybe my accuracy thing is doing something wrong
+ blackburn	no
+ blackburn	that is ok for 1e-37 lambda
+ blackburn	:D
+ blackburn	n4nd0: w contain e+41 elements this way
+ blackburn	n4nd0: okay let you compare results now :)
+ n4nd0	n4nd0: e+41 elements?
+ n4nd0	talking to myself again...
+ blackburn	n4nd0: not number, but order
+ n4nd0	does the objective in bmrm minimize too?
+ blackburn	n4nd0: do you understand what they sing about
+ blackburn	http://www.youtube.com/watch?v=Q7xZ3cBPxIE&feature=player_detailpage
+ blackburn	?
+ blackburn	:D
+ blackburn	n4nd0: hmmmm really.. I don't know
+ blackburn	looks like it maximiaze
+ n4nd0	blackburn: can you explain again why it is the argmax? :P
+ n4nd0	I just realized it is not feasible to check all the combinations y \in Y in HM-SVM
+ n4nd0	it just make sense to check all in the multiclass example
+ blackburn	n4nd0: why loss is argmax?
+ blackburn	because we find a most violating label for the vector
+ n4nd0	why max_y [ loss(yi,y) + < w, Psi(xi,y)-Psi(xi,yi) > ]
+ n4nd0	why the maximum is found for the argmax
+ blackburn	??
+ n4nd0	why the maximum of the equation I have just written
+ n4nd0	is achieved with the argmax_y function
+ n4nd0	but the definition of the argmax is not to find the most violated label
+ n4nd0	it is to maximize <w, Psi(x,y)>
+ blackburn	max_y [ loss(yi,y) + < w, Psi(xi,y)-Psi(xi,yi) > ] = max_y [ loss(yi,y) + < w, Psi(xi,y)> ] - <w, Psi(xi,yi) >
+ n4nd0	sure
+ n4nd0	now why
+ n4nd0	argmax_y [ loss(yi,y) + < w, Psi(xi,y) > ] = argmax_y < w, Psi(xi,y) > ??
+ blackburn	yes it is
+ blackburn	for proper loss it is for sure
+ n4nd0	why?
+ blackburn	they are both losses
+ blackburn	first is 'label' loss
+ blackburn	second is feature space 'loss'
+ n4nd0	that's not really a reason...
+ blackburn	let me get a tea
+ blackburn	:D
+ n4nd0	haha
+ n4nd0	we can talk about it tomorrow otherwise
+ n4nd0	maybe I am just stupid right now
+ n4nd0	and so stubborn as to see it
+ n4nd0	but this idea seems so simple
+ n4nd0	argmax_y should give a y close to yi for the input xi
+ blackburn	I am kind of practical guy so I prefer to check if it works first :D
+ n4nd0	and a y close to yi implies Delta(yi,y) close to zero
+ n4nd0	blackburn: I cannot compile here
+ n4nd0	https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/structure/PrimalMosekSOSVM.cpp
+ n4nd0	line 30
+ n4nd0	that constructor is not in
+ n4nd0	https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/machine/LinearStructuredOutputMachine.h
+ blackburn	uh ok
+ n4nd0	did you forget to add any of the files or?
+ blackburn	I removed features - did you forgot? :)
+ n4nd0	yeah I know you did that :)
+ n4nd0	but since the build doesn't compile
+-!- naywhaya1e is now known as naywhayare
+ blackburn	I have to do a blind fix
+ shogun-buildbot_	build #431 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/431  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ n4nd0	?
+ n4nd0	blackburn: why a blind fix?
+ blackburn	have no mercy^W mosek
+ n4nd0	aaah ok
+ n4nd0	true fact
+ blackburn	whicho ne?
+ n4nd0	I can apply that if you want
+ n4nd0	it looks like that was the only one
+ blackburn	okay let you check it
+ blackburn	n4nd0: please try now
+ CIA-52	shogun: Sergey Lisitsyn master * rff37c90 / (5 files in 2 dirs): Updated PrimalMosekSOSVM - http://git.io/kTbSbg
+ blackburn	n4nd0: inequality just after A.8 in teo
+ blackburn	this one should make you believe
+ n4nd0	mmm
+ blackburn	I didn't though about that
+ blackburn	1 + 2 is majorizing thing for 1
+ n4nd0	yes
+ blackburn	so it is a major of risk
+ n4nd0	but I don't understand why the loss is being majorized too!
+ n4nd0	haha
+ n4nd0	I am becoming crazy
+ blackburn	there is a description out there
+ blackburn	first of all dot product is positive okay? ;)
+ n4nd0	ok :)
+ blackburn	second ineq comes from max
+ n4nd0	?
+ blackburn	orr
+ blackburn	anyway
+ blackburn	are you convinced now?
+ n4nd0	I am reading the explanation around here
+ n4nd0	Note that (A.2) majorizes ?(y, y * ), where y * := argmaxy w, ?(x, y ) [Tsochantaridis
+ n4nd0	et al., 2005
+ n4nd0	haha, magic copying from PDFs...
+ blackburn	I have no idea if it has something formal
+ blackburn	I have a  gut feeling about that :D
+ blackburn	I know that would not work in science haha
+ CIA-52	shogun: Sergey Lisitsyn master * r416d360 / (2 files in 2 dirs): Doc fixes - http://git.io/VRU7oQ
+ n4nd0	blackburn: why not?
+ n4nd0	do you mean you?
+ blackburn	what do you mean now?
+ blackburn	:)
+ n4nd0	< blackburn> I know that would not work in science haha
+ blackburn	I mean no one would believe me if I said I have a gut feeling :D
+ blackburn	about quantum mechanics or economics or anything
+ n4nd0	aham
+ blackburn	okay no moar mosek
+ blackburn	I'm satisfied now
+ n4nd0	:)
+ shogun-buildbot_	build #432 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/432  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ n4nd0	blackburn: I think the same still!
+ n4nd0	haha
+ n4nd0	I believe strongly that another argmax is required
+ blackburn	it is infeasible
+ n4nd0	one that includes the term Delta(yi,y)
+ n4nd0	it depends on the application
+ n4nd0	for the HM-SVM it is probably feasible
+ blackburn	infeasible for HM, right?
+ blackburn	okay, infeasible for CRF?
+ n4nd0	in the same way that argmax_y < w, Psi(x,y) >
+ n4nd0	blackburn: my CRF knowledge is a bit limited for this
+ n4nd0	but my guess is that it is feasible for CRF too
+ n4nd0	since they have been used in real applications
+ blackburn	you should taklk to some SO expert
+ n4nd0	blackburn: do you give me some confidence at least? :D
+ blackburn	I am pretty sure it is correct now
+ n4nd0	but you are just basing it in the result of the accuracy
+ n4nd0	take into account that the dataset is not difficult
+ n4nd0	the underlying distribution is not really difficult
+ blackburn	no, I am basing it on my understanding of all these things
+ n4nd0	and we are providing lot of training examples
+ n4nd0	but look to equation A.7 in Teo
+ blackburn	and?
+ n4nd0	a hint could be that they do not use the same to denot
+ n4nd0	denote
+ n4nd0	y_bar
+ n4nd0	and y_*
+ n4nd0	y_* = argmax_y < w, phi(x,y) >
+ n4nd0	and y_bar is the thing of A.7
+ blackburn	oh I have to make SO locked training work
+ n4nd0	?
+ blackburn	it is not supported now
+ n4nd0	anyway
+ n4nd0	time to sleep now
+ blackburn	good idea
+ n4nd0	good night & good job :)
+ blackburn	good night
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has quit [Ping timeout: 252 seconds]
+-!- blackburn1 [~blackburn@188.168.14.172] has joined #shogun
+-!- blackburn [~blackburn@37.61.181.133] has quit [Read error: Operation timed out]
+-!- zxtx [~zv@cpe-75-83-151-252.socal.res.rr.com] has joined #shogun
+ CIA-52	shogun: Sergey Lisitsyn master * rd6b3a7d / (9 files in 3 dirs): Refactored apply of latent machines - http://git.io/9Omc-g
+-!- blackburn1 [~blackburn@188.168.14.172] has quit [Quit: Leaving.]
+ shogun-buildbot_	build #433 of deb3 - modular_interfaces is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/433
+-!- yooo [575b08cb@gateway/web/freenode/ip.87.91.8.203] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot_	build #62 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/62
+-!- av3ngr [av3ngr@nat/redhat/x-swaimdyxogxxwdlk] has joined #shogun
+ CIA-52	shogun: Sergey Lisitsyn master * rcf43532 / (2 files): Fixed compilation of data generator in case of no lapack available - http://git.io/QAFu6w
+ CIA-52	shogun: Sergey Lisitsyn master * r40564ac / src/shogun/latent/LatentSOSVM.cpp : Added missed lambda usage in LatentSOSVM - http://git.io/jfaIwQ
+ CIA-52	shogun: Sergey Lisitsyn master * r157fba3 / src/interfaces/modular/modshogun_ignores.i : An attempt to ignore display methods of SG datatypes - http://git.io/t04KgA
+-!- uricamic [~uricamic@2001:718:2:1634:155e:7544:fba4:9878] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	hey uricamic
+ n4nd0	how are you doing?
+ _____________	uricamic: hey - you should convince n4nd0 today :D
+ n4nd0	haha
+ n4nd0	_____________: uricamic and I will convince you :D
+ n4nd0	_____________: let me ask you
+ n4nd0	why do you do CDotFeatures* in 47 of PrimalMosekSOSVM.cpp
+ _____________	n4nd0: why not CFeatures?
+ n4nd0	_____________: yeah
+ _____________	because I didn't know what is restriction
+ _____________	please change if it is not correct
+ n4nd0	ok
+ n4nd0	just wanted to ensure that there was no special reason
+ _____________	good
+ n4nd0	but remember this restriction was the one that started all the refactoring
+ n4nd0	because in BMRM it was CDotFeatures and we needed CFeatures there
+ _____________	yes
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Client Quit]
+ CIA-52	shogun: iglesias master * rb985ee1 / src/shogun/structure/PrimalMosekSOSVM.cpp : * fix compilation error with MOSEK support - http://git.io/TtNrZw
+ CIA-52	shogun: Sergey Lisitsyn master * r8122bd8 / src/shogun/structure/PrimalMosekSOSVM.cpp : Merge pull request #751 from iglesias/master - http://git.io/0aIxew
+ uricamic	hi, sorry, I have been away
+ _____________	uricamic: we were arguing HARD yesterday
+ _____________	uricamic: help us to resolve that :)
+ _____________	uricamic: okay - the problem is
+ uricamic	ok :)
+ _____________	is argmax of <w, Phi(x_i,y)>
+ _____________	equal to argmax of
+ _____________	\Delta(y_i, y) + <w, Phi(x_i,y) - Phi(x_i,y_i)>
+ _____________	see what I mean?
+ n4nd0	uricamic: put some light into here please :D
+ uricamic	I am not sure what u mean, but wait a sec, I will figure it out :)
+ _____________	uricamic: I've added generic risk function
+ _____________	to structured model
+ n4nd0	uricamic: when one needs to compute the risk function
+ _____________	have you seen?
+ _____________	it works like
+ uricamic	not yet, but I will check it now
+ _____________	for each feature vector: find argmax, update risk and update subgrad
+ _____________	but n4nd0 thinks it is wrong to find argmax without loss
+ uricamic	yep, it is wrong
+ n4nd0	:)
+ uricamic	u need to add loss there, because u are trying to find the most violated constraint there
+ uricamic	and adapt to it
+ uricamic	it is similar to perceptron algorithm
+ n4nd0	and the argmax doesn't give you the most violated
+ uricamic	it can if u add loss term there
+ uricamic	to all examples
+ _____________	okay it is a luck it works now then :)
+ uricamic	e.g. I have been using it in one of my applications of so-svm, I have designed argmax function in matlab with the possibility to pass also the losses
+ uricamic	_____________: and on which instance u have checked that?
+ _____________	HM-SVM and multiclass
+ _____________	n4nd0: is it feasible to implement argmax with loss?
+ _____________	for HM-SVM?
+ uricamic	it should be possible
+ _____________	n4nd0: can you fix my code then?
+ _____________	what is needed is
+ n4nd0	_____________: it should be done modifying the Viterbi I implemented there
+ _____________	to add argmax_loss or so
+ n4nd0	uricamic: I am trying out the DualLibQPBMSOSVM and it never ends :(
+ n4nd0	I am doing something wrong for sure
+ _____________	change risk to call that, remove loss addition in risk
+ uricamic	n4nd0: I haven't checked your code for HM-SVM yet, but wouldn't it be possible to just ass loss to the features in argmax?
+ _____________	and then implement argmax_loss for multiclass and HM
+ uricamic	n4nd0: which algorithm and what lambda have u tryied?
+ uricamic	*tried
+ n4nd0	uricamic: I have not set any algorithm explicitely to tell the truth
+ uricamic	_____________: btw: I wanted to ask about the changes in my code for modular interfaces, because of java_modular failure
+ uricamic	so it should use BMRM
+ n4nd0	uricamic: I thought that would use BMRM by default
+ _____________	I fixed that
+ uricamic	that one has proven convergency
+ n4nd0	uricamic: lamda equal to 0.01
+ n4nd0	it doesn't finish though
+ uricamic	I see, that could be the problem
+ _____________	uricamic: do I understand right C is 1/lambda?
+ uricamic	Like it goes through 1000 iterations and did not stop?
+ _____________	uricamic: ah one ask for your code too
+ _____________	could you please add !CSignal::cancel_computations() to while condition?
+ n4nd0	uricamic: 294 iterations and it just froze
+ uricamic	I guess not just 1/lambda, it depends on the formulation of the task with C, do you have it somewhere? I guess it could be n/lambda
+ _____________	to make it possible to Ctrl+C that
+ uricamic	froze?
+ uricamic	hmm, that is strange
+ uricamic	it might mean that the qp task is really hard to solve
+ uricamic	and it could take really a long wjile
+ uricamic	*while
+ n4nd0	I am using the so_multiclass example, in libshogun
+ uricamic	n4nd0: it does not converge for so_multiclass ?
+ _____________	it was converging on my machine ehm
+ _____________	very fast
+ n4nd0	I am doing something wrong for sure then
+ n4nd0	but what?
+ n4nd0	http://pastebin.com/F6q9rrVS
+ n4nd0	just find bundle to look for the parts that use bmrm
+ uricamic	try to increase lambda
+ uricamic	a lot
+ uricamic	because, I probably haven't mentioned it anywhere yet
+ uricamic	but because of P3BMRM
+ uricamic	we are using unnormalized risk
+ uricamic	i.e. without division by number of examples
+ uricamic	which changes the lambda a lot
+ n4nd0	to what number?
+ uricamic	try something really big for start and then u can try lower
+ n4nd0	trying with 1000
+ uricamic	like 1e4
+ uricamic	yep, or that one
+ uricamic	the problem is that without this unnormalized risk, P3BMRM would not be identical to BMRM
+ n4nd0	ok it finished now, thank you :)
+ uricamic	it would require division of number of cp_models used depending also on the number of examples in the cp_model
+ uricamic	n4nd0: you are welcome
+ n4nd0	I get this accuracy
+ n4nd0	SO-SVM: 82.80%
+ n4nd0	BMRM:   69.90%
+ n4nd0	is that normal?
+ uricamic	but when using unnormalized risk, they are equal
+ uricamic	could be, try lower lambda now :)
+ n4nd0	model selection for this would be nice :D
+ uricamic	I have finished benchamrk for MNIST data yesterday, but I will probably have to change my code a bit to be able to send it in PR
+ uricamic	I mean  I need to return history of Fp, Fd and wdist from the solver, but in current form it crashes java_modular
+ uricamic	so I guess, it will be sufficient to add getters for these to DualLibQPBMSOSVM class and everything should be fine then
+ _____________	uricamic: it works now
+ _____________	I believe it does
+ uricamic	_____________: how come?  I guess it is impossible :)
+ _____________	uricamic: you didn't declare constructor and it was not inherited from sgobject
+ uricamic	because now in modular there is no support to return bmrm_return_T
+ _____________	so I had to declare ctor/dtor and add dummy save/load_serializable
+ _____________	I restored it
+ uricamic	oh, I see
+ _____________	just check latest
+ uricamic	I haven't noticed it
+ uricamic	ok, thanks, I will check it
+ _____________	it was crashing python graphical example of multiclass
+ _____________	but now it works without any glitches
+ _____________	uricamic: could you implement a multiclass agrmax with loss?
+ uricamic	_____________: I will look on it
+ uricamic	so the design will be to have overloaded argmax one without loss and the other with it?
+ n4nd0	I think that is the idea
+ n4nd0	I'd like to skype with Nico first to ensure it
+ _____________	yes
+ _____________	I was pretty sure it would work without loss
+ _____________	but okay if it is not I don't mind
+ _____________	:)
+ uricamic	well, I am still wondering that it was working, but it could happen :)
+ uricamic	but I am sure, that the loss has to be there before argmax
+ _____________	n4nd0 thought it is only because of simple cases
+ _____________	I could believe so
+ uricamic	yep, that is possible
+ n4nd0	I am preparing this case for multiclass classification to compare
+ _____________	http://25.media.tumblr.com/tumblr_m95fwdIEnn1qg3gfeo1_500.jpg hahah
+ wiking	blackburn why u no break somebody else's code? :D
+ n4nd0	lol
+ _____________	man it is easy to apply that patch
+ n4nd0	the lol was for the picture :D
+ wiking	wtf man
+ wiking	you broke the example :)
+ _____________	how?
+ wiking	i'll paste bt of gdb
+ wiking	[DEBUG] entering LatentSVM::apply(LatentFeatures at 0x10260bd90)
+ wiking	libc++abi.dylib: terminate called throwing an exception
+ wiking	[ERROR] Unknown problem type
+ wiking	Program received signal SIGABRT, Aborted.
+ wiking	0x00007fff8caff212 in __pthread_kill ()
+ _____________	oh okay
+ _____________	that can be let
+ _____________	me fix it
+ wiking	i'mjustaying
+ _____________	wiking: well you are not very active with that code so I didn't think I could make it hard to rebase :)
+ wiking	:)))
+ _____________	all changes in your code are just
+ _____________	apply -> apply_latent
+ wiking	it doesn't mean that i'm not preparing a patch
+ wiking	yeah i know
+ n4nd0	uricamic: I don't manage to make so_multiclass_BMRM work properly
+ _____________	that is the right way to do that so just rename it and you wouldn't really need to rebase
+ wiking	and as well the fuckup of yesterday's primalmosek :)
+ n4nd0	uricamic: I execute on command line ./so_multiclass_BMRM data.out 2 1000 500 1 0.01 BMRM
+ uricamic	n4nd0: what do u mean properly?
+ n4nd0	and it stays in iteration 0 forever
+ wiking	i mean the only thing is that please commit if it compiles
+ wiking	and not when it doesn't
+ wiking	and not having mosek is not an excuse when u edit that code ;)
+* wiking feeling bossy today :)
+ CIA-52	shogun: Sergey Lisitsyn master * r5347c30 / src/shogun/machine/Machine.cpp : Added missed latent problem handling in apply of machine - http://git.io/8EdOQQ
+ n4nd0	_____________: I have to support wiking there, I am sorry :S
+ uricamic	n4nd0: hmm,  I think I have changed that example to expect data in svmllight format
+ uricamic	but let me check that
+ n4nd0	uricamic: aaahm I am just using the data from the example I run
+ uricamic	I am just compiling the latest code
+ n4nd0	uricamic: ok, let me know someting
+ _____________	well guys I have nothing to say if you are so worried with breaking your code :)
+ n4nd0	:)
+ wiking	:>
+ n4nd0	I guess that we all want to rush a bit the things in order to be ready for release
+ wiking	btw what has happened with fixing up the static analyzer problems?
+ _____________	I have been waiting for generic risk function for a while and nobody did it
+ uricamic	hmm, it seems that I have to modified that example, cos' it refused to compile now :D
+ _____________	furthermore we had wrong interface with redundant features
+ wiking	_____________: a PR + wait for comment would be nice... it really worked out for me till now quite well
+ _____________	so having no mosek is excuse, it is not project of mine but I did that
+ wiking	_____________: but you've broken the code, and you couldn't see the problem as that code never compiled on your machine
+ n4nd0	uricamic: oh yes, you have to change the constructor
+ wiking	DONT FUCKING BREAK THE CODE! :)
+ n4nd0	uricamic: just leave out features
+ n4nd0	uricamic: and thank _____________  :P
+ uricamic	n4nd0: I see :D
+ wiking	uricamic: :DDD
+ _____________	wiking: I know what to do better
+ wiking	_____________: u mean u know better? :)
+ _____________	breaking mosek is not the issue when we are in rush to release sooner
+ wiking	but then we have a broken release :)
+ wiking	especially that mosek is not tested on any of the bots
+ uricamic	n4nd0:  ok it works for me now
+ n4nd0	_____________: we have to face that it will probably be difficult to have everything working with bundle methods for release
+ wiking	i.e. nobody else will pick up this error just who really wants it to work :)
+ _____________	n4nd0 will always test it because he works with it
+ _____________	n4nd0: I can't see any difficult there
+ _____________	you said HM argmax with loss is easy?
+ wiking	ok i was mostly joking till now
+ n4nd0	I didn't say it was easy
+ n4nd0	I am just guessing
+ _____________	so you can't do that?
+ wiking	but seriously is it really hard to wait 6 hours for comments on a PR _____________ ?
+ wiking	if yeas
+ wiking	then mea culpa
+ uricamic	n4nd0: so the input data are expected in svmlight format
+ n4nd0	_____________: I didn't say I can't
+ _____________	I have no fucking idea when will you appear wiking
+ wiking	_____________: i dont have to appear to comment on a PR on githug
+ _____________	what to wait for?
+ n4nd0	_____________: I just say that maybe it cannot be done for today
+ wiking	*github
+ _____________	I will do that then
+ uricamic	i.e. on each line first number is the label and then non-zero elements of feature vectors in format idx:value
+ wiking	especially if you add a @<github username> into the comment
+ wiking	as that person will get an email most probably
+ wiking	as that's the default setting of github...
+ _____________	wiking: what should I wait for?
+ wiking	_____________: comment on your intended PR
+ wiking	from the author of that actual code
+ _____________	which PR?
+ _____________	apply_latent?
+ wiking	_____________: i'm talking about future
+ wiking	that if u change code
+ wiking	which u really dont feel sure about
+ wiking	then maybe go with a PR and wait 3-6 hours
+ _____________	in future I would never get you back
+ _____________	what is unsure in that PR?
+ wiking	and if there's no comment
+ _____________	it should be apply_latent but not apply
+ _____________	did you ever check how machine works?
+ wiking	it's not about that given commit
+ wiking	same goes with primal mosek per se
+ wiking	and this is not a personal vendetta
+ _____________	did you check logs where I asked n4nd0 to check if it compiles?
+ wiking	so please do not start to patronize me with "did you ever check how machine works?"
+ wiking	i'm just suggesting
+ wiking	that maybe it would be better...
+ wiking	but if you know better
+ wiking	then it's ok
+ _____________	should I spend time on installing mosek just to check if it compiles when I could ask n4nd0 and he don't mind to do that?
+ wiking	sorry mate to bringing up this idea
+ _____________	I do not understand what you do blame me about
+ wiking	i dont blame u
+ wiking	i'm just saying that it would be great that if you start changing code that you haven't authored and it's not really an obvious assertation
+ wiking	then maybe it would be great that you somehow assure that it's ok
+ _____________	what is not obvious? removing features or renaming apply to apply_latent?
+ wiking	_____________: i've given there the example: not obvious = not an assertation
+ _____________	you claim I do that - where did I something that needs an author comment?
+ wiking	all these commits
+ wiking	that actually broken something
+ _____________	which these?
+ wiking	see the mentioned ones above
+ wiking	or now you really want to have sha-1 lines?
+ wiking	i mean seriously you are now going to take this as a personal matter
+ wiking	?
+ _____________	your example should work now it is just a missed line
+ wiking	because sorry mate i really like you so i rather just shut up
+ _____________	I do not understand why making it correct is so much an issue for you
+ _____________	yes because you are blaming me in things I didn't do
+ _____________	I am spending time on things I am unsure you will spend on
+ _____________	lately I have been fixing doc - wiking your code too - I don't know whether you would do that
+ n4nd0	this conversation makes me sad :(
+ _____________	as for your example I planned to run it later anywhay
+ _____________	I just wanted to make your projects more suitable before release that is coming already
+ wiking	ok 2 more questions: a) have you commited code that broke examples and compilation of primalmosek? (and you have your answer on your line of 'blaming you') b) why do you feel attacked here, i think this really a work matter and nothing personal? but anyhow if you feel in any ways offended, then i'm honestly sorry and let's just forget this... it's really not worth it...
+ _____________	you are not in active development (at least it looks like that for me)
+ _____________	a) yes, and fixed that after n4nd0's report
+ _____________	b) because you are attacking me - pretty obvious
+ _____________	n4nd0: can you finally assure wiking I didn't break your code without your participation at all?
+ wiking	as said in b) and earlier it wasn't meant to be attacking at all just a suggestion what would be great...
+ _____________	or you think too I am the breaker that makes your projects worse?
+ wiking	dude
+ wiking	you completely take this the wrong way
+ wiking	nobody ever told that "I am the breaker"
+ wiking	and that you are making the project worse
+ wiking	you are taking this out of proportion
+ wiking	i haven't told any of this
+ n4nd0	uricamic, _____________ : nice! I finally finished the test
+ uricamic	n4nd0: great :)
+ wiking	and wasn't even nearly implying it...
+ n4nd0	uricamic, _____________ : so I have compared the error when using the CMulticlassModel::risk and the error when using CStructuredModel::risk
+ n4nd0	the same data, same epsilon, same lambda, everything the same except from that function
+ n4nd0	when using CMulticlassModel::risk we get an error equal to 21.4%
+ n4nd0	and when using the other around 40%
+ n4nd0	_____________: so I finally conclude that bot argmax are not the same :)
+ _____________	n4nd0: I don't mind that but just do that correct
+ uricamic	n4nd0: yep, of course they can't be :)
+ uricamic	I am going for lunch now, will be back hopefully in less than 1 hour
+ n4nd0	uricamic: bye
+ n4nd0	_____________: c'mon man, don't say it so :(
+ _____________	how so?
+ n4nd0	never mind
+ _____________	I just mean if you have no time for that
+ _____________	just tell me
+ _____________	I will try to do by myself
+ n4nd0	look _____________, I have time for that
+ n4nd0	but time in my time frame
+ n4nd0	I may have done it by the end of this week, tested and everything
+ n4nd0	because first I want to consult with Nico
+ n4nd0	if you do not like that ..... just do it yourself
+ _____________	I want that to be in release I am sorry I am pushing you
+ n4nd0	_____________: I will do my best then
+ _____________	it seems to be the best new feature of shogun
+ n4nd0	_____________: then I will get more motivation :)
+ _____________	so I don't want to fuck up there
+ n4nd0	all right
+ _____________	so argmax is just viterbi in hm?
+ n4nd0	yes
+ _____________	can't you just put losses in that loss matrix?
+ _____________	I am newbie in HM still but just ask
+ n4nd0	let me check one thing in the hmsvm toolbox
+ _____________	it is easy to implement for multiclass
+ CIA-52	shogun: Soeren Sonnenburg master * r6d43e98 / src/shogun/features/DataGenerator.cpp : include lib/config.h when checking for a DEFINE_TO_BE_SET - http://git.io/cTCq-w
+ _____________	really easy
+ n4nd0	http://pastebin.com/KPkuwjta
+ n4nd0	take a look to that code
+ _____________	sonney2k: it is already included in .h - why?
+ n4nd0	_____________: you can see there are two calls to best_path
+ _____________	hah so it uses shogun's viterbi?
+ n4nd0	in the past yes, not in that version
+ _____________	lol
+ _____________	because our HMM is broken
+ _____________	and not because of me wiking
+ n4nd0	I think it was just to make it standalone...
+ n4nd0	at least they say so in the doc
+ _____________	n4nd0: 59-64 lines are the thing, right?
+ n4nd0	yes
+ n4nd0	and that is actually what I do in my code
+ n4nd0	I think that my argmax is looking for the MMV
+ _____________	what is MMV?
+ n4nd0	it is always doing the pred_path_mmv and not the pred_path
+ n4nd0	maximal margin violater
+ n4nd0	it appears in that snippet, in a comment
+ wiking	_____________ as i said earlier i'm sorry that i've brought up this whole topic; it was completely unrespectful from me to say anything like that....
+ _____________	ah right sure
+ _____________	wiking: you are right in what you are saying
+ _____________	but
+ _____________	I didn't break someone code if it is not obvious fix
+ _____________	or doc fix
+ _____________	or I didn't talk to author
+ _____________	obvious fix is your case
+ _____________	in case of mosek svm I was in touch with n4nd0 - no idea why he refuses to say that :D
+ n4nd0	because I do not agree in the way you are handling this
+ n4nd0	but anyway ... let's move on, this is not so important
+ _____________	okay one more guy against me
+ _____________	so
+ wiking	as i said it was my fault so i hope we can get over this
+ n4nd0	_____________: you see, it is not against you or with you man
+ wiking	JESUS
+ _____________	why didn't you say I should install mosek and do not touch it yesterday?
+ wiking	please
+ n4nd0	_____________: I don't know how you say that if I am not even taking part ....
+ _____________	you said okay I will compile'
+ _____________	didn't you say that?
+-!- emrecelikten [~emre@trir-5d8000e4.pool.mediaWays.net] has joined #shogun
+ n4nd0	all right guys
+ wiking	let's just get over this and i'm sorry for bringing this up
+ wiking	it's not worth any of this
+ n4nd0	sonney2k: captain, bring some peace please :)
+ _____________	I give up guys
+ wiking	_____________ there's nothing to give up, keep on as is and it's all good
+ _____________	let you work on that separetely then if you are so hurted
+-!- emrecelikten [~emre@trir-5d8000e4.pool.mediaWays.net] has quit [Read error: Connection reset by peer]
+ wiking	_____________ nobody is hurt here....
+ wiking	except maybe you
+ _____________	with commits I have to do without much checks
+ wiking	but that wasn't any of my intention
+ wiking	and since it escalated into this that you think i'm saying that you are makeing bad for the project
+ wiking	which is OBVIOUSLY not the case... it's the opposite
+ wiking	you are pushing this project like nobody else here
+ wiking	which is awesome
+ n4nd0	+1
+ wiking	so please just try to forget my comments and https://i.chzbgr.com/completestore/12/6/17/u5J1lVbU6UabQ5QinFqv0A2.jpg
+ _____________	I partly do understand your unsatisfaction
+ _____________	but I do not understand what made you so worried about that
+ wiking	neither of that has happened in me :)
+ wiking	neither unsatisfaction nor worried
+ wiking	it was really just a comment
+ wiking	no more no less
+ wiking	and u do whatever you want with it
+ wiking	just please dont take it as a personal vendetta against you and your personality
+ _____________	n4nd0: why didn't you say it is bad to do that blind fix?
+ _____________	and why do you feel it so bad if you could test that - as I asked you
+ _____________	I do not understand that
+ wiking	nyipp
+ n4nd0	_____________: I think I told you I could fix the MOSEK thing to ensure that it will compile, but you insisted
+ _____________	?????
+ wiking	*booom* and the last 20 minutes disappeared :DDD
+ wiking	nonono
+ n4nd0	I don't think it is bad to the blind fix either
+ wiking	llalalalal
+ wiking	lalal
+ wiking	a
+ _____________	insisted what?
+ wiking	alalalal
+ wiking	aa
+ n4nd0	bad sounds quite bad
+ wiking	alalla
+ wiking	alala
+ wiking	lalalala
+ wiking	lalalalal
+ wiking	ala
+ wiking	ala
+ _____________	I wanted you to test if it compiles after removing features
+ wiking	(do not let you speeak :DDD )
+ _____________	is that wrong for you?
+ n4nd0	no
+ n4nd0	of course not
+ _____________	what is?
+ n4nd0	?
+ _____________	I want to understand what is you feel wrong in handling
+ _____________	you said you disagree
+ _____________	with what?
+ n4nd0	how you have reacted
+ n4nd0	but it was nothing bad
+ wiking	have i told that ever since a chick moved into my office my office became a geek magnet and all the guys are coming into my office chatting... :))
+ n4nd0	:D
+ wiking	i'll be a true cockblocker :)
+ n4nd0	haha
+ wiking	i still need to work on some lines :)
+ n4nd0	_____________: seriously, I don't think you did wrong doing any fix there
+ _____________	then I am completely lost what I am wrong with
+ wiking	_____________: nothing!
+ wiking	that's the point :)
+ wiking	and i was just practicing my trolling skills :D
+ _____________	I understand you are comfortable with your own code and it is rather you should do changes
+ _____________	but it would take a while and I want to push latest must have features before release
+ _____________	and make it correct
+ n4nd0	_____________: agree
+ wiking	so is it over yet?
+ n4nd0	let's work together and have as many stable things as possible before release
+ _____________	I'll let you polish your code by yourselves then
+ _____________	wiking: so is your example worknig now?
+ wiking	_____________ yeah awesom-ooo-ly thnx!
+ _____________	wiking: why latentsosvm has training but has no apply?
+ wiking	_____________ because it's WIP
+ wiking	it'll be no WIP by this weekend
+ _____________	I see
+ wiking	we have this 'little' ongoing problem with structmodel and latentmodel and merging them
+ wiking	as currently creating a working latentSOSVM
+ wiking	takes too much user defined stuff
+ wiking	you have to define at least 4 different classes
+ wiking	and i think we shoudl take it down to 3
+ _____________	ok
+ _____________	I am sorry I am a bit offensive but I still don't really get why did you both blame me
+ wiking	I BLAME YOU FOR MISUNDERSTANDING ME!
+ wiking	u r the MISUNDERSTANDER!
+ wiking	:D
+ wiking	do not be that one :>
+ wiking	comeon man seriously
+ wiking	can we get over it?
+ _____________	yes but I want you to understand I am not a psycho
+ wiking	heheh i know you are not
+ wiking	:D
+ wiking	never was the case
+ wiking	you are just passionate about shogun
+ wiking	that would make you a geek but i would really like to think that you are not that type of a geek who would come into my office to try to chat with this chick :)))
+ n4nd0	:D
+ _____________	it is hard to talk about structured output machine with chick
+ wiking	hahahah
+ wiking	i hope they won't find these chat logs
+ wiking	:)))
+ wiking	or maybe i hope they'll find it :DD
+ _____________	I am sure no chick would ever try to read IRC LOG of MACHINE LEARNING TOOLBOX, I am pretty sure
+* wiking works at a very unpleasant place so that's why his implied complaning :)
+ _____________	which office you are talking about? your university?
+ wiking	heheheh she is doing phd in maths...
+ wiking	i mean it's not soooo unprobable
+ wiking	:)))
+ wiking	yeah my uni :)
+ wiking	ah yeah cool
+ wiking	i know how i'll cockblock
+ wiking	i'll use banners
+ wiking	:D
+ wiking	i'll print some banners and just raise them sometimes when i get annoyed with the jibberish :)
+ n4nd0	_____________: I think that the argmax I implemented does: argmax_y [ Delta(yi,y) + <w, Psi(xi,y)> ] in training
+ n4nd0	_____________: and argmax_y [ <w, Psi(xi,y)> ] during prediction
+ wiking	n4nd0: it should do that yes
+ _____________	lol
+ wiking	so if you have some good ideas for the banners let me know :)
+ n4nd0	wiking: but the definition of argmax is: y* = argmax_y <w, psi(xi,y)> or?
+ wiking	n4nd0: well that's the thing
+ _____________	n4nd0: can't we assume training is for +LOSS and not-training is w/o loss?
+ n4nd0	_____________: do you mean for every model, or just for HM-SVM?
+ wiking	n4nd0: it should be that in your case but i think you are trying to find the most violating ones
+ _____________	for all models
+ n4nd0	_____________: I am not sure about all models
+ n4nd0	_____________: let me check what I did in the multiclass one
+ wiking	not-training w/o loss?
+ wiking	no comply in me please explain
+ _____________	wiking: there are two modes in argmax
+ _____________	first is training one
+ n4nd0	_____________: in the multiclass the loss is not taking into account
+ _____________	n4nd0: we should change that then
+ wiking	but classification (not-training?) is just w*psi(x,y)
+ _____________	n4nd0: okay wait - so HM is correct because it was correct alreadY?
+ _____________	wiking: yes
+ n4nd0	_____________: why? I don't know which one is the correct :D
+ n4nd0	wiking: yes
+ _____________	n4nd0: you said it does loss+w max
+ wiking	so what else is not-training? :)))
+ n4nd0	prediction
+ _____________	exactly
+ wiking	well then u don't need that
+ wiking	:D
+ n4nd0	when you don't have the true label, you cannot get the loss
+ wiking	it's just w*psi()
+ _____________	no, it is argmax of w*psi
+ wiking	really?
+ wiking	ah ok
+ wiking	i get it
+ _____________	most probable label
+ wiking	or i would get it in latent case
+ wiking	but in simple struct as well?
+ n4nd0	http://www.cs.cornell.edu/people/tj/publications/tsochantaridis_etal_04a.pdf
+ n4nd0	look guys at algorithm 1
+ n4nd0	oh shit I am getting crazy confused
+ _____________	what to do with it?
+ _____________	n4nd0: if you are optimizing with loss term already
+ _____________	lets just remove it from generic risk
+ _____________	and put loss to multiclass argmax on training=true
+ n4nd0	I don't understand, sorry
+ _____________	n4nd0: you said you compute argmax with loss already, right?
+ n4nd0	in the HM-SVM
+ _____________	yes
+ n4nd0	not in the multiclass
+ _____________	we can fix multiclass - it is not the issue
+ _____________	I mean currently it is being added to risk
+ _____________	in generic risk
+ _____________	https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/structure/StructuredModel.cpp line 170
+ _____________	n4nd0: if we assume argmax includes loss on training we remove line 170
+ _____________	and add loss to multiclass
+ _____________	then everything becomes correct and we are all happy
+ n4nd0	the thing is that I am not sure whether the argmax should include the loss
+ n4nd0	even if we are in training
+ _____________	ehm
+ _____________	you was sure yesterday
+ _____________	and uricamic said it should
+ _____________	I was unsure it should
+ wiking	mmm
+ wiking	well risk is being used in bmrm code
+ _____________	okay I am off for food
+ wiking	and there the primal objective in some way will include using argmax
+ wiking	alas the risk
+ wiking	or?
+ n4nd0	_____________: yesterday I was sure that the argmax doesn't include the loss
+ n4nd0	_____________: that's why I said that it is not the same the argmax that was already implemented in the model than the one we need for risk
+ wiking	n4nd0 what i dont get is that how u want to have a generic risk, where what the bmrm solves is actually labmda*||w|| + RISK
+ wiking	so it pretty much depends on you what RISK -> p.o. is
+ n4nd0	but the risk can be written in terms of an argmax and the psi function
+ wiking	well it depends what's RISK's form
+ wiking	:)
+ n4nd0	so the generic risk calls these model dependent functions
+ wiking	yeah i get it
+ wiking	but the risk can be pretty much anything
+ wiking	:)
+ wiking	or?
+ n4nd0	R({\bf w}) = \sum_{i=1}^{m} \max_{y \in \mathcal{Y}} \left[ \ell(y_i, y) + \langle {\bf w}, \Psi(x_i, y) - \Psi(x_i, y_i)  \rangle  \right]
+ wiking	until it's convex... ;)
+ n4nd0	I thought the risk is that, and only that
+ wiking	this is from multiclass right/
+ wiking	?
+ n4nd0	(paste here for better reading)
+ n4nd0	http://www.codecogs.com/latex/eqneditor.php
+ wiking	i know this one
+ n4nd0	wiking: why just the multiclass one?
+ wiking	but from where did you get this comment?
+ n4nd0	MuticlassModel.h
+ wiking	yeah
+ wiking	afaik it's a good risk function for multiclass
+ n4nd0	it is the same that appears in Teo
+ wiking	yeah i know :)
+ n4nd0	page 103, equation A.2
+ wiking	and a lot of other places with SO
+ n4nd0	they don't talk there just about multiclass, right?
+ wiking	noup
+ wiking	wait a sec
+ wiking	wait
+ wiking	i'll just dig something out
+ wiking	ok so here's another thing
+ wiking	hahahah A FUCKING GEEK CAME TO MY ROOM BUT SINCE SHE IS NOT HERE HE DIDNT EVEN ENTER THE ROOM
+ wiking	how fucking lame is this :)))
+ wiking	they all want the pussy :)))
+ wiking	so yeah n4nd0 look
+ n4nd0	:D
+ wiking	http://www.cs.cornell.edu/~cnyu/papers/icml09_latentssvm.pdf
+ wiking	page 3 eq(7)
+ wiking	for me that is the RISK
+ wiking	with the -C\sum_....
+ wiking	the whole thing after 1/2||w||
+ n4nd0	aham
+ n4nd0	yeah, that is definitely different
+ n4nd0	that term is new
+ wiking	and the Dual solver
+ wiking	basically is intented to solve
+ wiking	anything that is convex and in labmda*||w||^@ + RISK
+ wiking	w/o constraints
+ wiking	so
+ wiking	until risk is convex
+ wiking	you can have anything
+ wiking	as risk
+ n4nd0	I see
+ wiking	this is my understanding and that's why i thought that StructuredModel::risk should not be implemented
+ wiking	n4nd0: but in multiclass case
+ wiking	you are totally right though
+ wiking	you can actually define the risk function with the help of psi and argmax
+ wiking	but what if is your risk is something completely different but still convex
+ wiking	see for example my case
+ n4nd0	but maybe this risk function we use in multiclass, and probably in HM-SVM too, may work as well
+ wiking	and yes in my case \hat{y} and \hat{h} should be defined/given by argmax
+ wiking	yeah it will work
+ wiking	until you want that risk function
+ n4nd0	then we just make it virtual
+ wiking	yeah
+ wiking	but i think you should note it somewhere that this is just an example ;)
+ n4nd0	giving the possibility to be overridden
+ wiking	yeah as until now
+ n4nd0	wiking: sure
+ n4nd0	in any case
+ n4nd0	probably it is not that great to have this generic risk for efficiency reasons
+ wiking	but i thought that it's a bit 'narrowing down' when you already implement a risk function in an abstract class whilst your risk function could be anything
+ wiking	anything = the PO is convex...
+ n4nd0	yes, I see your point and I agree with you
+ wiking	but
+ n4nd0	it is not conceptually right I think
+ wiking	there could be a protected default risk function ?:)
+ wiking	in structuredmodel
+ wiking	and then anybody who inherits from this class
+ wiking	will have already a function at hand
+ wiking	and he can just chuck that in into his risk function
+ wiking	(call it from it) if he really doesn't know what is he doing :)))
+ n4nd0	sounds like a good idea
+ wiking	or just wants to compare
+ wiking	bmrm vs mosek
+ wiking	btw have any of you run that ?
+ wiking	what's the accuracy difference between mosek and bmrm
+ wiking	on one given data set
+ n4nd0	not using an important data set
+ wiking	hehe yeah
+ n4nd0	just randomly generated Gaussian
+ wiking	but any dataset
+ wiking	yeah
+ n4nd0	for the multiclass example
+ wiking	and what are the numbers?
+ n4nd0	yeah, I have prepared that before
+ wiking	how far r they from each other ?
+ n4nd0	running again right now ..
+ n4nd0	but I don't think these results are very trustworthy
+ n4nd0	I just plugged a lambda at random
+ n4nd0	SO-SVM: 92.60%
+ n4nd0	BMRM:   88.60%
+ n4nd0	MC:     40.00%
+ wiking	okey
+ wiking	so bmrm is not so far at all
+ wiking	btw: labmda = 1/c
+ n4nd0	no
+ wiking	what's your c in primal?
+ wiking	just use lambda = 1/c
+ n4nd0	wiking: michal said something about that BUT also that he was not regularizing with the #examples
+ n4nd0	C = 1 in multiclass classification her
+ wiking	but it's pretty cool though
+ n4nd0	for the PrimalMosekSOSVM
+ wiking	and for mosek?
+ wiking	ah ok
+ wiking	then use lambda =1
+ wiking	:)
+ n4nd0	I am interested in knowing how faster it is
+ wiking	n4nd0: CMath::time
+ wiking	:P
+ wiking	but still it's awesome that there's bmrm that can actually give similar values as mosek but it's fully opensource
+ n4nd0	it is pretty slow with lambda = 1
+ wiking	https://fbcdn-sphotos-a-a.akamaihd.net/hphotos-ak-ash3/580085_462759493754616_184994591_n.jpg
+ wiking	:D
+ wiking	ok i'm off to pick up something to eat
+ n4nd0	lol
+ wiking	brb in 10
+ n4nd0	for a new run with other data and lambda = 1000 (#examples)
+ n4nd0	SO-SVM: 85.30%
+ n4nd0	BMRM:   79.20%
+ n4nd0	MC:     54.10%
+ n4nd0	>>>> PrimalMosekSOSVM trained in   22.0718
+ n4nd0	>>>> BMRM trained in    8.6328
+ n4nd0	SO-SVM: 85.10%
+ n4nd0	BMRM:   81.90%
+ n4nd0	MC:     46.30%
+ n4nd0	http://29.media.tumblr.com/tumblr_lltzgnHi5F1qzib3wo1_400.jpg
+ uricamic	back again, I had to read quite a big log :)
+ uricamic	so for the argmax question
+ uricamic	I said, that it is reasonable to have overloaded argmax function, which in training will get loss and therefore it will find the most violated constraint
+ uricamic	and the standard argmax function which should be used for prediction of with trained W vector
+ _____________	uricamic: should it argmax including loss?
+ uricamic	only in training
+ _____________	n4nd0: what is MC?
+ _____________	uricamic: sure
+ _____________	uricamic: my suggestion is
+ _____________	there is a training flag in argmax
+ uricamic	but then for predictions it shouldn't use it
+ uricamic	_____________: ok
+ _____________	in case of training it includes loss
+ n4nd0	_____________: linearMulticlassMachine with LibLinear
+ _____________	in other cases no
+ n4nd0	_____________: see libshogun/so_multiclass.cpp
+ _____________	uricamic: good for you?
+ uricamic	_____________: ok, that should be fine then
+ uricamic	yep
+ _____________	n4nd0: agree?
+ n4nd0	sure
+ n4nd0	then I had not fucking idea what the argmax should do
+ n4nd0	I feel stupid
+ _____________	ehhm I do not understand
+ _____________	I was wrong not you
+ uricamic	because then it fits the design and it is easy to understand what is going on there
+ n4nd0	_____________: I thought the loss is not included in the argmax
+ _____________	?????
+ n4nd0	so uricamic
+ _____________	what we were arguing about last night?
+ _____________	:D
+ n4nd0	uricamic: can you please check MulticlassModel.cpp
+ uricamic	argmax should do exactly what the name says - find argument where the dot product is maximal
+ _____________	I was pretty sure my position is that argmax with loss is equal to argmax without
+ _____________	but it was wrong
+ n4nd0	_____________: yeah, but I am not talking about that
+ n4nd0	I thought that the argmax must not include the loss
+ _____________	to score?
+ uricamic	and in training it has to find this maximum enhanced with losses -> i.e. find the most violated example
+ n4nd0	I understand
+ uricamic	n4nd0: the version which now in shogun or somewhere else?
+ CIA-52	shogun: Sergey Lisitsyn master * r50ba31c / src/shogun/structure/StructuredModel.cpp : Removed redundant loss in generic risk - http://git.io/wcQu-w
+ n4nd0	uricamic: let me paste it for you
+ uricamic	n4nd0: ok
+ n4nd0	http://pastebin.com/iK0xxBf1
+ n4nd0	that is used for training currently
+ n4nd0	and if I understand everything properly now
+ n4nd0	that is kind of wrong
+ n4nd0	since for training
+ n4nd0	the score should be
+ _____________	n4nd0: uricamic so should we add return_value->delta in risk?
+ n4nd0	uricamic: what is computed in that snippet in line 8 + the loss
+ _____________	n4nd0: yes it is wrong
+ _____________	it is not wrong for *applying*
+ _____________	but it is wrong for *training*
+ uricamic	n4nd0: I miss the loss there
+ n4nd0	uricamic: exactly
+ _____________	uricamic: n4nd0 only in case of training right?
+ n4nd0	_____________: I believe so
+ _____________	I can fix that
+ uricamic	it is ok for prediction but for training u have to add loss there to find the maximum score on features with loss
+ _____________	or anybody is willing to?
+ n4nd0	_____________: I can do it
+ _____________	okay please do then
+ n4nd0	uricamic: should we expect better classification results after this change?
+ _____________	n4nd0: I am unsure we need delta parameter in result type
+ n4nd0	_____________: that was designed by Nico
+ _____________	if it is being added in case of training to score
+ _____________	we won't use it anyway
+ uricamic	n4nd0: well I would expect that, because if you haven't counted with loss in training u actually trained different classifier
+ _____________	agree?
+ n4nd0	_____________: I am not sure if it is used somewhere right now
+ n4nd0	_____________: did you check?
+ uricamic	_____________: what do u mean by resturn_value->delta?
+ _____________	it is being set but it won't be used by risk
+ uricamic	*return_value
+ _____________	because score contains it
+ _____________	uricamic: https://github.com/shogun-toolbox/shogun/blob/master/src/shogun/structure/MulticlassModel.cpp 109
+ _____________	we don't need it, right?
+ uricamic	probably not
+ _____________	because we don't need in when applying
+ _____________	it*
+ _____________	and it is included when training
+ _____________	n4nd0: agree?
+ n4nd0	I wouldn't remove it right away
+ n4nd0	I guess Nico put it there for some reason
+ n4nd0	but no idea
+ _____________	okay no need to remove it
+ _____________	but lets remove it's setting in multiclass model
+ _____________	okay I'll wait for your code :)
+ _____________	n4nd0: we may do that with delta though
+ _____________	n4nd0: we then would need to add it in risk function but subtract from maximum score
+ _____________	see what I mean?
+ wiking	n4nd0: just a little bit of comment on CStructuredModel. dont u wanna pass const SGVector<float64_t>& w in argmax?
+ wiking	n4nd0: just to reserve some space on the heap
+ wiking	i mean stack
+ wiking	;)
+ wiking	otherwise copy constructor is being called etc etc etc
+ _____________	please do that somebody
+ _____________	or I will
+ _____________	:D
+ wiking	and actually
+ wiking	in risk function
+ _____________	what is in risk function?
+ wiking	don't we want to use SGVector<float64_t> instead of the simple pointers?
+ _____________	where?
+ wiking	float64_t risk(float64_t* subgrad, float64_t* W, TMultipleCPinfo* info=0);
+ wiking	float64_t* -> SGVector
+ _____________	why to use it?
+ _____________	we could but any specific reason?
+ wiking	since we have sgvector as a wrapper for simple type arrays
+ wiking	no other reason
+ _____________	wiking: to make it explicit I would keep it
+ _____________	it makes you think you are going to write to given memory
+ _____________	we need to add director model before release
+ _____________	I will do that
+ _____________	oops I am at job
+ _____________	damn
+ wiking	_____________: working again?
+ _____________	yes starting from this week
+ wiking	same place?
+ _____________	yes
+ _____________	netcracker
+ _____________	it is worth to mention that netcracker supports shogun implicitly :D
+ wiking	\o/
+ wiking	put it in the release notes :>
+ _____________	because I do shogun instead of my job
+ _____________	:D
+ wiking	(got that part ;P)
+ wiking	n4nd0: wtf is with CLatentData CData and CStructedData?
+ n4nd0	wiking: you talkead with sonney2k about that right?
+ n4nd0	he didn't like CData I think
+ n4nd0	uricamic: does BMRM use argmax somewhere?
+ _____________	n4nd0: ?? risk
+ uricamic	BMRM uses risk function, and risk function should use argmax inside
+ n4nd0	call directly to argmax
+ wiking	n4nd0: i remember sonney2k telling us that he doesn't like the naming... that was as far as i understood :)
+ wiking	n4nd0: that's why i'm asking to what now?
+ wiking	_____________: dont u wanna fix this? :)
+ n4nd0	wiking: I don't know ... I am ok with anything regarding that to tell the truth :)
+ wiking	and i'm TOOTALy not being ironic here :)
+ _____________	wiking: fix what?
+ wiking	as much as it sounds :>
+ wiking	_____________: so that we have this shit going on
+ wiking	_____________: we have CLatentData (actually we had now it's CData) and CStructuredData
+ wiking	and basically they are serving the same exact purpose
+ n4nd0	uricamic, _____________: so ... the accuracy doesn't change at all in this multiclass example
+ n4nd0	_____________, uricamic: training with argmax using or not using loss
+ uricamic	you mean with argmax containing losses in training?
+ wiking	_____________: so i thought it would be great to remove this redundancy and merge CLatentData and CStructuredData and just have CData
+ uricamic	:)
+ wiking	_____________: but sonney2k didn't like the name
+ wiking	_____________ so we need a new name and that's it basically ;)
+ _____________	n4nd0: it might be for multiclass (as far as I understand)
+ _____________	wiking: why latent is not structureD?
+ wiking	_____________ because it's not :)
+ n4nd0	uricamic: yes
+ uricamic	n4nd0:  but it could be true just for some particular example, definitely not generally
+ n4nd0	uricamic: ok
+ wiking	i mean they are semantically not the same
+ _____________	wiking: what is different in latent?
+ n4nd0	uricamic: I am using also loss equal to 1 or 0 so it might normal that it doesn't make a huge difference
+ wiking	_____________: that it's latent and not fixed contrary to structured
+ wiking	_____________: other than that it's the exact same implementation :)
+ uricamic	n4nd0: yep, that is another important fact
+ wiking	_____________: it's just semantics
+ wiking	_____________: but imho important one...
+ uricamic	when u use e.g. L2 loss the difference should be more obvious
+ _____________	wiking: okay lets get back to that later
+ n4nd0	uricamic: it converges faster including the loss though, for the PrimalMosekSOSVM case
+ _____________	n4nd0: what did you change now?
+ uricamic	n4nd0: you mean less number of iterations?
+ n4nd0	I am just comparing what happens when the argmax includes the loss or not
+ n4nd0	uricamic: I am just looking at the training time
+ n4nd0	uricamic: but I guess it is because the number of iterations is smaller
+ uricamic	n4nd0: I see, but it should be reasonable since without loss it could happen that sometimes not true most violated constraint is found and therefore it needs more iterations to converge
+ n4nd0	uricamic: yeah, could be
+ wiking	_____________: http://i.imgur.com/zQHv4.gif
+ wiking	:DDDDDDDDDDDDDDDDDDDD
+ n4nd0	uricamic: you are an expert in this man!
+ wiking	megalol
+ wiking	:>
+ uricamic	n4nd0: :D I wouldn't call myself one, but I have already written one paper about that
+ uricamic	actually 2 but unfortunately the second one was not accepted, since someone has already done something similar -> axed by reviewers immedeately
+ n4nd0	too bad
+ uricamic	it is life :)
+ n4nd0	uricamic: btw, I would really really prefer if the MulticlassModel::risk calls to argmax and delta loss
+ n4nd0	uricamic: what do you think?
+ uricamic	n4nd0: sure, it is no problem
+ uricamic	I will get to this hopefully soon
+ n4nd0	uricamic: do you want to change that?
+ uricamic	n4nd0: yep I can, but if u want to do that feel free :)
+ uricamic	since I have to write TR for my work which could be then referenced by shogun tutorial
+ n4nd0	I think I am going to stop soon of shoguning today ...
+ n4nd0	I should have done something for the job this morning
+ _____________	wiking: yes that made all russian twitter day yesterdday
+ _____________	n4nd0: uricamic where did you stop?
+ _____________	is it ok to include loss in multiclass now?
+ _____________	can I commit that?
+ uricamic	_____________: you mean loss in multiclass argmax?
+ _____________	yes
+ uricamic	_____________: then yep
+ _____________	if nobody of you are willing to do that I'll do
+ _____________	:)
+ _____________	n4nd0: job?
+ n4nd0	_____________: yeah
+ n4nd0	my professor at KTH gave me some things to do to help out in the robotics course this year too :)
+ _____________	teaching is great
+ n4nd0	he didn't tell me if he needs me in the lab this year too, for the moment I am just setting up some material
+ n4nd0	so to sum up
+ n4nd0	now both Multiclass and HM-SVM should work good with BMRM methods
+ n4nd0	uricamic, _____________: agree?
+ _____________	n4nd0: well
+ _____________	if HM-SVM argmaxes with loss
+ _____________	does it?
+ n4nd0	yes
+ _____________	okay nice
+ _____________	then yes, but multiclass needs to be changed
+ _____________	n4nd0: does structure_hmsvm_bmrm.py produce 99% still with latest changes?
+ n4nd0	it is changed
+ _____________	changed where?
+ _____________	by you - you mean?
+ _____________	if so let me merge it ;)
+ n4nd0	PR going
+ n4nd0	python structure_hmsvm_bmrm.py
+ n4nd0	Accuracy = 0.9989
+ _____________	I ask because I removed loss from risk
+ _____________	I assume it is correct and score includes it
+ _____________	right?
+ n4nd0	let me think about it a moment
+ n4nd0	but I think one term needs to be substracted from the risk
+ n4nd0	psi_truth in particular
+ _____________	yes
+ _____________	multiclass has that problem
+ n4nd0	well not just psi truth
+ n4nd0	but <w, psi(xi,yi)>
+ _____________	yes
+ _____________	is it true for HMModel too?
+ n4nd0	I am not sure for that
+ n4nd0	for example
+ n4nd0	I don't see directly that the score in the HMMModel includes the loss
+ n4nd0	although it may be since a matrix used for Viterbi decoding includes the loss term...
+ n4nd0	I am not sure regarding this
+ n4nd0	I will ask Nico about it tomorrow
+ n4nd0	or maybe uricamic can tell us about it
+ _____________	n4nd0: why did you make first -INFTY?
+ _____________	this way you disallow it to select 0th class
+ _____________	if you do it this way then c=0 initially
+-!- av3ngr [av3ngr@nat/redhat/x-swaimdyxogxxwdlk] has quit [Quit: That's all folks!]
+ n4nd0	mmm but that is weird
+ n4nd0	the accuracy remained the same after that fix
+ n4nd0	yeah of course it'd remain the same if I don't compile ....
+ wiking	n4nd0: you talking to me? (c) ?
+ uricamic	n4nd0: sorry, I have been away for a while, what is the question?
+ n4nd0	looking better now
+ n4nd0	wiking: talking alone I think...
+ wiking	n4nd0: hehe it was a quote from the taxi driver
+ _____________	n4nd0: c=0
+ n4nd0	uricamic: I need a rest now ...
+ _____________	please :)
+ uricamic	n4nd0: ok :)
+ _____________	n4nd0: where is your power?
+ n4nd0	_____________: I updated the PR
+ wiking	n4nd0: http://www.youtube.com/watch?v=bqLyTdcMLhc
+ wiking	n4nd0: for your rest ;)
+ n4nd0	I lost my power
+ CIA-52	shogun: iglesias master * r1a87bf0 / (3 files): * fix MulticlassModel argmax, the loss must be included in training to find the MMV - http://git.io/l1c4ig
+ CIA-52	shogun: iglesias master * r80f82b5 / (3 files): + extension in so_multiclass example and * fix in multiclass BMRM - http://git.io/ihzbGw
+ CIA-52	shogun: iglesias master * rbbb3457 / src/shogun/structure/MulticlassModel.cpp : * wrong looop initialization - http://git.io/gxDe4Q
+ CIA-52	shogun: Sergey Lisitsyn master * r8cec5d0 / (6 files in 2 dirs): Merge pull request #752 from iglesias/master - http://git.io/GRG4TQ
+ n4nd0	I think i'll do the dishes during my rest instead
+ shogun-buildbot_	build #333 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/333  blamelist: iglesias <fernando.iglesiasg@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ wiking	lol
+ wiking	shogun/io/streaming/StreamingAsciiFile.h
+ CIA-52	shogun: Sergey Lisitsyn master * r2f999e4 / examples/undocumented/libshogun/so_multiclass_BMRM.cpp : Update examples/undocumented/libshogun/so_multiclass_BMRM.cpp - http://git.io/PoHK1g
+ wiking	may the ILSVRC people rot in hell
+ _____________	?
+ wiking	ILSVRC2012_val_00004220.JPEG
+ wiking	JPEG
+ wiking	and capital
+ wiking	wtf :))))
+ _____________	oracle loves to capitalize words
+ wiking	and putting tars in tar is really a smart idea...
+ _____________	putting a tar archiver into a tar is way smarter
+ wiking	heheh
+ wiking	yeah that'dbe
+ wiking	but still now i'm running low actually on space on the cluster :)
+ wiking	i mean not the big hdfs
+ wiking	but the local little /home fs
+ _____________	how big it is untared?
+ wiking	well i guess it's the same size
+ _____________	yeah makes sense
+ wiking	so i would need another +138 gigs
+ wiking	but i think i've found a way around here :)
+ wiking	since the / has 800 gigs free on one node
+ wiking	that is part of the free space of hdfs
+ wiking	buuut i could use that for temp time
+ wiking	they put 1000 tars within that big tar
+ wiking	i think the 1000 tars is the different classes
+ wiking	lol
+ wiking	this is nice
+ wiking	actually they've provided a matlab file with all the dsift features within a class
+* wiking wonders if it's all the images in the class
+ _____________	dense sift? it must be way too big to be large scale
+ wiking	it is but still
+ wiking	it's there
+ _____________	however what is the other way?
+ _____________	matching?
+ _____________	or bow like yeah
+ wiking	mmm lol yeah
+ wiking	we have already all the sifts if we want it :)
+ wiking	marvolous
+ _____________	wiking: what is deadline for ilsvrc?
+ wiking	23rd of sept
+ _____________	I see
+-!- _____________ [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Ping timeout: 245 seconds]
+ shogun-buildbot_	build #351 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/351  blamelist: iglesias <fernando.iglesiasg@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot_	build #444 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/444  blamelist: iglesias <fernando.iglesiasg@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot_	build #334 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/334  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- alexlovesdata [~binder@goldenezahl.ml.tu-berlin.de] has joined #shogun
+ shogun-buildbot_	build #445 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/445  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- blackburn [~blackburn@188.168.13.28] has joined #shogun
+ shogun-buildbot_	build #352 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/352  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ blackburn	time to fix things
+ uricamic	blackburn: btw I have checked IRC log, BMRM cannot be used with lambda=0
+ blackburn	uricamic: sure
+ blackburn	that's clear
+ uricamic	and also, it should not be even close to 0
+ blackburn	well it converges with small lambda
+ blackburn	but it makes no sense
+ blackburn	it is just overfitting
+ uricamic	blackburn: yep, I just wanted to point that out just for sure :)
+ blackburn	the only reason I did that
+ blackburn	to try to fit model perfectly
+ blackburn	on training data
+ blackburn	with no regularization at all
+ uricamic	well, it can happen that for some instance and features the regularization term is not needed, by then it is not good idea to use BMRM
+ uricamic	blackburn: I see, but BMRM is not designed for such things, lambda has to be >0
+ blackburn	uricamic: btw multiclass model is not typical in bmrm, right?
+ blackburn	I mean it is L2 of whole w
+ uricamic	I am not sure that I understand the question now
+ blackburn	ahhh nevermind
+ blackburn	it is ||w||^2 so it is the same
+ blackburn	I meant that in crammer-singer or weston one
+ blackburn	\sum ||w|| is used
+ uricamic	you mean the way how it is implemented in shogun now?
+ blackburn	but it is the same in cases of ||w||^2
+ uricamic	I see
+ blackburn	read ^ as \sum ||w_i||^2
+ uricamic	yep
+ blackburn	uricamic: so are we ok now with multiclass bmrm?
+ blackburn	uricamic: btw what is the difference between all these solvers?
+ uricamic	I will check multiclass bmrm, soon, but I guess it should be ok now
+ uricamic	the difference
+ uricamic	BMRM is the standard method as described by Teo et al.
+ uricamic	only the inactive cutting plane (ICP) removal strategy is added there
+ blackburn	how one should choose a solver?
+ uricamic	PPBMRM is BMRM enhanced by prox-term
+ blackburn	kind of initial guess?
+ uricamic	which is our method how to enforce possibility of some initial solution by restricting the L2 distance between consecutive W_t
+ blackburn	our - your and vojta?
+ uricamic	and the last one P3BMRM is the same  as PPBMRM plus it can use multiple cutting plane models, it is similar to Joachim's nslack
+ uricamic	yep
+ uricamic	when cp_models = 1 in P3BMRM then it is reduced to PPBMRM
+ uricamic	and when you set K = 0 PPBMRM should reduce back to BMRM (but I haven't checked this particular one yet)
+ blackburn	we have to make your example support default values
+ uricamic	I mean in Shogun's implementation
+ uricamic	you mean cpp example?
+ blackburn	yes
+ uricamic	ok, I put it there just for my convenience to test all algorithms quickly
+ blackburn	I don't mind command line commands actually
+ blackburn	but we need it able to run as is
+ uricamic	like ./so_multiclass_BMRM and that's all?
+ blackburn	yes
+ blackburn	Makefile does that
+ blackburn	when testing
+ uricamic	i.e. to use randomly generated data and default settings
+ uricamic	ok
+ blackburn	yeah that would work I think
+ blackburn	can you do that next time?
+ uricamic	sure
+ blackburn	the earlier the better because currently test is broken: http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/352/steps/test%20libshogun/logs/stdio
+ uricamic	I think I will do this either in the evening or tomorrow
+ uricamic	ahh, ok
+ uricamic	so back to the solvers, if u are tuning the optimal lambda, it is nice to have some reasonable range of lambda's and in the cycle use PPBMRM or P3BMRM, since then it will use solution from the last lambda as initial one and converges much faster, especially for lower values of lambda
+ uricamic	to put it in numbers, on MNIST data (10 classes, 784 feature dimension), 60k training examples
+ uricamic	the difference between BMRM and P3BMRM on lambda=1
+ blackburn	kind of hot start?
+ uricamic	yep
+ blackburn	nice
+ uricamic	was from 2.01 hours to 2.09 hours for P3BMRM
+ uricamic	shit
+ uricamic	0.209 for P3BMRM :D
+ uricamic	otherwise it would be so impressive :D
+ uricamic	oh, again, wouldn't :D
+ blackburn	2 hrs?
+ blackburn	:D
+ uricamic	in iterations it was from 5932 iterations to 408
+ blackburn	uricamic: 0.209h sounds like it is pretty fast, something near to liblinear
+ uricamic	and the other thing about P3BMRM is that it could be quite easily written to use more cores
+ uricamic	blackburn: I haven't tried liblinear yet :)
+ uricamic	but this multicore thing has probably reason only when computation of the risk takes a long time
+ blackburn	I see
+ uricamic	so in multiclass it would probably not give any speedup at all
+ blackburn	that's clear
+ uricamic	another thing is that both PPBMRM and P3BMRM tends to converge to more precise solution than BMRM because of our alpha setting strategy and termination condition
+ blackburn	last two weeks I've been trying to employ L1/L2 tree regularization
+ blackburn	no success :(
+-!- blackburn1 [~blackburn@188.168.4.46] has joined #shogun
+-!- blackburn [~blackburn@188.168.13.28] has quit [Ping timeout: 250 seconds]
+ blackburn1	at some point users must claim us as an OSS having best support ever
+ blackburn1	I will eat them if not
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+-!- blackburn [~blackburn@83.234.54.112] has joined #shogun
+-!- blackburn1 [~blackburn@188.168.4.46] has quit [Ping timeout: 244 seconds]
+-!- blackburn1 [~blackburn@188.168.2.65] has joined #shogun
+ CIA-52	shogun: Sergey Lisitsyn master * r90d4424 / (9 files in 4 dirs): Refactored multiclass machines to support C parameter selection - http://git.io/rfAykA
+-!- blackburn [~blackburn@83.234.54.112] has quit [Ping timeout: 252 seconds]
+-!- uricamic [~uricamic@2001:718:2:1634:155e:7544:fba4:9878] has quit [Quit: Leaving.]
+ shogun-buildbot_	build #335 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/335  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ wiking	ahahhahahahahaha
+ wiking	"otherwise my concern would be -- where is the unittest?   logic-wise
+ wiking	it should indeed accomplish the desired goal but imho test would help to
+ wiking	'guarantee' that ;)
+ wiking	"
+ wiking	:DDDD
+ wiking	people are damanind :)
+ wiking	demanding :P
+ wiking	so yeah where's the unit test :>
+ shogun-buildbot_	build #446 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/446  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ shogun-buildbot_	build #353 of deb2 - static_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb2%20-%20static_interfaces/builds/353  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ yoo	hi all
+ wiking	yo
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- emrecelikten [~emre@trir-5d8000e4.pool.mediaWays.net] has joined #shogun
+-!- Netsplit *.net <-> *.split quits: shogun-buildbot_, yoh, audy, emrecelikten, @sonney2k, naywhayare, sr___, wiking, zxtx, CIA-52,  (+1 more, use /NETSPLIT to show all of them)
+-!- Netsplit over, joins: CIA-52, sonney2k, audy, shogun-buildbot_, sr___, wiking
+-!- naywhaya1e [~ryan@spoon.lugatgt.org] has joined #shogun
+-!- Netsplit over, joins: yoh, emrecelikten, blackburn1, zxtx
+-!- ServerMode/#shogun [+o sonney2k] by moorcock.freenode.net
+ shogun-buildbot_	build #336 of bsd1 - libshogun is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/bsd1%20-%20libshogun/builds/336  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- Netsplit *.net <-> *.split quits: yoh
+-!- Netsplit over, joins: yoh
+ wiking	blackburn1: we were in a split
+ blackburn1	hehe
+ wiking	so any ideas there?
+ blackburn1	about??
+ wiking	ah the func arg
+ wiking	have you got my two example cases for diff dims?
+ wiking	http://pastebin.com/VhXVs7qF and http://pastebin.com/p3EFtZdf
+ wiking	are two actual applications
+ blackburn1	this is *not* different dims case
+ blackburn1	just like in multiclass it is just sparse
+ wiking	blackburn1: noup http://pastebin.com/p3EFtZdf
+ wiking	check this one
+ wiking	score += sm->w[cur_class*sparm->size_hog+i+1]*hog[i];
+ wiking	w = num_class*sparm->size_hog
+ blackburn1	it is just multiclass hog
+ wiking	i mean the dimension of w
+ wiking	otherwise the indexing would not work
+ blackburn1	dimension is W is always equal to dimension of Psi, but Psi can be sparse
+ blackburn1	that is the case
+ blackburn1	and multiclass is the case
+ wiking	ano
+ wiking	no
+ wiking	ok
+ wiking	u r right
+ blackburn1	dimension of Psi here is not equal to dimension of hog
+ blackburn1	it is dim of hog * n_classes
+ blackburn1	but everything out given class is 0
+ blackburn1	so it is not computed at all
+ wiking	my bad
+ wiking	sorry
+ blackburn1	actually if you have that code HOGSO Model is straightforward
+ wiking	mmm now i'm in trouble...
+ wiking	i need to calculate this for all examples: argmax_{(ybar,hbar)} [<w,psi(x,ybar,hbar)> + loss(y,ybar,hbar)].
+ wiking	and i want to keep the COFFIN fw
+ blackburn1	line 25 is a dense dot
+ blackburn1	wiking: it is argmax alreadyy
+ wiking	which?
+ wiking	i mean now i'm writing a generic implementation i'm not talking about those pastebins
+ wiking	it's just that currnetly i have 1 method for psi
+ wiking	is that CDotFeatures* get_psi....()
+ wiking	i guess i could generate all the different CDotFeatures and generate a matrix of the w,psi(x,ybar,hbar)> + loss(y,ybar,hbar) values
+ wiking	and do there a max value search for each row/column (depending on who do i store [w,psi(x,ybar,hbar)> + loss(y,ybar,hbar)]) and then sum it up
+ wiking	:)
+ wiking	it's just a lot of memory waste...
+ wiking	blackburn1: input?
+ blackburn1	yeah sounds inefficient
+ wiking	but i dont have something like SGVector<float64_t> get_psi(x,y,h)
+ wiking	as sparse vector wouldn't work then
+ blackburn1	why don't you have it?
+ wiking	because i couldn't have sparse vector
+ wiking	this is why i threw out the first place the get_psi(x,y,h) and have only CDotFeatures* get_psi_vectors()
+ blackburn1	I see
+ shogun-buildbot_	build #447 of deb3 - modular_interfaces is complete: Failure [failed test libshogun]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/447  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	wiking: I just read the the thread with the problem with risk function args :D
+ wiking	:D
+-!- blackburn [~blackburn@83.234.54.163] has joined #shogun
+-!- blackburn1 [~blackburn@188.168.2.65] has quit [Ping timeout: 248 seconds]
+-!- sr___ [u5548@gateway/web/irccloud.com/x-fgcntzhdfnowhati] has quit [Read error: Connection reset by peer]
+-!- sr___ [u5548@gateway/web/irccloud.com/x-ewmhdcvbknaunxsl] has joined #shogun
+-!- blackburn [~blackburn@83.234.54.163] has quit [Quit: Leaving.]
+-!- naywhaya1e is now known as naywhayare
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Read error: Connection reset by peer]
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	any clue why that crash is happening in Arthur's question?
+ n4nd0	mailing list
+ wiking	n4nd0: swig version could be a possible problem
+ wiking	i mean i have 2.0.8
+ wiking	1.3.29 seems a bit old
+ n4nd0	wiking: that's true
+ n4nd0	wiking: should I answer him or do you want to do it?
+ wiking	mmm i think that should be tested though
+ wiking	and if that's the case then we should find the minimum swig version shogun requires to be able to compile the modular interfaces
+ wiking	the problem is that i have 0 knowledge about swig
+ wiking	i think gsomix would be the most competent to say anything about this
+ n4nd0	wiking: I remember once my compilation failed and sonney2k told me to update swig
+ n4nd0	it worked after that
+ n4nd0	I will just tell him in case it can solve his problem
+@sonney2k	n4nd0, wiking yes we need newer swig - but IIRC configure should fail if swig < 2.0.4
+ wiking	yeah the problem is i think that he would need to manually install a new version of swig as he now uses the standard distrib supplied swig
+ wiking	ooh yeah
+ n4nd0	I could do it via apt-get easily
+ wiking	_swig_version=`${SWIG} -version 2>/dev/null | grep Version | cut -f 3 -d ' '`
+ wiking	if assert_version swig $_swig $_swig_version 2.0.4; then
+ wiking	echores "$_swig_version"
+ wiking	_swig=yes
+ wiking	n4nd0: it's RH :)
+ n4nd0	wiking: RH?
+ wiking	redhat
+ wiking	according to his email he uses redhat => no apt-get ;P
+ wiking	lol his configure log is
+ wiking	============ Checking for SWIG ============
+ wiking	Result is: 1.3.29
+ wiking	##########################################
+ wiking	and the assert_version doesn't fail
+-!- blackburn [~blackburn@188.168.13.61] has joined #shogun
+ wiking	so there's something wrong with that if line
+ blackburn	discussing swig issue? I have to note he is using 1.1.0
+ blackburn	I do not remember if it requires >2.0 but probably it does
+ wiking	blackburn: just joined 1 minute later
+ wiking	blackburn: yeah accoding to ./configure script it should actually fail because it's not 2.0.4 or later
+ wiking	but for some reason that if branch keeps being true
+ blackburn	he seems to be a hardcore guy
+ blackburn	using RHEL
+ blackburn	n4nd0: did you graduate from kindness school? :)
+ n4nd0	blackburn: haha why so?
+ wiking	doh
+ n4nd0	it is free to be kind, not expensive :D
+ blackburn	:D
+ wiking	if i set _swig_version by hand the configure script fails
+ wiking	aaah
+ wiking	i think he is using a rather old shogun version
+ wiking	where this check is not yet present in ./configure script
+ wiking	as Result is: gcc 4.1.2, ok
+ wiking	and afaik that should fail as well with < 4.3
+ wiking	i wonder why they want to use shogun @ ernst & young ;P
+ blackburn	hey really
+ blackburn	what the heck
+ wiking	maybe for tax auditing :DDD
+ blackburn	why anybody in ernst & young would need shogun
+ wiking	i guess some classification stuff on tax auditing data ;P
+ blackburn	lol
+ wiking	would be great to hear more what's his idea for application
+ blackburn	hey we must get more E&Y users
+ blackburn	I bet they have money
+ blackburn	I don't mind to become rich :D
+ wiking	hahahahahha
+ wiking	yeah you should do a shogun spin-off ;P
+ wiking	and make money of shogun support :)))))
+ blackburn	n4nd0: did you notice
+ wiking	i mean this guy should just fucking update his linux distrib
+ blackburn	his name is sean
+ blackburn	but email is arthur edge
+ wiking	ah lol
+ wiking	wtf?
+ wiking	maybe he is disguising himself ;P
+ n4nd0	haha yeah I noticed
+ wiking	how old is RHEL 5.8 actually?
+ blackburn	I like footer part
+ n4nd0	I surprised myself when I thought, I am going to change the signature just in case it is not the same as the mail
+ blackburn	wiking: 2010 probably
+ n4nd0	to check* not to change
+ wiking	duuude
+ wiking	2012!!!!
+ blackburn	Any U.S. tax advice contained in the body of this e-mail was not intended or written to be used, and cannot be used, by the recipient for the purpose of avoiding penalties that may be imposed under the Internal Revenue Code or applicable state or local tax law provisions.
+ wiking	WTF?!?!?!?!?
+ blackburn	wiking: really?
+ blackburn	latest is 6.3 IIRC
+ wiking	blackburn: https://access.redhat.com/knowledge/docs/en-US/Red_Hat_Enterprise_Linux/5/html/5.8_Release_Notes/index.html
+ blackburn	I had to work with 5.3 yesterday on dev server
+ wiking	blackburn: http://www.h-online.com/open/features/What-s-new-in-Red-Hat-Enterprise-Linux-5-8-1439890.html
+ wiking	and it's a 2012 february news
+ wiking	wtf
+ wiking	redhat ships with fucking gcc 4.1.x in 2012?
+ blackburn	it is ENTERPRISE redhat
+ blackburn	i.e.
+ blackburn	slow
+ blackburn	very slow
+ blackburn	very very slow
+ wiking	so it must be filled with acient stuff? :)
+ blackburn	exactly
+ blackburn	very very slow developing
+ wiking	i guess they are following: 'the older the better'
+ wiking	;)
+ blackburn	they would use win95
+ blackburn	if m$ did support it still
+ wiking	ah lol
+ wiking	there's gcc44 package
+ wiking	so he should be ok
+ blackburn	wiking: I know a company which forces my company to use ClearCase
+ blackburn	heard about that?
+ wiking	hahahah YES
+ wiking	that's like fucking 2000
+ blackburn	used?
+ wiking	:D
+ wiking	yes unfortunately
+ blackburn	that's like
+ blackburn	that's like nothing on the earth
+ blackburn	it is pure love
+ wiking	yeah it's a pure beauty
+ wiking	:)))hahahhah
+ blackburn	it is when you lose your mind of happiness
+ blackburn	:D
+ blackburn	but serious, did they really think that dance is a good  way to develop
+ blackburn	you have to create an integration stream to view sources
+ wiking	hahahah
+ wiking	NOOOOOO
+ blackburn	then you add activity there you specify what do you want
+ wiking	i dont want to hear about that shit!
+ wiking	i had physical pain
+ blackburn	and then you need to create a development stream
+ wiking	when i had to use it
+ blackburn	and join project with it
+ wiking	yeah
+ blackburn	then checkout or hijack the file where you want to remove 2 lines
+ blackburn	commit (or how is it called out there)
+ wiking	i mean seriously why would u not use git+github in 2012?
+ blackburn	and write down 40 pages description of the commit
+ blackburn	we are using svn
+ wiking	blackburn: and i hope u use git-svn ;)
+ blackburn	but one project uses clearcase still
+ wiking	blackburn: just to make them cry :))))
+ blackburn	that is restricted and I didn't say that but it is TELUS
+ blackburn	:D
+ blackburn	wiking: you are the only one but me developer of shogun
+ blackburn	who have a sexual contact with CC
+ blackburn	had*
+ blackburn	I have still though
+ wiking	:DDD
+ wiking	fucking clearcase
+ wiking	i know a guy
+ wiking	!!!
+ wiking	he just had to start to use it
+ wiking	:DDDD
+ blackburn	in 2012
+ wiking	yep yep
+ blackburn	sounds like torquemada is back
+ wiking	2 weeks ago or something
+ blackburn	and he is full of will to punish somebody
+ wiking	yep
+ wiking	he seemed desparate on facebook
+ wiking	:P
+ blackburn	that's quite normal to get a depression after using CC for a while
+ blackburn	I am pretty sure there was a case of commiting suicide after trying to get that thing to get your changes
+ wiking	hehehe
+ wiking	i think a git-cc project would never be possible
+ blackburn	I am not using git-svn btw
+ wiking	LOOOOL
+ wiking	i was proved WRONG
+ wiking	*kabooom*
+ wiking	https://github.com/charleso/git-cc
+ wiking	:DDDD
+ blackburn	I actually feel comfortable with svn as well
+ wiking	"Warning
+ wiking	=======
+ wiking	I wrote this purely for fun and to see if I could stop use Clearcase at work
+ wiking	once and for all."
+ blackburn	for the thing we develop it is ok
+ wiking	:DDDDDDDDDDDDDD
+ wiking	blackburn: yeah i just don't like that u actually cannot commit a code in svn w/o having internet connection
+ wiking	"Actually what I would love to see
+ wiking	more is for Clearcase to die"
+ blackburn	wiking: that is ok when you have pretty reliable internet connection at your job
+ wiking	lol this guy did feel the pain
+ blackburn	I share his pain
+ blackburn	okay I am going to sleep now probably
+ wiking	gnite
+ blackburn	I am going to be at job 10 (11) o'clock :D
+ blackburn	or sth like 10*
+ n4nd0	blackburn: good night
+-!- blackburn1 [~blackburn@188.168.5.89] has joined #shogun
+ blackburn1	oops my cable didn't like that
+ blackburn1	wiking: I think git-cc is too dangerous to even try
+ blackburn1	CC looks like a space ship command panel
+ wiking	:)))
+ blackburn1	who knows may be one button could destroy the whole world
+ wiking	yeah i think it opens a new dimension if u try it :)))
+ blackburn1	one may end with nuclear war or some chemical disaster
+ wiking	if saddam would have used gitcc
+ n4nd0	haha you guys scare me sometimes :D
+ wiking	maybe they would have found some weapons of mass destructions :D
+ blackburn1	yeah CC with development stream
+ blackburn1	with all files hijacked
+ blackburn1	n4nd0: you should try CC
+ blackburn1	to achieve zen
+ blackburn1	in hofstadter book a theory that zen's stuff is just for destroy of all means
+-!- blackburn [~blackburn@188.168.13.61] has quit [Ping timeout: 265 seconds]
+ blackburn1	CC is just the same, it destroys development as we know it
+ n4nd0	cc is a version control system right?
+ blackburn1	yes
+ wiking	n4nd0: nonono
+ wiking	blackburn1: dont confuse him
+ blackburn1	spaceship missile control system
+ n4nd0	I was confused at the beginning with the command cc
+ blackburn1	with version control support
+ wiking	n4nd0: it's like a nuclear reactor man
+ n4nd0	hahaha
+ blackburn1	have you seen star trek?
+ n4nd0	no
+ blackburn1	may be gayniggers from the outer space?
+ blackburn1	they had planet destruction stuff
+ blackburn1	it comes out of box with clear case
+ n4nd0	I don't know what the heck are you talking about :)
+ wiking	:D
+ wiking	n4nd0: never ever touch clearcase man
+ wiking	not even in your dreams
+ n4nd0	all right, I promise you that :)
+ n4nd0	I had heard about subversion and cvs but not about clearcase
+ n4nd0	when was that used?
+ blackburn1	n4nd0: in 1400-1450
+ blackburn1	when the inquisition was like fashion
+ wiking	hahahahha
+ wiking	blackburn1: columbus tried to teach CC for the indians
+ wiking	and they told him: i rather fucking die
+ n4nd0	:DD
+ wiking	ok i know i might be a bit offensive with this comment, wasn't inteded
+ n4nd0	then it was probably invented by Spanish people
+ blackburn1	n4nd0: it is not true jeanne d'arc was burnt
+ n4nd0	Spain was quite an important country back then
+ blackburn1	she had to commit to UNOPENABLE DEVELOPMENT STREAM
+ n4nd0	is that like a code in that system?
+ wiking	n4nd0: i think they thought that using CC would be the solution... that's why your ship sank against nelson admiral
+ blackburn1	yeah, they just forgot to complete VOBs on integration views
+ blackburn1	that usually leads to ship sink or sth like that
+ blackburn1	chernobyl is the similar case
+ wiking	:DDDD
+ blackburn1	somebody joined wrong project
+ n4nd0	haha
+ wiking	blackburn1: i bet gorbachov thought that using CC would be the solution as well
+ n4nd0	I think we should move shogun to CC
+ blackburn1	haha lol
+ n4nd0	fuck off with git
+ wiking	:D
+ n4nd0	CC sounds exciting
+ blackburn1	it is
+ alexlovesdata	bye guys
+-!- alexlovesdata [~binder@goldenezahl.ml.tu-berlin.de] has left #shogun []
+ wiking	CC is a masterpiece
+ blackburn1	already leaving?
+ blackburn1	ahh
+ n4nd0	we scared alex!
+ wiking	i must check images.google for CC!!!
+ blackburn1	okay now finally leaving you too
+ n4nd0	http://www.cmcrossroads.com/forum/31-clearcase/100442-clearcase-ucm-vs-git
+ n4nd0	CC vs git
+ blackburn1	have a nice night I will push you tomorrow to develop more code with clearcase
+ blackburn1	oh
+ blackburn1	lock before edit is a pros
+ blackburn1	is in pros*
+ blackburn1	that's really nice
+ blackburn1	wiking: fits for your issue about breaking code :D
+ n4nd0	First, I would answer that comparing git to UCM is unfair to ClearCase, and not only from the point of view of performance!
+ blackburn1	nobody would break your code because you can LOCK IT
+ blackburn1	:D ohmfg
+ wiking	:DDD
+ blackburn1	n4nd0: they all sound like dinosaurs
+ blackburn1	I've seen one BIG COMPANY WITH MANAGERS claimed that open source solutions sucks
+ blackburn1	recently
+ blackburn1	in 2012
+ wiking	blackburn1: yes
+ blackburn1	gosh
+ wiking	blackburn1: that's pretty much normal :D
+ n4nd0	haha
+ blackburn1	okay okay
+ n4nd0	I found an answer you would like more in another forum
+ blackburn1	see you tomorrow
+ blackburn1	:)
+ n4nd0	Now, there is some potential in ClearCase that might make it compare favourably to Git.
+ wiking	duuuude
+ wiking	" If not, I'll probably need to have some internal discussion before proceeding.
+ n4nd0	But it is not commonly known or used, and would require some support at last from IBM.
+ wiking	these guys are trying to use
+ n4nd0	I love the last part
+ wiking	shogun @ ey
+ wiking	:DDD
+ blackburn1	n4nd0: yeah nuclear missile button is absent in git
+ blackburn1	:D
+ n4nd0	https://www.ibm.com/developerworks/forums/thread.jspa?messageID=14787484&#14787484
+ wiking	blackburn1: :DDDDDDDDDDDDDDDDDDDDD
+ wiking	ROTFL
+ wiking	:DDDD
+ blackburn1	okay see you :)
+-!- blackburn1 [~blackburn@188.168.5.89] has quit [Quit: Leaving.]
+ wiking	ok
+ wiking	let's support EY to use shoung
+ wiking	:D
+ wiking	erm shogun ;P
+ n4nd0	sure
+ n4nd0	wiking: do you know it gcc 4.1 will go well with shogun v.1.1.0?
+ wiking	yeah
+ wiking	i'm just checking
+ wiking	that why actually we had that bug
+ wiking	i must dig out the stupid commit log
+ wiking	ok yeah htis one
+ wiking	mmmm http://gcc.gnu.org/bugzilla/show_bug.cgi?id=23287
+ wiking	n4nd0: can u open this one?
+ n4nd0	yes
+ n4nd0	it took a bit long though
+ wiking	yeah here too
+ wiking	mmm what was the code that actually caused this one
+ wiking	ah git grep will tell me
+ n4nd0	oh didn't know there is a grep in git
+ wiking	yeah
+ wiking	it's fucking great
+ wiking	;)
+ n4nd0	sound really useful yes
+ n4nd0	thank you!
+ wiking	awesomefast
+ wiking	mmm do we have tags?
+ wiking	ah yeah cool we do
+ n4nd0	what are you executing exactly?
+ wiking	trying to find out
+ wiking	whether that bug actually present in 1.1.0 version
+ n4nd0	what command are you using? just to learn more about it
+ wiking	well now i've done this
+ wiking	git grep "\.~"
+ wiking	that'll give me back where the destructor was called explicitly in the code
+ wiking	and now i wanna do the same
+ wiking	on the 1.1.0 tag
+ wiking	but i cannot find tag for that
+ n4nd0	aham I see
+ wiking	git tag
+ n4nd0	did you go back to that commit?
+ wiking	n4nd0: yeah tag is for that
+ n4nd0	what was the gcc bug exactly?
+ wiking	n4nd0: that you cannot call explicitly a destructor
+ wiking	on a templated class
+ n4nd0	all right
+ wiking	i.e. something.~SGVector<float64_t>()
+ wiking	will not compile
+ n4nd0	ok
+ wiking	the problem is that there's no tag for 1.1.0 release
+ n4nd0	too bad
+ wiking	i'll check 1.0.0
+ n4nd0	maybe with the release date we can guess the last commit done by that time?
+ wiking	ok in 1.0.0 there was no such thing
+ wiking	mmm i cannot see it from the git log
+ wiking	which one supposed to be the 1.1.0 release
+ wiking	ok
+ wiking	how the fuck he downloaded 1.1.0 ?
+ wiking	ah ok
+ wiking	i was checking the wrong thingy
+ wiking	mmm
+ wiking	i really dont feel for downloading the tar.gz and do a grep -r on it
+ wiking	;)
+ wiking	i'll just tell him to try to compile it with 4.1
+ wiking	and it might fail
+ wiking	if it does
+ wiking	then it's because we execute that bug :D
+ n4nd0	but
+ n4nd0	wasn't the bug fixed in gcc 4?
+ wiking	n4nd0: after 4.3
+ n4nd0	ahh al right
+ n4nd0	I thought it was after 3.x
+ wiking	noup
+ wiking	4.3 and later
+ wiking	n4nd0: check the comments on the bug page
+ wiking	ok this guy might be lucky
+ wiking	i've just checked it :D
+ n4nd0	let's see
+ wiking	ok
+ wiking	support email sent
+ n4nd0	good job, nice mail!
+ wiking	hahah another one
+ wiking	osx
+ wiking	it should fucking work
+ wiking	ok shit i forgot to cc the mailinglist
+ wiking	;(
+ wiking	wonder what acient osx is he using
+ n4nd0	time to sleep for me
+ n4nd0	good night!
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Quit: leaving]
+--- Log closed Thu Aug 23 00:00:17 2012

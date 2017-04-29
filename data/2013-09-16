@@ -1,0 +1,933 @@
+--- Log opened Mon Sep 16 00:00:01 2013
+ wiking	i wonder what is the equivalent of FILE* in python
+@iglesiasg	yep
+ wiking	iglesiasg: maybe you need to implement
+ wiking	CSVFile(int fd)
+ wiking	ctor
+ wiking	and that'll solve your problem
+@iglesiasg	gsomix, what do you think? ^
+ wiking	yeah i think that's the problem
+ wiking	that u need a file descriptor ctor
+ wiking	and not a FILE*
+ gsomix	iglesiasg, I'm ok with it.
+ wiking	for this
+ wiking	iglesiasg: just create such a ctor
+ wiking	and just convert fd -> FILE*
+ wiking	in the ctor
+ wiking	( FILE *
+ wiking	     fdopen(int fildes, const char *mode);
+ wiking	^ is the standard c funct for this
+@iglesiasg	wiking, and from python the int fd will be the output from gzip.open, right?
+ wiking	mmmm
+ wiking	hope so
+@iglesiasg	isn't it a bit weird since then the file would be like opened twice?
+ wiking	why?
+ wiking	no
+ wiking	you are passing an FD
+@iglesiasg	gzip.open
+@iglesiasg	and then in the constructor
+ wiking	and?
+@iglesiasg	open(fd)
+ wiking	no
+ wiking	in ctor you open an fd
+ wiking	i mean you pass an fd
+ wiking	hence it's open
+@iglesiasg	all right
+ wiking	you just ready from the fd starting from that moment in CSVFile
+ wiking	u just need
+ wiking	fdopen(int fildes, const char *mode);
+ wiking	to convert from fd -> FILE*
+ wiking	as CSVFile is writter for using FILE*
+ gsomix	hm, are you sure that gzip.open returns fd?
+ wiking	gsomix: most probably....
+ gsomix	>> This is a shorthand for GzipFile(filename, mode, compresslevel).
+ gsomix	>> class gzip.GzipFile([filename[, mode[, compresslevel[, fileobj[, mtime]]]]])
+ gsomix	but class GzipFile class have  def fileno(self): method.
+* gsomix hates python's doc
+@iglesiasg	gsomix, any hack required to make a CSVFile constructor visible from interfaces?
+@iglesiasg	I just compiled and installed and the same error persists
+@iglesiasg	but in the list of CSVFile constructors printed in the error the CSVFile(int) constructor I created does not appear
+@iglesiasg	all right, cleaning and re-compiling...
+ gsomix	iglesiasg, I'd like to help, but... z-z-z
+@iglesiasg	gsomix, no worries
+ gsomix	nite
+ gsomix	iglesiasg, so if ctor works you can use fileno method of GzipFile for getting fd
+@iglesiasg	gsomix, nice, thanks!
+@iglesiasg	that can be indeed useful
+ wiking	lol
+ wiking	gta v is out
+ wiking	:d
+@iglesiasg	good bye guys, see you in three months again :P
+ wiking	indeed
+ wiking	:D
+-!- hushell [~hushell@c-98-232-178-161.hsd1.or.comcast.net] has joined #shogun
+ wiking	ah ok
+ wiking	i dont have neither ps3 nor xbox
+-!- pickle27 [~Kevin@208.138.34.236] has joined #shogun
+-!- pickle27 [~Kevin@208.138.34.236] has quit [Client Quit]
+@iglesiasg	wiking, one of my friends got a ps3 a couple of days ago for this lol
+@iglesiasg	wiking, btw it seems that gzip.open doesn't return an int
+@iglesiasg	or a fd for that matter
+ wiking	00:22 < gsomix> iglesiasg, so if ctor works you can use fileno method of GzipFile for getting fd
+@iglesiasg	wiking, bah it didn't work for some reason
+ wiking	?
+@iglesiasg	wiking, I can call the constructor with CSVFile(gzipfile.fileno())
+ wiking	how so?
+@iglesiasg	but the features object has 0 features and vectors
+ wiking	mmm iglesiasg test then first the ctor
+ wiking	i.e. write a small c++ code
+@iglesiasg	wiking, this is the constructor
+@iglesiasg	+CCSVFile::CCSVFile(int fd) :
+@iglesiasg	+       CFile(fdopen(fd, "r"), NULL)
+@iglesiasg	+{
+@iglesiasg	+       init();
+ wiking	that open a csv file with int fd = open('filename', 'r')
+@iglesiasg	+       init_with_defaults();
+@iglesiasg	+}
+@iglesiasg	I might have very well screwed
+ wiking	and then pass that fd to the new ctor
+@iglesiasg	just looked up what the other constructors do
+ wiking	yeah
+ wiking	CFile(fdopen(fd, "r"), NULL) -> CFile(fdopen(fd, rw), name)
+ wiking	and he ctor shouuld be
+@iglesiasg	wiking, rw is "rw"?
+@iglesiasg	I just didn't add the arguments for name and permissions at first
+ wiking	CSVFile(int fd, const char* name)
+ wiking	CSVFile(int fd, char rw, const char* name)
+ wiking	..
+ wiking	but yeah
+ wiking	other than that that should work
+ wiking	The mode of the stream must be compatible with the mode of the file descriptor.
+ wiking	maybe it has different modes?
+ wiking	u should really first test this ctor from c++ code
+@iglesiasg	wiking, how do you suggest me to try it?
+ wiking	00:54 < wiking> that open a csv file with int fd = open('filename', 'r')
+@iglesiasg	wiking, all right, let's do that
+@iglesiasg	sorry for making you repeat stuff :S
+@iglesiasg	 wiking, so I think the problem is that opening the file with gzip is not doing anything about uncompressing it
+@iglesiasg	the gzip.GzipFile.read() method does it
+@iglesiasg	but if we just open it and give it to CSVFile, then it is not uncompressed
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 264 seconds]
+-!- van51 [~van51@athedsl-409794.home.otenet.gr] has quit [Quit: Leaving.]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- sonne|osx_ [~sonne@f053038024.adsl.alicedsl.de] has joined #shogun
+-!- sonne|osx [~sonne@f053041201.adsl.alicedsl.de] has quit [Ping timeout: 256 seconds]
+-!- sonne|osx_ is now known as sonne|osx
+-!- gsomix [~gsomix@109.169.249.244] has quit [Remote host closed the connection]
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has quit [Quit: Ex-Chat]
+-!- zxtx [~zv@ip-64-134-197-230.public.wayport.net] has joined #shogun
+-!- sonne|osx [~sonne@f053038024.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+-!- besser82 [~besser82@77-22-24-208-dynip.superkabel.de] has joined #shogun
+-!- besser82 [~besser82@77-22-24-208-dynip.superkabel.de] has quit [Changing host]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- sonne|osx [~sonne@89.204.153.44] has joined #shogun
+ besser82	sonne|osx: Der neue build f?r rubygem-narray f?r FC19 ist unterwegs, sollte im laufe des heutigen Tages in den Repos sein :)
+ sonne|osx	besser82: very good
+ sonne|osx	err sehr sch?n :)
+ besser82	sonne|osx: F?r FCRH m?sste das update schon da sein :)
+ besser82	sonne|osx: uuups, was confused.  This is an English channel :)
+ lisitsyn	besser82: na ja das ist ok
+ lisitsyn	:D
+ besser82	OK. :D
+ besser82	Ihr seid fast alles deutsche, oder?
+ lisitsyn	besser82: well I am very basic with deutsch ;)
+ besser82	lisitsyn: I see :)
+ lisitsyn	besser82: but HeikoS is native and wiking speaks it ok IIRC
+ besser82	lisitsyn: HeikoS, I know about :)  Had a 1:1 with him when I intially joined this channel.  But it's good to know wiking has knowledge in German, too.  This may come in handy on squashig problem eith CMake :)
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * f56e63e / examples/undocumented/r_modular/classifier_svmocas_modular.R: https://github.com/shogun-toolbox/shogun/commit/f56e63e62ca6a3f6f252e50543ec5b21bd676e8a
+ shogun-notifier-	shogun: fix ocas R example
+ lisitsyn	besser82: and I cover russian side  :)
+ besser82	lisitsyn: Good to know. Some russian buddy of mine possibly wanted to comaintain SHOGUN on FC :)
+ besser82	lisitsyn: so we have very good lang-covering here ;)
+ lisitsyn	besser82: yeah
+-!- sonne|osx [~sonne@89.204.153.44] has quit [Quit: sonne|osx]
+ shogun-buildbot	build #1742 of bsd1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/bsd1%20-%20libshogun/builds/1742  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #80 of precise - libshogun is complete: Success [build successful]  Build details are at http://buildbot.shogun-toolbox.org/builders/precise%20-%20libshogun/builds/80
+-!- gsomix [~gsomix@188.168.3.89] has joined #shogun
+ gsomix	sonney2k, hey
+ shogun-buildbot	build #96 of FC19 - modular_interfaces is complete: Failure [failed configure]  Build details are at http://buildbot.shogun-toolbox.org/builders/FC19%20-%20modular_interfaces/builds/96  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- sonne|work [~sonnenbu@91-64-72-127-dynip.superkabel.de] has joined #shogun
+-!- gsomix [~gsomix@188.168.3.89] has quit [Client Quit]
+ shogun-buildbot	build #1477 of cyg1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/cyg1%20-%20libshogun/builds/1477  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ shogun-buildbot	build #1824 of deb3 - modular_interfaces is complete: Failure [failed test python_modular test r_modular]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1824  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- travis-ci [~travis-ci@ec2-23-23-70-204.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/11403552
+-!- travis-ci [~travis-ci@ec2-23-23-70-204.compute-1.amazonaws.com] has left #shogun []
+-!- lambday [67157d37@gateway/web/freenode/ip.103.21.125.55] has joined #shogun
+ sonne|work	wiking: awake?
+ wiking	yep yep
+ wiking	what'sup
+ sonne|work	wiking: could you enable running examples and tests for the static interfaces?
+ sonne|work	wiking: you currently enabled for cmdline only
+ wiking	hahah
+ sonne|work	and no tests
+ wiking	it's not about enabling them
+ wiking	it's about implementing them..
+ wiking	and that's more time
+ sonne|work	errm what changed?
+ wiking	nothing but it was never implemented
+ sonne|work	I mean how do you run *_modular examples?
+ wiking	it has nothing to do with it
+ wiking	i mean cmake needs to be created
+ wiking	the files that actually will run the examples
+ sonne|work	ok
+ sonne|work	so I guess later then :/
+ sonne|work	wiking: and what did you find out about the R dispatcher?
+ sonne|work	wiking: not sure if you have seen but we now have only 2 examples failing
+ sonne|work	and it seems like real bugs / memory corruption
+ lisitsyn	sonne|work: is thursday 18:00 ok for you?
+ lisitsyn	(meeting)
+ sonne|work	timezone?
+ lisitsyn	sonne|work: your
+ sonne|work	no time
+ lisitsyn	http://doodle.com/4ctd4cwr588nwe52
+ lisitsyn	I am having hard time with that doodle
+ lisitsyn	sonne|work: do you see anything that fits your timespans?
+ besser82	sonne|work: with the recent git-checkout build fails again, when no .git-dir is present: src/shogun/base/Version.cpp:20:43: Fehler: too many decimal points in number: const int32_t Version::version_revision = VERSION_REVISION;
+ besser82	sonne|osx: src/shogun/base/Version.cpp: In statischer Elementfunktion >>static int32_t shogun::Version::get_version_revision()<<:
+ besser82	sonne|osx: src/shogun/base/Version.cpp:70:1: Warnung: Kontrollfluss erreicht Ende von Nicht-void-Funktion [-Wreturn-type]
+ sonne|work	besser82: I didn't change a thing though, please paste the generated src/shogun/lib/versionstring.h
+ sonne|work	lisitsyn: looking
+ wiking	sonne|work: yeah i'll do the things...
+ wiking	sonne|work: but now i'm working on something else :)
+ wiking	for the first time
+ sonne|work	wiking: what did you find out about R?
+ sonne|work	lisitsyn: times are in UTC?
+ lisitsyn	sonne|work: berlin tz
+ lisitsyn	hmm
+ lisitsyn	sonne|work: argh
+ sonne|work	lisitsyn: so when I click 11PM then it is local time right?
+ lisitsyn	sonne|work: at the top of the table
+ sonne|work	?
+ lisitsyn	sonne|work: there is timezone thing
+ sonne|work	yes it says berlin
+ lisitsyn	sonne|work: yeah then what you see is berlin tz
+ besser82	sonne|work: here you go: http://ur1.ca/fk9m5
+ lisitsyn	sonne|work: because it shows me moscow tz for a reason :D
+ sonne|work	besser82: #define VERSION_REVISION 0x3.0.0
+ sonne|work	so yes indeed wrong
+ besser82	sonne|work: how should it be supposed to look like? 3.0.0?
+ sonne|work	I guess I will have to strip the dots and fill in some 0's
+ sonne|work	maybe 0x300000
+ besser82	sonne|work: looks better, meanwhile I'll use some sed-magic on it....
+ sonne|work	lisitsyn: ok filled in
+ besser82	sonne|work: sed-magick doesn't work file get's regenerated on `make`
+ sonne|work	besser82: sure I will fix it relax
+ besser82	sonne|work: thanks  :)
+ lisitsyn	sonne|work: ohh the best case is w/o pickle27 lambday hushell patrick and fernando
+ sonne|work	lisitsyn: what shall I say...
+-!- lambday [67157d37@gateway/web/freenode/ip.103.21.125.55] has quit [Ping timeout: 250 seconds]
+ sonne|work	besser82: any idea how to generate a regexp that adds a trailing 0 ? Or some cmake way to do the job 1 -> 01 ?
+ besser82	sonne|work: you are talking about PREpending a "0"?
+ sonne|work	besser82: yeah that is what I meant
+ besser82	sonne|work: SET (var "0${var}")  should do :)
+ sonne|work	besser82: well but var needs to be 0...9 then
+ besser82	sonne|work: or you can SET(var "0") ....  SET( var "${var}${new-value}")  ;)
+ besser82	sonne|work: if you need some more elaborated way, please point me to the code/script in question
+ sonne|work	besser82: well version.cmake in cmake dir
+ sonne|work	besser82: I am extracting a VERSION_MAJOR / MINOR now
+ sonne|work	for getting the
+ sonne|work	0x030000
+ sonne|work	I need to prepend a 0 if the MAJOR/MINOR is <10
+ besser82	if (${var} <= 9)
+ besser82	set(var "0${var}")
+ besser82	endif
+ besser82	sonne|work:  ^^^
+ lisitsyn	damn
+ lisitsyn	I am the worst manager
+ lisitsyn	:D
+ besser82	sonne|work: build of testsuit fails, too:  Linking CXX executable shogun-unit-test
+ besser82	CMakeFiles/shogun-unit-test.dir/SerializationAscii_unittest.cc.o: In function `Dummy_dummy_Test::TestBody()':
+ besser82	/home/besser82/shared/github/shogun/third_party/GoogleMock/gtest/include/gtest/internal/gtest-internal.h:443: multiple definition of `Dummy_dummy_Test::TestBody()'
+ besser82	CMakeFiles/shogun-unit-test.dir/clone_unittest.cc.o:/home/besser82/shared/github/shogun/third_party/GoogleMock/gtest/include/gtest/internal/gtest-internal.h:425: first defined here
+ besser82	CMakeFiles/shogun-unit-test.dir/SerializationAscii_unittest.cc.o: In function `Dummy_dummy_Test::TestBody()':
+ besser82	/home/besser82/shared/github/shogun/third_party/GoogleMock/gtest/include/gtest/internal/gtest-internal.h:443: multiple definition of `Dummy_dummy_Test::test_info_'
+ besser82	CMakeFiles/shogun-unit-test.dir/clone_unittest.cc.o:/home/besser82/shared/github/shogun/third_party/GoogleMock/gtest/include/gtest/internal/gtest-internal.h:425: first defined here
+ besser82	CMakeFiles/shogun-unit-test.dir/SerializationHDF5_unittest.cc.o: In function `Dummy_dummy_Test::TestBody()':
+ besser82	/home/besser82/shared/github/shogun/third_party/GoogleMock/gtest/include/gtest/internal/gtest-internal.h:443: multiple definition of `Dummy_dummy_Test::TestBody()'
+ besser82	CMakeFiles/shogun-unit-test.dir/clone_unittest.cc.o:/home/besser82/shared/github/shogun/third_party/GoogleMock/gtest/include/gtest/internal/gtest-internal.h:425: first defined here
+ besser82	CMakeFiles/shogun-unit-test.dir/SerializationHDF5_unittest.cc.o: In function `Dummy_dummy_Test::TestBody()':
+ besser82	/home/besser82/shared/github/shogun/third_party/GoogleMock/gtest/include/gtest/internal/gtest-internal.h:443: multiple definition of `Dummy_dummy_Test::test_info_'
+ besser82	CMakeFiles/shogun-unit-test.dir/clone_unittest.cc.o:/home/besser82/shared/github/shogun/third_party/GoogleMock/gtest/include/gtest/internal/gtest-internal.h:425: first defined here
+ besser82	CMakeFiles/shogun-unit-test.dir/SerializationJSON_unittest.cc.o: In function `Dummy_dummy_Test::TestBody()':
+ besser82	/home/besser82/shared/github/shogun/th
+ besser82	sonne|work:  ^^^
+ sonne|work	besser82: no idea about that one - that is sth for wiking...
+ besser82	sonne|work:  kk, will ping him about ;)
+ besser82	wiking: can you have a look, please.  ^^^^
+ wiking	mmm will do
+ wiking	later
+ wiking	besser82: send me an email
+ besser82	wiking: your adress?
+ wiking	wiking@maeth.com
+ besser82	wiking: thx!
+ besser82	wiking: should be there in a sec  ;)
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has quit [Quit: Leaving.]
+ wiking	gotitwillreplysoon
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+ sonne|work	excellent https://www.djangoproject.com/weblog/2013/sep/15/security/
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:f40b:9348:29da:4f3b] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Read error: Connection reset by peer]
+-!- HeikoS [~heiko@nat-183-166.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+-!- lambday [67157e37@gateway/web/freenode/ip.103.21.126.55] has joined #shogun
+@HeikoS	lambday: hi!
+ lambday	HeikoS: hi
+ lambday	hehe I pinged at the same time
+@HeikoS	just checked your PR, still building in travis
+@HeikoS	haha :)
+ lambday	HeikoS: with 10 log-det samples, I get pretty good accuracy
+@HeikoS	so how are things?
+ lambday	>>> print sum(probing_estimates)/len(probing_estimates) 1422.85679236 >>> print actual 1422.84404724
+ lambday	working with python now
+@HeikoS	this is the sparse matrix we had?
+ lambday	west0479
+ lambday	I took A'*A+eye
+@HeikoS	ok cool
+@HeikoS	is this dataset public open?
+ lambday	HeikoS: I guess so
+@HeikoS	http://math.nist.gov/MatrixMarket/data/Harwell-Boeing/chemwest/west0479.html
+ lambday	scipy is an angel
+@HeikoS	lambday: yep its very cool
+ lambday	great! So I can use this for all the examples, right?
+@HeikoS	yeah, we just have to find the license
+@HeikoS	I dont know whether we can just copy it into our gpl repo
+ lambday	HeikoS: how about I store the A'A+I one in the repo, that too would be causing license issues?
+@HeikoS	mmmh
+@HeikoS	I dont know
+@HeikoS	better check
+@HeikoS	If it is one, we can download it from the python example or so
+@HeikoS	The original data sets and descriptions are from the   NIST web site and were not covered by an explicit copyright.   Modifications for R data sets are covered by GPL (>= 2).
+@HeikoS	so thats the way we should do it
+@HeikoS	should add some comment stating where the data is from and that its not under gpl, but the changes are
+ lambday	alrighty
+@HeikoS	https://svn.r-project.org/R-packages/trunk/NISTnls/DESCRIPTION
+@HeikoS	thats how R does it
+@HeikoS	lambday: your latest patch, does that work with python modular?
+ lambday	HeikoS: locally it works
+@HeikoS	ok cool,
+@HeikoS	there were other problems too
+@HeikoS	did you rebase recently?
+ lambday	but on travis some examples/tests fail
+ lambday	yep
+@HeikoS	ok I will have a look once they are done
+ lambday	HeikoS: got an weird swig related error for JobResultAggregator, left that one for the time being from adding to modular interface...
+ lambday	the java modular failure was being caused by that
+ lambday	oh btw I converted this to ascii for libshogune examples as well, but some changes in the load_svmlight_file in SGSparseMatrix lately and it can't read
+ lambday	HeikoS: weirdly enough, I just set the max iteration limit to 10000 and it converges properly
+ lambday	for CG-M
+ lambday	max/min eigs are similar to the one you had for your ipython
+ lambday	not same but of similar range
+@HeikoS	lambday: ah annyoing with the changes
+@HeikoS	ok
+@HeikoS	lanczos might converge to different things in different runs
+@HeikoS	make sure the examples do not take too long to run
+@HeikoS	the python ones are part of the test-suite, so should be in less than say 2-3seconds
+@HeikoS	the ipython can take slightly longer (maybe 30s max)
+@HeikoS	but shorter is better
+@HeikoS	rather add a comment for the users that they can increase this or that to get "proper" results
+ lambday	2-3 secs!
+ lambday	I have to do with just 1 log-det sample then
+ lambday	yeah that sounds good
+ lambday	so, the matrix (mat and ascii) of A'A+I, where would it go?
+@HeikoS	ok thats ok
+ lambday	shogun/data?
+@HeikoS	into the data repository, in fact put the original dataset there
+@HeikoS	have a look at the other files
+@HeikoS	and add some comment with the readme
+ lambday	shogun-data?
+ lambday	alright checking
+@HeikoS	you can compute A^T A yourself then
+ lambday	ummm... yeah, but for the libshogun ones, it would be easier if we have the final matrix too, otherwise again gotta use eigen3
+ lambday	but for the time being only adding python examples
+@HeikoS	lambday: thats fine isnt it?
+ lambday	will add libshogun ones when load_from_svmlight works
+ lambday	yeah, should be fine
+@HeikoS	I mean eigen needs to be there anyway
+@HeikoS	lambday: yep ok
+@HeikoS	let me know how it goes
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has joined #shogun
+ lambday	HeikoS: alright
+@HeikoS	lambday: I told some people about this stuff and they liked it a lot. In particular that you did this c-implementation
+ lambday	:D
+ lambday	I hope this becomes useful... but we sure need to add preconditioners
+@HeikoS	lambday: yep we need those
+ lambday	feels good that things work properly
+ lambday	cocg too works now
+@HeikoS	lambday: yep very good!
+@HeikoS	probably takes much longer right?
+ lambday	I checked up to rational approximation of log(A) using unit basis vectors - they work as good as triangular solvers
+ lambday	for that test, they don't take long, converges within a few iterations
+ besser82	sonne|work, wiking: /home/besser82/rpmbuild/BUILD/shogun-f56e63e62ca6a3f6f252e50543ec5b21bd676e8a/examples/undocumented/csharp_modular/regression_svrlight_modular.cs(23,17): error CS0246: The type or namespace name `SVRLight' could not be found. Are you missing a using directive or an assembly reference?
+ besser82	/home/besser82/rpmbuild/BUILD/shogun-f56e63e62ca6a3f6f252e50543ec5b21bd676e8a/examples/undocumented/csharp_modular/regression_svrlight_modular.cs(24,17): error CS0841: A local variable `svr' cannot be used before it is declared
+ besser82	/home/besser82/rpmbuild/BUILD/shogun-f56e63e62ca6a3f6f252e50543ec5b21bd676e8a/examples/undocumented/csharp_modular/regression_svrlight_modular.cs(26,17): error CS0841: A local variable `svr' cannot be used before it is declared
+ besser82	/home/besser82/rpmbuild/BUILD/shogun-f56e63e62ca6a3f6f252e50543ec5b21bd676e8a/examples/undocumented/csharp_modular/regression_svrlight_modular.cs(29,67): error CS0841: A local variable `svr' cannot be used before it is declared
+ besser82	/home/besser82/rpmbuild/BUILD/shogun-f56e63e62ca6a3f6f252e50543ec5b21bd676e8a/examples/undocumented/csharp_modular/regression_svrlight_modular.cs(29,53): error CS1502: The best overloaded method match for `LabelsFactory.to_regression(Labels)' has some invalid arguments
+ besser82	/home/besser82/rpmbuild/BUILD/shogun-f56e63e62ca6a3f6f252e50543ec5b21bd676e8a/build/src/interfaces/csharp_modular/modshogun.dll (Location of the symbol related to previous error)
+ besser82	/home/besser82/rpmbuild/BUILD/shogun-f56e63e62ca6a3f6f252e50543ec5b21bd676e8a/examples/undocumented/csharp_modular/regression_svrlight_modular.cs(29,53): error CS1503: Argument `#1' cannot convert `object' expression to type `Labels'
+ besser82	Compilation failed: 6 error(s), 0 warnings
+ besser82	make[2]: *** [examples/undocumented/csharp_modular/csharp-regression_svrlight_modular] Error 1
+ besser82	sonne|work, wiking:  ^^^ happenes when -DUSE_SVMLIGHT=OFF.
+@HeikoS	besser82: this looks like forgotten guards for SVMLight
+ besser82	HeikoS: who in charge for this?
+@HeikoS	besser82: the one who finds it :D
+@HeikoS	I think in the example, there just needs to be a check whether USE_SVMLIGHT is defined
+@HeikoS	and if not, not execute things
+@HeikoS	or not compile to be more exact
+ besser82	HeikoS: I'm no official SHOGUN, I'm afraid...  Nor do I know about C#....
+@HeikoS	like #ifdef HAVE_BLABLALBA ..... #endif
+@HeikoS	besser82: yeah was just a joke, could you fill in an issue
+@HeikoS	besser82: I dont know who knows c# here
+ besser82	HeikoS: kk, will do :D
+ lambday	man shogun-data is *huge*
+@HeikoS	lambday: yep
+ besser82	HeikoS: https://github.com/shogun-toolbox/shogun/issues/1600
+ lambday	HeikoS: still downloading... oh and it doesn't have any README, so should I just add a separate directory for logdet and add a Readme.txt there, where I say that this matrix from this and that and GPL thing
+ besser82	lambday: what are going to bundle into SHOGUN?
+ besser82	lambday: s/are /&you
+@HeikoS	besser82: thanks!
+ lambday	besser82: adding a .mat file basically
+@HeikoS	lambday: no put it there directly
+@HeikoS	lambday: dont put a mat file
+@HeikoS	put a more standard format like csv, like the other files in there
+@HeikoS	maybe even zipped
+@HeikoS	lambday: we can ask sonney2k about the license stuff later, just add for now
+ lambday	HeikoS: alright.. so I have it in svmlight format
+@HeikoS	thats good
+ lambday	HeikoS: but for python, I was planning to use the mat/mtx one
+@HeikoS	lambday: you can load the thing and convert or?
+ lambday	HeikoS: ya scipy.io.mmread, and then tocsc()...
+@HeikoS	lambday: yeah thats good
+@HeikoS	csc_matrix() from scipy.sparse
+@HeikoS	also does that
+ lambday	yeah
+ lambday	alright
+ besser82	lambday: I thought I would have been another piece of code ;)
+ besser82	HeikoS: np. We all want to get that in shape, don't we?
+ lambday	HeikoS: so, shall I add the mtx that I directly downloaded from the website, and then my converted ascii svmlight format one (for libshogun examples), tarzipped
+ lambday	besser82: :D
+@HeikoS	besser82: yes!
+@HeikoS	besser82: you could also try to compile with LAPACK not being installed
+@HeikoS	I fixed like 50 issues around that a few weeks ago
+@HeikoS	but there are more
+ lambday	HeikoS: shogun-data/testsuite/mathematics/west0479.tar.gz sounds good?
+-!- gsomix [~gsomix@188.168.3.89] has joined #shogun
+ gsomix	sonney2k, sonne|work hey ho
+ lambday	west0479.mtx and west0479.txt inside
+@HeikoS	lambday: yep!
+ lambday	alright
+@HeikoS	ls /share/apps/lapack-3-4.1/
+@HeikoS	liblapack.a  librefblas.a  libtmglib.a
+@HeikoS	this is what I have
+@HeikoS	ah sorry wrong window
+ lisitsyn	wiking: ping
+-!- van51 [~van51@athedsl-409794.home.otenet.gr] has joined #shogun
+ van51	sonne|work: ping
+ sonne|work	van51: hey!
+ sonne|work	gsomix: ho!
+ van51	sonne|work: hey! I've started a comment on github, so I'll finish it there :)
+ gsomix	sonne|work, thnx for comments!
+ sonne|work	gsomix: hope they were useful...
+ sonne|work	van51: ok ping me once done
+ lambday	HeikoS: changed... moved it under logdet/
+ gsomix	sonne|work, yep, of course. CProtobufFile is a good idea I think.
+ sonne|work	HeikoS: btw have you seen almost all R examples seem to work now...
+ sonne|work	HeikoS: r_modular that is
+@HeikoS	sonne|work: its R modular
+@HeikoS	yeah I have seen something
+@HeikoS	is it wiking?
+ sonne|work	only 2 failing
+@HeikoS	sonne|work: is this with reference counting?
+ sonne|work	I fixed them...
+@HeikoS	sonne|work: wow! great job!
+@HeikoS	many people will love you for that? :)
+ sonne|work	I would wish we could compare if they do the right job...
+ sonne|work	still things are a bit awkward
+ sonne|work	e.g. there are some weird bugs
+@HeikoS	sonne|work: yeah testing the interfaces somehow would be great
+ sonne|work	like you do kernel.init() for linear kernel
+@HeikoS	sonne|work: btw a question: where in shogun-data should sparse test matrices for log-det framework go, new folder logdet?
+ sonne|work	and for some reason kernel.init_optimization is attempted to be called
+@HeikoS	sonne|work: ok ...
+ van51	sonne|work: done
+@HeikoS	sonne|work: if we can get it working at least minimally
+@HeikoS	then people would already use it, find more problems and maybe some people will start fixing them
+@HeikoS	sonne|work: just have been to a stats workshop and everyone is using R
+@HeikoS	its so weird
+ sonne|work	HeikoS: well it is it seems http://buildbot.shogun-toolbox.org/builders/deb3%20-%20modular_interfaces/builds/1824/steps/test%20r_modular/logs/stdio
+@HeikoS	they dont know anything else, they dont know even what else exists
+ sonne|work	statistics people...
+ sonne|work	van51: ok will have a look
+@HeikoS	but would be good users ;)
+@HeikoS	lambday: merged the data
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun-data: lambday :master * a12a28c / logdet/west0479.tar.gz: https://github.com/shogun-toolbox/shogun-data/commit/a12a28c93767c9c265295232cade3c490a7a3710
+ shogun-notifier-	shogun-data: Added matrix-data in mtx (original) and ascii (converted) (log-det)
+ shogun-notifier-	shogun-data: Heiko Strathmann :master * 7d37a77 / logdet/west0479.tar.gz: https://github.com/shogun-toolbox/shogun-data/commit/7d37a7713c407618bb5b790811040e6c71027922
+ shogun-notifier-	shogun-data: Merge pull request #19 from lambday/master
+ shogun-notifier-	shogun-data:
+ sonne|work	gsomix: have you seen the <size> <protobufmsg> format suggestion?
+ shogun-notifier-	shogun-data: Added matrix-data in mtx (original) and ascii (converted) (log-det)
+ lambday	HeikoS: thanks :)
+ gsomix	sonne|work, yep, I'm using this format for now.
+ lambday	HeikoS: my PR gives green except python modular, that fails for a few tests
+ lambday	3 tests basically
+ sonne|work	gsomix: just make sure that the <size> thing is endian save
+ shogun-notifier-	shogun: lambday :develop * bc17983 / / (163 files): https://github.com/shogun-toolbox/shogun/commit/bc179839b8f4b051a09c9c7f22529a962155ade9
+ shogun-notifier-	shogun: refactored log-det and computation framework
+ shogun-notifier-	shogun: lambday :develop * d49c048 / / (16 files): https://github.com/shogun-toolbox/shogun/commit/d49c048a5f0b26fd0985afb16d6f61311f6fcb62
+ shogun-notifier-	shogun: COCG linear solver fixed, unit-test modified (log-det)
+ shogun-notifier-	shogun: lambday :develop * 050f2a2 / src/ (5 files): https://github.com/shogun-toolbox/shogun/commit/050f2a2935c219b1a80ddcfd5f4a54e42e7cb1ee
+ shogun-notifier-	shogun: modular interface updated (log-det)
+ shogun-notifier-	shogun: Heiko Strathmann :develop * af2d9dc / / (175 files): https://github.com/shogun-toolbox/shogun/commit/af2d9dcbdc27cff4553f41ebce910251809f0120
+ shogun-notifier-	shogun: Merge pull request #1586 from lambday/feature/log_determinant
+ shogun-notifier-	shogun:
+ shogun-notifier-	shogun: Refactored log-det and computation framework
+@HeikoS	lambday: yep thats not your fault, merged :)
+ lambday	HeikoS: silly question - how shall I use this data for examples?
+ lambday	:)
+@HeikoS	lambday: well, import it
+@HeikoS	look at the other examples :)
+@HeikoS	very easy
+ lambday	alright checking
+ sonne|work	van51: can I reply here?
+ sonne|work	van51: you can do w/o function pointers - I mean this is C++ so just an interface class would do
+ sonne|work	van51: and you could add the abstraction to do the dot into this function
+ shogun-buildbot	build #2160 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2160  blamelist: lambday <heavensdevil6909@gmail.com>
+ sonne|work	van51: so some can call dense_dot some can do it better
+ shogun-buildbot	build #2162 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2162  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>, lambday <heavensdevil6909@gmail.com>
+ van51	sonne|work: ok sounds reasonable. I'll do it this way then :)
+ van51	I'll go grab a bite and get started
+ sonne|work	van51: cool!
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+-!- travis-ci [~travis-ci@ec2-23-23-70-204.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Heiko Strathmann's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/11412622
+-!- travis-ci [~travis-ci@ec2-23-23-70-204.compute-1.amazonaws.com] has left #shogun []
+@HeikoS	votjakovr: hi!
+@HeikoS	votjakovr: hope you are fine!
+@HeikoS	votjakovr: I thought that maybe for the notebook, one example could be on string data
+@HeikoS	what do you think?
+ votjakovr	HeikoS: hi! yeah it will be cool, do you have any particular suggestions on dataset or i could choose the data by myself?
+@HeikoS	votjakovr: if you want, you can choose yourself, if not, I am just about to look something up
+@HeikoS	http://www.retrovirology.com/content/5/1/110
+@HeikoS	this one here is good
+@HeikoS	I tried that before with an SVM
+@HeikoS	the string kernel they use is implemented in shogun
+@HeikoS	votjakovr: would be really cool to have a string example since most toolboxes dont have that
+ votjakovr	HeikoS: ok, cool, i'll add one :)
+@HeikoS	votjakovr: maybe you can also compare to an SVM in the notebook? (not in the examples)
+@HeikoS	this way, we could illustrate the certainties etc
+ votjakovr	HeikoS: yeah, great idea
+@HeikoS	votjakovr: if the dataset is too hard to import or so, you can choose another one, let me know ...
+@HeikoS	actually, I think I might still have the plain sequence files somewhere
+@HeikoS	Ill look it up at home
+@HeikoS	votjakovr:  and as a standard numerical dataset, just pick something from UCI
+@HeikoS	http://archive.ics.uci.edu/ml/datasets/Glass+Identification
+@HeikoS	votjakovr: like this one ^
+@HeikoS	there you can do window-glass against non-window-glass
+@HeikoS	that is very popular
+@HeikoS	and no missing values etc
+@HeikoS	just import, normalise (remove mean and whiten or scale features to unit variance) and then it directly should work
+@HeikoS	I tried it before with your binary logit classifier
+@HeikoS	ok going for lunch, see you!
+ votjakovr	HeikoS: Ok, thank you very much on datasets :) BTW Could you please look at some draft on gradients here: http://github.com/votjakovr/shogun/blob/feature/gp_refactoring/src/shogun/machine/gp/InferenceMethod.cpp#L142
+@HeikoS	ok, will do after lunch if thats ok?
+ votjakovr	HeikoS: ok :)
+@HeikoS	cool! :)
+@HeikoS	ah cool you pthreaded it?
+ votjakovr	HeikoS: yeah
+@HeikoS	awesome!
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Read error: Connection reset by peer]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has joined #shogun
+@HeikoS	votjakovr: I like the derivative method!
+@HeikoS	votjakovr: any reason why you used pthread rather than openmp (which makes the code more readable, although thats not a problem here)
+@HeikoS	wiking: ping
+ votjakovr	HeikoS: huh, good :) currently i'm using clang as a main compiler and clang doesn't support openmp yet, but we can change implementation in future, since it's pretty simple :-)
+@HeikoS	votjakovr: yeah no problem, just asking whether it was a conscious decision
+-!- az_de [82954e22@gateway/web/freenode/ip.130.149.78.34] has joined #shogun
+-!- van51 [~van51@athedsl-409794.home.otenet.gr] has quit [Quit: Leaving.]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- az_de [82954e22@gateway/web/freenode/ip.130.149.78.34] has left #shogun []
+-!- shogun-notifier- [~irker@7nn.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 20a7eb6 / cmake/version.cmake: https://github.com/shogun-toolbox/shogun/commit/20a7eb64cbd3a73ff66f986902d9f7637752df5d
+ shogun-notifier-	shogun: wip commit
+ shogun-buildbot	build #2163 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2163  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- foulwall [~zhengyang@114.255.40.22] has quit [Remote host closed the connection]
+-!- sonne|osx [~sonne@82.113.98.207] has joined #shogun
+-!- gsomix [~gsomix@188.168.3.89] has quit [Quit: Leaving]
+ shogun-buildbot	build #152 of osx1 - libshogun is complete: Failure [failed test]  Build details are at http://buildbot.shogun-toolbox.org/builders/osx1%20-%20libshogun/builds/152  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- sonne|osx [~sonne@82.113.98.207] has quit [Quit: sonne|osx]
+-!- lisitsyn [~lisitsin@mxs.kg.ru] has quit [Quit: Leaving.]
+ lambday	HeikoS: I added two examples, one for CG and another for log-det
+@HeikoS	cool, where?
+@HeikoS	is there a PR?
+ lambday	HeikoS: but the data I put there is in tar.gz, so
+ lambday	HeikoS: yeah just sending
+ lambday	HeikoS: currently I loaded the matrix from the data as if its extracted in the same dir :-/
+@HeikoS	lambday: are you working in python?
+@HeikoS	since in there you can easily extract compressed files
+ lambday	HeikoS: two more python modular examples I thought of, one for COCG, and another is CG-M (because the rest of the solvers are pretty much common but I haven't seen these two anywhere)
+ lambday	HeikoS: yes
+@HeikoS	and the file reader fraction of shogun is working on zipped formats, too
+ lambday	HeikoS: oh cool!
+@HeikoS	lambday: ok cool
+@HeikoS	send the PR, Ill grab a coffee now but will look later
+ lambday	HeikoS: but then I should modify to use the zipped one
+@HeikoS	lambday: yeah with python thats easy
+ lambday	checking
+@HeikoS	lambday: getting coffee :)
+ lambday	alright
+ lambday	:)
+-!- sonne|osx [~sonne@f053038024.adsl.alicedsl.de] has joined #shogun
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * 97d3a04 / cmake/version.cmake: https://github.com/shogun-toolbox/shogun/commit/97d3a04a392502e6d7c53948f27bc46c60b0ce69
+ shogun-notifier-	shogun: fix version
+-!- travis-ci [~travis-ci@ec2-54-227-13-93.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/11421263
+-!- travis-ci [~travis-ci@ec2-54-227-13-93.compute-1.amazonaws.com] has left #shogun []
+ besser82	sonne|osx: still fails with new commit: /home/besser82/shared/github/shogun-test/src/shogun/base/Version.cpp:20:43: Fehler: numerischer literaler Operator >>operator"" x<< konnte nicht gefunden werden
+ besser82	 const int32_t Version::version_revision = VERSION_REVISION;
+ besser82	                                           ^
+ besser82	/home/besser82/shared/github/shogun-test/src/shogun/base/Version.cpp: In statischer Elementfunktion >>static int32_t shogun::Version::get_version_revision()<<:
+ besser82	/home/besser82/shared/github/shogun-test/src/shogun/base/Version.cpp:70:1: Warnung: Kontrollfluss erreicht Ende von Nicht-void-Funktion [-Wreturn-type]
+ besser82	 }
+ besser82	 ^
+ besser82	make[2]: *** [src/shogun/CMakeFiles/shogun.dir/base/Version.cpp.o] Fehler 1
+ besser82	sonne|osx: ^^^
+ besser82	sonne|osx: http://ur1.ca/fkfs4  ---> paste of versionstring.h
+ besser82	sonne|work:  ^^^^
+ lambday	HeikoS: sending PR
+ shogun-buildbot	build #2164 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2164  blamelist: Soeren Sonnenburg <sonne@debian.org>
+-!- zxtx [~zv@ip-64-134-197-230.public.wayport.net] has quit [Ping timeout: 240 seconds]
+ lambday	HeikoS: please have a look
+ lambday	HeikoS: I am going for dinner.. will be back in an hour or so
+ lambday	HeikoS: regarding plots, I am thinking of these 1) CG-M convergence for the log-det (residuals over the iterations), 2) Probing/Normal sampler estimates 3) matrix-power vs log-det-estimates (was trying with matrix power 2 and I think it can make a difference)
+ lambday	oh and 4) number of shifts vs log-det accuracy
+ lambday	HeikoS: with diagrams explaining sparsity, fill-in
+ lambday	HeikoS: brb after dinner :)
+@HeikoS	lambday: that sounds very nice!
+-!- travis-ci [~travis-ci@ec2-54-221-77-190.compute-1.amazonaws.com] has joined #shogun
+ travis-ci	[travis-ci] it's Soeren Sonnenburg's turn to pay the next round of drinks for the massacre he caused in shogun-toolbox/shogun: http://travis-ci.org/shogun-toolbox/shogun/builds/11423486
+-!- travis-ci [~travis-ci@ec2-54-221-77-190.compute-1.amazonaws.com] has left #shogun []
+-!- van51 [~van51@athedsl-409794.home.otenet.gr] has joined #shogun
+@HeikoS	wiking: hi!
+ wiking	hey hey
+ wiking	i'm still not online actually
+ wiking	bbl
+@HeikoS	ok
+@HeikoS	then nevermind :D
+@HeikoS	I need a break anyways
+@HeikoS	be back in 10
+@HeikoS	wiking: now?
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has joined #shogun
+-!- iglesiasg [~iglesias@2001:6b0:1:1da0:f40b:9348:29da:4f3b] has quit [Quit: Ex-Chat]
+@HeikoS	lisitsyn: hi!
+ lisitsyn	HeikoS: hey
+@HeikoS	lisitsyn: I have more questions
+ lisitsyn	oh
+ lisitsyn	shoot
+@HeikoS	lisitsyn: so the cluster guy now installed lapack for me
+ lisitsyn	HeikoS: .so?
+@HeikoS	but I still have problems
+@HeikoS	yes
+ lisitsyn	alright
+ lisitsyn	HeikoS: what's the problem?
+@HeikoS	so first of all, cmake did not detect them even though they were in /usr/lib64
+@HeikoS	however -DBLAS_LIBRARIES=/usr/lib64 -DLAPACK_LIBRARIES=/usr/lib64 did that
+@HeikoS	but now unit tests dont compile
+ lisitsyn	HeikoS: sorry will get back in ten minutes
+@HeikoS	ok
+@HeikoS	https://gist.github.com/karlnapf/6584235
+ lisitsyn	HeikoS: re
+ lisitsyn	HeikoS: did you revert your changes in cmakelists?
+@HeikoS	lisitsyn: hi
+@HeikoS	yes I did
+@HeikoS	git reset --hard should do it right?
+ lisitsyn	HeikoS: heh yeah
+ lisitsyn	HeikoS: alright
+@HeikoS	so any idea?
+@HeikoS	first weird thing: why doesnt cmake detect my files?
+ lisitsyn	HeikoS: so the problem is that it doesn't work when you don't do /usr/lib64
+ lisitsyn	right?
+@HeikoS	yes
+@HeikoS	-- A library with BLAS API not found. Please specify library location.
+@HeikoS	-- LAPACK requires BLAS
+@HeikoS	-- A library with LAPACK API not found. Please specify library location.
+@HeikoS	I did not touch LD_LIBRARY_PATH
+@HeikoS	(for those things)
+@HeikoS	since it is /usr/lib64
+@HeikoS	that should not be the problem right?
+ lisitsyn	HeikoS: I think we use default lapack finder
+@HeikoS	yes
+@HeikoS	but ok
+@HeikoS	I can specify the path and then it works
+ lisitsyn	so that's out-of-box bug
+@HeikoS	also, I checked my files, they contain that symbol
+ lisitsyn	HeikoS: so the main problem is that unit-tests do not compile I guess
+ lisitsyn	that's more interesting
+@HeikoS	yes
+@HeikoS	no other problem compiling libshogun
+@HeikoS	they should also fail if lapack is not there right?
+ lisitsyn	HeikoS: I don't know if it is still needed
+@HeikoS	ah wait
+@HeikoS	-- A library with BLAS API found.
+@HeikoS	-- A library with LAPACK API found.
+@HeikoS	-- Looking for clapack_dpotrf in /usr/lib64/atlas/liblapack.so.3
+@HeikoS	WARNING: Target "cmTryCompileExec2276832605" requests linking to directory "/usr/lib64".  Targets may link only to libraries.  CMake is dropping the item.
+@HeikoS	-- Looking for clapack_dpotrf in /usr/lib64/atlas/liblapack.so.3 - found
+@HeikoS	-- Found ATLAS: /usr/lib64/atlas/liblapack.so.3;/usr/lib64/atlas/libcblas.so.3;/usr/lib64/atlas/libf77blas.so.3;/usr/lib64/atlas/libatlas.so.3;/usr/lib64/liblapack.so.3
+@HeikoS	there is this warning
+ lisitsyn	HeikoS: that sounds like cmake glitch
+ lisitsyn	no idea what to do about it
+@HeikoS	ok
+@HeikoS	so any idea whether maybe the lib order in the build command causes this?
+ lisitsyn	HeikoS: yeah may be
+ lisitsyn	as your library files are here in the command line
+@HeikoS	yeah and all those files exist
+@HeikoS	lisitsyn: updated the issue
+@HeikoS	the files also contain the symbol that is needed
+@HeikoS	so it *has* to be some homemade problem
+ lisitsyn	HeikoS: weird
+@HeikoS	ah and annoying since I need that for work
+@HeikoS	lisitsyn: so libshogun.so.14.0 is first in the list
+@HeikoS	maybe it should be last?
+@HeikoS	but I dont really believe that
+ lisitsyn	HeikoS: just try to rearrange them in the command
+-!- sonne|osx [~sonne@f053038024.adsl.alicedsl.de] has quit [Quit: sonne|osx]
+@HeikoS	trying
+@HeikoS	nope
+@HeikoS	lisitsyn: I asked wiking to add a bundle lapack option, that might help here
+ wiking	HeikoS: bundle lapack is impossible
+@HeikoS	wiking: why?
+ wiking	HeikoS: if u can do it
+ wiking	go for it
+@HeikoS	I managed to compile it locally and create a shared library
+ wiking	it's just crazy shit
+@HeikoS	mmh ok
+@HeikoS	there is this tool that helps creating the dynamic stuff
+@HeikoS	http://icl.cs.utk.edu/lapack-forum/viewtopic.php?f=2&t=1895
+@HeikoS	wiking: do you have any idea about this problem I have?
+@HeikoS	https://github.com/shogun-toolbox/shogun/issues/1604
+ wiking	mmm not yet
+ wiking	HeikoS: what's this distro?
+@HeikoS	mmh, dont know, let me find out
+@HeikoS	wiking: centos
+ wiking	HeikoS: which version?
+ shogun-notifier-	shogun: Soeren Sonnenburg :develop * dd41296 / cmake/version.cmake: https://github.com/shogun-toolbox/shogun/commit/dd412963294d6350b1e3ef05776e59e7a31daa6b
+ shogun-notifier-	shogun: fix version (for real)
+@sonney2k	besser82, ok now!
+@HeikoS	cat /proc/version
+@HeikoS	Linux version 2.6.18-308.13.1.el5 (mockbuild@builder10.centos.org) (gcc version 4.1.2 20080704 (Red Hat 4.1.2-52)) #1 SMP Tue Aug 21 17:10:18 EDT 2012
+@HeikoS	 cat /etc/issue
+@HeikoS	CentOS release 5.4 (Final)
+@HeikoS	wiking: ^
+ wiking	ok
+ wiking	i'll check it
+@HeikoS	cool man thanks!
+@HeikoS	wiking: oh and btw, cmake doesnt detect the installed lapack
+@HeikoS	I have to give the path by hand
+@sonney2k	HeikoS, errm so it compiles or what?
+@HeikoS	sonney2k: nope
+@sonney2k	HeikoS, it fails compiling doing what?
+@HeikoS	../../src/shogun/libshogun.so.14.0: undefined reference to `dstemr_'
+@HeikoS	but this symbol is there
+@HeikoS	nm /usr/lib64/liblapack.so.3 | grep dstemr_
+@HeikoS	00000000001e46d0 T dstemr_
+ shogun-buildbot	build #2165 of deb1 - libshogun is complete: Failure [failed compile]  Build details are at http://buildbot.shogun-toolbox.org/builders/deb1%20-%20libshogun/builds/2165  blamelist: Soeren Sonnenburg <sonne@debian.org>
+@HeikoS	and this file is also in the library list of the compile command
+ wiking	HeikoS: ldd ../../src/shogun/libshogun.so.14.0
+ wiking	?
+@HeikoS	wiking:
+@HeikoS	ldd ../../src/shogun/libshogun.so.14.0
+@HeikoS	linux-vdso.so.1 =>  (0x00007fff8b7fd000)
+@HeikoS	libpthread.so.0 => /lib64/libpthread.so.0 (0x00002abdaf792000)
+@HeikoS	liblapack.so.3 => /usr/lib64/atlas/liblapack.so.3 (0x00002abdaf9ae000)
+@HeikoS	libcblas.so.3 => /usr/lib64/atlas/libcblas.so.3 (0x00002abdb00ab000)
+@HeikoS	libf77blas.so.3 => /usr/lib64/atlas/libf77blas.so.3 (0x00002abdb02ca000)
+@HeikoS	libatlas.so.3 => /usr/lib64/atlas/libatlas.so.3 (0x00002abdb04e8000)
+@HeikoS	libz.so.1 => /usr/lib64/libz.so.1 (0x00002abdb0ddd000)
+@HeikoS	libstdc++.so.6 => /usr/lib64/libstdc++.so.6 (0x00002abdb0ff1000)
+@HeikoS	libm.so.6 => /lib64/libm.so.6 (0x00002abdb12f2000)
+@HeikoS	libgomp.so.1 => /usr/lib64/libgomp.so.1 (0x00002abdb1575000)
+@HeikoS	libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x00002abdb1782000)
+@HeikoS	libc.so.6 => /lib64/libc.so.6 (0x00002abdb1991000)
+@HeikoS	/lib64/ld-linux-x86-64.so.2 (0x000000315fe00000)
+@HeikoS	libgfortran.so.1 => /usr/lib64/libgfortran.so.1 (0x00002abdb1ce8000)
+@HeikoS	librt.so.1 => /lib64/librt.so.1 (0x00002abdb1f80000)
+@HeikoS	ah sorry
+@sonney2k	HeikoS, so it compiled!
+@sonney2k	so what is missing is a proper LD_LIBRARY_PATH=
+@sonney2k	when running things
+ wiking	HeikoS: Iliblapack.so.3 => /usr/lib64/atlas/liblapack.so.3
+ wiking	this does not have dstemr_  i guess
+ wiking	right?
+@HeikoS	nm says "no symbols"
+ wiking	HeikoS: ok so your problem is that the wrong lapack.so is being used
+ besser82	wiking: It should have that symbol, since it's a rewritten lapack in c ;)
+@HeikoS	sonney2k: shogun conmpiled, but its the unit tests ...
+@HeikoS	wiking: ah ok
+@HeikoS	so the one in lib64/atlas/ rather thanlib64
+@HeikoS	how to change that?
+ wiking	as sonney2k said
+ wiking	LD_LIBRARY_PATH
+@HeikoS	really that easy? let me try
+@HeikoS	 export LD_LIBRARY_PATH=/usr/lib64/:$LD_LIBRARY_PATH  ?
+ wiking	yeah
+ wiking	try that
+@HeikoS	nope
+@HeikoS	doesnt work
+@HeikoS	what about this list of .so files in the make command of the unit tests?
+@HeikoS	in the gist
+@HeikoS	sonney2k: to what do I have to set the LD_LIBRARY_PATH?
+ besser82	HeikoS, wiking: nm -D /usr/lib64/liblapack.so | grep dstemr  ---> shows the symbol is there
+@HeikoS	besser82 yes it does, but liblapack.so.3 => /usr/lib64/atlas/liblapack.so.3
+@HeikoS	and in there, it is not
+@sonney2k	HeikoS, to /usr/lib64/atlas if it is there
+@HeikoS	sonney2k: doesnt work either
+@HeikoS	wiking, sonney2k cant I tell the compiler somehow to reference the right library somehow else?
+ lisitsyn	I just wanted to note it is dstemr_ that is missed
+ lisitsyn	may be it is important here
+-!- zxtx [~zv@129-79-241-50.dhcp-bl.indiana.edu] has joined #shogun
+@HeikoS	lisitsyn: ?
+ lisitsyn	HeikoS: dstemr_ dstemr
+ lisitsyn	HeikoS: do you have dstemr_ or dstemr?
+@HeikoS	dstemr_
+@HeikoS	lisitsyn: I think it is as sonney2k and wiking said, libshogun.so references the wrong file, which is lib64/atlas/liblapack.so, but the file doesnt contain the symbol. However, lib64/liblapack.so contains it, I just dont know how to make libshogun reference to it
+ lisitsyn	HeikoS: ah
+ lisitsyn	I see
+@HeikoS	I tried prepending its path to LD_LIBRARY_PATH, the (re)-linking libshogun, but I still get the same error
+ besser82	HeikoS: lib64/atlas/liblapack.so contains dstemr_ ---> nm -D /usr/lib64/atlas/liblapack.so | grep dstemr
+ lambday	HeikoS: back
+ lambday	HeikoS: what's wrong with dstemr?
+@HeikoS	lambday: hi! ah, dont worry about that
+@HeikoS	trying to install things on weird machines
+@HeikoS	lambday: I had some comments in the PR, minor things
+ lambday	I added/used dstemr..  :-/
+ lambday	HeikoS: yeah checking
+@HeikoS	lambday: I cannot drop lapack unfortunately since I need the Lanczos on the cluster
+@HeikoS	if only eigen could do that little thing ;)
+@HeikoS	then I wouldnt have these stupid problems with stupid lapack
+ lambday	HeikoS: at times, I feel like adding that to eigen :-/
+ lambday	HeikoS: lapack API is horrible.. I only succeded because lisitsyn explain each and every params to me one by one :D
+ lambday	explained*
+@HeikoS	yeah I know that, he did that for me too a while ago
+ lambday	lisitsyn: kudos, master yoda!
+@HeikoS	we should just get rid of lapack as soon as possible
+@HeikoS	almost all things can be replaced by eigen
+ lambday	HeikoS: does lapack work faster than eigen3?
+@HeikoS	it just burned 3 working days of mine, so no
+@HeikoS	cannot be that fast ;)
+ lambday	:D
+@sonney2k	HeikoS, well you suffer from bad ass ubuntu not lapack
+@sonney2k	on debian you wouldn't have such trouble
+@HeikoS	sonney2k: no its not ubuntu
+@sonney2k	then FC*
+@HeikoS	well I cannot do anything about this since its not my machine
+@sonney2k	:)
+@HeikoS	sonney2k: how to change this reference?
+ lambday	sonney2k: you support lapack? :(
+@sonney2k	HeikoS, what I would do is run make with verbose
+@sonney2k	so you see the cmdline of linking libshogun
+ lambday	using it is so hard
+@sonney2k	then copy that line
+@HeikoS	yes, its in the issue I made
+@HeikoS	sonney2k: https://github.com/shogun-toolbox/shogun/issues/1604
+@sonney2k	and then make sure it links to the libs you want by specifying -L/path
+@sonney2k	and have *the same* libs in LD_LIBRARY_PATH
+@sonney2k	then it works
+@sonney2k	HeikoS, where is the line?
+@sonney2k	I only see attempts to link the example
+@HeikoS	ah sorry, will post
+@sonney2k	HeikoS, and of course LD_LIBRARY_PATH won't help with *linking* an example
+@sonney2k	you need the proper -L / -l
+ lambday	HeikoS: I have two files there, one mtx and another is libsvm.. I should add these individually zipped you meant
+@HeikoS	lambday: why have two? why not one?
+ lambday	HeikoS: the mtx one is for python modular examples, I intended to use the libsvm ones for libshogun examples
+@sonney2k	HeikoS, try to add -/usr/lib64 -llapack to the end of the line
+@HeikoS	sonney2k: ok thanks will try
+@HeikoS	sonney2k: besser82 had another suggestion, comment out find_atlas in cmake, that in fact made cmake realize the proper .so file, currently compiling this way ...
+@sonney2k	you have most likely a clash between /usr/lib64/atlas/liblapack.so.3 and /usr/lib64/liblapack.so.3
+@sonney2k	HeikoS, that can work too
+@HeikoS	 /usr/lib64/atlas/liblapack.so.3 doesnt contain the symbol thats the problem
+@sonney2k	HeikoS, then just don't link against it
+ besser82	sonney2k: the problem is CMakeLists.txt preferes ATLAS over FORTRAN-LAPACK
+@HeikoS	sonney2k: besser82, doesnt work with disabling atlas, got even more undefined symbols
+@HeikoS	sonney2k: I dont know how to not link against it
+ besser82	HeikoS: export LDFLAGS="-Wl,-l/usr/lib64/lapack.so"
+ besser82	and try rebuilding with ATLAS re-enabled
+@HeikoS	besser82: what does that do?
+ besser82	adds original LAPACK to the linker-flags
+@HeikoS	so before building I need to export right?
+@HeikoS	before linking I mean
+ besser82	right, before configuring with comake ;)
+ besser82	cmake hardcodes ldflags to Makefile
+@HeikoS	besser that screws up the cmake totally
+ besser82	really? What's the output?
+-!- HeikoS [~heiko@nat-183-166.internal.eduroam.ucl.ac.uk] has quit [Excess Flood]
+-!- HeikoS [~heiko@nat-183-166.internal.eduroam.ucl.ac.uk] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+ besser82	wb, HeikoS
+@HeikoS	sorry connection dropped
+@HeikoS	now compiling with verbose to see the link command of libshogun
+ besser82	kk
+* HeikoS is dreaming of shogun in the cloud without installation
+* besser82 would say let's get started on openShift :)
+@HeikoS	openshift?
+ wiking	HeikoS: well it needs to be installed once on the cloud as well
+ besser82	HeikoS: and will allow Software-as-a-Service ;)
+ besser82	HeikoS: easy deployment with containers and cartirdges ;)
+@HeikoS	besser82: yeah something like that
+ besser82	HeikoS: imageine a container as a vm
+@HeikoS	an ipython server would actually be enough
+ wiking	besser82: is it free? :D
+@HeikoS	can write code in my browser then
+ besser82	wiking: openShift-community is free ;)
+ wiking	besser82: yeah but not the service itself
+ besser82	wiking: and that's the EXACT codebase redhat uses ;)
+ besser82	wiking: a limited use is free as well
+ wiking	besser82: i mean what we need is actually a machine where we can run it
+ wiking	because then we already have like virtualenv
+ besser82	amazon EC2?
+ wiking	besser82: money? :)
+ lisitsyn	wiking: CV help needed ;)
+ lisitsyn	anyone else having a clue please comment too
+ wiking	lisitsyn: shoot although i'm like only 10% here
+ besser82	wiking: try creditcard, doesn't cost money, will be collect automatically ;)
+ lisitsyn	my problem is quite silly
+ lisitsyn	I have bounding box where object is probably is
+@HeikoS	sonney2k, wiking so the linking command of shogun contains /usr/lib64/atlas/libatlas.so.3 /usr/lib64/liblapack.so.3 in this order
+ lisitsyn	but I need to generate some candidates you know
+ lisitsyn	how not-brain-damaged-people-like-me do it?
+ wiking	how do u assign probabilities?
+ lisitsyn	wiking: no probabilities I just learned svm and have background model
+ lisitsyn	so I just track background changes
+ wiking	ok so u have the bo
+ wiking	x
+ lisitsyn	yeah some box and I need candidates around it
+ wiking	what's candidates aroudn it?
+ lisitsyn	wiking: well these regions I'll apply svm to
+ lambday	HeikoS: there is a bug reagarding reading gzipped mtx file in python mmread : https://github.com/scipy/scipy/issues/2152
+ lambday	HeikoS: I am adding the ImportErrors though, but not sure how to work with individual gzipped mtx files
+@HeikoS	can you just only have libsvm format?
+ lambday	HeikoS: yes, if I can read it from python, which I can I guess
+@HeikoS	lambday: I am sure you can
+-!- lambday [67157e37@gateway/web/freenode/ip.103.21.126.55] has quit [Ping timeout: 250 seconds]
+ lisitsyn	HeikoS: is that lambday poweroff time?
+@HeikoS	lisitsyn: maybe :)
+ lisitsyn	HeikoS: ain't it insane?
+@HeikoS	sonney2k: https://gist.github.com/karlnapf/6584235
+@HeikoS	here is the output of the linking of shogun
+@HeikoS	lisitsyn:  it is insane
+@HeikoS	but it really is like that oer there
+-!- lisitsyn [~lisitsyn@fb2-lo1.global63.net] has left #shogun []
+-!- iglesiasg [~iglesias@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- mode/#shogun [+o iglesiasg] by ChanServ
+-!- HeikoS [~heiko@nat-183-166.internal.eduroam.ucl.ac.uk] has quit [Quit: Leaving.]
+-!- votjakovr [~votjakovr@host-46-241-3-209.bbcustomer.zsttk.net] has quit [Quit: Good bye!]
+-!- shogun-notifier- [~irker@7nn.de] has quit [Quit: transmission timeout]
+-!- besser82 [~besser82@fedora/besser82] has quit [Quit: Verlassend]
+--- Log closed Tue Sep 17 00:00:02 2013

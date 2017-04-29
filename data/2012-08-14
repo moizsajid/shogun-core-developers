@@ -1,0 +1,541 @@
+--- Log opened Tue Aug 14 00:00:14 2012
+--- Day changed Tue Aug 14 2012
+ n4nd0	the data one
+ blackburn	ah
+ blackburn	well nevermind I get it bakc
+ n4nd0	sorry about that :S
+ CIA-39	shogun: Sergey Lisitsyn master * r45a5ee4 / (40 files in 10 dirs): Merge pull request #684 from iglesias/so (+17 more commits...) - http://git.io/x0FI_A
+ CIA-39	shogun: Sergey Lisitsyn master * r122079a / data : Restored data - http://git.io/8Pl5mA
+ n4nd0	I think I do something wrong with the submodule
+ n4nd0	because my git status shows always
+ n4nd0	#modified:   data (untracked content)
+ blackburn	what is the output of git status in that dir?
+ n4nd0	http://pastebin.com/TQvfuw66
+ n4nd0	I don't want to put that file toy/hmsvm_data.mat in the main repo so I will delete it
+ blackburn	yeah
+ blackburn	that's the reason
+ n4nd0	now I just get
+ n4nd0	# On branch master
+ n4nd0	# Your branch is ahead of 'origin/master' by 2 commits.
+ n4nd0	#
+ n4nd0	nothing to commit (working directory clean)
+ n4nd0	mmm but my last two commits are the same as the ones in shogun-data master
+ shogun-buildbot	build #345 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/345  blamelist: Viktor Gal <viktor.gal@maeth.com>
+ blackburn	try git reset --hard origin/master
+-!- zxtx [~zv@c-71-227-187-90.hsd1.wa.comcast.net] has quit [Ping timeout: 256 seconds]
+ n4nd0	blackburn: thanks, now everything is fine :)
+ blackburn	n4nd0: do you have a formulation of HM-SVM somewhere?
+ blackburn	primal
+ blackburn	or is it only primal?
+ n4nd0	the optimization problem is the one used in generic SO
+ blackburn	loss?
+ n4nd0	the one in particular of the HM-SVM or the generic one?
+ n4nd0	for the HM-SVM we use Hamming loss
+ n4nd0	just count the number of elements that are different in two sequences of states
+ n4nd0	for the generic one we are using the Hinge loss
+ blackburn	n4nd0: so we need subgradient of hamming loss, right?
+ n4nd0	blackburn: do you mean for the risk function?
+ blackburn	exactly
+ n4nd0	I am not sure about that
+-!- gsomix [~gsomix@80.234.28.229] has quit [Ping timeout: 245 seconds]
+ blackburn	n4nd0: for a function h subgradient is a vector g
+ blackburn	such that for all w following holds true
+ blackburn	h(w') >= h(w) + g(w'-w)
+ blackburn	right?
+ wiking	blackburn: can u throw out the modular interface for LatentLabels ?
+ wiking	as the fix is not so much of a quickfix
+ wiking	and i gotta go to sleep now
+ blackburn	whats the problem?
+-!- n4nd0 [~nando@56.Red-81-33-212.dynamicIP.rima-tde.net] has quit [Ping timeout: 240 seconds]
+ wiking	since i have to be awake in 3.5 hours
+ blackburn	I don't mind to wait for fix :)
+ wiking	ah ok
+ wiking	then i'll send it tomorrow around 12pm
+ blackburn	np, ok
+ wiking	i gotta go now as i said
+ wiking	gnite
+ blackburn	nite
+-!- n4nd0 [~nando@56.Red-81-33-212.dynamicIP.rima-tde.net] has joined #shogun
+ blackburn	n4nd0: what is the last message you received?
+ n4nd0	re
+ blackburn	haha I totally missed that picture
+ blackburn	http://1.bp.blogspot.com/-4L8SUhLlmRk/T-DcRJSyvNI/AAAAAAAAAqk/Bg-RjlzijcM/s1600/image02.jpg
+ blackburn	that's the very first puffin444 appearance
+ blackburn	:D
+ shogun-buildbot	build #346 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/346  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ n4nd0	yeah
+ n4nd0	the last thing I got from was an exactly
+ n4nd0	I don't know if you got what I said after
+ blackburn	n4nd0: have you seen that pic?
+ n4nd0	yes
+ blackburn	ah I see you +1 that
+ blackburn	:D
+ n4nd0	:)
+ blackburn	I wanted to see how puffin look like
+ blackburn	seems to be that his 5 kg notebook made him strong
+ blackburn	n4nd0: okay
+ blackburn	about subgrad
+ blackburn	did you receive these messages?
+ n4nd0	which one?
+ blackburn	(02:21:40 AM) blackburn: n4nd0: for a function h subgradient is a vector g
+ blackburn	(02:21:52 AM) blackburn: such that for all w following holds true
+ blackburn	(02:22:08 AM) blackburn: h(w') >= h(w) + g(w'-w)
+ blackburn	(02:22:10 AM) blackburn: right?
+ blackburn	n4nd0: are you out again?
+ blackburn	:)
+ n4nd0	I am here
+ blackburn	n4nd0: so in HM-SVM primal is just
+ blackburn	l2 of w + hamming loss
+ blackburn	right?
+ n4nd0	the loss is not l2, it is the hinge loss
+ n4nd0	something similar to hinge loss to tell the truth, just max(0,z)
+ n4nd0	and it is not taken to w directly
+ blackburn	ehmm I didn't say l2 loss
+ n4nd0	ok
+ blackburn	is regularizer ||w||^2_2?
+ n4nd0	what do you mean with l2 of w + hamming loss then?
+ n4nd0	where?
+ n4nd0	ok
+ blackburn	in your hm-svm :)
+ blackburn	how do you define risk at all?
+ n4nd0	as they say in the paper :)
+ blackburn	yeah that's what I am begging for :D
+ blackburn	is that a paper? http://www.cs.brown.edu/~th/papers/AltTsoHof-ICML2003.pdf
+ blackburn	the paper
+ blackburn	I mean
+ blackburn	:D
+ n4nd0	I understand it as a mean value of the loss function
+-!- zxtx [~zv@c-71-227-187-90.hsd1.wa.comcast.net] has joined #shogun
+ n4nd0	expected value transmits better the idea I think
+ blackburn	n4nd0: eq 18, right?
+ n4nd0	no
+ blackburn	which one?
+ n4nd0	that is the objective
+ n4nd0	in that paper they do not talk about risk functions
+ n4nd0	that definition pops up from a more general point of view, in generic SO
+ blackburn	objective is the risk
+ blackburn	if we put s.t. part to the objective I mean
+ n4nd0	but those are the constraints, not the objective
+ blackburn	we can put it into objective and get a risk function
+ n4nd0	http://jmlr.csail.mit.edu/papers/volume6/tsochantaridis05a/tsochantaridis05a.pdf
+ n4nd0	page 4
+ n4nd0	that is the formal definition of the risk function
+ n4nd0	I don't really see the equivalence you say :S
+ n4nd0	putting the constraints in the objective to get the risk function
+ blackburn	risk is regularizer+loss
+ blackburn	binary svm can be seen as
+ n4nd0	aham maybe that is another definition then
+ blackburn	||w||^2+max(0,1-y*<w,x>)
+ blackburn	right?
+ blackburn	w/o s.t part at all
+ n4nd0	what I understood following this paper is that the risk is a measure of expected value of the loss
+ n4nd0	let's see what Michal has done
+ blackburn	n4nd0: no, it is an empirical risk
+ blackburn	we optimize regularized risk
+ shogun-buildbot	build #347 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/347  blamelist: iglesias <fernando.iglesiasg@gmail.com>
+ blackburn	that's objective w/o s.t. part
+ n4nd0	ok
+ blackburn	n4nd0: expected value is an actual risk
+ blackburn	n4nd0: one interesting point here
+ blackburn	n4nd0: do you know why one should introduce slack variable here?
+ n4nd0	to penalize how far we go from the region of correct classification
+ blackburn	n4nd0: I mean why not to make it use hinge loss as is?
+ n4nd0	what do you mean with hinge loss as is?
+ blackburn	max(0,1-yz)
+ n4nd0	because in structured output, how do you define y?z?
+ n4nd0	y is not a number any more
+ blackburn	no, I don't mean that
+ blackburn	in typical svm
+ n4nd0	:)
+ blackburn	why do we introduce s.t. part
+ blackburn	but not use max(0,1-yz) in objective?
+ n4nd0	you in typical svm you mean
+ blackburn	just binary
+ n4nd0	min ||w||^2 +  \sum_i slack_i
+ blackburn	svm without s.t. part
+ blackburn	is
+ blackburn	min ||w||^2 + \sum_i max(0,1-y_i(<w,x_i>+b))
+ blackburn	agree?
+ n4nd0	agree
+ blackburn	no s.t. part at all
+ blackburn	right? :)
+ n4nd0	yes
+ blackburn	why not to solve that?
+ n4nd0	that is non linear
+ blackburn	yeah discontinuous I would say
+ n4nd0	because of the max
+ n4nd0	hehe ok
+ blackburn	that's what I mean
+ blackburn	but actually
+ blackburn	that thing I wrote
+ blackburn	is the regularized risk of svm
+ blackburn	it can be solved via bmrm already
+ n4nd0	ok
+ blackburn	see what I mean?
+ n4nd0	mmm not really
+ blackburn	so in your hm-svm thing
+ blackburn	you have
+ blackburn	min ||w||^2 + hamming(what?)
+ n4nd0	it is not directly like that
+ blackburn	can we come to that?
+ n4nd0	in generic SO we have
+ n4nd0	https://dl.dropbox.com/u/11020840/shogun/so.pdf
+ n4nd0	look at equation (1)
+ n4nd0	so-svm with margin rescaling
+ n4nd0	now
+ n4nd0	the l we are using is this modified hinge loss, i.e. max(0,z)
+ blackburn	no, for generic so we can't come up with subgradient at all I am afraid
+ n4nd0	yeah but substitute the missing pieces there for what I am telling you
+ n4nd0	and \Delta is the Hamming loss
+ blackburn	that's clear
+ blackburn	what are s.t. statements?
+ blackburn	can we get rid of it?
+ n4nd0	just some very generic constraints
+ n4nd0	sonme of them are actually required
+ n4nd0	forget about those there in the paper
+ n4nd0	and the ones we really need are A?x <= b
+ blackburn	what is A and b?
+ shogun-buildbot	build #348 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/348  blamelist: iglesias <fernando.iglesiasg@gmail.com>, Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ n4nd0	note that I use x and not w (x = [w auxiliary_variables slacks])
+ n4nd0	still here?
+ blackburn	hmm
+ blackburn	yes
+ n4nd0	they have several uses
+ n4nd0	one of them is particular to the cutting-plane algorithm I use
+ n4nd0	another one is for the hm-svm, to specify monotonicity in the emission functions learnt
+ blackburn	n4nd0: I got back to teo thesis
+ n4nd0	ok
+ blackburn	Appendix A.1 - isn't that what you need?
+ n4nd0	that is not telling me how to compute the risk in an hmm
+ blackburn	n4nd0: your loss is eq (A.2), subgradient is (A.8)
+ blackburn	risk is loss value + regularizer value
+ blackburn	n4nd0: can you compute loss function value?
+ n4nd0	I think that the regularizer is not included in the risk
+ blackburn	yeah I tend to that too
+ blackburn	in that method it is I mean
+ blackburn	generally it is included
+ n4nd0	at the beginning of the bmrm, in the definition they give, it is not included I think
+ blackburn	generally I mean in ML at all :)
+ blackburn	I expect they regularize by L2
+ n4nd0	ok :)
+ n4nd0	anyway they do not include it in Teo either
+ n4nd0	(A.2) for Teo is the loss (as you said) but it is also the risk
+ blackburn	risk is sum of losses, yes
+ n4nd0	ok
+ blackburn	or average (depending on the implementation, I don't know exactly)
+ blackburn	but it is not the issue right now
+ n4nd0	agree
+ blackburn	with A.8
+ blackburn	you can compute subgradient
+ n4nd0	ok
+ blackburn	all you would need is to compute argmax in A.7
+ blackburn	is it a hard task for hm-svm?
+ n4nd0	the subgradient of the loss
+ n4nd0	it is simply Viterbi
+ n4nd0	I already have that one there
+ blackburn	I am lame with markov models still but once you compute it you have everything you need
+ n4nd0	I think I start to see your point :)
+ blackburn	n4nd0: but you would need to run viterbi quite a few times, is it feasible?
+-!- zxtx [~zv@c-71-227-187-90.hsd1.wa.comcast.net] has quit [Ping timeout: 272 seconds]
+ blackburn	#of examples times to be exact
+ n4nd0	blackburn: it is the bottleneck in SO
+ n4nd0	the argmax
+ blackburn	n4nd0: btw delta is not included in subgradient here
+ blackburn	only in argmax
+ n4nd0	yes
+ n4nd0	we could say too that it is included in the risk
+ n4nd0	not in the subgradient of rish though
+ blackburn	ah right
+ n4nd0	look at this
+ blackburn	n4nd0: so do you get how to compute it now?
+ n4nd0	shogun/structure/MulticlassRiskFunction.h
+ blackburn	n4nd0: ha!
+ n4nd0	I think the doc Michal wrote there is precisely the important part we are discussing just now
+ n4nd0	and this deserves a huge LOL
+ blackburn	n4nd0: regularizer is included
+ n4nd0	mmm
+ n4nd0	blackburn: mmm where?
+ blackburn	wrong sorry
+ blackburn	n4nd0: everything is clear for me now
+ blackburn	omfg what does he do
+ n4nd0	there is something that doesn't fit I thin
+ blackburn	I have to change it now
+ n4nd0	think*
+ blackburn	what?
+ blackburn	he compute feature vector and compute dot manually
+ n4nd0	\ell(y_i,y)
+ n4nd0	that should be the delta loss
+ blackburn	where?
+ n4nd0	doc in the header
+ blackburn	multiclass risk/
+ blackburn	?
+ n4nd0	yeah
+ blackburn	so? it is implemented in line 90
+ n4nd0	ok
+ n4nd0	it was just a misleading in the notation
+ n4nd0	I am not saying is wrong
+ n4nd0	what do you want to put in there, DotFeatures?
+ blackburn	sure
+ blackburn	it is totally wrong to compute vectors here
+ blackburn	imagine sparse features with 1%  nnz
+ blackburn	:D
+ blackburn	100x speedup from nowhere
+ n4nd0	yes
+ n4nd0	maybe we should tell Michal instead
+ n4nd0	anyway, another thing
+ n4nd0	I don't know why the hell do we need a risk function for multiclass, another for hm-svm, another for ....
+ blackburn	he merged his stuff already I think so no problem
+ blackburn	n4nd0: ehmm because it is simple for multiclass
+ n4nd0	but it is the same for all
+ blackburn	loop on line 82 is your argmax
+ n4nd0	just the argmax and the psi changes
+ blackburn	yes
+ n4nd0	I think this risk function should go in StructuredModel
+ n4nd0	and call the argmax and psi
+ n4nd0	do you see my point?
+ n4nd0	I mean it is like A.2 and A.8
+ blackburn	yes that's misleading thing with our czech friend
+ blackburn	friends :)
+ blackburn	they tend to develop their own solutions
+ n4nd0	hehe
+ n4nd0	you have always to stop generalizing at some point...
+ blackburn	yes sure
+ blackburn	wait
+ blackburn	so you have everything you need already?
+ blackburn	both psi and argmax?
+ n4nd0	what?
+ blackburn	do you have psi and argmax for hm-svm?
+ n4nd0	sure
+ n4nd0	you always need those
+ blackburn	so you can easily add risk function for that?
+ n4nd0	I think so
+ n4nd0	is what I told you
+ n4nd0	I would just add a RiskFunction in CStructuredModel
+ blackburn	but what was the problem?
+ n4nd0	that I didn't know that the risk function was that...
+ blackburn	ahh
+ blackburn	so it is all now easy, right?
+ blackburn	and we are happy? :)
+ n4nd0	very happy :)
+ n4nd0	I am actually suspicious
+ blackburn	why?
+ n4nd0	it seems far too easy right now
+ blackburn	just try and compaer
+-!- n4nd0 [~nando@56.Red-81-33-212.dynamicIP.rima-tde.net] has quit [Quit: leaving]
+-!- zxtx [~zv@c-71-227-187-90.hsd1.wa.comcast.net] has joined #shogun
+ CIA-39	shogun: Sergey Lisitsyn master * rd16ae4b / (2 files): Made MulticlassRiskFunction use COFFIN operations and fixed reference count for data in dual lib qpbmsosvm - http://git.io/14c0SQ
+ blackburn	wiking: how can you write to twitter and sleep? :D
+ shogun-buildbot	build #54 of nightly_none is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_none/builds/54
+-!- blackburn [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+ shogun-buildbot	build #62 of nightly_default is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/62
+ shogun-buildbot	build #50 of nightly_all is complete: Failure [failed compile]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_all/builds/50
+-!- av3ngr [av3ngr@nat/redhat/x-ohnbmedkajymxfbl] has joined #shogun
+-!- av3ngr [av3ngr@nat/redhat/x-ohnbmedkajymxfbl] has quit [Client Quit]
+ shogun-buildbot	build #63 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/63
+ shogun-buildbot	build #349 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/349  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- uricamic [~uricamic@2001:718:2:1634:ad82:d30e:54f:2c11] has joined #shogun
+-!- zxtx [~zv@c-71-227-187-90.hsd1.wa.comcast.net] has quit [Ping timeout: 268 seconds]
+-!- gsomix [~gsomix@80.234.28.229] has joined #shogun
+-!- gsomix [~gsomix@80.234.28.229] has quit [Client Quit]
+ uricamic	hi, does anyone know what shall I do, to let configuration script find the MOSEK?
+ wiking	yo
+ wiking	blackburn magic ;)
+ wiking	ah u r not here :(
+ wiking	sonney2k: around?
+ wiking	sonney2k:  i need some advise
+ wiking	uricamic: here?
+ uricamic	wiking: yep
+ wiking	uricamic: n4nd0 had an idea yesterday to add the RiskFunction within the StructureModel class
+ wiking	uricamic: i.e. simply adding a new pure virtual function risk(...)
+ uricamic	wiking: yep, I think we had discussed that at the very beginning, so I am not against :)
+ wiking	i see
+ wiking	i'll check how that effects my code and i'll let you guys know whether i'm against it or supporting it :)
+ uricamic	this divergence was done mainly, we had to submit some code and I was waiting for his part for too long, so I started to code it, to be able to continue, and we left this for later, which unfortunately never happened :)
+ uricamic	wiking: ok
+ wiking	hehe ok
+ wiking	i hope i can get back to this today
+ uricamic	I guess it is reasonable to have it together, because then user have to write just one derived class not many of them :)
+ wiking	indeed
+ uricamic	but also it was better to have it separate because of simultaneous work
+ uricamic	but I guess now we can merge it
+ wiking	my problem is simply the mixture of latentmodel and structuremodel
+ uricamic	since GSoC end is coming :)
+ wiking	they share a lot of things together but not
+ wiking	so i'm still struggling with merging that too :))
+ uricamic	:)
+ uricamic	and maybe with merging also the support of user data for risk function will be simplified
+ wiking	uricamic: heheh that's for sure
+ uricamic	i.e. we could than remove CRiskData class, and all user data needed could be defined in the StructuredModel
+ wiking	uricamic: i mean currently i hd the troulbe of having reference on some other functions
+ uricamic	everything should be simplified then :D
+ wiking	since i needed the reference on functions like argmax_{y} withing CRiskFunction
+ wiking	mmm ok letme try to sketch up that thing now
+ wiking	as otherwise i'm wating on blackburn to give me some advise
+ uricamic	ok
+ wiking	uricamic: ok i think i'm done with it
+ wiking	:))
+ wiking	the only thing is that i don't know what where to add the the MulticlassRiskFunction implementation
+ wiking	uricamic: i've sent you and n4nd0 an email with the patch and some comments....
+-!- zxtx [~zv@c-24-18-130-24.hsd1.wa.comcast.net] has joined #shogun
+ uricamic	wiking: ok, thanks, I will look on it
+ uricamic	wiking: yep, risk function is needed whenever you want to use BMRM solver
+-!- gsomix [~gsomix@80.234.28.229] has joined #shogun
+ gsomix	good day
+ wiking	gsomix: where's blackburn? :)
+ gsomix	wiking, I dunno, lol. ;)
+-!- blackburn1 [~blackburn@109.226.80.43] has joined #shogun
+ gsomix	BLACKBURN!
+ blackburn1	hey there wiking uricamic
+ uricamic	blackburn1: hi
+ wiking	blackburn1: !!!
+ blackburn1	uricamic: we discussed things with n4nd0 last night
+ uricamic	yep, I have looked on the log :)
+ blackburn1	uricamic: I am curious why we do not include regularized?
+ blackburn1	zer*
+ uricamic	blackburn1: what do u mean?
+ uricamic	it is included in bmrm algorithm
+ blackburn1	uricamic: L2?
+ uricamic	yep
+ blackburn1	so L1 is not possible?
+ uricamic	I guess not in our implementation
+ blackburn1	I see
+ blackburn1	we need to merge things you all have done somehow :D
+ uricamic	the problem with L1 is that it would not be that easily solvable
+ blackburn1	uricamic: are you ok with changes in multiclass risk?
+ uricamic	I think this was the general intention, we have discuss it with n4ndo when GSoC started, and then somehow forgotten about this idea to merge it together
+ uricamic	blackburn1: sure
+ blackburn1	that's really important to use dense_dot and add
+ uricamic	as I said, it was just fast not very clever implementation just to prove, that it works :)
+ blackburn1	I see
+ uricamic	and I thing the way how wiking wants to merge it together is nice
+ uricamic	and I guess also not very demanding or time consuming
+ uricamic	CRiskData will disappear, because it will not be needed anymore
+ blackburn1	right
+ uricamic	and in StructuredModel virtual function risk will appear
+ wiking	:)
+ blackburn1	there are way too many entities here :D
+ uricamic	yep, as I said, it was general intention to put it together eventually :)
+ wiking	yeah a patch has been proposed
+ wiking	now i'm waiting n4nd0 and uricamic's comments
+ uricamic	because the risk function in fact uses argmax and loss function, which is already in StructuredModel
+ uricamic	wiking: I am ok with it like it is, just don't forget to add implementation of risk function in MulticlassModel
+ wiking	blackburn1: let me know when u have 5 mins
+ wiking	uricamic: okey that shouldn't be hard ;P
+ uricamic	nope, in fact it will be even easier now than it was :D
+ wiking	uricamic: i'll wait for n4nd0's feedback as well and then i'll fire a PR :P
+ uricamic	no need of using RiskData
+ uricamic	wiking: ok, looking forward :)
+ blackburn1	wiking: I will be back in 10 minutes
+ blackburn1	and then lets discuss
+ wiking	blackburn1: ok
+ blackburn1	wiking: re
+ wiking	blackburn1: rere
+ wiking	blackburn1: so it's regarding the latentlabels fix
+ wiking	so now i'm in a catch-22 state with the design
+ blackburn1	damn I should read that book, I stopped on page 10 or so :D
+ wiking	basically what a latent machine has is LatentFeatures, LatentLabels and Labels
+ wiking	the thing is that currently LatentLabels is derived from binarylabels thus it's 2 in one
+ wiking	this is good but till the moment when u want to have structural labels
+ wiking	or any other types of labels, i.e. y_i
+ wiking	i have two choices a) i separate h_i (latentlabels) and y_i
+ wiking	or b) i add a CLabels object within LatentLabels to contain the y_i
+ wiking	solution a) is cleaner i think but there comes the problem of standard API of CMachine
+ blackburn1	no, I like b) more if I understand it correctly
+ wiking	as it has CLabels* apply_<somekind> (CFeatures*)
+ wiking	with that API i cannot return h_i and y_i
+ wiking	so i have to break the API of machine
+ blackburn1	I think latent labels should contain both h_i and y_i
+ wiking	if i go with solution b) then yes
+ wiking	that way i won't break any API
+ wiking	but somehow the API won't be so clear for the latentmachine
+ wiking	as the y_i will be 'hidden'
+ blackburn1	I think that's ok
+ wiking	i.e. it wont ever appear as a function argument for example when u create a latent machine
+ blackburn1	just add a class to contain h_i and y_i
+ wiking	blackburn1: ok then i'll just change the inheritance of CLatentLabels to CLabels
+ blackburn1	yeah
+ wiking	and basically add a CLabels within CLatentLabels to store the y_i
+ blackburn1	any separating would be worse here
+ blackburn1	hmm that makes sense too
+ wiking	ok
+ wiking	then i'll just stash now the structuredModel +risk refactoring until n4nd0 gives his comments...
+ wiking	or maybe i just send in a PR about that
+ wiking	and n4nd0 can comment there
+ wiking	i have a feeling that'll be faster  ;P just as in case of unit testing :D
+ blackburn1	I thought of latent as structured model
+ blackburn1	can't you come this way?
+ wiking	well
+ wiking	that's the next step somehow
+ blackburn1	I see
+ wiking	but still cannot see a nice way to do it
+ wiking	yet
+ wiking	ok i'm away for 30mins to do so errands
+ wiking	blackburn1: thnx for the input
+ blackburn1	np
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+ yoo	hi all
+ blackburn1	hey
+-!- blackburn1 [~blackburn@109.226.80.43] has quit [Quit: Leaving.]
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Quit: Page closed]
+-!- CIA-39 [~CIA@204.152.223.100] has quit [Ping timeout: 265 seconds]
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has joined #shogun
+-!- yoo [2eda6d52@gateway/web/freenode/ip.46.218.109.82] has quit [Client Quit]
+ uricamic	wiking: I almost forgot one thing
+ uricamic	in the patch, u can also change risk function from void to return float64_t, i.e. it will return value of the risk
+ uricamic	blackburn suggested this, and it is reasonable
+-!- CIA-21 [~CIA@204.152.223.100] has joined #shogun
+-!- heiko [~heiko@host86-176-126-57.range86-176.btcentralplus.com] has joined #shogun
+ heiko	blackburn
+ heiko	oh not here
+ CIA-21	shogun: Heiko Strathmann master * r854ec32 / (2 files): minor updates - http://git.io/GtSCTg
+ CIA-21	shogun: Heiko Strathmann master * rf4c19cb / src/shogun/labels/BinaryLabels.cpp : bugfix - http://git.io/UK0PQQ
+ CIA-21	shogun: Heiko Strathmann master * rd75793a / (2 files): added example/test for fitting sigmoid on binary labels - http://git.io/CqWVLA
+ CIA-21	shogun: Heiko Strathmann master * r419f224 / (4 files in 2 dirs): Merge pull request #714 from karlnapf/master - http://git.io/WWKpjA
+ CIA-21	shogun: Heiko Strathmann master * r47bbe6a / (2 files): added john platt's method for computung calibrated posterior outputs for - http://git.io/l15Iiw
+-!- heiko [~heiko@host86-176-126-57.range86-176.btcentralplus.com] has quit [Quit: Leaving.]
+ shogun-buildbot	build #350 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/350  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+-!- blackburn [~blackburn@109.226.80.43] has joined #shogun
+-!- uricamic [~uricamic@2001:718:2:1634:ad82:d30e:54f:2c11] has quit [Quit: Leaving.]
+ shogun-buildbot	build #351 of deb3 - modular_interfaces is complete: Failure [failed compile java_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/351  blamelist: Heiko Strathmann <heiko.strathmann@gmail.com>
+@sonney2k	wiking, could you please fix the compile error?
+@sonney2k	hey gsomix - how is 0-copy stuff proceeding?
+@sonney2k	wiking, why do your latentlabels derive from denselabels?
+@sonney2k	and not just labels?
+@sonney2k	at least this is the reason for the compile error
+ blackburn	sonney2k: yeah he knows :)
+ blackburn	sonney2k: our SO guys need to make final effort to merge risk and models
+@sonney2k	wiking, I am renaming your get_labels to get_latent_labels
+@sonney2k	then this is resolved
+@sonney2k	wiking - hope that is what you had in mind
+ gsomix	sonney2k, good
+@sonney2k	gsomix, so that means PR any minute?
+ gsomix	sonney2k, nope
+@sonney2k	gsomix, what does it mean then?
+ gsomix	that I figured out how to do it rightly. and now doing
+@sonney2k	ok
+ CIA-21	shogun: Soeren Sonnenburg master * r973c3d7 / (2 files): rename conflicting get_labels function to get_latent_labels in CLatentLabels - http://git.io/rFhFmw
+-!- gsomix_ [~gsomix@109.169.234.221] has joined #shogun
+-!- gsomix [~gsomix@80.234.28.229] has quit [Read error: Connection reset by peer]
+ shogun-buildbot	build #352 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/352  blamelist: Soeren Sonnenburg <sonne@debian.org>
+ blackburn	hah
+ blackburn	the two sgvectors problem
+ blackburn	my favourite one
+ CIA-21	shogun: Sergey Lisitsyn master * rbbcbb01 / src/interfaces/modular/modshogun_ignores.i : Updated ignore statement to fix java building - http://git.io/QsvlLA
+-!- gsomix_ [~gsomix@109.169.234.221] has quit [Ping timeout: 244 seconds]
+ shogun-buildbot	build #353 of deb3 - modular_interfaces is complete: Failure [failed compile csharp_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/353  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+-!- gsomix_ [~gsomix@88.200.214.210] has joined #shogun
+ CIA-21	shogun: Sergey Lisitsyn master * rc6a588e / (4 files in 3 dirs): Attempt to fix csharp compilation - http://git.io/AI-xFg
+ shogun-buildbot	build #354 of deb3 - modular_interfaces is complete: Failure [failed test python_modular]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/deb3%20-%20modular_interfaces/builds/354  blamelist: Sergey Lisitsyn <lisitsyn.s.o@gmail.com>
+ blackburn	sonney2k: around?
+-!- n4nd0 [~nando@111.red-80-28-182.adsl.static.ccgg.telefonica.net] has joined #shogun
+ n4nd0	wiking: hey, I am checking your mail about the Risk Function right now (I've been out for the day)
+-!- n4nd0 [~nando@111.red-80-28-182.adsl.static.ccgg.telefonica.net] has quit [Ping timeout: 252 seconds]
+-!- gsomix_ [~gsomix@88.200.214.210] has quit [Ping timeout: 256 seconds]
+-!- n4nd0 [~nando@98.Red-2-137-39.dynamicIP.rima-tde.net] has joined #shogun
+ CIA-21	shogun: Sergey Lisitsyn master * r97768b9 / (11 files in 6 dirs): Fixed some regression static tester issues - http://git.io/Y8IVPA
+-!- n4nd0 [~nando@98.Red-2-137-39.dynamicIP.rima-tde.net] has quit [Ping timeout: 248 seconds]
+-!- n4nd0 [~nando@98.Red-2-137-39.dynamicIP.rima-tde.net] has joined #shogun
+-!- n4nd0 [~nando@98.Red-2-137-39.dynamicIP.rima-tde.net] has quit [Ping timeout: 240 seconds]
+-!- n4nd0 [~nando@98.Red-2-137-39.dynamicIP.rima-tde.net] has joined #shogun
+-!- n4nd0 [~nando@98.Red-2-137-39.dynamicIP.rima-tde.net] has quit [Client Quit]
+--- Log closed Wed Aug 15 00:00:17 2012

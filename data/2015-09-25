@@ -1,0 +1,159 @@
+--- Log opened Fri Sep 25 00:00:34 2015
+-!- besser82 [~besser82@fedora/besser82] has quit [Ping timeout: 246 seconds]
+-!- besser82 [~besser82@fedora/besser82] has joined #shogun
+-!- mode/#shogun [+o besser82] by ChanServ
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 240 seconds]
+-!- HeikoS [~heiko@144.82.196.166] has joined #shogun
+-!- mode/#shogun [+o HeikoS] by ChanServ
+@HeikoS	lisitsyn:  hi
+ lisitsyn	HeikoS: hey
+@HeikoS	lisitsyn: have a question for you
+@HeikoS	problem: I have new algorithms and would like to put them online
+ lisitsyn	aha
+@HeikoS	problem: shogun is too big and nobody can be asked to install it
+@HeikoS	so I cannot put it in there, no point
+@HeikoS	so I am thinking of rather writing micro libraries
+ lisitsyn	hmm yeah
+@HeikoS	that are super super easy to install
+@HeikoS	and use
+@HeikoS	BUT
+ lisitsyn	maybe this makes sense
+@HeikoS	I want to allow people to use them from different languages
+@HeikoS	just like shogun
+@HeikoS	since nobody uses C
+@HeikoS	or can be asked
+@HeikoS	how can I do this nicely?
+@HeikoS	what is your thoguhts on this?
+ lisitsyn	what langs do you want?
+@HeikoS	same as Shogun more or less
+@HeikoS	in order: python, R, Matlab, Java
+@HeikoS	but I dont want to build the interfaces by hand
+@HeikoS	the thing is
+@HeikoS	interface does not need to be object oriented
+@HeikoS	since the mini lib is very small
+@HeikoS	just some functions with couple of parameters to be called
+@HeikoS	that can be embedded into something else
+ lisitsyn	ok I see
+ lisitsyn	well if you need that many langs
+ lisitsyn	you'd need swig probably
+@HeikoS	lisitsyn: ok say I used swig
+ lisitsyn	but if you have just a few functions
+ lisitsyn	we can have something on our own
+@HeikoS	what do you mean?
+ lisitsyn	well matlab C bindings, python C bindings
+@HeikoS	I see
+@HeikoS	how realistic is a mini version of a meta library that exposes simple C functions via swig?
+ lisitsyn	well it sounds pretty easy
+ lisitsyn	HeikoS: I would design it like that:
+ lisitsyn	swig - C API - C++ code
+@HeikoS	ok
+@HeikoS	and the objects passed would just be vectors and matrices
+@HeikoS	and basic types
+@HeikoS	lisitsyn: how much sense do you think it makes to put this into a meta library for exactly that use?
+ lisitsyn	I see some problem it would become shogun
+ lisitsyn	:D
+ lisitsyn	I am thinking how to avoid that
+@HeikoS	lisitsyn: if Shogun was modular
+@HeikoS	then I would not have to do it
+ lisitsyn	modular like?
+@HeikoS	but right now it makes no sense for me to put stuff in --- to hard to use
+@HeikoS	a person quickly wants to use my algorithm
+@HeikoS	takes < 5 mins to get it running
+ lisitsyn	ok I see
+@HeikoS	or another scenario
+@HeikoS	someone wants to use the code in a ML toolbox or another project
+@HeikoS	takes just a few minutes to integrate it
+@HeikoS	just like say eigen
+@HeikoS	or scikit learn
+@HeikoS	mini libraries with a particular purpose and easy to use
+ lisitsyn	HeikoS: ok let me think
+ lisitsyn	HeikoS: will you be here in a hour?
+@HeikoS	yes
+ lisitsyn	ok I'll call you then :)
+@HeikoS	lisitsyn: cool!
+ lisitsyn	I'll get to work now
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 246 seconds]
+-!- uchihaitachi08 [~sameer@203.110.243.23] has joined #shogun
+@HeikoS	lisitsyn:  heya
+ lisitsyn	HeikoS: hey
+ lisitsyn	yeah I am back :)
+ lisitsyn	ok lets discuss the stuff
+@wiking	morning
+@wiking	:)
+* wiking in boston
+ lisitsyn	hah
+ lisitsyn	HeikoS: ping! :)
+ lisitsyn	wiking: no moar kiev?
+@HeikoS	lisitsyn: yo!
+@HeikoS	wiking: morning!
+ lisitsyn	HeikoS: I had other idea
+@HeikoS	shooot
+ lisitsyn	do you think you gonna call these methods very often?
+ lisitsyn	whatever methods you have
+ lisitsyn	train? apply?
+@HeikoS	lisitsyn: not really
+@HeikoS	they are expensive
+@HeikoS	so a simple API that hides a more expensive machinery in the back
+@HeikoS	maybe some methods are called more often though
+@HeikoS	like update methods of estimators
+ lisitsyn	what about data-driven api?
+@HeikoS	in fact
+@HeikoS	object oriented is best, it is for density estimation
+@HeikoS	so you learn an object and subsequently want to know its gradient many times
+@HeikoS	but explain what you ahve in mind
+ lisitsyn	well say have
+ lisitsyn	hmmm
+ lisitsyn	let me find some example
+ lisitsyn	ok nevermind
+ lisitsyn	HeikoS: say you submit some json and get result
+@HeikoS	no it is much simpler
+ lisitsyn	HeikoS: I mean this is supergeneral
+ lisitsyn	no matter what library you have you gonna use it the same way
+ lisitsyn	and change the json you submit
+ lisitsyn	HeikoS: I may be unclear
+@HeikoS	lisitsyn: but I do build research software
+ lisitsyn	yes
+@HeikoS	so it is more a library to be used in other code
+@HeikoS	not so much an application
+ lisitsyn	yes
+ lisitsyn	it is not that different
+ lisitsyn	HeikoS: I don't mean you're going to do all the json/whatever stuff
+ lisitsyn	I just mean we can define some api so that you pass some data
+ lisitsyn	and get some data
+ lisitsyn	not that you do some sequential steps
+@HeikoS	I see what you mean
+@HeikoS	but I would prefer a simple C-style or OO api to that
+@HeikoS	data driven is more interesting if developing tools that are going to be used in products
+@HeikoS	for me at least
+ lisitsyn	HeikoS: well I am approaching that as the simplest thing
+ lisitsyn	because this way we just need one swig method :D
+@HeikoS	lisitsyn: I see
+@HeikoS	but users need to put data into a json
+ lisitsyn	HeikoS: I am thinking about other thing
+ lisitsyn	like you provide how to access data
+ lisitsyn	say you attach some object to existing matrix
+ lisitsyn	and it has some unique id
+ lisitsyn	e.g.
+ lisitsyn	source = lib.source(your_feature_matrix)
+ lisitsyn	lib.do(task=learn, method=your_fancy_gp, data=source)
+@HeikoS	I see
+@HeikoS	that is quite cool
+@HeikoS	lisitsyn: in fact, that would be good for Shogun
+@wiking	lisitsyn: yeah kiev is over :)
+ lisitsyn	HeikoS: I am considering the case
+ lisitsyn	you read remote file
+ lisitsyn	or HDFS file
+@HeikoS	lisitsyn:  I see
+@HeikoS	or passdata from memory?
+ lisitsyn	HeikoS: yes
+ lisitsyn	HeikoS: ok what about
+ lisitsyn	your code is in C++ already?
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has joined #shogun
+-!- shaochuan [~shaochuan@c-50-184-81-180.hsd1.ca.comcast.net] has quit [Ping timeout: 268 seconds]
+@HeikoS	yes
+-!- HeikoS [~heiko@144.82.196.166] has quit [Ping timeout: 272 seconds]
+-!- shaochuan [~shaochuan@2601:647:4603:2a70:8f8:25bb:cd3c:3875] has joined #shogun
+-!- shaochuan [~shaochuan@2601:647:4603:2a70:8f8:25bb:cd3c:3875] has quit [Ping timeout: 246 seconds]
+--- Log closed Sat Sep 26 00:00:36 2015

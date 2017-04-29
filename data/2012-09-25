@@ -1,0 +1,377 @@
+--- Log opened Tue Sep 25 00:00:17 2012
+-!- blackburn [~blackburn@37.61.181.31] has quit [Quit: Leaving.]
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has quit [Ping timeout: 240 seconds]
+-!- heiko [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has quit [Quit: Leaving.]
+-!- wiking_ [~wiking@info2k1.hu] has joined #shogun
+-!- voket [26688042@gateway/web/freenode/ip.38.104.128.66] has quit [Ping timeout: 245 seconds]
+-!- wiking [~wiking@huwico/staff/wiking] has quit [Write error: Connection reset by peer]
+-!- audy- [~audy@heyaudy.com] has joined #shogun
+-!- audy [~audy@unaffiliated/audy] has quit [Write error: Broken pipe]
+ shogun-buildbot	build #112 of nightly_default is complete: Failure [failed test]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/112
+ shogun-buildbot	build #113 of nightly_default is complete: Success [build successful]  Build details are at http://www.shogun-toolbox.org/buildbot/builders/nightly_default/builds/113
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has joined #shogun
+-!- sonne|work [~sonnenbu@194.78.35.195] has joined #shogun
+-!- wiking_ is now known as wiking
+-!- wiking [~wiking@info2k1.hu] has quit [Changing host]
+-!- wiking [~wiking@huwico/staff/wiking] has joined #shogun
+-!- romi__ [~mizobe@187.74.0.20] has quit [Ping timeout: 264 seconds]
+-!- romi__ [~mizobe@187.57.9.8] has joined #shogun
+ wiking	sonne|work: here?
+ sonne|work	yes
+ wiking	have u managed to get the static analyzer working?
+ sonne|work	what is a static analyzer?
+ sonne|work	so no :)
+ wiking	ah ok
+ wiking	you know this one: http://clang-analyzer.llvm.org/
+ sonne|work	ahh
+ wiking	i'm happy to help out to make it work
+ wiking	but i'd need access to a buildbot where there's clang
+ wiking	(i don't have on freebsd)
+ sonne|work	no totally forgot about this - please file a github issue about this
+ wiking	heheheh ok
+ sonne|work	and assign it to me
+ wiking	as said if u give me access to a bot i can make it for u :P
+ sonne|work	well get it to work locally and I put it live :P
+ wiking	sonne|work: afaik you just need to change the ./configure and make command on the bot
+ wiking	sonne|work: at least it works for me like that
+ sonne|work	wiking: btw I heard you can now be officially called 'husband wiking' - congrats on that!
+ wiking	but i'll put it into the github issue, how i build it
+ sonne|work	wiking: then just send me these commands and all good
+ wiking	sonne|work: ehehhehe thanx!
+ wiking	sonne|work: i'll just check now whether you can put the output somewhere else... i mean the output of the static analyzer, since it's by default in a /tmp directory
+ sonne|work	ohh that would create clashes
+ sonne|work	some local ./tmp would be better
+ wiking	yeah it has -o option
+ wiking	so it puts it wherever you want it to
+ wiking	done
+ wiking	it seems i cannot assign
+ wiking	sonne|work: https://github.com/shogun-toolbox/shogun/issues/789
+ wiking	so i think you'll have to assign yourself
+ sonne|work	wiking: done
+ wiking	yey
+ sonne|work	wiking: btw I recall that you wanted to get google mock/test framework to work they way it was supposed
+ sonne|work	wiking: well assigned to myself
+ sonne|work	not implemented yet
+ wiking	the way t was supposed to?
+ wiking	ah you mean the whole change about statically linking it with the shogun library?
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has joined #shogun
+ blackburn	uh oh ah I have an interview in 3 hours
+ wiking	blackburn: goodluckwithath
+ blackburn	heh thanks
+ wiking	blackburn: where r u heading ?:)
+ blackburn	wiking: http://wesee.com/
+ wiking	blackburn: oh cool
+ wiking	would u move or stay in russia?
+ blackburn	no, no
+ blackburn	same city
+ blackburn	apparently 50 meters far away from current job :D
+ wiking	lol
+ wiking	nice :)
+ wiking	btw: i'll upload a static analyzer output again with the latest code
+ blackburn	nice
+ wiking	and hopefully sonne|work will make it automatic on one of the buildbots soon
+ wiking	done http://maeth.com/shogun-report/
+ wiking	blackburn: slep has leaks
+ blackburn	wiking: no, not really it is bad code IIRC
+ wiking	blackburn: ?
+ wiking	blackburn: http://maeth.com/shogun-report/report-a0hTXf.html#EndPath
+ wiking	this leaks definitely
+ blackburn	wiking: in case of malloc failure?
+ blackburn	kind of.. but securing malloc failures is something too safe for me
+ wiking	blackburn: you need to release the memory
+ wiking	if one of them failed
+ blackburn	yeah in ideal case
+ blackburn	wiking: what I meant is that if malloc failed here - all the algorithm pukes
+ wiking	blackburn: yeah true but better to be safe than sorry afaik
+ blackburn	heh right
+ wiking	it doesn't really hurt to put 2 if branches there and do a free
+ wiking	or even a goto
+ wiking	since there's cleanup on the end of the function
+ wiking	but this other one is a real leak imho
+ wiking	http://maeth.com/shogun-report/report-CTGMmV.html#EndPath
+ wiking	as infor really never released
+ blackburn	wiking: it is not my code so I didn't really checked for all that stuff :)
+ wiking	yeah i know
+ wiking	i was just saying
+ wiking	as i think it's either you or sonne|work or me who's gonna fix this :)
+ blackburn	oh who else who else
+ wiking	:>
+ wiking	mmm i still need to hack a bit the primal solver of n4nd0
+ wiking	sonne|work: btw if u use the static analyzer it'll create you libshogun.13.0.dylib
+ wiking	blackburn: r u still here or on interview now?
+ blackburn	wiking: here
+ blackburn	wiking: computation mistake :D two hours more
+ wiking	:>>>
+ wiking	do you know anything about the init_opt in StructureModel?
+ blackburn	it comes from mosek afaik
+ blackburn	or rather for mosek
+ wiking	yeah but what's it purpose and how to create it etc?
+ wiking	i've checked one example (the MUltiClassModel)
+ blackburn	well it is not used at all in case of bmrm
+ wiking	yeah i know
+ wiking	i'm just now trying to use the primal solver by n4nd0
+ wiking	that's why i'm asking
+ blackburn	ahh
+ blackburn	not sure I can help there
+ wiking	heheh yeah i've contacted n4nd0... hopefully he'll have time to answer today
+ wiking	i've tried with the one in MulticlassSOModel
+ wiking	but currently the biggest problem is that mosek eats up my memory
+ wiking	virtual memory consumption of that process is about 7 gigs :S
+ wiking	while if i use bmrm it uses 200megs
+ blackburn	why do you want msoek then?
+ wiking	i was just curious
+ blackburn	I see
+ wiking	mmm something is really wrong.... 12gigs of virtual mem
+ wiking	and still nothing
+ blackburn	okay let me try to impress these guys :)
+-!- blackburn [5bdfb203@gateway/web/freenode/ip.91.223.178.3] has quit [Quit: Page closed]
+-!- audy- [~audy@heyaudy.com] has quit [Ping timeout: 256 seconds]
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has quit [Ping timeout: 245 seconds]
+-!- audy [~audy@heyaudy.com] has joined #shogun
+-!- ptizoom [4f475132@gateway/web/freenode/ip.79.71.81.50] has joined #shogun
+-!- heiko1 [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has joined #shogun
+-!- hoijui [~hoijui@141.23.65.251] has joined #shogun
+-!- heiko2 [~heiko@host86-179-33-12.range86-179.btcentralplus.com] has joined #shogun
+-!- heiko1 [~heiko@host86-182-162-130.range86-182.btcentralplus.com] has quit [Ping timeout: 256 seconds]
+-!- ptizoom [4f475132@gateway/web/freenode/ip.79.71.81.50] has quit [Ping timeout: 245 seconds]
+ heiko2	sonne|work, sonney2k, around?
+ heiko2	or anybody else?
+ wiking	yo
+ heiko2	wiking hi
+ heiko2	I have a c++ problem
+ heiko2	I need something which behvaves as static virtual methods
+ heiko2	i.e.
+ heiko2	I have a base class with a static method
+ heiko2	and I want to overload that
+ heiko2	(base class is abstract)
+ heiko2	and when I call the method, the static method of the subclass should be executed
+ heiko2	is there any way to do that?
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+ n4nd0	hey wiking, how is it going with structured model thing?
+ wiking	n4nd0: mmm memory problems
+ wiking	heiko2: sorry i just came back
+ wiking	heiko2: what you can do is to do a wrapper function that is a virtual
+ heiko2	I dont have an instance
+ heiko2	of the base class
+ wiking	never?
+ heiko2	no ist abstract
+ heiko2	this has to be solved with templates somehow
+ heiko2	Ill put my hack version online soon ans ask people
+ wiking	mmm i think u can use using keyword as well
+ heiko2	yeah I read about that, but couldnt figure it out
+ heiko2	give me an hour, I will post it on github
+ wiking	i mean your problem is that foo::bar is static, foo is an abstract class
+ wiking	but you have foo2 : public foo
+ wiking	and you want to call foo2::bar, right?
+ wiking	n4nd0: so the thing starts to grow like hell
+ wiking	n4nd0: it hasn't yet really done anything but ate 12gigs of virtual mem
+ wiking	n4nd0: mosek is that memory hungry or i'm doing something very wrong? :)
+ heiko2	wiking, yes
+ wiking	heiko2: and when u try to call foo::bar() what does it say?
+ wiking	in foo2
+ heiko2	the thing is, the compiler cannot know the subclass since there is no instance which tells type
+-!- blackburn [~blackburn@188.168.14.212] has joined #shogun
+ n4nd0	wiking: how big are the tests you are running?
+ blackburn	that was uhhh
+-!- hoijui [~hoijui@141.23.65.251] has quit [Ping timeout: 244 seconds]
+ blackburn	I did not expect 2 hour interview :D
+ wiking	blackburn: nailed it?
+ n4nd0	wiking: have you tried running the examples for the hmsvm and see if that happens there too?
+ wiking	n4nd0: no not really
+ wiking	n4nd0: i've just tried with my own
+ blackburn	wiking: no idea, I feel like I looked stupid
+ wiking	n4nd0: it only has 245 examples
+ blackburn	but it is the machine learning job I want :(
+ wiking	blackburn: it's normal
+ n4nd0	wiking: could you take a look if it happens in the hmsvm with the large dataset?
+ wiking	n4nd0: cmdline?
+ wiking	n4nd0: i mean what should i run
+ n4nd0	wiking: one sec, let me check
+ blackburn	heiko2: static virtual is a singleton hierarchy I think
+ n4nd0	blackburn: it probably went well if it was about ml :)
+ blackburn	n4nd0: ml part was ok yes
+ heiko2	Ill post the problem, singleton wont work
+ wiking	heiko2: gist it
+ heiko2	Problem is this:
+ wiking	heiko2: but foo::bar() should work
+ wiking	regardless if it's a subclass or not
+ heiko2	static CStreamingFeatures* from_non_streaming(CFeatures* source_features)
+ heiko2	I want a static method in CStreamingFeatures (abstract)
+ heiko2	that I can give *any* CFeatures object
+ wiking	CStreamingFeatures::from_non_streaming
+ heiko2	and then the method calls the implementation in the class of the source_features object
+ wiking	in any object should work
+ n4nd0	wiking: run structure_hmsvm_mosek.py if python is ok
+ wiking	n4nd0: libshogun? :)
+ heiko2	if source_features is CDenseFeatures<T>, the method CDenseFeatures<T>::from_non_streaming(CFeatures* source_features) should be called, etc.
+ wiking	n4nd0: only python...? as i haven't compiled python interface :P
+ n4nd0	wiking: otherwise libshogun/so_hmsvm_mosek.cpp, you can modify CTwoStateModel::simulate_two_state_data if you want to make the dataset larger
+ wiking	n4nd0: mmm yeah
+ wiking	n4nd0: quite hungry :)
+ wiking	2.5g ram
+ wiking	and then suddenly drops down to 250megs
+ wiking	:)
+ wiking	and then dies with segfault
+ wiking	:)
+ n4nd0	?
+ n4nd0	that didn't seg fault some time ago :)
+ wiking	it does for me
+ wiking	lemme gdb it
+ n4nd0	in any case I see no reason why you'd like to use mosek instead of any of the bundle methods
+ wiking	n4nd0: as the other implementation that i'm comparing with is based on mosek
+ n4nd0	ok
+ wiking	it dies here
+ wiking	CStructuredLabels* out = CStructuredLabels::obtain_from_generic(sosvm->apply());
+ n4nd0	ok
+ wiking	so_hmsvm_mosek.cpp:28
+ n4nd0	it must be caused by some other recent change I think
+ blackburn	dies on obtain from generic?
+ blackburn	uhuhuh
+ blackburn	or lets say uuuhhhhhhhh
+-!- CIA-47 [cia@cia.vc] has quit [Ping timeout: 252 seconds]
+ wiking	doh the accuracy is shit 62.04
+ wiking	and that's only on structured labels
+ wiking	and the train and the test set is the same :D
+ blackburn	heh
+ wiking	something is very wrong :S
+ n4nd0	yeah, that doesn't look good
+ wiking	so n4nd0 i need that mosek :)
+ n4nd0	what do you mean?
+ wiking	that i'd like to get your primal solver to work on with my problem
+ wiking	and that it doesn't eat 12gigs of ram
+ n4nd0	I would like very much that it works for you too :)
+ wiking	ok does the so_hmsvm_mosek.cpp works for you now
+ wiking	with the HEAD of master?
+ n4nd0	let me check if it works for me with my what I currently have here
+ n4nd0	(not updated at all probably)
+ wiking	n4nd0: which commit is that? :)
+ n4nd0	compiling...
+ n4nd0	I am stuck with this error right now
+ n4nd0	/usr/local/etc/mosek/6/tools/platform/linux32x86/bin/libiomp5.so: undefined reference to `pthread_atfork'
+ n4nd0	I'm already including -lpthread
+ n4nd0	this error always tends to appear here and I have no idea why, it drives me crazy!
+ n4nd0	wiking: can you help me with that error ^?
+ wiking	mmm
+ wiking	what's your compilation line?
+ wiking	that gives this error?
+ n4nd0	clang++ -O0 so_hmsvm_mosek.cpp -I /usr/local/etc/mosek/6/tools/platform/linux32x86/h -L /usr/local/etc/mosek/6/tools/platform/linux32x86/bin/ -lshogun -lpthread -lmosek -o so_hmsvm_mosek -DUSE_MOSEK
+ wiking	aaa
+ wiking	you dont need -lmosek
+ n4nd0	I started using clang++ instead of g++ because I didn't manage to solve this error with g++
+ n4nd0	I already tried with that I think
+ wiking	as -lmosek is 'linked' with -lshogun
+ n4nd0	same thing without -lmosek
+ wiking	so shogun.so will depend on mosek
+ n4nd0	ok
+ n4nd0	makes sense but that didn't make the fix though
+ wiking	where's your shogun.so?
+ n4nd0	/usr/local/bin/shogun
+ wiking	ah and that's in library path?
+ wiking	btw: can you do a file /usr/local/bin/shogun/libshogun.so
+ wiking	?
+ wiking	file /usr/local/bin/shogun/libshogun.so
+ wiking	what's the output of this
+ n4nd0	LD_LIBRARY_PATH=:/usr/local/etc/mosek/6/tools/platform/linux32x86/bin
+ n4nd0	that was my LIBRARY_PAHT
+ n4nd0	so do you think I need to create this libshogun.so?
+ wiking	no
+ n4nd0	ok
+ wiking	/usr/local/bin/shogun/libshogun.so exists
+ wiking	or?
+ n4nd0	no
+ wiking	where is it then?
+ n4nd0	/usr/local/bin/shogun is a file
+ wiking	but where's your dynamic library for shogun?
+ n4nd0	whereis libshogun
+ n4nd0	libshogun: /usr/local/lib/libshogun.a /usr/local/lib/libshogun.so
+ wiking	it should be somewhere under /usr/local/lib
+ wiking	ok
+ wiking	file /usr/local/lib/libshogun.so
+ wiking	what's the output of this
+ n4nd0	file /usr/local/lib/libshogun.so
+ n4nd0	/usr/local/lib/libshogun.so: symbolic link to `libshogun.so.12.0'
+ wiking	ok
+ wiking	file /usr/local/lib/libshogun.so.12.0
+ n4nd0	/usr/local/lib/libshogun.so.12.0: ELF 32-bit LSB shared object, Intel 80386, version 1 (GNU/Linux), dynamically linked, BuildID[sha1]=0xc256cfc8209d9f09dfd579aeeacb31bff3bcf4ab, not stripped
+ wiking	mmm
+ n4nd0	so?
+ n4nd0	do you have any clue what's going on?
+ n4nd0	this lpthread is taking my live :D
+ wiking	mmm nos nog fdzlly
+ wiking	not really :)
+ wiking	as i thought there's a problem with the arch
+ wiking	but seems it's ok
+ wiking	so now i really have no clue
+ wiking	only that maybe the pthread it is trying to use
+ wiking	is the x86_64 version
+ wiking	not 32bit ...
+ n4nd0	who knows
+ n4nd0	I have to stop for dinner now
+ n4nd0	we'll see later
+ wiking	ok
+ wiking	mm i dont understand this
+ wiking	risk is 0.295583
+ wiking	still the results are far from being good :D
+ n4nd0	yeah ... it looks a bit weird
+ n4nd0	I don't remember the exact value for the risk though
+ n4nd0	the problem is I cannot test mosek here if we don't solve this pthread problem :S
+ wiking	mmm interesting
+ wiking	clang++ -O0 -g -I/usr/include -I/usr/include/atlas so_hmsvm_mosek.cpp -lshogun -I/Users/wiking/shogun-latent-build/include -I/opt/local/include -L/Users/wiking/shogun-latent-build/lib -I/Users/wiking/mosek/6/tools/platform/osx64x86/h -o so_hmsvm_mosek
+ wiking	works for me w/o problems
+ n4nd0	my computer has cancer
+ n4nd0	or sth
+ n4nd0	it is so annoying
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has joined #shogun
+ wiking	n4nd0: clang++ -O0 -g so_hmsvm_mosek.cpp -lshogun -I/Users/wiking/shogun-latent-build/include -o so_hmsvm_mosek
+ wiking	i mean change -I
+ wiking	what's the outptu
+ n4nd0	wiking: same same
+ n4nd0	clang++ -O0 -g so_hmsvm_mosek.cpp -lshogun -I/usr/local/etc/mosek/6/tools/platform/linux32x86/h -o so_hmsvm_mosek
+ n4nd0	/usr/local/etc/mosek/6/tools/platform/linux32x86/bin/libiomp5.so: undefined reference to `pthread_atfork'
+ n4nd0	clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ wiking	lol
+ wiking	and i guess clang++ -O0 -g so_hmsvm_mosek.cpp -lshogun -I/usr/local/etc/mosek/6/tools/platform/linux32x86/h -o so_hmsvm_mosek -lpthread
+ wiking	gives the same
+ wiking	ldd /usr/local/lib/libshogun.so
+ wiking	what's the output for that?
+ wiking	n4nd0: clang++ -O0 -g so_hmsvm_mosek.cpp -lshogun -I/usr/local/etc/mosek/6/tools/platform/linux32x86/h -o so_hmsvm_mosek -pthread
+ wiking	try this
+ wiking	not -lpthread but -pthread
+ n4nd0	wiking: http://pastebin.com/FhscaBSr
+ n4nd0	and same with the previous ones
+ n4nd0	I tried already using -pthread instead of -lpthread
+ wiking	:))
+ wiking	mmm
+ wiking	there's pthead
+ wiking	libpthread.so.0 => /lib/i386-linux-gnu/libpthread.so.0 (
+ wiking	i really wonder wtf
+ wiking	nm /lib/i386-linux-gnu/libpthread.so.0|grep atfork
+ wiking	aaaah fuck
+ wiking	try this still
+ wiking	clang++ -O0 -g so_hmsvm_mosek.cpp -lpthread -lshogun -I/usr/local/etc/mosek/6/tools/platform/linux32x86/h -o so_hmsvm_mosek
+ wiking	note the order of -l flags
+ n4nd0	hehe still the error
+ n4nd0	I tried changing the order before too ;)
+ wiking	nm /lib/i386-linux-gnu/libpthread.so.0|grep atfork
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has quit [Ping timeout: 252 seconds]
+-!- hoijui [~hoijui@dslb-088-074-107-101.pools.arcor-ip.net] has joined #shogun
+ n4nd0	nm /lib/i386-linux-gnu/libpthread.so.0|grep atfork
+ n4nd0	0000bef0 t __dyn_pthread_atfork U __register_atfork@@GLIBC_2.3.2
+ n4nd0	0000bef0 T pthread_atfork@GLIBC_2.0
+ n4nd0	wiking: is ^ looking fine?
+ wiking	noup
+ wiking	does not look fine
+ wiking	n4nd0: read this
+ wiking	http://ryanarn.blogspot.be/2011/07/curious-case-of-pthreadatfork-on.html
+ n4nd0	I don't understand that much to be honest
+ n4nd0	wiking: do you happen to know what needs to be done?
+ n4nd0	I am not familiarized with the linking process and I get a bit lost in the post
+-!- blackburn [~blackburn@188.168.14.212] has quit [Ping timeout: 246 seconds]
+-!- heiko2 [~heiko@host86-179-33-12.range86-179.btcentralplus.com] has left #shogun []
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 264 seconds]
+-!- heiko1 [~heiko@host86-181-80-213.range86-181.btcentralplus.com] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has joined #shogun
+-!- n4nd0 [~nando@s83-179-44-135.cust.tele2.se] has quit [Ping timeout: 246 seconds]
+ wiking	mmm
+* wiking is porting another latent-sosvm problem.... for doublechecking bmrm results
+--- Log closed Wed Sep 26 00:00:17 2012
